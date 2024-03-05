@@ -1,53 +1,21 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use Test::Nginx::Socket::Lua;
-use Cwd qw(cwd);
+use strict;
 use lib '.';
-use t::Util;
-
-no_long_string();
+use t::TestMLCache;
 
 workers(2);
-
 #repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3) + 9;
-
-my $pwd = cwd();
-
-our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
-    lua_shared_dict  cache_shm      1m;
-    lua_shared_dict  cache_shm_miss 1m;
-
-    init_by_lua_block {
-        -- local verbose = true
-        local verbose = false
-        local outfile = "$Test::Nginx::Util::ErrLogFile"
-        -- local outfile = "/tmp/v.log"
-        if verbose then
-            local dump = require "jit.dump"
-            dump.on(nil, outfile)
-        else
-            local v = require "jit.v"
-            v.on(outfile)
-        end
-
-        require "resty.core"
-        -- jit.opt.start("hotloop=1")
-        -- jit.opt.start("loopunroll=1000000")
-        -- jit.off()
-    }
-};
+plan tests => repeat_each() * blocks() * 4;
 
 run_tests();
 
 __DATA__
 
 === TEST 1: get() validates key
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -63,19 +31,17 @@ __DATA__
             end
         }
     }
---- request
-GET /t
 --- response_body
 key must be a string
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 2: get() accepts callback as nil or function
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -96,19 +62,17 @@ key must be a string
             end
         }
     }
---- request
-GET /t
 --- response_body
 
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 3: get() rejects callbacks not nil or function
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -129,20 +93,18 @@ GET /t
             end
         }
     }
---- request
-GET /t
 --- response_body
 callback must be nil or a function
 callback must be nil or a function
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 4: get() validates opts
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -158,19 +120,17 @@ callback must be nil or a function
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts must be a table
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 5: get() calls callback in protected mode with stack traceback
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -190,8 +150,6 @@ opts must be a table
             end
         }
     }
---- request
-GET /t
 --- response_body_like chomp
 callback threw an error: .*? oops
 stack traceback:
@@ -199,13 +157,13 @@ stack traceback:
 \s+content_by_lua\(nginx\.conf:\d+\):\d+: in function
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 6: get() is resilient to callback runtime errors with non-string arguments
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -226,20 +184,18 @@ stack traceback:
             end
         }
     }
---- request
-GET /t
 --- response_body_like
 callback threw an error: userdata: NULL
 callback threw an error: table: 0x[0-9a-fA-F]+
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 7: get() caches a number
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -286,21 +242,19 @@ callback threw an error: table: 0x[0-9a-fA-F]+
             ngx.say("from shm: ", type(data), " ", data)
         }
     }
---- request
-GET /t
 --- response_body
 from callback: number 123
 from lru: number 123
 from shm: number 123
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 8: get() caches a boolean (true)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -347,21 +301,19 @@ from shm: number 123
             ngx.say("from shm: ", type(data), " ", data)
         }
     }
---- request
-GET /t
 --- response_body
 from callback: boolean true
 from lru: boolean true
 from shm: boolean true
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 9: get() caches a boolean (false)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -408,21 +360,19 @@ from shm: boolean true
             ngx.say("from shm: ", type(data), " ", data)
         }
     }
---- request
-GET /t
 --- response_body
 from callback: boolean false
 from lru: boolean false
 from shm: boolean false
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 10: get() caches nil
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -469,21 +419,19 @@ from shm: boolean false
             ngx.say("from shm: ", type(data), " ", data)
         }
     }
---- request
-GET /t
 --- response_body
 from callback: nil nil
 from lru: nil nil
 from shm: nil nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 11: get() caches nil in 'shm_miss' if specified
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             local dict_miss = ngx.shared.cache_shm_miss
@@ -548,8 +496,6 @@ from shm: nil nil
             ngx.say("value in lru is a sentinel nil value: ", v ~= nil)
         }
     }
---- request
-GET /t
 --- response_body
 from callback: nil nil
 no value in shm: true
@@ -558,13 +504,13 @@ from shm: nil nil
 value in lru is a sentinel nil value: true
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 12: get() caches a string
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -611,21 +557,19 @@ value in lru is a sentinel nil value: true
             ngx.say("from shm: ", type(data), " ", data)
         }
     }
---- request
-GET /t
 --- response_body
 from callback: string hello world
 from lru: string hello world
 from shm: string hello world
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 13: get() caches a table
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local cjson = require "cjson"
             local mlcache = require "resty.mlcache"
@@ -676,21 +620,19 @@ from shm: string hello world
             ngx.say("from shm: ", type(data), " ", data.hello, " ", data.subt.foo)
         }
     }
---- request
-GET /t
 --- response_body
 from callback: table world bar
 from lru: table world bar
 from shm: table world bar
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 14: get() errors when caching an unsupported type
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local cjson = require "cjson"
             local mlcache = require "resty.mlcache"
@@ -712,8 +654,6 @@ from shm: table world bar
             end
         }
     }
---- request
-GET /t
 --- error_code: 500
 --- error_log eval
 qr/\[error\] .*?mlcache\.lua:\d+: cannot cache value of type userdata/
@@ -721,9 +661,8 @@ qr/\[error\] .*?mlcache\.lua:\d+: cannot cache value of type userdata/
 
 
 === TEST 15: get() calls callback with args
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -746,23 +685,23 @@ qr/\[error\] .*?mlcache\.lua:\d+: cannot cache value of type userdata/
             ngx.say(data)
         }
     }
---- request
-GET /t
 --- response_body
 3
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 16: get() caches hit for 'ttl' from LRU (in ms)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
-            local cache = assert(mlcache.new("my_mlcache", "cache_shm", { ttl = 0.3 }))
+            local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
+                ttl = 0.3,
+            }))
 
             local function cb()
                 ngx.say("in callback")
@@ -779,24 +718,22 @@ GET /t
 
             ngx.sleep(0.2)
 
-            data = assert(cache:get("key", nil, cb))
+            local data, err, lvl = assert(cache:get("key", nil, cb))
             assert(data == 123)
         }
     }
---- request
-GET /t
 --- response_body
 in callback
 in callback
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 17: get() caches miss (nil) for 'neg_ttl' from LRU (in ms)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -827,20 +764,18 @@ in callback
             assert(data == nil)
         }
     }
---- request
-GET /t
 --- response_body
 in callback
 in callback
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 18: get() caches for 'opts.ttl' from LRU (in ms)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -865,20 +800,18 @@ in callback
             assert(data == 123)
         }
     }
---- request
-GET /t
 --- response_body
 in callback
 in callback
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 19: get() caches for 'opts.neg_ttl' from LRU (in ms)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -906,20 +839,18 @@ in callback
             assert(data == nil)
         }
     }
---- request
-GET /t
 --- response_body
 in callback
 in callback
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 20: get() with ttl of 0 means indefinite caching
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -952,21 +883,19 @@ in callback
             ngx.say("in shm after exp: ", data)
         }
     }
---- request
-GET /t
 --- response_body
 in callback
 in LRU after exp: 123
 in shm after exp: 123
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 21: get() with neg_ttl of 0 means indefinite caching for nil values
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1001,21 +930,19 @@ in shm after exp: 123
             ngx.say("in shm after exp: ", tostring(data))
         }
     }
---- request
-GET /t
 --- response_body_like
 in callback
 in LRU after exp: table: \S+
 in shm after exp: nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 22: get() errors when ttl < 0
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1036,19 +963,17 @@ in shm after exp: nil
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.ttl must be >= 0
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 23: get() errors when neg_ttl < 0
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1069,19 +994,17 @@ opts.ttl must be >= 0
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.neg_ttl must be >= 0
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 24: get() shm -> LRU caches for 'opts.ttl - since' in ms
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1126,20 +1049,18 @@ opts.neg_ttl must be >= 0
             end
         }
     }
---- request
-GET /t
 --- response_body
 is not expired in LRU: 123
 is stale in LRU: 123
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 25: get() shm -> LRU caches non-nil for 'indefinite' if ttl is 0
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1171,19 +1092,17 @@ is stale in LRU: 123
             end
         }
     }
---- request
-GET /t
 --- response_body
 is not expired in LRU: 123
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 26: get() shm -> LRU caches for 'opts.neg_ttl - since' in ms
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1230,20 +1149,18 @@ is not expired in LRU: 123
             end
         }
     }
---- request
-GET /t
 --- response_body_like
 is not expired in LRU: table: \S+
 is stale in LRU: table: \S+
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 27: get() shm -> LRU caches nil for 'indefinite' if neg_ttl is 0
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1274,19 +1191,17 @@ is stale in LRU: table: \S+
             -- data is a table (nil sentinel value) so rely on stale instead
         }
     }
---- request
-GET /t
 --- response_body
 is stale in LRU: nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 28: get() returns hit level
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1310,21 +1225,19 @@ is stale in LRU: nil
             ngx.say("hit level from shm: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 hit level from callback: 3
 hit level from LRU: 1
 hit level from shm: 2
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 29: get() returns hit level for nil hits
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1348,22 +1261,20 @@ hit level from shm: 2
             ngx.say("hit level from shm: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 hit level from callback: 3
 hit level from LRU: 1
 hit level from shm: 2
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 30: get() returns hit level for boolean false hits
---- skip_eval: 3: t::Util::skip_openresty('<', '1.11.2.3')
---- http_config eval: $::HttpConfig
+--- skip_eval: 3: t::TestMLCache::skip_openresty('<', '1.11.2.3')
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1387,21 +1298,19 @@ hit level from shm: 2
             ngx.say("hit level from shm: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 hit level from callback: 3
 hit level from LRU: 1
 hit level from shm: 2
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 31: get() JITs when hit coming from LRU
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1417,21 +1326,18 @@ hit level from shm: 2
             end
         }
     }
---- request
-GET /t
---- response_body
-
+--- ignore_response_body
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):10 loop\]/
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 32: get() JITs when hit of scalar value coming from shm
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1477,10 +1383,7 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):10 loop\]/
             end
         }
     }
---- request
-GET /t
---- response_body
-
+--- ignore_response_body
 --- error_log eval
 [
     qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):18 loop\]/,
@@ -1489,14 +1392,14 @@ GET /t
 ]
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 33: get() JITs when hit of table value coming from shm
 --- SKIP: blocked until l2_serializer
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1515,21 +1418,18 @@ GET /t
             end
         }
     }
---- request
-GET /t
---- response_body
-
+--- ignore_response_body
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):18 loop\]/
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 34: get() JITs when miss coming from LRU
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1546,21 +1446,18 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):18 loop\]/
             end
         }
     }
---- request
-GET /t
---- response_body
-
+--- ignore_response_body
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):10 loop\]/
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 35: get() JITs when miss coming from shm
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1579,21 +1476,18 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):10 loop\]/
             end
         }
     }
---- request
-GET /t
---- response_body
-
+--- ignore_response_body
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):10 loop\]/
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 36: get() callback can return nil + err (string)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1620,20 +1514,18 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):10 loop\]/
             end
         }
     }
---- request
-GET /t
 --- response_body
 cb return values: nil an error occurred
 cb2 return values: foo an error occurred again
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 37: get() callback can return nil + err (non-string) safely
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -1659,20 +1551,18 @@ cb2 return values: foo an error occurred again
             end
         }
     }
---- request
-GET /t
 --- response_body_like chomp
 cb return values: nil table: 0x[[:xdigit:]]+
 cb2 return values: foo table: 0x[[:xdigit:]]+
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 38: get() callback can return nil + err (table) and will call __tostring
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -1693,19 +1583,17 @@ cb2 return values: foo table: 0x[[:xdigit:]]+
             end
         }
     }
---- request
-GET /t
 --- response_body
 cb return values: nil hello from __tostring
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 39: get() callback's 3th return value can override the ttl
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1743,20 +1631,18 @@ cb return values: nil hello from __tostring
             assert(data == 2)
         }
     }
---- request
-GET /t
 --- response_body
 in callback 1
 in callback 2
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 40: get() callback's 3th return value can override the neg_ttl
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1794,20 +1680,18 @@ in callback 2
             assert(data == 1)
         }
     }
---- request
-GET /t
 --- response_body
 in callback 1
 in callback 2
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 41: get() ignores invalid callback 3rd return value (not number)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -1869,8 +1753,6 @@ in callback 2
             assert(data == 1)
         }
     }
---- request
-GET /t
 --- response_body
 Test A: string TTL return value for positive data is ignored
 in positive callback
@@ -1880,13 +1762,41 @@ in negative callback
 in positive callback
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 42: get() passes 'resty_lock_opts' for L3 calls
---- http_config eval: $::HttpConfig
+=== TEST 42: get() errors on invalid opts.resty_lock_opts
 --- config
-    location = /t {
+    location /t {
+        content_by_lua_block {
+            local mlcache = require "resty.mlcache"
+
+            local cache, err = mlcache.new("my_mlcache", "cache_shm")
+            if not cache then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = pcall(cache.get, cache, "key", {
+                resty_lock_opts = "true"
+            })
+            if not ok then
+                ngx.say(err)
+            end
+        }
+    }
+--- response_body
+opts.resty_lock_opts must be a table
+--- no_error_log
+[error]
+[crit]
+
+
+
+=== TEST 43: get() passes 'resty_lock_opts' for L3 calls
+--- config
+    location /t {
         content_by_lua_block {
             local resty_lock = require "resty.lock"
             local mlcache = require "resty.mlcache"
@@ -1917,19 +1827,61 @@ in positive callback
             end
         }
     }
---- request
-GET /t
 --- response_body
 was given 'opts.resty_lock_opts': true
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 43: get() errors on lock timeout
---- http_config eval: $::HttpConfig
+=== TEST 44: get() uses 'opts.resty_lock_opts' if specified
 --- config
-    location = /t {
+    location /t {
+        content_by_lua_block {
+            local resty_lock = require "resty.lock"
+            local mlcache = require "resty.mlcache"
+
+            local opts = { timeout = 1 }
+            local resty_lock_opts = { timeout = 5 }
+
+            do
+                local orig_resty_lock_new = resty_lock.new
+                resty_lock.new = function(_, dict_name, opts, ...)
+                    ngx.say("was given 'opts.resty_lock_opts': ", opts == resty_lock_opts)
+
+                    return orig_resty_lock_new(_, dict_name, opts, ...)
+                end
+            end
+
+            local cache, err = mlcache.new("my_mlcache", "cache_shm", {
+                resty_lock_opts = opts,
+            })
+            if not cache then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local data, err = cache:get("key", {
+                resty_lock_opts = resty_lock_opts,
+            }, function() return nil end)
+            if err then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+        }
+    }
+--- response_body
+was given 'opts.resty_lock_opts': true
+--- no_error_log
+[error]
+[crit]
+
+
+
+=== TEST 45: get() errors on lock timeout
+--- config
+    location /t {
         access_by_lua_block {
             ngx.shared.cache_shm:set(1, true, 0.2)
             ngx.shared.cache_shm:set(2, true, 0.2)
@@ -1990,8 +1942,6 @@ was given 'opts.resty_lock_opts': true
             ngx.say("hit_lvl: ", hit_lvl) -- should be 1 since LRU instances are shared by mlcache namespace, and t1 finished
         }
     }
---- request
-GET /t
 --- response_body
 data: nil
 err: could not acquire callback lock: timeout
@@ -2003,13 +1953,13 @@ err: nil
 hit_lvl: 1
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 44: get() returns data even if failed to set in shm
---- http_config eval: $::HttpConfig
+=== TEST 46: get() returns data even if failed to set in shm
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             local mlcache = require "resty.mlcache"
@@ -2047,8 +1997,6 @@ hit_lvl: 1
             ngx.say("data type: ", type(data))
         }
     }
---- request
-GET /t
 --- response_body
 data type: string
 --- error_log eval
@@ -2058,10 +2006,9 @@ qr/\[warn\] .*? could not write to lua_shared_dict 'cache_shm' after 3 tries \(n
 
 
 
-=== TEST 45: get() errors on invalid opts.shm_set_tries
---- http_config eval: $::HttpConfig
+=== TEST 47: get() errors on invalid opts.shm_set_tries
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -2087,21 +2034,19 @@ qr/\[warn\] .*? could not write to lua_shared_dict 'cache_shm' after 3 tries \(n
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.shm_set_tries must be a number
 opts.shm_set_tries must be >= 1
 opts.shm_set_tries must be >= 1
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 46: get() with default shm_set_tries to LRU evict items when a large value is being cached
---- http_config eval: $::HttpConfig
+=== TEST 48: get() with default shm_set_tries to LRU evict items when a large value is being cached
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             dict:flush_all()
@@ -2158,8 +2103,6 @@ opts.shm_set_tries must be >= 1
             ngx.say("callback was called: ", cb_calls, " times")
         }
     }
---- request
-GET /t
 --- response_body
 type of data in shm: string
 callback was called: 1 times
@@ -2169,10 +2112,9 @@ callback was called: 1 times
 
 
 
-=== TEST 47: get() respects instance opts.shm_set_tries to LRU evict items when a large value is being cached
---- http_config eval: $::HttpConfig
+=== TEST 49: get() respects instance opts.shm_set_tries to LRU evict items when a large value is being cached
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             dict:flush_all()
@@ -2231,8 +2173,6 @@ callback was called: 1 times
             ngx.say("callback was called: ", cb_calls, " times")
         }
     }
---- request
-GET /t
 --- response_body
 type of data in shm: string
 callback was called: 1 times
@@ -2242,10 +2182,9 @@ callback was called: 1 times
 
 
 
-=== TEST 48: get() accepts opts.shm_set_tries to LRU evict items when a large value is being cached
---- http_config eval: $::HttpConfig
+=== TEST 50: get() accepts opts.shm_set_tries to LRU evict items when a large value is being cached
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             dict:flush_all()
@@ -2304,8 +2243,6 @@ callback was called: 1 times
             ngx.say("callback was called: ", cb_calls, " times")
         }
     }
---- request
-GET /t
 --- response_body
 type of data in shm: string
 callback was called: 1 times
@@ -2315,10 +2252,9 @@ callback was called: 1 times
 
 
 
-=== TEST 49: get() caches data in L1 LRU even if failed to set in shm
---- http_config eval: $::HttpConfig
+=== TEST 51: get() caches data in L1 LRU even if failed to set in shm
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             dict:flush_all()
@@ -2368,21 +2304,19 @@ callback was called: 1 times
             ngx.say("is stale: ", stale ~= nil)
         }
     }
---- request
-GET /t
 --- response_body
 type of data in LRU: string
 sleeping...
 is stale: true
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 50: get() does not cache value in LRU indefinitely when retrieved from shm on last ms (see GH PR #58)
---- http_config eval: $::HttpConfig
+=== TEST 52: get() does not cache value in LRU indefinitely when retrieved from shm on last ms (see GH PR #58)
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local forced_now = ngx.now()
             ngx.now = function()
@@ -2433,21 +2367,19 @@ is stale: true
             ngx.say("+0.201s hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 +0.200s hit_lvl: 2
 +0.200s hit_lvl: 2
 +0.201s hit_lvl: 3
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 51: get() bypass cache for negative callback TTL
---- http_config eval: $::HttpConfig
+=== TEST 53: get() bypass cache for negative callback TTL
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -2497,8 +2429,6 @@ GET /t
             assert(hit_level == 3)
         }
     }
---- request
-GET /t
 --- response_body
 Test A: negative TTL return value for positive data bypasses cache
 in positive callback
@@ -2508,13 +2438,13 @@ in negative callback
 in negative callback
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 52: get() nil callback returns positive cached items from L1/L2
---- http_config eval: $::HttpConfig
+=== TEST 54: get() nil callback returns positive cached items from L1/L2
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -2568,8 +2498,6 @@ in negative callback
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> miss
 data: nil
@@ -2592,13 +2520,13 @@ err: nil
 hit_lvl: 1
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 53: get() nil callback returns negative cached items from L1/L2
---- http_config eval: $::HttpConfig
+=== TEST 55: get() nil callback returns negative cached items from L1/L2
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -2652,8 +2580,6 @@ hit_lvl: 1
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> miss
 data: nil
@@ -2676,13 +2602,13 @@ err: nil
 hit_lvl: 1
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 54: get() JITs on misses without a callback
---- http_config eval: $::HttpConfig
+=== TEST 56: get() JITs on misses without a callback
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -2693,10 +2619,9 @@ hit_lvl: 1
             end
         }
     }
---- request
-GET /t
 --- ignore_response_body
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):6 loop\]/
 --- no_error_log
 [error]
+[crit]

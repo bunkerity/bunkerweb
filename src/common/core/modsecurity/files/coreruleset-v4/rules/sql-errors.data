@@ -1,0 +1,172 @@
+MySqlClient.
+Server message
+SQL error
+Oracle error
+JET Database Engine
+Procedure or function
+SQLite.Exception
+[IBM][CLI Driver][DB2/6000]
+the used select statements have different number of columns
+org.postgresql.util.PSQLException
+Access Database Engine
+Incorrect syntax near
+Syntax error in string in query expression
+SQLiteException
+' doesn't exist
+CLI Driver
+on MySQL result index
+sybase
+com.informix.jdbc
+[MySQL][ODBC
+Error
+has occurred in the vicinity of:
+Sintaxis incorrecta cerca de
+MySQL server version for the right syntax to use
+com.mysql.jdbc.exceptions
+You have an error in your SQL syntax near
+You have an error in your SQL syntax;
+An illegal character has been found in the statement
+pg_query() [:
+supplied argument is not a valid MySQL
+mssql_query()
+mysql_fetch_array()
+Exception
+java.sql.SQLException
+Column count doesn't match value count at row
+Sybase message
+SQL Server
+PostgreSQL query failed:
+Dynamic SQL Error
+System.Data.SQLite.SQLiteException
+SQLite/JDBCDriver
+Unclosed quotation mark before the character string
+System.Data.SqlClient.
+Unclosed quotation mark after the character string
+System.Data.OleDb.OleDbException
+[DM_QUERY_E_SYNTAX]
+[SqlException
+Unexpected end of command in statement
+valid PostgreSQL result
+pg_exec() [:
+[SQL Server]
+[SQLITE_ERROR]
+Microsoft OLE DB Provider for ODBC Drivers
+PostgreSQL
+org.hsqldb.jdbc
+ADODB.Field (0x800A0BCD)
+SQL syntax
+Exception
+System.Data.SqlClient.SqlException
+Data type mismatch in criteria expression.
+Driver
+DB2 SQL error
+Sybase message:
+ORA-
+[Microsoft][ODBC SQL Server Driver]
+'80040e14'
+Microsoft OLE DB Provider for SQL Server
+ in query expression
+Npgsql.
+valid MySQL result
+supplied argument is not a valid PostgreSQL result
+db2_
+Ingres SQLSTATE
+Column count doesn't match
+Warning
+[Microsoft][ODBC Microsoft Access Driver]
+[Macromedia][SQLServer JDBC Driver]
+<b>Warning</b>: ibase_
+Roadhouse.Cms.
+DB2 SQL error:
+SQLSTATE[
+MySQLSyntaxErrorException
+check the manual that corresponds to your MySQL server version
+check the manual that fits your MySQL server version
+check the manual that corresponds to your MariaDB server version
+check the manual that fits your MariaDB server version
+check the manual that corresponds to your Drizzle server version
+check the manual that fits your Drizzle server version
+Zend_Db_Adapter_Mysqli_Exception
+Zend_Db_Statement_Mysqli_Exception
+MySqlException
+Syntax error or access violation
+MemSQL does not support this type of query
+is not supported by MemSQL
+unsupported nested scalar subselect
+PG::SyntaxError:
+syntax error at or near
+ERROR: parser: parse error at or near
+org.postgresql.jdbc
+PSQLException
+System.Data.SqlClient.SqlConnection.OnError
+Microsoft SQL Native Client error
+com.jnetdirect.jsql
+macromedia.jdbc.sqlserver
+Zend_Db_Adapter_Sqlsrv_Exception
+Zend_Db_Statement_Sqlsrv_Exception
+com.microsoft.sqlserver.jdbc
+SQLSrvException
+SQLServerException
+quoted string not properly terminated
+SQL command not properly ended
+macromedia.jdbc.oracle
+oracle.jdbc
+Zend_Db_Adapter_Oracle_Exception
+Zend_Db_Statement_Oracle_Exception
+OracleException
+com.ibm.db2.jcc
+Zend_Db_Adapter_Db2_Exception
+Zend_Db_Statement_Db2_Exception
+ibm_db_dbi.ProgrammingError
+Informix ODBC Driver
+ODBC Informix driver
+weblogic.jdbc.informix
+IfxException
+org.firebirdsql.jdbc
+Microsoft.Data.SQLite.SQLiteException
+SQLite error
+sqlite3.OperationalError:
+SQLite3::SQLException
+org.sqlite.JDBC
+DriverSapDB
+com.sap.dbtech.jdbc
+Invalid keyword or missing delimiter
+SybSQLException
+Sybase.Data.AseClient
+com.sybase.jdbc
+com.ingres.gcf.jdbc
+com.frontbase.jdbc
+Syntax error 1. Missing
+Semantic error
+org.h2.jdbc
+[42000-192]
+[MonetDB][ODBC Driver
+nl.cwi.monetdb.jdbc
+Syntax error: Encountered
+org.apache.derby
+ERROR 42X01
+com.vertica.jdbc
+org.jkiss.dbeaver.ext.vertica
+com.vertica.dsi.dataengine
+com.mckoi.JDBCDriver
+com.mckoi.database.jdbc
+com.facebook.presto.jdbc
+io.prestosql.jdbc
+com.simba.presto.jdbc
+UNION query has different number of fields:
+Altibase.jdbc.driver
+com.mimer.jdbc
+Syntax error: failed at position
+io.crate.client.jdbc
+encountered after end of query
+A comparison operator is required here
+-10048: Syntax error
+SQ074: Line
+SR185: Undefined procedure
+SQ200: No table
+Virtuoso S0002 Error
+[Virtuoso Driver][Virtuoso Server]
+[Virtuoso iODBC Driver][Virtuoso Server]
+Conversion failed when converting the varchar value
+invalid input syntax for integer:
+XPATH syntax error:

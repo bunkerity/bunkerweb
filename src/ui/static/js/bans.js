@@ -1,3 +1,5 @@
+import { CheckNoMatchFilter } from "./utils/settings.js";
+
 class Filter {
   constructor(prefix = "bans") {
     this.prefix = prefix;
@@ -80,7 +82,7 @@ class Filter {
       const el = bans[i];
 
       const ip = this.getElAttribut(el, "ip");
-      const banStart = this.getElAttribut(el, "ban_sart");
+      const banStart = this.getElAttribut(el, "ban_start");
       const banEnd = this.getElAttribut(el, "ban_end");
       const remain = this.getElAttribut(el, "remain");
 
@@ -520,7 +522,7 @@ class AddBanModal {
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="pointer-events-none absolute top-1 right-2 w-6 h-6"
+          class="pointer-events-none dark:stroke-gray-300 absolute top-1 right-2 w-6 h-6"
         >
           <path
             stroke-linecap="round"
@@ -534,7 +536,7 @@ class AddBanModal {
       <button
         data-add-ban-delete-item
         type="button"
-        class="dark:bg-red-500/90 duration-300 dark:opacity-90 flex justify-center items-center p-2 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+        class="dark:bg-red-500/90 duration-300 flex justify-center items-center p-2 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -605,3 +607,23 @@ const setDropdown = new Dropdown();
 const setFilter = new Filter();
 const setUnban = new Unban();
 const setModal = new AddBanModal();
+
+const checkPluginKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#keyword"),
+  "input",
+  document
+    .querySelector("[data-bans-list]")
+    .querySelectorAll("[data-bans-item]"),
+  document.querySelector("[data-bans-list-container]"),
+  document.querySelector("[data-bans-nomatch]"),
+);
+
+const checkPluginSelect = new CheckNoMatchFilter(
+  document.querySelectorAll("button[data-bans-setting-select-dropdown-btn]"),
+  "select",
+  document
+    .querySelector("[data-bans-list]")
+    .querySelectorAll("[data-bans-item]"),
+  document.querySelector("[data-bans-list-container]"),
+  document.querySelector("[data-bans-nomatch]"),
+);

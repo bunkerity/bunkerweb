@@ -5,6 +5,7 @@ from requests import get
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER, UI_URL
 from utils import access_page, assert_button_click, safe_get_element
@@ -35,7 +36,19 @@ try:
             log_error("The keyword filter is not working, exiting ...")
             exit(1)
 
-    filter_input.clear()
+    # Reset
+    filter_input.send_keys(Keys.CONTROL, "a")
+    filter_input.send_keys(Keys.BACKSPACE)
+
+    # Test select filters
+    select_filters = [
+        {"name": "Success state", "id": "success", "value": "all"},
+        {"name": "Reload state", "id": "reload", "value": "all"},
+        {"name": "Run time", "id": "every", "value": "all"},
+    ]
+
+    for item in select_filters:
+        DRIVER.execute_script(f"""return document.querySelector('[data-jobs-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Keyword filter is working, trying to filter by success state ...")
 
@@ -88,8 +101,9 @@ except KeyboardInterrupt:
     exit_code = 1
 except:
     log_exception("Something went wrong, exiting ...")
-    DRIVER.save_screenshot("error.png")
     exit_code = 1
 finally:
+    if exit_code:
+        DRIVER.save_screenshot("error.png")
     DRIVER.quit()
     exit(exit_code)

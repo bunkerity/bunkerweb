@@ -165,6 +165,8 @@ Tests matrix results:
 | `1.17.8.x`  | :heavy_check_mark:
 | `1.19.3.x`  | :heavy_check_mark:
 | `1.19.9.x`  | :heavy_check_mark:
+| `1.21.4.x`  | :heavy_check_mark:
+| `1.25.3.x`  | :heavy_check_mark:
 | >           | not tested
 
 [Back to TOC](#table-of-contents)
@@ -337,17 +339,18 @@ Perform a cache lookup. This is the primary and most efficient method of this
 module. A typical pattern is to *not* call [set()](#set), and let [get()](#get)
 perform all the work.
 
-When this method succeeds, it returns `value` and no error. **Because `nil`
-values from the L3 callback can be cached (i.e. "negative caching"), `value` can
-be nil albeit already cached. Hence, one must rely on the second return value
-`err` to determine if this method succeeded or not**.
+When this method succeeds, it returns `value` and `err` is set to `nil`.
+**Because `nil` values from the L3 callback can be cached (i.e. "negative
+caching"), `value` can be `nil` albeit already cached. Hence, one must note to
+check the second return value `err` to determine if this method succeeded or
+not**.
 
 The third return value is a number which is set if no error was encountered.
-It indicated the level at which the value was fetched: `1` for L1, `2` for L2,
+It indicates the level at which the value was fetched: `1` for L1, `2` for L2,
 and `3` for L3.
 
-If an error is encountered, this method returns `nil` plus a string describing
-the error.
+If, however, an error is encountered, then this method returns `nil` in `value`
+and a string describing the error in `err`.
 
 The first argument `key` is a string. Each value must be stored under a unique
 key.
@@ -407,6 +410,9 @@ options:
   having to repeat such transformations on every request, such as creating
   tables, cdata objects, loading new Lua code, etc...
   **Default:** inherited from the instance.
+- `resty_lock_opts`: _optional_ table. If specified, override the instance
+  `resty_lock_opts` for the current `get()` lookup.
+  **Default:** inherited from the instance.
 
 The third argument `callback` is optional. If provided, it must be a function
 whose signature and return values are documented in the following example:
@@ -442,14 +448,20 @@ in the cache **and** no callback is provided, `get()` will return `nil, nil,
 with return values such as `nil, nil, 1`, where 1 signifies a **negative cached
 item** found in L1 (cached `nil`).
 
+Not providing a `callback` function allows implementing cache lookup patterns
+that are guaranteed to be on-cpu for a more constant, smoother latency tail end
+(e.g. with values refreshed in background timers via `set()`).
+
 ```lua
 local value, err, hit_lvl = cache:get("key")
 if value == nil then
-    if hit_lvl == -1 then
+    if err ~= nil then
+        -- error
+    elseif hit_lvl == -1 then
         -- miss (no value)
+    else
+        -- negative hit (cached `nil` value)
     end
-
-    -- negative hit (cached `nil`)
 end
 ```
 
@@ -736,8 +748,12 @@ If there is no value for the queried `key`, it returns `nil` and no error.
 If there is a value for the queried `key`, it returns a number indicating the
 remaining TTL of the cached value (in seconds) and no error. If the value for
 `key` has expired but is still in the L2 cache, returned TTL value will be
-negative. Finally, the third returned value in that case will be the cached
-value itself, for convenience.
+negative. The remaining TTL return value will only be `0` if the queried `key`
+has an indefinite ttl (`ttl=0`). Otherwise, this return value may be positive
+(`key` still valid), or negative (`key` is stale).
+
+The third returned value will be the cached value as stored in the L2 cache, if
+still available.
 
 This method is useful when you want to determine if a value is cached. A value
 stored in the L2 cache is considered cached regardless of whether or not it is

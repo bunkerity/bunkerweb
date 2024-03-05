@@ -1,0 +1,66 @@
+---
+meta:
+  author: "jptosso"
+  enabled: true
+  name: "920341.yaml"
+  description: "Tests to trigger, or not trigger 920341"
+tests:
+  - # Standard POST request with length 4 and no content-type
+    test_title: 920341-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Length: 4
+              # No content-type
+
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/pineapple"
+            version: "HTTP/1.1"
+            data: test
+            stop_magic: true
+          output:
+            log_contains: id "920341"
+  - # Standard POST request with length and content-type
+    test_title: 920341-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Length: 2
+              Content-Type: application/json
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+            data: "{}"
+          output:
+            no_log_contains: id "920341"
+  - # Standard GET request (negative test)
+    test_title: 920341-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: id "920341"

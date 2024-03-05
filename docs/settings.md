@@ -15,39 +15,41 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 STREAM support :warning:
 
-|           Setting            |                                                        Default                                                         | Context |Multiple|                   Description                    |
-|------------------------------|------------------------------------------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
-|`IS_LOADING`                  |`no`                                                                                                                    |global   |no      |Internal use : set to yes when BW is loading.     |
-|`NGINX_PREFIX`                |`/etc/nginx/`                                                                                                           |global   |no      |Where nginx will search for configurations.       |
-|`HTTP_PORT`                   |`8080`                                                                                                                  |global   |no      |HTTP port number which bunkerweb binds to.        |
-|`HTTPS_PORT`                  |`8443`                                                                                                                  |global   |no      |HTTPS port number which bunkerweb binds to.       |
-|`MULTISITE`                   |`no`                                                                                                                    |global   |no      |Multi site activation.                            |
-|`SERVER_NAME`                 |`www.example.com`                                                                                                       |multisite|no      |List of the virtual hosts served by bunkerweb.    |
-|`WORKER_PROCESSES`            |`auto`                                                                                                                  |global   |no      |Number of worker processes.                       |
-|`WORKER_RLIMIT_NOFILE`        |`2048`                                                                                                                  |global   |no      |Maximum number of open files for worker processes.|
-|`WORKER_CONNECTIONS`          |`1024`                                                                                                                  |global   |no      |Maximum number of connections per worker.         |
-|`LOG_FORMAT`                  |`$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`|global   |no      |The format to use for access logs.                |
-|`LOG_LEVEL`                   |`notice`                                                                                                                |global   |no      |The level to use for error logs.                  |
-|`DNS_RESOLVERS`               |`127.0.0.11`                                                                                                            |global   |no      |DNS addresses of resolvers to use.                |
-|`DATASTORE_MEMORY_SIZE`       |`64m`                                                                                                                   |global   |no      |Size of the internal datastore.                   |
-|`CACHESTORE_MEMORY_SIZE`      |`64m`                                                                                                                   |global   |no      |Size of the internal cachestore.                  |
-|`CACHESTORE_IPC_MEMORY_SIZE`  |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (ipc).            |
-|`CACHESTORE_MISS_MEMORY_SIZE` |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (miss).           |
-|`CACHESTORE_LOCKS_MEMORY_SIZE`|`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (locks).          |
-|`USE_API`                     |`yes`                                                                                                                   |global   |no      |Activate the API to control BunkerWeb.            |
-|`API_HTTP_PORT`               |`5000`                                                                                                                  |global   |no      |Listen port number for the API.                   |
-|`API_LISTEN_IP`               |`0.0.0.0`                                                                                                               |global   |no      |Listen IP address for the API.                    |
-|`API_SERVER_NAME`             |`bwapi`                                                                                                                 |global   |no      |Server name (virtual host) for the API.           |
-|`API_WHITELIST_IP`            |`127.0.0.0/8`                                                                                                           |global   |no      |List of IP/network allowed to contact the API.    |
-|`AUTOCONF_MODE`               |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.               |
-|`SWARM_MODE`                  |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                  |
-|`KUBERNETES_MODE`             |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                    |
-|`SERVER_TYPE`                 |`http`                                                                                                                  |multisite|no      |Server type : http or stream.                     |
-|`LISTEN_STREAM`               |`yes`                                                                                                                   |multisite|no      |Enable listening for non-ssl (passthrough).       |
-|`LISTEN_STREAM_PORT`          |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).         |
-|`LISTEN_STREAM_PORT_SSL`      |`4242`                                                                                                                  |multisite|no      |Listening port for ssl (passthrough).             |
-|`USE_UDP`                     |`no`                                                                                                                    |multisite|no      |UDP listen instead of TCP (stream).               |
-|`USE_IPV6`                    |`no`                                                                                                                    |global   |no      |Enable IPv6 connectivity.                         |
+|           Setting            |                                                        Default                                                         | Context |Multiple|                        Description                         |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------|---------|--------|------------------------------------------------------------|
+|`IS_LOADING`                  |`no`                                                                                                                    |global   |no      |Internal use : set to yes when BW is loading.               |
+|`NGINX_PREFIX`                |`/etc/nginx/`                                                                                                           |global   |no      |Where nginx will search for configurations.                 |
+|`HTTP_PORT`                   |`8080`                                                                                                                  |global   |no      |HTTP port number which bunkerweb binds to.                  |
+|`HTTPS_PORT`                  |`8443`                                                                                                                  |global   |no      |HTTPS port number which bunkerweb binds to.                 |
+|`MULTISITE`                   |`no`                                                                                                                    |global   |no      |Multi site activation.                                      |
+|`SERVER_NAME`                 |`www.example.com`                                                                                                       |multisite|no      |List of the virtual hosts served by bunkerweb.              |
+|`WORKER_PROCESSES`            |`auto`                                                                                                                  |global   |no      |Number of worker processes.                                 |
+|`WORKER_RLIMIT_NOFILE`        |`2048`                                                                                                                  |global   |no      |Maximum number of open files for worker processes.          |
+|`WORKER_CONNECTIONS`          |`1024`                                                                                                                  |global   |no      |Maximum number of connections per worker.                   |
+|`LOG_FORMAT`                  |`$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`|global   |no      |The format to use for access logs.                          |
+|`LOG_LEVEL`                   |`notice`                                                                                                                |global   |no      |The level to use for error logs.                            |
+|`DNS_RESOLVERS`               |`127.0.0.11`                                                                                                            |global   |no      |DNS addresses of resolvers to use.                          |
+|`DATASTORE_MEMORY_SIZE`       |`64m`                                                                                                                   |global   |no      |Size of the internal datastore.                             |
+|`CACHESTORE_MEMORY_SIZE`      |`64m`                                                                                                                   |global   |no      |Size of the internal cachestore.                            |
+|`CACHESTORE_IPC_MEMORY_SIZE`  |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (ipc).                      |
+|`CACHESTORE_MISS_MEMORY_SIZE` |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (miss).                     |
+|`CACHESTORE_LOCKS_MEMORY_SIZE`|`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (locks).                    |
+|`USE_API`                     |`yes`                                                                                                                   |global   |no      |Activate the API to control BunkerWeb.                      |
+|`API_HTTP_PORT`               |`5000`                                                                                                                  |global   |no      |Listen port number for the API.                             |
+|`API_LISTEN_IP`               |`0.0.0.0`                                                                                                               |global   |no      |Listen IP address for the API.                              |
+|`API_SERVER_NAME`             |`bwapi`                                                                                                                 |global   |no      |Server name (virtual host) for the API.                     |
+|`API_WHITELIST_IP`            |`127.0.0.0/8`                                                                                                           |global   |no      |List of IP/network allowed to contact the API.              |
+|`AUTOCONF_MODE`               |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.                         |
+|`SWARM_MODE`                  |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                            |
+|`KUBERNETES_MODE`             |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                              |
+|`SERVER_TYPE`                 |`http`                                                                                                                  |multisite|no      |Server type : http or stream.                               |
+|`LISTEN_STREAM`               |`yes`                                                                                                                   |multisite|no      |Enable listening for non-ssl (passthrough).                 |
+|`LISTEN_STREAM_PORT`          |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).                   |
+|`LISTEN_STREAM_PORT_SSL`      |`4242`                                                                                                                  |multisite|no      |Listening port for ssl (passthrough).                       |
+|`USE_UDP`                     |`no`                                                                                                                    |multisite|no      |UDP listen instead of TCP (stream).                         |
+|`USE_IPV6`                    |`no`                                                                                                                    |global   |no      |Enable IPv6 connectivity.                                   |
+|`IS_DRAFT`                    |`no`                                                                                                                    |multisite|no      |Internal use : set to yes when the service is in draft mode.|
+|`TIMERS_LOG_LEVEL`            |`debug`                                                                                                                 |global   |no      |Log level for timers.                                       |
 
 
 ## Core settings
@@ -219,9 +221,10 @@ STREAM support :white_check_mark:
 
 Integrate easily the Database.
 
-|   Setting    |                 Default                 |Context|Multiple|                   Description                    |
-|--------------|-----------------------------------------|-------|--------|--------------------------------------------------|
-|`DATABASE_URI`|`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
+|      Setting       |                 Default                 |Context|Multiple|                   Description                    |
+|--------------------|-----------------------------------------|-------|--------|--------------------------------------------------|
+|`DATABASE_URI`      |`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
+|`DATABASE_LOG_LEVEL`|`warning`                                |global |no      |The level to use for database logs.               |
 
 ### DNSBL
 
@@ -312,6 +315,16 @@ Manage HTTP headers sent to clients.
 |`X_CONTENT_TYPE_OPTIONS`             |`nosniff`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |multisite|no      |Value for the X-Content-Type-Options header.                                                  |
 |`X_XSS_PROTECTION`                   |`1; mode=block`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |multisite|no      |Value for the X-XSS-Protection header.                                                        |
 
+### Jobs
+
+STREAM support :white_check_mark:
+
+Fake core plugin for internal jobs.
+
+|        Setting        |Default|Context|Multiple|                  Description                  |
+|-----------------------|-------|-------|--------|-----------------------------------------------|
+|`SEND_ANONYMOUS_REPORT`|`yes`  |global |no      |Send anonymous report to BunkerWeb maintainers.|
+
 ### Let's Encrypt
 
 STREAM support :white_check_mark:
@@ -340,6 +353,18 @@ Limit maximum number of requests and connections.
 |`LIMIT_CONN_MAX_HTTP2` |`100`  |multisite|no      |Maximum number of streams per IP when using HTTP/2 protocol.                                 |
 |`LIMIT_CONN_MAX_STREAM`|`10`   |multisite|no      |Maximum number of connections per IP when using stream.                                      |
 
+### Metrics
+
+STREAM support :warning:
+
+Metrics collection and retrieve.
+
+|           Setting            |Default| Context |Multiple|                       Description                       |
+|------------------------------|-------|---------|--------|---------------------------------------------------------|
+|`USE_METRICS`                 |`yes`  |multisite|no      |Enable collection and retrieval of internal metrics.     |
+|`METRICS_MEMORY_SIZE`         |`16m`  |global   |no      |Size of the internal storage for metrics.                |
+|`METRICS_MAX_BLOCKED_REQUESTS`|`100`  |global   |no      |Maximum number of blocked requests to store (per worker).|
+
 ### Miscellaneous
 
 STREAM support :warning:
@@ -365,7 +390,6 @@ Miscellaneous settings.
 |`OPEN_FILE_CACHE_VALID`      |`30s`                  |multisite|no      |Open file cache valid time                                                                                                   |
 |`EXTERNAL_PLUGIN_URLS`       |                       |global   |no      |List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).|
 |`DENY_HTTP_STATUS`           |`403`                  |global   |no      |HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.       |
-|`SEND_ANONYMOUS_REPORT`      |`yes`                  |global   |no      |Send anonymous report to BunkerWeb maintainers.                                                                              |
 
 ### ModSecurity
 
@@ -377,6 +401,7 @@ Management of the ModSecurity WAF.
 |---------------------------------|--------------|---------|--------|------------------------------------------|
 |`USE_MODSECURITY`                |`yes`         |multisite|no      |Enable ModSecurity WAF.                   |
 |`USE_MODSECURITY_CRS`            |`yes`         |multisite|no      |Enable OWASP Core Rule Set.               |
+|`MODSECURITY_CRS_VERSION`        |`3`           |multisite|no      |Version of the OWASP Core Rule Set to use.|
 |`MODSECURITY_SEC_AUDIT_ENGINE`   |`RelevantOnly`|multisite|no      |SecAuditEngine directive of ModSecurity.  |
 |`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.   |
 |`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.|
@@ -393,6 +418,16 @@ Manage local or remote PHP-FPM.
 |`REMOTE_PHP_PATH`|       |multisite|no      |Root folder containing files in the remote PHP-FPM instance.|
 |`LOCAL_PHP`      |       |multisite|no      |Path to the PHP-FPM socket file.                            |
 |`LOCAL_PHP_PATH` |       |multisite|no      |Root folder containing files in the local PHP-FPM instance. |
+
+### Pro
+
+STREAM support :x:
+
+Pro settings for the Pro version of BunkerWeb.
+
+|     Setting     |Default|Context|Multiple|                   Description                   |
+|-----------------|-------|-------|--------|-------------------------------------------------|
+|`PRO_LICENSE_KEY`|       |global |no      |The License Key for the Pro version of BunkerWeb.|
 
 ### Real IP
 
@@ -434,6 +469,7 @@ Redis server configuration when using BunkerWeb in cluster mode.
 |`REDIS_PORT`             |`6379` |global |no      |Redis server port.                                                 |
 |`REDIS_DATABASE`         |`0`    |global |no      |Redis database number.                                             |
 |`REDIS_SSL`              |`no`   |global |no      |Use SSL/TLS connection with Redis server.                          |
+|`REDIS_SSL_VERIFY`       |`no`   |global |no      |Verify the certificate of Redis server.                            |
 |`REDIS_TIMEOUT`          |`1000` |global |no      |Redis server timeout (in ms) for connect, read and write.          |
 |`REDIS_KEEPALIVE_IDLE`   |`30000`|global |no      |Max idle time (in ms) before closing redis connection in the pool. |
 |`REDIS_KEEPALIVE_POOL`   |`10`   |global |no      |Max number of redis connection(s) kept in the pool.                |
@@ -478,6 +514,7 @@ Manage reverse proxy configurations.
 |`REVERSE_PROXY_READ_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when reading from the proxied resource.                                                                              |
 |`REVERSE_PROXY_SEND_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when sending to the proxied resource.                                                                                |
 |`REVERSE_PROXY_INCLUDES`               |                                  |multisite|yes     |Additional configuration to include in the location block, separated with spaces.                                            |
+|`REVERSE_PROXY_CUSTOM_HOST`            |                                  |multisite|no      |Override Host header sent to upstream server.                                                                                |
 
 ### Reverse scan
 

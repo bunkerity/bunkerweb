@@ -5,12 +5,19 @@ from pathlib import Path
 from requests import request as requests_request, ReadTimeout
 from typing import Literal, Optional, Tuple, Union
 
+from jobs import get_os_info, get_integration, get_version  # type: ignore
+
 
 def request(method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
-    data = {"integration": get_integration(), "version": get_version()}
-    headers = {"User-Agent": f"BunkerWeb/{get_version()}"}
-    if _id is not None:
+    data = {
+        "integration": get_integration(),
+        "version": get_version(),
+        "os": get_os_info(),
+    }
+    if _id:
         data["id"] = _id
+
+    headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
     try:
         resp = requests_request(
             method,
@@ -50,27 +57,3 @@ def data() -> Tuple[bool, Optional[int], Union[str, dict]]:
 
 def get_id() -> str:
     return Path(sep, "var", "cache", "bunkerweb", "bunkernet", "instance.id").read_text(encoding="utf-8").strip()
-
-
-def get_version() -> str:
-    return Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
-
-
-def get_integration() -> str:
-    try:
-        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-        os_release_path = Path(sep, "etc", "os-release")
-        if getenv("KUBERNETES_MODE", "no").lower() == "yes":
-            return "kubernetes"
-        elif getenv("SWARM_MODE", "no").lower() == "yes":
-            return "swarm"
-        elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
-            return "autoconf"
-        elif integration_path.is_file():
-            return integration_path.read_text(encoding="utf-8").strip().lower()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
-            return "docker"
-
-        return "linux"
-    except:
-        return "unknown"

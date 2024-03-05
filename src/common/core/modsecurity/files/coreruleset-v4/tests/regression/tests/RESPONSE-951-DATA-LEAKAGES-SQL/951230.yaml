@@ -1,0 +1,47 @@
+---
+meta:
+  author: "azurit, Xhoenix"
+  enabled: true
+  name: "951230.yaml"
+  description: "Regression tests for rule 951230"
+tests:
+  - test_title: 951230-1
+    desc: "Matching MySQL SQL Information Leakage"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: "[match sql-errors.data]the used select statements have different number of columns[/match]: ERROR 1772 (HY000): Malformed GTID set specification 'secret_password'."
+          output:
+            log_contains: "id \"951230\""
+  - test_title: 951230-2
+    desc: "Matching MySQL SQL Information Leakage"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "POST"
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "[match sql-errors.data]the used select statements have different number of columns[/match]: ERROR 1105 (HY000): XPATH syntax error: '\\secret'"
+          output:
+            log_contains: "id \"951230\""

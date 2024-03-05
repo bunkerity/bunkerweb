@@ -1,0 +1,98 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This assembly file generates a prefix match for unix shell RCE
+##! evasions. Command words, in this case, must folow the prefix.
+##! Separate rules target commands that do not follow this prefix,
+##! as the chance of false positives is higher without a prefix match.
+
+##! <some command> ifconfig
+##!> cmdline unix
+  busybox
+  command
+  env
+  eval
+  ltrace
+  nohup
+  strace
+  time
+  timeout
+  watch
+##!<
+##! ;ifconfig
+;
+##! =ifconfig
+=
+##! {ifconfig}
+\{
+##! |ifconfig
+\|
+##! ||ifconfig
+\|\|
+##! &ifconfig
+&
+##! & &ifconfig
+&&
+##! ;\nifconfig
+\n
+##! ;\rifconfig
+\r
+##! $(ifconfig)
+\$\(
+##! $((ifconfig))
+\$\(\(
+##! `ifconfig`
+`
+##! ${ifconfig}
+\${
+##! <( ifconfig )
+<\(
+##! >( ifconfig )
+>\(
+##! a() ( ifconfig; ); a
+\(\s*\)
+##! `cat<<<ifconfig` or `cat<<< ifconfig`
+<<<
+##!=>
+
+##! match possible white space between prefix expressions
+\s*
+##!=>
+
+##! commands prefix
+##!> assemble
+  ##! { ifconfig }
+  \{
+  ##! ( ifconfig )
+  \s*\(\s*
+  ##! VARNAME=xyz ifconfig
+  \w+=(?:[^\s]*|\$.*|\$.*|<.*|>.*|\'.*\'|\".*\")\s+
+  ##! ! ifconfig
+  !\s*
+  ##! $ifconfig
+  \$
+##!<
+##!=>
+
+*
+##!=>
+
+##! match possible white space between prefix expressions
+\s*
+##!=>
+
+##! quoting prefix
+##!> assemble
+  ##! 'ifconfig'
+  '
+  ##! "ifconfig"
+  \"
+##!<
+##!=>
+
+*
+##!=>
+
+##! paths prefix (+ evasion prevention suffix [\x5c'\"]*)
+(?:[\?\*\[\]\(\)\-\|+\w'\"\./\x5c]+/)?[\x5c'\"]*
+##!=>

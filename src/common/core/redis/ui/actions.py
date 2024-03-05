@@ -17,4 +17,4 @@ def redis(**kwargs):
     except:
         data = {"redis_nb_keys": 0}
 
-    return {**ping, **data}
+    return ping | data

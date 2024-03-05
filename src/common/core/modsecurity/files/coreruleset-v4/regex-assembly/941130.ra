@@ -1,0 +1,17 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+##!^ .
+##!$ \b
+
+\bxlink:href
+\bxhtml
+\bxmlns
+!ENTITY\s+(?:\S+|%\s+\S+)\s+SYSTEM
+!ENTITY\s+(?:\S+|%\s+\S+)\s+PUBLIC
+\bdata:text/html
+\bformaction
+@import
+;base64
+\bpattern\b.*?=

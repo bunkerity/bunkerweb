@@ -382,6 +382,8 @@ class Instances:
         # Get metrics from all instances
         metrics = {}
         for instance in self.get_instances():
+            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+
             try:
                 if plugin_id == "redis":
                     resp, instance_metrics = instance.metrics_redis()
@@ -394,10 +396,10 @@ class Instances:
             if not resp:
                 continue
 
-            if instance.name not in instance_metrics or instance_metrics[instance.name]["msg"] is None or instance_metrics[instance.name]["msg"] is not dict or instance_metrics[instance.name]["status"] != "success":
+            if not isinstance(instance_metrics.get(instance_name, {"msg": None}).get("msg"), dict) or instance_metrics[instance_name].get("status", "error") != "success":
                 continue
 
-            metric_data = instance_metrics[instance.name]["msg"]
+            metric_data = instance_metrics[instance_name]["msg"]
 
             # Update metrics looking for value type
             for key, value in metric_data.items():
@@ -407,42 +409,37 @@ class Instances:
 
                 # Some value are the same for all instances, we don't need to update them
                 # Example redis_nb_keys count
-                if key in ["redis_nb_keys"]:
+                if key == "redis_nb_keys":
                     continue
 
                 # Case value is number, add it to the existing value
                 if isinstance(value, (int, float)):
                     metrics[key] += value
-                    continue
                 # Case value is string, replace the existing value
                 elif isinstance(value, str):
                     metrics[key] = value
-                    continue
                 # Case value is list, extend it to the existing value
-                if isinstance(value, list):
+                elif isinstance(value, list):
                     metrics[key].extend(value)
-                    continue
                 # Case value is a dict, loop on it and update the existing value
-                if isinstance(value, dict):
+                elif isinstance(value, dict):
                     for k, v in value.items():
                         if k not in metrics[key]:
                             metrics[key][k] = v
-                            continue
-                        if isinstance(v, (int, float)):
+                        elif isinstance(v, (int, float)):
                             metrics[key][k] += v
-                            continue
-                        if isinstance(v, list):
+                        elif isinstance(v, list):
                             metrics[key][k].extend(v)
-                            continue
-                        if isinstance(v, str):
+                        elif isinstance(v, str):
                             metrics[key][k] = v
-                            continue
         return metrics
 
     def get_ping(self, plugin_id: str):
         # Need at least one instance to get a success ping to return success
         ping = {"status": "error"}
         for instance in self.get_instances():
+            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+
             try:
                 resp, ping_data = instance.ping(plugin_id)
             except:
@@ -451,11 +448,9 @@ class Instances:
             if not resp:
                 continue
 
-            if instance.name not in ping_data or ping_data[instance.name]["msg"] is None:
-                continue
+            ping["status"] = ping_data[instance_name].get("status", "error")
 
-            if ping_data[instance.name]["status"] == "success":
-                ping["status"] = "success"
+            if ping["status"] == "success":
                 break
 
         return ping

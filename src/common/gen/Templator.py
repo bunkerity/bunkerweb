@@ -16,18 +16,12 @@ from jinja2 import Environment, FileSystemLoader
 
 
 class Templator:
-    def __init__(
-        self,
-        templates: str,
-        core: str,
-        plugins: str,
-        output: str,
-        target: str,
-        config: Dict[str, Any],
-    ):
+    def __init__(self, templates: str, core: str, plugins: str, pro_plugins: str, output: str, target: str, config: Dict[str, Any]):
         self.__templates = templates
+        self.__global_templates = [basename(template) for template in glob(join(self.__templates, "*", "*.conf"))]
         self.__core = core
         self.__plugins = plugins
+        self.__pro_plugins = pro_plugins
         self.__output = output
         self.__target = target
         self.__config = config
@@ -43,14 +37,10 @@ class Templator:
 
     def __load_jinja_env(self) -> Environment:
         searchpath = [self.__templates]
-        for subpath in glob(join(self.__core, "*")) + glob(join(self.__plugins, "*")):
+        for subpath in glob(join(self.__core, "*", "confs")) + glob(join(self.__plugins, "*", "confs")) + glob(join(self.__pro_plugins, "*", "confs")):
             if Path(subpath).is_dir():
-                searchpath.append(join(subpath, "confs"))
-        return Environment(
-            loader=FileSystemLoader(searchpath=searchpath),
-            lstrip_blocks=True,
-            trim_blocks=True,
-        )
+                searchpath.append(subpath)
+        return Environment(loader=FileSystemLoader(searchpath=searchpath), lstrip_blocks=True, trim_blocks=True)
 
     def __find_templates(self, contexts) -> List[str]:
         templates = []
@@ -98,18 +88,7 @@ class Templator:
                 if server_key not in self.__config:
                     config["SERVER_NAME"] = server
 
-            for root_conf in (
-                "server.conf",
-                "access-lua.conf",
-                "ssl-certificate-lua.conf",
-                "header-lua.conf",
-                "init-lua.conf",
-                "log-lua.conf",
-                "set-lua.conf",
-                "log-stream-lua.conf",
-                "preread-stream-lua.conf",
-                "server-stream.conf",
-            ):
+            for root_conf in self.__global_templates:
                 if template.endswith(root_conf):
                     name = basename(template)
                     break

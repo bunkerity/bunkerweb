@@ -28,7 +28,7 @@ try:
 
         DRIVER.refresh()
 
-    log_info("Trying to filter the reports ...")
+    log_info("Check if reports generated ...")
 
     reports_list = safe_get_element(DRIVER, By.XPATH, "//ul[@data-reports-list='']/li", multiple=True)
     assert isinstance(reports_list, list), "Reports list is not a list"
@@ -36,6 +36,19 @@ try:
     if not reports_list:
         log_error("No reports found, exiting ...")
         exit(1)
+
+    log_info("Reports found, trying to filter the reports ...")
+
+    # Test select filters
+    select_filters = [
+        {"name": "Country", "id": "country", "value": "all"},
+        {"name": "Method", "id": "method", "value": "all"},
+        {"name": "Status code", "id": "status", "value": "all"},
+        {"name": "Reason", "id": "reason", "value": "all"},
+    ]
+
+    for item in select_filters:
+        DRIVER.execute_script(f"""return document.querySelector('[data-reports-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     filter_input = safe_get_element(DRIVER, By.ID, "keyword")
     assert isinstance(filter_input, WebElement), "Keyword filter input is not a WebElement"
@@ -55,8 +68,9 @@ except KeyboardInterrupt:
     exit_code = 1
 except:
     log_exception("Something went wrong, exiting ...")
-    DRIVER.save_screenshot("error.png")
     exit_code = 1
 finally:
+    if exit_code:
+        DRIVER.save_screenshot("error.png")
     DRIVER.quit()
     exit(exit_code)

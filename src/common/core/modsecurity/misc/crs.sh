@@ -3,7 +3,12 @@
 function git_secure_clone() {
 	repo="$1"
 	commit="$2"
-	folder="$(echo "$repo" | sed -E "s@https://github.com/.*/(.*)\.git@\1@")"
+	folder="$3"
+
+	if [ -z "$folder" ] || [ "$folder" == "" ] ; then
+		folder="$(echo "$repo" | rev | cut -d '/' -f 1 | rev | sed -E "s@\.git@@")"
+	fi
+
 	if [ ! -d "files/${folder}" ] ; then
 		output="$(git clone "$repo" "files/${folder}" 2>&1)"
 		# shellcheck disable=SC2181
@@ -45,11 +50,25 @@ function do_and_check_cmd() {
 		echo "$output"
 		exit $ret
 	fi
-	#echo $output
 	return 0
 }
 
-# CRS v3.3.5
-echo "ℹ️ Download CRS"
-git_secure_clone "https://github.com/coreruleset/coreruleset.git" "0bd51ff806c68e2a54c4d60ca13f731c5355696d"
-do_and_check_cmd cp -r files/coreruleset/crs-setup.conf.example files/crs-setup.conf
+rm -rf files/*
+
+jq -c .git_repository[] misc/versions.json | while read -r repo
+do
+  id="$(echo "$repo" | jq -r .id)"
+  name="$(echo "$repo" | jq -r .name)"
+  url="$(echo "$repo" | jq -r .url)"
+  commit="$(echo "$repo" | jq -r .commit)"
+  post_install="$(echo "$repo" | jq -r .post_install)"
+
+  echo "ℹ️ Clone ${name} from $url at commit/version $commit"
+
+	git_secure_clone "$url" "$commit" "$id"
+
+  if [ "$post_install" != "null" ]; then
+    echo "ℹ️ Running post install script for ${name}"
+    bash -c "$post_install"
+  fi
+done

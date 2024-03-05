@@ -1,0 +1,216 @@
+---
+meta:
+  author: "Franziska Bühler"
+  enabled: true
+  name: 930121.yaml
+tests:
+  - test_title: 930121-1
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "cat /root/.ssh/id_rsa"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-2
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "cat /etc/apache2/apache2/apache2.conf"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-3
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "cat /proc/sys/kernel/randomize_va_space"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-4
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "cat /proc/net/tcp"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-5
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "cat /root/.aws/credentials"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-6
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "cat /root/.ssh/id_rsa"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-7
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "/root/.aws/credentials"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-8
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "/proc/sys/kernel/randomize_va_space"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-9
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "/proc/net/tcp"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"
+  - test_title: 930121-10
+    desc: Remote File Access Attempt (930121) in REQUEST_HEADERS
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "/root/.ssh/id_rsa"
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            log_contains: id "930121"

@@ -30,9 +30,11 @@ else
     sudo systemctl stop bunkerweb
     echo "USE_MODSECURITY=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_MODSECURITY_CRS=yes" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "MODSECURITY_CRS_VERSION=3" | sudo tee -a /etc/bunkerweb/variables.env
     echo "MODSECURITY_SEC_AUDIT_ENGINE=RelevantOnly" | sudo tee -a /etc/bunkerweb/variables.env
     echo "MODSECURITY_SEC_RULE_ENGINE=On" | sudo tee -a /etc/bunkerweb/variables.env
     echo "MODSECURITY_SEC_AUDIT_LOG_PARTS=ABCFHZ" | sudo tee -a /etc/bunkerweb/variables.env
+    export TEST_TYPE="linux"
     sudo touch /var/www/html/index.html
     sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
@@ -45,6 +47,7 @@ cleanup_stack () {
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_MODSECURITY: "no"@USE_MODSECURITY: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_MODSECURITY_CRS: "no"@USE_MODSECURITY_CRS: "yes"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@MODSECURITY_CRS_VERSION: "4"@MODSECURITY_CRS_VERSION: "3"@' {} \;
         else
             sudo sed -i 's@USE_MODSECURITY=.*$@USE_MODSECURITY=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@USE_MODSECURITY_CRS=.*$@USE_MODSECURITY_CRS=yes@' /etc/bunkerweb/variables.env
@@ -77,7 +80,7 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
-for test in "activated" "crs_deactivated" "deactivated"
+for test in "activated" "crs_deactivated" "crs_v4" "deactivated"
 do
     if [ "$test" = "activated" ] ; then
         echo "👮 Running tests with modsecurity activated ..."
@@ -89,15 +92,26 @@ do
             sudo sed -i 's@USE_MODSECURITY_CRS=.*$@USE_MODSECURITY_CRS=no@' /etc/bunkerweb/variables.env
             export USE_MODSECURITY_CRS="no"
         fi
+    elif [ "$test" = "crs_v4" ] ; then
+        echo "👮 Running tests with the CRS v4 ..."
+        if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@MODSECURITY_CRS_VERSION: "3"@MODSECURITY_CRS_VERSION: "4"@' {} \;
+        else
+            sudo sed -i 's@MODSECURITY_CRS_VERSION=.*$@MODSECURITY_CRS_VERSION=4@' /etc/bunkerweb/variables.env
+            export MODSECURITY_CRS_VERSION="4"
+        fi
     elif [ "$test" = "deactivated" ] ; then
         echo "👮 Running tests without modsecurity ..."
         if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@MODSECURITY_CRS_VERSION: "4"@MODSECURITY_CRS_VERSION: "3"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_MODSECURITY_CRS: "no"@USE_MODSECURITY_CRS: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_MODSECURITY: "yes"@USE_MODSECURITY: "no"@' {} \;
         else
             sudo sed -i 's@USE_MODSECURITY_CRS=.*$@USE_MODSECURITY_CRS=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@USE_MODSECURITY=.*$@USE_MODSECURITY=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@MODSECURITY_CRS_VERSION=.*$@MODSECURITY_CRS_VERSION=3@' /etc/bunkerweb/variables.env
             unset USE_MODSECURITY_CRS
+            unset MODSECURITY_CRS_VERSION
             export USE_MODSECURITY="no"
         fi
     fi
@@ -199,7 +213,7 @@ do
     if [ "$integration" == "docker" ] ; then
         docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
     else
-        python3 main.py
+        sudo -E python3 main.py
     fi
 
     # shellcheck disable=SC2181

@@ -1,0 +1,21 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Word list for rule 932250 (RCE Unix command injection)
+
+##!+ i
+
+##!> assemble
+  ##!> include unix-shell-evasion-prefix-start-of-string
+
+  ##!> assemble
+    ##!> cmdline unix
+      ##!> include-except unix-shell-upto3 unix-shell-fps-pl1 -- @ "" ~ ""
+    ##!<
+    ##!=>
+    ##! This pattern is an approximation of the pattern used by the cmdline
+    ##! processor for `@`.
+    ##! This pattern is used across multiple files, change with care.
+    [\s<>&|)]
+  ##!<
+##!<

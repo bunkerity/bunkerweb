@@ -96,7 +96,7 @@ function start() {
 
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
-        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nDNS_RESOLVERS=8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env"
+        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nDNS_RESOLVERS=8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\nMODSECURITY_CRS_VERSION=4\n' > /etc/bunkerweb/variables.env"
         log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
     fi
 
@@ -151,7 +151,11 @@ function start() {
     if [ "$HTTPS_PORT" = "" ] ; then
         HTTPS_PORT="443"
     fi
-    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n' > /var/tmp/bunkerweb/tmp.env"
+    MODSECURITY_CRS_VERSION="$(grep "^MODSECURITY_CRS_VERSION=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$MODSECURITY_CRS_VERSION" = "" ] ; then
+        MODSECURITY_CRS_VERSION="4"
+    fi
+    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nMODSECURITY_CRS_VERSION=${MODSECURITY_CRS_VERSION}\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n' > /var/tmp/bunkerweb/tmp.env"
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload"
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then

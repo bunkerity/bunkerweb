@@ -1,0 +1,165 @@
+---
+meta:
+  author: "Felipe Zipitria"
+  description: "Remote Command Execution: shell aliasing detection"
+  enabled: true
+  name: 932175.yaml
+tests:
+  - test_title: 932175-1
+    desc: "Test for 0FA9HCGT alias eennvv=env&eennvv whoami"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /get?rce=alias%20eennvv%3Denv%26eennvv%20whoami
+            version: HTTP/1.1
+          output:
+            log_contains: id "932175"
+  - test_title: 932175-2
+    desc: "Test for alias with shell tricks"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              rce=alias a=c${KK}url&a google.com
+            version: HTTP/1.1
+          output:
+            log_contains: id "932175"
+  - test_title: 932175-3
+    desc: "Test for alias name with single quoting"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              rce=alias 'letter'=curl&letter google.com
+            version: HTTP/1.1
+          output:
+            log_contains: id "932175"
+  - test_title: 932175-4
+    desc: "Test for alias name with double quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              rce=alias "quote"=curl&quote google.com
+            version: HTTP/1.1
+          output:
+            log_contains: id "932175"
+  - test_title: 932175-5
+    desc: "Test for alias value with single quoting"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              rce=alias alias='curl'&letter google.com
+            version: HTTP/1.1
+          output:
+            log_contains: id "932175"
+  - test_title: 932175-6
+    desc: "Test for alias value with double quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              rce=alias double="curl"&quote google.com
+            version: HTTP/1.1
+          output:
+            log_contains: id "932175"
+  - test_title: 932175-7
+    desc: "Negative test alias"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              "text=I%20see%2C%20so%20your%20alias%20is%20not%20%3D%20to%20your%20name"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932175"
+  - test_title: 932175-8
+    desc: "Negative test alias with quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              "text=The%20pizza%20vendor%20was%20known%20by%20the%20alias%20%22pineapple%22%20online."
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932175"
+  - test_title: 932175-9
+    desc: "Status Page Test - Test for simple alias example"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /get?rce=alias%20a=b
+            version: HTTP/1.1
+          output:
+            log_contains: id "932175"

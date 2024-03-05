@@ -5,6 +5,7 @@ from requests import get
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER, UI_URL
 from utils import access_page, assert_button_click, safe_get_element
@@ -14,6 +15,23 @@ exit_code = 0
 try:
     log_info("Navigating to the logs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[11]/a", "logs")
+
+    log_info("Trying filters ...")
+
+    key_word_filter_input = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
+    assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
+    key_word_filter_input.send_keys("Antibot")
+
+    # Reset
+    key_word_filter_input.send_keys("")
+
+    # Test select filters
+    select_filters = [
+        {"name": "Types", "id": "types", "value": "all"},
+    ]
+
+    for item in select_filters:
+        DRIVER.execute_script(f"""return document.querySelector('[data-logs-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Selecting correct instance ...")
 
@@ -93,7 +111,9 @@ try:
         log_error("The keyword filter is not working, exiting ...")
         exit(1)
 
-    filter_input.clear()
+    # Reset
+    filter_input.send_keys(Keys.CONTROL, "a")
+    filter_input.send_keys(Keys.BACKSPACE)
 
     log_info("Keyword filter is working, trying type filter ...")
 
@@ -132,8 +152,9 @@ except KeyboardInterrupt:
     exit_code = 1
 except:
     log_exception("Something went wrong, exiting ...")
-    DRIVER.save_screenshot("error.png")
     exit_code = 1
 finally:
+    if exit_code:
+        DRIVER.save_screenshot("error.png")
     DRIVER.quit()
     exit(exit_code)

@@ -75,7 +75,7 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 "-nodes",
                 "-x509",
                 "-newkey",
-                "rsa:4096",
+                "ed25519",
                 "-keyout",
                 str(self_signed_path.joinpath(f"{first_server}.key")),
                 "-out",

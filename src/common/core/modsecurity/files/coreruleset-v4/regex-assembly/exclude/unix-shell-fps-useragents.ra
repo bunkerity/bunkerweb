@@ -1,0 +1,47 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This list excludes command words that are prone to cause false
+##! positives from the following include files:
+##!
+##! - unix-shell-upto3.ra
+##! - unix-shell-4andup.ra
+##! - unix-shell-pl3.ra
+
+##! This list is managed manually and contains known user-agents causing false positives
+##! in rules checking for RCE in User-Agent and Referer request header.
+
+##! To reduce complexity, this file simply lists all possible
+##! variants of a word, so when a word would be changed from, e.g.,
+##! `curl@` to `curl~`, this list would not have to be updated.
+##! See also unix-shell-fps-pl1.ra.
+
+# CPanel client (https://cpanel.net): Cpanel-HTTP-Client/1.0
+cpan
+cpan@
+cpan~
+# curl (https://curl.se): curl/8.1.2
+curl
+curl@
+curl~
+# Links browser (https://en.wikipedia.org/wiki/Links_(web_browser)): Links (2.3pre1; Linux 2.6.38-8-generic x86_64; 170x48)
+links
+links@
+links~
+# Requests (https://docs.python-requests.org/en/latest/index.html): python-requests/2.31.0
+# urllib (https://docs.python.org/3/library/urllib.html): Python-urllib/3.9
+python
+python@
+python~
+# Snapchat URL Preview Service (https://developers.snap.com/robots): Snap URL Preview Service; bot; snapchat; https://developers.snap.com/robots
+snap
+snap@
+snap~
+# w3m browser (https://en.wikipedia.org/wiki/W3m): w3m/0.5.1
+w3m
+w3m@
+w3m~
+# wget (https://www.gnu.org/software/wget/): wget
+wget
+wget@
+wget~

@@ -1,118 +1,66 @@
-{% extends "base.html" %} {% block content %}
-<input
-  type="csrf_token"
-  name="csrf_token"
-  value="{{ csrf_token }}"
-  class="hidden"
-  hidden
-/>
-
-<div class="col-span-12 grid grid-cols-12 gap-4">
-  <div class="col-span-12 grid grid-cols-12 gap-4">
-    <!-- info-->
-    <div
-      class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-    >
-      <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-
-      <div class="mx-1 flex justify-start items-center my-4">
-        <p
-          data-info
-          class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-        ></p>
-      </div>
-    </div>
-    <!-- end info -->
-  </div>
-
-  <div
-    class="h-fit dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  >
-    <!-- text -->
-    <div>
-      <p
-        class="mb-2 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
-      >
-        DEFAULT SERVER DISABLED
-      </p>
-      <h5
-        data-count-server-disabled
-        class="mb-1 font-bold dark:text-white/90"
-      ></h5>
-
-      <p class="mb-0 dark:text-white dark:opacity-60">
-        <span class="font-bold leading-normal text-sm text-sky-500 mx-0.5">
-          total
-        </span>
-      </p>
-    </div>
-    <!-- end text -->
-    <!-- icon -->
-    <div
-      role="img"
-      class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-orange-600"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        class="scale-[0.55] leading-none text-lg relative fill-white"
-      >
-        <path
-          d="M4.08 5.227A3 3 0 0 1 6.979 3H17.02a3 3 0 0 1 2.9 2.227l2.113 7.926A5.228 5.228 0 0 0 18.75 12H5.25a5.228 5.228 0 0 0-3.284 1.153L4.08 5.227Z"
-        />
-        <path
-          fill-rule="evenodd"
-          d="M5.25 13.5a3.75 3.75 0 1 0 0 7.5h13.5a3.75 3.75 0 1 0 0-7.5H5.25Zm10.5 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm3.75-.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-          clip-rule="evenodd"
-        />
-      </svg>
-    </div>
-    <!-- end icon -->
-  </div>
-
-  <div
-    class="h-fit dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  >
-    <!-- text -->
-    <div>
-      <p
-        class="mb-2 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
-      >
-        DISALLOWED METHODS
-      </p>
-      <h5
-        data-count-disallowed-methods
-        class="mb-1 font-bold dark:text-white/90"
-      ></h5>
-
-      <p class="mb-0 dark:text-white dark:opacity-60">
-        <span class="font-bold leading-normal text-sm text-sky-500 mx-0.5">
-          count
-        </span>
-      </p>
-    </div>
-    <!-- end text -->
-    <!-- icon -->
-    <div
-      role="img"
-      class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-lime-600"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        class="scale-50 leading-none text-lg relative fill-white"
-      >
-        <path
-          d="M18.75 12.75h1.5a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM12 6a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 6ZM12 18a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 18ZM3.75 6.75h1.5a.75.75 0 1 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM5.25 18.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 0 1.5ZM3 12a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3 12ZM9 3.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM12.75 12a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM9 15.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"
-        />
-      </svg>
-    </div>
-    <!-- end icon -->
-  </div>
-
-  <script>
+{% extends "base.html" %}
+{% block content %}
+    <input type="csrf_token"
+           name="csrf_token"
+           value="{{ csrf_token }}"
+           class="hidden"
+           hidden />
+    <div class="core-layout">
+        {% if is_used and is_metrics %}
+            <div class="core-layout">
+                <!-- info-->
+                <div class="core-card">
+                    <h5 class="core-card-title">INFO</h5>
+                    <div class="core-card-text-container">
+                        <p data-info class="core-card-text"></p>
+                    </div>
+                </div>
+                <!-- end info -->
+            </div>
+            <div class="core-card-metrics">
+                <!-- text -->
+                <div>
+                    <p class="core-card-metrics-name">DEFAULT SERVER DISABLED</p>
+                    <h5 data-count-server-disabled class="core-card-title"></h5>
+                    <p class="core-card-metrics-subtitle">
+                        <span class="core-card-metrics-subtitle-content info">total</span>
+                    </p>
+                </div>
+                <!-- end text -->
+                <!-- icon -->
+                <div role="img" class="core-card-svg-container orange">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="currentColor"
+                         class="scale-[0.55] core-card-metrics-svg">
+                        <path d="M4.08 5.227A3 3 0 0 1 6.979 3H17.02a3 3 0 0 1 2.9 2.227l2.113 7.926A5.228 5.228 0 0 0 18.75 12H5.25a5.228 5.228 0 0 0-3.284 1.153L4.08 5.227Z" />
+                        <path fill-rule="evenodd" d="M5.25 13.5a3.75 3.75 0 1 0 0 7.5h13.5a3.75 3.75 0 1 0 0-7.5H5.25Zm10.5 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm3.75-.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <!-- end icon -->
+            </div>
+            <div class="core-card-metrics">
+                <!-- text -->
+                <div>
+                    <p class="core-card-metrics-name">DISALLOWED METHODS</p>
+                    <h5 data-count-disallowed-methods class="core-card-title"></h5>
+                    <p class="core-card-metrics-subtitle">
+                        <span class="core-card-metrics-subtitle-content info">count</span>
+                    </p>
+                </div>
+                <!-- end text -->
+                <!-- icon -->
+                <div role="img" class="core-card-svg-container lime">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="currentColor"
+                         class="size-small core-card-metrics-svg">
+                        <path d="M18.75 12.75h1.5a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM12 6a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 6ZM12 18a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 18ZM3.75 6.75h1.5a.75.75 0 1 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM5.25 18.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 0 1.5ZM3 12a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3 12ZM9 3.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM12.75 12a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM9 15.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+                    </svg>
+                </div>
+                <!-- end icon -->
+            </div>
+            <script nonce="{{script_nonce}}">
     // Use SetupPlugin class that is on static/js/plugins/setup.js
     const setPlugin = new SetupPlugin({
       info: {
@@ -131,6 +79,29 @@
         type: "text",
       },
     });
-  </script>
-</div>
+            </script>
+        {% else %}
+            <div class="core-card">
+                <div class="core-card-wrap">
+                    <h5 class="core-card-title">Deactivated</h5>
+                    <!-- icon -->
+                    <div role="img" class="core-card-svg-container">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="core-card-deactivated-svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <!-- end icon -->
+                </div>
+                <div class="core-card-text-container">
+                    <p data-info class="core-card-text">This plugin need to be activated to get metrics.</p>
+                </div>
+            </div>
+            <!-- end info -->
+        {% endif %}
+    </div>
 {% endblock %}

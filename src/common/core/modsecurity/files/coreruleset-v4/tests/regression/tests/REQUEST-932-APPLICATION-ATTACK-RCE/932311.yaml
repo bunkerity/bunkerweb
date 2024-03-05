@@ -1,0 +1,238 @@
+---
+meta:
+  author: fzipi
+  description: "Remote Command Execution: IMAP Command Injection test cases PL3"
+  enabled: true
+  name: 932311.yaml
+tests:
+  - test_title: 932311-1
+    desc: "IMAP CREATE/DELETE/EXAMINE/SELECT/SUBSCRIBE/UNSUBSCRIBE Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aa001%20EXAMINE%20INBOX
+            version: HTTP/1.0
+          output:
+            log_contains: id "932311"
+  - test_title: 932311-2
+    desc: "IMAP CREATE/DELETE/EXAMINE/SELECT/SUBSCRIBE/UNSUBSCRIBE Command Injection true negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+              X-CRS-test: "CREATE:1"
+            method: GET
+            port: 80
+            uri: /get?text=We%examine%20this%20mail%20from%20Mars
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932311"
+  - test_title: 932311-3
+    desc: "IMAP COPY Command Injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0d%0aa002%20copy%202%3A4%20MEETING
+            version: HTTP/1.0
+          output:
+            log_contains: id "932311"
+  - test_title: 932311-4
+    desc: "IMAP COPY Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=Just%20to%20remind%20you%20that%20I%20need%20to%20copy%20those%20documents
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932311"
+  - test_title: 932311-5
+    desc: "IMAP LIST Command Injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0d%0aA1%20list%20%22INBOX%2F%22%20%22%2A%22
+            version: HTTP/1.0
+          output:
+            log_contains: id "932311"
+  - test_title: 932311-6
+    desc: "IMAP LIST Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=We%20need%20the%20list%20%22ASAP%22
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932311"
+  - test_title: 932311-7
+    desc: "IMAP STORE Command Injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0d%0ad%20store%202%20%2BFLAGS%20%28%5CDeleted%29
+            version: HTTP/1.0
+          output:
+            log_contains: id "932311"
+  - test_title: 932311-8
+    desc: "IMAP STORE Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0aLet%27s%20go%20to%20the%20store%20%28sale%20time%21%29
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932311"
+  - test_title: 932311-9
+    desc: "IMAP SEARCH Command Injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0d%0aA282%20SEARCH%20FLAGGED%20SINCE%201-Feb-1994%20NOT%20FROM%20%22Smith%22
+            version: HTTP/1.0
+          output:
+            log_contains: id "932311"
+  - test_title: 932311-10
+    desc: "IMAP SEARCH with CHARSET Command Injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0d%0aZ001%20SEARCH%20CHARSET%20WINDOWS-1252%20DELETED%20SINCE%201-Feb-1994
+            version: HTTP/1.0
+          output:
+            log_contains: id "932311"
+  - test_title: 932311-11
+    desc: "IMAP SEARCH using TEXT Command Injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0d%0aA283%20SEARCH%20TEXT%20%22string%20not%20in%20mailbox%22
+            version: HTTP/1.0
+          output:
+            log_contains: id "932311"
+  - test_title: 932311-12
+    desc: "IMAP SEARCH using CHARSET and range Command Injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=%0d%0aA284%20SEARCH%20CHARSET%20UTF-8%20TEXT%20%7B6%7D
+            version: HTTP/1.0
+          output:
+            log_contains: id "932311"
+  - test_title: 932311-13
+    desc: "IMAP SEARCH Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=In%20all%20search%20keys%20that%20use%20strings%2C%20a%20message%20matches%20the%20key%20if%20the%20string%20is%20a%20substring%20of%20the%20field.%20%20The%20matching%20is%20case-insensitive.
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932311"

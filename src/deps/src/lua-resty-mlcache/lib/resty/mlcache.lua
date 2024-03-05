@@ -174,7 +174,7 @@ end
 
 
 local _M     = {
-    _VERSION = "2.6.0",
+    _VERSION = "2.7.0",
     _AUTHOR  = "Thibault Charbonnier",
     _LICENSE = "MIT",
     _URL     = "https://github.com/thibaultcha/lua-resty-mlcache",
@@ -394,12 +394,8 @@ function _M.new(name, shm, opts)
 end
 
 
-local function set_lru(self, key, value, ttl, neg_ttl, l1_serializer)
-    if value == nil then
-        ttl = neg_ttl
-        value = CACHE_MISS_SENTINEL_LRU
-
-    elseif l1_serializer then
+local function l1_serialize(value, l1_serializer)
+    if value ~= nil and l1_serializer then
         local ok, err
         ok, value, err = pcall(l1_serializer, value)
         if not ok then
@@ -413,6 +409,21 @@ local function set_lru(self, key, value, ttl, neg_ttl, l1_serializer)
         if value == nil then
             return nil, "l1_serializer returned a nil value"
         end
+    end
+
+    return value
+end
+
+
+local function set_lru(self, key, value, ttl, neg_ttl, l1_serializer)
+    local value, err = l1_serialize(value, l1_serializer)
+    if err then
+        return nil, err
+    end
+
+    if value == nil then
+        value = CACHE_MISS_SENTINEL_LRU
+        ttl = neg_ttl
     end
 
     if ttl == 0 then
@@ -555,6 +566,11 @@ local function get_shm_set_lru(self, key, shm_key, l1_serializer)
         end
 
         if went_stale then
+            value, err = l1_serialize(value, l1_serializer)
+            if err then
+                return nil, err
+            end
+
             return value, nil, went_stale
         end
 
@@ -574,6 +590,11 @@ local function get_shm_set_lru(self, key, shm_key, l1_serializer)
                 -- value has less than 1ms of lifetime in the shm, avoid
                 -- setting it in LRU which would be wasteful and could
                 -- indefinitely cache the value when ttl == 0
+                value, err = l1_serialize(value, l1_serializer)
+                if err then
+                    return nil, err
+                end
+
                 return value, nil, nil, is_stale
             end
         end
@@ -595,6 +616,7 @@ local function check_opts(self, opts)
     local resurrect_ttl
     local l1_serializer
     local shm_set_tries
+    local resty_lock_opts
 
     if opts ~= nil then
         if type(opts) ~= "table" then
@@ -649,6 +671,13 @@ local function check_opts(self, opts)
                 error("opts.shm_set_tries must be >= 1", 3)
             end
         end
+
+        resty_lock_opts = opts.resty_lock_opts
+        if resty_lock_opts ~= nil then
+            if type(resty_lock_opts) ~= "table" then
+                error("opts.resty_lock_opts must be a table", 3)
+            end
+        end
     end
 
     if not ttl then
@@ -671,7 +700,12 @@ local function check_opts(self, opts)
         shm_set_tries = self.shm_set_tries
     end
 
-    return ttl, neg_ttl, resurrect_ttl, l1_serializer, shm_set_tries
+    if not resty_lock_opts then
+        resty_lock_opts = self.resty_lock_opts
+    end
+
+    return ttl, neg_ttl, resurrect_ttl, l1_serializer, shm_set_tries,
+           resty_lock_opts
 end
 
 
@@ -686,8 +720,9 @@ end
 
 
 local function run_callback(self, key, shm_key, data, ttl, neg_ttl,
-    went_stale, l1_serializer, resurrect_ttl, shm_set_tries, cb, ...)
-    local lock, err = resty_lock:new(self.shm_locks, self.resty_lock_opts)
+    went_stale, l1_serializer, resurrect_ttl, shm_set_tries, rlock_opts, cb, ...)
+
+    local lock, err = resty_lock:new(self.shm_locks, rlock_opts)
     if not lock then
         return nil, "could not create lock: " .. err
     end
@@ -855,8 +890,8 @@ function _M:get(key, opts, cb, ...)
 
     -- opts validation
 
-    local ttl, neg_ttl, resurrect_ttl, l1_serializer, shm_set_tries =
-        check_opts(self, opts)
+    local ttl, neg_ttl, resurrect_ttl, l1_serializer, shm_set_tries,
+          rlock_opts = check_opts(self, opts)
 
     local err, went_stale, is_stale
     data, err, went_stale, is_stale = get_shm_set_lru(self, key, namespaced_key,
@@ -884,7 +919,7 @@ function _M:get(key, opts, cb, ...)
 
     return run_callback(self, key, namespaced_key, data, ttl, neg_ttl,
                         went_stale, l1_serializer, resurrect_ttl,
-                        shm_set_tries, cb, ...)
+                        shm_set_tries, rlock_opts, cb, ...)
 end
 
 
@@ -900,6 +935,7 @@ local function run_thread(self, ops, from, to)
                                                       ctx.l1_serializer,
                                                       ctx.resurrect_ttl,
                                                       ctx.shm_set_tries,
+                                                      ctx.rlock_opts,
                                                       ctx.cb, ctx.arg)
     end
 end
@@ -1020,8 +1056,8 @@ function _M:get_bulk(bulk, opts)
             res[res_idx + 2] = 1
 
         else
-            local pok, ttl, neg_ttl, resurrect_ttl, l1_serializer, shm_set_tries
-                = pcall(check_opts, self, b_opts)
+            local pok, ttl, neg_ttl, resurrect_ttl, l1_serializer,
+                  shm_set_tries, rlock_opts = pcall(check_opts, self, b_opts)
             if not pok then
                 -- strip the stacktrace
                 local err = ttl:match("mlcache%.lua:%d+:%s(.*)")
@@ -1074,6 +1110,7 @@ function _M:get_bulk(bulk, opts)
                 ctx.l1_serializer = l1_serializer
                 ctx.resurrect_ttl = resurrect_ttl
                 ctx.shm_set_tries = shm_set_tries
+                ctx.rlock_opts = rlock_opts
                 ctx.data = data
                 ctx.err = nil
                 ctx.hit_lvl = nil
@@ -1240,7 +1277,16 @@ function _M:peek(key, stale)
                         "retrieval: " .. err
         end
 
-        local remaining_ttl = ttl - (now() - at)
+        local remaining_ttl = 0
+
+        if ttl > 0 then
+            remaining_ttl = ttl - (now() - at)
+
+            if remaining_ttl == 0 then
+                -- guarantee a non-zero remaining_ttl if ttl is set
+                remaining_ttl = 0.001
+            end
+        end
 
         return remaining_ttl, nil, value, went_stale
     end

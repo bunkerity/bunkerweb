@@ -1,0 +1,35 @@
+---
+meta:
+  author: ", Max Leske"
+  enabled: true
+  name: "920221.yaml"
+  description: "Detect invalid URI encoding in the last path segment of the URI"
+tests:
+  - test_title: 920221-1
+    description: Detect invalid URI encoding in decoded URI (`%w20`)
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/get/%25w20"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: "id \"920221\""
+  - test_title: 920221-2
+    description: Ignore invalid URI encoding if the last path segment looks like file name (`%w20`)
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/get/%25w20.txt"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            no_log_contains: "id \"920221\""

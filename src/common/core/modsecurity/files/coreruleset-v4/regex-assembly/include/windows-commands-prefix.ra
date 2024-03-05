@@ -1,0 +1,68 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This assembly file generates a prefix match for windows commands.
+##! Command words, in this case, must follow the prefix.
+##! Separate rules target commands that do not follow this prefix,
+##! as the chance of false positives is higher without a prefix match.
+
+##! Note: the quoting prefixes are part of the command prefixes, except for ^
+##!       which, for unknown reasons, is not part of the expression
+
+##! ;cmd
+;
+##! {cmd
+\{
+##! |cmd
+\|
+##! ||cmd
+\|\|
+##! &cmd
+&
+##! &&cmd
+&&
+##! \ncmd
+\n
+##! \rcmd
+\r
+##! `cmd
+`
+##!=>
+
+##! match possible white space between prefix expressions
+\s*
+##!=>
+
+##! commands prefix
+##!> assemble
+  ##! (cmd)
+  \(
+  ##! ,cmd
+  ,
+  ##! @cmd
+  @
+  ##! 'cmd'
+  '
+  ##! "cmd"
+  \"
+  ##! spacing+cmd
+  \s
+##!<
+##!=>
+
+*
+##!=>
+
+##! paths prefix
+##!> assemble
+  ##! /path/cmd
+  [\w'\"\./]+/
+  ##! C:\Program Files\cmd
+  [\x5c'\"\^]*\w[\x5c'\"\^]*:.*\x5c
+  ##! \\net\share\dir\cmd
+  [\^\.\w '\"/\x5c]*\x5c
+##!<
+##!=>
+
+?[\"\^]*
+##!=>

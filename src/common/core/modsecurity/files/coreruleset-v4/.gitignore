@@ -1,0 +1,34 @@
+*.swp
+*.swo
+
+# User configuration
+crs-setup.conf
+rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+
+# The MaxMind GeoIP database can be downloaded or upgraded by running:
+# util/upgrade.py geoip
+util/geo-location/GeoIP.dat
+
+# PHP functions frequency list generated and updated by running
+# util/php-dictionary-gen.sh 
+util/php-dictionary-gen/frequencylist.txt
+
+# Unit test caches
+.cache
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+.idea/
+
+# Ignore test logs
+tests/logs/
+
+# ignore .env in tests for docker-compose variables
+tests/.env
+
+# Ignore Go-FTW configuration file
+.ftw.yaml

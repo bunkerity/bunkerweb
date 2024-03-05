@@ -6,6 +6,7 @@ from requests import get
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER
 from base import TEST_TYPE
@@ -22,7 +23,10 @@ try:
     server_name_input = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
     assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
 
-    server_name_input.clear()
+    # Reset
+    server_name_input.send_keys(Keys.CONTROL, "a")
+    server_name_input.send_keys(Keys.BACKSPACE)
+
     server_name_input.send_keys("app1.example.com")
 
     access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
@@ -36,7 +40,7 @@ try:
     log_info("Trying to create a new config ...")
 
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
-    assert_button_click(DRIVER, "//li[@data-configs-add-file='']/button")
+    assert_button_click(DRIVER, "//button[@data-configs-add-file='']")
 
     configs_modal_path_input = safe_get_element(DRIVER, By.XPATH, "//div[@data-configs-modal-path='']/input")
     assert isinstance(configs_modal_path_input, WebElement), "The path input is not an instance of WebElement"
@@ -120,7 +124,7 @@ location /hello {
 
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
     assert_button_click(DRIVER, "//div[@data-path='/etc/bunkerweb/configs/server-http/app1.example.com' and @data-_type='folder']")
-    assert_button_click(DRIVER, "//li[@data-configs-add-file='']/button")
+    assert_button_click(DRIVER, "//button[@data-configs-add-file='']")
 
     configs_modal_path_input = safe_get_element(DRIVER, By.XPATH, "//div[@data-configs-modal-path='']/input")
     assert isinstance(configs_modal_path_input, WebElement), "The path input is not an instance of WebElement"
@@ -201,8 +205,9 @@ except KeyboardInterrupt:
     exit_code = 1
 except:
     log_exception("Something went wrong, exiting ...")
-    DRIVER.save_screenshot("error.png")
     exit_code = 1
 finally:
+    if exit_code:
+        DRIVER.save_screenshot("error.png")
     DRIVER.quit()
     exit(exit_code)

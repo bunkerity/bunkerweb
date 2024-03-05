@@ -282,7 +282,7 @@ try:
             "description": "The general settings for the server",
             "version": "0.1",
             "stream": "partial",
-            "external": False,
+            "type": "core",
             "checked": False,
             "page_checked": True,
             "settings": global_settings,
@@ -316,27 +316,30 @@ try:
                 Plugins.description,
                 Plugins.version,
                 Plugins.stream,
-                Plugins.external,
+                Plugins.type,
                 Plugins.method,
             )
             .all()
         )
 
         for plugin in plugins:
-            if not plugin.external and plugin.id in core_plugins:
+            if plugin.type == "pro":  # ? We do not test the pro plugins in here
+                continue
+
+            if plugin.type == "core" and plugin.id in core_plugins:
                 current_plugin = core_plugins
-            elif plugin.external and plugin.id in external_plugins:
+            elif plugin.type == "external" and plugin.id in external_plugins:
                 current_plugin = external_plugins
             else:
                 print(
-                    f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but should not be, exiting ...",
+                    f"❌ The {'external' if plugin.type == 'external' else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but should not be, exiting ...: {plugin}",
                     flush=True,
                 )
                 exit(1)
 
             if plugin.name != current_plugin[plugin.id]["name"] or plugin.description != current_plugin[plugin.id]["description"] or plugin.version != current_plugin[plugin.id]["version"] or plugin.stream != current_plugin[plugin.id]["stream"]:
                 print(
-                    f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
+                    f"❌ The {'external' if plugin.type == 'external' else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
                     + f"{dumps({'name': plugin.name, 'description': plugin.description, 'version': plugin.version, 'stream': plugin.stream})}"
                     + f" (database) != {dumps({'name': current_plugin[plugin.id]['name'], 'description': current_plugin[plugin.id]['description'], 'version': current_plugin[plugin.id]['version'], 'stream': current_plugin[plugin.id]['stream']})} (file)",  # noqa: E501
                     flush=True,
@@ -357,7 +360,7 @@ try:
                         or setting.multiple != current_plugin[plugin.id]["settings"][setting.id].get("multiple", None)
                     ):
                         print(
-                            f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
+                            f"❌ The {'external' if plugin.type == 'external' else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
                             + f"{dumps({'default': setting.default, 'help': setting.help, 'label': setting.label, 'regex': setting.regex, 'type': setting.type})}"
                             + f" (database) != {dumps({'default': current_plugin[plugin.id]['settings'][setting.id]['default'], 'help': current_plugin[plugin.id]['settings'][setting.id]['help'], 'label': current_plugin[plugin.id]['settings'][setting.id]['label'], 'regex': current_plugin[plugin.id]['settings'][setting.id]['regex'], 'type': current_plugin[plugin.id]['settings'][setting.id]['type']})} (file)",  # noqa: E501
                             flush=True,

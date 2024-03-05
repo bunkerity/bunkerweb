@@ -1,8 +1,9 @@
 import {
   Popover,
-  Tabs,
+  TabsSelect,
   FormatValue,
   FilterSettings,
+  CheckNoMatchFilter,
 } from "./utils/settings.js";
 
 class Multiple {
@@ -26,10 +27,25 @@ class Multiple {
 }
 
 const setPopover = new Popover("main", "global-config");
-const setTabs = new Tabs("[global-config-tabs]", "global-config");
+const setTabsSelect = new TabsSelect(
+  document.querySelector("[data-global-config-tabs-select-container]"),
+  document.querySelector("[data-global-config-plugins-container]"),
+);
 const format = new FormatValue();
 const setMultiple = new Multiple("global-config");
+
 const setFilterGlobal = new FilterSettings(
-  "settings-filter",
-  "[data-service-content='settings']",
+  "keyword",
+  document.querySelector("[data-global-config-tabs-select-container]"),
+  document.querySelector("[data-global-config-plugins-container]"),
+);
+
+const checkServiceModalKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#keyword"),
+  "input",
+  document
+    .querySelector("[data-global-config-plugins-container]")
+    .querySelectorAll("[data-plugin-item]"),
+  document.querySelector("[data-global-config-form]"),
+  document.querySelector("[data-global-config-nomatch]"),
 );

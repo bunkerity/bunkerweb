@@ -11,7 +11,7 @@ from os.path import basename, normpath, join
 from pathlib import Path
 from re import compile as re_compile
 from sys import _getframe, path as sys_path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
 
@@ -39,7 +39,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from jobs import file_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import create_engine, text, inspect
+from sqlalchemy import create_engine, MetaData as sql_metadata, text, inspect
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
@@ -223,6 +223,23 @@ class Database:
 
         return ""
 
+    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
+        """Set the pro metadata values"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                for key, value in data.items():
+                    setattr(metadata, key, value)
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
     def is_scheduler_first_start(self) -> bool:
         """Check if it's the scheduler's first start"""
         with self.__db_session() as session:
@@ -274,12 +291,33 @@ class Database:
 
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
-        data = {"version": "1.5.6", "integration": "unknown"}
+        data = {
+            "version": "1.5.6",
+            "integration": "unknown",
+            "database_version": "Unknown",
+            "is_pro": "no",
+            "pro_expire": None,
+            "pro_services": 0,
+            "pro_overlapped": False,
+            "pro_status": "invalid",
+        }
+        database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration).filter_by(id=1).first()
+                data["database_version"] = (session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"])[0]
+                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration, Metadata.is_pro, Metadata.pro_expire, Metadata.pro_services, Metadata.pro_overlapped, Metadata.pro_status).filter_by(id=1).first()
                 if metadata:
-                    data = {"version": metadata.version, "integration": metadata.integration}
+                    data.update(
+                        {
+                            "version": metadata.version,
+                            "integration": metadata.integration,
+                            "is_pro": metadata.is_pro,
+                            "pro_expire": metadata.pro_expire,
+                            "pro_services": metadata.pro_services,
+                            "pro_overlapped": metadata.pro_overlapped,
+                            "pro_status": metadata.pro_status,
+                        }
+                    )
 
         return data
 
@@ -292,6 +330,7 @@ class Database:
                     .with_entities(
                         Metadata.custom_configs_changed,
                         Metadata.external_plugins_changed,
+                        Metadata.pro_plugins_changed,
                         Metadata.config_changed,
                         Metadata.instances_changed,
                     )
@@ -302,6 +341,7 @@ class Database:
                 return dict(
                     custom_configs_changed=metadata is not None and metadata.custom_configs_changed,
                     external_plugins_changed=metadata is not None and metadata.external_plugins_changed,
+                    pro_plugins_changed=metadata is not None and metadata.pro_plugins_changed,
                     config_changed=metadata is not None and metadata.config_changed,
                     instances_changed=metadata is not None and metadata.instances_changed,
                 )
@@ -314,6 +354,7 @@ class Database:
             "config",
             "custom_configs",
             "external_plugins",
+            "pro_plugins",
             "instances",
         ]
         with self.__db_session() as session:
@@ -331,6 +372,8 @@ class Database:
                     metadata.custom_configs_changed = value
                 if "external_plugins" in changes:
                     metadata.external_plugins_changed = value
+                if "pro_plugins" in changes:
+                    metadata.pro_plugins_changed = value
                 if "instances" in changes:
                     metadata.instances_changed = value
                 session.commit()
@@ -341,33 +384,37 @@ class Database:
 
     def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
+        assert self.__sql_engine is not None, "The database engine is not initialized"
+
         inspector = inspect(self.__sql_engine)
         db_version = None
         has_all_tables = True
+        old_data = {}
+
         if inspector and len(inspector.get_table_names()):
             db_version = self.get_metadata()["version"]
 
             if db_version != bunkerweb_version:
-                self.__logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), checking if it needs to be updated")
-                for table in Base.metadata.tables:
-                    if not inspector.has_table(table):
+                self.__logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
+                metadata = sql_metadata()
+                metadata.reflect(self.__sql_engine)
+
+                for table_name in Base.metadata.tables.keys():
+                    if not inspector.has_table(table_name):
+                        self.__logger.warning(f'Table "{table_name}" is missing')
                         has_all_tables = False
-                    else:
-                        missing_columns = []
+                        continue
 
-                        db_columns = inspector.get_columns(table)
-                        for column in Base.metadata.tables[table].columns:
-                            if not any(db_column["name"] == column.name for db_column in db_columns):
-                                missing_columns.append(column)
+                    with self.__db_session() as session:
+                        old_data[table_name] = session.query(metadata.tables[table_name]).all()
 
-                        try:
-                            with self.__db_session() as session:
-                                if missing_columns:
-                                    for column in missing_columns:
-                                        session.execute(text(f"ALTER TABLE {table} ADD COLUMN {column.name} {column.type}"))
-                                session.commit()
-                        except BaseException:
-                            return False, format_exc()
+                # Drop all missing tables
+                for table_name in metadata.tables.keys():
+                    if table_name not in Base.metadata.tables:
+                        with self.__db_session() as session:
+                            session.execute(text(f"DROP TABLE {table_name}"))
+
+                Base.metadata.drop_all(self.__sql_engine)
 
         if has_all_tables and db_version and db_version == bunkerweb_version:
             return False, ""
@@ -376,6 +423,20 @@ class Database:
             Base.metadata.create_all(self.__sql_engine, checkfirst=True)
         except BaseException:
             return False, format_exc()
+
+        if db_version and db_version != bunkerweb_version:
+            with self.__db_session() as session:
+                for table_name, data in old_data.items():
+                    for row in data:
+                        has_external_column = "external" in row
+                        row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() + (["external"] if has_external_column else []) if hasattr(row, column)}
+
+                        # ? As the external column has been replaced by the type column, we need to update the data if the column exists
+                        if table_name == "bw_plugins" and "external" in row:
+                            row["type"] = "external" if row.pop("external") else "core"
+
+                        session.execute(Base.metadata.tables[table_name].insert().values(row))
+                session.commit()
 
         to_put = []
         with self.__db_session() as session:
@@ -394,7 +455,6 @@ class Database:
                             "description": "The general settings for the server",
                             "version": "0.1",
                             "stream": "partial",
-                            "external": False,
                         }
                     else:
                         settings = plugin.pop("settings", {})
@@ -417,8 +477,8 @@ class Database:
                         if plugin["stream"] != db_plugin.stream:
                             updates[Plugins.stream] = plugin["stream"]
 
-                        if plugin.get("external", False) != db_plugin.external:
-                            updates[Plugins.external] = plugin.get("external", False)
+                        if plugin.get("type", "core") != db_plugin.type:
+                            updates[Plugins.type] = plugin.get("type", "core")
 
                         if plugin.get("method", "manual") != db_plugin.method:
                             updates[Plugins.method] = plugin.get("method", "manual")
@@ -440,7 +500,7 @@ class Database:
                                 description=plugin["description"],
                                 version=plugin["version"],
                                 stream=plugin["stream"],
-                                external=plugin.get("external", False),
+                                type=plugin.get("type", "core"),
                                 method=plugin.get("method"),
                                 data=plugin.get("data"),
                                 checksum=plugin.get("checksum"),
@@ -460,6 +520,9 @@ class Database:
 
                         if db_setting:
                             updates = {}
+
+                            if value["plugin_id"] != db_setting.plugin_id:
+                                updates[Settings.plugin_id] = value["plugin_id"]
 
                             if value["name"] != db_setting.name:
                                 updates[Settings.name] = value["name"]
@@ -949,6 +1012,9 @@ class Database:
             if is_multisite:
                 for service in services:
                     config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
+                    if methods:
+                        config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
+
                     checked_settings = []
                     for key, value in deepcopy(config).items():
                         original_key = key
@@ -1099,11 +1165,12 @@ class Database:
 
         return ""
 
-    def update_external_plugins(self, plugins: List[Dict[str, Any]], *, delete_missing: bool = True) -> str:
+    def update_external_plugins(self, plugins: List[Dict[str, Any]], *, _type: Literal["external", "pro"] = "external", delete_missing: bool = True) -> str:
         """Update external plugins from the database"""
         to_put = []
+        changes = False
         with self.__db_session() as session:
-            db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(external=True).all()
+            db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(type=_type).all()
 
             db_ids = []
             if delete_missing and db_plugins:
@@ -1112,6 +1179,7 @@ class Database:
                 missing_ids = [plugin for plugin in db_ids if plugin not in ids]
 
                 if missing_ids:
+                    changes = True
                     # Remove plugins that are no longer in the list
                     session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
 
@@ -1119,7 +1187,7 @@ class Database:
                 settings = plugin.pop("settings", {})
                 jobs = plugin.pop("jobs", [])
                 page = plugin.pop("page", False)
-                plugin["external"] = True
+                plugin["type"] = _type
                 db_plugin = (
                     session.query(Plugins)
                     .with_entities(
@@ -1130,16 +1198,16 @@ class Database:
                         Plugins.method,
                         Plugins.data,
                         Plugins.checksum,
-                        Plugins.external,
+                        Plugins.type,
                     )
                     .filter_by(id=plugin["id"])
                     .first()
                 )
 
-                if db_plugin is not None:
-                    if db_plugin.external is False:
+                if db_plugin:
+                    if db_plugin.type not in ("external", "pro"):
                         self.__logger.warning(
-                            f"Plugin \"{plugin['id']}\" is not external, skipping update (updating a non-external plugin is forbidden for security reasons)",
+                            f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external or non-pro plugin is forbidden for security reasons)",
                         )
                         continue
 
@@ -1166,7 +1234,11 @@ class Database:
                     if plugin.get("checksum") != db_plugin.checksum:
                         updates[Plugins.checksum] = plugin.get("checksum")
 
+                    if plugin.get("type") != db_plugin.type:
+                        updates[Plugins.type] = plugin.get("type")
+
                     if updates:
+                        changes = True
                         session.query(Plugins).filter(Plugins.id == plugin["id"]).update(updates)
 
                     db_plugin_settings = session.query(Settings).with_entities(Settings.id).filter_by(plugin_id=plugin["id"]).all()
@@ -1175,17 +1247,12 @@ class Database:
                     missing_ids = [setting for setting in db_ids if setting not in setting_ids]
 
                     if missing_ids:
+                        changes = True
                         # Remove settings that are no longer in the list
                         session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
 
                     for setting, value in settings.items():
-                        value.update(
-                            {
-                                "plugin_id": plugin["id"],
-                                "name": value["id"],
-                                "id": setting,
-                            }
-                        )
+                        value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
                         db_setting = (
                             session.query(Settings)
                             .with_entities(
@@ -1203,14 +1270,11 @@ class Database:
                         )
 
                         if setting not in db_ids or not db_setting:
+                            changes = True
                             for select in value.pop("select", []):
                                 to_put.append(Selects(setting_id=value["id"], value=select))
 
-                            to_put.append(
-                                Settings(
-                                    **value,
-                                )
-                            )
+                            to_put.append(Settings(**value))
                         else:
                             updates = {}
 
@@ -1239,6 +1303,7 @@ class Database:
                                 updates[Settings.multiple] = value.get("multiple")
 
                             if updates:
+                                changes = True
                                 session.query(Settings).filter(Settings.id == setting).update(updates)
 
                             db_selects = session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting).all()
@@ -1247,11 +1312,13 @@ class Database:
                             missing_values = [select for select in db_values if select not in select_values]
 
                             if missing_values:
+                                changes = True
                                 # Remove selects that are no longer in the list
                                 session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
 
                             for select in value.get("select", []):
                                 if select not in db_values:
+                                    changes = True
                                     to_put.append(Selects(setting_id=setting, value=select))
 
                     db_jobs = session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"]).all()
@@ -1260,6 +1327,7 @@ class Database:
                     missing_names = [job for job in db_names if job not in job_names]
 
                     if missing_names:
+                        changes = True
                         # Remove jobs that are no longer in the list
                         session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
 
@@ -1267,14 +1335,10 @@ class Database:
                         db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
 
                         if job["name"] not in db_names or not db_job:
+                            changes = True
                             job["file_name"] = job.pop("file")
                             job["reload"] = job.get("reload", False)
-                            to_put.append(
-                                Jobs(
-                                    plugin_id=plugin["id"],
-                                    **job,
-                                )
-                            )
+                            to_put.append(Jobs(plugin_id=plugin["id"], **job))
                         else:
                             updates = {}
 
@@ -1288,6 +1352,7 @@ class Database:
                                 updates[Jobs.reload] = job.get("reload", False)
 
                             if updates:
+                                changes = True
                                 updates[Jobs.last_run] = None
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
@@ -1308,6 +1373,7 @@ class Database:
                             )
 
                             if not db_plugin_page:
+                                changes = True
                                 template = path_ui.joinpath("template.html").read_bytes()
                                 actions = path_ui.joinpath("actions.py").read_bytes()
 
@@ -1344,10 +1410,12 @@ class Database:
                                     )
 
                                 if updates:
+                                    changes = True
                                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
 
                     continue
 
+                changes = True
                 to_put.append(
                     Plugins(
                         id=plugin["id"],
@@ -1355,7 +1423,7 @@ class Database:
                         description=plugin["description"],
                         version=plugin["version"],
                         stream=plugin["stream"],
-                        external=True,
+                        type=_type,
                         method=plugin["method"],
                         data=plugin.get("data"),
                         checksum=plugin.get("checksum"),
@@ -1369,22 +1437,12 @@ class Database:
                         self.__logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
                         continue
 
-                    value.update(
-                        {
-                            "plugin_id": plugin["id"],
-                            "name": value["id"],
-                            "id": setting,
-                        }
-                    )
+                    value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
 
                     for select in value.pop("select", []):
                         to_put.append(Selects(setting_id=value["id"], value=select))
 
-                    to_put.append(
-                        Settings(
-                            **value,
-                        )
-                    )
+                    to_put.append(Settings(**value))
 
                 for job in jobs:
                     db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
@@ -1452,10 +1510,14 @@ class Database:
                                 if updates:
                                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
 
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.external_plugins_changed = True
+            if changes:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        if _type == "external":
+                            metadata.external_plugins_changed = True
+                        elif _type == "pro":
+                            metadata.pro_plugins_changed = True
 
             try:
                 session.add_all(to_put)
@@ -1465,17 +1527,19 @@ class Database:
 
         return ""
 
-    def get_plugins(self, *, external: bool = False, with_data: bool = False) -> List[Dict[str, Any]]:
+    def get_plugins(self, *, _type: Literal["all", "external", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
         """Get all plugins from the database."""
         plugins = []
         with self.__db_session() as session:
-            entities = [Plugins.id, Plugins.stream, Plugins.name, Plugins.description, Plugins.version, Plugins.external, Plugins.method, Plugins.checksum]
+            entities = [Plugins.id, Plugins.stream, Plugins.name, Plugins.description, Plugins.version, Plugins.type, Plugins.method, Plugins.checksum]
             if with_data:
                 entities.append(Plugins.data)
-            for plugin in session.query(Plugins).with_entities(*entities).all():
-                if external and not plugin.external:
-                    continue
 
+            db_plugins = session.query(Plugins).with_entities(*entities)
+            if _type != "all":
+                db_plugins = db_plugins.filter_by(type=_type)
+
+            for plugin in db_plugins.all():
                 page = session.query(Plugin_pages).with_entities(Plugin_pages.id).filter_by(plugin_id=plugin.id).first()
                 data = {
                     "id": plugin.id,
@@ -1483,7 +1547,7 @@ class Database:
                     "name": plugin.name,
                     "description": plugin.description,
                     "version": plugin.version,
-                    "external": plugin.external,
+                    "type": plugin.type,
                     "method": plugin.method,
                     "page": page is not None,
                     "settings": {},

@@ -1,0 +1,193 @@
+---
+meta:
+  author: fzipi
+  description: "Remote Command Execution: POP3 Command Injection test cases"
+  enabled: true
+  name: 932320.yaml
+tests:
+  - test_title: 932320-1
+    desc: "POP3 RETR/DELE Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aRETR%20123
+            version: HTTP/1.0
+          output:
+            log_contains: id "932320"
+  - test_title: 932320-2
+    desc: "POP3 RETR Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?text=Let%20me%20retrieve%2010%20of%20those
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932320"
+  - test_title: 932320-3
+    desc: "POP3 DELE Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=We%20should%20delete%20nine
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932320"
+  - test_title: 932320-4
+    desc: "POP3 LIST Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0alist%203
+            version: HTTP/1.0
+          output:
+            log_contains: id "932320"
+  - test_title: 932320-5
+    desc: "POP3 LIST Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=This%20text%20is%20a%20way%20of%20list%203%20things
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932320"
+  - test_title: 932320-6
+    desc: "POP3 TOP Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aTOP%201%202
+            version: HTTP/1.0
+          output:
+            log_contains: id "932320"
+  - test_title: 932320-7
+    desc: "POP3 TOP Command Injection true negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=These%20are%20top%10%20rules
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932320"
+  - test_title: 932320-8
+    desc: "POP3 AUTH Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aAUTH%20corerulest%20dGhpc2lzIWF0ZXN0cGFzc3dvcmQ=
+            version: HTTP/1.0
+          output:
+            log_contains: id "932320"
+  - test_title: 932320-9
+    desc: "POP3 AUTH Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=Hey%2C%20sent%20me%20those%20auth%20codes%20please!
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932320"
+  - test_title: 932320-10
+    desc: "POP3 APOP Command injection positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: GET
+            port: 80
+            uri: /get?attackme=%0d%0aAPOP%20corerulest%207d0a3bd8e5b2abcfb3e256633c23b891
+            version: HTTP/1.0
+          output:
+            log_contains: id "932320"
+  - test_title: 932320-11
+    desc: "POP3 APOP Command Injection negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: "localhost"
+              User-Agent: "Coreruleset"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              textarea=Look%2C%20apop%20star!
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932320"

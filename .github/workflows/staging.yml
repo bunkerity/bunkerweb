@@ -85,7 +85,6 @@ jobs:
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      K8S_IP: ${{ secrets.K8S_IP }}
   prepare-tests-core:
     runs-on: ubuntu-latest
     steps:

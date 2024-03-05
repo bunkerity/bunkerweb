@@ -1,8 +1,9 @@
 import {
   Popover,
-  Tabs,
+  TabsSelect,
   FormatValue,
   FilterSettings,
+  CheckNoMatchFilter,
 } from "./utils/settings.js";
 
 class ServiceModal {
@@ -10,11 +11,13 @@ class ServiceModal {
     //modal elements
     this.modal = document.querySelector("[data-services-modal]");
     this.modalTitle = this.modal.querySelector("[data-services-modal-title]");
-    this.modalTabs = this.modal.querySelector(["[data-services-tabs]"]);
+    this.modalTabs = this.modal.querySelector(["[data-services-tabs-select]"]);
     this.modalTabsHeader = this.modal.querySelector([
-      "[data-services-tabs-header]",
+      "[data-services-tabs-select-header]",
     ]);
-
+    this.modalErrMsg = this.modal.querySelector(
+      "[data-services-modal-error-msg]",
+    );
     this.modalCard = this.modal.querySelector("[data-services-modal-card]");
     //modal forms
     this.formNewEdit = this.modal.querySelector("[data-services-modal-form]");
@@ -59,6 +62,7 @@ class ServiceModal {
   }
 
   init() {
+    this.disabledSaveCases();
     this.modal.addEventListener("click", (e) => {
       // update draft mode
       try {
@@ -314,15 +318,12 @@ class ServiceModal {
   }
 
   setIsDraft(isDraft, method) {
-    console.log(isDraft, method);
     const draftVal = isDraft ? "yes" : "no";
 
     document.querySelectorAll('input[name="is_draft"]').forEach((inp) => {
       inp.setAttribute("value", draftVal);
       inp.value = draftVal;
     });
-
-    console.log("f");
 
     //Update draft button
     const btn = document.querySelector("button[data-toggle-draft-btn]");
@@ -382,16 +383,74 @@ class ServiceModal {
     }
   }
 
+  // Get list of server name from services card
+  // When the server name input is matching existing server name that is not the current modal one
+  // Disable the submit button
+  disabledSaveCases() {
+    window.addEventListener("DOMContentLoaded", () => {
+      const serverNameInput = document.querySelector(
+        'input[name="SERVER_NAME"]',
+      );
+
+      window.addEventListener("click", (e) => {
+        if (e.target.hasAttribute("data-services-action")) {
+          // focus on input server name
+          serverNameInput.focus();
+          this.checkServNameInput();
+        }
+      });
+
+      serverNameInput.addEventListener("input", () => {
+        // Case input is empty
+        this.checkServNameInput();
+      });
+    });
+  }
+
+  checkServNameInput() {
+    const serverNameInput = document.querySelector('input[name="SERVER_NAME"]');
+
+    if (serverNameInput.value === "") {
+      this.modalErrMsg.textContent = "Server name cannot be empty";
+      this.modalErrMsg.classList.remove("hidden");
+      return this.submitBtn.setAttribute("disabled", "");
+    }
+
+    // Case conflict with another server name
+    const serverNames = document.querySelectorAll("[data-services-service]");
+    const serverNameValue = serverNameInput.getAttribute("value");
+
+    // Case inp name is current server name
+    if (serverNameInput.value === serverNameValue) {
+      return this.submitBtn.removeAttribute("disabled");
+    }
+    // case inp name is not current server name, check if it is same as another
+    for (let i = 0; i < serverNames.length; i++) {
+      const name = serverNames[i].getAttribute("data-services-service");
+      if (name === serverNameValue) continue;
+
+      if (name === serverNameInput.value) {
+        this.modalErrMsg.textContent = "Server name already exists";
+        this.modalErrMsg.classList.remove("hidden");
+        return this.submitBtn.setAttribute("disabled", "");
+      }
+    }
+
+    this.modalErrMsg.textContent = "";
+    this.modalErrMsg.classList.add("hidden");
+    return this.submitBtn.removeAttribute("disabled");
+  }
+
   showNewEditForm() {
     this.cardViewport();
-    this.showTabs();
+    this.showSelectTabs();
     this.hideForms();
     this.formNewEdit.classList.remove("hidden");
   }
 
   showDeleteForm() {
     this.cardNoViewport();
-    this.hideTabs();
+    this.hideSelectTabs();
     this.hideForms();
 
     this.formDelete.classList.remove("hidden");
@@ -412,7 +471,7 @@ class ServiceModal {
     this.formDelete.classList.add("hidden");
   }
 
-  hideTabs() {
+  hideSelectTabs() {
     this.modalTabs.classList.remove("grid");
     this.modalTabs.classList.add("hidden");
 
@@ -420,7 +479,7 @@ class ServiceModal {
     this.modalTabsHeader.classList.add("hidden");
   }
 
-  showTabs() {
+  showSelectTabs() {
     this.modalTabs.classList.add("grid");
     this.modalTabs.classList.remove("hidden");
     this.modalTabsHeader.classList.add("flex");
@@ -522,7 +581,7 @@ class ServiceModal {
 
   openModal() {
     //switch to first setting
-    document.querySelector("button[data-tab-handler]").click();
+    document.querySelector("button[data-tab-select-handler]").click();
     //show modal el
     this.modal.classList.add("flex");
     this.modal.classList.remove("hidden");
@@ -1047,13 +1106,349 @@ class Multiple {
   }
 }
 
+class Dropdown {
+  constructor(prefix = "services") {
+    this.prefix = prefix;
+    this.container = document.querySelector("main");
+    this.lastDrop = "";
+    this.initDropdown();
+  }
+
+  initDropdown() {
+    this.container.addEventListener("click", (e) => {
+      //SELECT BTN LOGIC
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-setting-select`) &&
+          !e.target.closest("button").hasAttribute(`disabled`)
+        ) {
+          const btnName = e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select`);
+          if (this.lastDrop !== btnName) {
+            this.lastDrop = btnName;
+            this.closeAllDrop();
+          }
+
+          this.toggleSelectBtn(e);
+        }
+      } catch (err) {}
+      //SELECT DROPDOWN BTN LOGIC
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-setting-select-dropdown-btn`)
+        ) {
+          const btn = e.target.closest("button");
+          const btnValue = btn.getAttribute("value");
+          const btnSetting = btn.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown-btn`,
+          );
+          //stop if same value to avoid new fetching
+          const isSameVal = this.isSameValue(btnSetting, btnValue);
+          if (isSameVal) return this.hideDropdown(btnSetting);
+          //else, add new value to custom
+          this.setSelectNewValue(btnSetting, btnValue);
+          //close dropdown and change style
+          this.hideDropdown(btnSetting);
+
+          if (
+            !e.target.closest("button").hasAttribute(`data-${this.prefix}-file`)
+          ) {
+            this.changeDropBtnStyle(btnSetting, btn);
+          }
+          //show / hide filter
+          if (btnSetting === "instances") {
+            this.hideFilterOnLocal(btn.getAttribute("data-_type"));
+          }
+        }
+      } catch (err) {}
+    });
+  }
+
+  closeAllDrop() {
+    const drops = document.querySelectorAll(
+      `[data-${this.prefix}-setting-select-dropdown]`,
+    );
+    drops.forEach((drop) => {
+      drop.classList.add("hidden");
+      drop.classList.remove("flex");
+      document
+        .querySelector(
+          `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown`,
+          )}"]`,
+        )
+        .classList.remove("rotate-180");
+    });
+  }
+
+  isSameValue(btnSetting, value) {
+    const selectCustom = document.querySelector(
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`,
+    );
+    const currVal = selectCustom.textContent;
+    return currVal === value ? true : false;
+  }
+
+  setSelectNewValue(btnSetting, value) {
+    const selectCustom = document.querySelector(
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`,
+    );
+    selectCustom.querySelector(
+      `[data-${this.prefix}-setting-select-text]`,
+    ).textContent = value;
+  }
+
+  hideDropdown(btnSetting) {
+    //hide dropdown
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
+    );
+    dropdownEl.classList.add("hidden");
+    dropdownEl.classList.remove("flex");
+    //svg effect
+    const dropdownChevron = document.querySelector(
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`,
+    );
+    dropdownChevron.classList.remove("rotate-180");
+  }
+
+  changeDropBtnStyle(btnSetting, selectedBtn) {
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
+    );
+    //reset dropdown btns
+    const btnEls = dropdownEl.querySelectorAll("button");
+
+    btnEls.forEach((btn) => {
+      btn.classList.remove(
+        "bg-primary",
+        "dark:bg-primary",
+        "text-gray-300",
+        "text-gray-300",
+      );
+      btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
+    });
+    //highlight clicked btn
+    selectedBtn.classList.remove(
+      "bg-white",
+      "dark:bg-slate-700",
+      "text-gray-700",
+    );
+    selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
+  }
+
+  toggleSelectBtn(e) {
+    const attribute = e.target
+      .closest("button")
+      .getAttribute(`data-${this.prefix}-setting-select`);
+    //toggle dropdown
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`,
+    );
+    const dropdownChevron = document.querySelector(
+      `svg[data-${this.prefix}-setting-select="${attribute}"]`,
+    );
+    dropdownEl.classList.toggle("hidden");
+    dropdownEl.classList.toggle("flex");
+    dropdownChevron.classList.toggle("rotate-180");
+  }
+
+  //hide date filter on local
+  hideFilterOnLocal(type) {
+    if (type === "local") {
+      this.hideInp(`input#from-date`);
+      this.hideInp(`input#to-date`);
+    }
+
+    if (type !== "local") {
+      this.showInp(`input#from-date`);
+      this.showInp(`input#to-date`);
+    }
+  }
+
+  showInp(selector) {
+    document.querySelector(selector).closest("div").classList.add("flex");
+    document.querySelector(selector).closest("div").classList.remove("hidden");
+  }
+
+  hideInp(selector) {
+    document.querySelector(selector).closest("div").classList.add("hidden");
+    document.querySelector(selector).closest("div").classList.remove("flex");
+  }
+}
+
+class Filter {
+  constructor(prefix = "services") {
+    this.prefix = prefix;
+    this.container =
+      document.querySelector(`[data-${this.prefix}-filter]`) || null;
+    this.keyInp = document.querySelector("input#service-name-keyword");
+    this.stateValue = "all";
+    this.methodValue = "all";
+    this.initHandler();
+  }
+
+  initHandler() {
+    if (!this.container) return;
+    //STATE HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "state"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="state"]`,
+              )
+              .textContent.trim()
+              .toLowerCase();
+
+            this.stateValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    //METHOD HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "method"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="method"]`,
+              )
+              .textContent.trim()
+              .toLowerCase();
+
+            this.methodValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    //KEYWORD HANDLER
+    this.keyInp.addEventListener("input", (e) => {
+      this.filter();
+    });
+  }
+
+  filter() {
+    const services = document.querySelectorAll(`[data-${this.prefix}-card]`);
+    if (services.length === 0) return;
+    //reset
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      el.classList.remove("hidden");
+    }
+    //filter type
+    this.setFilterState(services);
+    this.setFilterMethod(services);
+    this.setFilterKeyword(services);
+  }
+
+  setFilterState(services) {
+    if (this.stateValue === "all") return;
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      const type = el
+        .querySelector(`[data-${this.prefix}-state]`)
+        .getAttribute(`data-${this.prefix}-state`)
+        .trim()
+        .toLowerCase();
+      if (type !== this.stateValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterMethod(services) {
+    if (this.methodValue === "all") return;
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      const type = el
+        .querySelector(`[data-${this.prefix}-method]`)
+        .getAttribute(`data-${this.prefix}-method`)
+        .trim()
+        .toLowerCase();
+      if (type !== this.methodValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterKeyword(jobs) {
+    const keyword = this.keyInp.value.trim().toLowerCase();
+    if (!keyword) return;
+    for (let i = 0; i < jobs.length; i++) {
+      const el = jobs[i];
+      const name = el
+        .querySelector(`[data-${this.prefix}-name]`)
+        .textContent.trim()
+        .toLowerCase();
+
+      if (!name.includes(keyword)) el.classList.add("hidden");
+    }
+  }
+}
+
+const setDropdown = new Dropdown();
+const setFilter = new Filter();
+const setTabsSelect = new TabsSelect(
+  document.querySelector("[data-services-tabs-select]"),
+  document.querySelector("[data-services-modal-form]"),
+);
+
 const setPopover = new Popover();
-const setTabs = new Tabs();
 const setModal = new ServiceModal();
 const format = new FormatValue();
+
 const setFilterGlobal = new FilterSettings(
   "settings-filter",
-  "[data-service-content='settings']",
+  document.querySelector("[data-services-tabs-select]"),
+  document.querySelector("[data-services-modal-form]"),
 );
 
 const setMultiple = new Multiple("services");
+
+const checkServiceModalKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#settings-filter"),
+  "input",
+  document
+    .querySelector("[data-services-modal-form]")
+    .querySelectorAll("[data-plugin-item]"),
+  document.querySelector("[data-services-modal-form]"),
+  document.querySelector("[data-services-nomatch]"),
+);
+
+try {
+  const checkServiceCardKeyword = new CheckNoMatchFilter(
+    document.querySelectorAll("input#service-name-keyword"),
+    "input",
+    document.querySelectorAll("[data-services-card]"),
+    false,
+    document.querySelector("[data-services-nomatch-card]"),
+  );
+
+  const checkServiceCardSelect = new CheckNoMatchFilter(
+    document.querySelectorAll(
+      "button[data-services-setting-select-dropdown-btn]",
+    ),
+    "select",
+    document.querySelectorAll("[data-services-card]"),
+    false,
+    document.querySelector("[data-services-nomatch-card]"),
+  );
+} catch (e) {}

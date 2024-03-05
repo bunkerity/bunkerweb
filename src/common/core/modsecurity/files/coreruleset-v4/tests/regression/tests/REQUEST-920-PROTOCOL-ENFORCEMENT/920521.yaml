@@ -1,0 +1,133 @@
+---
+meta:
+  author: "Franziska Bühler"
+  enabled: true
+  name: "920521.yaml"
+  description: "Testing for allowed and forbidden Accept-Encoding"
+tests:
+  - test_title: 920521-1
+    desc: "Allowed Accept-Encoding: gzip, deflate, br"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: "gzip, deflate, br"
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920521\""
+  - test_title: 920521-2
+    desc: "Allowed Accept-Encoding: gzip,deflate,identity"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: "gzip,deflate,identity"
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920521\""
+  - test_title: 920521-3
+    desc: "Allowed Accept-Encoding: compress;q=0.5, gzip;q=1.0"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: "compress;q=0.5, gzip;q=1.0"
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920521\""
+  - test_title: 920521-4
+    desc: "Allowed Accept-Encoding: gzip;q=1.0, identity; q=0.5, *;q=0"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: "gzip;q=1.0, identity; q=0.5, *;q=0"
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920521\""
+  - test_title: 920521-5
+    desc: "Allowed Accept-Encoding: gzip;q=1.0, identity; q=0.5, *;q=0"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: "gzip;q=1.0, identity; q=0.5, *;q=0"
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920521\""
+  - test_title: 920521-6
+    desc: "Allowed empty Accept-Encoding"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: ""
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920521\""
+  - test_title: 920521-7
+    desc: "Not allowed Accept-Encoding: foobar"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: "foobar"
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            log_contains: "id \"920521\""

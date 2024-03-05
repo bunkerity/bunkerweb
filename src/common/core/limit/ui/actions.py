@@ -1,3 +1,6 @@
+from operator import itemgetter
+
+
 def limit(**kwargs):
     try:
         # Here we will have a list { 'limit_uri_url1': X, 'limit_uri_url2': Y ... }
@@ -5,9 +8,13 @@ def limit(**kwargs):
         format_data = []
         # Format to fit [{url: "url1", count: X}, {url: "url2", count: Y} ...]
         for key, value in data.items():
-            format_data[key] = {"url": key.replace("limit_uri_", ""), "count": value}
-
+            key = key.split("/", 1)
+            if len(key) > 1:
+                key = key[1]
+            else:
+                key = ""
+            format_data.append({"url": f"/{key}", "count": int(value)})
+        format_data.sort(key=itemgetter("count"), reverse=True)
         return {"items": format_data}
-
     except:
         return {"items": []}

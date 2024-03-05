@@ -1,0 +1,32 @@
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920320.yaml"
+  description: "Description"
+tests:
+  - test_title: 920330-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              # Test needs an empty User-Agent: "" header
+              User-Agent: ""
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: "id \"920330\""
+  - test_title: 920330-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            no_log_contains: "id \"920330\""

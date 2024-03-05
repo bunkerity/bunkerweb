@@ -6,16 +6,28 @@ BunkerWeb is maintained by [Bunkerity](https://www.bunkerity.com/?utm_campaign=s
 
 ## Do you offer professional services ?
 
-Yes, we offer professional services related to BunkerWeb such as :
+Yes, we offer professional services related to BunkerWeb.
+
+**We have a [dedicated panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to centralize all professional requests.**
+
+You can also contact use at [contact@bunkerity.com](mailto:contact@bunkerity.com) if you are interested.
+
+### Support
+
+You can get in touch with us about any of the following :
 
 - Consulting
 - Support
 - Custom development
 - Partnership
 
-**We have a [dedicated panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to centralize all professional requests.**
+### Pro version
 
-You can also contact use at [contact@bunkerity.com](mailto:contact@bunkerity.com) if you are interested.
+We have a (pro version of BunkerWeb)[https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro], which includes :
+
+- additional features and plugins
+- regular updates to improve your experience
+- we take your feedback into account to develop the plugins or offer you custom plugins.
 
 ## Where to get community support ?
 

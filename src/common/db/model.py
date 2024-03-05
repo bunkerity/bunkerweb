@@ -39,6 +39,9 @@ INTEGRATIONS_ENUM = Enum(
     "Unknown",
     name="integrations_enum",
 )
+STREAM_TYPES_ENUM = Enum("no", "yes", "partial", name="stream_types_enum")
+PLUGIN_TYPES_ENUM = Enum("core", "external", "pro", name="plugin_types_enum")
+PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
 Base = declarative_base()
 
 
@@ -49,8 +52,8 @@ class Plugins(Base):
     name = Column(String(128), nullable=False)
     description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)
-    stream = Column(String(16), nullable=False)
-    external = Column(Boolean, default=False, nullable=False)
+    stream = Column(STREAM_TYPES_ENUM, default="no", nullable=False)
+    type = Column(PLUGIN_TYPES_ENUM, default="core", nullable=False)
     method = Column(METHODS_ENUM, default="manual", nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     checksum = Column(String(128), nullable=True)
@@ -65,7 +68,6 @@ class Settings(Base):
     __table_args__ = (
         PrimaryKeyConstraint("id", "name"),
         UniqueConstraint("id"),
-        UniqueConstraint("name"),
     )
 
     id = Column(String(256), primary_key=True)
@@ -268,11 +270,17 @@ class Metadata(Base):
 
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
+    is_pro = Column(Boolean, default=False, nullable=False)
+    pro_expire = Column(DateTime, nullable=True)
+    pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
+    pro_services = Column(Integer, default=0, nullable=False)
+    pro_overlapped = Column(Boolean, default=False, nullable=False)
     first_config_saved = Column(Boolean, nullable=False)
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
     scheduler_first_start = Column(Boolean, nullable=True)
     custom_configs_changed = Column(Boolean, default=False, nullable=True)
     external_plugins_changed = Column(Boolean, default=False, nullable=True)
+    pro_plugins_changed = Column(Boolean, default=False, nullable=True)
     config_changed = Column(Boolean, default=False, nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)

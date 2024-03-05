@@ -1,49 +1,21 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use Test::Nginx::Socket::Lua;
-use Cwd qw(cwd);
+use strict;
+use lib '.';
+use t::TestMLCache;
 
 workers(2);
-
 #repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3) + 2;
-
-my $pwd = cwd();
-
-our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
-    lua_shared_dict  cache_shm      1m;
-    lua_shared_dict  cache_shm_miss 1m;
-
-    init_by_lua_block {
-        -- local verbose = true
-        local verbose = false
-        local outfile = "$Test::Nginx::Util::ErrLogFile"
-        -- local outfile = "/tmp/v.log"
-        if verbose then
-            local dump = require "jit.dump"
-            dump.on(nil, outfile)
-        else
-            local v = require "jit.v"
-            v.on(outfile)
-        end
-
-        require "resty.core"
-        -- jit.opt.start("hotloop=1")
-        -- jit.opt.start("loopunroll=1000000")
-        -- jit.off()
-    }
-};
+plan tests => repeat_each() * (blocks() * 4);
 
 run_tests();
 
 __DATA__
 
 === TEST 1: peek() validates key
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -59,19 +31,17 @@ __DATA__
             end
         }
     }
---- request
-GET /t
 --- response_body
 key must be a string
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 2: peek() returns nil if a key has never been fetched before
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -90,19 +60,19 @@ key must be a string
             ngx.say("ttl: ", ttl)
         }
     }
---- request
-GET /t
 --- response_body
 ttl: nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 3: peek() returns the remaining ttl if a key has been fetched before
---- http_config eval: $::HttpConfig
+--- main_config
+    timer_resolution 10ms;
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -141,20 +111,18 @@ ttl: nil
             ngx.say("ttl: ", math.ceil(ttl))
         }
     }
---- request
-GET /t
 --- response_body
 ttl: 19
 ttl: 18
 --- no_error_log
 [error]
+[crit]
 
 
 
-=== TEST 4: peek() returns a negative ttl when a key expired
---- http_config eval: $::HttpConfig
+=== TEST 4: peek() returns a 0 remaining_ttl if the ttl was 0
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -181,20 +149,20 @@ ttl: 18
             ngx.say("ttl: ", math.ceil(ttl))
         }
     }
---- request
-GET /t
 --- response_body
-ttl: -1
-ttl: -2
+ttl: 0
+ttl: 0
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 5: peek() returns remaining ttl if shm_miss is specified
---- http_config eval: $::HttpConfig
+--- main_config
+    timer_resolution 10ms;
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -231,20 +199,18 @@ ttl: -2
             ngx.say("ttl: ", math.ceil(ttl))
         }
     }
---- request
-GET /t
 --- response_body
 ttl: 19
 ttl: 18
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 6: peek() returns the value if a key has been fetched before
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -291,20 +257,18 @@ ttl: 18
             ngx.say("ttl: ", math.ceil(ttl), " nil_val: ", val)
         }
     }
---- request
-GET /t
 --- response_body_like
 ttl: \d* val: 123
 ttl: \d* nil_val: nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 7: peek() returns the value if shm_miss is specified
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -331,19 +295,17 @@ ttl: \d* nil_val: nil
             ngx.say("ttl: ", math.ceil(ttl), " nil_val: ", val)
         }
     }
---- request
-GET /t
 --- response_body_like
 ttl: \d* nil_val: nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 8: peek() JITs on hit
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -361,21 +323,18 @@ ttl: \d* nil_val: nil
             end
         }
     }
---- request
-GET /t
 --- response_body
 val: 123456
---- no_error_log
-[error]
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):13 loop\]/
+--- no_error_log
+[error]
 
 
 
 === TEST 9: peek() JITs on miss
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -389,21 +348,18 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):13 loop\]/
             end
         }
     }
---- request
-GET /t
---- response_body
-
---- no_error_log
-[error]
+--- ignore_response_body
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):6 loop\]/
+--- no_error_log
+[error]
+[crit]
 
 
 
 === TEST 10: peek() returns nil if a value expired
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -430,21 +386,19 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):6 loop\]/
             ngx.say("stale: ", stale)
         }
     }
---- request
-GET /t
 --- response_body
 ttl: nil
 data: nil
 stale: nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 11: peek() returns nil if a value expired in 'shm_miss'
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -477,21 +431,19 @@ stale: nil
             ngx.say("stale: ", stale)
         }
     }
---- request
-GET /t
 --- response_body
 ttl: nil
 data: nil
 stale: nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 12: peek() accepts stale arg and returns stale values
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -518,21 +470,19 @@ stale: nil
             ngx.say("stale: ", stale)
         }
     }
---- request
-GET /t
 --- response_body_like chomp
 ttl: -0\.\d+
 data: 123
 stale: true
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 13: peek() accepts stale arg and returns stale values from 'shm_miss'
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -565,21 +515,19 @@ stale: true
             ngx.say("stale: ", stale)
         }
     }
---- request
-GET /t
 --- response_body_like chomp
 ttl: -0\.\d+
 data: nil
 stale: true
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 14: peek() does not evict stale items from L2 shm
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -607,8 +555,6 @@ stale: true
             end
         }
     }
---- request
-GET /t
 --- response_body_like chomp
 remaining_ttl: -\d\.\d+
 data: 123
@@ -618,13 +564,13 @@ remaining_ttl: -\d\.\d+
 data: 123
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 15: peek() does not evict stale negative data from L2 shm_miss
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -653,8 +599,6 @@ data: 123
             end
         }
     }
---- request
-GET /t
 --- response_body_like chomp
 remaining_ttl: -\d\.\d+
 data: nil
@@ -664,3 +608,4 @@ remaining_ttl: -\d\.\d+
 data: nil
 --- no_error_log
 [error]
+[crit]

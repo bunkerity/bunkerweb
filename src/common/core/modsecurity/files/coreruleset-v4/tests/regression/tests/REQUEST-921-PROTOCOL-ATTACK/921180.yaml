@@ -1,0 +1,109 @@
+---
+meta:
+  author: "jptosso"
+  enabled: true
+  name: "921180.yaml"
+  description: "Tests to trigger, or not trigger 921170 and 921180"
+tests:
+  - # Standard GET request
+    test_title: 921180-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/?pineapple=pizza"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"921180\""
+  - # Standard GET request
+    test_title: 921180-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/?pineapple=pizza&pizza=pineapple"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"921180\""
+  - # Standard GET request (Negative, no args)
+    test_title: 921180-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"921180\""
+  - # HPP payload
+    test_title: 921180-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/?pineapple=pizza&pineapple=aint-pizza"
+            version: "HTTP/1.1"
+          output:
+            log_contains: "id \"921180\""
+  - # Similar arg names
+    test_title: 921180-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/?pineapple=pizza&pineapple2=aint-pizza"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"921180\""
+  - # HPP payload with multiple iterations
+    test_title: 921180-6
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/?pineapple=pizza&pineapple=aint-pizza&pineapple=is-pizza&pineapple=aint-pizza2"
+            version: "HTTP/1.1"
+          output:
+            log_contains: "id \"921180\""

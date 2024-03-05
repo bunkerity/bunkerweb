@@ -25,8 +25,9 @@ local_geckodriver = "geckodriver" in listdir(Path.cwd())
 FIREFOX_OPTIONS = Options()
 if not local_geckodriver:
     FIREFOX_OPTIONS.add_argument("--headless")
+    FIREFOX_OPTIONS.add_argument("--width=2560")
+    FIREFOX_OPTIONS.add_argument("--height=1440")
 FIREFOX_OPTIONS.log.level = "trace"  # type: ignore
-
 
 ready = False
 retries = 0

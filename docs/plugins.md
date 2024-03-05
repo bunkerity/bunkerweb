@@ -45,11 +45,44 @@ The first step is to install the plugin by putting the plugin files inside the c
     cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
     ```
 
-    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+    !!! warning "Using local folder for persistent data"
+        The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+        But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
 
-    ```shell
-    chown -R 101:101 ./bw-data
-    ```
+        ```shell
+        mkdir bw-data && \
+        chown root:101 bw-data && \
+        chmod 770 bw-data
+        ```
+
+        Alternatively, if the folder already exists :
+
+        ```shell
+        chown -R root:101 bw-data && \
+        chmod -R 770 bw-data
+        ```
+
+        If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+
+        ```shell
+        grep ^$(whoami): /etc/subuid && \
+        grep ^$(whoami): /etc/subgid
+        ```
+
+        For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
+
+        ```shell
+        mkdir bw-data && \
+        sudo chgrp 100100 bw-data && \
+        chmod 770 bw-data
+        ```
+
+        Or if the folder already exists :
+
+        ```shell
+        sudo chgrp -R 100100 bw-data && \
+        chmod -R 770 bw-data
+        ```
 
     Then you can mount the volume when starting your Docker stack :
 
@@ -276,7 +309,7 @@ plugin /
         plugin.json
 ```
 
-- **conf_type.conf** : add a [custom NGINX configurations.](/quickstart-guide/#custom-configurations)
+- **conf_type.conf** : add a [custom NGINX configurations.](quickstart-guide.md#custom-configurations)
 
 - **actions.py** : script to execute on flask server.
 This script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
@@ -544,59 +577,97 @@ BunkerWeb uses an internal job scheduler for periodic tasks like renewing certif
 
 ### Plugin page
 
-Everything related to the web UI is located inside the subfolder **ui** as we seen in the [previous structure section.](#structure)
+Everything related to the web UI is located inside the subfolder **ui** as we seen in the [previous structure section.](#structure).
+
+#### Prerequisites
+
+When you want to create a plugin page, you need two files :
+
+- **template.html** that will be accessible with a **GET /plugins/<*plugin_id*>**.
+
+- **actions.py** where you can add some scripting and logic with a **POST /plugins/<*plugin_id*>**. Notice that this file **need a function with the same name as the plugin** to work. This file is needed even if the function is empty.
 
 #### Basic example
 
 !!! info "Jinja 2 template"
     The **template.html** file is a Jinja2 template, please refer to the [Jinja2 documentation](https://jinja.palletsprojects.com) if needed.
 
-A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the [Flask library](https://flask.palletsprojects.com)) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**. The helper function `url_for` will generate for you the prefix of the URL : `{{ url_for('plugins') }}/plugin_id`.
+We can put aside the **actions.py** file and start **only using the template on a GET situation**. The template can access app context and libs, so you can use Jinja, request or flask utils.
 
-If you want to display variables generated from your **actions.py** in your template file, you can return a dictionary with variables name as keys and variables value as values. Here is dummy example where we return a single variable :
+For example, you can get the request arguments in your template like this :
 
-```python
-def myplugin() :
-	return {"foo": "bar"}
-```
-
-And we display it in the **template.html** file :
 ```html
-{% if foo %}
-Content of foo is : {{ foo }}.
-{% endif %}
+<p>request args : {{ request.args.get() }}.</p>
 ```
 
-Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
-```html
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-```
-
-Retrieving user submitted data is pretty simple, thanks to the request module provided by Flask :
-
-```python
-from flask import request
-
-def myplugin() :
-	my_form_value = request.form["my_form_input"]
-```
+#### Actions.py
 
 !!! info "Python libraries"
     You can use Python libraries that are already available like :
     `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
 
-#### Utils
+!!! warning "CSRF Token"
 
-To easily update the content of a template inside the UI with JSON, a **SetupPlugin class** is available in `src/ui/static/js/plugins/setup.js` and will be executed when the plugin template is load.
+    Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
+    ```html
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    ```
 
-For example, in case **actions.py** return this JSON :
+
+You can power-up your plugin page with additional scripting with the **actions.py** file when sending a **POST /plugins/<*plugin_id*>**.
+
+Here is what is send to the function :
+
 ```python
-def plugin():
-    return {"message": "ok", "data": {"name": "test"}}
+function(app=app, args=request.args.to_dict() or request.json or None)
 ```
 
-I need to add this on my **template.html** :
+Some examples of what you can do :
+
+- Retrieve form submitted data
+
+```python
+from flask import request
+
+def myplugin(**kwargs) :
+	my_form_value = request.form["my_form_input"]
+```
+
+- Access app methods
+
+```python
+from flask import request
+
+def myplugin(**kwargs) :
+	config = kwargs['app'].config["CONFIG"].get_config(methods=False)
+```
+
+**You need to retrieve JSON compatible data from this function**, app will return this as response :
+
+```python
+return jsonify({"message": "ok", "data": <function_output>}), 200
+```
+
+#### Updating template
+
+To easily update the content of a template inside the UI with JSON, a **SetupPlugin class** is available in `src/ui/static/js/plugins/setup.js`.
+
+!!! info "Check core plugins"
+
+    Core plugins are using this class. Feel free to look at them in order to see in details how it works.
+
+For example, in case **actions.py** return this :
+
+```python
+def myplugin(**kwargs):
+    return  {"name": "My awesome plugin"}
+```
+
+I can add this on my **template.html** :
+
 ```html
+<p data-name></p>
+
 <script>
   new SetupPlugin({
     name: {
@@ -608,16 +679,25 @@ I need to add this on my **template.html** :
 </script>
 ```
 
-!!! info "Check core plugins"
-
-    Core plugins are using this utils. Feel free to look at them in order to see in details how each `key` is working.
+**This class will send a POST request, and will try to match the dict key to a JSON key and update your template**.
 
 
-|     key     | Type   | Description                                                                                  |
-| :--------:  | :----: | :------------------------------------------------------------------------------------------- |
-| `name   `   | string | Replace `name` by the JSON key to extract the related value.                                 |
-| `el`        | element| Select element you want the value to be updated.                                             |
-|   `value`   | any    | Default value on template load or in case retrieving JSON failed.                            |
-|    `type`   | string | Define the script behavior with the incoming value. Available : `text`, `list` and `status`. |
-|  `textEl`   | element| Optional additional text content when type is `status`.                                     |
-|  `listNames`| string | List of data keys when type is `list`.                                                       |
+Here it will look for a `name` key in the JSON response, and will set the `data` on the defined `el`.
+In case there is no `data` matching, this will keep or set the `value` key data.
+
+This class has two arguments `SetupPlugin(setup, url)` :
+
+- `url`(optional) : current endpoint by default. You can define another url or add arguments.
+
+- `setup` : a dict of dict with needed data to update properly the template with the incoming data.
+
+**setup details**
+
+|     key     | Type       | Description                                                                                  |
+| :--------:  | :--------: | :------------------------------------------------------------------------------------------- |
+| `dict name` | string     | Replace `dict name` by the JSON key to extract the related value.                            |
+| `el`        | DOM element| Select element you want the value to be updated.                                             |
+|   `value`   | any        | Default value on template load or in case retrieving JSON failed.                            |
+|    `type`   | string     | Define the script behavior with the incoming value. Available : `text`, `list` and `status`. |
+|  `textEl`   | DOM element| Optional additional text content when type is `status`.                                      |
+|  `listNames`| string     | List of data keys when type is `list`.                                                       |

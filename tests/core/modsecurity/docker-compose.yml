@@ -19,6 +19,7 @@ services:
       # ? MODECURITY settings
       USE_MODSECURITY: "yes"
       USE_MODSECURITY_CRS: "yes"
+      MODSECURITY_CRS_VERSION: "3"
       MODSECURITY_SEC_AUDIT_ENGINE: "RelevantOnly"
       MODSECURITY_SEC_RULE_ENGINE: "On"
       MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABCFHZ"
@@ -72,3 +73,4 @@ networks:
       config:
         - subnet: 192.168.0.0/24
   bw-docker:
+    name: bw-docker

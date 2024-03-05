@@ -70,8 +70,8 @@ if [ "$integration" = "docker" ] ; then
 else
     sudo systemctl stop bunkerweb bunkerweb-ui
     sudo sed -i "/--bind \"127.0.0.1:7000\" &/c\        --bind \"127.0.0.1:7000\" --log-level debug &" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
-    sudo mkdir /var/www/html/app1.example.com /var/www/html/app2.example.com
-    sudo touch /var/www/html/app1.example.com/index.html /var/www/html/app2.example.com/index.html
+    sudo mkdir /var/www/html/app1.example.com /var/www/html/app2.example.com /var/www/html/app3.example.com
+    sudo touch /var/www/html/app1.example.com/index.html /var/www/html/app2.example.com/index.html /var/www/html/app3.example.com/index.html
     sudo find /etc/bunkerweb/configs/ -type f -exec rm -f {} \;
     sudo cp ready.conf /etc/bunkerweb/configs/server-http
     export TEST_TYPE="linux"
@@ -156,7 +156,6 @@ if [ "$integration" == "docker" ] ; then
     fi
 
     docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
-    rm -f .env
 else
     python3 "$test"
 fi
@@ -164,6 +163,7 @@ fi
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     if [ "$integration" == "docker" ] ; then
+        rm -f .env
         docker compose logs
     else
         echo "🛡️ Showing BunkerWeb journal logs ..."

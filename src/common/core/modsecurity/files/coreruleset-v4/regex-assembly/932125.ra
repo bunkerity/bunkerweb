@@ -1,0 +1,235 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Word list for rule 932125 (RCE Windows command injection - PowerShell aliases)
+##!
+##! This list comes from the powershell source code. Can be updated using this oneliner:
+##! curl -s https://raw.githubusercontent.com/PowerShell/PowerShell/master/src/System.Management.Automation/engine/InitialSessionState.cs -o - | awk -F\" '/new SessionStateAliasEntry\("/ { print $2; }'
+##! To prevent some FP for a command, you can require command parameters
+##! after a command. Only do this if the command regularly causes FP and if
+##! allowing the bare command (without parameters) is not too dangerous.
+##! (Note: due to \b following the regexp, a word boundary is also required
+##! further on, so some letter/number is needed for a match). Example:
+##!
+##!   diff@
+
+##!+ i
+
+##! Note: the quoting prefixes are part of the command prefixes, except for ^
+##!       which, for unknown reasons, is not part of the expression
+
+##! extension/switches suffix
+##! cmd.com, cmd.exe, etc.
+##!$ (?:\.[\"\^]*\w+)?
+##! cmd/h
+##!$ \b
+
+##! starting tokens prefix
+##!> assemble
+  ##! ;cmd
+  ;
+  ##! {cmd
+  \{
+  ##! |cmd
+  \|
+  ##! ||cmd
+  \|\|
+  ##! &cmd
+  &
+  ##! &&cmd
+  &&
+  ##! \ncmd
+  \n
+  ##! \rcmd
+  \r
+  ##! `cmd
+  `
+  ##!=>
+
+  ##! match possible white space between prefix expressions
+  \s*
+  ##!=>
+
+  ##! commands prefix
+  ##!> assemble
+    ##! (cmd)
+    \(
+    ##! ,cmd
+    ,
+    ##! @cmd
+    @
+    ##! 'cmd'
+    '
+    ##! "cmd"
+    \"
+    ##! spacing+cmd
+    \s
+  ##!<
+  ##!=>
+
+  *
+  ##!=>
+
+  ##! paths prefix
+  ##!> assemble
+    ##! /path/cmd
+    [\w'\"\./]+/
+    ##! C:\Program Files\cmd
+    [\x5c'\"\^]*\w[\x5c'\"\^]*:.*\x5c
+    ##! \\net\share\dir\cmd
+    [\^\.\w '\"/\x5c]*\x5c
+  ##!<
+  ##!=>
+
+  ?[\"\^]*
+  ##!=>
+
+  ##!> cmdline windows
+
+    ac@
+    asnp@
+    cd@
+    ##! disabled for FP: cat@
+    chdir@
+    clc@
+    ##! disabled for FP: clear
+    clhy@
+    cli@
+    clp@
+    cls
+    clv@
+    cnsn
+    ##! disabled for FP: compare@
+    ##! disabled for FP: copy@
+    cp@
+    cpi@
+    cpp@
+    cvpa@
+    dbp@
+    del@
+    diff@
+    dir@
+    dnsn
+    ebp@
+    epal@
+    epcsv@
+    epsn@
+    ##! disabled for FP: erase@
+    etsn@
+    exsn@
+    fc@
+    fl@
+    foreach@
+    ft@
+    fw@
+    gal@
+    gbp@
+    gc@
+    gci@
+    gcm@
+    gcs@
+    gdr@
+    gerr
+    ghy@
+    gi@
+    gjb@
+    gl@
+    gm@
+    gmo@
+    gp@
+    gps@
+    gpv
+    ##! disabled for FP: group
+    gsn@
+    gsnp@
+    gsv@
+    gu@
+    gv@
+    gwmi@
+    ##! disabled for FP: h
+    ##! disabled for FP: history
+    icm@
+    iex@
+    ihy@
+    ii@
+    ipal@
+    ipcsv@
+    ipmo@
+    ipsn@
+    irm@
+    ise@
+    iwmi@
+    iwr@
+    ##! disabled for FP: kill
+    ls
+    man@
+    md@
+    ##! disabled for FP: measure
+    mi@
+    mount@
+    ##! disabled for FP: move
+    mp@
+    mv@
+    nal@
+    ndr@
+    ni@
+    nmo@
+    npssc
+    nsn@
+    nv@
+    ogv@
+    ##! disabled for FP: oh
+    popd@
+    pushd@
+    ##! disabled for FP: pwd
+    ##! disabled for FP: r
+    rbp@
+    rcjb@
+    rcsn
+    rd@
+    rdr@
+    ren@
+    ri@
+    rjb@
+    rm@
+    rmdir@
+    rmo@
+    rni@
+    rnp@
+    rp@
+    rsn@
+    rsnp@
+    rujb
+    rv@
+    rvpa@
+    rwmi@
+    sajb@
+    sal@
+    saps@
+    sasv@
+    sbp@
+    sc@
+    ##! disabled for FP: select
+    ##! disabled for FP: set
+    shcm
+    si@
+    sl@
+    ##! disabled for FP: sleep
+    sls@
+    ##! disabled for FP: sort
+    sp@
+    spjb@
+    spps@
+    spsv@
+    ##! disabled for FP: start
+    sujb
+    sv@
+    swmi@
+    ##! disabled for FP: tee
+    trcm@
+    ##! disabled for FP: type
+    ##! disabled for FP: where
+    wjb@
+    ##! disabled for FP: write@
+  ##!<
+##!<

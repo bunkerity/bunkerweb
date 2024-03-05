@@ -1,0 +1,76 @@
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920250.yaml"
+  description: "Description"
+tests:
+  - # crs-setup.conf needs to have CRS_VALIDATE_UTF8_ENCODING set
+    # Taken from existing modsec regression
+    test_title: 920250-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/?param=%c0%af"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Language: "en-us,en;q=0.5"
+              Keep-Alive: "300"
+              Proxy-Connection: "keep-alive"
+          output:
+            log_contains: "id \"920250\""
+  - # Taken from existing modsec regression
+    test_title: 920250-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/?param=%c0"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Language: "en-us,en;q=0.5"
+              Keep-Alive: "300"
+              Proxy-Connection: "keep-alive"
+          output:
+            log_contains: "id \"920250\""
+  - # Taken from existing modsec regression
+    test_title: 920250-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/?param=%F5%80%BF%BF"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Language: "en-us,en;q=0.5"
+              Keep-Alive: "300"
+              Proxy-Connection: "keep-alive"
+          output:
+            log_contains: "id \"920250\""
+  - test_title: 920250-4
+    desc: "Status Page Test - Invalid UTF-8 encoding: %C2%A3 is a valid Pound sign; %E2%A3 is invalid UTF-8 (incorrect starting binary sequence)"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/?param=%E2%A3"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Language: "en-us,en;q=0.5"
+              Keep-Alive: "300"
+              Proxy-Connection: "keep-alive"
+          output:
+            log_contains: "id \"920250\""

@@ -53,19 +53,43 @@ class News {
 
   init() {
     window.addEventListener("load", () => {
-      try {
-        fetch("https://www.bunkerweb.io/api/posts/0/2")
-          .then((res) => {
-            return res.json();
-          })
-          .then((res) => {
-            return this.render(res.data);
-          });
-      } catch (err) {}
+      if (sessionStorage.getItem("lastRefetch") !== null) {
+        const storeStamp = sessionStorage.getItem("lastRefetch");
+        const nowStamp = Math.round(new Date().getTime() / 1000);
+        if (+nowStamp > storeStamp) {
+          sessionStorage.removeItem("lastRefetch");
+          sessionStorage.removeItem("lastNews");
+        }
+      }
+
+      if (sessionStorage.getItem("lastNews") !== null)
+        return this.render(JSON.parse(sessionStorage.getItem("lastNews")));
+
+      fetch("https://www.bunkerweb.io/api/posts/0/2")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          const reverseData = res.data.reverse();
+          return this.render(reverseData);
+        })
+        .catch((e) => {});
     });
   }
 
   render(lastNews) {
+    // store for next time if not the case
+    if (
+      !sessionStorage.getItem("lastNews") &&
+      !sessionStorage.getItem("lastRefetch")
+    ) {
+      sessionStorage.setItem(
+        "lastRefetch",
+        Math.round(new Date().getTime() / 1000) + 3600,
+      );
+      sessionStorage.setItem("lastNews", JSON.stringify(lastNews));
+    }
+
     const newsContainer = document.querySelector("[data-news-container]");
     //remove default message
     newsContainer.textContent = "";
@@ -222,6 +246,15 @@ class FlashMsg {
     //animate message button if message + never opened
     window.addEventListener("load", (e) => {
       if (Number(this.flashCount.textContent) > 0) this.animeBtn();
+      // display only one fixed flash message
+      const flashFixedEls = document.querySelectorAll(
+        "[data-flash-message-fixed]",
+      );
+      if (flashFixedEls.length > 1) {
+        flashFixedEls.forEach((el, i) => {
+          if (i > 0) el.remove();
+        });
+      }
     });
     //stop animate if clicked once
     this.openBtn.addEventListener("click", (e) => {
@@ -323,7 +356,62 @@ class Banner {
   }
 
   init() {
-    this.changeMenu();
+    window.addEventListener("load", () => {
+      this.changeMenu();
+      this.loadData();
+      this.animateBanner();
+    });
+  }
+
+  loadData() {
+    if (sessionStorage.getItem("bannerRefetch") !== null) {
+      const storeStamp = sessionStorage.getItem("bannerRefetch");
+      const nowStamp = Math.round(new Date().getTime() / 1000);
+      if (+nowStamp > storeStamp) {
+        sessionStorage.removeItem("bannerRefetch");
+        sessionStorage.removeItem("bannerNews");
+      }
+    }
+
+    //test with data
+    // sessionStorage.setItem("bannerNews", JSON.stringify([{"content" : `    <p class="dark:brightness-125 mb-0 text-center text-xs xs:text-sm text-white">
+    // TEST
+    //<a class="dark:brightness-125 font-medium underline text-gray-100 hover:no-underline"
+    //  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui">TEST</a>
+    //</p>`}]));
+    // Try to get data from api
+    if (sessionStorage.getItem("bannerNews") !== null)
+      return this.updateBanner(
+        JSON.parse(sessionStorage.getItem("bannerNews")),
+      );
+    fetch("https://www.bunkerweb.io/api/bw-ui-news")
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        return this.updateBanner(res.data);
+      })
+      .catch((e) => {});
+  }
+
+  updateBanner(bannerNews) {
+    // store for next time
+    sessionStorage.setItem("bannerNews", JSON.stringify(bannerNews));
+    // Refetch after one hour
+    sessionStorage.setItem(
+      "bannerRefetch",
+      Math.round(new Date().getTime() / 1000) + 3600,
+    );
+    const bannerItems = this.bannerEl.querySelectorAll('[role="listitem"]');
+    const maxItems = Math.min(bannerNews.length, bannerItems.length);
+
+    for (let i = 0; i < maxItems; i++) {
+      const bannerEl = bannerItems[i];
+      bannerEl.innerHTML = bannerNews[i]["content"];
+    }
+  }
+
+  animateBanner() {
     setInterval(() => {
       // Get current visible
       let visibleEl;
@@ -365,6 +453,7 @@ class Banner {
     }, this.nextDelay);
   }
 
+  // update float button position looking at current banner visibility
   changeMenu() {
     let options = {
       root: null,
@@ -445,9 +534,9 @@ const setSelect = new Select();
 const setPassword = new Password();
 const setDisabledPop = new DisabledPop();
 const setNews = new News();
+const setBanner = new Banner();
 const setDarkM = new darkMode();
 const setFlash = new FlashMsg();
-const setBanner = new Banner();
 const setLoader = new Loader();
 const setMenu = new Menu();
 

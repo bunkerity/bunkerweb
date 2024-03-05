@@ -4,7 +4,7 @@ def blacklist(**kwargs):
         "counter_blacklist_ip",
         "counter_blacklist_rdns",
         "counter_blacklist_asn",
-        "counter_blacklist_usa",
+        "counter_blacklist_ua",
     ]
 
     try:

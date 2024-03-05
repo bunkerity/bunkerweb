@@ -170,10 +170,6 @@ function whitelist:preread()
 	return self:access()
 end
 
-function whitelist:log_default()
-	return self:access()
-end
-
 function whitelist:kind_to_ele(kind)
 	if kind == "IP" then
 		return "ip" .. self.ctx.bw.remote_addr

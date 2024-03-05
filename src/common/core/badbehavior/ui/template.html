@@ -1,77 +1,44 @@
-{% extends "base.html" %} {% block content %}
-<input
-  type="csrf_token"
-  name="csrf_token"
-  value="{{ csrf_token }}"
-  class="hidden"
-  hidden
-/>
-
-<div class="col-span-12 grid grid-cols-12 gap-4">
-  {% if is_used %}
-  <!-- info-->
-  <div
-    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  >
-    <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-
-    <div class="mx-1 flex justify-start items-center my-4">
-      <p
-        data-info
-        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-      ></p>
-    </div>
-  </div>
-  <!-- end info -->
-
-  <div
-    data-fetch-success-show
-    class="hidden 2xl:col-span-4 3xl:col-span-3 w-full md:max-w-[350px] overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  >
-    <div class="col-span-12 flex">
-      <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">
-        BAD BEHAVIOR LIST
-      </h5>
-    </div>
-    <div class="col-span-12 overflow-y-auto overflow-x-auto">
-      <!-- list container-->
-      <div class="min-w-[250px] w-full grid grid-cols-12 rounded p-2">
-        <!-- header-->
-        <p
-          class="dark:text-gray-300 h-8 text-sm font-bold col-span-6 m-0 pb-2 border-b border-gray-400"
-        >
-          Error code
-        </p>
-        <p
-          class="dark:text-gray-300 h-8 text-sm font-bold col-span-6 m-0 pb-2 border-b border-gray-400"
-        >
-          Count
-        </p>
-
-        <!-- end header-->
-        <!-- list -->
-        <ul class="col-span-12 w-full">
-          <li
-            data-item
-            class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
-          >
-            <p
-              data-name="code"
-              class="dark:text-gray-400 dark:opacity-80 text-sm col-span-6 m-0 my-1"
-            ></p>
-            <p
-              data-name="count"
-              class="dark:text-gray-400 dark:opacity-80 text-sm col-span-6 m-0 my-1"
-            ></p>
-          </li>
-        </ul>
-        <!-- end list-->
-      </div>
-      <!-- end list container-->
-    </div>
-  </div>
-
-  <script>
+{% extends "base.html" %}
+{% block content %}
+    <input type="csrf_token"
+           name="csrf_token"
+           value="{{ csrf_token }}"
+           class="hidden"
+           hidden />
+    <div class="core-layout">
+        {% if is_used and is_metrics %}
+            <!-- info-->
+            <div class="core-card">
+                <h5 class="core-card-title">INFO</h5>
+                <div class="core-card-text-container">
+                    <p data-info class="core-card-text"></p>
+                </div>
+            </div>
+            <!-- end info -->
+            <div data-fetch-success-show class="hidden core-card-list w-small">
+                <div class="core-card-list-title-container">
+                    <h5 class="core-card-list-title">BAD BEHAVIOR LIST</h5>
+                </div>
+                <div class="core-card-list-container">
+                    <!-- list container-->
+                    <div class="w-small core-card-list-wrap">
+                        <!-- header-->
+                        <p class="core-card-list-header col-span-6">Error code</p>
+                        <p class="core-card-list-header col-span-6">Count</p>
+                        <!-- end header-->
+                        <!-- list -->
+                        <ul class="col-span-12 w-full">
+                            <li data-item class="core-card-list-item col-span-6">
+                                <p data-name="code" class="core-card-list-item-content col-span-6"></p>
+                                <p data-name="count" class="core-card-list-item-content col-span-6"></p>
+                            </li>
+                        </ul>
+                        <!-- end list-->
+                    </div>
+                    <!-- end list container-->
+                </div>
+            </div>
+            <script nonce="{{script_nonce}}">
     // Use SetupPlugin class that is on static/js/plugins/setup.js
     const setPlugin = new SetupPlugin({
       info: {
@@ -86,46 +53,29 @@
         listNames: ["code", "count"],
       },
     });
-  </script>
-  {% else %}
-  <div
-    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  >
-    <div class="flex justify-between">
-      <h5 class="mb-2 font-bold dark:text-white/90">Deactivated</h5>
-      <!-- icon -->
-      <div
-        role="img"
-        class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-yellow-500"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="scale-75 leading-none text-lg relative fill-yellow-500 stroke-white"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-          />
-        </svg>
-      </div>
-      <!-- end icon -->
+            </script>
+        {% else %}
+            <div class="core-card">
+                <div class="core-card-wrap">
+                    <h5 class="core-card-title">Deactivated</h5>
+                    <!-- icon -->
+                    <div role="img" class="core-card-svg-container">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="core-card-deactivated-svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <!-- end icon -->
+                </div>
+                <div class="core-card-text-container">
+                    <p data-info class="core-card-text">This plugin need to be activated to get metrics.</p>
+                </div>
+            </div>
+            <!-- end info -->
+        {% endif %}
     </div>
-
-    <div class="mx-1 flex justify-start items-center my-2">
-      <p
-        data-info
-        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-      >
-        This plugin need to be activated to get metrics.
-      </p>
-    </div>
-  </div>
-  <!-- end info -->
-  {% endif %}
-</div>
 {% endblock %}

@@ -1,0 +1,27 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This list contains terms that are only searched for at PL 3.
+##! Note that the equivalent could be achieved by using
+##! `include` processors with both <= 3 and > 3 but that would
+##! make the rule almost identical to its PL 1 counterparts,
+##! artificially doubling the critiality of hits and adding
+##! unnecessary overhead.
+
+##! Note that this list is arbitrary. We do not have criteria
+##! for inclusion in this list apart from false positive
+##! reports.
+
+##! This list must be in sync with:
+##! - unix-shell-upto3.ra
+##! - unix-shell-4andup.ra
+##! - unix-shell-pl3.ra
+
+aptitude@
+dnf
+pacman@
+ps
+up2date@
+vi@
+who
+w@

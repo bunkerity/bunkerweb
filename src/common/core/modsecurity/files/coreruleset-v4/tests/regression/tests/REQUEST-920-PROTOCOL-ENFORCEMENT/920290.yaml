@@ -1,0 +1,64 @@
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920290.yaml"
+  description: "Description"
+tests:
+  - # Apache will block this with a 400 and it will
+    # never get to CRS. We will fix this more when
+    # FTW supports the OR operator for outputs.
+    test_title: 920290-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              # Test needs empty Host: ""
+              Host: ""
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            status: [403, 400]
+  - test_title: 920290-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: "%00"
+          output:
+            no_log_contains: "id \"920290\""
+  - test_title: 920290-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: "localhost"
+          output:
+            no_log_contains: "id \"920290\""
+  - test_title: 920290-4
+    desc: Status Page Test - test for empty host header
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            encoded_request: "R0VUIC8gSFRUUC8xLjANCkhvc3Q6DQoNCg=="
+            # Request:
+            #
+            # GET / HTTP/1.0
+            # Host:
+            #
+            # CRS prefers the use of encoded_request over raw_request.
+            # Known reason is encoding issues with raw_request.
+          output:
+            log_contains: "id \"920290\""

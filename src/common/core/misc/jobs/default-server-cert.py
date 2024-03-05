@@ -39,7 +39,7 @@ try:
                     "-nodes",
                     "-x509",
                     "-newkey",
-                    "rsa:4096",
+                    "ed25519",
                     "-keyout",
                     str(cert_path.joinpath("cert.key")),
                     "-out",

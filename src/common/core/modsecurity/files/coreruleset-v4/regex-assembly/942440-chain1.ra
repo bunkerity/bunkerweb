@@ -1,0 +1,25 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This chained rule is used to match on JWT base64-urlencoded tokens.
+##! See https://www.rfc-editor.org/rfc/rfc4648#section-5 for details.
+
+##! JWTs consist of base64-urlencoded encoded JSON, and a JSON structure 
+##! just starts with '{"', which becomes 'ey' when encoded with a base64-urlencoded encoder.
+
+##!> define base64-urlencoded-charset [a-zA-Z0-9_-]+
+##!> define dot [.]
+
+##!^ ^ey
+
+{{base64-urlencoded-charset}}
+
+##!=>
+
+{{dot}}ey{{base64-urlencoded-charset}}
+
+##!=>
+
+{{dot}}{{base64-urlencoded-charset}}
+
+##!$ $

@@ -1,45 +1,18 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use Test::Nginx::Socket::Lua;
-use Cwd qw(cwd);
+use strict;
+use lib '.';
+use t::TestMLCache;
 
-plan tests => repeat_each() * (blocks() * 3);
-
-my $pwd = cwd();
-
-our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
-    lua_shared_dict  cache_shm 1m;
-    lua_shared_dict  locks_shm 1m;
-
-    init_by_lua_block {
-        -- local verbose = true
-        local verbose = false
-        local outfile = "$Test::Nginx::Util::ErrLogFile"
-        -- local outfile = "/tmp/v.log"
-        if verbose then
-            local dump = require "jit.dump"
-            dump.on(nil, outfile)
-        else
-            local v = require "jit.v"
-            v.on(outfile)
-        end
-
-        require "resty.core"
-        -- jit.opt.start("hotloop=1")
-        -- jit.opt.start("loopunroll=1000000")
-        -- jit.off()
-    }
-};
+plan tests => repeat_each() * blocks() * 3;
 
 run_tests();
 
 __DATA__
 
 === TEST 1: new() validates opts.shm_locks
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -51,8 +24,6 @@ __DATA__
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.shm_locks must be a string
 --- no_error_log
@@ -61,9 +32,8 @@ opts.shm_locks must be a string
 
 
 === TEST 2: new() ensures opts.shm_locks exists
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -75,8 +45,6 @@ opts.shm_locks must be a string
             end
         }
     }
---- request
-GET /t
 --- response_body
 no such lua_shared_dict for opts.shm_locks: foo
 --- no_error_log
@@ -85,9 +53,8 @@ no such lua_shared_dict for opts.shm_locks: foo
 
 
 === TEST 3: get() stores resty-locks in opts.shm_locks if specified
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -107,8 +74,6 @@ no such lua_shared_dict for opts.shm_locks: foo
             cache:get("key", nil, cb)
         }
     }
---- request
-GET /t
 --- response_body
 1: lua-resty-mlcache:lock:namekey
 --- no_error_log

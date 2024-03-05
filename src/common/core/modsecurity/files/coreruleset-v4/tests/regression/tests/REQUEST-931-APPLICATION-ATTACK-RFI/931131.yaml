@@ -1,0 +1,23 @@
+---
+meta:
+  author: emphazer
+  description: None
+  enabled: true
+  name: 931131.yaml
+tests:
+  - test_title: 931131-1
+    desc: Remote File Inclusion Attack (931131) with REQUEST_FILENAME
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /file:%2f%2f/usr/src/blog/app/assets/javascripts/%252e%252e/%252e%252e/%252e%252e/%252e%252e/%252e%252e/%252e%252e/%252e%252e/%252e%252e/etc/passwd
+            version: HTTP/1.1
+          output:
+            log_contains: id "931131"

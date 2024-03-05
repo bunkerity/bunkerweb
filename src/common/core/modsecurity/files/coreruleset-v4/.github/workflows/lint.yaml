@@ -1,0 +1,65 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  check-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Lint Yaml
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          format: github
+          file_or_dir: tests/regression/tests
+          config_file: .yamllint.yml
+
+      - name: Linelint
+        uses: fernandrone/linelint@master
+        id: linelint
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.7
+
+      - name: "Check CRS syntax"
+        run: |
+          pip install --upgrade setuptools
+          pip install secrules-parsing
+          secrules-parser -c --output-type github -f rules/*.conf
+
+      - name: "Check CRS formatting"
+        run: |
+          pip install --upgrade setuptools
+          pip install -r ./util/crs-rules-check/requirements.txt
+          ./util/crs-rules-check/rules-check.py --output=github -r crs-setup.conf.example -r rules/*.conf -t util/APPROVED_TAGS
+
+      - name: "Find rules without test"
+        run: |
+          pip install --upgrade setuptools
+          pip install -r ./util/find-rules-without-test/requirements.txt
+          ./util/find-rules-without-test/find-rules-without-test.py --output=github .
+
+      - name: "Install crs-toolchain"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download -R coreruleset/crs-toolchain -p '*_linux_amd64.tar.gz'
+          ls crs-toolchain*
+          tar xzf crs-toolchain*_linux_amd64.tar.gz
+          rm crs-toolchain*_linux_amd64.tar.gz
+
+      - name: "Check that all assembly files are properly formatted"
+        run: |
+          ./crs-toolchain regex format -aco github
+
+      - name: "Check that all rules are up to date"
+        run: |
+          ./crs-toolchain regex compare -ao github
+
+      - name: "Check that all tests are properly numbered"
+        run: |
+          ./crs-toolchain util renumber-tests -cao github

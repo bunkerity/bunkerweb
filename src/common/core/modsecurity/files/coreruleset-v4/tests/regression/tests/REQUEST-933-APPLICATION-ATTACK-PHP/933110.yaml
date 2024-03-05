@@ -1,0 +1,479 @@
+---
+meta:
+  author: lifeforms
+  description: None
+  enabled: true
+  name: 933110.yaml
+tests:
+  - test_title: 933110-1
+    desc: PHP no file upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /
+          output:
+            no_log_contains: id "933110"
+  - test_title: 933110-2
+    desc: PHP .php upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-Filename: a.php
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload1
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-3
+    desc: PHP .php upload in X_Filename
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X_Filename: a.php
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload2
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-4
+    desc: PHP .php upload in X-File-Name
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: a.php
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload3
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-5
+    desc: PHP .php.. upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-Filename: a.php..
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload4
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-6
+    desc: PHP .phtml upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-Filename: a.phtml
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-7
+    desc: PHP .phtml...... upload in X-File-Name
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: fda.phtml......
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-8
+    desc: PHP .php5 upload in X-File-Name
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: fda.php5
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-9
+    desc: PHP .php5 upload in X-File-Name
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: fda.php5
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-10
+    desc: PHP .php7 upload in X-File-Name
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: fda.php7
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-11
+    desc: PHP no file upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /
+          output:
+            no_log_contains: id "933110"
+  - test_title: 933110-12
+    desc: PHP php5... upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-Filename: fda.php5...
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload5
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-13
+    desc: PHP php5... upload in X_Filename
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X_Filename: fda.php5...
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload6
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-14
+    desc: PHP .php. upload in X_Filename
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X_Filename: fthisfewfda.php.
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload7
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-15
+    desc: PHP sfewfda.php............. upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: fthi/sfewfda.php.............
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload8
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-16
+    desc: PHP script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: fthi/sfewfda.php.............
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-17
+    desc: PHP .php907............. upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: fthi/sfewfda.php907.............
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-18
+    desc: PHP .phtml upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-Filename: fthi/sfewfda.phtml
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-19
+    desc: PHP .phtml987... upload passes in X_Filename
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X_Filename: fthi/sfewfda.phtml987...
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /
+          output:
+            no_log_contains: id "933110"
+  - test_title: 933110-20
+    desc: PHP .php upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X.Filename: a.php
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload2
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-21
+    desc: PHP .php5... upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X.Filename: fda.php5...
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload6
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-22
+    desc: PHP .php. upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X.Filename: fthisfewfda.php.
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload7
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-23
+    desc: PHP .phtml987... upload passes in X.Filename
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X.Filename: fthi/sfewfda.phtml987...
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /
+          output:
+            no_log_contains: id "933110"
+  - test_title: 933110-24
+    desc: PHP .phar upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X.Filename: dangerous.phar
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload7
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-25
+    desc: PHP .phps upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X.Filename: dangerous.phps
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload7
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-26
+    desc: PHP .pht upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X.Filename: dangerous.pht
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload7
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-27
+    desc: PHP .phpt upload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X.Filename: dangerous.phpt
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload7
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-28
+    desc: PHP upload via multipart
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="fileRap"; filename="something/dangerous.php"
+              Content-Type: text/plain
+
+              please block me
+              ----------397236876--
+            protocol: "http"
+          output:
+            log_contains: id "933110"
+  - test_title: 933110-29
+    desc: PHP upload via multipart should pass
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="something/dangerous.php"; filename="safe.txt"
+              Content-Type: text/plain
+
+              please don't block me
+              ----------397236876--
+            protocol: "http"
+          output:
+            no_log_contains: id "933110"
+  - test_title: 933110-30
+    desc: PHP upload via multipart should pass
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="file"; filename="safe.phpinfo"
+              Content-Type: text/plain
+
+              please don't block me
+              ----------397236876--
+            protocol: "http"
+          output:
+            no_log_contains: id "933110"

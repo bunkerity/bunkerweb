@@ -1,0 +1,169 @@
+---
+meta:
+  author: "Christian S.J. Peron"
+  description: None
+  enabled: true
+  name: 933120.yaml
+tests:
+  - test_title: 933120-1
+    desc: "PHP Injection Attack: Configuration Directive"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: '/post'
+            data: "var=opcache.jit_max_polymorphic_calls%3d50"
+            version: HTTP/1.0
+          output:
+            log_contains: id "933120"
+  - test_title: 933120-2
+    desc: "Test correct logging"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: '/post'
+            port: 80
+            data: "var=session.referer_check%3dtrue"
+            version: HTTP/1.0
+          output:
+            no_log_contains: = found within
+  - test_title: 933120-3
+    desc: "PHP Injection Attack: Configuration Directive: engine"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: '/post'
+            port: 80
+            data: "var=engine%3dtrue"
+            version: HTTP/1.0
+          output:
+            log_contains: id "933120"
+  - test_title: 933120-4
+    desc: "PHP Injection Attack: Configuration Directive: extension"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: '/post'
+            port: 80
+            data: "var=extension%3dtrue"
+            version: HTTP/1.0
+          output:
+            log_contains: id "933120"
+  - test_title: 933120-5
+    desc: "PHP Injection Attack: Configuration Directive: mbstring.regex_retry_limit"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: '/post'
+            port: 80
+            data: "var=mbstring.regex_retry_limit%3dtrue"
+            version: HTTP/1.0
+          output:
+            log_contains: id "933120"
+  - test_title: 933120-6
+    desc: "PHP Injection Attack: Configuration Directive: mbstring.regex_stack_limit"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: '/post'
+            port: 80
+            data: "var=mbstring.regex_stack_limit%3dtrue"
+            version: HTTP/1.0
+          output:
+            log_contains: id "933120"
+  - test_title: 933120-7
+    desc: "PHP Injection Attack: Configuration Directive: precision"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: '/post'
+            port: 80
+            data: "var=precision%3dtrue"
+            version: HTTP/1.0
+          output:
+            log_contains: id "933120"
+  - test_title: 933120-8
+    desc: "PHP Injection Attack: Configuration Directive: smtp"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: '/post'
+            port: 80
+            data: "var=smtp%3dtrue"
+            version: HTTP/1.0
+          output:
+            log_contains: id "933120"
+  - test_title: 933120-9
+    desc: "PHP Injection Attack: Configuration Directive: unserialize_max_depth"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: '/post'
+            port: 80
+            data: "var=unserialize_max_depth%3dtrue"
+            version: HTTP/1.0
+          output:
+            log_contains: id "933120"

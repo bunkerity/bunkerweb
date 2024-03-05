@@ -1,0 +1,23 @@
+name: Create changelog PRs
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+
+jobs:
+  create-changelog-prs:
+    name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repo"
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: "Run script"
+        run: ".github/create-changelog-prs.py"
+        env:
+          # Required for the use of the gh CLI in the script
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,9 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Attacks attempting to bypass content-type restrictions or behaviour
+##! Find Content-Type: application/x-www-form-urlencoded;boundary="multipart/form-data"
+##! Find Content-Type: application/soap-xml;boundary="multipart/form-data"
+^[^;\s,]+[;\s,].*?\b(text|multipart|application)\b
+^[^;\s,]+[;\s,].*?\b(audio|image|video|csv|css|vnd|pdf|plain|json|soap|xml|x-www-form-urlencoded|form-data|related|x-amf|octet|stream|csp|report)\b
+^[^;\s,]+[;\s,].*?\b(\/|\+)\b

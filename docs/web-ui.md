@@ -1728,3 +1728,27 @@ After a successful login/password combination, you will be prompted to enter you
     ```shell
     systemctl restart bunkerweb
     ```
+
+## Upgrade to PRO
+
+In case you have buy a (pro version)[https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro] and you already have a BunkerWeb setup with an UI, you can upgrade doing this :
+
+- access the **global config page**.
+- click on the **pro plugin**
+- fill the **setting Pro License Key**
+- **save** your changes
+
+
+<figure markdown>
+  ![Overview](assets/img/pro-from-ui.webp){ align=center, width="1000" }
+  <figcaption>Upgrade to PRO from UI</figcaption>
+</figure>
+
+If your license key is valid, the upgrade to the pro version will take place automatically in the background.
+
+You can check the status of your version by going to the **home page**, you will see this in case of success :
+
+<figure markdown>
+  ![Overview](assets/img/pro-home-card.png){ align=center, width="450" }
+  <figcaption>PRO version card</figcaption>
+</figure>

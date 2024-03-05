@@ -252,6 +252,15 @@
       "regex": "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
       "type": "text",
       "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_CUSTOM_HOST": {
+      "context": "multisite",
+      "default": "",
+      "help": "Override Host header sent to upstream server.",
+      "id": "reverse-proxy-custom-host",
+      "label": "Reverse proxy custom host",
+      "regex": "^.*$",
+      "type": "text"
     }
   }
 }

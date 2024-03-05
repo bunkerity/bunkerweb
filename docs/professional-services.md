@@ -12,6 +12,8 @@ Please note that professionnal services are directly offered by [Bunkerity](http
 
 ## Which professional services do you offer ?
 
+### Support
+
 We offer technical support around the BunkerWeb solution. By using this service, we will assist you on the technical issues (installation, configuration, false positive, ...).
 
 According to your needs you have the choice between "one time" and subscriptions offers.
@@ -22,6 +24,20 @@ In addition to the support service, we also offer custom services around the Bun
 
 - Consulting : a dedicated expert will give you advices on your project
 - Development : if you need specific features in BunkerWeb, we can do it for you
+
+[You can check for technical support here.](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)
+
+### Pro version
+
+A BunkerWeb pro version is available.
+
+With this version you'll get a power-up version with more plugins and details settings.
+
+Any features from pro version are up to date, and we have an active listening on your feedbacks in order to enhance them and fit your needs.
+
+Switching to the pro version is done centrally via the panel, which is also used for support.
+
+If you are interested, please [visit the dedicated page.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
 
 ## How can I get more information ?
 

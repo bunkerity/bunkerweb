@@ -1,0 +1,35 @@
+---
+meta:
+  author: "Franziska Bühler"
+  description: "Rule against CVE-2021-40438"
+  enabled: true
+  name: 921240.yaml
+tests:
+  - test_title: 921240-1
+    desc: "Detect attacks against mod_proxy: CVE-2021-40438"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: "/?unix:AAAAAAAAA|http://coreruleset.org/"
+          output:
+            log_contains: id "921240"
+  - test_title: 921240-2
+    desc: "Detect attacks against mod_proxy: CVE-2021-40438, URI encoded"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: "/?unix%3AAAAAAAAAA|http://coreruleset.org/"
+          output:
+            log_contains: id "921240"

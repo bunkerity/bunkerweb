@@ -1,0 +1,71 @@
+---
+meta:
+  author: "studersi"
+  enabled: true
+  name: "959100.yaml"
+  description: |
+    Test whether the outbound blocking mechanism works by testing whether rule 959100 is triggered.
+    For these tests, existing test are repurposed with different assertions. Instead of asserting that the original
+    rules are triggered that the tests are written for, we assert that triggering these rules causes the blocking
+    rule to be triggered.
+tests:
+  - test_title: 959100-1
+    desc: Test is basically identical to 953120-0 (PHP leakage positive test in phase 4) but here we assert that the outbound blocking mechanism is triggered
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?php echo "Hello World!\n" ?>
+          output:
+            log_contains: "id \"959100\""
+  - test_title: 959100-2
+    desc: Test is basically identical to 953120-1 (PHP leakage negative test in phase 4) but here we assert that the outbound blocking mechanism is not triggered
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?php12345
+          output:
+            no_log_contains: "id \"959100\""
+  - test_title: 959100-3
+    desc: Test is basically identical to 959100-0 (see above) but here we assert that the scores are summed up and reported properly
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?php echo "Hello World!\n" ?>
+          output:
+            log_contains: "Outbound Anomaly Score Exceeded [(]Total Score: "

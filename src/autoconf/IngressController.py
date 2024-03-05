@@ -232,7 +232,7 @@ class IngressController(Controller):
         obj = event["object"]
         metadata = obj.metadata if obj else None
         annotations = metadata.annotations if metadata else None
-        data = getattr(obj, 'data', None) if obj else None
+        data = getattr(obj, "data", None) if obj else None
         if not obj:
             return False
         if obj.kind == "Pod":

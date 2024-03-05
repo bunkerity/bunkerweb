@@ -17,6 +17,17 @@ try:
     log_info("Navigating to the logs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
+    log_info("Try to click on all available tabs ...")
+
+    assert_button_click(DRIVER, "//button[@data-tab-handler='global']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler='password']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler='totp']")
+
+    log_info("All tabs working, start username tab ...")
+
+    assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
+
     username_input = safe_get_element(DRIVER, By.ID, "admin_username")
     assert isinstance(username_input, WebElement), "The username input is not an instance of WebElement"
 
@@ -24,8 +35,9 @@ try:
         log_error("The username is not correct, exiting ...")
         exit(1)
 
-    username_input.clear()
-    username_input.send_keys("admin2")
+    log_info("username 'admin' is correctly set by default, trying username update ...")
+
+    DRIVER.execute_script(f"return arguments[0].value = 'admin2'", username_input)
 
     password_input = safe_get_element(DRIVER, By.ID, "curr_password")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
@@ -34,8 +46,8 @@ try:
         log_error("The current password is not empty, exiting ...")
         exit(1)
 
-    password_input.send_keys(UI_PASSWORD)
-
+    # execute script using create password_input
+    DRIVER.execute_script(f"return arguments[0].value = '{UI_PASSWORD}'", password_input)
     assert_button_click(DRIVER, "//button[@id='username-button' and @class='edit-btn']")
 
     try:
@@ -62,6 +74,8 @@ try:
     access_page(DRIVER, "//button[@value='login']", "home")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
+    assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
+
     username_input = safe_get_element(DRIVER, By.ID, "admin_username")
     assert isinstance(username_input, WebElement), "The username input is not an instance of WebElement"
 
@@ -73,7 +87,7 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-tab-handler='password']")
 
-    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-plugin-item='password']//input[@id='curr_password']")
+    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-tab-item='password']//input[@id='curr_password']")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
 
     if password_input.get_attribute("value") != "":
@@ -156,7 +170,7 @@ try:
     assert isinstance(totp_input, WebElement), "The TOTP input is not an instance of WebElement"
     totp_input.send_keys(totp.now())
 
-    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-plugin-item='totp']//input[@id='curr_password']")
+    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-tab-item='totp']//input[@id='curr_password']")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
 
     if password_input.get_attribute("value") != "":
@@ -239,7 +253,7 @@ try:
     assert isinstance(totp_input, WebElement), "The TOTP input is not an instance of WebElement"
     totp_input.send_keys(totp.now())
 
-    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-plugin-item='totp']//input[@id='curr_password']")
+    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-tab-item='totp']//input[@id='curr_password']")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
     password_input.send_keys("P@ssw0rd")
 
@@ -294,8 +308,9 @@ except KeyboardInterrupt:
     exit_code = 1
 except:
     log_exception("Something went wrong, exiting ...")
-    DRIVER.save_screenshot("error.png")
     exit_code = 1
 finally:
+    if exit_code:
+        DRIVER.save_screenshot("error.png")
     DRIVER.quit()
     exit(exit_code)

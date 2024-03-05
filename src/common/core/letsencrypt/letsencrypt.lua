@@ -33,6 +33,14 @@ function letsencrypt:initialize(ctx)
 	plugin.initialize(self, "letsencrypt", ctx)
 end
 
+function letsencrypt:set()
+	local https_configured = self.variables["AUTO_LETS_ENCRYPT"]
+	if https_configured == "yes" then
+		self.ctx.bw.https_configured = "yes"
+	end
+	return self:ret(true, "set https_configured to " .. https_configured)
+end
+
 function letsencrypt:init()
 	local ret_ok, ret_err = true, "success"
 	if has_variable("AUTO_LETS_ENCRYPT", "yes") then

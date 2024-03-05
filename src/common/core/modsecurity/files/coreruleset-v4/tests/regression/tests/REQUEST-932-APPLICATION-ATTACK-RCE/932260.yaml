@@ -1,0 +1,466 @@
+---
+meta:
+  author: "Paul Beckett, Franziska Bühler, karelorigin, Esad Cetiner"
+  enabled: true
+  name: "932260.yaml"
+  description: "Tests to trigger or not trigger rule 932260"
+tests:
+  - test_title: 932260-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get?932260-1=bash%20-c%20%22echo%20test%22"
+            protocol: "http"
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Cookie: "931120-3=exec 5<>/dev/tcp/8.8.8.8/80"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/post'
+            protocol: "http"
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: '932260-2=dont match commands that are not at start;tar -xzf /var/www/exfiltrate.tar.gz /etc'
+            uri: '/post'
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: 'foo=ping pong tables'
+            uri: '/post'
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: 'foo=time is of the essence'
+            uri: '/post'
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-6
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: 'x=printf%20dwssap/cte/%20tac%20|%20rev%20|%20sh'
+            uri: '/post'
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-7
+    desc: "Unix Command Injection - python version bypass test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            # "cmd=python cmd"
+            uri: /get?cmd=python3.10%20cmd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-8
+    desc: "Unix Command Injection - printf bypass test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            # "cmd=printf dW5hbWUgLWE=|base64 -d|sh"
+            uri: /get?cmd=printf%20dW5hbWUgLWE=%7Cbase64%20-d%7Csh
+            version: HTTP/1.0
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-9
+    desc: "Positive test: Data exfiltration with gunzip"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: 'cmd=gunzip -c /var/log/sensitive_log_file.gz'
+            uri: '/post'
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-10
+    desc: "Positive test: Data exfiltration with zstdcat"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: 'cmd=zstdcat /var/log/sensitive_log_file.zst'
+            uri: '/post'
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-11
+    desc: "Positive test: Unix Command Injection - busybox test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            # code=busybox -c "echo hi"
+            uri: /get?code=busybox%20-c%20%22echo%20hi%22
+            version: HTTP/1.0
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-12
+    desc: Remote Command Execution bypass with time
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?foo=time+bsdtar+"
+            version: HTTP/1.1
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-13
+    desc: Remote Command Execution bypass with time negative test
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?foo=time+warner+"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-14
+    desc: Remote Command Injection test for BB finding 935E1D91
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?foo=time+curl+coreruleset.org"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-15
+    desc: Remote Command Injection test for BB finding 935E1D91 - time evasion attempt
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?foo=ti''me+curl+coreruleset.org"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-16
+    desc: System Command Injection test for BB finding AV6ZO3ZS - mixed case
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?foo='ZsTdcaT+/var/log/sensitive_log_file.zst"
+            version: HTTP/1.1
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-17
+    desc: "'find' direct command injection FP test"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=find%20.%201%20-exec%20curl%20google.com%20\\;"
+            protocol: "http"
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-18
+    desc: "'find' direct command injection FP test"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=find%20x%20for%20y"
+            protocol: "http"
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-19
+    desc: "'ping' direct command injection FP test"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=ping%20127.0.0.1"
+            protocol: "http"
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-20
+    desc: "FP for 'head of'"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/post"
+            protocol: "http"
+            data: "job_title=head%20of"
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-21
+    desc: "False positive test: 'evaluation' (FP while rule looks for 'eval')"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get?word=evaluation'
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-22
+    desc: "False positive test: 'schedule' (FP while rule looks for 'sched')"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get?word=schedule'
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-23
+    desc: "FP with word comment Github Issue #3387"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /?args=comment
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-24
+    desc: "FP against name 'Perlak' (matches 'perl')"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get?last_name=Perlak
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-25
+    desc: "FP against word 'Axel'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get?first_name=Axel
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-26
+    desc: "FP with word performance"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get?args=performance
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932260"
+  - test_title: 932260-27
+    desc: "Block execution of perf command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: POST
+            port: 80
+            uri: /post
+            data: "args=perf --version"
+            version: HTTP/1.1
+          output:
+            log_contains: id "932260"
+  - test_title: 932260-28
+    desc: |
+      Match despite quote evasion attempt.
+      932260 accidentally contained a chain rule for some time that enabled
+      trivial bypasses, by excluding matches against number separators (see 932240).
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: get
+            port: 80
+            uri: /get/?a=whoami;0'0'"
+            version: HTTP/1.1
+          output:
+            log_contains: id "932260"

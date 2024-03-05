@@ -10,28 +10,58 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
 
 
-def safe_get_element(driver, by: str, _id: str, *, driver_wait: Optional[WebDriverWait] = None, multiple: bool = False, error: bool = False) -> Union[WebElement, List[WebElement]]:
+def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[WebDriverWait] = None, multiple: bool = False, error: bool = False) -> Union[WebElement, List[WebElement]]:
     try:
-        return (driver_wait or WebDriverWait(driver, 4)).until(EC.presence_of_element_located((by, _id)) if not multiple else EC.presence_of_all_elements_located((by, _id)))
+        # Retrieve by js script
+        if by == "js":
+            # Run every wait seconds trying to get elements
+            wait = driver_wait or 4
+            el = None
+            for x in range(wait):
+                try:
+                    el = driver.execute_script(f"return {selector} || null")
+                    if not el:
+                        sleep(1)
+                        continue
+                    else:
+                        break
+                except:
+                    el = None
+            # Case no el found
+            if not el:
+                log_exception(f'Element searched by {by}: "{selector}" not found, exiting ...')
+                raise TimeoutException
+
+            return el
+
+        # Retrieve with XPATH
+        return (driver_wait or WebDriverWait(driver, 4)).until(EC.presence_of_element_located((by, selector)) if not multiple else EC.presence_of_all_elements_located((by, selector)))
     except TimeoutException as e:
+
         if error:
             raise e
 
-        log_exception(f'Element searched by {by}: "{_id}" not found, exiting ...')
+        log_exception(f'Element searched by {by}: "{selector}" not found, exiting ...')
         exit(1)
 
 
-def assert_button_click(driver, button: Union[str, WebElement]):  # type: ignore
+def assert_button_click(driver, button: Union[str, WebElement], by: str = "xpath"):  # type: ignore
     clicked = False
     while not clicked:
         with suppress(ElementClickInterceptedException):
             if isinstance(button, str):
-                button: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, button)
+                # Retrieve with js script
+                if by == "js":
+                    button: Union[WebElement, List[WebElement]] = safe_get_element(driver, by, button)
+                # Retrieve by XPATH
+                else:
+                    button: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, button)
                 assert isinstance(button, WebElement), "Button is not a WebElement"
 
             sleep(0.5)
 
             button.click()
+
             clicked = True
     return clicked
 
@@ -76,16 +106,16 @@ def assert_alert_message(driver, message: str):
     assert_button_click(driver, "//button[@data-flash-sidebar-close='']/*[local-name() = 'svg']")
 
 
-def access_page(driver, button: Union[str, WebElement], name: str, message: bool = True, *, retries: int = 0, clicked: bool = False):
+def access_page(driver, button: Union[bool, str, WebElement], name: str, message: bool = True, *, retries: int = 0, clicked: bool = False):
     if retries > 5:
         log_error("Too many retries...")
         exit(1)
 
     try:
-        if not clicked:
+        if not isinstance(button, bool) and not clicked:
             clicked = assert_button_click(driver, button)
 
-        title: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, "/html/body/div/header/div/nav/h6", driver_wait=WebDriverWait(driver, 45))
+        title: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, "/html/body/div[3]/header/div/nav/h6", driver_wait=WebDriverWait(driver, 45))
         assert isinstance(title, WebElement), "Title is not a WebElement"
 
         if title.text != name.title():
@@ -108,6 +138,8 @@ def access_page(driver, button: Union[str, WebElement], name: str, message: bool
 
     if message:
         log_info(f"{name.title()} page loaded successfully")
+
+    driver.set_window_size(2560, 1440)
 
 
 def wait_for_service(service: str = "www.example.com"):

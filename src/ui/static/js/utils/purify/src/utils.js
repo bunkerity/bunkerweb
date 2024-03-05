@@ -46,6 +46,8 @@ const stringReplace = unapply(String.prototype.replace);
 const stringIndexOf = unapply(String.prototype.indexOf);
 const stringTrim = unapply(String.prototype.trim);
 
+const objectHasOwnProperty = unapply(Object.prototype.hasOwnProperty);
+
 const regExpTest = unapply(RegExp.prototype.test);
 
 const typeErrorCreate = unconstruct(TypeError);
@@ -108,17 +110,47 @@ function addToSet(set, array, transformCaseFunc = stringToLowerCase) {
 }
 
 /**
+ * Clean up an array to harden against CSPP
+ *
+ * @param {Array} array - The array to be cleaned.
+ * @returns {Array} The cleaned version of the array
+ */
+function cleanArray(array) {
+  for (let index = 0; index < array.length; index++) {
+    const isPropertyExist = objectHasOwnProperty(array, index);
+
+    if (!isPropertyExist) {
+      array[index] = null;
+    }
+  }
+
+  return array;
+}
+
+/**
  * Shallow clone an object
  *
  * @param {Object} object - The object to be cloned.
  * @returns {Object} A new object that copies the original.
  */
-export function clone(object) {
+function clone(object) {
   const newObject = create(null);
 
   for (const [property, value] of entries(object)) {
-    if (getOwnPropertyDescriptor(object, property) !== undefined) {
-      newObject[property] = value;
+    const isPropertyExist = objectHasOwnProperty(object, property);
+
+    if (isPropertyExist) {
+      if (Array.isArray(value)) {
+        newObject[property] = cleanArray(value);
+      } else if (
+        value &&
+        typeof value === 'object' &&
+        value.constructor === Object
+      ) {
+        newObject[property] = clone(value);
+      } else {
+        newObject[property] = value;
+      }
     }
   }
 
@@ -149,8 +181,7 @@ function lookupGetter(object, prop) {
     object = getPrototypeOf(object);
   }
 
-  function fallbackValue(element) {
-    console.warn('fallback value for', element);
+  function fallbackValue() {
     return null;
   }
 
@@ -172,7 +203,9 @@ export {
   isFrozen,
   setPrototypeOf,
   seal,
+  clone,
   create,
+  objectHasOwnProperty,
   // RegExp
   regExpTest,
   // String

