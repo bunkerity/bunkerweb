@@ -2,15 +2,15 @@
 
 from hashlib import sha256
 from io import BytesIO
-from os import getenv, listdir, chmod, _exit, sep
-from os.path import basename, dirname, join, normpath
+from os import getenv, listdir, chmod, sep
+from os.path import basename, join, normpath
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from uuid import uuid4
 from glob import glob
-from json import loads
+from json import JSONDecodeError, loads
 from shutil import copytree, rmtree
 from tarfile import open as tar_open
 from traceback import format_exc
@@ -40,10 +40,21 @@ logger = setup_logger("Jobs.download-plugins", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 
-def install_plugin(plugin_dir, db) -> bool:
+def install_plugin(plugin_dir: str, db) -> bool:
     plugin_path = Path(plugin_dir)
+    plugin_file = plugin_path.joinpath("plugin.json")
+
+    if not plugin_file.is_file():
+        logger.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json not found)")
+        return False
+
     # Load plugin.json
-    metadata = loads(plugin_path.joinpath("plugin.json").read_text(encoding="utf-8"))
+    try:
+        metadata = loads(plugin_file.read_text(encoding="utf-8"))
+    except JSONDecodeError:
+        logger.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json is not valid)")
+        return False
+
     # Don't go further if plugin is already installed
     if EXTERNAL_PLUGINS_DIR.joinpath(metadata["id"], "plugin.json").is_file():
         old_version = None
@@ -79,7 +90,7 @@ try:
     plugin_urls = getenv("EXTERNAL_PLUGIN_URLS")
     if not plugin_urls:
         logger.info("No external plugins to download")
-        _exit(0)
+        sys_exit(0)
 
     db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     plugin_nbr = 0
@@ -134,31 +145,25 @@ try:
                 logger.error(f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping...")
                 continue
         except:
-            logger.error(
-                f"Exception while decompressing plugin(s) from {plugin_url} :\n{format_exc()}",
-            )
+            logger.error(f"Exception while decompressing plugin(s) from {plugin_url} :\n{format_exc()}")
             status = 2
             continue
 
         # Install plugins
         try:
-            for plugin_dir in glob(join(temp_dir, "**", "plugin.json"), recursive=True):
+            for plugin_dir in glob(join(temp_dir, "*")):
                 try:
-                    if install_plugin(dirname(plugin_dir), db):
+                    if install_plugin(plugin_dir, db):
                         plugin_nbr += 1
                 except FileExistsError:
-                    logger.warning(
-                        f"Skipping installation of plugin {basename(dirname(plugin_dir))} (already installed)",
-                    )
+                    logger.warning(f"Skipping installation of plugin {basename(plugin_dir)} (already installed)")
         except:
-            logger.error(
-                f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}",
-            )
+            logger.error(f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}")
             status = 2
 
     if not plugin_nbr:
         logger.info("No external plugins to update to database")
-        _exit(0)
+        sys_exit(0)
 
     external_plugins = []
     external_plugins_ids = []
@@ -210,6 +215,8 @@ try:
     status = 1
     logger.info("External plugins downloaded and installed")
 
+except SystemExit as e:
+    status = e.code
 except:
     status = 2
     logger.error(f"Exception while running download-plugins.py :\n{format_exc()}")

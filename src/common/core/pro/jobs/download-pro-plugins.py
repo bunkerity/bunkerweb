@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 from hashlib import sha256
 from io import BytesIO
-from os import getenv, listdir, chmod, _exit, sep
-from os.path import basename, dirname, join
+from os import getenv, listdir, chmod, sep
+from os.path import basename, join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from uuid import uuid4
 from glob import glob
-from json import dumps, loads
+from json import JSONDecodeError, loads
 from shutil import copytree, rmtree
 from tarfile import open as tar_open
 from traceback import format_exc
@@ -34,17 +35,41 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import get_os_info, get_integration, get_version  # type: ignore
 
-API_ENDPOINT = "https://api.bunkerweb.io/pro"
+API_ENDPOINT = "https://api.staging.bunkerweb.io"
+PREVIEW_ENDPOINT = "https://assets.bunkerity.com/bw-pro/preview"
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "pro", "plugins")
 PRO_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "pro", "plugins")
+STATUS_MESSAGES = {
+    "invalid": "is not valid",
+    "expired": "has expired",
+    "suspended": "has been suspended",
+}
 logger = setup_logger("Jobs.download-pro-plugins", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 
-def install_plugin(plugin_dir, db) -> bool:
+def clean_pro_plugins(db) -> None:
+    # Clean pro plugins
+    rmtree(PRO_PLUGINS_DIR.joinpath("*"), ignore_errors=True)
+    # Update database
+    db.update_external_plugins([], _type="pro")
+
+
+def install_plugin(plugin_dir: str, db) -> bool:
     plugin_path = Path(plugin_dir)
+    plugin_file = plugin_path.joinpath("plugin.json")
+
+    if not plugin_file.is_file():
+        logger.error(f"Skipping installation of pro plugin {plugin_path.name} (plugin.json not found)")
+        return False
+
     # Load plugin.json
-    metadata = loads(plugin_path.joinpath("plugin.json").read_text(encoding="utf-8"))
+    try:
+        metadata = loads(plugin_file.read_text(encoding="utf-8"))
+    except JSONDecodeError:
+        logger.error(f"Skipping installation of pro plugin {plugin_path.name} (plugin.json is not valid)")
+        return False
+
     # Don't go further if plugin is already installed
     if PRO_PLUGINS_DIR.joinpath(metadata["id"], "plugin.json").is_file():
         old_version = None
@@ -67,12 +92,13 @@ def install_plugin(plugin_dir, db) -> bool:
     for job_file in glob(PRO_PLUGINS_DIR.joinpath(metadata["id"], "jobs", "*").as_posix()):
         st = Path(job_file).stat()
         chmod(job_file, st.st_mode | S_IEXEC)
-    logger.info(f"Plugin {metadata['id']} installed")
+    logger.info(f"Pro plugin {metadata['id']} installed")
     return True
 
 
 try:
-    logger.info(f"Trying to download pro plugins from {API_ENDPOINT}")
+    logger.info("Checking BunkerWeb Pro license key...")
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
 
     data = {
         "integration": get_integration(),
@@ -80,80 +106,120 @@ try:
         "os": get_os_info(),
         "service_number": str(len(getenv("SERVER_NAME", "").split(" "))),
     }
-
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
+    default_metadata = {
+        "is_pro": False,
+        "pro_expire": None,
+        "pro_status": "invalid",
+        "pro_overlapped": False,
+        "pro_services": 0,
+    }
+    metadata = {}
+    db_metadata = db.get_metadata()
     pro_license_key = getenv("PRO_LICENSE_KEY")
-    if pro_license_key:
-        headers["Authorization"] = f"Bearer {pro_license_key}"
 
-    resp = get(API_ENDPOINT, headers=headers, json=data, timeout=5)
-    resp.raise_for_status()
-
-    if resp.headers.get("Content-Type", "") not in ("application/zip", "application/json"):
-        logger.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}")
-        status = 2
-        sys_exit(status)
-
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     temp_dir = TMP_DIR.joinpath(str(uuid4()))
     temp_dir.mkdir(parents=True, exist_ok=True)
 
-    if resp.headers.get("Content-Type") == "application/zip":
+    if pro_license_key:
+        logger.info("BunkerWeb Pro license provided, checking if it's valid...")
+        headers["Authorization"] = f"Bearer {pro_license_key.strip()}"
+        resp = get(f"{API_ENDPOINT}/pro-status", headers=headers, json=data, timeout=5, allow_redirects=True)
+
+        if resp.status_code == 403:
+            db.set_pro_metadata(default_metadata)
+            clean_pro_plugins(db)
+            logger.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
+            status = 2
+            sys_exit(status)
+        elif resp.status_code == 500:
+            logger.error("An error occurred with the remote server while checking BunkerWeb Pro license, please try again later")
+            status = 2
+            sys_exit(status)
+        resp.raise_for_status()
+
+        metadata = resp.json()
+        metadata["pro_expire"] = datetime.strptime(metadata["pro_expire"], "%Y-%m-%d") if metadata["pro_expire"] else None
+        if metadata["pro_expire"] and metadata["pro_expire"] < datetime.now():
+            metadata["pro_status"] = "expired"
+        if metadata["pro_services"] < int(data["service_number"]):
+            metadata["pro_overlapped"] = True
+        metadata["is_pro"] = metadata["pro_status"] == "valid" and not metadata["pro_overlapped"]
+
+    metadata = metadata or default_metadata
+    db.set_pro_metadata(metadata)
+
+    if metadata["is_pro"]:
         logger.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated pro plugins...")
 
-        db.set_pro_metadata(
-            {
-                "is_pro": True,
-                "pro_expire": None,
-                "pro_status": "valid",
-                "pro_overlapped": False,
-                "pro_services": 0,
-            }
-        )
+        if not db_metadata["is_pro"]:
+            clean_pro_plugins(db)
 
-        with BytesIO(resp.content) as plugin_content:
-            with ZipFile(plugin_content) as zf:
-                zf.extractall(path=temp_dir)
+        resp = get(f"{API_ENDPOINT}/pro", headers=headers, json=data, timeout=5, allow_redirects=True)
+
+        if resp.status_code == 403:
+            db.set_pro_metadata(default_metadata)
+            clean_pro_plugins(db)
+            logger.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
+            status = 2
+            sys_exit(status)
+
+        if resp.headers.get("Content-Type", "") != "application/octet-stream":
+            logger.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}/pro")
+            status = 2
+            sys_exit(status)
     else:
-        message = "No BunkerWeb Pro license key found"
-        if pro_license_key:
-            message = "Your BunkerWeb Pro license is not valid or has expired"
+        if metadata["pro_overlapped"]:
+            message = f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']}"
+        elif pro_license_key:
+            message = f"Your BunkerWeb Pro license {STATUS_MESSAGES.get(metadata['pro_status'], 'is not valid')}"
+        else:
+            logger.info("If you wish to purchase a BunkerWeb Pro license, please visit https://panel.bunkerweb.io/")
+            message = "No BunkerWeb Pro license key provided"
         logger.warning(f"{message}, only checking if there are new or updated info about pro plugins...")
 
-        db.set_pro_metadata(  # TODO: set other pro metadata than is_pro correctly
-            {
-                "is_pro": False,
-                "pro_expire": None,
-                "pro_status": "invalid",
-                "pro_overlapped": False,
-                "pro_services": 0,
-            }
-        )
+        if db_metadata["pro_status"] == "valid":
+            clean_pro_plugins(db)
 
-        plugins = resp.json()
-        for plugin in plugins["data"]:
-            plugin_path = temp_dir.joinpath(plugin["id"])
-            plugin_path.mkdir(parents=True, exist_ok=True)
-            plugin_path.joinpath("plugin.json").write_text(dumps(plugin, indent=4), encoding="utf-8")
+        resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", headers=headers, timeout=5, allow_redirects=True)
+
+        if resp.status_code == 404:
+            logger.error(f"Couldn't find pro plugins for BunkerWeb version {data['version']} at {PREVIEW_ENDPOINT}/v{data['version']}.zip")
+            status = 2
+            sys_exit(status)
+        elif resp.headers.get("Content-Type", "") != "application/zip":
+            logger.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {PREVIEW_ENDPOINT}/v{data['version']}.zip")
+            status = 2
+            sys_exit(status)
+
+    if resp.status_code == 500:
+        logger.error("An error occurred with the remote server, please try again later")
+        status = 2
+        sys_exit(status)
+    resp.raise_for_status()
+
+    with BytesIO(resp.content) as plugin_content:
+        with ZipFile(plugin_content) as zf:
+            zf.extractall(path=temp_dir)
 
     plugin_nbr = 0
 
     # Install plugins
     try:
-        for plugin_dir in glob(temp_dir.joinpath("**", "plugin.json").as_posix(), recursive=True):
+        for plugin_dir in glob(temp_dir.joinpath("*").as_posix()):
             try:
-                if install_plugin(dirname(plugin_dir), db):
+                if install_plugin(plugin_dir, db):
                     plugin_nbr += 1
             except FileExistsError:
-                logger.warning(f"Skipping installation of plugin {basename(dirname(plugin_dir))} (already installed)")
+                logger.warning(f"Skipping installation of pro plugin {basename(plugin_dir)} (already installed)")
     except:
         logger.exception("Exception while installing pro plugin(s)")
         status = 2
         sys_exit(status)
 
     if not plugin_nbr:
-        logger.info("No pro plugins to update to database")
-        _exit(0)
+        logger.info("All pro plugins are up to date")
+        sys_exit(0)
 
     pro_plugins = []
     pro_plugins_ids = []
@@ -201,7 +267,9 @@ try:
         logger.error(f"Couldn't update pro plugins to database: {err}")
 
     status = 1
-    logger.info("Pro plugins downloaded and installed successfully!")
+    logger.info("🚀 Pro plugins downloaded and installed successfully!")
+except SystemExit as e:
+    status = e.code
 except:
     status = 2
     logger.error(f"Exception while running download-pro-plugins.py :\n{format_exc()}")
