@@ -41,7 +41,7 @@ INTEGRATIONS_ENUM = Enum(
 )
 STREAM_TYPES_ENUM = Enum("no", "yes", "partial", name="stream_types_enum")
 PLUGIN_TYPES_ENUM = Enum("core", "external", "pro", name="plugin_types_enum")
-PRO_STATUS_ENUM = Enum("invalid", "valid", "expired", name="pro_status_enum")
+PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
 Base = declarative_base()
 
 
