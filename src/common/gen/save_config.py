@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from os import R_OK, X_OK, access, environ, getenv, sep
-from os.path import join, normpath
+from os.path import join
 from pathlib import Path
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
@@ -89,10 +89,10 @@ if __name__ == "__main__":
         parser.add_argument("--no-check-changes", action="store_true", help="Set the changes to checked in the database")
         args = parser.parse_args()
 
-        settings_path = Path(normpath(args.settings))
-        core_path = Path(normpath(args.core))
-        plugins_path = Path(normpath(args.plugins))
-        pro_plugins_path = Path(normpath(args.pro_plugins))
+        settings_path = Path(args.settings)
+        core_path = Path(args.core)
+        plugins_path = Path(args.plugins)
+        pro_plugins_path = Path(args.pro_plugins)
 
         logger.info("Save config started ...")
         logger.info(f"Settings : {settings_path}")
@@ -120,6 +120,9 @@ if __name__ == "__main__":
         if args.init:
             logger.info(f"Detected {integration} integration")
 
+        if integration == "Linux" and not args.variables:
+            args.variables = join(sep, "etc", "bunkerweb", "variables.env")
+
         config_files = None
         db = None
         apis = []
@@ -133,7 +136,7 @@ if __name__ == "__main__":
 
         # Check existences and permissions
         logger.info("Checking arguments ...")
-        files = [settings_path] + ([Path(normpath(args.variables))] if args.variables else [])
+        files = [settings_path] + ([Path(args.variables)] if args.variables else [])
         paths_rx = [core_path, plugins_path, pro_plugins_path]
         for file in files:
             if not file.is_file():
@@ -151,7 +154,7 @@ if __name__ == "__main__":
                 sys_exit(1)
 
         if args.variables:
-            variables_path = Path(normpath(args.variables))
+            variables_path = Path(args.variables)
             logger.info(f"Variables : {variables_path}")
 
             # Compute the config
