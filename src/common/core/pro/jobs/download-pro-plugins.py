@@ -49,25 +49,26 @@ status = 0
 
 
 def clean_pro_plugins(db) -> None:
-    # Clean pro plugins
+    logger.debug("Cleaning up Pro plugins...")
+    # Clean Pro plugins
     rmtree(PRO_PLUGINS_DIR.joinpath("*"), ignore_errors=True)
     # Update database
     db.update_external_plugins([], _type="pro")
 
 
-def install_plugin(plugin_dir: str, db) -> bool:
+def install_plugin(plugin_dir: str, db, preview: bool = True) -> bool:
     plugin_path = Path(plugin_dir)
     plugin_file = plugin_path.joinpath("plugin.json")
 
     if not plugin_file.is_file():
-        logger.error(f"Skipping installation of pro plugin {plugin_path.name} (plugin.json not found)")
+        logger.error(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {plugin_path.name} (plugin.json not found)")
         return False
 
     # Load plugin.json
     try:
         metadata = loads(plugin_file.read_text(encoding="utf-8"))
     except JSONDecodeError:
-        logger.error(f"Skipping installation of pro plugin {plugin_path.name} (plugin.json is not valid)")
+        logger.error(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {plugin_path.name} (plugin.json is not valid)")
         return False
 
     # Don't go further if plugin is already installed
@@ -80,10 +81,10 @@ def install_plugin(plugin_dir: str, db) -> bool:
                 break
 
         if old_version == metadata["version"]:
-            logger.warning(f"Skipping installation of pro plugin {metadata['id']} (version {metadata['version']} already installed)")
+            logger.warning(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']} already installed)")
             return False
 
-        logger.warning(f"Pro plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it...")
+        logger.warning(f"{'Preview version of ' if preview else ''}Pro plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it...")
         rmtree(PRO_PLUGINS_DIR.joinpath(metadata["id"]), ignore_errors=True)
 
     # Copy the plugin
@@ -92,7 +93,7 @@ def install_plugin(plugin_dir: str, db) -> bool:
     for job_file in glob(PRO_PLUGINS_DIR.joinpath(metadata["id"], "jobs", "*").as_posix()):
         st = Path(job_file).stat()
         chmod(job_file, st.st_mode | S_IEXEC)
-    logger.info(f"Pro plugin {metadata['id']} installed")
+    logger.info(f"✅ {'Preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']}) installed successfully!")
     return True
 
 
@@ -117,6 +118,7 @@ try:
     metadata = {}
     db_metadata = db.get_metadata()
     pro_license_key = getenv("PRO_LICENSE_KEY")
+    error = False
 
     temp_dir = TMP_DIR.joinpath(str(uuid4()))
     temp_dir.mkdir(parents=True, exist_ok=True)
@@ -127,30 +129,30 @@ try:
         resp = get(f"{API_ENDPOINT}/pro-status", headers=headers, json=data, timeout=5, allow_redirects=True)
 
         if resp.status_code == 403:
-            db.set_pro_metadata(default_metadata)
-            clean_pro_plugins(db)
             logger.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
-            status = 2
-            sys_exit(status)
+            error = True
+            if db_metadata["is_pro"]:
+                clean_pro_plugins(db)
         elif resp.status_code == 500:
             logger.error("An error occurred with the remote server while checking BunkerWeb Pro license, please try again later")
             status = 2
             sys_exit(status)
-        resp.raise_for_status()
+        else:
+            resp.raise_for_status()
 
-        metadata = resp.json()
-        metadata["pro_expire"] = datetime.strptime(metadata["pro_expire"], "%Y-%m-%d") if metadata["pro_expire"] else None
-        if metadata["pro_expire"] and metadata["pro_expire"] < datetime.now():
-            metadata["pro_status"] = "expired"
-        if metadata["pro_services"] < int(data["service_number"]):
-            metadata["pro_overlapped"] = True
-        metadata["is_pro"] = metadata["pro_status"] == "valid" and not metadata["pro_overlapped"]
+            metadata = resp.json()
+            metadata["pro_expire"] = datetime.strptime(metadata["pro_expire"], "%Y-%m-%d") if metadata["pro_expire"] else None
+            if metadata["pro_expire"] and metadata["pro_expire"] < datetime.now():
+                metadata["pro_status"] = "expired"
+            if metadata["pro_services"] < int(data["service_number"]):
+                metadata["pro_overlapped"] = True
+            metadata["is_pro"] = metadata["pro_status"] == "valid" and not metadata["pro_overlapped"]
 
     metadata = metadata or default_metadata
     db.set_pro_metadata(metadata)
 
     if metadata["is_pro"]:
-        logger.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated pro plugins...")
+        logger.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated Pro plugins...")
 
         if not db_metadata["is_pro"]:
             clean_pro_plugins(db)
@@ -158,33 +160,33 @@ try:
         resp = get(f"{API_ENDPOINT}/pro", headers=headers, json=data, timeout=5, allow_redirects=True)
 
         if resp.status_code == 403:
-            db.set_pro_metadata(default_metadata)
-            clean_pro_plugins(db)
             logger.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
-            status = 2
-            sys_exit(status)
-
-        if resp.headers.get("Content-Type", "") != "application/octet-stream":
+            error = True
+            metadata = default_metadata
+            db.set_pro_metadata(metadata)
+            clean_pro_plugins(db)
+        elif resp.headers.get("Content-Type", "") != "application/octet-stream":
             logger.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}/pro")
             status = 2
             sys_exit(status)
-    else:
+
+    if not metadata["is_pro"]:
         if metadata["pro_overlapped"]:
             message = f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']}"
         elif pro_license_key:
-            message = f"Your BunkerWeb Pro license {STATUS_MESSAGES.get(metadata['pro_status'], 'is not valid')}"
+            message = "Your BunkerWeb Pro license " + (STATUS_MESSAGES.get(metadata["pro_status"], "is not valid or has expired") if not error else "is not valid or has expired")
         else:
             logger.info("If you wish to purchase a BunkerWeb Pro license, please visit https://panel.bunkerweb.io/")
             message = "No BunkerWeb Pro license key provided"
-        logger.warning(f"{message}, only checking if there are new or updated info about pro plugins...")
+        logger.warning(f"{message}, only checking if there are new or updated preview versions of Pro plugins...")
 
         if db_metadata["pro_status"] == "valid":
             clean_pro_plugins(db)
 
-        resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", headers=headers, timeout=5, allow_redirects=True)
+        resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=5, allow_redirects=True)
 
         if resp.status_code == 404:
-            logger.error(f"Couldn't find pro plugins for BunkerWeb version {data['version']} at {PREVIEW_ENDPOINT}/v{data['version']}.zip")
+            logger.error(f"Couldn't find Pro plugins for BunkerWeb version {data['version']} at {PREVIEW_ENDPOINT}/v{data['version']}.zip")
             status = 2
             sys_exit(status)
         elif resp.headers.get("Content-Type", "") != "application/zip":
@@ -208,7 +210,7 @@ try:
     try:
         for plugin_dir in glob(temp_dir.joinpath("*").as_posix()):
             try:
-                if install_plugin(plugin_dir, db):
+                if install_plugin(plugin_dir, db, not metadata["is_pro"]):
                     plugin_nbr += 1
             except FileExistsError:
                 logger.warning(f"Skipping installation of pro plugin {basename(plugin_dir)} (already installed)")
@@ -218,7 +220,7 @@ try:
         sys_exit(status)
 
     if not plugin_nbr:
-        logger.info("All pro plugins are up to date")
+        logger.info("All Pro plugins are up to date")
         sys_exit(0)
 
     pro_plugins = []
@@ -264,7 +266,7 @@ try:
         err = db.update_external_plugins(pro_plugins, _type="pro")
 
     if err:
-        logger.error(f"Couldn't update pro plugins to database: {err}")
+        logger.error(f"Couldn't update Pro plugins to database: {err}")
 
     status = 1
     logger.info("🚀 Pro plugins downloaded and installed successfully!")
