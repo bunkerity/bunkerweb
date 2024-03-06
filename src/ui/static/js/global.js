@@ -373,35 +373,36 @@ class Banner {
       }
     }
 
-    //test with data
-    // sessionStorage.setItem("bannerNews", JSON.stringify([{"content" : `    <p class="dark:brightness-125 mb-0 text-center text-xs xs:text-sm text-white">
-    // TEST
-    //<a class="dark:brightness-125 font-medium underline text-gray-100 hover:no-underline"
-    //  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui">TEST</a>
-    //</p>`}]));
+    //[
+    //   {
+    //  "content": "<p  class='dark:brightness-125 mb-0 text-center text-xs xs:text-sm text-white' style='color:white'> Need premium support ? <a class='dark:brightness-125 font-medium underline text-gray-100 hover:no-underline ml-1' style='text-decoration:underline; color :  white;' href='https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc'>Check BunkerWeb Panel</a></p>"
+    // }
+    //]
     // Try to get data from api
-    if (sessionStorage.getItem("bannerNews") !== null)
+    if (sessionStorage.getItem("bannerNews") !== null) {
+      console.log(JSON.parse(sessionStorage.getItem("bannerNews")));
       return this.updateBanner(
         JSON.parse(sessionStorage.getItem("bannerNews")),
       );
-    fetch("https://www.bunkerweb.io/api/bw-ui-news")
+    }
+    fetch("https://bunkerweb.io/api/bw-ui-news")
       .then((res) => {
         return res.json();
       })
       .then((res) => {
-        return this.updateBanner(res.data);
+        sessionStorage.setItem("bannerNews", JSON.stringify(res.data[0].data));
+        // Refetch after one hour
+        sessionStorage.setItem(
+          "bannerRefetch",
+          Math.round(new Date().getTime() / 1000) + 3600,
+        );
+        return this.updateBanner(res.data[0].data);
       })
       .catch((e) => {});
   }
 
   updateBanner(bannerNews) {
     // store for next time
-    sessionStorage.setItem("bannerNews", JSON.stringify(bannerNews));
-    // Refetch after one hour
-    sessionStorage.setItem(
-      "bannerRefetch",
-      Math.round(new Date().getTime() / 1000) + 3600,
-    );
     const bannerItems = this.bannerEl.querySelectorAll('[role="listitem"]');
     const maxItems = Math.min(bannerNews.length, bannerItems.length);
 
