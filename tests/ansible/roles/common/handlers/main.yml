@@ -1,8 +1,0 @@
----
-- name: Restart networking
-  service:
-    name: networking
-    state: restarted
-
-- name: Reload sysctl
-  shell: sysctl -p -f /etc/sysctl.d/70-disable-ipv6.conf

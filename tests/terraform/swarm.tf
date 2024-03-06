@@ -39,6 +39,7 @@ resource "scaleway_instance_server" "instances" {
 resource "local_sensitive_file" "ansible_inventory" {
   content = templatefile("templates/swarm_inventory.tftpl", {
     public_ips = var.swarm_ips
+    local_ips = scaleway_instance_server.instances.*.private_ip
   })
   filename = "/tmp/swarm_inventory"
 }

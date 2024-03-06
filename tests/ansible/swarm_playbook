@@ -15,7 +15,6 @@
   roles:
     - common
     - docker
-    - private_net
 
 - hosts: all
   name: Setup swarm

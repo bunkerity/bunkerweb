@@ -29,6 +29,15 @@
 #     executable: pip3
 #     extra_args:
 
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].local_ip }} {{item}}"
+    state: present
+  when: hostvars[item].local_ip is defined
+  with_items: "{{ groups.all }}"
+
 - name: Init Docker Swarm
   community.docker.docker_swarm:
     advertise_addr: "{{ local_ip }}"
