@@ -39,17 +39,17 @@ class SwarmTest(Test):
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb:.*$",
-                "192.168.42.100:5000/bunkerweb-tests:latest",
+                "manager:5000/bunkerweb-tests:latest",
             )
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-autoconf:.*$",
-                "192.168.42.100:5000/autoconf-tests:latest",
+                "manager:5000/autoconf-tests:latest",
             )
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-scheduler:.*$",
-                "192.168.42.100:5000/scheduler-tests:latest",
+                "manager:5000/scheduler-tests:latest",
             )
             # Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
             proc = run(
