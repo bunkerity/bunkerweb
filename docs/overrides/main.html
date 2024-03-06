@@ -87,15 +87,16 @@
       function runBanner() {
         // Try to get dynamic content
         // Else keep static ones
-        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        fetch("https://bunkerweb.io/api/bw-ui-news")
         .then((res) => {
           return res.json();
         })
         .then((res) => {
-          defaultContent = res.data;
+          defaultContent = res.data[0].data;
           startBannerLoop();
         })
-        .catch((e) => {          startBannerLoop();
+        .catch((e) => {
+          startBannerLoop();
 });
       }
 
