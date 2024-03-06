@@ -21,7 +21,8 @@ resource "scaleway_instance_server" "instance" {
   depends_on = [scaleway_account_ssh_key.ssh_key]
   name = "cicd_bw_autoconf"
   type = "DEV1-M"
-  image = "debian_bullseye"
+  image = "debian_bookworm"
+  routed_ip_enabled = true
   ip_id = var.autoconf_ip_id
 }
 
