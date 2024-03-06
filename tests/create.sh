@@ -23,7 +23,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 # terraform apply
-terraform apply -auto-approve
+terraform apply -auto-approve -input=false
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
 	echo "terraform apply failed"
