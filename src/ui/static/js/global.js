@@ -385,7 +385,7 @@ class Banner {
         JSON.parse(sessionStorage.getItem("bannerNews")),
       );
     }
-    fetch("https://bunkerweb.io/api/bw-ui-news")
+    fetch("https://www.bunkerweb.io/api/bw-ui-news")
       .then((res) => {
         return res.json();
       })
