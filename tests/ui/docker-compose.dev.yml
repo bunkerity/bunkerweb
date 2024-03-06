@@ -19,6 +19,7 @@ services:
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       DATASTORE_MEMORY_SIZE: "384m"
+      BAD_BEHAVIOR_THRESHOLD: "30"
       UI_HOST: "http://bw-ui:7000"
     labels:
       - "bunkerweb.INSTANCE=yes"

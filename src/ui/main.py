@@ -1427,12 +1427,13 @@ def custom_plugin(plugin: str):
     try:
         # Try to get the custom plugin custom function and call it
         method = getattr(actions, plugin)
-        if request.args:
-            res = method(app=app, args=request.args.to_dict())
-        elif request.is_json:
-            res = method(app=app, args=request.json)
-        else:
-            res = method(app=app)
+        queries = request.args.to_dict()
+        try:
+            data = request.json or False
+        except:
+            data = {}
+
+        res = method(app=app, args=queries, data=data)
     except AttributeError:
         message = f"The plugin does not have a method, see logs for more details"
     except:
