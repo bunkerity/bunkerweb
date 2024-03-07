@@ -714,6 +714,8 @@ class Database:
                     if missing_ids:
                         # Remove services that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_ids)).delete()
+                        session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete()
+                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
 
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
                 db_drafts = {service.id for service in db_services if service.is_draft}
@@ -1198,6 +1200,17 @@ class Database:
                     changes = True
                     # Remove plugins that are no longer in the list
                     session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
+                    session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
+
+                    for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_ids)).all():
+                        session.query(Jobs_cache).filter(Jobs_cache.job_name == plugin_job.name).delete()
+                        session.query(Jobs).filter(Jobs.name == plugin_job.name).delete()
+
+                    for plugin_setting in session.query(Settings).with_entities(Settings.id).filter(Settings.plugin_id.in_(missing_ids)).all():
+                        session.query(Selects).filter(Selects.setting_id == plugin_setting.id).delete()
+                        session.query(Services_settings).filter(Services_settings.setting_id == plugin_setting.id).delete()
+                        session.query(Global_values).filter(Global_values.setting_id == plugin_setting.id).delete()
+                        session.query(Settings).filter(Settings.id == plugin_setting.id).delete()
 
             for plugin in plugins:
                 settings = plugin.pop("settings", {})
