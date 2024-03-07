@@ -124,7 +124,9 @@ try:
             else:
                 logger.info(f"No change for certificate {cert_path}")
         elif not cert_path or not key_path:
-            logger.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY (or CUSTOM_SSL_CERT_DATA and CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates, clearing cache ...")
+            logger.warning(
+                "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY (or CUSTOM_SSL_CERT_DATA and CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates, clearing cache ..."
+            )
             cert_cache_path = Path(
                 sep,
                 "var",
@@ -188,7 +190,9 @@ try:
                         f"No change for certificate {cert_path}",
                     )
             elif not cert_path or not key_path:
-                logger.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY (or CUSTOM_SSL_CERT_DATA and CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates, clearing cache ...")
+                logger.warning(
+                    "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY (or CUSTOM_SSL_CERT_DATA and CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates, clearing cache ..."
+                )
                 cert_cache_path = Path(
                     sep,
                     "var",

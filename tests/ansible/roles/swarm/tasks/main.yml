@@ -23,7 +23,7 @@
 - name: Add IP address of all hosts to all hosts
   lineinfile:
     dest: /etc/hosts
-    regexp: '.*{{ item }}$'
+    regexp: ".*{{ item }}$"
     line: "{{ hostvars[item].local_ip }} {{item}}"
     state: present
   when: hostvars[item].local_ip is defined

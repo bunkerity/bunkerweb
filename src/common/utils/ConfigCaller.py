@@ -16,7 +16,9 @@ class ConfigCaller:
     def __init__(self):
         self.__logger = setup_logger("Config", "INFO")
         self._settings = loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
-        for plugin in glob(join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")) + glob(join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")):
+        for plugin in glob(join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")) + glob(
+            join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")
+        ):
             try:
                 self._settings.update(loads(Path(plugin).read_text(encoding="utf-8"))["settings"])
             except KeyError:
@@ -36,7 +38,9 @@ class ConfigCaller:
             return self._settings[setting]["context"] == context
         elif match(r"^.+_\d+$", setting):
             multiple_setting = "_".join(setting.split("_")[:-1])
-            return self._is_setting(multiple_setting) and self._settings[multiple_setting]["context"] == context and "multiple" in self._settings[multiple_setting]
+            return (
+                self._is_setting(multiple_setting) and self._settings[multiple_setting]["context"] == context and "multiple" in self._settings[multiple_setting]
+            )
         return False
 
     def _full_env(self, env_instances: Dict[str, Any], env_services: Dict[str, Any]) -> Dict[str, Any]:

@@ -89,7 +89,9 @@ class JobScheduler(ApiCaller):
     def __get_jobs(self):
         jobs = {}
         for plugin_file in (
-            glob(join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")) + glob(join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")) + glob(join(sep, "etc", "bunkerweb", "pro", "plugins", "*", "plugin.json"))
+            glob(join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json"))
+            + glob(join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json"))
+            + glob(join(sep, "etc", "bunkerweb", "pro", "plugins", "*", "plugin.json"))
         ):  # core plugins  # external plugins # pro plugins
             plugin_name = basename(dirname(plugin_file))
             jobs[plugin_name] = []
@@ -102,20 +104,28 @@ class JobScheduler(ApiCaller):
 
                 for x, job in enumerate(deepcopy(plugin_jobs)):
                     if not all(key in job.keys() for key in ("name", "file", "every", "reload")):
-                        self.__logger.warning(f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job")
+                        self.__logger.warning(
+                            f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job"
+                        )
                         plugin_jobs.pop(x)
                         continue
 
                     if not match(r"^[\w.-]{1,128}$", job["name"]):
-                        self.__logger.warning(f"Invalid name for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128)), ignoring job")
+                        self.__logger.warning(
+                            f"Invalid name for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128)), ignoring job"
+                        )
                         plugin_jobs.pop(x)
                         continue
                     elif not match(r"^[\w./-]{1,256}$", job["file"]):
-                        self.__logger.warning(f"Invalid file for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256)), ignoring job")
+                        self.__logger.warning(
+                            f"Invalid file for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256)), ignoring job"
+                        )
                         plugin_jobs.pop(x)
                         continue
                     elif job["every"] not in ("once", "minute", "hour", "day", "week"):
-                        self.__logger.warning(f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job")
+                        self.__logger.warning(
+                            f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job"
+                        )
                         plugin_jobs.pop(x)
                         continue
                     elif job["reload"] is not True and job["reload"] is not False:
@@ -152,7 +162,9 @@ class JobScheduler(ApiCaller):
             if reload:
                 self.__logger.info("Successfully reloaded nginx")
             else:
-                self.__logger.error(f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}")
+                self.__logger.error(
+                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}"
+                )
         else:
             self.__logger.info("Reloading nginx ...")
             reload = self.send_to_apis("POST", "/reload")

@@ -140,7 +140,9 @@ class CLI(ApiCaller):
                         self.__use_redis = False
 
                     if self.__use_redis:
-                        self.__logger.info(f"Connected to redis sentinel cluster, getting master with the following parameters:\n{sentinel_master=}\n{redis_db=}\n{username=}\n{password=}")
+                        self.__logger.info(
+                            f"Connected to redis sentinel cluster, getting master with the following parameters:\n{sentinel_master=}\n{redis_db=}\n{username=}\n{password=}"
+                        )
                         self.__redis = sentinel.master_for(
                             sentinel_master,
                             db=redis_db,
@@ -148,7 +150,9 @@ class CLI(ApiCaller):
                             password=password,
                         )
                 else:
-                    self.__logger.info(f"Connecting to redis with the following parameters:\n{redis_host=}\n{redis_port=}\n{redis_db=}\n{username=}\n{password=}\n{redis_timeout=}\nmax_connections={redis_keepalive_pool}\n{redis_ssl=}")
+                    self.__logger.info(
+                        f"Connecting to redis with the following parameters:\n{redis_host=}\n{redis_port=}\n{redis_db=}\n{username=}\n{password=}\n{redis_timeout=}\nmax_connections={redis_keepalive_pool}\n{redis_ssl=}"
+                    )
                     self.__redis = StrictRedis(
                         host=redis_host,
                         port=redis_port,

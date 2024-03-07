@@ -64,16 +64,16 @@ try:
 
     log_info("Check only one plugin is visible ...")
 
-    is_general_plugin_hidden = DRIVER.execute_script(f"""return document.querySelector('[data-plugin-item="general"]').classList.contains('hidden')""")
+    is_general_plugin_hidden = DRIVER.execute_script("""return document.querySelector('[data-plugin-item="general"]').classList.contains('hidden')""")
 
     if is_general_plugin_hidden:
-        log_error(f"Plugin general should be visible.")
+        log_error("Plugin general should be visible.")
         exit(1)
 
-    is_antibot_plugin_hidden = DRIVER.execute_script(f"""return document.querySelector('[data-plugin-item="antibot"]').classList.contains('hidden')""")
+    is_antibot_plugin_hidden = DRIVER.execute_script("""return document.querySelector('[data-plugin-item="antibot"]').classList.contains('hidden')""")
 
     if not is_antibot_plugin_hidden:
-        log_error(f"Plugin antibot should not be visible.")
+        log_error("Plugin antibot should not be visible.")
         exit(1)
 
     log_info("Only one plugin visible checked, trying keyword no match ...")
@@ -85,7 +85,7 @@ try:
     # Check that the no matching element is shown and other card hide
     is_no_match = DRIVER.execute_script('return document.querySelector("[data-services-nomatch]").classList.contains("hidden")')
     if is_no_match:
-        log_error(f"Filter keyword shouldn't match something.")
+        log_error("Filter keyword shouldn't match something.")
         exit(1)
 
     # Reset
@@ -97,16 +97,16 @@ try:
     input_keyword.send_keys("server type")
 
     # Check that the matching element is shown and other card hide
-    is_server_type_hidden = DRIVER.execute_script(f"""return document.querySelector('#form-edit-services-server-type').classList.contains('hidden')""")
+    is_server_type_hidden = DRIVER.execute_script("return document.querySelector('#form-edit-services-server-type').classList.contains('hidden')")
 
     if is_server_type_hidden:
-        log_error(f"Setting server type should be match.")
+        log_error("Setting server type should be match.")
         exit(1)
 
-    is_server_name_hidden = DRIVER.execute_script(f"""return document.querySelector('#form-edit-services-server-name').classList.contains('hidden')""")
+    is_server_name_hidden = DRIVER.execute_script("return document.querySelector('#form-edit-services-server-name').classList.contains('hidden')")
 
     if not is_server_name_hidden:
-        log_error(f"Setting server name should not be match.")
+        log_error("Setting server name should not be match.")
         exit(1)
 
     # Reset
@@ -405,7 +405,7 @@ try:
     # Check that the no matching element is shown and other card hide
     is_no_match = DRIVER.execute_script('return document.querySelector("[data-services-nomatch-card]").classList.contains("hidden")')
     if is_no_match:
-        log_error(f"Filter keyword shouldn't match something.")
+        log_error("Filter keyword shouldn't match something.")
         exit(1)
 
     # Reset
@@ -421,12 +421,16 @@ try:
     ]
 
     for item in select_filters:
-        DRIVER.execute_script(f"""return document.querySelector('[data-services-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
+        DRIVER.execute_script(
+            f"""return document.querySelector('[data-services-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()"""
+        )
 
     log_info("Filters working as expected, trying to delete app3.example.com ...")
 
     try:
-        delete_card_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-services-action='delete' and @data-services-name='app3.example.com']", error=True)
+        delete_card_button = safe_get_element(
+            DRIVER, By.XPATH, "//button[@data-services-action='delete' and @data-services-name='app3.example.com']", error=True
+        )
         assert isinstance(delete_card_button, WebElement), "Delete button is not a WebElement"
         assert_button_click(DRIVER, delete_card_button)
 

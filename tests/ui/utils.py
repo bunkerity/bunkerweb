@@ -10,7 +10,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
 
 
-def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[WebDriverWait] = None, multiple: bool = False, error: bool = False) -> Union[WebElement, List[WebElement]]:
+def safe_get_element(
+    driver, by: str, selector: str, *, driver_wait: Optional[WebDriverWait] = None, multiple: bool = False, error: bool = False
+) -> Union[WebElement, List[WebElement]]:
     try:
         # Retrieve by js script
         if by == "js":
@@ -35,7 +37,9 @@ def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[We
             return el
 
         # Retrieve with XPATH
-        return (driver_wait or WebDriverWait(driver, 4)).until(EC.presence_of_element_located((by, selector)) if not multiple else EC.presence_of_all_elements_located((by, selector)))
+        return (driver_wait or WebDriverWait(driver, 4)).until(
+            EC.presence_of_element_located((by, selector)) if not multiple else EC.presence_of_all_elements_located((by, selector))
+        )
     except TimeoutException as e:
 
         if error:
@@ -115,7 +119,9 @@ def access_page(driver, button: Union[bool, str, WebElement], name: str, message
         if not isinstance(button, bool) and not clicked:
             clicked = assert_button_click(driver, button)
 
-        title: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, "/html/body/div[3]/header/div/nav/h6", driver_wait=WebDriverWait(driver, 45))
+        title: Union[WebElement, List[WebElement]] = safe_get_element(
+            driver, By.XPATH, "/html/body/div[3]/header/div/nav/h6", driver_wait=WebDriverWait(driver, 45)
+        )
         assert isinstance(title, WebElement), "Title is not a WebElement"
 
         if title.text != name.title():

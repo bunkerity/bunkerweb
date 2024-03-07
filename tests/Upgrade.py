@@ -324,7 +324,12 @@ if distro == "ubuntu":
         print("❌ /usr/bin/bwcli found.")
     # Checking Removing test
     try:
-        if pathlib.Path("/usr/share/bunkerweb").is_dir() or pathlib.Path("/var/tmp/bunkerweb").is_dir() or pathlib.Path("/var/cache/bunkerweb").is_dir() or pathlib.Path("/usr/bin/bwcli").is_file():
+        if (
+            pathlib.Path("/usr/share/bunkerweb").is_dir()
+            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
+            or pathlib.Path("/var/cache/bunkerweb").is_dir()
+            or pathlib.Path("/usr/bin/bwcli").is_file()
+        ):
             test_results["Removing test"] = "KO"
         else:
             test_results["Removing test"] = "OK"
@@ -839,7 +844,12 @@ elif distro == "debian":
         print("❌ /usr/bin/bwcli found.")
     # Checking Removing test
     try:
-        if pathlib.Path("/usr/share/bunkerweb").is_dir() or pathlib.Path("/var/tmp/bunkerweb").is_dir() or pathlib.Path("/var/cache/bunkerweb").is_dir() or pathlib.Path("/usr/bin/bwcli").is_file():
+        if (
+            pathlib.Path("/usr/share/bunkerweb").is_dir()
+            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
+            or pathlib.Path("/var/cache/bunkerweb").is_dir()
+            or pathlib.Path("/usr/bin/bwcli").is_file()
+        ):
             test_results["Removing test"] = "KO"
         else:
             test_results["Removing test"] = "OK"

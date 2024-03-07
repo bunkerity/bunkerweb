@@ -45,7 +45,9 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
                     ),
                 }
             )
-            logger.info(f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}")
+            logger.info(
+                f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
+            )
         else:
             tmp_config[split[0]] = split[1]
 
@@ -175,7 +177,9 @@ if __name__ == "__main__":
                             ),
                         }
                     )
-                    logger.info(f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}")
+                    logger.info(
+                        f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
+                    )
 
             db = Database(logger, config_files.get("DATABASE_URI", None), pool=False)
         else:
@@ -206,7 +210,9 @@ if __name__ == "__main__":
                                 ),
                             }
                         )
-                        logger.info(f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}")
+                        logger.info(
+                            f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
+                        )
                     else:
                         tmp_config[split[0]] = split[1]
 

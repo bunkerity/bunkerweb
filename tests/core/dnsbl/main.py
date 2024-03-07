@@ -41,7 +41,9 @@ try:
     retries = 0
 
     while not passed and retries < 10:
-        status_code = get("http://www.example.com", headers={"Host": "www.example.com"} | ({"X-Forwarded-For": getenv("IP_ADDRESS", "")} if TEST_TYPE == "linux" else {})).status_code
+        status_code = get(
+            "http://www.example.com", headers={"Host": "www.example.com"} | ({"X-Forwarded-For": getenv("IP_ADDRESS", "")} if TEST_TYPE == "linux" else {})
+        ).status_code
 
         if status_code == 403:
             if not use_dnsbl:

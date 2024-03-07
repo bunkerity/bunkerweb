@@ -281,7 +281,10 @@ class Configurator:
                 return (False, f"missing keys for setting {setting} in plugin {plugin['id']}, must have context, default, help, id, label, regex and type")
 
             if not self.__setting_id_rx.match(setting):
-                return (False, f"Invalid setting name for setting {setting} in plugin {plugin['id']} (Can only contain capital letters and underscores (min 1 characters and max 256))")
+                return (
+                    False,
+                    f"Invalid setting name for setting {setting} in plugin {plugin['id']} (Can only contain capital letters and underscores (min 1 characters and max 256))",
+                )
             elif data["context"] not in ("global", "multisite"):
                 return (False, f"Invalid context for setting {setting} in plugin {plugin['id']} (Must be global or multisite)")
             elif len(data["default"]) > 4096:
@@ -297,7 +300,10 @@ class Configurator:
 
             if "multiple" in data:
                 if not self.__name_rx.match(data["multiple"]):
-                    return (False, f"Invalid multiple for setting {setting} in plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128))")
+                    return (
+                        False,
+                        f"Invalid multiple for setting {setting} in plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128))",
+                    )
 
             for select in data.get("select", []):
                 if len(select) > 256:
@@ -310,7 +316,10 @@ class Configurator:
             if not self.__name_rx.match(job["name"]):
                 return (False, f"Invalid name for job {job['name']} in plugin {plugin['id']}")
             elif not self.__job_file_rx.match(job["file"]):
-                return (False, f"Invalid file for job {job['name']} in plugin {plugin['id']} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256))")
+                return (
+                    False,
+                    f"Invalid file for job {job['name']} in plugin {plugin['id']} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256))",
+                )
             elif job["every"] not in ("once", "minute", "hour", "day", "week"):
                 return (False, f"Invalid every for job {job['name']} in plugin {plugin['id']} (Must be once, minute, hour, day or week)")
             elif job["reload"] is not True and job["reload"] is not False:

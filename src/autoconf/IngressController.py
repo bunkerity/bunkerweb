@@ -19,7 +19,11 @@ class IngressController(Controller):
         self.__networkingv1 = client.NetworkingV1Api()
 
     def _get_controller_instances(self) -> list:
-        return [pod for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items if (pod.metadata.annotations and "bunkerweb.io/INSTANCE" in pod.metadata.annotations)]
+        return [
+            pod
+            for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items
+            if (pod.metadata.annotations and "bunkerweb.io/INSTANCE" in pod.metadata.annotations)
+        ]
 
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {}

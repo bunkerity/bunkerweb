@@ -29,7 +29,9 @@ if __name__ == "__main__":
         # Parse arguments
         parser = ArgumentParser(description="BunkerWeb config generator")
         parser.add_argument("--settings", default=join(sep, "usr", "share", "bunkerweb", "settings.json"), type=str, help="file containing the main settings")
-        parser.add_argument("--templates", default=join(sep, "usr", "share", "bunkerweb", "confs"), type=str, help="directory containing the main template files")
+        parser.add_argument(
+            "--templates", default=join(sep, "usr", "share", "bunkerweb", "confs"), type=str, help="directory containing the main template files"
+        )
         parser.add_argument("--core", default=join(sep, "usr", "share", "bunkerweb", "core"), type=str, help="directory containing the core plugins")
         parser.add_argument("--plugins", default=join(sep, "etc", "bunkerweb", "plugins"), type=str, help="directory containing the external plugins")
         parser.add_argument("--pro-plugins", default=join(sep, "etc", "bunkerweb", "pro", "plugins"), type=str, help="directory containing the pro plugins")
@@ -106,7 +108,9 @@ if __name__ == "__main__":
 
             # Compute the config
             logger.info("Computing config ...")
-            config: Dict[str, Any] = Configurator(str(settings_path), str(core_path), str(plugins_path), str(pro_plugins_path), str(variables_path), logger).get_config()
+            config: Dict[str, Any] = Configurator(
+                str(settings_path), str(core_path), str(plugins_path), str(pro_plugins_path), str(variables_path), logger
+            ).get_config()
         else:
             if join(sep, "usr", "share", "bunkerweb", "db") not in sys_path:
                 sys_path.append(join(sep, "usr", "share", "bunkerweb", "db"))
