@@ -30,6 +30,7 @@ from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 
+HEALTHY = False
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 INTEGRATION = "Linux"
@@ -518,7 +519,6 @@ if __name__ == "__main__":
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
-            Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").write_text("ok", encoding="utf-8")
             while RUN and not NEED_RELOAD:
                 SCHEDULER.run_pending()
                 sleep(1)
@@ -586,6 +586,10 @@ if __name__ == "__main__":
                     CONFIGS_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
+
+                if not NEED_RELOAD and not HEALTHY:
+                    Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").write_text("ok", encoding="utf-8")
+                    HEALTHY = True
 
             FIRST_RUN = False
 
