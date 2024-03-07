@@ -167,7 +167,9 @@ elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
             app.logger.error("The admin username is too long. It must be less than 256 characters.")
             stop(1)
         elif not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "changeme")):
-            app.logger.error("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
+            app.logger.error(
+                "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
+            )
             stop(1)
 
     user_name = getenv("ADMIN_USERNAME", "admin")
@@ -231,7 +233,9 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
                     if listdir(service_custom_conf):
                         move(service_custom_conf, service_custom_conf.replace(f"{sep}{args[1].split(' ')[0]}", f"{sep}{args[2].split(' ')[0]}"))
                         moved = True
-            operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft) and not moved, is_draft=is_draft)
+            operation, error = app.config["CONFIG"].edit_service(
+                args[1], args[0], check_changes=(was_draft != is_draft or not is_draft) and not moved, is_draft=is_draft
+            )
         elif operation == "delete":
             for service_custom_conf in glob(join(sep, "etc", "bunkerweb", "configs", "*", args[2].split(" ")[0])):
                 if listdir(service_custom_conf):
@@ -255,7 +259,9 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
                 ret = db.checked_changes(changes, value=True)
                 if ret:
                     app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
-                    app.config["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
+                    app.config["TO_FLASH"].append(
+                        {"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"}
+                    )
     if method == "global_config":
         operation = app.config["CONFIG"].edit_global_conf(args[0])
     elif method == "plugins":
@@ -393,11 +399,22 @@ def before_request():
         passed = True
 
         # Go back from totp to login
-        if not session.get("totp_validated", False) and current_user.is_two_factor_enabled and "/totp" not in request.path and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")) and request.path.endswith("/login"):
+        if (
+            not session.get("totp_validated", False)
+            and current_user.is_two_factor_enabled
+            and "/totp" not in request.path
+            and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts"))
+            and request.path.endswith("/login")
+        ):
             return redirect(url_for("login", next=request.path))
 
         # Case not login page, keep on 2FA before any other access
-        if not session.get("totp_validated", False) and current_user.is_two_factor_enabled and "/totp" not in request.path and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
+        if (
+            not session.get("totp_validated", False)
+            and current_user.is_two_factor_enabled
+            and "/totp" not in request.path
+            and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts"))
+        ):
             return redirect(url_for("totp", next=request.form.get("next")))
         elif session.get("ip") != request.remote_addr:
             passed = False
@@ -448,7 +465,9 @@ def setup():
         is_request_form("setup")
 
         if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check", "server_name", "ui_host", "ui_url")):
-            return redirect_flash_error("Missing either admin_username, admin_password, admin_password_check, server_name, ui_host, ui_url or auto_lets_encrypt parameter.", "setup")
+            return redirect_flash_error(
+                "Missing either admin_username, admin_password, admin_password_check, server_name, ui_host, ui_url or auto_lets_encrypt parameter.", "setup"
+            )
 
         if len(request.form["admin_username"]) > 256:
             return redirect_flash_error("The admin username is too long. It must be less than 256 characters.", "setup")
@@ -457,7 +476,10 @@ def setup():
             return redirect_flash_error("The passwords do not match.", "setup")
 
         if not USER_PASSWORD_RX.match(request.form["admin_password"]):
-            return redirect_flash_error("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "setup")
+            return redirect_flash_error(
+                "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
+                "setup",
+            )
 
         server_names = db_config["SERVER_NAME"].split(" ")
         if request.form["server_name"] in server_names:
@@ -631,7 +653,8 @@ def account():
 
             if not USER_PASSWORD_RX.match(request.form["admin_password"]):
                 return redirect_flash_error(
-                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). (password)", "account"
+                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). (password)",
+                    "account",
                 )
 
             password = request.form["admin_password"]
@@ -652,12 +675,18 @@ def account():
             app.config["CURRENT_TOTP_TOKEN"] = None
 
         user = User(username, password, is_two_factor_enabled=is_two_factor_enabled, secret_token=secret_token, method=current_user.method)
-        ret = db.update_ui_user(username, user.password_hash, is_two_factor_enabled, secret_token, current_user.method if request.form["operation"] == "totp" else "ui")
+        ret = db.update_ui_user(
+            username, user.password_hash, is_two_factor_enabled, secret_token, current_user.method if request.form["operation"] == "totp" else "ui"
+        )
         if ret:
             return redirect_flash_error(f"Couldn't update the admin user in the database: {ret}", "account", False, "error")
 
         flash(
-            f"The {request.form['operation']} has been successfully updated." if request.form["operation"] != "totp" else f"The two-factor authentication was successfully {'disabled' if current_user.is_two_factor_enabled else 'enabled'}.",
+            (
+                f"The {request.form['operation']} has been successfully updated."
+                if request.form["operation"] != "totp"
+                else f"The two-factor authentication was successfully {'disabled' if current_user.is_two_factor_enabled else 'enabled'}."
+            ),
         )
 
         return redirect(url_for("account" if request.form["operation"] == "totp" else "login"))
@@ -763,10 +792,20 @@ def services():
                 elif value == "off":
                     value = "no"
 
-                if variable in variables and variable != "SERVER_NAME" and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, None):
+                if (
+                    variable in variables
+                    and variable != "SERVER_NAME"
+                    and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, None)
+                ):
                     del variables[variable]
 
-            if was_draft == is_draft and request.form["operation"] == "edit" and len(variables) == 1 and "SERVER_NAME" in variables and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", ""):
+            if (
+                was_draft == is_draft
+                and request.form["operation"] == "edit"
+                and len(variables) == 1
+                and "SERVER_NAME" in variables
+                and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", "")
+            ):
                 return redirect_flash_error("The service was not edited because no values were changed.", "services", True)
 
             elif request.form["operation"] == "new" and not variables:
@@ -1298,7 +1337,7 @@ def upload_plugin():
 def custom_plugin(plugin: str):
     message = ""
     if not plugin_id_rx.match(plugin):
-        return error_message(f"Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)"), 400
+        return error_message("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)"), 400
 
     # Case we ware looking for a plugin template
     # We need to check if a page exists, and if it does, we need to check if the plugin is activated and metrics are on
@@ -1308,7 +1347,7 @@ def custom_plugin(plugin: str):
         page = db.get_plugin_template(plugin)
 
         if not page:
-            return error_message(f"The plugin does not have a template"), 404
+            return error_message("The plugin does not have a template"), 404
 
         # Case template, prepare data
         plugins = app.config["CONFIG"].get_plugins()
@@ -1327,7 +1366,7 @@ def custom_plugin(plugin: str):
 
         # Case no plugin found
         if plugin_id is None:
-            return error_message(f"Plugin not found"), 404
+            return error_message("Plugin not found"), 404
 
         config = app.config["CONFIG"].get_config(methods=False)
 
@@ -1409,7 +1448,7 @@ def custom_plugin(plugin: str):
     module = db.get_plugin_actions(plugin)
 
     if module is None:
-        return error_message(f"The actions.py file for the plugin does not exist"), 404
+        return error_message("The actions.py file for the plugin does not exist"), 404
 
     try:
         # Try to import the custom plugin
@@ -1420,7 +1459,7 @@ def custom_plugin(plugin: str):
             loader = SourceFileLoader("actions", temp.name)
             actions = loader.load_module()
     except:
-        return error_message(f"An error occurred while importing the plugin, see logs for more details"), 500
+        return error_message("An error occurred while importing the plugin, see logs for more details"), 500
 
     res = None
 
@@ -1435,9 +1474,9 @@ def custom_plugin(plugin: str):
 
         res = method(app=app, args=queries, data=data)
     except AttributeError:
-        message = f"The plugin does not have a method, see logs for more details"
+        message = "The plugin does not have a method, see logs for more details"
     except:
-        message = f"An error occurred while executing the plugin, see logs for more details"
+        message = "An error occurred while executing the plugin, see logs for more details"
     finally:
         if sbin_nginx_path.is_file():
             # Remove the custom plugin from the shared library
@@ -1533,7 +1572,9 @@ def logs_linux():
     if nginx_access_file.is_file():
         with open(nginx_access_file, encoding="utf-8") as f:
             for line in f.readlines()[int(last_update.split(".")[1]) if last_update else 0 :]:  # noqa: E203
-                logs_access.append(f"{datetime.strptime(line[line.find('[') + 1: line.find(']')], '%d/%b/%Y:%H:%M:%S %z').replace(tzinfo=timezone.utc).timestamp()} {line}")
+                logs_access.append(
+                    f"{datetime.strptime(line[line.find('[') + 1: line.find(']')], '%d/%b/%Y:%H:%M:%S %z').replace(tzinfo=timezone.utc).timestamp()} {line}"
+                )
 
     raw_logs = logs_error + logs_access
 
@@ -1584,7 +1625,11 @@ def logs_linux():
     return jsonify(
         {
             "logs": logs,
-            "last_update": f"{count_error_logs + int(last_update.split('.')[0])}.{len(logs_access) + int(last_update.split('.')[1])}" if last_update else f"{count_error_logs}.{len(logs_access)}",
+            "last_update": (
+                f"{count_error_logs + int(last_update.split('.')[0])}.{len(logs_access) + int(last_update.split('.')[1])}"
+                if last_update
+                else f"{count_error_logs}.{len(logs_access)}"
+            ),
         }
     )
 

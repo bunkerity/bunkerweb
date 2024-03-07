@@ -81,10 +81,14 @@ def install_plugin(plugin_dir: str, db, preview: bool = True) -> bool:
                 break
 
         if old_version == metadata["version"]:
-            logger.warning(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']} already installed)")
+            logger.warning(
+                f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']} already installed)"
+            )
             return False
 
-        logger.warning(f"{'Preview version of ' if preview else ''}Pro plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it...")
+        logger.warning(
+            f"{'Preview version of ' if preview else ''}Pro plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it..."
+        )
         rmtree(PRO_PLUGINS_DIR.joinpath(metadata["id"]), ignore_errors=True)
 
     # Copy the plugin
@@ -180,9 +184,13 @@ try:
 
     if not metadata["is_pro"]:
         if metadata["pro_overlapped"]:
-            message = f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']}"
+            message = (
+                f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']}"
+            )
         elif pro_license_key:
-            message = "Your BunkerWeb Pro license " + (STATUS_MESSAGES.get(metadata["pro_status"], "is not valid or has expired") if not error else "is not valid or has expired")
+            message = "Your BunkerWeb Pro license " + (
+                STATUS_MESSAGES.get(metadata["pro_status"], "is not valid or has expired") if not error else "is not valid or has expired"
+            )
         else:
             logger.info("If you wish to purchase a BunkerWeb Pro license, please visit https://panel.bunkerweb.io/")
             message = "No BunkerWeb Pro license key provided"

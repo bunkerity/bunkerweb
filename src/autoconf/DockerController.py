@@ -101,7 +101,11 @@ class DockerController(Controller):
         )
 
     def __process_event(self, event):
-        return "Actor" in event and "Attributes" in event["Actor"] and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"] or "bunkerweb.SERVER_NAME" in event["Actor"]["Attributes"])
+        return (
+            "Actor" in event
+            and "Attributes" in event["Actor"]
+            and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"] or "bunkerweb.SERVER_NAME" in event["Actor"]["Attributes"])
+        )
 
     def process_events(self):
         self._set_autoconf_load_db()

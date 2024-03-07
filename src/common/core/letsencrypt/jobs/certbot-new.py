@@ -127,7 +127,16 @@ try:
         domains_sever_names = {server_names[0]: all_domains}
 
     proc = run(
-        [CERTBOT_BIN, "certificates", "--config-dir", LETS_ENCRYPT_PATH.joinpath("etc").as_posix(), "--work-dir", LETS_ENCRYPT_WORK_DIR, "--logs-dir", LETS_ENCRYPT_LOGS_DIR],
+        [
+            CERTBOT_BIN,
+            "certificates",
+            "--config-dir",
+            LETS_ENCRYPT_PATH.joinpath("etc").as_posix(),
+            "--work-dir",
+            LETS_ENCRYPT_WORK_DIR,
+            "--logs-dir",
+            LETS_ENCRYPT_LOGS_DIR,
+        ],
         stdin=DEVNULL,
         stdout=PIPE,
         stderr=STDOUT,

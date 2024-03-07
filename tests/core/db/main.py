@@ -337,7 +337,12 @@ try:
                 )
                 exit(1)
 
-            if plugin.name != current_plugin[plugin.id]["name"] or plugin.description != current_plugin[plugin.id]["description"] or plugin.version != current_plugin[plugin.id]["version"] or plugin.stream != current_plugin[plugin.id]["stream"]:
+            if (
+                plugin.name != current_plugin[plugin.id]["name"]
+                or plugin.description != current_plugin[plugin.id]["description"]
+                or plugin.version != current_plugin[plugin.id]["version"]
+                or plugin.stream != current_plugin[plugin.id]["stream"]
+            ):
                 print(
                     f"❌ The {'external' if plugin.type == 'external' else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
                     + f"{dumps({'name': plugin.name, 'description': plugin.description, 'version': plugin.version, 'stream': plugin.stream})}"
@@ -472,7 +477,11 @@ try:
                 )
                 exit(1)
 
-            path_ui = Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")) if Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")).exists() else Path(join("external", plugin_page.plugin_id, "ui"))
+            path_ui = (
+                Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui"))
+                if Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")).exists()
+                else Path(join("external", plugin_page.plugin_id, "ui"))
+            )
 
             if not path_ui.exists():
                 print(
@@ -571,7 +580,10 @@ try:
                     flush=True,
                 )
                 exit(1)
-            elif custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"] and custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"] + b"\n":
+            elif (
+                custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"]
+                and custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"] + b"\n"
+            ):
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but the value differ, exiting ...\n{custom_config.data} (database) != {current_custom_configs[custom_config.name]['value']} (env)",
                     flush=True,

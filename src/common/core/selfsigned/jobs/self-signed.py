@@ -62,7 +62,9 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
             if sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
                 logger.warning(f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
             elif certificate.not_valid_after - certificate.not_valid_before != timedelta(days=int(days)):
-                logger.warning(f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
+                logger.warning(
+                    f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
+                )
             else:
                 return True, 0
 

@@ -34,7 +34,9 @@ class Instance:
         self.name = name
         self.hostname = hostname
         self._type = _type
-        self.health = status == "up" and ((data.attrs["State"]["Health"]["Status"] == "healthy" if "Health" in data.attrs["State"] else False) if _type == "container" and data else True)
+        self.health = status == "up" and (
+            (data.attrs["State"]["Health"]["Status"] == "healthy" if "Health" in data.attrs["State"] else False) if _type == "container" and data else True
+        )
         self.env = data
         self.apiCaller = apiCaller or ApiCaller()
 
@@ -396,7 +398,10 @@ class Instances:
             if not resp:
                 continue
 
-            if not isinstance(instance_metrics.get(instance_name, {"msg": None}).get("msg"), dict) or instance_metrics[instance_name].get("status", "error") != "success":
+            if (
+                not isinstance(instance_metrics.get(instance_name, {"msg": None}).get("msg"), dict)
+                or instance_metrics[instance_name].get("status", "error") != "success"
+            ):
                 continue
 
             metric_data = instance_metrics[instance_name]["msg"]

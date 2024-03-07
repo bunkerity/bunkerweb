@@ -37,7 +37,7 @@ try:
 
     log_info("username 'admin' is correctly set by default, trying username update ...")
 
-    DRIVER.execute_script(f"return arguments[0].value = 'admin2'", username_input)
+    DRIVER.execute_script("return arguments[0].value = 'admin2'", username_input)
 
     password_input = safe_get_element(DRIVER, By.ID, "curr_password")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"

@@ -217,7 +217,13 @@ if __name__ == "__main__":
                 sleep(5)
 
             env = db.get_config()
-        elif not tmp_variables_path.exists() or not nginx_variables_path.exists() or (tmp_variables_path.read_text(encoding="utf-8") != nginx_variables_path.read_text(encoding="utf-8")) or db.is_initialized() and db.get_config() != dotenv_env:
+        elif (
+            not tmp_variables_path.exists()
+            or not nginx_variables_path.exists()
+            or (tmp_variables_path.read_text(encoding="utf-8") != nginx_variables_path.read_text(encoding="utf-8"))
+            or db.is_initialized()
+            and db.get_config() != dotenv_env
+        ):
             # run the config saver
             proc = subprocess_run(
                 [
@@ -494,7 +500,9 @@ if __name__ == "__main__":
                     if proc.returncode == 0:
                         logger.info("Successfully sent reload signal to nginx")
                     else:
-                        logger.error(f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}")
+                        logger.error(
+                            f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}"
+                        )
                 else:
                     logger.warning("No BunkerWeb instance found, skipping nginx reload ...")
             except:

@@ -1,5 +1,4 @@
 from logging import info as log_info, exception as log_exception, error as log_error, warning as log_warning
-from time import sleep
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -25,7 +24,7 @@ try:
     is_no_match_hidden = DRIVER.execute_script('return document.querySelector("[data-global-config-nomatch]").classList.contains("hidden")')
 
     if is_no_match_hidden:
-        log_error(f"Filter keyword shouldn't match something.")
+        log_error("Filter keyword shouldn't match something.")
         exit(1)
 
     # Reset
@@ -37,16 +36,16 @@ try:
     input_keyword.send_keys("http port")
 
     # Check that the matching element is shown and other card hide
-    is_http_port_hidden = DRIVER.execute_script(f"""return document.querySelector('#form-edit-global-config-http-port').classList.contains('hidden')""")
+    is_http_port_hidden = DRIVER.execute_script("return document.querySelector('#form-edit-global-config-http-port').classList.contains('hidden')")
 
     if is_http_port_hidden:
-        log_error(f"hidden http port should be match.")
+        log_error("hidden http port should be match.")
         exit(1)
 
-    is_https_port_hidden = DRIVER.execute_script(f"""return document.querySelector('#form-edit-global-config-https-port').classList.contains('hidden')""")
+    is_https_port_hidden = DRIVER.execute_script("return document.querySelector('#form-edit-global-config-https-port').classList.contains('hidden')")
 
     if not is_https_port_hidden:
-        log_error(f"Setting https port should not be match.")
+        log_error("Setting https port should not be match.")
         exit(1)
 
     # Reset
