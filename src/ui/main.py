@@ -578,24 +578,28 @@ def home():
         remote_version = basename(r.url).strip().replace("v", "")
 
     instances = app.config["INSTANCES"].get_instances()
-    services = app.config["CONFIG"].get_services()
+    config = app.config["CONFIG"].get_config(with_drafts=True)
     instance_health_count = 0
 
     for instance in instances:
         if instance.health is True:
             instance_health_count += 1
 
+    services = 0
     services_scheduler_count = 0
     services_ui_count = 0
     services_autoconf_count = 0
 
-    for service in services:
-        if service["SERVER_NAME"]["method"] == "scheduler":
+    for service in config["SERVER_NAME"]["value"].split(" "):
+        service_method = config.get(f"{service}_SERVER_NAME", {"method": "scheduler"})["method"]
+
+        if service_method == "scheduler":
             services_scheduler_count += 1
-        elif service["SERVER_NAME"]["method"] == "ui":
+        elif service_method == "ui":
             services_ui_count += 1
-        elif service["SERVER_NAME"]["method"] == "autoconf":
+        elif service_method == "autoconf":
             services_autoconf_count += 1
+        services += 1
 
     return render_template(
         "home.html",
@@ -603,7 +607,7 @@ def home():
         remote_version=remote_version,
         version=bw_version,
         instances_number=len(instances),
-        services_number=len(services),
+        services_number=services,
         plugins_errors=db.get_plugins_errors(),
         instance_health_count=instance_health_count,
         services_scheduler_count=services_scheduler_count,
@@ -850,32 +854,49 @@ def services():
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
     # Display services
-    services = app.config["CONFIG"].get_services(with_drafts=True)
-    return render_template(
-        "services.html",
-        services=[
+    services = []
+    global_config = app.config["CONFIG"].get_config()
+    service_names = global_config["SERVER_NAME"]["value"].split(" ")
+    for service in service_names:
+        service_settings = []
+        tmp_config = global_config.copy()
+
+        for key, value in tmp_config.copy().items():
+            if key.startswith(f"{service}_"):
+                setting = key.replace(f"{service}_", "")
+                service_settings.append(setting)
+                tmp_config[setting] = tmp_config.pop(key)
+            elif any(key.startswith(f"{s}_") for s in service_names):
+                tmp_config.pop(key)
+            elif key not in service_settings:
+                tmp_config[key] = {"value": value["value"], "global": value["global"], "method": value["method"]}
+
+        services.append(
             {
                 "SERVER_NAME": {
-                    "value": service["SERVER_NAME"]["value"].split(" ")[0],
-                    "full_value": service["SERVER_NAME"]["value"],
-                    "method": service["SERVER_NAME"]["method"],
+                    "value": tmp_config["SERVER_NAME"]["value"].split(" ")[0],
+                    "full_value": tmp_config["SERVER_NAME"]["value"],
+                    "method": tmp_config["SERVER_NAME"]["method"],
                 },
-                "IS_DRAFT": service.pop("IS_DRAFT", {"value": "no"})["value"],
-                "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
-                "SERVE_FILES": service["SERVE_FILES"],
-                "REMOTE_PHP": service["REMOTE_PHP"],
-                "AUTO_LETS_ENCRYPT": service["AUTO_LETS_ENCRYPT"],
-                "USE_CUSTOM_SSL": service["USE_CUSTOM_SSL"],
-                "GENERATE_SELF_SIGNED_SSL": service["GENERATE_SELF_SIGNED_SSL"],
-                "USE_MODSECURITY": service["USE_MODSECURITY"],
-                "USE_BAD_BEHAVIOR": service["USE_BAD_BEHAVIOR"],
-                "USE_LIMIT_REQ": service["USE_LIMIT_REQ"],
-                "USE_DNSBL": service["USE_DNSBL"],
-                "settings": dumps(service),
+                "IS_DRAFT": tmp_config.pop("IS_DRAFT", {"value": "no"})["value"],
+                "USE_REVERSE_PROXY": tmp_config["USE_REVERSE_PROXY"],
+                "SERVE_FILES": tmp_config["SERVE_FILES"],
+                "REMOTE_PHP": tmp_config["REMOTE_PHP"],
+                "AUTO_LETS_ENCRYPT": tmp_config["AUTO_LETS_ENCRYPT"],
+                "USE_CUSTOM_SSL": tmp_config["USE_CUSTOM_SSL"],
+                "GENERATE_SELF_SIGNED_SSL": tmp_config["GENERATE_SELF_SIGNED_SSL"],
+                "USE_MODSECURITY": tmp_config["USE_MODSECURITY"],
+                "USE_BAD_BEHAVIOR": tmp_config["USE_BAD_BEHAVIOR"],
+                "USE_LIMIT_REQ": tmp_config["USE_LIMIT_REQ"],
+                "USE_DNSBL": tmp_config["USE_DNSBL"],
+                "settings": dumps(tmp_config),
             }
-            for service in services
-        ],
-        global_config=app.config["CONFIG"].get_config(),
+        )
+
+    return render_template(
+        "services.html",
+        services=services,
+        global_config=global_config,
         username=current_user.get_id(),
     )
 
