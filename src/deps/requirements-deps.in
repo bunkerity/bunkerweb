@@ -1,6 +1,6 @@
 pip==24.0
 pip-compile-multi==2.6.3
-pip-tools==7.4.0
+pip-tools==7.4.1
 pip-upgrader==1.4.15
 setuptools==69.1.1
 tomli==2.0.1
