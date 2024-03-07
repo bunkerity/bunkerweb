@@ -140,6 +140,7 @@ CN=test.com
         listen unix:/tmp/nginx-c4.sock ssl;
         server_name   test.com;
         ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384;
+        ssl_protocols TLSv1.2;
     }
 --- config
     location /t {

@@ -1,8 +1,8 @@
 package = "lua-resty-openssl"
-version = "1.2.0-1"
+version = "1.2.1-1"
 source = {
    url = "git+https://github.com/fffonion/lua-resty-openssl.git",
-   tag = "1.2.0"
+   tag = "1.2.1"
 }
 description = {
    detailed = "FFI-based OpenSSL binding for LuaJIT.",

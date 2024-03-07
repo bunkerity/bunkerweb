@@ -61,6 +61,7 @@ __DATA__
 --- http_config
     server {
         listen unix:/tmp/nginx-sctx1.sock ssl;
+        ssl_protocols TLSv1.2;
         server_name   test.com;
 
         ssl_certificate_by_lua_block {

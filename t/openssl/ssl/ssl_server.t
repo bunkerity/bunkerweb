@@ -149,6 +149,7 @@ CN=test.com
     server {
         listen unix:/tmp/nginx-s3.sock ssl;
         server_name   test.com;
+        ssl_protocols TLSv1.2;
         ssl_ciphers ECDHE-RSA-AES128-SHA;
 
         ssl_certificate_by_lua_block {
@@ -196,6 +197,7 @@ ECDHE-RSA-AES256-SHA$
     server {
         listen unix:/tmp/nginx-s4.sock ssl;
         server_name   test.com;
+        ssl_protocols TLSv1.2;
         ssl_ciphers ECDHE-RSA-AES128-SHA;
 
         location /t {
