@@ -855,7 +855,7 @@ def services():
 
     # Display services
     services = []
-    global_config = app.config["CONFIG"].get_config()
+    global_config = app.config["CONFIG"].get_config(with_drafts=True)
     service_names = global_config["SERVER_NAME"]["value"].split(" ")
     for service in service_names:
         service_settings = []
