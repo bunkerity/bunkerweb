@@ -94,10 +94,12 @@ end
 
 api.global.POST["^/reload$"] = function(self)
 	-- Check config
+	logger:log(NOTICE, "Checking Nginx configuration")
 	local status = execute("nginx -t")
 	if status ~= 0 then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed")
 	end
+	logger:log(NOTICE, "Nginx configuration is valid, reloading Nginx")
 	-- Send HUP signal to master process
 	local ok, err = kill(get_master_pid(), "HUP")
 	if not ok then
