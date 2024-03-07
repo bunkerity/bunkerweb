@@ -47,6 +47,8 @@
 - [DEPS] Updated coreruleset version to v3.3.5
 - [DEPS] Added coreruleset version v4.0.0
 - [DEPS] Updated lua-resty-mlcache version to v2.7.0
+- [DEPS] Updated lua-resty-openssl version to v1.2.1
+- [DEPS] Updated lua-resty-http version to v0.17.2
 
 ## v1.5.5 - 2024/01/12
 
