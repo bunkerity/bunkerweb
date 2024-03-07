@@ -105,7 +105,6 @@ GET /t
 
 === TEST 2: Connection fails during handshake with not priv_key
 --- http_config eval: $::mtls_http_config
---- SKIP
 --- config eval
 "
 lua_ssl_trusted_certificate $::HtmlDir/test.crt;
@@ -138,6 +137,9 @@ location /t {
           })
 
           ngx.say(res:read_body())
+
+        else
+          ngx.say('failed to connect: ' .. (err or ''))
         end
 
         httpc:close()
@@ -148,13 +150,16 @@ location /t {
 --- request
 GET /t
 --- error_code: 200
---- error_log
-could not set client certificate: bad client pkey type
---- response_body_unlike: hello, CN=foo@example.com,O=OpenResty,ST=California,C=US
+--- no_error_log
+[error]
+[warn]
+--- response_body
+failed to connect: bad ssl_client_priv_key: cdata expected, got string
+--- skip_nginx
+4: < 1.21.4
 
 
-=== TEST 3: Connection succeeds with client cert and key. SKIP'd for CI until feature is merged.
---- SKIP
+=== TEST 3: Connection succeeds with client cert and key.
 --- http_config eval: $::mtls_http_config
 --- config eval
 "
@@ -208,4 +213,104 @@ GET /t
 [warn]
 --- response_body
 hello, CN=foo@example.com,O=OpenResty,ST=California,C=US
+--- skip_nginx
+4: < 1.21.4
 
+=== TEST 4: users with different client certs should not share the same pool.
+--- http_config eval: $::mtls_http_config
+--- config eval
+"
+lua_ssl_trusted_certificate $::HtmlDir/test.crt;
+
+location /t {
+    content_by_lua_block {
+        local f = assert(io.open('$::HtmlDir/mtls_client.crt'))
+        local cert_data = f:read('*a')
+        f:close()
+
+        f = assert(io.open('$::HtmlDir/mtls_client.key'))
+        local key_data = f:read('*a')
+        f:close()
+
+        local ssl = require('ngx.ssl')
+
+        local cert = assert(ssl.parse_pem_cert(cert_data))
+        local key = assert(ssl.parse_pem_priv_key(key_data))
+
+        f = assert(io.open('$::HtmlDir/test.crt'))
+        local invalid_cert_data = f:read('*a')
+        f:close()
+
+        f = assert(io.open('$::HtmlDir/test.key'))
+        local invalid_key_data = f:read('*a')
+        f:close()
+
+        local invalid_cert = assert(ssl.parse_pem_cert(invalid_cert_data))
+        local invalid_key = assert(ssl.parse_pem_priv_key(invalid_key_data))
+
+        local httpc = assert(require('resty.http').new())
+
+        local ok, err = httpc:connect {
+          scheme = 'https',
+          host = 'unix:$::HtmlDir/mtls.sock',
+          ssl_client_cert = cert,
+          ssl_client_priv_key = key,
+        }
+
+        if ok and not err then
+          local res, err = assert(httpc:request {
+            method = 'GET',
+            path = '/',
+            headers = {
+              ['Host'] = 'example.com',
+            },
+          })
+
+          ngx.say(res:read_body())
+        end
+
+        httpc:set_keepalive()
+
+        local httpc = assert(require('resty.http').new())
+
+        local ok, err = httpc:connect {
+          scheme = 'https',
+          host = 'unix:$::HtmlDir/mtls.sock',
+          ssl_client_cert = invalid_cert,
+          ssl_client_priv_key = invalid_key,
+        }
+
+        ngx.say(httpc:get_reused_times())
+        ngx.say(ok)
+        ngx.say(err)
+
+        if ok and not err then
+          local res, err = assert(httpc:request {
+            method = 'GET',
+            path = '/',
+            headers = {
+              ['Host'] = 'example.com',
+            },
+          })
+
+          ngx.say(res.status)   -- expect 400
+        end
+
+        httpc:close()
+    }
+}
+"
+--- user_files eval: $::mtls_user_files
+--- request
+GET /t
+--- no_error_log
+[error]
+[warn]
+--- response_body
+hello, CN=foo@example.com,O=OpenResty,ST=California,C=US
+0
+true
+nil
+400
+--- skip_nginx
+4: < 1.21.4
