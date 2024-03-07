@@ -120,9 +120,9 @@
     },
     {
       "id": "lua-resty-http",
-      "name": "lua-resty-http v0.17.1",
+      "name": "lua-resty-http v0.17.2",
       "url": "https://github.com/ledgetech/lua-resty-http.git",
-      "commit": "4ab4269cf442ba52507aa2c718f606054452fcad"
+      "commit": "183310324026120ab7eaf5dd82b9be90ae63aadf"
     },
     {
       "id": "lua-resty-ipmatcher",
