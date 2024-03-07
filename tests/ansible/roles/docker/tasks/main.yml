@@ -31,8 +31,8 @@
     update_cache: yes
     state: present
 
-  - name: Symlink docker-compose
-    shell: ln -f -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+- name: Symlink docker-compose
+  shell: ln -f -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 - name: Add user to docker group
   user:
