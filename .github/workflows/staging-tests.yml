@@ -39,7 +39,7 @@ jobs:
       - run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing local/autoconf-tests:latest
         if: contains(fromJSON('["autoconf", "swarm"]'), inputs.TYPE)
       - name: Push images to local repo
-        run: docker tag local/bunkerweb-tests:latest 192.168.42.100:5000/bunkerweb-tests:latest && docker push 192.168.42.100:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest 192.168.42.100:5000/scheduler-tests:latest && docker push 192.168.42.100:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest 192.168.42.100:5000/autoconf-tests:latest && docker push 192.168.42.100:5000/autoconf-tests:latest
+        run: docker tag local/bunkerweb-tests:latest manager:5000/bunkerweb-tests:latest && docker push manager:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest manager:5000/scheduler-tests:latest && docker push manager:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest manager:5000/autoconf-tests:latest && docker push manager:5000/autoconf-tests:latest
         if: inputs.TYPE == 'swarm'
       - name: Install test dependencies
         run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
