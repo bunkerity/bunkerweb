@@ -47,7 +47,7 @@ repos:
     hooks:
       - id: flake8
         name: Flake8 Python Linter
-        args: ["--max-line-length=250", "--ignore=E266,E402,E722,W503"]
+        args: ["--max-line-length=160", "--ignore=E266,E402,E722,W503"]
 
   - repo: https://github.com/dosisod/refurb
     rev: a9a4edd45687e664dee0905ba1c848bda227d1d6 # frozen: v1.28.0

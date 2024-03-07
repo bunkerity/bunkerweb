@@ -86,9 +86,13 @@ class Database:
             else:
                 db_path.parent.mkdir(parents=True, exist_ok=True)
         elif match.group("database").startswith("m") and not match.group("database").endswith("+pymysql"):
-            sqlalchemy_string = sqlalchemy_string.replace(match.group("database"), f"{match.group('database')}+pymysql")  # ? This is mandatory for alemic to work with mariadb and mysql
+            sqlalchemy_string = sqlalchemy_string.replace(
+                match.group("database"), f"{match.group('database')}+pymysql"
+            )  # ? This is mandatory for alemic to work with mariadb and mysql
         elif match.group("database").startswith("postgresql") and not match.group("database").endswith("+psycopg"):
-            sqlalchemy_string = sqlalchemy_string.replace(match.group("database"), f"{match.group('database')}+psycopg")  # ? This is strongly recommended as psycopg is the new way to connect to postgresql
+            sqlalchemy_string = sqlalchemy_string.replace(
+                match.group("database"), f"{match.group('database')}+psycopg"
+            )  # ? This is strongly recommended as psycopg is the new way to connect to postgresql
 
         self.database_uri = sqlalchemy_string
         error = False
@@ -271,8 +275,11 @@ class Database:
         """Initialize the database"""
         with self.__db_session() as session:
             try:
-                if session.query(Metadata).get(1):
-                    session.query(Metadata).filter_by(id=1).update({Metadata.version: version, Metadata.integration: integration})
+                metadata = session.query(Metadata).get(1)
+
+                if metadata:
+                    metadata.version = version
+                    metadata.integration = integration
                 else:
                     session.add(
                         Metadata(
@@ -305,7 +312,9 @@ class Database:
         database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):
-                data["database_version"] = (session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"])[0]
+                data["database_version"] = (
+                    session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"]
+                )[0]
                 metadata = (
                     session.query(Metadata)
                     .with_entities(
@@ -445,7 +454,11 @@ class Database:
                 for table_name, data in old_data.items():
                     for row in data:
                         has_external_column = "external" in row
-                        row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() + (["external"] if has_external_column else []) if hasattr(row, column)}
+                        row = {
+                            column: getattr(row, column)
+                            for column in Base.metadata.tables[table_name].columns.keys() + (["external"] if has_external_column else [])
+                            if hasattr(row, column)
+                        }
 
                         # ? As the external column has been replaced by the type column, we need to update the data if the column exists
                         if table_name == "bw_plugins" and "external" in row:
@@ -572,8 +585,7 @@ class Database:
                                 self.__logger.warning(f'Setting "{setting}" does not exist, creating it')
                             to_put.append(Settings(**value))
 
-                        db_selects = session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"]).all()
-                        db_values = [select.value for select in db_selects]
+                        db_values = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"])]
                         missing_values = [select for select in db_values if select not in select_values]
 
                         if select_values:
@@ -590,8 +602,7 @@ class Database:
                                 self.__logger.warning(f'Removing all selects from setting "{setting}" as there are no longer any in the list')
                             session.query(Selects).filter_by(setting_id=value["id"]).delete()
 
-                    db_jobs = session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"]).all()
-                    db_names = [job.name for job in db_jobs]
+                    db_names = [job.name for job in session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"])]
                     job_names = [job["name"] for job in jobs]
                     missing_names = [job for job in db_names if job not in job_names]
 
@@ -601,7 +612,12 @@ class Database:
                         session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
 
                     for job in jobs:
-                        db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
+                        db_job = (
+                            session.query(Jobs)
+                            .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
+                            .filter_by(name=job["name"], plugin_id=plugin["id"])
+                            .first()
+                        )
 
                         if job["name"] not in db_names or not db_job:
                             job["file_name"] = job.pop("file")
@@ -721,7 +737,9 @@ class Database:
                 db_drafts = {service.id for service in db_services if service.is_draft}
 
                 if db_drafts:
-                    missing_drafts = [service.id for service in db_services if service.method == method and service.id not in drafts and service.id not in missing_ids]
+                    missing_drafts = [
+                        service.id for service in db_services if service.method == method and service.id not in drafts and service.id not in missing_ids
+                    ]
 
                     if missing_drafts:
                         # Remove drafts that are no longer in the list
@@ -847,7 +865,13 @@ class Database:
                                     }
                                 )
                 else:
-                    if config.get("SERVER_NAME", "www.example.com") and not session.query(Services).with_entities(Services.id).filter_by(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0]).first():
+                    if (
+                        config.get("SERVER_NAME", "www.example.com")
+                        and not session.query(Services)
+                        .with_entities(Services.id)
+                        .filter_by(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0])
+                        .first()
+                    ):
                         to_put.append(Services(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0], method=method))
 
                     for key, value in config.items():
@@ -861,7 +885,12 @@ class Database:
                         if not setting:
                             continue
 
-                        global_value = session.query(Global_values).with_entities(Global_values.value, Global_values.method).filter_by(setting_id=key, suffix=suffix).first()
+                        global_value = (
+                            session.query(Global_values)
+                            .with_entities(Global_values.value, Global_values.method)
+                            .filter_by(setting_id=key, suffix=suffix)
+                            .first()
+                        )
 
                         if not global_value:
                             if value == setting.default:
@@ -991,22 +1020,18 @@ class Database:
         with self.__db_session() as session:
             config = {}
             multisite = []
-            for setting in (
-                session.query(Settings)
-                .with_entities(
-                    Settings.id,
-                    Settings.context,
-                    Settings.default,
-                    Settings.multiple,
-                )
-                .all()
+            for setting in session.query(Settings).with_entities(
+                Settings.id,
+                Settings.context,
+                Settings.default,
+                Settings.multiple,
             ):
                 default = setting.default or ""
                 config[setting.id] = default if not methods else {"value": default, "global": True, "method": "default"}
 
-                global_values = session.query(Global_values).with_entities(Global_values.value, Global_values.suffix, Global_values.method).filter_by(setting_id=setting.id).all()
-
-                for global_value in global_values:
+                for global_value in (
+                    session.query(Global_values).with_entities(Global_values.value, Global_values.suffix, Global_values.method).filter_by(setting_id=setting.id)
+                ):
                     config[setting.id + (f"_{global_value.suffix}" if setting.multiple and global_value.suffix > 0 else "")] = (
                         global_value.value
                         if not methods
@@ -1022,10 +1047,9 @@ class Database:
 
             is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"
 
-            if with_drafts:
-                services = session.query(Services).with_entities(Services.id, Services.is_draft).all()
-            else:
-                services = session.query(Services).with_entities(Services.id, Services.is_draft).filter_by(is_draft=False).all()
+            services = session.query(Services).with_entities(Services.id, Services.is_draft)
+            if not with_drafts:
+                services = services.filter_by(is_draft=False)
 
             if is_multisite:
                 for service in services:
@@ -1034,7 +1058,7 @@ class Database:
                         config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
 
                     checked_settings = []
-                    for key, value in deepcopy(config).items():
+                    for key, value in config.copy().items():
                         original_key = key
                         if self.suffix_rx.search(key):
                             key = key[: -len(str(key.split("_")[-1])) - 1]
@@ -1049,7 +1073,7 @@ class Database:
                         else:
                             continue
 
-                        service_settings = (
+                        for service_setting in (
                             session.query(Services_settings)
                             .with_entities(
                                 Services_settings.value,
@@ -1057,10 +1081,7 @@ class Database:
                                 Services_settings.method,
                             )
                             .filter_by(service_id=service.id, setting_id=key)
-                            .all()
-                        )
-
-                        for service_setting in service_settings:
+                        ):
                             config[f"{service.id}_{key}" + (f"_{service_setting.suffix}" if service_setting.suffix > 0 else "")] = (
                                 service_setting.value
                                 if not methods
@@ -1088,15 +1109,13 @@ class Database:
                     "method": custom_config.method,
                 }
                 for custom_config in (
-                    session.query(Custom_configs)
-                    .with_entities(
+                    session.query(Custom_configs).with_entities(
                         Custom_configs.service_id,
                         Custom_configs.type,
                         Custom_configs.name,
                         Custom_configs.data,
                         Custom_configs.method,
                     )
-                    .all()
                 )
             ]
 
@@ -1107,9 +1126,9 @@ class Database:
         service_names = config["SERVER_NAME"]["value"].split(" ") if methods else config["SERVER_NAME"].split(" ")
         for service in service_names:
             service_settings = []
-            tmp_config = deepcopy(config)
+            tmp_config = config.copy()
 
-            for key, value in deepcopy(tmp_config).items():
+            for key, value in tmp_config.copy().items():
                 if key.startswith(f"{service}_"):
                     setting = key.replace(f"{service}_", "")
                     service_settings.append(setting)
@@ -1202,11 +1221,11 @@ class Database:
                     session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
 
-                    for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_ids)).all():
+                    for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_ids)):
                         session.query(Jobs_cache).filter(Jobs_cache.job_name == plugin_job.name).delete()
                         session.query(Jobs).filter(Jobs.name == plugin_job.name).delete()
 
-                    for plugin_setting in session.query(Settings).with_entities(Settings.id).filter(Settings.plugin_id.in_(missing_ids)).all():
+                    for plugin_setting in session.query(Settings).with_entities(Settings.id).filter(Settings.plugin_id.in_(missing_ids)):
                         session.query(Selects).filter(Selects.setting_id == plugin_setting.id).delete()
                         session.query(Services_settings).filter(Services_settings.setting_id == plugin_setting.id).delete()
                         session.query(Global_values).filter(Global_values.setting_id == plugin_setting.id).delete()
@@ -1236,7 +1255,7 @@ class Database:
                 if db_plugin:
                     if db_plugin.type not in ("external", "pro"):
                         self.__logger.warning(
-                            f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external or non-pro plugin is forbidden for security reasons)",
+                            f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external or non-pro plugin is forbidden for security reasons)",  # noqa: E501
                         )
                         continue
 
@@ -1270,8 +1289,7 @@ class Database:
                         changes = True
                         session.query(Plugins).filter(Plugins.id == plugin["id"]).update(updates)
 
-                    db_plugin_settings = session.query(Settings).with_entities(Settings.id).filter_by(plugin_id=plugin["id"]).all()
-                    db_ids = [setting.id for setting in db_plugin_settings]
+                    db_ids = [setting.id for setting in session.query(Settings).with_entities(Settings.id).filter_by(plugin_id=plugin["id"])]
                     setting_ids = [setting for setting in settings]
                     missing_ids = [setting for setting in db_ids if setting not in setting_ids]
 
@@ -1335,8 +1353,7 @@ class Database:
                                 changes = True
                                 session.query(Settings).filter(Settings.id == setting).update(updates)
 
-                            db_selects = session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting).all()
-                            db_values = [select.value for select in db_selects]
+                            db_values = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting)]
                             select_values = value.get("select", [])
                             missing_values = [select for select in db_values if select not in select_values]
 
@@ -1350,8 +1367,7 @@ class Database:
                                     changes = True
                                     to_put.append(Selects(setting_id=setting, value=select))
 
-                    db_jobs = session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"]).all()
-                    db_names = [job.name for job in db_jobs]
+                    db_names = [job.name for job in session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"])]
                     job_names = [job["name"] for job in jobs]
                     missing_names = [job for job in db_names if job not in job_names]
 
@@ -1361,7 +1377,12 @@ class Database:
                         session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
 
                     for job in jobs:
-                        db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
+                        db_job = (
+                            session.query(Jobs)
+                            .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
+                            .filter_by(name=job["name"], plugin_id=plugin["id"])
+                            .first()
+                        )
 
                         if job["name"] not in db_names or not db_job:
                             changes = True
@@ -1474,7 +1495,9 @@ class Database:
                     to_put.append(Settings(**value))
 
                 for job in jobs:
-                    db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
+                    db_job = (
+                        session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
+                    )
 
                     if db_job is not None:
                         self.__logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
@@ -1568,7 +1591,7 @@ class Database:
             if _type != "all":
                 db_plugins = db_plugins.filter_by(type=_type)
 
-            for plugin in db_plugins.all():
+            for plugin in db_plugins:
                 page = session.query(Plugin_pages).with_entities(Plugin_pages.id).filter_by(plugin_id=plugin.id).first()
                 data = {
                     "id": plugin.id,
@@ -1597,7 +1620,6 @@ class Database:
                         Settings.multiple,
                     )
                     .filter_by(plugin_id=plugin.id)
-                    .all()
                 ):
                     data["settings"][setting.id] = {
                         "context": setting.context,
@@ -1610,7 +1632,9 @@ class Database:
                     } | ({"multiple": setting.multiple} if setting.multiple else {})
 
                     if setting.type == "select":
-                        data["settings"][setting.id]["select"] = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting.id).all()]
+                        data["settings"][setting.id]["select"] = [
+                            select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting.id)
+                        ]
 
                 plugins.append(data)
 
@@ -1643,19 +1667,16 @@ class Database:
                             Jobs_cache.last_update,
                         )
                         .filter_by(job_name=job.name)
-                        .all()
                     ],
                 }
                 for job in (
-                    session.query(Jobs)
-                    .with_entities(
+                    session.query(Jobs).with_entities(
                         Jobs.name,
                         Jobs.every,
                         Jobs.reload,
                         Jobs.success,
                         Jobs.last_run,
                     )
-                    .all()
                 )
             }
 
@@ -1688,13 +1709,11 @@ class Database:
                     "data": "Download file to view content",
                 }
                 for cache in (
-                    session.query(Jobs_cache)
-                    .with_entities(
+                    session.query(Jobs_cache).with_entities(
                         Jobs_cache.job_name,
                         Jobs_cache.service_id,
                         Jobs_cache.file_name,
                     )
-                    .all()
                 )
             ]
 
@@ -1759,7 +1778,7 @@ class Database:
                     "port": instance.port,
                     "server_name": instance.server_name,
                 }
-                for instance in (session.query(Instances).with_entities(Instances.hostname, Instances.port, Instances.server_name).all())
+                for instance in (session.query(Instances).with_entities(Instances.hostname, Instances.port, Instances.server_name))
             ]
 
     def get_plugin_actions(self, plugin: str) -> Optional[Any]:
@@ -1785,7 +1804,12 @@ class Database:
     def get_ui_user(self) -> Optional[dict]:
         """Get ui user."""
         with self.__db_session() as session:
-            user = session.query(Users).with_entities(Users.username, Users.password, Users.is_two_factor_enabled, Users.secret_token, Users.method).filter_by(id=1).first()
+            user = (
+                session.query(Users)
+                .with_entities(Users.username, Users.password, Users.is_two_factor_enabled, Users.secret_token, Users.method)
+                .filter_by(id=1)
+                .first()
+            )
             if not user:
                 return None
             return {
@@ -1811,7 +1835,9 @@ class Database:
 
         return ""
 
-    def update_ui_user(self, username: str, password: bytes, is_two_factor_enabled: bool = False, secret_token: Optional[str] = None, method: str = "ui") -> str:
+    def update_ui_user(
+        self, username: str, password: bytes, is_two_factor_enabled: bool = False, secret_token: Optional[str] = None, method: str = "ui"
+    ) -> str:
         """Update ui user."""
         with self.__db_session() as session:
             user = session.query(Users).filter_by(id=1).first()
