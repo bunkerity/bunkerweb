@@ -215,14 +215,18 @@ class FilterSettings {
             }
           } catch (err) {}
         });
-        //case no setting match, hidden tab and content
+        //case no setting match, check if match at least tab name
+        //if not, hide tab
         if (settingCount === hiddenCount) {
           const tabName = tab.getAttribute(`data-tab-select-handler`);
-          tab.classList.add("!hidden");
+          const tabTxt = tab.textContent.trim().toLowerCase();
+          if (!tabTxt.includes(inpValue)) {
+            tab.classList.add("!hidden");
 
-          this.contentContainer
-            .querySelector(`[data-plugin-item=${tabName}]`)
-            .classList.add("hidden");
+            this.contentContainer
+              .querySelector(`[data-plugin-item=${tabName}]`)
+              .classList.add("hidden");
+          }
         }
       });
 

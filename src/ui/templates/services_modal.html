@@ -3,7 +3,7 @@
      data-services-modal
      class="dark:brightness-110 hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center">
     <div data-services-modal-card
-         class="overflow-y-auto mx-0 sm:mx-6 lg:mx-8 my-3 px-3 sm:px-4 pt-4 pb-8 w-full h-fit sm:min-w-[500px] max-w-[1000px] max-h-[95vh] md:max-h-[90vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+         class="overflow-y-auto mx-0 sm:mx-6 lg:mx-8 my-3 px-3 sm:px-4 pt-4 pb-8 w-full sm:min-w-[500px] max-w-[1000px] max-h-[95vh] md:max-h-[90vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="w-full flex justify-between items-start mb-2">
             <div class="flex flex-col sm:flex-row justify-start items-start sm:items-center">
                 <p data-services-modal-title
@@ -94,14 +94,17 @@
 
             {% include "settings_plugins.html" %}
             <!-- action button -->
-            <div class="w-full justify-center flex mt-10">
-                <button data-services-modal-close
-                        type="button"
-                        class="close-btn mb-4 mr-3 text-base">Close</button>
-                <button data-services-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
+            <div class="w-full flex-col items-center justify-center flex mt-10">
+                <div class="flex justify-center">
+
+                    <button data-services-modal-close
+                    type="button"
+                    class="close-btn mb-4 mr-3 text-base">Close</button>
+            <button data-services-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
+                </div>
+                <!-- end action button-->
+                <p data-services-modal-error-msg  class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
             </div>
-            <!-- end action button-->
-            <p data-services-modal-error-msg  class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
         </form>
         <!-- end new and edit form -->
         <!-- delete form-->
