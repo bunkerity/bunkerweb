@@ -22,6 +22,7 @@
 - [UI] Service page : add services filter when at least 4 services
 - [UI] Configs page : add path filtering related to config presence
 - [UI] Pro license : add home card, show pro plugis on menu and plugins page, resume in account page, alert in case issue with license usage
+- [UI] Global config page : Add the possibility to edit multisite settings as well
 - [FEATURE] Add setting REDIS_SSL_VERIFY to activate/disable the SSL certificate verification when using Redis
 - [FEATURE] Add Redis Sentinel fallback to master automatically if no slaves are available
 - [FEATURE] Add Redis Sentinel support for bwcli
