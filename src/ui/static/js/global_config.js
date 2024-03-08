@@ -4,6 +4,7 @@ import {
   FormatValue,
   FilterSettings,
   CheckNoMatchFilter,
+  showInvalid,
 } from "./utils/settings.js";
 
 class Multiple {
@@ -300,6 +301,36 @@ class Multiple {
       );
     });
 
+    //rename popover
+    const popoverBtns = schemaCtnrClone.querySelectorAll("[data-popover-btn]");
+    popoverBtns.forEach((popoverBtn) => {
+      popoverBtn.setAttribute(
+        "data-popover-btn",
+        popoverBtn.getAttribute("data-popover-btn").replace("_SCHEMA", suffix),
+      );
+    });
+
+    const popoverContents = schemaCtnrClone.querySelectorAll(
+      "[data-popover-content]",
+    );
+    popoverContents.forEach((popoverContent) => {
+      popoverContent.setAttribute(
+        "data-popover-content",
+        popoverContent
+          .getAttribute("data-popover-content")
+          .replace("_SCHEMA", suffix),
+      );
+    });
+
+    //rename invalid
+    const invalidEls = schemaCtnrClone.querySelectorAll("[data-invalid]");
+    invalidEls.forEach((invalidEl) => {
+      invalidEl.setAttribute(
+        "data-invalid",
+        invalidEl.getAttribute("data-invalid").replace("_SCHEMA", suffix),
+      );
+    });
+
     //rename input
     try {
       const inps = schemaCtnrClone.querySelectorAll("input");
@@ -505,6 +536,7 @@ const setTabsSelect = new TabsSelect(
   document.querySelector("[data-global-config-tabs-select-container]"),
   document.querySelector("[data-global-config-plugins-container]"),
 );
+const setInvalid = new showInvalid();
 const format = new FormatValue();
 
 const setFilterGlobal = new FilterSettings(

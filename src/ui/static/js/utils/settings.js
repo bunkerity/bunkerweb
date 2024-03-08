@@ -7,7 +7,10 @@ class Popover {
     window.addEventListener("pointerover", (e) => {
       //POPOVER LOGIC
       try {
-        if (e.target.closest("svg").hasAttribute(`data-popover-btn`)) {
+        if (
+          e.target.closest("button").hasAttribute(`data-popover-btn`) ||
+          e.target.closest("svg").hasAttribute(`data-popover-btn`)
+        ) {
           this.showPopover(e.target);
         }
       } catch (err) {}
@@ -16,7 +19,10 @@ class Popover {
     window.addEventListener("pointerout", (e) => {
       //POPOVER LOGIC
       try {
-        if (e.target.closest("svg").hasAttribute(`data-popover-btn`)) {
+        if (
+          e.target.closest("button").hasAttribute(`data-popover-btn`) ||
+          e.target.closest("svg").hasAttribute(`data-popover-btn`)
+        ) {
           this.hidePopover(e.target);
         }
       } catch (err) {}
@@ -24,9 +30,14 @@ class Popover {
   }
 
   showPopover(el) {
-    const btn = el.closest("svg");
+    const btn = el.closest("button").hasAttribute("data-popover-btn")
+      ? el.closest("button")
+      : el.closest("svg");
+    const popoverName = btn.getAttribute("data-popover-btn");
     //toggle curr popover
-    const popover = btn.parentElement.querySelector(`[data-popover-content]`);
+    const popover = btn.parentElement.querySelector(
+      `[data-popover-content=${popoverName}]`,
+    );
     popover.classList.add("transition-all", "delay-200", "opacity-0");
     popover.classList.remove("hidden");
     setTimeout(() => {
@@ -35,9 +46,14 @@ class Popover {
   }
 
   hidePopover(el) {
-    const btn = el.closest("svg");
+    const btn = el.closest("button").hasAttribute("data-popover-btn")
+      ? el.closest("button")
+      : el.closest("svg");
+    const popoverName = btn.getAttribute("data-popover-btn");
     //toggle curr popover
-    const popover = btn.parentElement.querySelector(`[data-popover-content]`);
+    const popover = btn.parentElement.querySelector(
+      `[data-popover-content=${popoverName}]`,
+    );
     popover.classList.add("hidden");
     popover.classList.remove("transition-all", "delay-200");
   }
@@ -422,6 +438,49 @@ class CheckNoMatchFilter {
   }
 }
 
+class showInvalid {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    window.addEventListener("change", (e) => {
+      this.setInvalidState(e);
+    });
+
+    window.addEventListener("input", (e) => {
+      this.setInvalidState(e);
+    });
+
+    window.addEventListener("click", (e) => {
+      this.setInvalidState(e);
+    });
+  }
+
+  setInvalidState(e) {
+    try {
+      if (e.target.hasAttribute("data-setting-input")) {
+        const settingName = e.target.getAttribute("id");
+        const invalidEl = document.querySelector(
+          `[data-invalid=${settingName}]`,
+        );
+        const isValid = e.target.validity.valid;
+
+        if (isValid) {
+          e.target.classList.remove("invalid");
+          invalidEl.classList.add("hidden", "md:hidden");
+          return;
+        }
+        if (!isValid) {
+          e.target.classList.add("invalid");
+          invalidEl.classList.remove("hidden", "md:hidden");
+          return;
+        }
+      }
+    } catch (e) {}
+  }
+}
+
 export {
   Popover,
   Tabs,
@@ -429,4 +488,5 @@ export {
   FormatValue,
   FilterSettings,
   CheckNoMatchFilter,
+  showInvalid,
 };

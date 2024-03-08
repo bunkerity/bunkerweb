@@ -71,6 +71,7 @@ module.exports = {
 
   presets: [],
   darkMode: "class",
+  important: true,
   theme: {
     extend: {
       data: {
