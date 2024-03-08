@@ -21,7 +21,7 @@
         <div id="tab-dropdown"
              role="listbox"
              data-tab-select-dropdown
-             class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto h-90 max-h-[50vh]">
+             class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto max-h-[350px]">
             {% set first_el = "True" %}
             {% for plugin in plugins %}
                 {% if current_endpoint == "services" and plugin["settings"]

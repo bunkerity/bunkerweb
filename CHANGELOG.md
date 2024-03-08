@@ -11,18 +11,20 @@
 - [BUGFIX] Database update with external plugins reupload
 - [LINUX] Add logrotate support for the logs
 - [UI] New : add bans management page in the web UI
+- [UI] New : add blocked requests page in the web UI
 - [UI] New : some core plugins pages in the web UI
 - [UI] General : enhance the Content-Security-Policy header in the web UI
 - [UI] General : dark mode enhancement
 - [UI] General : add visual feedback when filtering is matching nothing
-- [UI] Add blocked requests page in the web UI
-- [UI] Global config / service page : remove tabs for select and enhance filtering (plugin name includes)
+- [UI] General : blog news working and add dynamic banner news
+- [UI] Global config page : Add the possibility to edit multisite settings as well
+- [UI] Global config / Service page : remove tabs for select and enhance filtering (plugin name includes)
 - [UI] Service page : add the possibility to clone a service in the web UI
 - [UI] Service page : add the possibility to set a service as draft in the web UI
 - [UI] Service page : add services filter when at least 4 services
 - [UI] Configs page : add path filtering related to config presence
-- [UI] Pro license : add home card, show pro plugis on menu and plugins page, resume in account page, alert in case issue with license usage
-- [UI] Global config page : Add the possibility to edit multisite settings as well
+- [UI] Pro license : add home card, show pro plugins on menu and plugins page, resume in account page, alert in case issue with license usage
+- [UI] Log page : enhance UX
 - [FEATURE] Add setting REDIS_SSL_VERIFY to activate/disable the SSL certificate verification when using Redis
 - [FEATURE] Add Redis Sentinel fallback to master automatically if no slaves are available
 - [FEATURE] Add Redis Sentinel support for bwcli

@@ -113,12 +113,12 @@
                         <div id="filter-{{ filter['id'] }}"
                              role="listbox"
                              data-jobs-setting-select-dropdown="{{ filter['id'] }}"
-                             class="hidden z-100 absolute h-full flex-col w-full translate-y-16">
+                             class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
                             {% for value in filter['values'] %}
                                 <button role="option"
                                         data-jobs-setting-select-dropdown-btn="{{ filter['id'] }}"
                                         value="{{ value }}"
-                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
                                     {{ value }}
                                 </button>
                             {% endfor %}
