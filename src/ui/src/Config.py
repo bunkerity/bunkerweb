@@ -122,7 +122,7 @@ class Config:
         """
         return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
-    def check_variables(self, variables: dict, _global: bool = False) -> int:
+    def check_variables(self, variables: dict) -> int:
         """Testify that the variables passed are valid
 
         Parameters
@@ -141,11 +141,6 @@ class Config:
             check = False
 
             if k in plugins_settings:
-                if _global ^ (plugins_settings[k]["context"] == "global"):
-                    error = 1
-                    flash(f"Variable {k} is not valid.", "error")
-                    continue
-
                 setting = k
             else:
                 setting = k[0 : k.rfind("_")]  # noqa: E203
@@ -154,7 +149,7 @@ class Config:
                     flash(f"Variable {k} is not valid.", "error")
                     continue
 
-            if not (_global ^ (plugins_settings[setting]["context"] == "global")) and re_search(plugins_settings[setting]["regex"], v):
+            if re_search(plugins_settings[setting]["regex"], v):
                 check = True
 
             if not check:

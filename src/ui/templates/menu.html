@@ -201,7 +201,9 @@
             <div>
                 <ul>
                     <li class="w-full mt-4">
-                        <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-gray-400 dark:opacity-100 opacity-60">PLUGINS PAGE</h6>
+                        <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-gray-400 dark:opacity-100 opacity-60">
+                            PLUGINS PAGE
+                        </h6>
                     </li>
                     {% for plugin in plugins %}
                         {% if plugin['page'] and plugin['type'] != "pro" %}
@@ -221,9 +223,7 @@
                         {% endif %}
                         {% if plugin['page'] and plugin['type'] == "pro" %}
                             <li class="mt-0.5 w-full">
-                                <a {% if not is_pro_version %}target="_blank" rel="noopener"{% endif %}
-                                   class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-gray-200 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-                                   href="{% if not is_pro_version %}https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro{% else %}javascript:void(0){% endif %}"
+                                <a {% if not is_pro_version %}target="_blank" rel="noopener"{% endif %} class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-gray-200 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition" href="{% if not is_pro_version %}https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro{% else %}javascript:void(0){% endif %}"
                                     <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
                                         <svg class="h-5 w-5 dark:brightness-90"
                                              viewBox="0 0 48 46"

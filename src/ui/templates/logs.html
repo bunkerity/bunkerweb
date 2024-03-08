@@ -53,9 +53,7 @@
             <h5 class="col-span-12 mb-1 mt-2 text-[1.1rem] font-bold dark:text-white/90">Date options</h5>
             <!-- from date input -->
             <div class="flex flex-col relative col-span-12 sm:col-span-6">
-                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                    From date
-                </h5>
+                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">From date</h5>
                 <div class="relative">
                     <input type="text"
                            id="from-date"
@@ -124,7 +122,6 @@
                 </div>
             </div>
             <!-- end refresh inp-->
-
             <!-- refresh delay input -->
             <div class="flex flex-col relative col-span-12 sm:col-span-6">
                 <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
@@ -139,7 +136,6 @@
                        required />
             </div>
             <!-- end refresh delay input -->
-
             <div class="col-span-12 w-full justify-center flex mt-2">
                 <button data-submit-date
                         id="submit-data"
@@ -247,22 +243,21 @@
     </div>
     <!-- end filter -->
     <div data-logs-no-run
-    class="w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
-   <div class="col-span-12 flex flex-col justify-center items-center h-fit">
-       <svg xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="mb-2 w-8 h-8 stroke-white">
-           <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
-       </svg>
-       <h5 class="font-bold dark:text-white/90 mx-2 text-white">No logs to show</h5>
+         class="w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
+        <div class="col-span-12 flex flex-col justify-center items-center h-fit">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke-width="1.5"
+                 stroke="currentColor"
+                 class="mb-2 w-8 h-8 stroke-white">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+            </svg>
+            <h5 class="font-bold dark:text-white/90 mx-2 text-white">No logs to show</h5>
+        </div>
     </div>
-    </div>
-
-
-    <div data-logs-card class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div data-logs-card
+         class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="col-span-12">
             <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">LOGS</h5>
         </div>

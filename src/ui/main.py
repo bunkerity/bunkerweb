@@ -787,7 +787,7 @@ def services():
 
             # Edit check fields and remove already existing ones
             for variable, value in deepcopy(variables).items():
-                if variable.endswith("SCHEMA"):
+                if variable == "IS_DRAFT" or variable.endswith("SCHEMA"):
                     del variables[variable]
                     continue
 
@@ -906,13 +906,14 @@ def services():
 def global_config():
     if request.method == "POST":
         # Check variables
-        variables = deepcopy(request.form.to_dict())
+        variables = request.form.to_dict().copy()
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(methods=False)
-        for variable, value in deepcopy(variables).items():
-            if variable.endswith("SCHEMA"):
+        config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
+        services = config["SERVER_NAME"].split(" ")
+        for variable, value in variables.copy().items():
+            if variable in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "SERVER_NAME", "IS_LOADING", "IS_DRAFT") or variable.endswith("SCHEMA"):
                 del variables[variable]
                 continue
 
@@ -921,13 +922,13 @@ def global_config():
             elif value == "off":
                 value = "no"
 
-            if value == config.get(variable, None):
+            if value == config.get(variable, None) or any(variable.startswith(f"{service}_") for service in services):
                 del variables[variable]
 
         if not variables:
             return redirect_flash_error("The global configuration was not edited because no values were changed.", "global_config", True)
 
-        error = app.config["CONFIG"].check_variables(variables, True)
+        error = app.config["CONFIG"].check_variables(variables)
 
         if error:
             return redirect_flash_error("The global configuration variable checks returned error", "global_config", True)
@@ -952,12 +953,13 @@ def global_config():
             )
         )
 
+    global_config = app.config["CONFIG"].get_config()
+    for service in global_config["SERVER_NAME"]["value"].split(" "):
+        for key in global_config.copy():
+            if key.startswith(f"{service}_"):
+                global_config.pop(key)
     # Display global config
-    return render_template(
-        "global_config.html",
-        username=current_user.get_id(),
-        global_config=app.config["CONFIG"].get_config(),
-    )
+    return render_template("global_config.html", username=current_user.get_id(), global_config=global_config, dumped_global_config=dumps(global_config))
 
 
 @app.route("/configs", methods=["GET", "POST"])
