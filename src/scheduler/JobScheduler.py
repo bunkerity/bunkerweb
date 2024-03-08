@@ -284,6 +284,29 @@ class JobScheduler(ApiCaller):
 
         return ret
 
+    def run_single(self, job_name: str) -> bool:
+        if self.__lock:
+            self.__lock.acquire()
+
+        job_plugin = None
+        job_to_run = None
+        for plugin, jobs in self.__jobs.items():
+            for job in jobs:
+                if job["name"] == job_name:
+                    job_plugin = plugin
+                    job_to_run = job
+                    break
+
+        if not job_to_run:
+            self.__logger.warning(f"Job {job_name} not found")
+            return False
+
+        self.__job_wrapper(job_to_run["path"], job_plugin, job_to_run["name"], job_to_run["file"])
+
+        if self.__lock:
+            self.__lock.release()
+        return self.__job_success
+
     def __run_in_thread(self, jobs: list):
         self.__semaphore.acquire(timeout=60)
         for job in jobs:

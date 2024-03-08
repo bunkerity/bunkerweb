@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from copy import deepcopy
+from datetime import datetime
 from glob import glob
 from hashlib import sha256
 from io import BytesIO
@@ -30,10 +31,10 @@ from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 
-HEALTHY = False
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 INTEGRATION = "Linux"
+HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy")
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
@@ -74,7 +75,7 @@ signal(SIGHUP, handle_reload)
 
 def stop(status):
     Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
-    Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").unlink(missing_ok=True)
+    HEALTHY_PATH.unlink(missing_ok=True)
     _exit(status)
 
 
@@ -273,6 +274,7 @@ if __name__ == "__main__":
         logger.info("Scheduler started ...")
 
         # Checking if any custom config has been created by the user
+        logger.info("Checking if there are any changes in custom configs ...")
         custom_configs = []
         db_configs = db.get_custom_configs()
         configs_path = Path(sep, "etc", "bunkerweb", "configs")
@@ -318,6 +320,7 @@ if __name__ == "__main__":
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
+            logger.info(f"Checking if there are any changes in {_type} plugins ...")
             external_plugins = []
             db_plugins = db.get_plugins(_type=_type)
             for filename in glob(str((EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH).joinpath("*", "plugin.json"))):
@@ -370,6 +373,35 @@ if __name__ == "__main__":
         check_plugin_changes("external")
         check_plugin_changes("pro")
 
+        logger.info("Running plugins download jobs ...")
+
+        # Update the environment variables of the scheduler
+        SCHEDULER.env = env | environ.copy()
+        if not SCHEDULER.run_single("download-plugins"):
+            logger.warning("download-plugins job failed at first start, plugins settings set by the user may not be up to date ...")
+        if not SCHEDULER.run_single("download-pro-plugins"):
+            logger.warning("download-pro-plugins job failed at first start, pro plugins settings set by the user may not be up to date ...")
+
+        changes = db.check_changes()
+        if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf") and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
+            # run the config saver to save potential ignored external plugins settings
+            logger.info("Running config saver to save potential ignored external plugins settings ...")
+            proc = subprocess_run(
+                [
+                    "python3",
+                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                    "--settings",
+                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                ],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                logger.error(
+                    "Config saver failed, configuration will not work as expected...",
+                )
+
         logger.info("Executing scheduler ...")
 
         del dotenv_env
@@ -381,7 +413,6 @@ if __name__ == "__main__":
                 logger.error(f"An error occurred when setting the scheduler first start : {ret}")
                 stop(1)
 
-        FIRST_RUN = True
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
         CHANGES = []
@@ -517,6 +548,9 @@ if __name__ == "__main__":
             PRO_PLUGINS_NEED_GENERATION = False
             INSTANCES_NEED_GENERATION = False
 
+            if not HEALTHY_PATH.is_file():
+                HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")
+
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
             while RUN and not NEED_RELOAD:
@@ -544,27 +578,6 @@ if __name__ == "__main__":
                     RUN_JOBS_ONCE = True
                     NEED_RELOAD = True
 
-                if FIRST_RUN and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
-                    if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf"):
-                        # run the config saver to save potential ignored external plugins settings
-                        logger.info("Running config saver to save potential ignored external plugins settings ...")
-                        proc = subprocess_run(
-                            [
-                                "python3",
-                                join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                                "--settings",
-                                join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                            ],
-                            stdin=DEVNULL,
-                            stderr=STDOUT,
-                            check=False,
-                        )
-                        if proc.returncode != 0:
-                            logger.error(
-                                "Config saver failed, configuration will not work as expected...",
-                            )
-                    changes.update({"custom_configs_changed": True, "config_changed": True})
-
                 # check if the custom configs have changed since last time
                 if changes["custom_configs_changed"]:
                     logger.info("Custom configs changed, generating ...")
@@ -586,12 +599,6 @@ if __name__ == "__main__":
                     CONFIGS_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
-
-                if not NEED_RELOAD and not HEALTHY:
-                    Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").write_text("ok", encoding="utf-8")
-                    HEALTHY = True
-
-            FIRST_RUN = False
 
             if NEED_RELOAD:
                 CHANGES.clear()
