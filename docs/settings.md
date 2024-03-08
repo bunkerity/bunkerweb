@@ -315,16 +315,6 @@ Manage HTTP headers sent to clients.
 |`X_CONTENT_TYPE_OPTIONS`             |`nosniff`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |multisite|no      |Value for the X-Content-Type-Options header.                                                  |
 |`X_XSS_PROTECTION`                   |`1; mode=block`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |multisite|no      |Value for the X-XSS-Protection header.                                                        |
 
-### Jobs
-
-STREAM support :white_check_mark:
-
-Fake core plugin for internal jobs.
-
-|        Setting        |Default|Context|Multiple|                  Description                  |
-|-----------------------|-------|-------|--------|-----------------------------------------------|
-|`SEND_ANONYMOUS_REPORT`|`yes`  |global |no      |Send anonymous report to BunkerWeb maintainers.|
-
 ### Let's Encrypt
 
 STREAM support :white_check_mark:
@@ -390,6 +380,7 @@ Miscellaneous settings.
 |`OPEN_FILE_CACHE_VALID`      |`30s`                  |multisite|no      |Open file cache valid time                                                                                                   |
 |`EXTERNAL_PLUGIN_URLS`       |                       |global   |no      |List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).|
 |`DENY_HTTP_STATUS`           |`403`                  |global   |no      |HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.       |
+|`SEND_ANONYMOUS_REPORT`      |`yes`                  |global   |no      |Send anonymous report to BunkerWeb maintainers.                                                                              |
 
 ### ModSecurity
 
