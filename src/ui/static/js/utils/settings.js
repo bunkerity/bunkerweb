@@ -196,102 +196,161 @@ class FormatValue {
 class FilterSettings {
   constructor(inputID, tabContainer, contentContainer) {
     this.input = document.querySelector(`input#${inputID}`);
+    this.contextTxtEl = document.querySelector(
+      'span[data-global-config-setting-select-text="context"]',
+    );
     this.tabContainer = tabContainer;
     this.contentContainer = contentContainer;
     this.tabsEls = this.tabContainer.querySelectorAll(
       `[data-tab-select-handler]`,
     );
+
     this.init();
   }
 
   init() {
-    this.input.addEventListener("input", () => {
-      this.resetFilter();
-      //get inp format
-      const inpValue = this.input.value.trim().toLowerCase();
-
-      //loop all tabs
-      this.tabsEls.forEach((tab) => {
-        //get settings of tabs except multiples
-        const settings = this.getSettingsFromTab(tab);
-
-        //compare total count to currCount to determine
-        //if tabs need to be hidden
-        const settingCount = settings.length;
-        let hiddenCount = 0;
-        settings.forEach((setting) => {
-          try {
-            const title = setting
-              .querySelector("h5")
-              .textContent.trim()
-              .toLowerCase();
-            if (!title.includes(inpValue)) {
-              setting.classList.add("hidden");
-              hiddenCount++;
-            }
-          } catch (err) {}
+    window.addEventListener("DOMContentLoaded", () => {
+      if (this.input) {
+        this.input.addEventListener("input", () => {
+          this.runFilter();
         });
-        //case no setting match, check if match at least tab name
-        //if not, hide tab
-        if (settingCount === hiddenCount) {
-          const tabName = tab.getAttribute(`data-tab-select-handler`);
-          const tabTxt = tab.textContent.trim().toLowerCase();
-          if (!tabTxt.includes(inpValue)) {
-            tab.classList.add("!hidden");
+      }
 
-            this.contentContainer
-              .querySelector(`[data-plugin-item=${tabName}]`)
-              .classList.add("hidden");
+      window.addEventListener("click", (e) => {
+        try {
+          if (
+            e.target.hasAttribute(
+              "data-global-config-setting-select-dropdown-btn",
+            ) &&
+            e.target.getAttribute(
+              "data-global-config-setting-select-dropdown-btn",
+            ) === "context"
+          ) {
+            return this.runFilter();
           }
-        }
+        } catch (e) {}
       });
+    });
+  }
 
-      // check current tabs states
-      let isAllHidden = true;
-      let firstNotHiddenEl = null;
-      for (let i = 0; i < this.tabsEls.length; i++) {
-        const tab = this.tabsEls[i];
-        if (!tab.classList.contains("!hidden")) {
-          isAllHidden = false;
-          firstNotHiddenEl = tab;
-          break;
+  runFilter() {
+    this.resetFilter();
+    //get inp format
+    const inpValue = this.input.value.trim().toLowerCase();
+
+    //loop all tabs
+    this.tabsEls.forEach((tab) => {
+      //get settings of tabs except multiples
+      const settings = this.getSettingsFromTab(tab);
+
+      //compare total count to currCount to determine
+      //if tabs need to be hidden
+      const settingCount = settings.length;
+      let hiddenCount = 0;
+      settings.forEach((setting) => {
+        try {
+          let needToHide = false;
+          const title = setting
+            .querySelector("h5")
+            .textContent.trim()
+            .toLowerCase();
+          if (!title.includes(inpValue)) {
+            needToHide = true;
+          }
+
+          // check context if filter exists
+          try {
+            if (this.contextTxtEl) {
+              const currContextFilter =
+                this.contextTxtEl.textContent.toLowerCase();
+
+              if (currContextFilter !== "all") {
+                const settingContext = setting
+                  .getAttribute("data-global-config-context")
+                  .toLowerCase();
+                if (settingContext !== currContextFilter) {
+                  needToHide = true;
+                }
+              }
+            }
+          } catch (e) {}
+
+          if (needToHide) {
+            setting.classList.add("hidden");
+            hiddenCount++;
+          }
+        } catch (err) {}
+      });
+      //case no setting match, check if match at least tab name
+      // if no context, else we don't care about name
+      if (settingCount === hiddenCount) {
+        const tabName = tab.getAttribute(`data-tab-select-handler`);
+        const tabTxt = tab.textContent.trim().toLowerCase();
+        let needHideTab = false;
+        try {
+          if (this.contextTxtEl.textContent.toLowerCase() !== "all")
+            needHideTab = true;
+        } catch (e) {}
+
+        if (!tabTxt.includes(inpValue)) needHideTab = true;
+
+        if (needHideTab) {
+          tab.classList.add("!hidden");
+
+          this.contentContainer
+            .querySelector(`[data-plugin-item=${tabName}]`)
+            .classList.add("hidden");
         }
-      }
-
-      // case no tab match
-      if (isAllHidden) {
-        this.tabContainer
-          .querySelector("[data-tab-select-dropdown-btn]")
-          .setAttribute("data-tab-id", "no-match");
-        return (this.tabContainer.querySelector(
-          "[data-tab-select-dropdown-btn] span",
-        ).textContent = "No match");
-      }
-
-      // click first not hidden tab
-      const currTabEl = this.tabContainer.querySelector(
-        "[data-tab-select-dropdown-btn]",
-      );
-
-      const currTabName = currTabEl.getAttribute("data-tab-id");
-
-      // case previously no match
-      if (currTabName === "no-match" && !isAllHidden) {
-        return firstNotHiddenEl.click();
-      }
-
-      const currTabBtn = this.tabContainer.querySelector(
-        `[data-tab-select-handler='${currTabName}']`,
-      );
-
-      if (!currTabBtn.classList.contains("!hidden")) {
-        return currTabBtn.click();
-      }
-
-      if (currTabBtn.classList.contains("!hidden")) {
-        return firstNotHiddenEl.click();
       }
     });
+
+    // check current tabs states
+    let isAllHidden = true;
+    let firstNotHiddenEl = null;
+    for (let i = 0; i < this.tabsEls.length; i++) {
+      const tab = this.tabsEls[i];
+      if (!tab.classList.contains("!hidden")) {
+        isAllHidden = false;
+        firstNotHiddenEl = tab;
+        break;
+      }
+    }
+
+    console.log("is all hidden", isAllHidden);
+
+    // case no tab match
+    if (isAllHidden) {
+      this.tabContainer
+        .querySelector("[data-tab-select-dropdown-btn]")
+        .setAttribute("data-tab-id", "no-match");
+      return (this.tabContainer.querySelector(
+        "[data-tab-select-dropdown-btn] span",
+      ).textContent = "No match");
+    }
+
+    // click first not hidden tab
+    const currTabEl = this.tabContainer.querySelector(
+      "[data-tab-select-dropdown-btn]",
+    );
+
+    const currTabName = currTabEl.getAttribute("data-tab-id");
+
+    // case previously no match
+    if (currTabName === "no-match" && !isAllHidden) {
+      return firstNotHiddenEl.click();
+    }
+
+    const currTabBtn = this.tabContainer.querySelector(
+      `[data-tab-select-handler='${currTabName}']`,
+    );
+
+    if (!currTabBtn.classList.contains("!hidden")) {
+      return currTabBtn.click();
+    }
+
+    if (currTabBtn.classList.contains("!hidden")) {
+      return firstNotHiddenEl.click();
+    }
   }
 
   resetFilter() {

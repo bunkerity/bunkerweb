@@ -17,7 +17,7 @@
 - [UI] General : dark mode enhancement
 - [UI] General : add visual feedback when filtering is matching nothing
 - [UI] General : blog news working and add dynamic banner news
-- [UI] Global config page : Add the possibility to edit multisite settings as well
+- [UI] Global config page : Add multisite edit, add context filter
 - [UI] Global config / Service page : remove tabs for select and enhance filtering (plugin name includes)
 - [UI] Service page : add the possibility to clone a service in the web UI
 - [UI] Service page : add the possibility to set a service as draft in the web UI
