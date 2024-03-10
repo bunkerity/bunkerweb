@@ -44,6 +44,7 @@
 - [MISC] Refactor SSL/TLS logics to make it more consistent
 - [MISC] Use ed5519 key instead of RSA for default/fallback certificates
 - [MISC] Refactor certbot-new job to optimize the certbot requests
+- [MISC] Refactor jobs utils to make it more consistent
 - [DOCUMENTATION] Update web UI's setup wizard instructions in the documentation
 - [DOCUMENTATION] Update plugins documentation to reflect the new plugin system
 - [DOCUMENTATION] Update ModSecurity documentation to reflect the new changes in the Security Tuning section
