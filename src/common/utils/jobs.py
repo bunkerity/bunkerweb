@@ -139,7 +139,8 @@ class Job:
 
         try:
             with LOCK:
-                if self.db.upsert_job_cache(service_id, name, content, job_name=job_name or self.job_name, checksum=checksum):  # type: ignore
+                err = self.db.upsert_job_cache(service_id, name, content, job_name=job_name or self.job_name, checksum=checksum)  # type: ignore
+                if err:
                     ret = False
 
             if ret and isinstance(file_cache, Path) and delete_file and file_cache != cache_path:
