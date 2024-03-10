@@ -39,7 +39,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from common_utils import file_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import create_engine, MetaData as sql_metadata, text, inspect
+from sqlalchemy import create_engine, event, MetaData as sql_metadata, text, inspect
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
@@ -49,8 +50,18 @@ from sqlalchemy.exc import (
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import QueuePool
+from sqlite3 import Connection as SQLiteConnection
 
 install_as_MySQLdb()
+
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, _):
+    if isinstance(dbapi_connection, SQLiteConnection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.close()
 
 
 class Database:
@@ -154,14 +165,8 @@ class Database:
                 self.logger.error(f"Error when trying to connect to the database: {format_exc()}")
                 exit(1)
 
-        self.logger.info("✅ Database connection established")
-
         self.suffix_rx = re_compile(r"_\d+$")
-
-        if sqlalchemy_string.startswith("sqlite"):
-            with self.__db_session() as session:
-                session.execute(text("PRAGMA journal_mode=WAL"))
-                session.commit()
+        self.logger.info("✅ Database connection established")
 
     def __del__(self) -> None:
         """Close the database"""
@@ -1186,6 +1191,7 @@ class Database:
     ) -> str:
         """Update the plugin cache in the database"""
         job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
+        service_id = service_id or None
         with self.__db_session() as session:
             cache = session.query(Jobs_cache).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
 
