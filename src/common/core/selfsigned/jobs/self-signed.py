@@ -25,18 +25,12 @@ status = 0
 
 
 def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path) -> Tuple[bool, int]:
-    if self_signed_path.joinpath(f"{first_server}.pem").is_file():
+    server_path = self_signed_path.joinpath(first_server)
+
+    if server_path.joinpath("cert.pem").is_file() and server_path.joinpath("key.pem").is_file():
         if (
             run(
-                [
-                    "openssl",
-                    "x509",
-                    "-checkend",
-                    "86400",
-                    "-noout",
-                    "-in",
-                    str(self_signed_path.joinpath(f"{first_server}.pem")),
-                ],
+                ["openssl", "x509", "-checkend", "86400", "-noout", "-in", server_path.joinpath("cert.pem").as_posix()],
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
@@ -45,21 +39,18 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
         ):
             LOGGER.info(f"Self-signed certificate already present for {first_server}")
 
-            certificate = x509.load_pem_x509_certificate(
-                self_signed_path.joinpath(f"{first_server}.pem").read_bytes(),
-                default_backend(),
-            )
+            certificate = x509.load_pem_x509_certificate(JOB.get_cache("cert.pem", service_id=first_server), default_backend())
             if sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
                 LOGGER.warning(f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
-            elif certificate.not_valid_after - certificate.not_valid_before != timedelta(days=int(days)):
+            elif certificate.not_valid_after_utc - certificate.not_valid_before_utc != timedelta(days=int(days)):
                 LOGGER.warning(
                     f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
                 )
             else:
+                LOGGER.info(f"Self-signed certificate for {first_server} is valid")
                 return True, 0
 
     LOGGER.info(f"Generating self-signed certificate for {first_server}")
-    server_path = self_signed_path.joinpath(first_server)
     server_path.mkdir(parents=True, exist_ok=True)
     if (
         run(
@@ -71,9 +62,9 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 "-newkey",
                 "ed25519",
                 "-keyout",
-                str(self_signed_path.joinpath(first_server, "key.pem")),
+                server_path.joinpath("key.pem").as_posix(),
                 "-out",
-                str(self_signed_path.joinpath(first_server, "cert.pem")),
+                server_path.joinpath("cert.pem").as_posix(),
                 "-days",
                 days,
                 "-subj",
@@ -134,6 +125,8 @@ try:
                 getenv(f"{first_server}_SELF_SIGNED_SSL_SUBJ", getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/")),
                 self_signed_path,
             )
+            if not ret:
+                skipped_servers.append(first_server)
             status = ret_status
 
     for first_server in skipped_servers:
