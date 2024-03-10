@@ -44,8 +44,8 @@ function selfsigned:init()
 			for server_name, multisite_vars in pairs(vars) do
 				if multisite_vars["GENERATE_SELF_SIGNED_SSL"] == "yes" and server_name ~= "global" then
 					local check, data = read_files({
-						"/var/cache/bunkerweb/selfsigned/" .. server_name .. ".pem",
-						"/var/cache/bunkerweb/selfsigned/" .. server_name .. ".key",
+						"/var/cache/bunkerweb/selfsigned/" .. server_name .. "/cert.pem",
+						"/var/cache/bunkerweb/selfsigned/" .. server_name .. "/key.pem",
 					})
 					if not check then
 						self.logger:log(ERR, "error while reading files : " .. data)
@@ -68,8 +68,8 @@ function selfsigned:init()
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
 			local check, data = read_files({
-				"/var/cache/bunkerweb/selfsigned/" .. server_name:match("%S+") .. ".pem",
-				"/var/cache/bunkerweb/selfsigned/" .. server_name:match("%S+") .. ".key",
+				"/var/cache/bunkerweb/selfsigned/" .. server_name:match("%S+") .. "/cert.pem",
+				"/var/cache/bunkerweb/selfsigned/" .. server_name:match("%S+") .. "/key.pem",
 			})
 			if not check then
 				self.logger:log(ERR, "error while reading files : " .. data)

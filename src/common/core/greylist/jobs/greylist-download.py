@@ -2,10 +2,9 @@
 
 from contextlib import suppress
 from ipaddress import ip_address, ip_network
-from os import _exit, getenv, sep
+from os import getenv, sep
 from os.path import join, normpath
-from pathlib import Path
-from re import IGNORECASE, compile as re_compile
+from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Tuple
@@ -16,11 +15,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from requests import get
 
-from Database import Database  # type: ignore
+from common_utils import bytes_hash  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, cache_hash, del_file_in_db, is_cached_file, file_hash
+from jobs import Job  # type: ignore
 
-rdns_rx = re_compile(rb"^[^ ]+$", IGNORECASE)
+rdns_rx = re_compile(rb"^[^ ]+$")
 asn_rx = re_compile(rb"^\d+$")
 uri_rx = re_compile(rb"^/")
 
@@ -51,7 +50,7 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     return False, b""
 
 
-logger = setup_logger("GREYLIST", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("GREYLIST", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
@@ -68,16 +67,10 @@ try:
         greylist_activated = True
 
     if not greylist_activated:
-        logger.info("Greylist is not activated, skipping downloads...")
-        _exit(0)
+        LOGGER.info("Greylist is not activated, skipping downloads...")
+        sys_exit(0)
 
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
-
-    # Create directories if they don't exist
-    greylist_path = Path(sep, "var", "cache", "bunkerweb", "greylist")
-    greylist_path.mkdir(parents=True, exist_ok=True)
-    tmp_greylist_path = Path(sep, "var", "tmp", "bunkerweb", "greylist")
-    tmp_greylist_path.mkdir(parents=True, exist_ok=True)
+    JOB = Job(LOGGER)
 
     # Get URLs
     urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
@@ -87,45 +80,36 @@ try:
                 urls[kind].append(url)
 
     # Don't go further if the cache is fresh
-    kinds_fresh = {
-        "IP": True,
-        "RDNS": True,
-        "ASN": True,
-        "USER_AGENT": True,
-        "URI": True,
-    }
-    all_fresh = True
+    kinds_fresh = {"IP": True, "RDNS": True, "ASN": True, "USER_AGENT": True, "URI": True}
     for kind in kinds_fresh:
-        if not is_cached_file(greylist_path.joinpath(f"{kind}.list"), "hour", db):
-            kinds_fresh[kind] = False
-            all_fresh = False
-            logger.info(
-                f"Greylist for {kind} is not cached, processing downloads..",
-            )
-        else:
-            logger.info(
-                f"Greylist for {kind} is already in cache, skipping downloads...",
-            )
-            if not urls[kind]:
-                logger.warning(
-                    f"Greylist for {kind} is cached but no URL is configured, removing from cache...",
-                )
-                greylist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
-                deleted, err = del_file_in_db(f"{kind}.list", db)
-                if not deleted:
-                    logger.warning(f"Couldn't delete {kind}.list from cache : {err}")
+        if not JOB.is_cached_file(f"{kind}.list", "hour"):
+            if urls[kind]:
+                kinds_fresh[kind] = False
+                LOGGER.info(f"Greylist for {kind} is not cached, processing downloads..")
+            continue
 
-    if all_fresh:
-        _exit(0)
+        LOGGER.info(f"Greylist for {kind} is already in cache, skipping downloads...")
+
+        if not urls[kind]:
+            LOGGER.warning(f"Greylist for {kind} is cached but no URL is configured, removing from cache...")
+            deleted, err = JOB.del_cache(f"{kind}.list")
+            if not deleted:
+                LOGGER.warning(f"Couldn't delete {kind}.list from cache : {err}")
+
+    if all(kinds_fresh.values()):
+        if not any(urls.values()):
+            LOGGER.info("No greylist URL is configured, nothing to do...")
+        sys_exit(0)
 
     # Loop on kinds
     for kind, urls_list in urls.items():
         if kinds_fresh[kind]:
             continue
-        # Write combined data of the kind to a single temp file
+
+        # Write combined data of the kind in memory and check if it has changed
         for url in urls_list:
             try:
-                logger.info(f"Downloading greylist data from {url} ...")
+                LOGGER.info(f"Downloading greylist data from {url} ...")
                 if url.startswith("file://"):
                     with open(normpath(url[7:]), "rb") as f:
                         iterable = f.readlines()
@@ -133,7 +117,7 @@ try:
                     resp = get(url, stream=True, timeout=10)
 
                     if resp.status_code != 200:
-                        logger.warning(f"Got status code {resp.status_code}, skipping...")
+                        LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
                         continue
 
                     iterable = resp.iter_lines()
@@ -153,39 +137,28 @@ try:
                         content += data + b"\n"
                         i += 1
 
-                tmp_greylist_path.joinpath(f"{kind}.list").write_bytes(content)
-
-                logger.info(f"Downloaded {i} bad {kind}")
+                LOGGER.info(f"Downloaded {i} bad {kind}")
                 # Check if file has changed
-                new_hash = file_hash(tmp_greylist_path.joinpath(f"{kind}.list"))
-                old_hash = cache_hash(greylist_path.joinpath(f"{kind}.list"), db)
+                new_hash = bytes_hash(content)
+                old_hash = JOB.cache_hash(f"{kind}.list")
                 if new_hash == old_hash:
-                    logger.info(
-                        f"New file {kind}.list is identical to cache file, reload is not needed",
-                    )
+                    LOGGER.info(f"New file {kind}.list is identical to cache file, reload is not needed")
                 else:
-                    logger.info(
-                        f"New file {kind}.list is different than cache file, reload is needed",
-                    )
+                    LOGGER.info(f"New file {kind}.list is different than cache file, reload is needed")
                     # Put file in cache
-                    cached, err = cache_file(
-                        tmp_greylist_path.joinpath(f"{kind}.list"),
-                        greylist_path.joinpath(f"{kind}.list"),
-                        new_hash,
-                        db,
-                    )
-
+                    cached, err = JOB.cache_file(f"{kind}.list", content, checksum=new_hash)
                     if not cached:
-                        logger.error(f"Error while caching greylist : {err}")
+                        LOGGER.error(f"Error while caching greylist : {err}")
                         status = 2
                     else:
                         status = 1
             except:
                 status = 2
-                logger.error(f"Exception while getting greylist from {url} :\n{format_exc()}")
-
+                LOGGER.error(f"Exception while getting greylist from {url} :\n{format_exc()}")
+except SystemExit as e:
+    status = e.code
 except:
     status = 2
-    logger.error(f"Exception while running greylist-download.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running greylist-download.py :\n{format_exc()}")
 
 sys_exit(status)
