@@ -75,22 +75,18 @@ class Job:
     ) -> Optional[Union[Dict[str, Any], bytes]]:
         """Get cache file from database or from local cache file."""
         cache_path = self.job_path.joinpath(service_id, name)
+        ret_data = {}
         if cache_path.is_file():
             if with_data and not with_info:
                 return cache_path.read_bytes()
-
-            ret_data = {}
-            if with_info:
-                ret_data = {
-                    "last_update": cache_path.stat().st_mtime,
-                    "checksum": file_hash(cache_path),
-                }
             if with_data:
                 ret_data["data"] = cache_path.read_bytes()
-            return ret_data
 
         with LOCK:
-            return self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, with_info=with_info, with_data=with_data)  # type: ignore
+            if not ret_data:
+                return self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, with_info=with_info, with_data=with_data)  # type: ignore
+            ret_data.update(self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, with_info=True, with_data=False))  # type: ignore
+        return ret_data
 
     def is_cached_file(self, name: str, expire: Literal["hour", "day", "week", "month"], *, job_name: str = "", service_id: str = "") -> bool:
         """Check if cache file is cached and if it's still fresh."""
@@ -100,9 +96,8 @@ class Job:
             if isinstance(cache_info, dict):
                 current_time = datetime.now().timestamp()
                 if current_time < cache_info["last_update"]:
-                    is_cached = False
-                else:
-                    is_cached = current_time - cache_info["last_update"] < EXPIRE_TIME[expire]
+                    return False
+                is_cached = current_time - cache_info["last_update"] < EXPIRE_TIME[expire]
         except:
             is_cached = False
         return is_cached
