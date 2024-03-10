@@ -92,7 +92,7 @@ try:
         LOGGER.info("No external plugins to download")
         sys_exit(0)
 
-    db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
+    db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     plugin_nbr = 0
 
     # Loop on URLs

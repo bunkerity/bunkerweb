@@ -52,7 +52,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
             tmp_config[split[0]] = split[1]
 
             if not db and split[0] == "DATABASE_URI":
-                db = Database(logger, sqlalchemy_string=split[1], pool=False)
+                db = Database(logger, sqlalchemy_string=split[1])
             elif split[0] == "API_HTTP_PORT":
                 api_http_port = split[1]
             elif split[0] == "API_SERVER_NAME":
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         external_plugins = args.plugins
         pro_plugins = args.pro_plugins
         if not Path(sep, "usr", "sbin", "nginx").exists() and args.method == "ui":
-            db = Database(logger, pool=False)
+            db = Database(logger)
             external_plugins = db.get_plugins(_type="external")
             pro_plugins = db.get_plugins(_type="pro")
 
@@ -181,7 +181,7 @@ if __name__ == "__main__":
                         f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
                     )
 
-            db = Database(logger, config_files.get("DATABASE_URI", None), pool=False)
+            db = Database(logger, config_files.get("DATABASE_URI", None))
         else:
             docker_client = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
 
@@ -217,7 +217,7 @@ if __name__ == "__main__":
                         tmp_config[split[0]] = split[1]
 
                         if not db and split[0] == "DATABASE_URI":
-                            db = Database(logger, sqlalchemy_string=split[1], pool=False)
+                            db = Database(logger, sqlalchemy_string=split[1])
                         elif split[0] == "API_HTTP_PORT":
                             api_http_port = split[1]
                         elif split[0] == "API_SERVER_NAME":
@@ -231,7 +231,7 @@ if __name__ == "__main__":
                 )
 
         if not db:
-            db = Database(logger, pool=False)
+            db = Database(logger)
 
         # Compute the config
         if not config_files:

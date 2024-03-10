@@ -37,7 +37,7 @@ try:
         tgz.seek(0, 0)
         files = {"archive.tar.gz": tgz}
 
-        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
         lock = Lock()
 
         with lock:

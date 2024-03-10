@@ -94,7 +94,7 @@ def install_plugin(plugin_dir: str, db, preview: bool = True) -> bool:
 
 
 try:
-    db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
+    db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     db_metadata = db.get_metadata()
     current_date = datetime.now()
 

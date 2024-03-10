@@ -72,7 +72,7 @@ try:
         sys_exit(0)
 
     if not urls:
-        LOGGER.error("No URL found, skipping download...")
+        LOGGER.info("No URL found, skipping download...")
         sys_exit(0)
 
     # Download and write data to temp file

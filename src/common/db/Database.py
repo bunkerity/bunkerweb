@@ -48,7 +48,7 @@ from sqlalchemy.exc import (
     SQLAlchemyError,
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.pool import SingletonThreadPool
+from sqlalchemy.pool import QueuePool
 
 install_as_MySQLdb()
 
@@ -56,16 +56,13 @@ install_as_MySQLdb()
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
 
-    def __init__(
-        self,
-        logger: Logger,
-        sqlalchemy_string: Optional[str] = None,
-        *,
-        ui: bool = False,
-        pool: bool = True,
-    ) -> None:
+    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None) -> None:
         """Initialize the database"""
         self.logger = logger
+
+        if pool:
+            self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
+
         self.__session_factory = None
         self.__sql_engine = None
 
@@ -97,7 +94,14 @@ class Database:
         self.database_uri = sqlalchemy_string
         error = False
 
-        engine_kwargs = {"future": True, "poolclass": None if pool else SingletonThreadPool, "pool_pre_ping": True, "pool_recycle": 1800}
+        engine_kwargs = {
+            "future": True,
+            "poolclass": QueuePool,
+            "pool_pre_ping": True,
+            "pool_recycle": 1800,
+            "pool_size": 20,
+            "max_overflow": 10,
+        }
 
         try:
             self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
@@ -152,7 +156,6 @@ class Database:
 
         self.logger.info("✅ Database connection established")
 
-        self.__session_factory = sessionmaker(bind=self.__sql_engine, autoflush=True, expire_on_commit=False)
         self.suffix_rx = re_compile(r"_\d+$")
 
         if sqlalchemy_string.startswith("sqlite"):
@@ -171,20 +174,21 @@ class Database:
     @contextmanager
     def __db_session(self):
         try:
-            assert self.__session_factory is not None
+            assert self.__sql_engine is not None
         except AssertionError:
-            self.logger.error("The database session is not initialized")
+            self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        session = scoped_session(self.__session_factory)
-
-        try:
-            yield session
-        except BaseException:
-            session.rollback()
-            raise
-        finally:
-            session.remove()
+        with self.__sql_engine.connect() as conn:
+            session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
+            session = scoped_session(session_factory)
+            try:
+                yield session
+            except BaseException:
+                session.rollback()
+                raise
+            finally:
+                session.remove()
 
     def set_autoconf_load(self, value: bool = True) -> str:
         """Set the autoconf_loaded value"""

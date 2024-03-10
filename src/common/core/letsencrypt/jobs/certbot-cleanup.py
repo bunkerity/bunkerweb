@@ -25,7 +25,7 @@ try:
 
     # Cluster case
     if get_integration() in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
-        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
         lock = Lock()
         with lock:
             instances = db.get_instances()

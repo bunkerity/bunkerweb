@@ -41,7 +41,7 @@ class Job:
         if not self.db:
             from Database import Database  # type: ignore
 
-            self.db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
+            self.db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"))
         self.logger = logger or self.db.logger
 
         if not deprecated:
