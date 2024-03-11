@@ -232,9 +232,9 @@ typing-extensions==4.10.0 \
     #   pydantic-core
     #   starlette
     #   uvicorn
-uvicorn==0.27.1 \
-    --hash=sha256:3d9a267296243532db80c83a959a3400502165ade2c1338dea4e67915fd4745a \
-    --hash=sha256:5c89da2f3895767472a35556e539fd59f7edbe9b1e9c0e1c99eebeadc61838e4
+uvicorn==0.28.0 \
+    --hash=sha256:6623abbbe6176204a4226e67607b4d52cc60ff62cda0ff177613645cefa2ece1 \
+    --hash=sha256:cab4473b5d1eaeb5a0f6375ac4bc85007ffc75c3cc1768816d9e5d589857b067
     # via -r requirements.in
 uvloop==0.19.0 \
     --hash=sha256:0246f4fd1bf2bf702e06b0d45ee91677ee5c31242f39aab4ea6fe0c51aedd0fd \
