@@ -5,6 +5,8 @@ from json import loads
 from glob import glob
 from pathlib import Path
 from pytablewriter import MarkdownTableWriter
+import requests
+import zipfile
 
 
 def print_md_table(settings) -> MarkdownTableWriter:
@@ -80,6 +82,44 @@ for name, data in dict(sorted(core_settings.items())).items():
     print(f"{stream_support(data['stream'])}\n", file=doc)
     print(f"{data['description']}\n", file=doc)
     print(print_md_table(data["settings"]), file=doc)
+
+
+# Read VERSION as file with permissions to read from src/
+with open("src/VERSION", "r") as f:
+    version = f.read().strip()
+
+# Get zip file from https://assets.bunkerity.com/bw-pro/preview/v{version}
+url = f"https://assets.bunkerity.com/bw-pro/preview/v{version}.zip"
+
+# Download zip
+response = requests.get(url)
+response.raise_for_status()
+with open(f"v{version}.zip", "wb") as f:
+    f.write(response.content)
+
+# Unzip file
+with zipfile.ZipFile(f"v{version}.zip", "r") as zip_ref:
+    zip_ref.extractall(f"v{version}")
+
+# Print pro settings
+print("## Pro settings [](assets/img/pro-icon.svg)\n", file=doc)
+pro_settings = {}
+for pro in glob(f"v{version}/*/plugin.json"):
+    with open(pro, "r") as f:
+        pro_plugin = loads(f.read())
+        if len(pro_plugin["settings"]) > 0:
+            pro_settings[pro_plugin["name"]] = pro_plugin
+
+for name, data in dict(sorted(pro_settings.items())).items():
+    print(f"### {data['name']} [](assets/img/pro-icon.svg)\n", file=doc)
+    print(f"{stream_support(data['stream'])}\n", file=doc)
+    print(f"{data['description']}\n", file=doc)
+    print(print_md_table(data["settings"]), file=doc)
+
+# Remove zip file
+Path(f"v{version}.zip").unlink()
+# Remove pro-preview folder
+Path(f"v{version}").rmdir()
 
 doc.seek(0)
 content = doc.read()
