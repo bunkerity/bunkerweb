@@ -507,9 +507,11 @@ You can deploy complex authentication (e.g. SSO), by using the auth request sett
 
 Monitoring and reporting means that you are kept informed of the slightest problem and can react as quickly as possible.
 
+### Reporting
+
 <div style="display:flex; align-items:center">
 
-  <h3 id="reporting">Reporting</h3>
+  <h3 data-custom-header id="reporting">Reporting</h3>
 
   <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
         viewBox="0 0 48 46"
@@ -525,7 +527,6 @@ Monitoring and reporting means that you are kept informed of the slightest probl
     A comparison is made every hour with the cached data. If BunkerWeb no longer has access to the cache, the data to be compared will be reset.
 
 #### Types of reporting
-
 
 Pro reporting plugin gives you two types of reports :
 
@@ -564,9 +565,11 @@ You need to **pay attention** using SMTP:
   - The address used must **not have double authentication** to work.
 
 
+### Prometheus exporter
+
 <div style="display:flex; align-items:center">
 
-  <h3 id="prometheus-exporter">Prometheus exporter</h3>
+  <h3 data-custom-header id="prometheus-exporter">Prometheus exporter</h3>
 
   <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
         viewBox="0 0 48 46"
@@ -579,9 +582,11 @@ You need to **pay attention** using SMTP:
 
 TO DO
 
+### Pro metrics
+
 <div style="display:flex; align-items:center">
 
-  <h3 id="prometheus-exporter">Pro metrics</h3>
+  <h3 data-custom-header id="pro-metrics">Pro metrics</h3>
 
   <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
         viewBox="0 0 48 46"

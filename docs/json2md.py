@@ -89,10 +89,12 @@ for name, data in dict(sorted(core_settings.items())).items():
 
 
 def pro_title(head_num: str, title: str) -> str:
+    markdown_header = "##" if head_num == "2" else "###"
     return f"""
-<div style="display:flex; align-items:center">
+{markdown_header} {title}
 
-    <h{head_num} id="{title.lower().replace(" ", "-")}">{title}</h{head_num}>
+<div style="display:flex; align-items:center">
+    <h{head_num} data-custom-header id="{title.lower().replace(" ", "-")}">{title}</h{head_num}>
 
     <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
             viewBox="0 0 48 46"
@@ -123,7 +125,7 @@ with zipfile.ZipFile(f"v{version}.zip", "r") as zip_ref:
     zip_ref.extractall(f"v{version}")
 
 # Print pro settings
-print(pro_title("2", "Pro plugins"), file=doc)
+print("## Pro plugins", file=doc)
 pro_settings = {}
 for pro in glob(f"v{version}/*/plugin.json"):
     with open(pro, "r") as f:
