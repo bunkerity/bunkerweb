@@ -18,7 +18,7 @@
 - [UI] General : add visual feedback when filtering is matching nothing
 - [UI] General : blog news working and add dynamic banner news
 - [UI] Global config page : Add multisite edit, add context filter
-- [UI] Global config / Service page : remove tabs for select and enhance filtering (plugin name includes)
+- [UI] Global config / Service page : remove tabs for select and enhance filtering (plugin name, multiple settings and context now includes)
 - [UI] Service page : add the possibility to clone a service in the web UI
 - [UI] Service page : add the possibility to set a service as draft in the web UI
 - [UI] Service page : add services filter when at least 4 services

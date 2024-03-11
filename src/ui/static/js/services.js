@@ -1450,6 +1450,7 @@ const setFilterGlobal = new FilterSettings(
   "settings-filter",
   document.querySelector("[data-services-tabs-select]"),
   document.querySelector("[data-services-modal-form]"),
+  "services",
 );
 
 const setMultiple = new Multiple("services");

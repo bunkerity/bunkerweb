@@ -194,10 +194,16 @@ class FormatValue {
 }
 
 class FilterSettings {
-  constructor(inputID, tabContainer, contentContainer) {
+  constructor(
+    inputID,
+    tabContainer,
+    contentContainer,
+    prefix = "global-config",
+  ) {
     this.input = document.querySelector(`input#${inputID}`);
+    this.prefix = prefix;
     this.contextTxtEl = document.querySelector(
-      'span[data-global-config-setting-select-text="context"]',
+      `span[data-${this.prefix}-setting-select-text="context"]`,
     );
     this.tabContainer = tabContainer;
     this.contentContainer = contentContainer;
@@ -240,13 +246,14 @@ class FilterSettings {
 
     //loop all tabs
     this.tabsEls.forEach((tab) => {
+      const tabName = tab.getAttribute(`data-tab-select-handler`);
       //get settings of tabs except multiples
       const settings = this.getSettingsFromTab(tab);
 
       //compare total count to currCount to determine
       //if tabs need to be hidden
       const settingCount = settings.length;
-      let hiddenCount = 0;
+      let settingHiddenCount = 0;
       settings.forEach((setting) => {
         try {
           let needToHide = false;
@@ -254,7 +261,7 @@ class FilterSettings {
             .querySelector("h5")
             .textContent.trim()
             .toLowerCase();
-          if (!title.includes(inpValue)) {
+          if (!title.includes(inpValue) && inpValue !== "") {
             needToHide = true;
           }
 
@@ -277,13 +284,111 @@ class FilterSettings {
 
           if (needToHide) {
             setting.classList.add("hidden");
-            hiddenCount++;
+            settingHiddenCount++;
           }
         } catch (err) {}
       });
-      //case no setting match, check if match at least tab name
+
+      // check multiple settings
+      //get settings of tabs except multiples
+      const multSettings = this.getMultSettingsFromTab(tab);
+      const multSettingCount = multSettings.length;
+      let multSettingHiddenCount = 0;
+      multSettings.forEach((multSetting) => {
+        try {
+          let needToHideMult = false;
+          const title = multSetting
+            .querySelector("h5")
+            .textContent.trim()
+            .toLowerCase();
+          if (!title.includes(inpValue) && inpValue !== "") {
+            needToHideMult = true;
+          }
+
+          // check context if filter exists
+          try {
+            if (this.contextTxtEl) {
+              const currContextFilter =
+                this.contextTxtEl.textContent.toLowerCase();
+
+              if (currContextFilter !== "all") {
+                const settingContext = multSetting
+                  .getAttribute("data-global-config-context")
+                  .toLowerCase();
+                if (settingContext !== currContextFilter) {
+                  needToHideMult = true;
+                }
+              }
+            }
+          } catch (e) {}
+
+          if (needToHideMult) {
+            multSetting.classList.add("hidden");
+            multSettingHiddenCount++;
+          }
+        } catch (err) {}
+      });
+
+      // check for each multiple groups if all are hidden
+      // if so, hide the multiple handler
+      const multSettingsHandler = this.contentContainer
+        .querySelector(`[data-plugin-item=${tabName}]`)
+        .querySelectorAll(`[data-multiple-handler]`);
+
+      for (let i = 0; i < multSettingsHandler.length; i++) {
+        // loop en each multiple groups
+        const handlerEl = multSettingsHandler[i];
+        const multHandlerName = handlerEl.getAttribute("data-multiple-handler");
+        const multGroups = this.contentContainer
+          .querySelector(`[data-plugin-item=${tabName}]`)
+          .querySelectorAll(
+            `[data-${this.prefix}-settings-multiple^="${multHandlerName}"]`,
+          );
+        // check for each if all settings are hidden
+
+        for (let j = 0; j < multGroups.length; j++) {
+          const multGroup = multGroups[j];
+          let isAllMultSettingHidden = true;
+          const settings = multGroup.querySelectorAll(
+            `[data-setting-container]`,
+          );
+          for (let k = 0; k < settings.length; k++) {
+            if (!settings[k].classList.contains("hidden")) {
+              isAllMultSettingHidden = false;
+              break;
+            }
+          }
+
+          if (isAllMultSettingHidden) {
+            handlerEl.classList.add("hidden");
+            multGroup.classList.add("hidden");
+          }
+        }
+      }
+
+      // Hide title if multSettingsHandler are hidden
+      let isAllGroupsHidden = true;
+      for (let i = 0; i < multSettingsHandler.length; i++) {
+        const handlerEl = multSettingsHandler[i];
+        if (!handlerEl.classList.contains("hidden")) {
+          isAllGroupsHidden = false;
+          break;
+        }
+      }
+
+      if (multSettingsHandler.length > 0 && isAllGroupsHidden) {
+        const multTitle = this.contentContainer
+          .querySelector(`[data-plugin-item=${tabName}]`)
+          .querySelector("[data-multiple-title]");
+        multTitle.classList.add("hidden");
+      }
+
+      //case no setting or no multiple match, check if match at least tab name
       // if no context, else we don't care about name
-      if (settingCount === hiddenCount) {
+      if (
+        settingCount === settingHiddenCount &&
+        multSettingCount === multSettingHiddenCount
+      ) {
         const tabName = tab.getAttribute(`data-tab-select-handler`);
         const tabTxt = tab.textContent.trim().toLowerCase();
         let needHideTab = false;
@@ -315,8 +420,6 @@ class FilterSettings {
         break;
       }
     }
-
-    console.log("is all hidden", isAllHidden);
 
     // case no tab match
     if (isAllHidden) {
@@ -356,26 +459,103 @@ class FilterSettings {
   resetFilter() {
     this.tabsEls.forEach((tab) => {
       const tabName = tab.getAttribute(`data-tab-select-handler`);
-      //hide mobile and desk tabs
+      //show tab
       tab.classList.remove("!hidden");
       this.contentContainer
         .querySelector(`[data-plugin-item=${tabName}]`)
         .classList.remove("hidden");
+      // show no multiple setting
       const settings = this.getSettingsFromTab(tab);
       settings.forEach((setting) => {
         setting.classList.remove("hidden");
       });
+      // show multiple setting
+      const multSettings = this.getMultSettingsFromTab(tab);
+      multSettings.forEach((setting) => {
+        setting.classList.remove("hidden");
+      });
+      // show multiple handler
+      const multSettingsHandler = this.contentContainer
+        .querySelector(`[data-plugin-item=${tabName}]`)
+        .querySelectorAll(`[data-multiple-handler]`);
+
+      const multTitle = this.contentContainer
+        .querySelector(`[data-plugin-item=${tabName}]`)
+        .querySelector("[data-multiple-title]");
+
+      if (multTitle) {
+        multTitle.classList.remove("hidden");
+      }
+
+      for (let i = 0; i < multSettingsHandler.length; i++) {
+        // loop en each multiple groups
+        const handlerEl = multSettingsHandler[i];
+        handlerEl.classList.remove("hidden");
+        const multHandlerName = handlerEl.getAttribute("data-multiple-handler");
+        const multGroups = this.contentContainer
+          .querySelector(`[data-plugin-item=${tabName}]`)
+          .querySelectorAll(
+            `[data-${this.prefix}-settings-multiple^="${multHandlerName}"]`,
+          );
+        // check for each if all settings are hidden
+        for (let j = 0; j < multGroups.length; j++) {
+          const multGroup = multGroups[j];
+          // avoid if _SCHEMA
+          if (
+            multGroup
+              .getAttribute(`data-${this.prefix}-settings-multiple`)
+              .includes("_SCHEMA")
+          )
+            continue;
+          multGroup.classList.remove("hidden");
+
+          const settings = multGroup.querySelectorAll(
+            `[data-setting-container]`,
+          );
+          for (let k = 0; k < settings.length; k++) {
+            settings[k].classList.remove("hidden");
+          }
+        }
+      }
     });
   }
 
   getSettingsFromTab(tabEl) {
     const tabName = tabEl.getAttribute(`data-tab-select-handler`);
+    // no multiple settings
     const settingContainer = this.contentContainer
       .querySelector(`[data-plugin-item="${tabName}"]`)
       .querySelector(`[data-plugin-settings]`);
     const settings = settingContainer.querySelectorAll(
       "[data-setting-container]",
     );
+    return settings;
+  }
+
+  getMultSettingsFromTab(tabEl) {
+    const tabName = tabEl.getAttribute(`data-tab-select-handler`);
+    const settings = [];
+    // get multiple settings
+    const settingMultipleGroups = this.contentContainer
+      .querySelector(`[data-plugin-item="${tabName}"]`)
+      .querySelectorAll(`[data-${this.prefix}-settings-multiple]`);
+    for (let i = 0; i < settingMultipleGroups.length; i++) {
+      const settingMultipleGroup = settingMultipleGroups[i];
+      // case attribute ends with _SCHEMA, continue
+      if (
+        settingMultipleGroup
+          .getAttribute(`data-${this.prefix}-settings-multiple`)
+          .includes("_SCHEMA")
+      )
+        continue;
+      const settingsContainer = settingMultipleGroup.querySelectorAll(
+        `[data-setting-container]`,
+      );
+
+      settingsContainer.forEach((setting) => {
+        settings.push(setting);
+      });
+    }
     return settings;
   }
 }

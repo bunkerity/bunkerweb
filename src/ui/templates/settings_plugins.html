@@ -264,13 +264,13 @@
         </div>
         <!-- end plugin settings not multiple -->
         {% if multList|length > 0 %}
-            <h5 class="transition duration-300 ease-in-out ml-2 font-bold text-[1.1rem] uppercase dark:text-white/90 mt-2 mb-0">
+            <h5 data-multiple-title class="transition duration-300 ease-in-out ml-2 font-bold text-[1.1rem] uppercase dark:text-white/90 mt-2 mb-0">
                 multiple settings
             </h5>
         {% endif %}
         {% for multiple in multList %}
             <!-- plugin multiple handler -->
-            <div data-multiple-handler
+            <div data-multiple-handler="{{ multiple }}"
                  class="flex items-center mx-2 mb-2 mt-5 col-span-12 ">
                 <h5 class="input-title max-w-[150px] sm:max-w-[350px]">{{ multiple.replace('-', ' ').replace('_', ' ')|upper }}</h5>
                 <button data-{{ current_endpoint }}-multiple-add="{{ multiple }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
@@ -290,6 +290,7 @@
                         or current_endpoint == "services" and value['context'] == "multisite"
                         ) %}
                         <div data-setting-container="{{ setting }}_SCHEMA"
+                        data-{{ current_endpoint }}-context="{{ value['context'] }}"
                              class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4"
                              id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
                             <!-- title and info -->
