@@ -1709,16 +1709,17 @@ class Database:
         filters = {"job_name": job_name, "file_name": file_name}
         if service_id:
             filters["service_id"] = service_id
-        if plugin_id:
-            filters["plugin_id"] = plugin_id
 
         with self.__db_session() as session:
+            if plugin_id:
+                job = session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first()
+                if not job:
+                    return None
             data = session.query(Jobs_cache).with_entities(*entities).filter_by(**filters).first()
 
         if not data:
             return None
-
-        if with_data and not with_info:
+        elif with_data and not with_info:
             return data.data
 
         ret_data = {}
@@ -1738,24 +1739,36 @@ class Database:
 
             query = session.query(Jobs_cache).with_entities(*entities)
 
-            filters = {}
             if job_name:
-                filters["job_name"] = job_name
+                query = query.filter_by(job_name=job_name)
+
+            db_cache = query.all()
+
+            if not db_cache:
+                return []
+
+            job_names = []
             if plugin_id:
-                filters["plugin_id"] = plugin_id
+                filters = {"plugin_id": plugin_id}
+                if job_name:
+                    filters["name"] = job_name
+                job_names = [name for name in session.query(Jobs).with_entities(Jobs.name).filter_by(**filters)]
+                if not job_names:
+                    return []
 
-            if filters:
-                query = query.filter_by(**filters)
-
-            return [
-                {
-                    "job_name": cache.job_name,
-                    "service_id": cache.service_id,
-                    "file_name": cache.file_name,
-                    "data": "Download file to view content" if not with_data else cache.data,
-                }
-                for cache in query
-            ]
+            cache_files = []
+            for cache in db_cache:
+                if cache.job_name not in job_names:
+                    continue
+                cache_files.append(
+                    {
+                        "job_name": cache.job_name,
+                        "service_id": cache.service_id,
+                        "file_name": cache.file_name,
+                        "data": "Download file to view content" if not with_data else cache.data,
+                    }
+                )
+            return cache_files
 
     def add_instance(self, hostname: str, port: int, server_name: str, changed: Optional[bool] = True) -> str:
         """Add instance."""
