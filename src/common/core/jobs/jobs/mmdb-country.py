@@ -2,7 +2,6 @@
 
 from datetime import date, datetime, timedelta
 from gzip import decompress
-from hashlib import sha1
 from io import BytesIO
 from os import getenv, sep
 from os.path import join
@@ -10,16 +9,9 @@ from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from traceback import format_exc
-from typing import Optional, Union
+from typing import Optional
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("utils",),
-        ("db",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -27,7 +19,7 @@ from maxminddb import MODE_FD, open_database
 from requests import RequestException, Response, get
 
 from logger import setup_logger  # type: ignore
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, file_hash  # type: ignore
 from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
@@ -44,24 +36,6 @@ def request_mmdb() -> Optional[Response]:
         return None
 
 
-def bytes_sha1(bio: Union[Path, bytes, BytesIO]) -> str:
-    if isinstance(bio, Path):
-        bio = bio.read_bytes()
-    if isinstance(bio, bytes):
-        bio = BytesIO(bio)
-
-    assert isinstance(bio, BytesIO)
-
-    _sha512 = sha1()
-    while True:
-        data = bio.read(1024)
-        if not data:
-            break
-        _sha512.update(data)
-    bio.seek(0)
-    return _sha512.hexdigest()
-
-
 try:
     dl_mmdb = True
     tmp_path = Path(sep, "var", "tmp", "bunkerweb", "country.mmdb")
@@ -73,7 +47,7 @@ try:
         response = request_mmdb()
 
         if response and response.status_code == 200:
-            if response.content.find(bytes_sha1(tmp_path).encode()) != -1:
+            if response.content.find(file_hash(tmp_path, algorithm="sha1").encode()) != -1:
                 LOGGER.info("country.mmdb is already the latest version, skipping download...")
                 dl_mmdb = False
         else:
@@ -89,7 +63,7 @@ try:
                 response = request_mmdb()
 
             if response and response.status_code == 200:
-                skip_dl = response.content.find(bytes_sha1(job_cache["data"]).encode()) != -1
+                skip_dl = response.content.find(bytes_hash(job_cache["data"], algorithm="sha1").encode()) != -1
             elif job_cache["last_update"] < (datetime.now() - timedelta(weeks=1)).timestamp():
                 LOGGER.warning("Unable to check if the cache file is the latest version from db-ip.com and file is older than 1 week, checking anyway...")
                 skip_dl = False
