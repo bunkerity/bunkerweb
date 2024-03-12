@@ -357,7 +357,7 @@ def set_csp_header(response):
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
-        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com;"
+        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com;"
         + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: https://assets.bunkerity.com;"
