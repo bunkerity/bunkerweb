@@ -47,7 +47,8 @@ class Job:
         if not deprecated:
             with LOCK:
                 is_scheduler_first_start = self.db.is_scheduler_first_start()
-            self.restore_cache(manual=is_scheduler_first_start)
+            if not is_scheduler_first_start:
+                self.restore_cache(manual=False)
 
     def restore_cache(self, *, job_name: str = "", plugin_id: str = "", manual: bool = True) -> bool:
         """Restore job cache files from database."""
