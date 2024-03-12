@@ -618,7 +618,8 @@ class Database:
                     if missing_names:
                         # Remove jobs that are no longer in the list
                         self.logger.warning(f'Removing {len(missing_names)} jobs from plugin "{plugin["id"]}" as they are no longer in the list')
-                        session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
+                        session.query(Jobs).filter(Jobs.name.in_(missing_names), Jobs.plugin_id == plugin["id"]).delete()
+                        session.query(Jobs_cache).filter(Jobs_cache.job_name.in_(missing_names)).delete()
 
                     for job in jobs:
                         db_job = (
@@ -741,6 +742,7 @@ class Database:
                         session.query(Services).filter(Services.id.in_(missing_ids)).delete()
                         session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete()
                         session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
+                        session.query(Jobs_cache).filter(Jobs_cache.setting_id.in_(missing_ids)).delete()
 
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
                 db_drafts = {service.id for service in db_services if service.is_draft}
@@ -1317,6 +1319,9 @@ class Database:
                         changes = True
                         # Remove settings that are no longer in the list
                         session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
+                        session.query(Selects).filter(Selects.setting_id.in_(missing_ids)).delete()
+                        session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_ids)).delete()
+                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
 
                     for setting, value in settings.items():
                         value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
@@ -1395,6 +1400,7 @@ class Database:
                         changes = True
                         # Remove jobs that are no longer in the list
                         session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
+                        session.query(Jobs_cache).filter(Jobs_cache.job_name.in_(missing_names)).delete()
 
                     for job in jobs:
                         db_job = (

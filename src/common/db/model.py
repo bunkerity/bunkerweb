@@ -125,7 +125,6 @@ class Services_settings(Base):
 
 class Jobs(Base):
     __tablename__ = "bw_jobs"
-    __table_args__ = (UniqueConstraint("name", "plugin_id"),)
 
     name = Column(String(128), primary_key=True)
     plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"))
