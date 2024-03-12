@@ -1697,7 +1697,7 @@ class Database:
             }
 
     def get_job_cache_file(
-        self, job_name: str, file_name: str, *, service_id: str = "", with_info: bool = False, with_data: bool = True
+        self, job_name: str, file_name: str, *, service_id: str = "", plugin_id: str = "", with_info: bool = False, with_data: bool = True
     ) -> Optional[Union[Dict[str, Any], bytes]]:
         """Get job cache file."""
         entities = []
@@ -1709,6 +1709,8 @@ class Database:
         filters = {"job_name": job_name, "file_name": file_name}
         if service_id:
             filters["service_id"] = service_id
+        if plugin_id:
+            filters["plugin_id"] = plugin_id
 
         with self.__db_session() as session:
             data = session.query(Jobs_cache).with_entities(*entities).filter_by(**filters).first()
@@ -1727,7 +1729,7 @@ class Database:
             ret_data["data"] = data.data
         return ret_data
 
-    def get_jobs_cache_files(self, *, job_name: str = "", with_data: bool = False) -> List[Dict[str, Any]]:
+    def get_jobs_cache_files(self, *, job_name: str = "", plugin_id: str = "", with_data: bool = False) -> List[Dict[str, Any]]:
         """Get jobs cache files."""
         with self.__db_session() as session:
             entities = [Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name]
@@ -1736,8 +1738,14 @@ class Database:
 
             query = session.query(Jobs_cache).with_entities(*entities)
 
+            filters = {}
             if job_name:
-                query = query.filter_by(job_name=job_name)
+                filters["job_name"] = job_name
+            if plugin_id:
+                filters["plugin_id"] = plugin_id
+
+            if filters:
+                query = query.filter_by(**filters)
 
             return [
                 {
