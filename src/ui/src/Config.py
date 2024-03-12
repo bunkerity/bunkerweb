@@ -18,7 +18,7 @@ class Config:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
 
-    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True) -> None:
+    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, global_edit: bool = False) -> None:
         """Generates the nginx configuration file from the given configuration
 
         Parameters
@@ -31,7 +31,7 @@ class Config:
         ConfigGenerationError
             If an error occurred during the generation of the configuration file, raises this exception
         """
-        conf = deepcopy(global_conf)
+        conf = global_conf.copy()
 
         servers = []
         plugins_settings = self.get_plugins_settings()
@@ -42,11 +42,9 @@ class Config:
 
             for k in service:
                 key_without_server_name = k.replace(f"{server_name}_", "")
-                if plugins_settings[key_without_server_name]["context"] != "global" if key_without_server_name in plugins_settings else True:
-                    if not k.startswith(server_name) or k in plugins_settings:
-                        conf[f"{server_name}_{k}"] = service[k]
-                    else:
-                        conf[k] = service[k]
+                if plugins_settings[key_without_server_name]["context"] == "multisite":
+                    if not global_edit or f"{server_name}_{key_without_server_name}" not in conf:
+                        conf[f"{server_name}_{key_without_server_name}"] = service[k]
 
             servers.append(server_name)
 
@@ -221,7 +219,7 @@ class Config:
         config = self.get_config(methods=False)
 
         if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
-            for k in deepcopy(config):
+            for k in config.copy():
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
@@ -241,7 +239,7 @@ class Config:
         str
             the confirmation message
         """
-        self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
+        self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False), global_edit=True)
         return "The global configuration has been edited."
 
     def delete_service(self, service_name: str, *, check_changes: bool = True) -> Tuple[str, int]:
@@ -279,7 +277,7 @@ class Config:
 
         full_env["SERVER_NAME"] = " ".join([s for s in full_env["SERVER_NAME"].split(" ") if s != service_name])
 
-        new_env = deepcopy(full_env)
+        new_env = full_env.copy()
 
         for k in full_env:
             if k.startswith(service_name):

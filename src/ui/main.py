@@ -907,8 +907,8 @@ def global_config():
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
-        services = config["SERVER_NAME"].split(" ")
+        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
+        services = config["SERVER_NAME"]["value"].split(" ")
         for variable, value in variables.copy().items():
             if variable in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "SERVER_NAME", "IS_LOADING", "IS_DRAFT") or variable.endswith("SCHEMA"):
                 del variables[variable]
@@ -919,7 +919,8 @@ def global_config():
             elif value == "off":
                 value = "no"
 
-            if value == config.get(variable, None) or any(variable.startswith(f"{service}_") for service in services):
+            setting = config.get(variable, {"value": None, "global": True})
+            if setting["global"] and value == setting["value"]:
                 del variables[variable]
 
         if not variables:
@@ -929,6 +930,12 @@ def global_config():
 
         if error:
             return redirect_flash_error("The global configuration variable checks returned error", "global_config", True)
+
+        for variable, value in variables.copy().items():
+            for service in services:
+                setting = config.get(f"{service}_{variable}", None)
+                if setting and setting["global"] and value != setting["value"]:
+                    variables[f"{service}_{variable}"] = value
 
         # Reload instances
         app.config["RELOADING"] = True
