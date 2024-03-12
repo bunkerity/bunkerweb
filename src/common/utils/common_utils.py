@@ -1,4 +1,4 @@
-from hashlib import sha512
+from hashlib import new as new_hash
 from io import BytesIO
 from os import getenv, sep
 from pathlib import Path
@@ -50,8 +50,8 @@ def get_os_info() -> Dict[str, str]:
     return os_data
 
 
-def file_hash(file: Union[str, Path]) -> str:
-    _sha512 = sha512()
+def file_hash(file: Union[str, Path], *, algorithm: str = "sha512") -> str:
+    _hash = new_hash(algorithm)
     if not isinstance(file, Path):
         file = Path(file)
 
@@ -60,21 +60,23 @@ def file_hash(file: Union[str, Path]) -> str:
             data = f.read(1024)
             if not data:
                 break
-            _sha512.update(data)
-    return _sha512.hexdigest()
+            _hash.update(data)
+    return _hash.hexdigest()
 
 
-def bytes_hash(bio: Union[bytes, BytesIO]) -> str:
-    if isinstance(bio, bytes):
+def bytes_hash(bio: Union[str, bytes, BytesIO], *, algorithm: str = "sha512") -> str:
+    if isinstance(bio, str):
+        bio = BytesIO(bio.encode("utf-8"))
+    elif isinstance(bio, bytes):
         bio = BytesIO(bio)
 
     assert isinstance(bio, BytesIO)
 
-    _sha512 = sha512()
+    _hash = new_hash(algorithm)
     while True:
         data = bio.read(1024)
         if not data:
             break
-        _sha512.update(data)
+        _hash.update(data)
     bio.seek(0)
-    return _sha512.hexdigest()
+    return _hash.hexdigest()

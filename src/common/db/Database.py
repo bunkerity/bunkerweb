@@ -1091,11 +1091,15 @@ class Database:
                             )
                             .filter_by(service_id=service.id, setting_id=key)
                         ):
+                            value = service_setting.value
+                            if key == "SERVER_NAME" and service.id not in value.split(" "):
+                                value = f"{service.id} {value}".strip()
+
                             config[f"{service.id}_{key}" + (f"_{service_setting.suffix}" if service_setting.suffix > 0 else "")] = (
-                                service_setting.value
+                                value
                                 if not methods
                                 else {
-                                    "value": service_setting.value,
+                                    "value": value,
                                     "global": False,
                                     "method": service_setting.method,
                                 }

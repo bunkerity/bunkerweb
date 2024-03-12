@@ -106,7 +106,7 @@ try:
         sys_exit(0)
 
     skipped_servers = []
-    if not getenv("MULTISITE", "no") == "yes":
+    if getenv("MULTISITE", "no") == "no":
         servers = [servers[0]]
         if getenv("GENERATE_SELF_SIGNED_SSL", "no") == "no":
             LOGGER.info("Generate self-signed SSL is not enabled, skipping certificate generation ...")
