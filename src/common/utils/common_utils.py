@@ -64,8 +64,10 @@ def file_hash(file: Union[str, Path]) -> str:
     return _sha512.hexdigest()
 
 
-def bytes_hash(bio: Union[bytes, BytesIO]) -> str:
-    if isinstance(bio, bytes):
+def bytes_hash(bio: Union[str, bytes, BytesIO]) -> str:
+    if isinstance(bio, str):
+        bio = BytesIO(bio.encode("utf-8"))
+    elif isinstance(bio, bytes):
         bio = BytesIO(bio)
 
     assert isinstance(bio, BytesIO)
