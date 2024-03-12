@@ -185,16 +185,9 @@
                                        value="" />
                             </div>
                             <!-- auto privacy policy-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
-                                    I've read and agree to the
-                                    <a class="privacy-link"
-                                       href="https://www.bunkerity.com/privacy-policy/?utm_campaign=self&utm_source=ui"
-                                       target="_blank"
-                                       rel="noopener">privacy policy</a>
-                                </h5>
-                                <label class="sr-only" for="newsletter-check">privacy policy</label>
-                                <div data-checkbox-handler="newsletter-check"
+                            <div class="flex relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                              <label class="sr-only" for="newsletter-check">privacy policy</label>
+                              <div data-checkbox-handler="newsletter-check"
                                      class="relative mb-7 md:mb-0 z-10">
                                     <input data-check
                                            type="checkbox"
@@ -207,10 +200,17 @@
                                          class="pointer-events-none absolute fill-white left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
                                          xmlns="http://www.w3.org/2000/svg"
                                          viewBox="0 0 512 512">
-                                        <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
+                                         <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
                                         </path>
-                                    </svg>
-                                </div>
+                                      </svg>
+                                    </div>
+                                    <h5 class="text-base mt-1 transition duration-300 ease-in-out text-md font-bold m-0 ml-2">
+                                        I've read and agree to the
+                                        <a class="privacy-link"
+                                           href="https://www.bunkerity.com/privacy-policy/?utm_campaign=self&utm_source=ui"
+                                           target="_blank"
+                                           rel="noopener">privacy policy</a>
+                                    </h5>
                             </div>
                             <!-- end auto privacy policy-->
                             <!-- end email inpt-->
