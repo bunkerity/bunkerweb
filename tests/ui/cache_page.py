@@ -17,7 +17,7 @@ try:
 
     assert_button_click(DRIVER, "//div[@data-cache-element='mmdb-asn/asn.mmdb']")
 
-    file_content_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-cache-modal-editor='']/div[@class='ace_scroller']//div[@class='ace_content']")
+    file_content_elem = safe_get_element(DRIVER, By.XPATH, "//div[@id='editor']//div[@class='ace_content']")
     assert isinstance(file_content_elem, WebElement), "The file content element is not an instance of WebElement"
     if file_content_elem.text.strip() != "Download file to view content":
         log_exception("The cache file content is not correct, exiting ...")
