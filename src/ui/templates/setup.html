@@ -207,7 +207,7 @@
                                     <h5 class="text-base mt-1 transition duration-300 ease-in-out text-md font-bold m-0 ml-2">
                                         I've read and agree to the
                                         <a class="privacy-link"
-                                           href="https://www.bunkerity.com/privacy-policy/?utm_campaign=self&utm_source=ui"
+                                           href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
                                            target="_blank"
                                            rel="noopener">privacy policy</a>
                                     </h5>
@@ -320,6 +320,10 @@
                     </div>
                 </div>
                 <!-- end form -->
+                <form style="display: none;" id="newsletter-form" action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67" method="POST" target="_blank">
+                  <input id="newsletter-form-email" name="EMAIL" type="email" value="" />
+                  <input id="newsletter-form-check" name="newsletter-check" type="checkbox" value="yes" />
+                </form>
             </main>
             <script nonce="{{ script_nonce }}">
       class ServerCheck {
@@ -348,19 +352,7 @@
             }://${this.servInp.value}/setup/check`;
             fetch(api)
               .then((res) => {
-              // check if status 200 and body = {"message" : "ok"}
-                if (res.status === 200) {
-                  return res.json();
-                } else {
-                  this.updateCheck("error");
-                }
-              }).then(res => {
-                // check message
-                if (res.message === "ok") {
-                  this.updateCheck("success");
-                } else {
-                  this.updateCheck("error");
-                }
+                this.updateCheck("success");
               })
               .catch((err) => {
                 this.updateCheck("error");
@@ -587,10 +579,15 @@
                   setTimeout(() => {
                     setInterval(() => {
                       fetch(`${api}/check`, {
+                        mode: "cors",
                         cache: "no-cache",
                       })
                         .then((res) => {
-                          if (res.status === 200) {
+                          if (res.status === 200 ) {
+                            return res.json();
+                          }
+                        }).then(res => {
+                          if (res.message === "ok") {
                             window.open(`${api}/login`, "_self");
                           }
                         })
@@ -612,14 +609,8 @@
         }
 
         subscribe() {
-          const subForm = new FormData();
-          subForm.append('EMAIL', this.emailInp.value);
-          subForm.append("newsletter-check", "yes")
-          fetch("https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67", {
-              method: "POST",
-              body: subForm,
-              redirect: "error",
-            }).then(res => {}).catch(err => {})
+          document.querySelector('#newsletter-form-email').value = this.emailInp.value;
+          document.querySelector('#newsletter-form').submit();
         }
 
         checkSamePW() {
