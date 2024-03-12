@@ -741,8 +741,8 @@ class Database:
                         # Remove services that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_ids)).delete()
                         session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete()
-                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
-                        session.query(Jobs_cache).filter(Jobs_cache.setting_id.in_(missing_ids)).delete()
+                        session.query(Custom_configs).filter(Custom_configs.service_id.in_(missing_ids)).delete()
+                        session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(missing_ids)).delete()
 
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
                 db_drafts = {service.id for service in db_services if service.is_draft}
