@@ -47,11 +47,11 @@ class Job:
         if not deprecated:
             self.restore_cache()
 
-    def restore_cache(self, *, job_name: str = "") -> bool:
+    def restore_cache(self, *, job_name: str = "", plugin_id: str = "") -> bool:
         """Restore job cache files from database."""
         ret = True
         with LOCK:
-            job_cache_files = self.db.get_jobs_cache_files(job_name=job_name or self.job_name, with_data=True)  # type: ignore
+            job_cache_files = self.db.get_jobs_cache_files(job_name=job_name or self.job_name, plugin_id=plugin_id or self.job_path.name, with_data=True)  # type: ignore
 
         for job_cache_file in job_cache_files:
             try:
@@ -71,7 +71,7 @@ class Job:
         return ret
 
     def get_cache(
-        self, name: str, *, job_name: str = "", service_id: str = "", with_info: bool = False, with_data: bool = True
+        self, name: str, *, job_name: str = "", service_id: str = "", plugin_id: str = "", with_info: bool = False, with_data: bool = True
     ) -> Optional[Union[Dict[str, Any], bytes]]:
         """Get cache file from database or from local cache file."""
         cache_path = self.job_path.joinpath(service_id, name)
@@ -84,15 +84,17 @@ class Job:
 
         with LOCK:
             if not ret_data:
-                return self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, with_info=with_info, with_data=with_data)  # type: ignore
-            ret_data.update(self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, with_info=True, with_data=False))  # type: ignore
+                return self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, plugin_id=plugin_id or self.job_path.name, with_info=with_info, with_data=with_data)  # type: ignore
+            ret_data.update(self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, plugin_id=plugin_id or self.job_path.name, with_info=True, with_data=False))  # type: ignore
         return ret_data
 
-    def is_cached_file(self, name: str, expire: Literal["hour", "day", "week", "month"], *, job_name: str = "", service_id: str = "") -> bool:
+    def is_cached_file(
+        self, name: str, expire: Literal["hour", "day", "week", "month"], *, job_name: str = "", service_id: str = "", plugin_id: str = ""
+    ) -> bool:
         """Check if cache file is cached and if it's still fresh."""
         is_cached = False
         try:
-            cache_info = self.get_cache(name, job_name=job_name, service_id=service_id, with_info=True, with_data=False)
+            cache_info = self.get_cache(name, job_name=job_name, service_id=service_id, plugin_id=plugin_id, with_info=True, with_data=False)
             if isinstance(cache_info, dict):
                 current_time = datetime.now().timestamp()
                 if current_time < cache_info["last_update"]:
@@ -178,13 +180,13 @@ class Job:
             return False, f"exception :\n{format_exc()}"
         return ret, err
 
-    def cache_hash(self, name: str, *, job_name: str = "", service_id: str = "") -> Optional[str]:
+    def cache_hash(self, name: str, *, job_name: str = "", service_id: str = "", plugin_id: str = "") -> Optional[str]:
         """Get cache file hash from database or from local cache file."""
         cache_path = self.job_path.joinpath(service_id, name)
         if cache_path.is_file():
             return file_hash(cache_path)
 
-        cache_info = self.get_cache(name, with_info=True, with_data=False, job_name=job_name, service_id=service_id)
+        cache_info = self.get_cache(name, with_info=True, with_data=False, job_name=job_name, service_id=service_id, plugin_id=plugin_id)
 
         if isinstance(cache_info, dict):
             return cache_info.get("checksum")

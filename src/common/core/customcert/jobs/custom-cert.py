@@ -134,6 +134,8 @@ try:
     for first_server in skipped_servers:
         JOB.del_cache("cert.pem", service_id=first_server)
         JOB.del_cache("key.pem", service_id=first_server)
+except SystemExit as e:
+    status = e.code
 except:
     status = 2
     LOGGER.error(f"Exception while running custom-cert.py :\n{format_exc()}")
