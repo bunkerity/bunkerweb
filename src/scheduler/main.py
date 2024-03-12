@@ -406,13 +406,6 @@ if __name__ == "__main__":
 
         del dotenv_env
 
-        if scheduler_first_start:
-            ret = db.set_scheduler_first_start()
-
-            if ret:
-                logger.error(f"An error occurred when setting the scheduler first start : {ret}")
-                stop(1)
-
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
         CHANGES = []
@@ -547,6 +540,14 @@ if __name__ == "__main__":
             PLUGINS_NEED_GENERATION = False
             PRO_PLUGINS_NEED_GENERATION = False
             INSTANCES_NEED_GENERATION = False
+
+            if scheduler_first_start:
+                ret = db.set_scheduler_first_start()
+
+                if ret:
+                    logger.error(f"An error occurred when setting the scheduler first start : {ret}")
+                    stop(1)
+                scheduler_first_start = False
 
             if not HEALTHY_PATH.is_file():
                 HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")

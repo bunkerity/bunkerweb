@@ -1762,13 +1762,13 @@ class Database:
                 filters = {"plugin_id": plugin_id}
                 if job_name:
                     filters["name"] = job_name
-                job_names = [name for name in session.query(Jobs).with_entities(Jobs.name).filter_by(**filters)]
+                job_names = [job.name for job in session.query(Jobs).with_entities(Jobs.name).filter_by(**filters)]
                 if not job_names:
                     return []
 
             cache_files = []
             for cache in db_cache:
-                if cache.job_name not in job_names:
+                if job_name and cache.job_name not in job_names:
                     continue
                 cache_files.append(
                     {
