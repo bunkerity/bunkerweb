@@ -446,7 +446,7 @@ def check():
     if "Origin" not in request.headers:
         return Response(status=403)
 
-    return Response(status=200, headers={"Access-Control-Allow-Origin": "*"})
+    return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
 @app.route("/setup", methods=["GET", "POST"])

@@ -348,7 +348,19 @@
             }://${this.servInp.value}/setup/check`;
             fetch(api)
               .then((res) => {
-                this.updateCheck("success");
+              // check if status 200 and body = {"message" : "ok"}
+                if (res.status === 200) {
+                  return res.json();
+                } else {
+                  this.updateCheck("error");
+                }
+              }).then(res => {
+                // check message
+                if (res.message === "ok") {
+                  this.updateCheck("success");
+                } else {
+                  this.updateCheck("error");
+                }
               })
               .catch((err) => {
                 this.updateCheck("error");
