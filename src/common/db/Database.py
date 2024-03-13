@@ -96,7 +96,7 @@ class Database:
         elif match.group("database").startswith("m") and not match.group("database").endswith("+pymysql"):
             sqlalchemy_string = sqlalchemy_string.replace(
                 match.group("database"), f"{match.group('database')}+pymysql"
-            )  # ? This is mandatory for alemic to work with mariadb and mysql
+            )  # ? This is strongly recommended as pymysql is the new way to connect to mariadb and mysql
         elif match.group("database").startswith("postgresql") and not match.group("database").endswith("+psycopg"):
             sqlalchemy_string = sqlalchemy_string.replace(
                 match.group("database"), f"{match.group('database')}+psycopg"
@@ -317,10 +317,11 @@ class Database:
             "pro_overlapped": False,
             "pro_status": "invalid",
             "last_pro_check": None,
+            "default": True,
         }
         database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
-            with suppress(ProgrammingError, OperationalError):
+            try:
                 data["database_version"] = (
                     session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"]
                 )[0]
@@ -350,8 +351,11 @@ class Database:
                             "pro_overlapped": metadata.pro_overlapped,
                             "pro_status": metadata.pro_status,
                             "last_pro_check": metadata.last_pro_check,
+                            "default": False,
                         }
                     )
+            except (ProgrammingError, OperationalError):
+                self.logger.debug(f"Can't get the metadata: {format_exc()}")
 
         return data
 
@@ -426,7 +430,10 @@ class Database:
         old_data = {}
 
         if inspector and len(inspector.get_table_names()):
-            db_version = self.get_metadata()["version"]
+            metadata = self.get_metadata()
+            db_version = metadata["version"]
+            if metadata["default"]:
+                db_version = "error"
 
             if db_version != bunkerweb_version:
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
