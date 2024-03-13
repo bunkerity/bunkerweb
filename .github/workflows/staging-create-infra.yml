@@ -21,7 +21,7 @@ jobs:
         run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
         if: inputs.TYPE != 'k8s'
       - name: Checkout source code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - name: Install terraform
         uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3.0.0
       - name: Install kubectl
