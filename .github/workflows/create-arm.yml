@@ -33,7 +33,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - name: Get ARM availabilities
         id: availabilities
         uses: scaleway/action-scw@c718eca1fcb9fec1fb1433752d61599c6a0ad2e9
