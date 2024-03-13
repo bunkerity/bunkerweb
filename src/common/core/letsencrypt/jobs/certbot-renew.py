@@ -48,7 +48,7 @@ try:
 
     JOB = Job(LOGGER)
 
-    with Popen(
+    process = Popen(
         [
             CERTBOT_BIN,
             "renew",
@@ -64,14 +64,15 @@ try:
         stderr=PIPE,
         universal_newlines=True,
         env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
-    ) as process:
+    )
+    while process.poll() is None:
         if process.stderr:
             for line in process.stderr:
                 LOGGER_CERTBOT.info(line.strip())
 
-        if process.returncode == 0:
-            status = 2
-            LOGGER.error("Certificates renewal failed")
+    if process.returncode != 0:
+        status = 2
+        LOGGER.error("Certificates renewal failed")
 
     # Save Let's Encrypt data to db cache
     if LETS_ENCRYPT_PATH.is_dir() and list(LETS_ENCRYPT_PATH.iterdir()):

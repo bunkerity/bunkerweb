@@ -28,7 +28,7 @@ LETS_ENCRYPT_LOGS_DIR = join(sep, "var", "log", "bunkerweb")
 
 
 def certbot_new(domains: str, email: str, use_letsencrypt_staging: bool = False) -> int:
-    with Popen(
+    process = Popen(
         [
             CERTBOT_BIN,
             "certonly",
@@ -57,11 +57,12 @@ def certbot_new(domains: str, email: str, use_letsencrypt_staging: bool = False)
         stderr=PIPE,
         universal_newlines=True,
         env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
-    ) as process:
+    )
+    while process.poll() is None:
         if process.stderr:
             for line in process.stderr:
                 LOGGER_CERTBOT.info(line.strip())
-        return process.returncode
+    return process.returncode
 
 
 status = 0
