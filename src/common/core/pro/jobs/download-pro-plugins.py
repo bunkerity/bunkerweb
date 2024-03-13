@@ -133,8 +133,10 @@ try:
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
             error = True
-            if db_metadata["is_pro"]:
-                clean_pro_plugins(db)
+            if resp.headers.get("Content-Type", "") == "application/json":
+                resp_data = resp.json()
+                if db_metadata["is_pro"] and resp_data.get("action") == "clean":
+                    clean_pro_plugins(db)
         elif resp.status_code == 500:
             LOGGER.error("An error occurred with the remote server while checking BunkerWeb Pro license, please try again later")
             status = 2
@@ -165,9 +167,12 @@ try:
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
             error = True
-            metadata = default_metadata.copy()
-            db.set_pro_metadata(metadata | {"last_pro_check": current_date})
-            clean_pro_plugins(db)
+            if resp.headers.get("Content-Type", "") == "application/json":
+                resp_data = resp.json()
+                if resp_data.get("action") == "clean":
+                    metadata = default_metadata.copy()
+                    db.set_pro_metadata(metadata | {"last_pro_check": current_date})
+                    clean_pro_plugins(db)
         elif resp.headers.get("Content-Type", "") != "application/octet-stream":
             LOGGER.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}/pro")
             status = 2
