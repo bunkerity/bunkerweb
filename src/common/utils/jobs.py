@@ -70,7 +70,7 @@ class Job:
                 if job_cache_file["file_name"].endswith(".tgz"):
                     extract_path = cache_path.parent
                     if job_cache_file["file_name"].startswith("path:"):
-                        extract_path = Path(job_cache_file["file_name"].split(":", 1)[1].replace("_", "/").replace(".tgz", ""))
+                        extract_path = Path(job_cache_file["file_name"].split("path:", 1)[1].rsplit(".tgz", 1)[0])
                     rmtree(extract_path, ignore_errors=True)
                     extract_path.mkdir(parents=True, exist_ok=True)
                     with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
@@ -155,7 +155,6 @@ class Job:
         """Cache file in database and in local cache file."""
         ret, err = True, "success"
         cache_path = self.job_path.joinpath(service_id, name)
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         if isinstance(file_cache, bytes):
             content = file_cache
@@ -165,7 +164,8 @@ class Job:
             assert isinstance(file_cache, Path)
             content = file_cache.read_bytes()
 
-        if overwrite_file or not cache_path.is_file():
+        if not name.startswith("path:") and (overwrite_file or not cache_path.is_file()):
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_bytes(content)
 
         if not checksum:
@@ -189,7 +189,7 @@ class Job:
             dir_path = Path(dir_path)
         assert isinstance(dir_path, Path)
 
-        file_name = f"path:{dir_path.as_posix().replace('/', '_')}.tgz"
+        file_name = f"path:{dir_path.as_posix()}.tgz"
         content = BytesIO()
         with tar_open(file_name, mode="w:gz", fileobj=content, compresslevel=9) as tgz:
             tgz.add(dir_path, arcname=".")
