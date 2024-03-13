@@ -57,11 +57,12 @@ class Job:
             job_cache_files = self.db.get_jobs_cache_files(plugin_id=plugin_id or self.job_path.name, with_data=True)  # type: ignore
 
         job_name = job_name or self.job_name
-        plugin_cache_files = []
+        plugin_cache_files = set()
+        ignored_dirs = set()
 
         for job_cache_file in job_cache_files:
             cache_path = self.job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
-            plugin_cache_files.append(cache_path)
+            plugin_cache_files.add(cache_path)
             if job_cache_file["job_name"] != job_name:
                 continue
 
@@ -73,7 +74,8 @@ class Job:
                     rmtree(extract_path, ignore_errors=True)
                     extract_path.mkdir(parents=True, exist_ok=True)
                     with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
-                        tar.extractall(extract_path)
+                        tar.extractall(extract_path, filter="fully_trusted")
+                    ignored_dirs.add(extract_path)
                 else:
                     cache_path.parent.mkdir(parents=True, exist_ok=True)
                     cache_path.write_bytes(job_cache_file["data"])
@@ -84,6 +86,15 @@ class Job:
         if not manual:
             for file in self.job_path.glob("**/*"):
                 self.logger.debug(f"file : {file}")
+                skipped = False
+                for ignored_dir in ignored_dirs:
+                    if file.as_posix().startswith(ignored_dir.as_posix()):
+                        skipped = True
+                        break
+
+                if skipped:
+                    continue
+
                 if file not in plugin_cache_files and file.is_file():
                     self.logger.debug(f"Removing non-cached file {file}")
                     file.unlink(missing_ok=True)
