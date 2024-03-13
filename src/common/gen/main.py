@@ -16,6 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
@@ -58,21 +59,7 @@ if __name__ == "__main__":
         logger.info(f"Output : {output_path}")
         logger.info(f"Target : {target_path}")
 
-        integration = "Linux"
-        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-        os_release_path = Path(sep, "etc", "os-release")
-        if getenv("KUBERNETES_MODE", "no").lower() == "yes":
-            integration = "Kubernetes"
-        elif getenv("SWARM_MODE", "no").lower() == "yes":
-            integration = "Swarm"
-        elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
-            integration = "Autoconf"
-        elif integration_path.is_file():
-            integration = integration_path.read_text().strip()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text():
-            integration = "Docker"
-
-        del integration_path, os_release_path
+        integration = get_integration()
 
         if args.variables:
             variables_path = Path(normpath(args.variables))

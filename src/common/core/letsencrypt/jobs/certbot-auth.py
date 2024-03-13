@@ -26,7 +26,6 @@ try:
     integration = get_integration()
 
     LOGGER.info(f"Detected {integration} integration")
-    LOGGER.info(f"Sending challenge {token} with validation {validation}")
 
     # Cluster case
     if integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):

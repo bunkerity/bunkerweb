@@ -21,7 +21,7 @@ def get_integration() -> str:
         elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
             return "Autoconf"
         elif integration_path.is_file():
-            return integration_path.read_text(encoding="utf-8").strip().lower()
+            return integration_path.read_text(encoding="utf-8").strip().title()
         elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
             return "Docker"
 

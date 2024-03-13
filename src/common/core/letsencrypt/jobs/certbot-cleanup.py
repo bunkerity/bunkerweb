@@ -25,7 +25,6 @@ try:
     integration = get_integration()
 
     LOGGER.info(f"Detected {integration} integration")
-    LOGGER.info(f"Cleaning up challenge {token}")
 
     # Cluster case
     if integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
@@ -34,7 +33,7 @@ try:
         with lock:
             instances = db.get_instances()
 
-        LOGGER.info(f"Sending challenge to {len(instances)} instances")
+        LOGGER.info(f"Cleaning challenge from {len(instances)} instances")
         for instance in instances:
             api = API(f"http://{instance['hostname']}:{instance['port']}", host=instance["server_name"])
             sent, err, status, resp = api.request("DELETE", "/lets-encrypt/challenge", data={"token": token})
