@@ -4,7 +4,7 @@ from datetime import datetime
 from hashlib import sha256
 from io import BytesIO
 from os import getenv, listdir, chmod, sep
-from os.path import basename, join
+from os.path import join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
@@ -48,8 +48,7 @@ def clean_pro_plugins(db) -> None:
     db.update_external_plugins([], _type="pro")
 
 
-def install_plugin(plugin_dir: str, db, preview: bool = True) -> bool:
-    plugin_path = Path(plugin_dir)
+def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
     plugin_file = plugin_path.joinpath("plugin.json")
 
     if not plugin_file.is_file():
@@ -84,7 +83,7 @@ def install_plugin(plugin_dir: str, db, preview: bool = True) -> bool:
         rmtree(PRO_PLUGINS_DIR.joinpath(metadata["id"]), ignore_errors=True)
 
     # Copy the plugin
-    copytree(plugin_dir, PRO_PLUGINS_DIR.joinpath(metadata["id"]))
+    copytree(plugin_path, PRO_PLUGINS_DIR.joinpath(metadata["id"]))
     # Add u+x permissions to jobs files
     for job_file in glob(PRO_PLUGINS_DIR.joinpath(metadata["id"], "jobs", "*").as_posix()):
         st = Path(job_file).stat()
@@ -98,9 +97,9 @@ try:
     db_metadata = db.get_metadata()
     current_date = datetime.now()
 
-    # If we already checked in the last 10 minutes, skip the check
-    if db_metadata["last_pro_check"] and (current_date - db_metadata["last_pro_check"]).seconds < 600:
-        LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked in the last 10 minutes)")
+    # If we already checked in the last hour, skip the check
+    if db_metadata["last_pro_check"] and (current_date - db_metadata["last_pro_check"]).seconds < 3500:
+        LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked in the last hour)")
         sys_exit(0)
 
     LOGGER.info("Checking BunkerWeb Pro license key...")
@@ -129,7 +128,7 @@ try:
     if pro_license_key:
         LOGGER.info("BunkerWeb Pro license provided, checking if it's valid...")
         headers["Authorization"] = f"Bearer {pro_license_key.strip()}"
-        resp = get(f"{API_ENDPOINT}/pro-status", headers=headers, json=data, timeout=5, allow_redirects=True)
+        resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=5, allow_redirects=True)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
@@ -150,23 +149,23 @@ try:
                 metadata["pro_status"] = "expired"
             if metadata["pro_services"] < int(data["service_number"]):
                 metadata["pro_overlapped"] = True
-            metadata["is_pro"] = metadata["pro_status"] == "active" and not metadata["pro_overlapped"]
+            metadata["is_pro"] = metadata["pro_status"] == "active"
 
-    metadata = metadata or default_metadata
+    metadata = metadata or default_metadata.copy()
     db.set_pro_metadata(metadata | {"last_pro_check": current_date})
+
+    if metadata["is_pro"] != db_metadata["is_pro"]:
+        clean_pro_plugins(db)
 
     if metadata["is_pro"]:
         LOGGER.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated Pro plugins...")
 
-        if not db_metadata["is_pro"]:
-            clean_pro_plugins(db)
-
-        resp = get(f"{API_ENDPOINT}/pro", headers=headers, json=data, timeout=5, allow_redirects=True)
+        resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=5, allow_redirects=True)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
             error = True
-            metadata = default_metadata
+            metadata = default_metadata.copy()
             db.set_pro_metadata(metadata | {"last_pro_check": current_date})
             clean_pro_plugins(db)
         elif resp.headers.get("Content-Type", "") != "application/octet-stream":
@@ -187,9 +186,6 @@ try:
             LOGGER.info("If you wish to purchase a BunkerWeb Pro license, please visit https://panel.bunkerweb.io/")
             message = "No BunkerWeb Pro license key provided"
         LOGGER.warning(f"{message}, only checking if there are new or updated preview versions of Pro plugins...")
-
-        if metadata["is_pro"]:
-            clean_pro_plugins(db)
 
         resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=5, allow_redirects=True)
 
@@ -216,12 +212,12 @@ try:
 
     # Install plugins
     try:
-        for plugin_dir in glob(temp_dir.joinpath(data["version"] if metadata["is_pro"] else "", "*").as_posix()):
+        for plugin_path in temp_dir.glob("*"):
             try:
-                if install_plugin(plugin_dir, db, not metadata["is_pro"]):
+                if install_plugin(plugin_path, db, not metadata["is_pro"]):
                     plugin_nbr += 1
             except FileExistsError:
-                LOGGER.warning(f"Skipping installation of pro plugin {basename(plugin_dir)} (already installed)")
+                LOGGER.warning(f"Skipping installation of pro plugin {plugin_path.name} (already installed)")
     except:
         LOGGER.exception("Exception while installing pro plugin(s)")
         status = 2
