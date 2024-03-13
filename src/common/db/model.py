@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from sqlalchemy import (
+    TEXT,
     Boolean,
     Column,
     DateTime,
@@ -91,7 +92,7 @@ class Global_values(Base):
     __tablename__ = "bw_global_values"
 
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    value = Column(String(8192), nullable=False)
+    value = Column(TEXT, nullable=False)
     suffix = Column(Integer, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -115,7 +116,7 @@ class Services_settings(Base):
 
     service_id = Column(String(64), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    value = Column(String(8192), nullable=False)
+    value = Column(TEXT, nullable=False)
     suffix = Column(Integer, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
