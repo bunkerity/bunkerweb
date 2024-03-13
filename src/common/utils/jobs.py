@@ -85,7 +85,6 @@ class Job:
 
         if not manual:
             for file in self.job_path.glob("**/*"):
-                self.logger.debug(f"file : {file}")
                 skipped = False
                 for ignored_dir in ignored_dirs:
                     if file.as_posix().startswith(ignored_dir.as_posix()):
@@ -95,6 +94,7 @@ class Job:
                 if skipped:
                     continue
 
+                self.logger.debug(f"Checking if {file} should be removed")
                 if file not in plugin_cache_files and file.is_file():
                     self.logger.debug(f"Removing non-cached file {file}")
                     file.unlink(missing_ok=True)
