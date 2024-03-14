@@ -69,8 +69,8 @@ class Job:
             try:
                 if job_cache_file["file_name"].endswith(".tgz"):
                     extract_path = cache_path.parent
-                    if job_cache_file["file_name"].startswith("path:"):
-                        extract_path = Path(job_cache_file["file_name"].split("path:", 1)[1].rsplit(".tgz", 1)[0])
+                    if job_cache_file["file_name"].startswith("folder:"):
+                        extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
                     rmtree(extract_path, ignore_errors=True)
                     extract_path.mkdir(parents=True, exist_ok=True)
                     with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
@@ -164,7 +164,7 @@ class Job:
             assert isinstance(file_cache, Path)
             content = file_cache.read_bytes()
 
-        if not name.startswith("path:") and (overwrite_file or not cache_path.is_file()):
+        if not name.startswith("folder:") and (overwrite_file or not cache_path.is_file()):
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_bytes(content)
 
@@ -189,7 +189,7 @@ class Job:
             dir_path = Path(dir_path)
         assert isinstance(dir_path, Path)
 
-        file_name = f"path:{dir_path.as_posix()}.tgz"
+        file_name = f"folder:{dir_path.as_posix()}.tgz"
         content = BytesIO()
         with tar_open(file_name, mode="w:gz", fileobj=content, compresslevel=9) as tgz:
             tgz.add(dir_path, arcname=".")
