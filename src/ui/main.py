@@ -1135,7 +1135,7 @@ def plugins():
                                     tar_file.getmember("plugin.json")
                                 except KeyError:
                                     is_dir = True
-                                tar_file.extractall(str(temp_folder_path))
+                                tar_file.extractall(str(temp_folder_path), filter="data")
                         except ReadError:
                             errors += 1
                             error = 1
@@ -1339,7 +1339,7 @@ def upload_plugin():
                         if file.endswith("plugin.json"):
                             plugins.append(basename(dirname(file)))
                     if len(plugins) > 1:
-                        tar_file.extractall(str(tmp_ui_path) + "/")
+                        tar_file.extractall(str(tmp_ui_path) + "/", filter="data")
                 folder_name = uploaded_file.filename.replace(".tar.gz", "").replace(".tar.xz", "")
 
             if len(plugins) <= 1:

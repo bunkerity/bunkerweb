@@ -134,7 +134,7 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
             tmp_path.parent.mkdir(parents=True, exist_ok=True)
             tmp_path.write_bytes(plugin["data"])
             with tar_open(str(tmp_path), "r:gz") as tar:
-                tar.extractall(original_path)
+                tar.extractall(original_path, filter="fully_trusted")
             tmp_path.unlink()
 
             for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
