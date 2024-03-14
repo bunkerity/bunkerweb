@@ -192,6 +192,11 @@ try:
             message = "No BunkerWeb Pro license key provided"
         LOGGER.warning(f"{message}, only checking if there are new or updated preview versions of Pro plugins...")
 
+        # If we already checked in the last day, skip the check (only for preview versions)
+        if not db_metadata["is_pro"] and db_metadata["last_pro_check"] and (current_date - db_metadata["last_pro_check"]).days < 1:
+            LOGGER.info("Skipping the check for BunkerWeb Pro preview plugins (already checked in the last day)")
+            sys_exit(0)
+
         resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=5, allow_redirects=True)
 
         if resp.status_code == 404:
