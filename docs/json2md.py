@@ -8,6 +8,7 @@ from pytablewriter import MarkdownTableWriter
 import requests
 import zipfile
 import shutil
+from contextlib import suppress
 
 
 def print_md_table(settings) -> MarkdownTableWriter:
@@ -74,12 +75,10 @@ print("## Core settings\n", file=doc)
 core_settings = {}
 for core in glob("src/common/core/*/plugin.json"):
     with open(core, "r") as f:
-        try:
+        with suppress(Exception):
             core_plugin = loads(f.read())
             if len(core_plugin["settings"]) > 0:
                 core_settings[core_plugin["name"]] = core_plugin
-        except:
-            pass
 
 for name, data in dict(sorted(core_settings.items())).items():
     print(f"### {data['name']}\n", file=doc)
@@ -117,8 +116,7 @@ url = f"https://assets.bunkerity.com/bw-pro/preview/v{version}.zip"
 # Download zip
 response = requests.get(url)
 response.raise_for_status()
-with open(f"v{version}.zip", "wb") as f:
-    f.write(response.content)
+Path(f"v{version}.zip").write_bytes(response.content)
 
 # Unzip file
 with zipfile.ZipFile(f"v{version}.zip", "r") as zip_ref:
@@ -129,12 +127,10 @@ print("## Pro plugins", file=doc)
 pro_settings = {}
 for pro in glob(f"v{version}/*/plugin.json"):
     with open(pro, "r") as f:
-        try:
+        with suppress(Exception):
             pro_plugin = loads(f.read())
             if len(pro_plugin["settings"]) > 0:
                 pro_settings[pro_plugin["name"]] = pro_plugin
-        except:
-            pass
 
 for name, data in dict(sorted(pro_settings.items())).items():
     print(pro_title("3", data["name"]), file=doc)

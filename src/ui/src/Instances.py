@@ -129,6 +129,9 @@ class Instance:
     def ping(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("POST", f"/{plugin_id}/ping", response=True)
 
+    def data(self, plugin_endpoint) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", f"/{plugin_endpoint}", response=True)
+
 
 class Instances:
     def __init__(self, docker_client, kubernetes_client, integration: str):
@@ -459,3 +462,25 @@ class Instances:
                 break
 
         return ping
+
+    def get_data(self, plugin_endpoint: str):
+        # Need at least one instance to get a success ping to return success
+        data = []
+        for instance in self.get_instances():
+
+            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+
+            try:
+                resp, instance_data = instance.data(plugin_endpoint)
+            except:
+                continue
+
+            if not resp:
+                continue
+
+            if instance_data[instance_name].get("status", "error") == "error":
+                continue
+
+            data.append({instance_name: instance_data[instance_name].get("msg", {})})
+
+        return data

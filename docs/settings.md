@@ -321,11 +321,11 @@ STREAM support :white_check_mark:
 
 Automatic creation, renewal and configuration of Let's Encrypt certificates.
 
-|         Setting          |Default| Context |Multiple|                                                                                 Description                                                                                 |
-|--------------------------|-------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                       |
-|`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
-|`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
+|         Setting          |Default| Context |Multiple|                                                                                  Description                                                                                  |
+|--------------------------|-------|---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                         |
+|`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                  |
+|`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Letâ€™s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
 
 ### Limit
 

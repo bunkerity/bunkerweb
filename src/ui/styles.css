@@ -303,7 +303,7 @@
 }
 
 .core-layout-separator {
-  @apply col-span-12
+  @apply col-span-12;
 }
 
 .core-card-list {
