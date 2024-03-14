@@ -1511,8 +1511,6 @@ def custom_plugin(plugin: str):
         # Get prerender from action.py
         pre_render = run_action(plugin, "pre_render")
 
-        print(pre_render, flush=True)
-
         return render_template(
             Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
             username=current_user.get_id(),
