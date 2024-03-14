@@ -27,13 +27,13 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from dotenv import dotenv_values
 
+from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
-INTEGRATION = "Linux"
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy")
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
@@ -183,30 +183,13 @@ if __name__ == "__main__":
         parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
         args = parser.parse_args()
 
-        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-        os_release_path = Path(sep, "etc", "os-release")
-        if getenv("KUBERNETES_MODE", "no").lower() == "yes":
-            INTEGRATION = "Kubernetes"
-        elif getenv("SWARM_MODE", "no").lower() == "yes":
-            INTEGRATION = "Swarm"
-        elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
-            INTEGRATION = "Autoconf"
-        elif integration_path.is_file():
-            INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
-            INTEGRATION = "Docker"
-
-        del integration_path, os_release_path
-
+        INTEGRATION = get_integration()
         tmp_variables_path = normpath(args.variables) if args.variables else join(sep, "var", "tmp", "bunkerweb", "variables.env")
         tmp_variables_path = Path(tmp_variables_path)
         nginx_variables_path = Path(sep, "etc", "nginx", "variables.env")
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
-        db = Database(
-            logger,
-            sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)),
-        )
+        db = Database(logger, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
         env = {}
 
         if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
