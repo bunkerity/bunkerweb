@@ -351,7 +351,6 @@ if __name__ == "__main__":
                     db.get_plugins(_type=_type, with_data=True),
                     original_path=EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH,
                 )
-                SCHEDULER.update_jobs()
 
         check_plugin_changes("external")
         check_plugin_changes("pro")
@@ -367,6 +366,11 @@ if __name__ == "__main__":
 
         changes = db.check_changes()
         if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf") and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
+            if changes["pro_plugins_changed"]:
+                generate_external_plugins(db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
+            if changes["external_plugins_changed"]:
+                generate_external_plugins(db.get_plugins(_type="external", with_data=True))
+
             # run the config saver to save potential ignored external plugins settings
             logger.info("Running config saver to save potential ignored external plugins settings ...")
             proc = subprocess_run(
@@ -384,6 +388,10 @@ if __name__ == "__main__":
                 logger.error(
                     "Config saver failed, configuration will not work as expected...",
                 )
+
+            SCHEDULER.update_jobs()
+            env = db.get_config()
+            env["DATABASE_URI"] = db.database_uri
 
         logger.info("Executing scheduler ...")
 
