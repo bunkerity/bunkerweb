@@ -393,8 +393,12 @@ try:
 
     with db_session() as session:
         jobs = session.query(Jobs).all()
+        pro_plugin_ids = [plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).filter_by(type="pro").all()]
 
         for job in jobs:
+            if job.plugin_id in pro_plugin_ids:
+                continue
+
             if not job.success:
                 print(
                     f"❌ The job {job.name} (plugin_id: {job.plugin_id}) is in the database but failed, exiting ...",
