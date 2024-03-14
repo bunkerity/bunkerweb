@@ -319,9 +319,9 @@ class Database:
             "last_pro_check": None,
             "default": True,
         }
-        database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
             try:
+                database = self.database_uri.split(":")[0].split("+")[0]
                 data["database_version"] = (
                     session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"]
                 )[0]
@@ -354,7 +354,7 @@ class Database:
                             "default": False,
                         }
                     )
-            except (ProgrammingError, OperationalError):
+            except BaseException:
                 self.logger.debug(f"Can't get the metadata: {format_exc()}")
 
         return data
