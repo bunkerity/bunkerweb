@@ -473,12 +473,15 @@ class Instances:
             try:
                 resp, instance_data = instance.data(plugin_endpoint)
             except:
+                data.append({instance_name: {"status": "error"}})
                 continue
 
             if not resp:
+                data.append({instance_name: {"status": "error"}})
                 continue
 
             if instance_data[instance_name].get("status", "error") == "error":
+                data.append({instance_name: {"status": "error"}})
                 continue
 
             data.append({instance_name: instance_data[instance_name].get("msg", {})})

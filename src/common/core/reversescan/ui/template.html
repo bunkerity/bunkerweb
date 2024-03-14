@@ -7,53 +7,99 @@
            hidden />
     <div class="core-layout">
         {% if is_used and is_metrics %}
-            <!-- info-->
-            <div class="core-card">
-                <h5 class="core-card-title">INFO</h5>
-                <div class="core-card-text-container">
-                    <p data-info class="core-card-text"></p>
-                </div>
+        <div class="core-card">
+            <h5 class="core-card-title">INFO</h5>
+            <div class="core-card-text-container">
+                <p data-info class="core-card-text">{{plugin.get('description')}}</p>
             </div>
-            <!-- end info -->
-            <div data-fetch-success-show class="hidden core-card-list w-large">
-                <div class="core-card-list-container">
-                    <h5 class="core-card-list-title">REVERSE SCAN LIST</h5>
-                </div>
-                <div class="core-card-list-container">
-                    <!-- list container-->
-                    <div class="core-card-list-wrap w-large">
-                        <!-- header-->
-                        <p class="core-card-list-header col-span-5">Port</p>
-                        <p class="core-card-list-header col-span-7">Block count</p>
-                        <!-- end header-->
-                        <!-- list -->
-                        <ul class="col-span-12 w-full">
-                            <li data-item class="core-card-list-item">
-                                <p data-name="port" class="core-card-list-item-content col-span-5"></p>
-                                <p data-name="count" class="core-card-list-item-content col-span-7"></p>
-                            </li>
-                        </ul>
-                        <!-- end list-->
+        </div>
+        <!-- end info -->   <div class="core-layout-separator"></div>
+
+        {% if pre_render["status"] and pre_render["status"] == "ok" %}
+
+            {% for key, value in pre_render["data"].items() %}
+
+                {% if key.startswith("ping_") %}
+                <div class="core-card-status">
+                    <div class="core-card-status-container">
+                        <h5 class="core-card-status-title">{{ pre_render['data'][key].get('title', 'STATUS')}}</h5>
+                        <svg data-status-svg
+                             class="core-card-status-svg {{ 'fill-green-500' if pre_render['data'][key].get('value') in ('up', 'yes', 'success', 'true') else 'fill-red-500' }}"
+                             viewBox="0 0 100 100"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="50" />
+                        </svg>
                     </div>
-                    <!-- end list container-->
+                    <p data-status-text class="core-card-text">{{ 'Active' if pre_render['data'][key].get('value') in ('up', 'yes', 'success', 'true') else 'Inactive' }}</p>
                 </div>
-            </div>
-            <script nonce="{{script_nonce}}">
-    // Use SetupPlugin class that is on static/js/plugins/setup.js
-    const setPlugin = new SetupPlugin({
-      info: {
-        el: document.querySelector("[data-info]"),
-        value: "{{ plugin['description'] or ''}}",
-        type: "text",
-      },
-      items: {
-        el: document.querySelector("[data-item]"),
-        value: [],
-        type: "list",
-        listNames: ["port", "count"],
-      },
-    });
-            </script>
+                {% endif %}
+
+
+                {% if key.startswith("count_") or key.startswith("counter_") %}
+                <div class="core-card-metrics">
+                    <!-- text -->
+                    <div>
+                        <p class="core-card-metrics-name">{{pre_render['data'][key].get("title")}}</p>
+                        <h5 data-count class="core-card-title">{{pre_render['data'][key].get("value")}}</h5>
+                        <p class="core-card-metrics-subtitle">
+                            <span class="core-card-metrics-subtitle-content {{pre_render['data'][key].get("subtitle_color", "info")}}">{{pre_render['data'][key].get("subtitle")}}</span>
+                        </p>
+                    </div>
+                    <!-- end text -->
+                    <!-- icon -->
+                    <div role="img" class="core-card-svg-container {{pre_render['data'][key].get("svg_color")}}">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          class="size-small core-card-metrics-svg"
+                        >
+                          <path
+                            d="M18.75 12.75h1.5a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM12 6a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 6ZM12 18a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 18ZM3.75 6.75h1.5a.75.75 0 1 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM5.25 18.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 0 1.5ZM3 12a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3 12ZM9 3.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM12.75 12a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM9 15.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"
+                          />
+                        </svg>
+                      </div>
+                    <!-- end icon -->
+                </div>
+                {% endif %}
+
+
+                {% if (key.startswith("top_") and pre_render['data'][key]|length > 0) or (key.startswith("list_") and pre_render['data'][key]|length > 0) %}
+                <div class="core-card-list">
+                    <div class="core-card-list-title-container">
+                        <h5 class="core-card-list-title">{{ key.replace('_', ' ').upper()}}</h5>
+                    </div>
+                    <div class="core-card-list-container">
+                        <!-- list container-->
+                        <div class="core-card-list-wrap">
+                            <!-- header-->
+                            {% for val_key, val_value in pre_render['data'][key][0].items() %}
+
+
+                            <p class="core-card-list-header {{'col-span-6' if pre_render['data'][key][0].keys()|length == 2 else "col-span-4" if pre_render['data'][key][0].keys()|length == 3 else "col-span-3" if pre_render['data'][key][0].keys()|length == 4}}">{{ val_key }}</p>
+                            {% endfor%}
+                            <!-- end header-->
+                            <!-- list -->
+                            <ul class="col-span-12 w-full">
+                                {% for item in  pre_render['data'][key] %}
+                                <li class="core-card-list-item">
+                                    {% for top_key, top_value in item.items() %}
+                                    <p class="core-card-list-item-content {{'col-span-6' if item.keys()|length == 2 else "col-span-4" if item.keys()|length == 3 else "col-span-3" if item.keys()|length == 4}}">{{ top_value }}</p>
+                                    {% endfor %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+
+                            <!-- end list-->
+                        </div>
+                        <!-- end list container-->
+                    </div>
+                </div>
+                {% endif %}
+
+
+            {% endfor %}
+        {% endif %}
         {% else %}
             <div class="core-card">
                 <div class="core-card-wrap">
@@ -72,7 +118,7 @@
                     <!-- end icon -->
                 </div>
                 <div class="core-card-text-container">
-                    <p data-info class="core-card-text">This plugin need to be activated to get metrics.</p>
+                    <p data-info class="core-card-text">This plugin need to be activated to access page.</p>
                 </div>
             </div>
             <!-- end info -->

@@ -293,6 +293,53 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
 
 
 # UTILS
+def run_action(plugin: str, function_name: str = ""):
+    message = ""
+    module = db.get_plugin_actions(plugin)
+
+    if module is None:
+        return {"status": "ko", "code": 404, "message": "The actions.py file for the plugin does not exist"}
+
+    try:
+        # Try to import the custom plugin
+        with NamedTemporaryFile(mode="wb", suffix=".py", delete=True) as temp:
+            temp.write(module)
+            temp.flush()
+            temp.seek(0)
+            loader = SourceFileLoader("actions", temp.name)
+            actions = loader.load_module()
+    except:
+        return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
+
+    res = None
+
+    try:
+        # Try to get the custom plugin custom function and call it
+        method = getattr(actions, function_name or plugin)
+        queries = request.args.to_dict()
+        try:
+            data = request.json or False
+        except:
+            data = {}
+
+        res = method(app=app, args=queries, data=data)
+    except AttributeError:
+        message = "The plugin does not have a method, see logs for more details"
+    except:
+        message = "An error occurred while executing the plugin, see logs for more details"
+    finally:
+        if sbin_nginx_path.is_file():
+            # Remove the custom plugin from the shared library
+            sys_path.pop()
+            sys_modules.pop("actions")
+            del actions
+
+        if message or not isinstance(res, dict) and not res:
+            return {"status": "ko", "code": 500, "message": message or "The plugin did not return a valid response"}
+
+    return {"status": "ok", "code": 200, "data": res}
+
+
 def is_request_form(url_name: str, next: bool = False):
     if not request.form:
         flash("Missing form data.", "error")
@@ -1362,7 +1409,6 @@ def upload_plugin():
 @app.route("/plugins/<plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin(plugin: str):
-    message = ""
     if not plugin_id_rx.match(plugin):
         return error_message("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)"), 400
 
@@ -1462,60 +1508,29 @@ def custom_plugin(plugin: str):
                     is_used = True
                     break
 
+        # Get prerender from action.py
+        pre_render = run_action(plugin, "pre_render")
+
+        print(pre_render, flush=True)
+
         return render_template(
             Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
             username=current_user.get_id(),
             current_endpoint=plugin,
             plugin=curr_plugin,
+            pre_render=pre_render,
             is_used=is_used,
             is_metrics=is_metrics_on,
             **app.jinja_env.globals,
         )
 
-    module = db.get_plugin_actions(plugin)
-
-    if module is None:
-        return error_message("The actions.py file for the plugin does not exist"), 404
-
-    try:
-        # Try to import the custom plugin
-        with NamedTemporaryFile(mode="wb", suffix=".py", delete=True) as temp:
-            temp.write(module)
-            temp.flush()
-            temp.seek(0)
-            loader = SourceFileLoader("actions", temp.name)
-            actions = loader.load_module()
-    except:
-        return error_message("An error occurred while importing the plugin, see logs for more details"), 500
-
-    res = None
-
-    try:
-        # Try to get the custom plugin custom function and call it
-        method = getattr(actions, plugin)
-        queries = request.args.to_dict()
-        try:
-            data = request.json or False
-        except:
-            data = {}
-
-        res = method(app=app, args=queries, data=data)
-    except AttributeError:
-        message = "The plugin does not have a method, see logs for more details"
-    except:
-        message = "An error occurred while executing the plugin, see logs for more details"
-    finally:
-        if sbin_nginx_path.is_file():
-            # Remove the custom plugin from the shared library
-            sys_path.pop()
-            sys_modules.pop("actions")
-            del actions
-
-        if message or not isinstance(res, dict) and not res:
-            return error_message(message or "The plugin did not return a valid response"), 500
+    action_result = run_action(plugin)
+    # case error
+    if action_result["status"] == "ko":
+        return error_message(action_result["message"]), action_result["code"]
 
     app.logger.info(f"Plugin {plugin} action executed successfully")
-    return jsonify({"message": "ok", "data": res}), 200
+    return jsonify({"message": "ok", "data": action_result["data"]}), 200
 
 
 @app.route("/cache", methods=["GET"])

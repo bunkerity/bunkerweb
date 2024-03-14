@@ -1,11 +1,20 @@
-def country(**kwargs):
+def pre_render(**kwargs):
     try:
         data = kwargs["app"].config["INSTANCES"].get_metrics("country")
-
-        if data.get("counter_failed_country") is None:
-            data["counter_failed_country"] = 0
-
-        return data
-
+        return {
+            "counter_failed_country": {
+                "value": data.get("counter_failed_country", 0),
+                "title": "Country",
+                "subtitle": "request blocked",
+                "subtitle_color": "error",
+                "svg_color": "red",
+            }
+        }
     except:
-        return {"counter_failed_country": 0}
+        return {
+            "counter_failed_country": {"value": "unknown", "title": "Country", "subtitle": "request blocked", "subtitle_color": "error", "svg_color": "red"}
+        }
+
+
+def country(**kwargs):
+    pass

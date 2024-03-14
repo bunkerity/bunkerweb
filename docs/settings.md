@@ -594,7 +594,7 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
         <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
     </svg>
 </div>
-        
+
 STREAM support :x:
 
 Prometheus export for BunkerWeb
@@ -607,4 +607,3 @@ Prometheus export for BunkerWeb
 |`PROMETHEUS_EXPORTER_DICT_SIZE`|`10M`                                                |global |no      |Size of the dict to store Prometheus metrics.                           |
 |`PROMETHEUS_EXPORTER_ALLOW_IP` |`127.0.0.1/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
 |`PROMETHEUS_EXPORTER_URL`      |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
-
