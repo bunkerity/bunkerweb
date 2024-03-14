@@ -96,10 +96,11 @@ try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     db_metadata = db.get_metadata()
     current_date = datetime.now()
+    pro_license_key = getenv("PRO_LICENSE_KEY")
 
-    # If we already checked in the last hour, skip the check
-    if db_metadata["last_pro_check"] and (current_date - db_metadata["last_pro_check"]).seconds < 3500:
-        LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked in the last hour)")
+    # If we already checked today, skip the check
+    if pro_license_key == db_metadata["pro_license_key"] and db_metadata["last_pro_check"] and current_date.day == db_metadata["last_pro_check"].day:
+        LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
         sys_exit(0)
 
     LOGGER.info("Checking BunkerWeb Pro license key...")
@@ -113,21 +114,24 @@ try:
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
     default_metadata = {
         "is_pro": False,
+        "pro_license_key": None,
         "pro_expire": None,
         "pro_status": "invalid",
         "pro_overlapped": False,
         "pro_services": 0,
+        "last_pro_check": current_date,
     }
     metadata = {}
-    pro_license_key = getenv("PRO_LICENSE_KEY")
     error = False
 
     temp_dir = TMP_DIR.joinpath(str(uuid4()))
     temp_dir.mkdir(parents=True, exist_ok=True)
 
     if pro_license_key:
+        default_metadata["pro_license_key"] = (pro_license_key := pro_license_key.strip())
+
         LOGGER.info("BunkerWeb Pro license provided, checking if it's valid...")
-        headers["Authorization"] = f"Bearer {pro_license_key.strip()}"
+        headers["Authorization"] = f"Bearer {pro_license_key}"
         resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=5, allow_redirects=True)
 
         if resp.status_code == 403:
@@ -153,8 +157,8 @@ try:
                 metadata["pro_overlapped"] = True
             metadata["is_pro"] = metadata["pro_status"] == "active"
 
-    metadata = metadata or default_metadata.copy()
-    db.set_pro_metadata(metadata | {"last_pro_check": current_date})
+    metadata = default_metadata | metadata
+    db.set_pro_metadata(metadata)
 
     if metadata["is_pro"] != db_metadata["is_pro"]:
         clean_pro_plugins(db)
@@ -171,7 +175,7 @@ try:
                 resp_data = resp.json()
                 if resp_data.get("action") == "clean":
                     metadata = default_metadata.copy()
-                    db.set_pro_metadata(metadata | {"last_pro_check": current_date})
+                    db.set_pro_metadata(metadata)
                     clean_pro_plugins(db)
         elif resp.headers.get("Content-Type", "") != "application/octet-stream":
             LOGGER.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}/pro")
@@ -191,11 +195,6 @@ try:
             LOGGER.info("If you wish to purchase a BunkerWeb Pro license, please visit https://panel.bunkerweb.io/")
             message = "No BunkerWeb Pro license key provided"
         LOGGER.warning(f"{message}, only checking if there are new or updated preview versions of Pro plugins...")
-
-        # If we already checked in the last day, skip the check (only for preview versions)
-        if not db_metadata["is_pro"] and db_metadata["last_pro_check"] and (current_date - db_metadata["last_pro_check"]).days < 1:
-            LOGGER.info("Skipping the check for BunkerWeb Pro preview plugins (already checked in the last day)")
-            sys_exit(0)
 
         resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=5, allow_redirects=True)
 
