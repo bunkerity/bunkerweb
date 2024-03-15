@@ -95,6 +95,8 @@ try:
 
     access_page(DRIVER, "//form[@data-plugins-modal-form-delete='']//button[@type='submit']", "plugins", False)
 
+    sleep(30)
+
     if TEST_TYPE == "linux":
         wait_for_service()
 
