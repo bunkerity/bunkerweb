@@ -63,22 +63,24 @@ class Job:
         for job_cache_file in job_cache_files:
             cache_path = self.job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
             plugin_cache_files.add(cache_path)
-            if job_cache_file["job_name"] != job_name:
-                continue
 
             try:
                 if job_cache_file["file_name"].endswith(".tgz"):
                     extract_path = cache_path.parent
                     if job_cache_file["file_name"].startswith("folder:"):
                         extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
+                    ignored_dirs.add(extract_path)
+                    if job_cache_file["job_name"] != job_name:
+                        continue
                     rmtree(extract_path, ignore_errors=True)
                     extract_path.mkdir(parents=True, exist_ok=True)
                     with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
                         tar.extractall(extract_path, filter="fully_trusted")
-                    ignored_dirs.add(extract_path)
-                else:
-                    cache_path.parent.mkdir(parents=True, exist_ok=True)
-                    cache_path.write_bytes(job_cache_file["data"])
+                    continue
+                elif job_cache_file["job_name"] != job_name:
+                    continue
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                cache_path.write_bytes(job_cache_file["data"])
             except BaseException as e:
                 self.logger.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
                 ret = False
