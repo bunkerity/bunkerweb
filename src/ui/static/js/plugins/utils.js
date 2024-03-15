@@ -13,28 +13,27 @@ class Ping {
   }
 
   init() {
-      this.createAlertEl();
-      this.updateAlert("fetch");
+    this.createAlertEl();
+    this.updateAlert("fetch");
 
-      // Case no status element
-      if (!this.statusColorEl || !this.statusTextEl)
-        return this.updateAlert("error");
+    // Case no status element
+    if (!this.statusColorEl || !this.statusTextEl)
+      return this.updateAlert("error");
 
-      fetch(this.url, {
-        method: "POST",
-        headers: {
-          "X-CSRFToken": document.querySelector('input[name="csrf_token"]')
-            .value,
-        },
+    fetch(this.url, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": document.querySelector('input[name="csrf_token"]').value,
+      },
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        // Update data
+        this.updateEl(res.data);
       })
-        .then((res) => res.json())
-        .then((res) => {
-          // Update data
-          this.updateEl(res.data);
-        })
-        .catch((error) => {
-          this.updateAlert("error");
-        });
+      .catch((error) => {
+        this.updateAlert("error");
+      });
   }
 
   createAlertEl() {

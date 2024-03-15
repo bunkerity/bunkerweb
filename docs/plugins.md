@@ -683,5 +683,5 @@ def pre_render(**kwargs) :
 **template**
 ```html
 <!-- metadata + config -->
-<div>{{ pre_render }}</div> 
+<div>{{ pre_render }}</div>
 ```
