@@ -197,7 +197,7 @@ try:
     sleep(5)
 
     misc_disallowed_count = safe_get_element(
-        DRIVER, By.XPATH, '//p[@class="core-card-metrics-name" and text()="DISALLOWED METHODS"]/following-sibling::h5[@data-count=""]'
+        DRIVER, By.XPATH, '//p[@class="core-card-metrics-name" and contains(text(), "DISALLOWED METHODS")]/following-sibling::h5[@data-count=""]'
     )
     assert isinstance(misc_disallowed_count, WebElement), "Miscellaneous disallowed count is not a WebElement"
 
