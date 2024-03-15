@@ -88,7 +88,7 @@ class Job:
                 self.logger.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
                 ret = False
 
-        if not manual:
+        if not manual and self.job_path.is_dir():
             for file in self.job_path.glob("**/*"):
                 skipped = False
                 for ignored_dir in ignored_dirs:
