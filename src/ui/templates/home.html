@@ -12,7 +12,7 @@
             <!-- stats card -->
             <a href="{{ card['link'] }}"
                class="home-card"
-               target="_blank"
+               {% if card['link'].startswith('http') %} target="_blank" {% endif %}
                rel="noopener">
                 <!-- text -->
                 <div>
