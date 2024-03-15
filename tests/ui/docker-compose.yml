@@ -19,6 +19,7 @@ services:
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       DATASTORE_MEMORY_SIZE: "384m"
+      BAD_BEHAVIOR_THRESHOLD: "30"
       CUSTOM_CONF_SERVER_HTTP_port-redirect: "port_in_redirect on;"
       UI_HOST: "http://bw-ui:7000"
     labels:
