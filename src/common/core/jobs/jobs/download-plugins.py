@@ -137,10 +137,16 @@ try:
                     zf.extractall(path=temp_dir)
             elif file_type == "application/gzip":
                 with tar_open(fileobj=BytesIO(content), mode="r:gz") as tar:
-                    tar.extractall(path=temp_dir, filter="data")
+                    try:
+                        tar.extractall(path=temp_dir, filter="data")
+                    except TypeError:
+                        tar.extractall(path=temp_dir)
             elif file_type == "application/x-tar":
                 with tar_open(fileobj=BytesIO(content), mode="r") as tar:
-                    tar.extractall(path=temp_dir, filter="data")
+                    try:
+                        tar.extractall(path=temp_dir, filter="data")
+                    except TypeError:
+                        tar.extractall(path=temp_dir)
             else:
                 LOGGER.error(f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping...")
                 continue

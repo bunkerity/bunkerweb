@@ -75,7 +75,10 @@ class Job:
                     rmtree(extract_path, ignore_errors=True)
                     extract_path.mkdir(parents=True, exist_ok=True)
                     with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
-                        tar.extractall(extract_path, filter="fully_trusted")
+                        try:
+                            tar.extractall(extract_path, filter="fully_trusted")
+                        except TypeError:
+                            tar.extractall(extract_path)
                     continue
                 elif job_cache_file["job_name"] != job_name:
                     continue
