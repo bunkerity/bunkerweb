@@ -330,8 +330,9 @@ def run_action(plugin: str, function_name: str = ""):
     finally:
         if sbin_nginx_path.is_file():
             # Remove the custom plugin from the shared library
-            sys_path.pop()
-            sys_modules.pop("actions")
+            if sys_path:
+                sys_path.pop()
+            sys_modules.pop("actions", None)
             del actions
 
         if message or not isinstance(res, dict) and not res:
@@ -813,7 +814,7 @@ def services():
         # Check variables
         variables = deepcopy(request.form.to_dict())
         del variables["csrf_token"]
-        is_draft = variables.pop("is_draft") == "yes"
+        is_draft = variables.pop("is_draft", "no") == "yes"
 
         if "OLD_SERVER_NAME" not in request.form and request.form["operation"] == "edit":
             return redirect_flash_error("Missing OLD_SERVER_NAME parameter.", "services", True)
@@ -1974,7 +1975,7 @@ def bans():
     bans = bans[:100]
 
     for ban in bans:
-        exp = ban.pop("exp")
+        exp = ban.pop("exp", 0)
         # Add remain
         ban["remain"], ban["term"] = ("unknown", "unknown") if exp <= 0 else get_remain(exp)
         # Convert stamp to date
