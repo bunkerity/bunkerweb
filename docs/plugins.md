@@ -602,10 +602,6 @@ For example, you can get the request arguments in your template like this :
 
 #### Actions.py
 
-!!! info "Python libraries"
-    You can use Python libraries that are already available like :
-    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
-
 !!! warning "CSRF Token"
 
     Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
@@ -613,16 +609,55 @@ For example, you can get the request arguments in your template like this :
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     ```
 
-
 You can power-up your plugin page with additional scripting with the **actions.py** file when sending a **POST /plugins/<*plugin_id*>**.
 
-Here is what is send to the function :
+You have two functions by default in **actions.py** :
+
+**pre_render function**
+
+This allows you to retrieve data when you **GET** the template, and to use the data with the pre_render variable available in Jinja to display content more dynamically.
+
+```python
+def pre_render(**kwargs)
+  return <pre_render_data>
+```
+
+BunkerWeb will send you this type of response :
+
+
+```python
+return jsonify({"status": "ok|ko", "code" : XXX, "data": <pre_render_data>}), 200
+```
+
+**<*plugin_id*> function**
+
+This allows you to retrieve data when you make a **POST** from the template endpoint, which must be used in AJAX.
+
+```python
+def myplugin(**kwargs)
+  return <plugin_id_data>
+```
+
+BunkerWeb will send you this type of response :
+
+```python
+return jsonify({"message": "ok", "data": <plugin_id_data>}), 200
+```
+
+**What you can access from action.py**
+
+Here are the arguments that are passed and access on action.py functions:
 
 ```python
 function(app=app, args=request.args.to_dict() or request.json or None)
 ```
 
-Some examples of what you can do :
+!!! info "Python libraries"
+    In addition, you can use Python libraries that are already available like :
+    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
+
+
+**Some examples**
 
 - Retrieve form submitted data
 
@@ -631,73 +666,22 @@ from flask import request
 
 def myplugin(**kwargs) :
 	my_form_value = request.form["my_form_input"]
+  return my_form_value
 ```
 
-- Access app methods
+- Access app config
 
+**action.py**
 ```python
 from flask import request
 
-def myplugin(**kwargs) :
+def pre_render(**kwargs) :
 	config = kwargs['app'].config["CONFIG"].get_config(methods=False)
+  return config
 ```
 
-**You need to retrieve JSON compatible data from this function**, app will return this as response :
-
-```python
-return jsonify({"message": "ok", "data": <function_output>}), 200
-```
-
-#### Updating template
-
-To easily update the content of a template inside the UI with JSON, a **SetupPlugin class** is available in `src/ui/static/js/plugins/setup.js`.
-
-!!! info "Check core plugins"
-
-    Core plugins are using this class. Feel free to look at them in order to see in details how it works.
-
-For example, in case **actions.py** return this :
-
-```python
-def myplugin(**kwargs):
-    return  {"name": "My awesome plugin"}
-```
-
-I can add this on my **template.html** :
-
+**template**
 ```html
-<p data-name></p>
-
-<script>
-  new SetupPlugin({
-    name: {
-      el: document.querySelector('[data-name]'),
-      value: '',
-      type: 'text',
-    },
-  });
-</script>
+<!-- metadata + config -->
+<div>{{ pre_render }}</div> 
 ```
-
-**This class will send a POST request, and will try to match the dict key to a JSON key and update your template**.
-
-
-Here it will look for a `name` key in the JSON response, and will set the `data` on the defined `el`.
-In case there is no `data` matching, this will keep or set the `value` key data.
-
-This class has two arguments `SetupPlugin(setup, url)` :
-
-- `url`(optional) : current endpoint by default. You can define another url or add arguments.
-
-- `setup` : a dict of dict with needed data to update properly the template with the incoming data.
-
-**setup details**
-
-|     key     | Type       | Description                                                                                  |
-| :--------:  | :--------: | :------------------------------------------------------------------------------------------- |
-| `dict name` | string     | Replace `dict name` by the JSON key to extract the related value.                            |
-| `el`        | DOM element| Select element you want the value to be updated.                                             |
-|   `value`   | any        | Default value on template load or in case retrieving JSON failed.                            |
-|    `type`   | string     | Define the script behavior with the incoming value. Available : `text`, `list` and `status`. |
-|  `textEl`   | DOM element| Optional additional text content when type is `status`.                                      |
-|  `listNames`| string     | List of data keys when type is `list`.                                                       |

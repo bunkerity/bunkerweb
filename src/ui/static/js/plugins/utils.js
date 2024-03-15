@@ -1,12 +1,11 @@
 class Ping {
   constructor(
-    url = location.href,
+    url = `${location.origin}${location.pathname}`,
     statusTextEl = null,
     statusColorEl = null,
     key_to_check = "ping",
   ) {
     this.url = url;
-    this.data = data;
     this.statusColorEl = statusColorEl;
     this.statusTextEl = statusTextEl;
     this.key_to_check = key_to_check;
@@ -14,7 +13,6 @@ class Ping {
   }
 
   init() {
-    window.addEventListener("DOMContentLoaded", () => {
       this.createAlertEl();
       this.updateAlert("fetch");
 
@@ -32,12 +30,11 @@ class Ping {
         .then((res) => res.json())
         .then((res) => {
           // Update data
-          this.updateEl(res);
+          this.updateEl(res.data);
         })
         .catch((error) => {
           this.updateAlert("error");
         });
-    });
   }
 
   createAlertEl() {
