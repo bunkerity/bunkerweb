@@ -1,7 +1,7 @@
-FROM nginx:1.24.0-alpine@sha256:6845649eadc1f0a5dacaf5bb3f01b480ce200ae1249114be11fef9d389196eaf AS builder
+FROM nginx:1.24.0-alpine-slim@sha256:9cec4fd40a4e5156b4f4f555ee44a597491b6e8b91380c32b63ed45a4053a763 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
+RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
 
 WORKDIR /tmp/bunkerweb/deps
 
@@ -9,27 +9,21 @@ WORKDIR /tmp/bunkerweb/deps
 COPY src/deps/misc misc
 COPY src/deps/src src
 COPY src/deps/deps.json deps.json
-COPY src/deps/install.sh install.sh
+COPY --chmod=644 src/deps/install.sh install.sh
 
 # Compile and install dependencies
-RUN mkdir -p /usr/share/bunkerweb/deps/python && \
-	chmod +x install.sh && \
-	bash install.sh
+RUN bash install.sh
 
 WORKDIR /usr/share/bunkerweb
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
-COPY src/common/gen/requirements.txt deps/requirements.txt
+COPY src/common/gen/requirements.txt deps/requirements-gen.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-	pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
-	pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
-
-# Clean up temporary dependencies
-RUN apk del .build-deps && \
-	rm -rf /var/cache/apk/*
+	pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+	pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements-gen.txt
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
@@ -48,7 +42,7 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-FROM nginx:1.24.0-alpine@sha256:76ca7f6bfe01c3e22e3af85fd37c30149ece3ac2a444973687cab1765abca115
+FROM nginx:1.24.0-alpine-slim@sha256:9cec4fd40a4e5156b4f4f555ee44a597491b6e8b91380c32b63ed45a4053a763
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -59,13 +53,9 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
-RUN apk add --no-cache pcre bash python3 yajl && \
+RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd && \
 	cp helpers/bwcli /usr/bin/ && \
-	mkdir -p /var/tmp/bunkerweb && \
-	mkdir -p /var/run/bunkerweb && \
-	mkdir -p /var/log/bunkerweb && \
-	mkdir -p /var/www/html && \
-	mkdir -p /etc/bunkerweb && \
+	mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www/html && \
 	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
 	for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
 	for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
@@ -79,6 +69,8 @@ RUN apk add --no-cache pcre bash python3 yajl && \
 
 # Fix CVEs
 RUN apk add --no-cache "curl>=8.5.0-r0" "libcurl>=8.5.0-r0" "libcrypto3>=3.0.12-r4" "libexpat>=2.6.0-r0" "libssl3>=3.0.12-r4" "libwebp>=1.2.4-r3" "libx11>=1.8.7-r0" "nghttp2-libs>=1.51.0-r2"
+
+VOLUME /data /etc/nginx
 
 EXPOSE 8080/tcp 8443/tcp
 

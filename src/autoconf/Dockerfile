@@ -1,27 +1,19 @@
 FROM python:3.12.2-alpine3.19@sha256:1a0501213b470de000d8432b3caab9d8de5489e9443c2cc7ccaa6b0aa5c3148e as builder
 
+# Install python dependencies
+RUN apk add --no-cache build-base postgresql-dev
+
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
+COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 
 WORKDIR /usr/share/bunkerweb
 
-RUN mkdir -p deps/python && \
-  cat /tmp/req/requirements.txt* > deps/requirements.txt && \
-  rm -rf /tmp/req
-
-# Install python dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev
-
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
-
-# Remove build dependencies
-RUN apk del .build-deps && \
-  rm -rf /var/cache/apk/*
+  pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
+  pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -49,9 +41,8 @@ RUN apk add --no-cache bash && \
   addgroup -g 101 autoconf && \
   adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf && \
   cp helpers/bwcli /usr/bin/ && \
-  mkdir -p /var/tmp/bunkerweb && \
-  mkdir -p /var/www && \
-  mkdir -p /etc/bunkerweb && \
+  echo "Docker" > INTEGRATION && \
+  mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /data/www && ln -s /data/www /var/www/html && \
@@ -59,14 +50,15 @@ RUN apk add --no-cache bash && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:autoconf /data && \
   chmod -R 770 /data && \
-  chown -R root:autoconf /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
+  chown -R root:autoconf INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
-  chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/*
+  chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/* && \
+  chmod 660 INTEGRATION
 
 # Fix CVEs
 RUN apk add --no-cache "libexpat>=2.6.0-r0"
 
-VOLUME /data /etc/nginx
+VOLUME /data
 
 WORKDIR /usr/share/bunkerweb/autoconf
 

@@ -45,6 +45,8 @@
 - [MISC] Use ed5519 key instead of RSA for default/fallback certificates
 - [MISC] Refactor certbot-new job to optimize the certbot requests
 - [MISC] Refactor jobs utils to make it more consistent
+- [MISC] Review jobs and utils to make it more consistent and better in general
+- [MISC] Change BunkerWeb base Docker image to nginx:1.24.0-alpine-slim
 - [DOCUMENTATION] Update web UI's setup wizard instructions in the documentation
 - [DOCUMENTATION] Update plugins documentation to reflect the new plugin system
 - [DOCUMENTATION] Update ModSecurity documentation to reflect the new changes in the Security Tuning section
