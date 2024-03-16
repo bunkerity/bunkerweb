@@ -665,6 +665,7 @@ class Database:
 
                     core_ui_path = Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"], "ui")
                     path_ui = core_ui_path if core_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
+                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
 
                     if path_ui.exists():
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
@@ -1445,6 +1446,7 @@ class Database:
 
                     tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui")
                     path_ui = tmp_ui_path if tmp_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
+                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
 
                     if path_ui.exists():
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
@@ -1546,6 +1548,7 @@ class Database:
                 if page:
                     tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui")
                     path_ui = tmp_ui_path if tmp_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
+                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
 
                     if path_ui.exists():
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
