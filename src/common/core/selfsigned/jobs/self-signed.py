@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from subprocess import DEVNULL, STDOUT, run
+from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Tuple
@@ -26,13 +26,15 @@ status = 0
 
 def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path) -> Tuple[bool, int]:
     server_path = self_signed_path.joinpath(first_server)
+    cert_path = server_path.joinpath("cert.pem")
+    key_path = server_path.joinpath("key.pem")
 
-    if server_path.joinpath("cert.pem").is_file() and server_path.joinpath("key.pem").is_file():
+    if cert_path.is_file() and key_path.is_file():
         if (
             run(
-                ["openssl", "x509", "-checkend", "86400", "-noout", "-in", server_path.joinpath("cert.pem").as_posix()],
+                ["openssl", "x509", "-checkend", "86400", "-noout", "-in", cert_path.as_posix()],
                 stdin=DEVNULL,
-                stderr=STDOUT,
+                stderr=DEVNULL,
                 check=False,
             ).returncode
             == 0
@@ -46,7 +48,7 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 LOGGER.warning(
                     f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
                 )
-            elif certificate.not_valid_after_utc < datetime.now(UTC):
+            elif certificate.not_valid_after_utc < datetime.now(tz=certificate.not_valid_after_utc.timetz().tzinfo):
                 LOGGER.warning(f"Self-signed certificate for {first_server} has expired, regenerating ...")
             else:
                 LOGGER.info(f"Self-signed certificate for {first_server} is valid")
@@ -64,9 +66,9 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 "-newkey",
                 "rsa:4096",
                 "-keyout",
-                server_path.joinpath("key.pem").as_posix(),
+                key_path.as_posix(),
                 "-out",
-                server_path.joinpath("cert.pem").as_posix(),
+                cert_path.as_posix(),
                 "-days",
                 days,
                 "-subj",
