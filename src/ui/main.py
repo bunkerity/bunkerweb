@@ -669,6 +669,45 @@ def account():
         # Check form data validity
         is_request_form("account")
 
+        if request.form["operation"] not in ("username", "password", "totp", "activate-key"):
+            return redirect_flash_error("Invalid operation parameter.", "account")
+
+        if request.form["operation"] == "activate-key":
+            is_request_params(["license"], "account")
+
+            if len(request.form["license"]) == 0:
+                return redirect_flash_error("The license key is empty", "account")
+
+            variable = {}
+            variable["PRO_LICENSE_KEY"] = request.form["license"]
+
+            error = app.config["CONFIG"].check_variables(variable)
+
+            if error:
+                return redirect_flash_error("The license key variable checks returned error", "account", True)
+
+            # Reload instances
+            app.config["RELOADING"] = True
+            app.config["LAST_RELOAD"] = time()
+            Thread(
+                target=manage_bunkerweb,
+                name="Reloading instances",
+                args=(
+                    "global_config",
+                    variable,
+                ),
+            ).start()
+
+            flash("Checking license key to upgrade.", "success")
+
+            return redirect(
+                url_for(
+                    "loading",
+                    next=url_for("account"),
+                    message="Saving license key",
+                )
+            )
+
         is_request_params(["operation", "curr_password"], "account")
 
         if not current_user.check_password(request.form["curr_password"]):
@@ -678,9 +717,6 @@ def account():
         password = request.form["curr_password"]
         is_two_factor_enabled = current_user.is_two_factor_enabled
         secret_token = current_user.secret_token
-
-        if request.form["operation"] not in ("username", "password", "totp"):
-            return redirect_flash_error("Invalid operation parameter.", "account")
 
         if request.form["operation"] == "username":
             is_request_params(["admin_username"], "account")
@@ -952,6 +988,7 @@ def global_config():
     if request.method == "POST":
         # Check variables
         variables = request.form.to_dict().copy()
+        print(variables, flush=True)
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
@@ -996,6 +1033,12 @@ def global_config():
                 variables,
             ),
         ).start()
+
+        try:
+            if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
+                flash("Checking license key to upgrade.", "success")
+        except:
+            pass
 
         return redirect(
             url_for(
