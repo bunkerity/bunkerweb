@@ -19,6 +19,14 @@ function errors:initialize(ctx)
 	plugin.initialize(self, "errors", ctx)
 	-- Default error texts
 	self.default_errors = {
+		["301"] = {
+			title = "Moved Permanently",
+			text = "The requested page has moved to a new url.",
+		},
+		["302"] = {
+			title = "Found",
+			text = "The requested page has moved temporarily to a new url.",
+		},
 		["400"] = {
 			title = "Bad Request",
 			text = "The server did not understand the request.",
