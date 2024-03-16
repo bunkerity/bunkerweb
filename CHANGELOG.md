@@ -42,7 +42,7 @@
 - [MISC] BunkerWeb will now load the default loading page even on 404 errors when generating the configuration
 - [MISC] Update database schema to support the new pro version and optimize it
 - [MISC] Refactor SSL/TLS logics to make it more consistent
-- [MISC] Use ed5519 key instead of RSA for default/fallback certificates
+- [MISC] Use ECDSA key instead of RSA for selfsigned/default/fallback certificates
 - [MISC] Refactor certbot-new job to optimize the certbot requests
 - [MISC] Refactor jobs utils to make it more consistent
 - [MISC] Review jobs and utils to make it more consistent and better in general
