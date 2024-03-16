@@ -60,10 +60,8 @@ RUN apk add --no-cache bash libgcc libstdc++ libpq openssl libmagic && \
 # Cleanup
 RUN rm -rf /var/cache/apk/*
 
-COPY --chown=root:scheduler src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
-COPY --chown=root:scheduler src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
-
-RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
+COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
 RUN apk add --no-cache "libexpat>=2.6.0-r0"
