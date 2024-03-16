@@ -17,10 +17,10 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
-      - name: Set up Python 3.12
+      - name: Set up Python 3.9
         uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
-          python-version: "3.12"
+          python-version: "3.9"
       - name: Install Firefox manually and dependencies
         run: |
           sudo add-apt-repository ppa:mozillateam/ppa -y
