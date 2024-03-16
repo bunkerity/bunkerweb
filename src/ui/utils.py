@@ -157,8 +157,6 @@ def path_to_dict(
             mime = Magic(mime=True)
             file_type = mime.from_buffer(conf["data"])
 
-            print(join(path, conf["plugin_id"], conf["service_id"] or "", conf["file_name"]), file_type, flush=True)
-
             file_info = {
                 "name": conf["file_name"],
                 "type": "file",
