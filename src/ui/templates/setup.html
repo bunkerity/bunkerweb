@@ -416,7 +416,7 @@
         updateResume() {
           this.resumeEl.textContent = `http${
             this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
-          }://${this.servInp.value}${this.urlInp.value}`;
+          }://${this.servInp.value.replace('https://', '').replace('http://', '')}${this.urlInp.value}`;
         }
       }
 
@@ -562,7 +562,7 @@
 
             const api = `http${
               this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
-            }://${this.servInp.value}${this.urlInp.value}`;
+            }://${this.servInp.value.replace('https://', '').replace('http://', '')}${this.urlInp.value}`;
 
             fetch(window.location.href, {
               method: "POST",
