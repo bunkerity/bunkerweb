@@ -347,9 +347,7 @@
             e.preventDefault();
             this.updateCheck("unknown");
             // get resume
-            const api = `http${
-              this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
-            }://${this.servInp.value}/setup/check`;
+            const api = `http://${this.servInp.value}/setup/check`;
             fetch(api)
               .then((res) => {
                 this.updateCheck("success");
