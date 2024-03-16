@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -46,6 +46,8 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 LOGGER.warning(
                     f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
                 )
+            elif certificate.not_valid_after_utc < datetime.now(UTC):
+                LOGGER.warning(f"Self-signed certificate for {first_server} has expired, regenerating ...")
             else:
                 LOGGER.info(f"Self-signed certificate for {first_server} is valid")
                 return True, 0
@@ -60,7 +62,7 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 "-nodes",
                 "-x509",
                 "-newkey",
-                "ed25519",
+                "rsa:4096",
                 "-keyout",
                 server_path.joinpath("key.pem").as_posix(),
                 "-out",
