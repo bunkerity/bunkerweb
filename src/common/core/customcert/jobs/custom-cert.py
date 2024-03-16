@@ -66,7 +66,7 @@ try:
         all_domains = all_domains.split(" ")
 
     if not all_domains:
-        LOGGER.warning("No services found, exiting ...")
+        LOGGER.info("No services found, exiting ...")
         sys_exit(0)
 
     skipped_servers = []
