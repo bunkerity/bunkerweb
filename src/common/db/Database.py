@@ -1753,42 +1753,47 @@ class Database:
             ret_data["data"] = data.data
         return ret_data
 
-    def get_jobs_cache_files(self, *, job_name: str = "", plugin_id: str = "", with_data: bool = False) -> List[Dict[str, Any]]:
+    def get_jobs_cache_files(self, *, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
         """Get jobs cache files."""
         with self.__db_session() as session:
-            entities = [Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name]
-            if with_data:
-                entities.append(Jobs_cache.data)
-
-            query = session.query(Jobs_cache).with_entities(*entities)
+            filters = {}
+            query = session.query(Jobs_cache).with_entities(Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.data)
 
             if job_name:
                 query = query.filter_by(job_name=job_name)
+                filters["name"] = job_name
 
             db_cache = query.all()
 
             if not db_cache:
                 return []
 
-            job_names = []
             if plugin_id:
-                filters = {"plugin_id": plugin_id}
-                if job_name:
-                    filters["name"] = job_name
-                job_names = [job.name for job in session.query(Jobs).with_entities(Jobs.name).filter_by(**filters)]
-                if not job_names:
-                    return []
+                filters["plugin_id"] = plugin_id
+
+            query = session.query(Jobs).with_entities(Jobs.name, Jobs.plugin_id)
+
+            if filters:
+                query = query.filter_by(**filters)
+
+            jobs = {}
+            for job in query:
+                jobs[job.name] = job.plugin_id
+
+            if not jobs:
+                return []
 
             cache_files = []
             for cache in db_cache:
-                if job_name and cache.job_name not in job_names:
+                if cache.job_name not in jobs:
                     continue
                 cache_files.append(
                     {
+                        "plugin_id": jobs[cache.job_name],
                         "job_name": cache.job_name,
                         "service_id": cache.service_id,
                         "file_name": cache.file_name,
-                        "data": "Download file to view content" if not with_data else cache.data,
+                        "data": cache.data,
                     }
                 )
             return cache_files

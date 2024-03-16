@@ -54,7 +54,7 @@ class Job:
         """Restore job cache files from database."""
         ret = True
         with LOCK:
-            job_cache_files = self.db.get_jobs_cache_files(plugin_id=plugin_id or self.job_path.name, with_data=True)  # type: ignore
+            job_cache_files = self.db.get_jobs_cache_files(plugin_id=plugin_id or self.job_path.name)  # type: ignore
 
         job_name = job_name or self.job_name
         plugin_cache_files = set()
