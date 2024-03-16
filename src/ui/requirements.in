@@ -6,6 +6,7 @@ Flask_WTF==1.2.1
 gunicorn[gthread]==21.2.0
 importlib-metadata==7.0.2
 pyotp==2.9.0
+python-magic==0.4.27
 python_dateutil==2.9.0.post0
 qrcode==7.4.2
 regex==2023.12.25
