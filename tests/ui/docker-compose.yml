@@ -34,6 +34,7 @@ services:
     pull_policy: never
     depends_on:
       - bw
+      - bw-docker-proxy
     environment:
       DOCKER_HOST: "tcp://bw-docker-proxy:2375"
     volumes:
@@ -48,6 +49,7 @@ services:
     depends_on:
       - bw
       - bw-docker-proxy
+      - bw-scheduler
     environment:
       DOCKER_HOST: "tcp://bw-docker-proxy:2375"
     volumes:

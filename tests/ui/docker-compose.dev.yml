@@ -34,6 +34,7 @@ services:
       dockerfile: src/scheduler/Dockerfile
     depends_on:
       - mybunker
+      - docker-proxy
     volumes:
       - bw-data:/data
     environment:
@@ -49,6 +50,7 @@ services:
     depends_on:
       - mybunker
       - docker-proxy
+      - bw-scheduler
     volumes:
       - bw-data:/data
     environment:
