@@ -46,21 +46,15 @@ if [ "$integration" = "docker" ] ; then
     sed -i "s@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@" docker-compose.yml
     sed -i "s@bunkerity/bunkerweb-ui:.*@ui-tests@" docker-compose.yml
 
-    # Start stack
-    docker-compose pull bw-docker-proxy app1
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
-        echo "❌ Pull failed"
-        exit 1
-    fi
+    cleanup_stack
 
     echo "🌐 Starting stack ..."
-    docker compose up -d
+    docker compose up --build -d
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🌐 Up failed, retrying ... ⚠️"
         cleanup_stack
-        docker compose up -d
+        docker compose up --build -d
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             echo "🌐 Up failed ❌"
