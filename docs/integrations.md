@@ -976,15 +976,21 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing version"
-        If you use the `testing` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+    !!! warning "Testing/dev version"
+        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+
+    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+
+    ```shell
+    export UI_WIZARD=1
+    ```
 
     And finally install BunkerWeb 1.5.6 :
 
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo apt install -y bunkerweb=1.5.6
+    sudo -E apt install -y bunkerweb=1.5.6
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -1013,15 +1019,21 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo apt install -y nginx=1.24.0-1~jammy
     ```
 
-    !!! warning "Testing version"
-        If you use the `testing` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+    !!! warning "Testing/dev version"
+        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+
+    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+
+    ```shell
+    export UI_WIZARD=1
+    ```
 
     And finally install BunkerWeb 1.5.6 :
 
     ```shell
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo apt install -y bunkerweb=1.5.6
+    sudo -E apt install -y bunkerweb=1.5.6
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
@@ -1038,6 +1050,12 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo dnf install -y nginx-1.24.0
     ```
 
+    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+
+    ```shell
+    export UI_WIZARD=1
+    ```
+
     And finally install BunkerWeb 1.5.6 :
 
     ```shell
@@ -1045,7 +1063,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
   	sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
   	sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
   	sudo dnf makecache && \
-  	sudo dnf install -y bunkerweb-1.5.6
+  	sudo -E dnf install -y bunkerweb-1.5.6
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
@@ -1082,13 +1100,20 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     ```shell
     sudo dnf install nginx-1.24.0
     ```
+
+    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+
+    ```shell
+    export UI_WIZARD=1
+    ```
+
     And finally install BunkerWeb 1.5.6 :
 
     ```shell
 	  dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo dnf install -y bunkerweb-1.5.6
+    sudo -E dnf install -y bunkerweb-1.5.6
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
