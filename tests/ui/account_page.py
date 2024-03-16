@@ -19,7 +19,7 @@ try:
 
     log_info("Try to click on all available tabs ...")
 
-    assert_button_click(DRIVER, "//button[@data-tab-handler='global']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler='version']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='password']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='totp']")
