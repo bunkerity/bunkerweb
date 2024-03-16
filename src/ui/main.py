@@ -88,9 +88,8 @@ app.config["SECRET_KEY"] = getenv("FLASK_SECRET", urandom(32))
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
 app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
 gunicorn_logger = getLogger("gunicorn.error")
-app.logger.handlers = gunicorn_logger.handlers
+app.logger = gunicorn_logger
 app.logger.setLevel(gunicorn_logger.level)
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -686,6 +685,12 @@ def account():
             if error:
                 return redirect_flash_error("The license key variable checks returned error", "account", True)
 
+            # Force job to contact PRO API
+            # by setting the last check to None
+            metadata = db.get_metadata()
+            metadata["last_pro_check"] = None
+            db.set_pro_metadata(metadata)
+
             # Reload instances
             app.config["RELOADING"] = True
             app.config["LAST_RELOAD"] = time()
@@ -988,7 +993,6 @@ def global_config():
     if request.method == "POST":
         # Check variables
         variables = request.form.to_dict().copy()
-        print(variables, flush=True)
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones

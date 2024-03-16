@@ -414,9 +414,13 @@
         }
 
         updateResume() {
+          this.servInp.value = this.servInp.value.replace('https://', '').replace('http://', '');
+          if (!this.urlInp.value.startsWith("/")) {
+            this.urlInp.value = "/" + this.urlInp.value;
+          }
           this.resumeEl.textContent = `http${
             this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
-          }://${this.servInp.value.replace('https://', '').replace('http://', '')}${this.urlInp.value}`;
+          }://${this.servInp.value}${this.urlInp.value}`;
         }
       }
 
@@ -562,7 +566,7 @@
 
             const api = `http${
               this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
-            }://${this.servInp.value.replace('https://', '').replace('http://', '')}${this.urlInp.value}`;
+            }://${this.servInp.value}${this.urlInp.value}`;
 
             fetch(window.location.href, {
               method: "POST",
