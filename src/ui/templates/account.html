@@ -5,9 +5,9 @@
         <h5 class="my-2 font-bold dark:text-white/90 mx-2">SETTINGS</h5>
         {% set tabs = [
             {
-                "name": "Global",
-                "id": "global",
-                "description": "Global informations"
+                "name": "Version",
+                "id": "version",
+                "description": "Version informations"
             },
             {
                 "name": "Username",
@@ -55,23 +55,23 @@
                 <!--end tabs-->
             </div>
         </div>
-        {% set global_info = {
+        {% set version_info = {
                     "message" : "Pro version" if is_pro_version else "Pro version but exceeding services" if pro_status == "active" and pro_overlapped else "Pro version is expired" if pro_status == "expired" else "Pro version suspended" if pro_status == "suspended" else "You are using free version",
                     "link_message" : "All features available" if is_pro_version else "Awaiting compliance" if pro_status == "active" and pro_overlapped else "Renew license" if pro_status == "expired" else "Talk to team" if pro_status == "suspended" else "Upgrade to pro",
                     "icon" : "pro" if is_pro_version else "free"
                 } %}
-        <div data-tab-item="global"
+        <div data-tab-item="version"
              class="grid grid-cols-12 w-full justify-items-center">
             <div class="col-span-12">
                 <h5 class="text-xl my-1 text-center transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200">
                     VERSION
                 </h5>
                 <div class="flex justify-center items-center">
-                    <p class="mb-0 mr-2 dark:text-gray-300">{{ global_info['message'] }}</p>
+                    <p class="mb-0 mr-2 dark:text-gray-300">{{ version_info['message'] }}</p>
                     <div role="img"
                          aria-label="version"
                          class="dark:brightness-90 inline-block w-8 h-8 text-center rounded-circle bg-yellow-500">
-                        {% if global_info['icon'] == 'pro' %}
+                        {% if version_info['icon'] == 'pro' %}
                             <svg class="leading-none text-lg relative scale-[0.6]"
                                  viewBox="0 0 48 46"
                                  fill="none"
@@ -91,10 +91,10 @@
                         {% endif %}
                     </div>
                 </div>
-                {% if global_info['link_message'] %}
+                {% if version_info['link_message'] %}
                 <div class="flex justify-center mt-2">
                     <a class="text-center font-semibold text-yellow-500 underline"
-                        href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro">{{ global_info['link_message'] }}</a>
+                        href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro">{{ version_info['link_message'] }}</a>
                 </div>
                 {% endif %}
 

@@ -1,7 +1,7 @@
 {% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- main container -->
-<div data-{{ current_endpoint }}-container class="max-h-[700px] flex flex-col justify-between :brightness-110 md:min-h-50-screen col-span-12 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-    <div class="mb-4 px-3 max-h-[350px] md:max-h-[500px] overflow-y-auto overflow-x-hidden">
+<div data-{{ current_endpoint }}-container class="min-h-[400px] flex flex-col justify-between dark:brightness-110 md:min-h-50-screen col-span-12 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div class="mb-4 px-3">
         <div class="w-full grid-cols-12 grid">
             <div class="col-span-12 md:col-span-8">
                 <h5 class="mb-2 font-bold dark:text-white/90">
@@ -57,7 +57,7 @@
                             {% endif %}
                             <!-- end service root-->
                             <!-- services folder -->
-                            {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth != 1 %}
+                            {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth != 1 or  child['type'] == "folder" and current_endpoint == "cache" and loop.depth > 2 %}
                                 <svg class="col-span-2 h-[2.5rem] w-[2.5rem] fill-primary stroke-gray-100 dark:stroke-gray-400"
                                      xmlns="http://www.w3.org/2000/svg"
                                      fill="none"
