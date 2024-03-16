@@ -119,7 +119,6 @@ try:
         "pro_status": "invalid",
         "pro_overlapped": False,
         "pro_services": 0,
-        "last_pro_check": current_date,
     }
     metadata = {}
     error = False
@@ -280,7 +279,9 @@ try:
 
     if err:
         LOGGER.error(f"Couldn't update Pro plugins to database: {err}")
+        sys_exit(2)
 
+    db.set_pro_metadata(metadata | {"last_pro_check": current_date})
     status = 1
     LOGGER.info("🚀 Pro plugins downloaded and installed successfully!")
 except SystemExit as e:
