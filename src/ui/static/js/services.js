@@ -4,6 +4,7 @@ import {
   FormatValue,
   FilterSettings,
   CheckNoMatchFilter,
+  showInvalid,
 } from "./utils/settings.js";
 
 class ServiceModal {
@@ -906,6 +907,36 @@ class Multiple {
       );
     });
 
+    //rename popover
+    const popoverBtns = schemaCtnrClone.querySelectorAll("[data-popover-btn]");
+    popoverBtns.forEach((popoverBtn) => {
+      popoverBtn.setAttribute(
+        "data-popover-btn",
+        popoverBtn.getAttribute("data-popover-btn").replace("_SCHEMA", suffix),
+      );
+    });
+
+    const popoverContents = schemaCtnrClone.querySelectorAll(
+      "[data-popover-content]",
+    );
+    popoverContents.forEach((popoverContent) => {
+      popoverContent.setAttribute(
+        "data-popover-content",
+        popoverContent
+          .getAttribute("data-popover-content")
+          .replace("_SCHEMA", suffix),
+      );
+    });
+
+    //rename invalid
+    const invalidEls = schemaCtnrClone.querySelectorAll("[data-invalid]");
+    invalidEls.forEach((invalidEl) => {
+      invalidEl.setAttribute(
+        "data-invalid",
+        invalidEl.getAttribute("data-invalid").replace("_SCHEMA", suffix),
+      );
+    });
+
     //rename input
     try {
       const inps = schemaCtnrClone.querySelectorAll("input");
@@ -1414,11 +1445,12 @@ const setTabsSelect = new TabsSelect(
 const setPopover = new Popover();
 const setModal = new ServiceModal();
 const format = new FormatValue();
-
+const invalid = new showInvalid();
 const setFilterGlobal = new FilterSettings(
   "settings-filter",
   document.querySelector("[data-services-tabs-select]"),
   document.querySelector("[data-services-modal-form]"),
+  "services",
 );
 
 const setMultiple = new Multiple("services");

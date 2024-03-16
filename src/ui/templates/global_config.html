@@ -1,15 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-
-<div  data-global-config-tabs-select-container
-class="z-100 w-full  grid grid-cols-12 h-fit max-h-100 sm:max-h-125 col-span-12 md:col-span-6 lg:col-span-4 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-    <div data-{{ current_endpoint }}-tabs-select-header class="col-span-12">
-        <div  class="flex flex-col xs:flex-row xs:justify-start xs:items-center gap-x-4 gap-y-2 mb-4">
-            <h5 class="transition duration-300 ease-in-out 0 ml-2 font-bold text-md uppercase dark:text-white/90 mb-0">PLUGINS</h5>
+    <div data-global-config-tabs-select-container
+         class="z-100 w-full  grid grid-cols-12 h-fit max-h-100 sm:max-h-125 col-span-12 md:col-span-6 lg:col-span-4 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        <div data-{{ current_endpoint }}-tabs-select-header class="col-span-12">
+            <div class="flex flex-col xs:flex-row xs:justify-start xs:items-center gap-x-4 gap-y-2 mb-4">
+                <h5 class="transition duration-300 ease-in-out 0 ml-2 font-bold text-md uppercase dark:text-white/90 mb-0">PLUGINS</h5>
+            </div>
+            {% include "settings_tabs_select.html" %}
         </div>
-                {% include "settings_tabs_select.html" %}
     </div>
-</div>
     <!-- filter -->
     {% set filters = [
         {
@@ -19,6 +18,13 @@ class="z-100 w-full  grid grid-cols-12 h-fit max-h-100 sm:max-h-125 col-span-12 
             "id": "keyword",
             "placeholder": "keyword",
             "pattern": "(.*?)"
+        },
+        {
+            "type": "select",
+            "name": "Context",
+            "id": "context",
+            "value": "all",
+            "values": ["all", "global", "multisite"]
         }
     ] %}
     <div data-global-config-filter
@@ -69,12 +75,12 @@ class="z-100 w-full  grid grid-cols-12 h-fit max-h-100 sm:max-h-125 col-span-12 
                         <div id="filter-{{ filter['id'] }}"
                              role="listbox"
                              data-global-config-setting-select-dropdown="{{ filter['id'] }}"
-                             class="hidden z-100 absolute h-full flex-col w-full translate-y-16">
+                             class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
                             {% for value in filter['values'] %}
                                 <button role="option"
                                         data-global-config-setting-select-dropdown-btn="{{ filter['id'] }}"
                                         value="{{ value }}"
-                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
                                     {{ value }}
                                 </button>
                             {% endfor %}
@@ -87,13 +93,15 @@ class="z-100 w-full  grid grid-cols-12 h-fit max-h-100 sm:max-h-125 col-span-12 
         </div>
     </div>
     <!-- end filter -->
-
     <div data-global-config-plugins-container
          class="col-span-12 gap-y-4 grid grid-cols-12">
+        <div data-global-config-settings
+             class="hidden"
+             data-value="{{ dumped_global_config }}"></div>
         <!-- form global conf -->
         <form data-global-config-form
               id="form-edit-global-config"
-              method="POST"
+              method="post"
               class="flex flex-col justify-between overflow-hidden overflow-y-auto dark:brightness-110 col-span-12 break-words bg-white shadow-xl p-4 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <!-- plugin item -->
@@ -121,5 +129,4 @@ class="z-100 w-full  grid grid-cols-12 h-fit max-h-100 sm:max-h-125 col-span-12 
             </div>
         </div>
     </div>
-</div>
 {% endblock content %}

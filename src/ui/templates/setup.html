@@ -123,7 +123,9 @@
                             <h2 class="col-span-12 block text-left font-bold my-4 text-2xl">Account</h2>
                             <!-- username inpt-->
                             <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Username<strong class="required-mark">*</strong></h5>
+                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                    Username<strong class="required-mark">*</strong>
+                                </h5>
                                 <label class="sr-only" for="admin_username">Username</label>
                                 <input type="text"
                                        id="admin_username"
@@ -138,7 +140,9 @@
                             <!-- end username inpt-->
                             <!-- password inpt-->
                             <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Password<strong class="required-mark">*</strong></h5>
+                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                    Password<strong class="required-mark">*</strong>
+                                </h5>
                                 <label class="sr-only" for="admin_password">Password</label>
                                 <input type="password"
                                        id="admin_password"
@@ -153,7 +157,9 @@
                             <!-- end password inpt-->
                             <!-- password inpt-->
                             <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Confirm Password<strong class="required-mark">*</strong></h5>
+                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                    Confirm Password<strong class="required-mark">*</strong>
+                                </h5>
                                 <label class="sr-only" for="admin_password_check">Confirm Password</label>
                                 <input type="password"
                                        id="admin_password_check"
@@ -169,47 +175,51 @@
                             <!-- end password inpt-->
                             <!-- email inpt-->
                             <div class="flex flex-col relative col-span-12 mx-2 max-w-[400px] w-full">
-                              <h5 class="text-base mb-1 transition duration-300 ease-in-out text-md font-bold m-0">Email</h5>
-                              <label class="sr-only" for="newsletter-email">email</label>
-                              <input type="email"
-                                      id="newsletter-email"
-                                      name="EMAIL"
-                                      class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                      placeholder="example@gmail.com"
-                                      value=""/>
-                          </div>
-                          <!-- auto privacy policy-->
-                          <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                            <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"> I've read and agree to the
-                              <a class="privacy-link"
-                                 href="https://www.bunkerity.com/privacy-policy/?utm_campaign=self&utm_source=ui"
-                                 target="_blank"
-                                 rel="noopener">privacy policy</a></h5>
-                            <label class="sr-only" for="newsletter-check">privacy policy</label>
-                            <div data-checkbox-handler="newsletter-check"
-                                  class="relative mb-7 md:mb-0 z-10">
-                                <input data-check
-                                        type="checkbox"
-                                        id="newsletter-check"
-                                        name="newsletter-check"
-                                        data-checked="false"
-                                        class="checkbox"
-                                        value="no" />
-                                <svg data-checkbox-handler="newsletter-check"
-                                      class="pointer-events-none absolute fill-white left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      viewBox="0 0 512 512">
-                                    <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
-                                    </path>
-                                </svg>
+                                <h5 class="text-base mb-1 transition duration-300 ease-in-out text-md font-bold m-0">Email</h5>
+                                <label class="sr-only" for="newsletter-email">email</label>
+                                <input type="email"
+                                       id="newsletter-email"
+                                       name="EMAIL"
+                                       class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                       placeholder="example@gmail.com"
+                                       value="" />
                             </div>
-                        </div>
-                        <!-- end auto privacy policy-->
-                          <!-- end email inpt-->
+                            <!-- auto privacy policy-->
+                            <div class="flex relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                              <label class="sr-only" for="newsletter-check">privacy policy</label>
+                              <div data-checkbox-handler="newsletter-check"
+                                     class="relative mb-7 md:mb-0 z-10">
+                                    <input data-check
+                                           type="checkbox"
+                                           id="newsletter-check"
+                                           name="newsletter-check"
+                                           data-checked="false"
+                                           class="checkbox"
+                                           value="no" />
+                                    <svg data-checkbox-handler="newsletter-check"
+                                         class="pointer-events-none absolute fill-white left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 512 512">
+                                         <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
+                                        </path>
+                                      </svg>
+                                    </div>
+                                    <h5 class="text-base mt-1 transition duration-300 ease-in-out text-md font-bold m-0 ml-2">
+                                        I've read and agree to the
+                                        <a class="privacy-link"
+                                           href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
+                                           target="_blank"
+                                           rel="noopener">privacy policy</a>
+                                    </h5>
+                            </div>
+                            <!-- end auto privacy policy-->
+                            <!-- end email inpt-->
                             <h2 class="col-span-12 block text-left font-bold mb-4 mt-2 text-2xl">Settings</h2>
                             <!-- ui host-->
                             <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">UI Host (REVERSE_PROXY_HOST)<strong class="required-mark">*</strong></h5>
+                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                    UI Host (REVERSE_PROXY_HOST)<strong class="required-mark">*</strong>
+                                </h5>
                                 <label class="sr-only" for="ui_host">ui host</label>
                                 <input type="text"
                                        id="ui_host"
@@ -223,7 +233,9 @@
                             <!-- end ui host-->
                             <!-- ui url-->
                             <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">UI URL (REVERSE_PROXY_URL)<strong class="required-mark">*</strong></h5>
+                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                    UI URL (REVERSE_PROXY_URL)<strong class="required-mark">*</strong>
+                                </h5>
                                 <label class="sr-only" for="ui_url">ui url</label>
                                 <input type="text"
                                        id="ui_url"
@@ -237,7 +249,9 @@
                             <!-- end ui url-->
                             <!-- server name-->
                             <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Server name<strong class="required-mark">*</strong></h5>
+                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                    Server name<strong class="required-mark">*</strong>
+                                </h5>
                                 <label class="sr-only" for="server_name">server name</label>
                                 <input type="text"
                                        id="server_name"
@@ -306,6 +320,10 @@
                     </div>
                 </div>
                 <!-- end form -->
+                <form style="display: none;" id="newsletter-form" action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67" method="POST" target="_blank">
+                  <input id="newsletter-form-email" name="EMAIL" type="email" value="" />
+                  <input id="newsletter-form-check" name="newsletter-check" type="checkbox" value="yes" />
+                </form>
             </main>
             <script nonce="{{ script_nonce }}">
       class ServerCheck {
@@ -329,9 +347,7 @@
             e.preventDefault();
             this.updateCheck("unknown");
             // get resume
-            const api = `http${
-              this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
-            }://${this.servInp.value}/setup/check`;
+            const api = `http://${this.servInp.value}/setup/check`;
             fetch(api)
               .then((res) => {
                 this.updateCheck("success");
@@ -561,10 +577,15 @@
                   setTimeout(() => {
                     setInterval(() => {
                       fetch(`${api}/check`, {
+                        mode: "cors",
                         cache: "no-cache",
                       })
                         .then((res) => {
-                          if (res.status === 200) {
+                          if (res.status === 200 ) {
+                            return res.json();
+                          }
+                        }).then(res => {
+                          if (res.message === "ok") {
                             window.open(`${api}/login`, "_self");
                           }
                         })
@@ -586,14 +607,8 @@
         }
 
         subscribe() {
-          const subForm = new FormData();
-          subForm.append('EMAIL', this.emailInp.value);
-          subForm.append("newsletter-check", "yes")
-          fetch("https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67", {
-              method: "POST",
-              body: subForm,
-              redirect: "error",
-            }).then(res => {}).catch(err => {})
+          document.querySelector('#newsletter-form-email').value = this.emailInp.value;
+          document.querySelector('#newsletter-form').submit();
         }
 
         checkSamePW() {

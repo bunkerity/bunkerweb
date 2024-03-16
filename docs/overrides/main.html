@@ -7,8 +7,7 @@
     </a>
 {% endblock %}
 {% block announce %}
-    📢 Looking for technical support, tailored
-    consulting or custom development for BunkerWeb ? Visit the
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
@@ -19,6 +18,21 @@
             defer
             data-domain="docs.bunkerweb.io"
             src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+
     <script defer>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
@@ -37,14 +51,14 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : 'Need premium support ? <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc">Check BunkerWeb Panel</a>'},
-        { "content" : 'Try BunkerWeb on our <a style="text-decoration:underline; color :  white;" href="https://demo.bunkerweb.io/link/?utm_campaign=self&utm_source=doc">demo web app !</a>'},
-        { "content" : 'All information about BunkerWeb on our <a style="text-decoration:underline; color :  white;" href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=doc">website !</a>'}
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
 
       function setBannerStyle() {
         const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#36ce7a";
+        bannerEl.style.backgroundColor = "#2eac68";
         bannerItem.style.textAlign = "center";
         bannerItem.style.transition = "all 0.5s ease-out";
       }
@@ -52,7 +66,7 @@
       function setDefault() {
         const bannerItem = bannerEl.querySelector('.md-banner__inner');
         const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[defaultContent.length - 1]["content"];
+        clone.innerHTML = defaultContent[0]["content"];
         bannerEl.replaceChild(clone, bannerItem);
       }
 
@@ -62,7 +76,7 @@
 
         setInterval(() => {
           // Update or reset index
-          if(i + 1 === defaultContent.length - 1) {
+          if(i + 1 === defaultContent.length) {
             i = 0;
           } else {
             i++;

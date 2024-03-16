@@ -4,40 +4,24 @@
   "description": "Fake core plugin for internal jobs.",
   "version": "1.0",
   "stream": "yes",
-  "settings": {
-    "SEND_ANONYMOUS_REPORT": {
-      "context": "global",
-      "default": "yes",
-      "help": "Send anonymous report to BunkerWeb maintainers.",
-      "id": "send-anonymous-report",
-      "label": "Send anonymous report",
-      "regex": "^(yes|no)$",
-      "type": "check"
-    }
-  },
+  "settings": {},
   "jobs": [
     {
       "name": "mmdb-country",
       "file": "mmdb-country.py",
-      "every": "week",
+      "every": "day",
       "reload": true
     },
     {
       "name": "mmdb-asn",
       "file": "mmdb-asn.py",
-      "every": "week",
+      "every": "day",
       "reload": true
     },
     {
       "name": "download-plugins",
       "file": "download-plugins.py",
       "every": "once",
-      "reload": false
-    },
-    {
-      "name": "anonymous-report",
-      "file": "anonymous-report.py",
-      "every": "day",
       "reload": false
     }
   ]

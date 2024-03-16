@@ -19,7 +19,7 @@
     {
       "name": "download-pro-plugins",
       "file": "download-pro-plugins.py",
-      "every": "hour",
+      "every": "day",
       "reload": true
     }
   ]

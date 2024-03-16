@@ -95,6 +95,8 @@ try:
 
     access_page(DRIVER, "//form[@data-plugins-modal-form-delete='']//button[@type='submit']", "plugins", False)
 
+    sleep(30)
+
     if TEST_TYPE == "linux":
         wait_for_service()
 
@@ -124,7 +126,7 @@ try:
 
     sleep(5)
 
-    badbehavior_list = safe_get_element(DRIVER, By.XPATH, '//li[@data-item=""]', multiple=True)
+    badbehavior_list = safe_get_element(DRIVER, By.XPATH, '//li[@class="core-card-list-item"]', multiple=True)
     assert isinstance(badbehavior_list, list), "Bad behavior list is not a list"
 
     found_403 = False
@@ -160,7 +162,7 @@ try:
 
     sleep(5)
 
-    errors_list = safe_get_element(DRIVER, By.XPATH, '//li[@data-item=""]', multiple=True)
+    errors_list = safe_get_element(DRIVER, By.XPATH, '//li[@class="core-card-list-item"]', multiple=True)
     assert isinstance(errors_list, list), "Errors list is not a list"
 
     found_403 = False
@@ -194,7 +196,9 @@ try:
 
     sleep(5)
 
-    misc_disallowed_count = safe_get_element(DRIVER, By.XPATH, '//h5[@data-count-disallowed-methods=""]')
+    misc_disallowed_count = safe_get_element(
+        DRIVER, By.XPATH, '//p[@class="core-card-metrics-name" and contains(text(), "DISALLOWED METHODS")]/following-sibling::h5[@data-count=""]'
+    )
     assert isinstance(misc_disallowed_count, WebElement), "Miscellaneous disallowed count is not a WebElement"
 
     if misc_disallowed_count.text != "0":

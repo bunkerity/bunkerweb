@@ -95,11 +95,63 @@ location /hello {
         log_info("The config hasn't been created, exiting ...")
         exit(1)
 
-    log_info("The config has been created and is working with both services, trying to delete it ...")
+    log_info("The config has been created and is working with both services, trying filters ... ...")
 
     for _ in range(2):
         DRIVER.close()
         DRIVER.switch_to.window(DRIVER.window_handles[len(DRIVER.window_handles) - 1])
+
+    log_info("Check path with conf only filter ...")
+
+    assert_button_click(DRIVER, "//button[@data-configs-setting-select='withconf']")
+    assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='withconf' and @value='true']")
+
+    is_server_http_folder_hidden = DRIVER.execute_script(
+        f"""return document.querySelector("[data-configs-element='server-http']").classList.contains("hidden")"""
+    )
+
+    if is_server_http_folder_hidden:
+        log_error(f"Server http folder should be visible.")
+        exit(1)
+
+    is_http_folder_hidden = DRIVER.execute_script(f"""return document.querySelector("[data-configs-element='http']").classList.contains("hidden")""")
+
+    if not is_http_folder_hidden:
+        log_error(f"Http folder should be hidden.")
+        exit(1)
+
+    # Reset
+    assert_button_click(DRIVER, "//button[@data-configs-setting-select='withconf']")
+    assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='withconf' and @value='false']")
+
+    log_info("Check path with conf only filter done, check show global conf only ...")
+
+    assert_button_click(DRIVER, "//button[@data-configs-setting-select='globalconf']")
+    assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='globalconf' and @value='true']")
+
+    assert_button_click(DRIVER, "//div[@data-configs-element='http' and @data-_type='folder']")
+
+    is_app1_example_com_folder_hidden = DRIVER.execute_script(
+        f"""return document.querySelector("[data-configs-element='app1.example.com']").classList.contains("hidden")"""
+    )
+
+    if not is_app1_example_com_folder_hidden:
+        log_error(f"app1.example.com folder should be hidden.")
+        exit(1)
+
+    assert_button_click(DRIVER, "//button[@data-configs-setting-select='globalconf']")
+    assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='globalconf' and @value='false']")
+
+    log_info("Check show global conf only  done...")
+
+    log_info("Filters working, trying breadcrumb ...")
+
+    assert_button_click(DRIVER, "//div[@data-configs-element='http' and @data-_type='folder']")
+    assert_button_click(DRIVER, "//li[@data-configs-breadcrumb-item]")
+    assert_button_click(DRIVER, "//div[@data-configs-element='http' and @data-_type='folder']")
+    assert_button_click(DRIVER, "//li[@data-configs-breadcrumb-item and @data-level='0']/button")
+
+    log_info("Breadcrumb working, trying to delete the config ...")
 
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
     assert_button_click(DRIVER, "//div[@data-configs-action-button='hello.conf']")

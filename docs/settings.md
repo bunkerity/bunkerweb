@@ -315,27 +315,17 @@ Manage HTTP headers sent to clients.
 |`X_CONTENT_TYPE_OPTIONS`             |`nosniff`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |multisite|no      |Value for the X-Content-Type-Options header.                                                  |
 |`X_XSS_PROTECTION`                   |`1; mode=block`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |multisite|no      |Value for the X-XSS-Protection header.                                                        |
 
-### Jobs
-
-STREAM support :white_check_mark:
-
-Fake core plugin for internal jobs.
-
-|        Setting        |Default|Context|Multiple|                  Description                  |
-|-----------------------|-------|-------|--------|-----------------------------------------------|
-|`SEND_ANONYMOUS_REPORT`|`yes`  |global |no      |Send anonymous report to BunkerWeb maintainers.|
-
 ### Let's Encrypt
 
 STREAM support :white_check_mark:
 
 Automatic creation, renewal and configuration of Let's Encrypt certificates.
 
-|         Setting          |Default| Context |Multiple|                                                                                 Description                                                                                 |
-|--------------------------|-------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                       |
-|`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
-|`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
+|         Setting          |Default| Context |Multiple|                                                                                  Description                                                                                  |
+|--------------------------|-------|---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                         |
+|`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                  |
+|`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Letâ€™s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
 
 ### Limit
 
@@ -390,6 +380,7 @@ Miscellaneous settings.
 |`OPEN_FILE_CACHE_VALID`      |`30s`                  |multisite|no      |Open file cache valid time                                                                                                   |
 |`EXTERNAL_PLUGIN_URLS`       |                       |global   |no      |List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).|
 |`DENY_HTTP_STATUS`           |`403`                  |global   |no      |HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.       |
+|`SEND_ANONYMOUS_REPORT`      |`yes`                  |global   |no      |Send anonymous report to BunkerWeb maintainers.                                                                              |
 
 ### ModSecurity
 
@@ -587,3 +578,32 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
+
+## Pro plugins
+
+### Prometheus exporter
+
+<div style="display:flex; align-items:center">
+    <h3 data-custom-header id="prometheus-exporter">Prometheus exporter</h3>
+
+    <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+            viewBox="0 0 48 46"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+        <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+        <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+    </svg>
+</div>
+
+STREAM support :x:
+
+Prometheus export for BunkerWeb
+
+|            Setting            |                       Default                       |Context|Multiple|                              Description                               |
+|-------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
+|`USE_PROMETHEUS_EXPORTER`      |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
+|`PROMETHEUS_EXPORTER_IP`       |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
+|`PROMETHEUS_EXPORTER_PORT`     |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
+|`PROMETHEUS_EXPORTER_DICT_SIZE`|`10M`                                                |global |no      |Size of the dict to store Prometheus metrics.                           |
+|`PROMETHEUS_EXPORTER_ALLOW_IP` |`127.0.0.1/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
+|`PROMETHEUS_EXPORTER_URL`      |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |

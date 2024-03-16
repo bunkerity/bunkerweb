@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from copy import deepcopy
+from datetime import datetime
 from glob import glob
 from hashlib import sha256
 from io import BytesIO
@@ -26,13 +27,14 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from dotenv import dotenv_values
 
+from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
-INTEGRATION = "Linux"
+HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy")
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
@@ -73,7 +75,7 @@ signal(SIGHUP, handle_reload)
 
 def stop(status):
     Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
-    Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").unlink(missing_ok=True)
+    HEALTHY_PATH.unlink(missing_ok=True)
     _exit(status)
 
 
@@ -132,7 +134,10 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
             tmp_path.parent.mkdir(parents=True, exist_ok=True)
             tmp_path.write_bytes(plugin["data"])
             with tar_open(str(tmp_path), "r:gz") as tar:
-                tar.extractall(original_path)
+                try:
+                    tar.extractall(original_path, filter="fully_trusted")
+                except TypeError:
+                    tar.extractall(original_path)
             tmp_path.unlink()
 
             for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
@@ -181,30 +186,13 @@ if __name__ == "__main__":
         parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
         args = parser.parse_args()
 
-        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-        os_release_path = Path(sep, "etc", "os-release")
-        if getenv("KUBERNETES_MODE", "no").lower() == "yes":
-            INTEGRATION = "Kubernetes"
-        elif getenv("SWARM_MODE", "no").lower() == "yes":
-            INTEGRATION = "Swarm"
-        elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
-            INTEGRATION = "Autoconf"
-        elif integration_path.is_file():
-            INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
-            INTEGRATION = "Docker"
-
-        del integration_path, os_release_path
-
+        INTEGRATION = get_integration()
         tmp_variables_path = normpath(args.variables) if args.variables else join(sep, "var", "tmp", "bunkerweb", "variables.env")
         tmp_variables_path = Path(tmp_variables_path)
         nginx_variables_path = Path(sep, "etc", "nginx", "variables.env")
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
-        db = Database(
-            logger,
-            sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)),
-        )
+        db = Database(logger, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
         env = {}
 
         if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
@@ -272,6 +260,7 @@ if __name__ == "__main__":
         logger.info("Scheduler started ...")
 
         # Checking if any custom config has been created by the user
+        logger.info("Checking if there are any changes in custom configs ...")
         custom_configs = []
         db_configs = db.get_custom_configs()
         configs_path = Path(sep, "etc", "bunkerweb", "configs")
@@ -317,6 +306,7 @@ if __name__ == "__main__":
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
+            logger.info(f"Checking if there are any changes in {_type} plugins ...")
             external_plugins = []
             db_plugins = db.get_plugins(_type=_type)
             for filename in glob(str((EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH).joinpath("*", "plugin.json"))):
@@ -364,23 +354,52 @@ if __name__ == "__main__":
                     db.get_plugins(_type=_type, with_data=True),
                     original_path=EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH,
                 )
-                SCHEDULER.update_jobs()
 
         check_plugin_changes("external")
         check_plugin_changes("pro")
+
+        logger.info("Running plugins download jobs ...")
+
+        # Update the environment variables of the scheduler
+        SCHEDULER.env = env | environ.copy()
+        if not SCHEDULER.run_single("download-plugins"):
+            logger.warning("download-plugins job failed at first start, plugins settings set by the user may not be up to date ...")
+        if not SCHEDULER.run_single("download-pro-plugins"):
+            logger.warning("download-pro-plugins job failed at first start, pro plugins settings set by the user may not be up to date ...")
+
+        changes = db.check_changes()
+        if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf") and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
+            if changes["pro_plugins_changed"]:
+                generate_external_plugins(db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
+            if changes["external_plugins_changed"]:
+                generate_external_plugins(db.get_plugins(_type="external", with_data=True))
+
+            # run the config saver to save potential ignored external plugins settings
+            logger.info("Running config saver to save potential ignored external plugins settings ...")
+            proc = subprocess_run(
+                [
+                    "python3",
+                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                    "--settings",
+                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                ],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                logger.error(
+                    "Config saver failed, configuration will not work as expected...",
+                )
+
+            SCHEDULER.update_jobs()
+            env = db.get_config()
+            env["DATABASE_URI"] = db.database_uri
 
         logger.info("Executing scheduler ...")
 
         del dotenv_env
 
-        if scheduler_first_start:
-            ret = db.set_scheduler_first_start()
-
-            if ret:
-                logger.error(f"An error occurred when setting the scheduler first start : {ret}")
-                stop(1)
-
-        FIRST_RUN = True
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
         CHANGES = []
@@ -516,9 +535,19 @@ if __name__ == "__main__":
             PRO_PLUGINS_NEED_GENERATION = False
             INSTANCES_NEED_GENERATION = False
 
+            if scheduler_first_start:
+                ret = db.set_scheduler_first_start()
+
+                if ret:
+                    logger.error(f"An error occurred when setting the scheduler first start : {ret}")
+                    stop(1)
+                scheduler_first_start = False
+
+            if not HEALTHY_PATH.is_file():
+                HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")
+
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
-            Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").write_text("ok", encoding="utf-8")
             while RUN and not NEED_RELOAD:
                 SCHEDULER.run_pending()
                 sleep(1)
@@ -544,27 +573,6 @@ if __name__ == "__main__":
                     RUN_JOBS_ONCE = True
                     NEED_RELOAD = True
 
-                if FIRST_RUN and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
-                    if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf"):
-                        # run the config saver to save potential ignored external plugins settings
-                        logger.info("Running config saver to save potential ignored external plugins settings ...")
-                        proc = subprocess_run(
-                            [
-                                "python3",
-                                join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                                "--settings",
-                                join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                            ],
-                            stdin=DEVNULL,
-                            stderr=STDOUT,
-                            check=False,
-                        )
-                        if proc.returncode != 0:
-                            logger.error(
-                                "Config saver failed, configuration will not work as expected...",
-                            )
-                    changes.update({"custom_configs_changed": True, "config_changed": True})
-
                 # check if the custom configs have changed since last time
                 if changes["custom_configs_changed"]:
                     logger.info("Custom configs changed, generating ...")
@@ -586,8 +594,6 @@ if __name__ == "__main__":
                     CONFIGS_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
-
-            FIRST_RUN = False
 
             if NEED_RELOAD:
                 CHANGES.clear()

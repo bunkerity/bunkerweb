@@ -293,6 +293,54 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
 
 
 # UTILS
+def run_action(plugin: str, function_name: str = ""):
+    message = ""
+    module = db.get_plugin_actions(plugin)
+
+    if module is None:
+        return {"status": "ko", "code": 404, "message": "The actions.py file for the plugin does not exist"}
+
+    try:
+        # Try to import the custom plugin
+        with NamedTemporaryFile(mode="wb", suffix=".py", delete=True) as temp:
+            temp.write(module)
+            temp.flush()
+            temp.seek(0)
+            loader = SourceFileLoader("actions", temp.name)
+            actions = loader.load_module()
+    except:
+        return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
+
+    res = None
+
+    try:
+        # Try to get the custom plugin custom function and call it
+        method = getattr(actions, function_name or plugin)
+        queries = request.args.to_dict()
+        try:
+            data = request.json or False
+        except:
+            data = {}
+
+        res = method(app=app, args=queries, data=data)
+    except AttributeError:
+        message = "The plugin does not have a method, see logs for more details"
+    except:
+        message = "An error occurred while executing the plugin, see logs for more details"
+    finally:
+        if sbin_nginx_path.is_file():
+            # Remove the custom plugin from the shared library
+            if sys_path:
+                sys_path.pop()
+            sys_modules.pop("actions", None)
+            del actions
+
+        if message or not isinstance(res, dict) and not res:
+            return {"status": "ko", "code": 500, "message": message or "The plugin did not return a valid response"}
+
+    return {"status": "ok", "code": 200, "data": res}
+
+
 def is_request_form(url_name: str, next: bool = False):
     if not request.form:
         flash("Missing form data.", "error")
@@ -357,7 +405,7 @@ def set_csp_header(response):
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
-        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com;"
+        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com;"
         + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: https://assets.bunkerity.com;"
@@ -443,10 +491,7 @@ def loading():
 
 @app.route("/check", methods=["GET"])
 def check():
-    if "Origin" not in request.headers:
-        return Response(status=403)
-
-    return Response(status=200, headers={"Access-Control-Allow-Origin": "*"})
+    return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
 @app.route("/setup", methods=["GET", "POST"])
@@ -578,24 +623,28 @@ def home():
         remote_version = basename(r.url).strip().replace("v", "")
 
     instances = app.config["INSTANCES"].get_instances()
-    services = app.config["CONFIG"].get_services()
+    config = app.config["CONFIG"].get_config(with_drafts=True)
     instance_health_count = 0
 
     for instance in instances:
         if instance.health is True:
             instance_health_count += 1
 
+    services = 0
     services_scheduler_count = 0
     services_ui_count = 0
     services_autoconf_count = 0
 
-    for service in services:
-        if service["SERVER_NAME"]["method"] == "scheduler":
+    for service in config["SERVER_NAME"]["value"].split(" "):
+        service_method = config.get(f"{service}_SERVER_NAME", {"method": "scheduler"})["method"]
+
+        if service_method == "scheduler":
             services_scheduler_count += 1
-        elif service["SERVER_NAME"]["method"] == "ui":
+        elif service_method == "ui":
             services_ui_count += 1
-        elif service["SERVER_NAME"]["method"] == "autoconf":
+        elif service_method == "autoconf":
             services_autoconf_count += 1
+        services += 1
 
     return render_template(
         "home.html",
@@ -603,7 +652,7 @@ def home():
         remote_version=remote_version,
         version=bw_version,
         instances_number=len(instances),
-        services_number=len(services),
+        services_number=services,
         plugins_errors=db.get_plugins_errors(),
         instance_health_count=instance_health_count,
         services_scheduler_count=services_scheduler_count,
@@ -765,7 +814,7 @@ def services():
         # Check variables
         variables = deepcopy(request.form.to_dict())
         del variables["csrf_token"]
-        is_draft = variables.pop("is_draft") == "yes"
+        is_draft = variables.pop("is_draft", "no") == "yes"
 
         if "OLD_SERVER_NAME" not in request.form and request.form["operation"] == "edit":
             return redirect_flash_error("Missing OLD_SERVER_NAME parameter.", "services", True)
@@ -783,7 +832,7 @@ def services():
 
             # Edit check fields and remove already existing ones
             for variable, value in deepcopy(variables).items():
-                if variable.endswith("SCHEMA"):
+                if variable == "IS_DRAFT" or variable.endswith("SCHEMA"):
                     del variables[variable]
                     continue
 
@@ -850,32 +899,49 @@ def services():
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
     # Display services
-    services = app.config["CONFIG"].get_services(with_drafts=True)
-    return render_template(
-        "services.html",
-        services=[
+    services = []
+    global_config = app.config["CONFIG"].get_config(with_drafts=True)
+    service_names = global_config["SERVER_NAME"]["value"].split(" ")
+    for service in service_names:
+        service_settings = []
+        tmp_config = global_config.copy()
+
+        for key, value in tmp_config.copy().items():
+            if key.startswith(f"{service}_"):
+                setting = key.replace(f"{service}_", "")
+                service_settings.append(setting)
+                tmp_config[setting] = tmp_config.pop(key)
+            elif any(key.startswith(f"{s}_") for s in service_names):
+                tmp_config.pop(key)
+            elif key not in service_settings:
+                tmp_config[key] = {"value": value["value"], "global": value["global"], "method": value["method"]}
+
+        services.append(
             {
                 "SERVER_NAME": {
-                    "value": service["SERVER_NAME"]["value"].split(" ")[0],
-                    "full_value": service["SERVER_NAME"]["value"],
-                    "method": service["SERVER_NAME"]["method"],
+                    "value": tmp_config["SERVER_NAME"]["value"].split(" ")[0],
+                    "full_value": tmp_config["SERVER_NAME"]["value"],
+                    "method": tmp_config["SERVER_NAME"]["method"],
                 },
-                "IS_DRAFT": service.pop("IS_DRAFT", {"value": "no"})["value"],
-                "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
-                "SERVE_FILES": service["SERVE_FILES"],
-                "REMOTE_PHP": service["REMOTE_PHP"],
-                "AUTO_LETS_ENCRYPT": service["AUTO_LETS_ENCRYPT"],
-                "USE_CUSTOM_SSL": service["USE_CUSTOM_SSL"],
-                "GENERATE_SELF_SIGNED_SSL": service["GENERATE_SELF_SIGNED_SSL"],
-                "USE_MODSECURITY": service["USE_MODSECURITY"],
-                "USE_BAD_BEHAVIOR": service["USE_BAD_BEHAVIOR"],
-                "USE_LIMIT_REQ": service["USE_LIMIT_REQ"],
-                "USE_DNSBL": service["USE_DNSBL"],
-                "settings": dumps(service),
+                "IS_DRAFT": tmp_config.pop("IS_DRAFT", {"value": "no"})["value"],
+                "USE_REVERSE_PROXY": tmp_config["USE_REVERSE_PROXY"],
+                "SERVE_FILES": tmp_config["SERVE_FILES"],
+                "REMOTE_PHP": tmp_config["REMOTE_PHP"],
+                "AUTO_LETS_ENCRYPT": tmp_config["AUTO_LETS_ENCRYPT"],
+                "USE_CUSTOM_SSL": tmp_config["USE_CUSTOM_SSL"],
+                "GENERATE_SELF_SIGNED_SSL": tmp_config["GENERATE_SELF_SIGNED_SSL"],
+                "USE_MODSECURITY": tmp_config["USE_MODSECURITY"],
+                "USE_BAD_BEHAVIOR": tmp_config["USE_BAD_BEHAVIOR"],
+                "USE_LIMIT_REQ": tmp_config["USE_LIMIT_REQ"],
+                "USE_DNSBL": tmp_config["USE_DNSBL"],
+                "settings": dumps(tmp_config),
             }
-            for service in services
-        ],
-        global_config=app.config["CONFIG"].get_config(),
+        )
+
+    return render_template(
+        "services.html",
+        services=services,
+        global_config=global_config,
         username=current_user.get_id(),
     )
 
@@ -885,13 +951,14 @@ def services():
 def global_config():
     if request.method == "POST":
         # Check variables
-        variables = deepcopy(request.form.to_dict())
+        variables = request.form.to_dict().copy()
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(methods=False)
-        for variable, value in deepcopy(variables).items():
-            if variable.endswith("SCHEMA"):
+        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
+        services = config["SERVER_NAME"]["value"].split(" ")
+        for variable, value in variables.copy().items():
+            if variable in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "SERVER_NAME", "IS_LOADING", "IS_DRAFT") or variable.endswith("SCHEMA"):
                 del variables[variable]
                 continue
 
@@ -900,16 +967,23 @@ def global_config():
             elif value == "off":
                 value = "no"
 
-            if value == config.get(variable, None):
+            setting = config.get(variable, {"value": None, "global": True})
+            if setting["global"] and value == setting["value"]:
                 del variables[variable]
 
         if not variables:
             return redirect_flash_error("The global configuration was not edited because no values were changed.", "global_config", True)
 
-        error = app.config["CONFIG"].check_variables(variables, True)
+        error = app.config["CONFIG"].check_variables(variables)
 
         if error:
             return redirect_flash_error("The global configuration variable checks returned error", "global_config", True)
+
+        for variable, value in variables.copy().items():
+            for service in services:
+                setting = config.get(f"{service}_{variable}", None)
+                if setting and setting["global"] and value != setting["value"]:
+                    variables[f"{service}_{variable}"] = value
 
         # Reload instances
         app.config["RELOADING"] = True
@@ -931,12 +1005,13 @@ def global_config():
             )
         )
 
+    global_config = app.config["CONFIG"].get_config()
+    for service in global_config["SERVER_NAME"]["value"].split(" "):
+        for key in global_config.copy():
+            if key.startswith(f"{service}_"):
+                global_config.pop(key)
     # Display global config
-    return render_template(
-        "global_config.html",
-        username=current_user.get_id(),
-        global_config=app.config["CONFIG"].get_config(),
-    )
+    return render_template("global_config.html", username=current_user.get_id(), global_config=global_config, dumped_global_config=dumps(global_config))
 
 
 @app.route("/configs", methods=["GET", "POST"])
@@ -1108,7 +1183,10 @@ def plugins():
                                     tar_file.getmember("plugin.json")
                                 except KeyError:
                                     is_dir = True
-                                tar_file.extractall(str(temp_folder_path))
+                                try:
+                                    tar_file.extractall(str(temp_folder_path), filter="data")
+                                except TypeError:
+                                    tar_file.extractall(str(temp_folder_path))
                         except ReadError:
                             errors += 1
                             error = 1
@@ -1312,7 +1390,10 @@ def upload_plugin():
                         if file.endswith("plugin.json"):
                             plugins.append(basename(dirname(file)))
                     if len(plugins) > 1:
-                        tar_file.extractall(str(tmp_ui_path) + "/")
+                        try:
+                            tar_file.extractall(str(tmp_ui_path) + "/", filter="data")
+                        except TypeError:
+                            tar_file.extractall(str(tmp_ui_path) + "/")
                 folder_name = uploaded_file.filename.replace(".tar.gz", "").replace(".tar.xz", "")
 
             if len(plugins) <= 1:
@@ -1335,7 +1416,6 @@ def upload_plugin():
 @app.route("/plugins/<plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin(plugin: str):
-    message = ""
     if not plugin_id_rx.match(plugin):
         return error_message("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)"), 400
 
@@ -1435,60 +1515,27 @@ def custom_plugin(plugin: str):
                     is_used = True
                     break
 
+        # Get prerender from action.py
+        pre_render = run_action(plugin, "pre_render")
+
         return render_template(
             Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
             username=current_user.get_id(),
             current_endpoint=plugin,
             plugin=curr_plugin,
+            pre_render=pre_render,
             is_used=is_used,
             is_metrics=is_metrics_on,
             **app.jinja_env.globals,
         )
 
-    module = db.get_plugin_actions(plugin)
-
-    if module is None:
-        return error_message("The actions.py file for the plugin does not exist"), 404
-
-    try:
-        # Try to import the custom plugin
-        with NamedTemporaryFile(mode="wb", suffix=".py", delete=True) as temp:
-            temp.write(module)
-            temp.flush()
-            temp.seek(0)
-            loader = SourceFileLoader("actions", temp.name)
-            actions = loader.load_module()
-    except:
-        return error_message("An error occurred while importing the plugin, see logs for more details"), 500
-
-    res = None
-
-    try:
-        # Try to get the custom plugin custom function and call it
-        method = getattr(actions, plugin)
-        queries = request.args.to_dict()
-        try:
-            data = request.json or False
-        except:
-            data = {}
-
-        res = method(app=app, args=queries, data=data)
-    except AttributeError:
-        message = "The plugin does not have a method, see logs for more details"
-    except:
-        message = "An error occurred while executing the plugin, see logs for more details"
-    finally:
-        if sbin_nginx_path.is_file():
-            # Remove the custom plugin from the shared library
-            sys_path.pop()
-            sys_modules.pop("actions")
-            del actions
-
-        if message or not isinstance(res, dict) and not res:
-            return error_message(message or "The plugin did not return a valid response"), 500
+    action_result = run_action(plugin)
+    # case error
+    if action_result["status"] == "ko":
+        return error_message(action_result["message"]), action_result["code"]
 
     app.logger.info(f"Plugin {plugin} action executed successfully")
-    return jsonify({"message": "ok", "data": res}), 200
+    return jsonify({"message": "ok", "data": action_result["data"]}), 200
 
 
 @app.route("/cache", methods=["GET"])
@@ -1934,7 +1981,7 @@ def bans():
     bans = bans[:100]
 
     for ban in bans:
-        exp = ban.pop("exp")
+        exp = ban.pop("exp", 0)
         # Add remain
         ban["remain"], ban["term"] = ("unknown", "unknown") if exp <= 0 else get_remain(exp)
         # Convert stamp to date

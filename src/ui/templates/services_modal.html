@@ -42,12 +42,9 @@
                 </svg>
             </button>
         </div>
-        <div data-services-tabs-select-header
-             class="flex flex-col">
-             <div class="flex flex-col sm:flex-row justify-start w-full items-start sm:items-center gap-y-3 gap-x-4">
-                <div class="w-full sm:min-w-[250px] max-w-[300px]">
-                    {% include "settings_tabs_select.html" %}
-                </div>
+        <div data-services-tabs-select-header class="flex flex-col">
+            <div class="flex flex-col sm:flex-row justify-start w-full items-start sm:items-center gap-y-3 gap-x-4">
+                <div class="w-full sm:min-w-[250px] max-w-[300px]">{% include "settings_tabs_select.html" %}</div>
                 <!-- search inpt-->
                 <div class="flex relative w-full max-w-[200px]">
                     <label class="sr-only" for="settings-filter">search</label>
@@ -60,14 +57,11 @@
                            required />
                 </div>
                 <!-- end search inpt-->
-             </div>
-
+            </div>
             <div class="w-full min-w-[300px] my-1 sm:my-0">
                 <hr class="separator" />
             </div>
         </div>
-
-
         <div data-services-nomatch
              class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words">
             <div class="col-span-12 flex flex-col justify-center items-center h-fit">
@@ -91,19 +85,18 @@
             <input type="hidden" id="operation" value="new" name="operation" />
             <input type="hidden" value="new" name="OLD_SERVER_NAME" />
             <input type="hidden" value="no" name="is_draft" />
-
             {% include "settings_plugins.html" %}
             <!-- action button -->
             <div class="w-full flex-col items-center justify-center flex mt-10">
                 <div class="flex justify-center">
-
                     <button data-services-modal-close
-                    type="button"
-                    class="close-btn mb-4 mr-3 text-base">Close</button>
-            <button data-services-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
+                            type="button"
+                            class="close-btn mb-4 mr-3 text-base">Close</button>
+                    <button data-services-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
                 </div>
                 <!-- end action button-->
-                <p data-services-modal-error-msg  class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
+                <p data-services-modal-error-msg
+                   class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
             </div>
         </form>
         <!-- end new and edit form -->

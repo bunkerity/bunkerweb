@@ -9,31 +9,23 @@ from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("utils",),
-        ("api",),
-        ("db",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from Database import Database  # type: ignore
-from jobs import get_integration  # type: ignore
+from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from API import API  # type: ignore
 
-logger = setup_logger("Lets-encrypt.deploy", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("Lets-encrypt.deploy", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
     # Get env vars
     token = getenv("CERTBOT_TOKEN", "")
 
-    logger.info(f"Certificates renewal for {getenv('RENEWED_DOMAINS')} successful")
+    LOGGER.info(f"Certificates renewal for {getenv('RENEWED_DOMAINS')} successful")
 
     # Cluster case
     if get_integration() in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
@@ -45,7 +37,7 @@ try:
         tgz.seek(0, 0)
         files = {"archive.tar.gz": tgz}
 
-        db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
         lock = Lock()
 
         with lock:
@@ -59,32 +51,32 @@ try:
             sent, err, status, resp = api.request("POST", "/lets-encrypt/certificates", files=files)
             if not sent:
                 status = 1
-                logger.error(f"Can't send API request to {api.endpoint}/lets-encrypt/certificates : {err}")
+                LOGGER.error(f"Can't send API request to {api.endpoint}/lets-encrypt/certificates : {err}")
             elif status != 200:
                 status = 1
-                logger.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}")
+                LOGGER.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}")
             else:
-                logger.info(
+                LOGGER.info(
                     f"Successfully sent API request to {api.endpoint}/lets-encrypt/certificates",
                 )
                 sent, err, status, resp = api.request("POST", "/reload")
                 if not sent:
                     status = 1
-                    logger.error(f"Can't send API request to {api.endpoint}/reload : {err}")
+                    LOGGER.error(f"Can't send API request to {api.endpoint}/reload : {err}")
                 elif status != 200:
                     status = 1
-                    logger.error(f"Error while sending API request to {api.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}")
+                    LOGGER.error(f"Error while sending API request to {api.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}")
                 else:
-                    logger.info(f"Successfully sent API request to {api.endpoint}/reload")
+                    LOGGER.info(f"Successfully sent API request to {api.endpoint}/reload")
     # Linux case
     else:
         if run([join(sep, "usr", "sbin", "nginx"), "-s", "reload"], stdin=DEVNULL, stderr=STDOUT, check=False).returncode != 0:
             status = 1
-            logger.error("Error while reloading nginx")
+            LOGGER.error("Error while reloading nginx")
         else:
-            logger.info("Successfully reloaded nginx")
+            LOGGER.info("Successfully reloaded nginx")
 except:
     status = 1
-    logger.error(f"Exception while running certbot-deploy.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running certbot-deploy.py :\n{format_exc()}")
 
 sys_exit(status)

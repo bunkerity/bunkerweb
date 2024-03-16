@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       # Get PDF doc
       - name: Get documentation
         if: inputs.VERSION != 'testing'
@@ -51,7 +51,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION != 'testing'
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
         with:
           body: |
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
@@ -75,7 +75,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION == 'testing'
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
         with:
           body: |
             **The testing version of BunkerWeb should not be used in production, please use the latest stable version instead.**

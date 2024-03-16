@@ -7,79 +7,111 @@
            hidden />
     <div class="core-layout">
         {% if is_used and is_metrics %}
-            <div class="core-layout">
-                <!-- info-->
-                <div class="core-card">
-                    <h5 class="core-card-title">INFO</h5>
-                    <div class="core-card-text-container">
-                        <p data-info class="core-card-text"></p>
+        <div class="core-card">
+            <h5 class="core-card-title">INFO</h5>
+            <div class="core-card-text-container">
+                <p data-info class="core-card-text">{{plugin.get('description')}}</p>
+            </div>
+        </div>
+        <!-- end info -->   <div class="core-layout-separator"></div>
+
+          {% if pre_render["status"] and pre_render["status"] == "ko" or "error" in pre_render["data"] %}
+  <div class="flex justify-center col-span-12">
+         <p class="text-white">Error during pre rendering</p>
+      <div class="ml-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 stroke-red-500 fill-white">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+      </div>
+  </div>
+  {% endif %}
+
+  {% if pre_render["status"] and pre_render["status"] == "ok" and "error" not in pre_render["data"] %}
+
+
+            {% for key, value in pre_render["data"].items() %}
+
+                {% if key.startswith("ping_") %}
+                <div class="core-card-status">
+                    <div class="core-card-status-container">
+                        <h5 class="core-card-status-title">{{ pre_render['data'][key].get('title', 'STATUS')}}</h5>
+                        <svg data-status-svg
+                             class="core-card-status-svg {{ 'fill-green-500' if pre_render['data'][key].get('value') in ('up', 'yes', 'success', 'true') else 'fill-red-500' }}"
+                             viewBox="0 0 100 100"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="50" />
+                        </svg>
+                    </div>
+                    <p data-status-text class="core-card-text">{{ 'Active' if pre_render['data'][key].get('value') in ('up', 'yes', 'success', 'true') else 'Inactive' }}</p>
+                </div>
+                {% endif %}
+
+
+                {% if key.startswith("count_") or key.startswith("counter_") %}
+                <div class="core-card-metrics">
+                    <!-- text -->
+                    <div>
+                        <p class="core-card-metrics-name">{{pre_render['data'][key].get("title")}}</p>
+                        <h5 data-count class="core-card-title">{{pre_render['data'][key].get("value")}}</h5>
+                        <p class="core-card-metrics-subtitle">
+                            <span class="core-card-metrics-subtitle-content {{pre_render['data'][key].get("subtitle_color", "info")}}">{{pre_render['data'][key].get("subtitle")}}</span>
+                        </p>
+                    </div>
+                    <!-- end text -->
+                    <!-- icon -->
+                    <div role="img" class="core-card-svg-container {{pre_render['data'][key].get("svg_color")}}">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          class="size-small core-card-metrics-svg"
+                        >
+                          <path
+                            d="M18.75 12.75h1.5a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM12 6a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 6ZM12 18a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 18ZM3.75 6.75h1.5a.75.75 0 1 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM5.25 18.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 0 1.5ZM3 12a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3 12ZM9 3.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM12.75 12a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM9 15.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"
+                          />
+                        </svg>
+                      </div>
+                    <!-- end icon -->
+                </div>
+                {% endif %}
+
+
+                {% if (key.startswith("top_") and pre_render['data'][key]|length > 0) or (key.startswith("list_") and pre_render['data'][key]|length > 0) %}
+                <div class="core-card-list">
+                    <div class="core-card-list-title-container">
+                        <h5 class="core-card-list-title">{{ key.replace('_', ' ').upper()}}</h5>
+                    </div>
+                    <div class="core-card-list-container">
+                        <!-- list container-->
+                        <div class="core-card-list-wrap">
+                            <!-- header-->
+                            {% for val_key, val_value in pre_render['data'][key][0].items() %}
+
+
+                            <p class="core-card-list-header {{'col-span-6' if pre_render['data'][key][0].keys()|length == 2 else "col-span-4" if pre_render['data'][key][0].keys()|length == 3 else "col-span-3" if pre_render['data'][key][0].keys()|length == 4}}">{{ val_key }}</p>
+                            {% endfor%}
+                            <!-- end header-->
+                            <!-- list -->
+                            <ul class="col-span-12 w-full">
+                                {% for item in  pre_render['data'][key] %}
+                                <li class="core-card-list-item">
+                                    {% for top_key, top_value in item.items() %}
+                                    <p class="core-card-list-item-content {{'col-span-6' if item.keys()|length == 2 else "col-span-4" if item.keys()|length == 3 else "col-span-3" if item.keys()|length == 4}}">{{ top_value }}</p>
+                                    {% endfor %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+
+                            <!-- end list-->
+                        </div>
+                        <!-- end list container-->
                     </div>
                 </div>
-                <!-- end info -->
-            </div>
-            <div class="core-card-metrics">
-                <!-- text -->
-                <div>
-                    <p class="core-card-metrics-name">DEFAULT SERVER DISABLED</p>
-                    <h5 data-count-server-disabled class="core-card-title"></h5>
-                    <p class="core-card-metrics-subtitle">
-                        <span class="core-card-metrics-subtitle-content info">total</span>
-                    </p>
-                </div>
-                <!-- end text -->
-                <!-- icon -->
-                <div role="img" class="core-card-svg-container orange">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         viewBox="0 0 24 24"
-                         fill="currentColor"
-                         class="scale-[0.55] core-card-metrics-svg">
-                        <path d="M4.08 5.227A3 3 0 0 1 6.979 3H17.02a3 3 0 0 1 2.9 2.227l2.113 7.926A5.228 5.228 0 0 0 18.75 12H5.25a5.228 5.228 0 0 0-3.284 1.153L4.08 5.227Z" />
-                        <path fill-rule="evenodd" d="M5.25 13.5a3.75 3.75 0 1 0 0 7.5h13.5a3.75 3.75 0 1 0 0-7.5H5.25Zm10.5 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm3.75-.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <!-- end icon -->
-            </div>
-            <div class="core-card-metrics">
-                <!-- text -->
-                <div>
-                    <p class="core-card-metrics-name">DISALLOWED METHODS</p>
-                    <h5 data-count-disallowed-methods class="core-card-title"></h5>
-                    <p class="core-card-metrics-subtitle">
-                        <span class="core-card-metrics-subtitle-content info">count</span>
-                    </p>
-                </div>
-                <!-- end text -->
-                <!-- icon -->
-                <div role="img" class="core-card-svg-container lime">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         viewBox="0 0 24 24"
-                         fill="currentColor"
-                         class="size-small core-card-metrics-svg">
-                        <path d="M18.75 12.75h1.5a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM12 6a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 6ZM12 18a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 18ZM3.75 6.75h1.5a.75.75 0 1 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM5.25 18.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 0 1.5ZM3 12a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3 12ZM9 3.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM12.75 12a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM9 15.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-                    </svg>
-                </div>
-                <!-- end icon -->
-            </div>
-            <script nonce="{{script_nonce}}">
-    // Use SetupPlugin class that is on static/js/plugins/setup.js
-    const setPlugin = new SetupPlugin({
-      info: {
-        el: document.querySelector("[data-info]"),
-        value: "{{ plugin['description'] or ''}}",
-        type: "text",
-      },
-      counter_failed_default: {
-        el: document.querySelector("[data-count-server-disabled]"),
-        value: "unknown",
-        type: "text",
-      },
-      counter_failed_method: {
-        el: document.querySelector("[data-count-disallowed-methods]"),
-        value: "unknown",
-        type: "text",
-      },
-    });
-            </script>
+                {% endif %}
+
+
+            {% endfor %}
+        {% endif %}
         {% else %}
             <div class="core-card">
                 <div class="core-card-wrap">
@@ -98,7 +130,7 @@
                     <!-- end icon -->
                 </div>
                 <div class="core-card-text-container">
-                    <p data-info class="core-card-text">This plugin need to be activated to get metrics.</p>
+                    <p data-info class="core-card-text">This plugin need to be activated to access page.</p>
                 </div>
             </div>
             <!-- end info -->

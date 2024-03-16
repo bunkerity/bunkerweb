@@ -45,7 +45,7 @@ services:
       - ./init/plugins:/data/plugins
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
       # ? DATABASE settings
       DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
     networks:

@@ -1,12 +1,10 @@
 {
+  "dependencies": {
+    "ace-builds": "^1.32.7",
+    "dompurify": "^3.0.9",
+    "flatpickr": "^4.6.13"
+  },
   "devDependencies": {
     "tailwindcss": "^3.3.2"
-  },
-  "dependencies": {
-    "ace-builds": "^1.12.5",
-    "air-datepicker": "^3.3.1",
-    "dropzone": "^6.0.0-beta.2",
-    "flatpickr": "^4.6.13",
-    "json-formatter-js": "^2.3.4"
   }
 }

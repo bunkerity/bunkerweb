@@ -1738,11 +1738,9 @@ In case you have buy a (pro version)[https://panel.bunkerweb.io/?utm_campaign=se
 - fill the **setting Pro License Key**
 - **save** your changes
 
+!!! warning "Download"
 
-<figure markdown>
-  ![Overview](assets/img/pro-from-ui.webp){ align=center, width="1000" }
-  <figcaption>Upgrade to PRO from UI</figcaption>
-</figure>
+    The pro version is downloaded in the background by the scheduler. It may take some time before you see the changes to the UI.
 
 If your license key is valid, the upgrade to the pro version will take place automatically in the background.
 

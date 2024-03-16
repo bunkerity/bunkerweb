@@ -5,6 +5,7 @@ from io import BytesIO
 from os.path import join
 from typing import List, Optional
 
+from magic import Magic
 from qrcode.main import QRCode
 
 
@@ -131,40 +132,66 @@ def path_to_dict(
             "can_create_folders": False,
             "can_edit": False,
             "can_delete": False,
-            "children": [
-                {
-                    "name": service,
-                    "type": "folder",
-                    "path": join(path, service),
-                    "can_create_files": False,
-                    "can_create_folders": False,
-                    "can_edit": False,
-                    "can_delete": False,
-                    "children": [],
-                }
-                for service in services
-            ],
+            "children": [],
         }
 
+        plugins = []
+        paths = []
         for conf in db_data:
+            if conf["plugin_id"] not in plugins:
+                d["children"].append(
+                    {
+                        "name": conf["plugin_id"],
+                        "type": "folder",
+                        "path": join(path, conf["plugin_id"]),
+                        "can_create_files": True,
+                        "can_create_folders": False,
+                        "can_edit": False,
+                        "can_delete": False,
+                        "children": [],
+                    }
+                )
+                plugins.append(conf["plugin_id"])
+                paths.append(join(path, conf["plugin_id"]))
+
+            mime = Magic(mime=True)
+            file_type = mime.from_buffer(conf["data"])
+
             file_info = {
-                "name": join(conf["job_name"], conf["file_name"]),
+                "name": conf["file_name"],
                 "type": "file",
                 "path": join(
                     path,
+                    conf["plugin_id"],
                     conf["service_id"] or "",
                     conf["file_name"],
                 ),
                 "can_edit": False,
                 "can_delete": False,
                 "can_download": True,
-                "content": conf["data"],
+                "content": "Download file to view content" if file_type != "text/plain" else conf["data"].decode("utf-8"),
             }
 
             if conf["service_id"]:
-                d["children"][[x["name"] for x in d["children"]].index(conf["service_id"])]["children"].append(file_info)
+                if join(conf["plugin_id"], conf["service_id"]) not in paths:
+                    d["children"][[x["name"] for x in d["children"]].index(conf["plugin_id"])]["children"].append(
+                        {
+                            "name": conf["service_id"],
+                            "type": "folder",
+                            "path": join(path, conf["plugin_id"], conf["service_id"]),
+                            "can_create_files": True,
+                            "can_create_folders": False,
+                            "can_edit": False,
+                            "can_delete": False,
+                            "children": [],
+                        }
+                    )
+                    paths.append(join(conf["plugin_id"], conf["service_id"]))
+
+                data_plugin = d["children"][[x["name"] for x in d["children"]].index(conf["plugin_id"])]
+                data_plugin["children"][[x["name"] for x in data_plugin["children"]].index(conf["service_id"])]["children"].append(file_info)
             else:
-                d["children"].append(file_info)
+                d["children"][[x["name"] for x in d["children"]].index(conf["plugin_id"])]["children"].append(file_info)
 
     return d
 

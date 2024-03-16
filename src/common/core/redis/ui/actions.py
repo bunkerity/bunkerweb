@@ -1,20 +1,29 @@
-def redis(**kwargs):
+def pre_render(**kwargs):
     ping = {}
     data = {}
     try:
         ping_data = kwargs["app"].config["INSTANCES"].get_ping("redis")
-        ping = {"ping_status": ping_data["status"]}
+        ping = {"ping_status": {"title": "REDIS STATUS", "value": ping_data["status"]}}
     except:
-        ping = {"ping_status": "error"}
+        ping = {"ping_status": {"title": "REDIS STATUS", "value": "error"}}
 
     try:
         metrics = kwargs["app"].config["INSTANCES"].get_metrics("redis")
+        data = {
+            "counter_redis_nb_keys": {
+                "value": metrics.get("redis_nb_keys", 0),
+                "title": "REDIS KEYS",
+                "subtitle": "total number",
+                "subtitle_color": "info",
+                "svg_color": "sky",
+            }
+        }
 
-        if metrics.get("redis_nb_keys") is None:
-            metrics["redis_nb_keys"] = 0
-
-        data = metrics
     except:
-        data = {"redis_nb_keys": 0}
+        data = {"counter_redis_nb_keys": {"value": "unknown", "title": "REDIS KEYS", "subtitle": "total number", "subtitle_color": "info", "svg_color": "sky"}}
 
     return ping | data
+
+
+def redis(**kwargs):
+    pass

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from sqlalchemy import (
+    TEXT,
     Boolean,
     Column,
     DateTime,
@@ -72,11 +73,7 @@ class Settings(Base):
 
     id = Column(String(256), primary_key=True)
     name = Column(String(256), primary_key=True)
-    plugin_id = Column(
-        String(64),
-        ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"),
-        nullable=False,
-    )
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     context = Column(CONTEXTS_ENUM, nullable=False)
     default = Column(String(4096), nullable=True, default="")
     help = Column(String(512), nullable=False)
@@ -94,12 +91,8 @@ class Settings(Base):
 class Global_values(Base):
     __tablename__ = "bw_global_values"
 
-    setting_id = Column(
-        String(256),
-        ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
-        primary_key=True,
-    )
-    value = Column(String(8192), nullable=False)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    value = Column(TEXT, nullable=False)
     suffix = Column(Integer, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -121,17 +114,9 @@ class Services(Base):
 class Services_settings(Base):
     __tablename__ = "bw_services_settings"
 
-    service_id = Column(
-        String(64),
-        ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"),
-        primary_key=True,
-    )
-    setting_id = Column(
-        String(256),
-        ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
-        primary_key=True,
-    )
-    value = Column(String(8192), nullable=False)
+    service_id = Column(String(64), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    value = Column(TEXT, nullable=False)
     suffix = Column(Integer, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -141,13 +126,9 @@ class Services_settings(Base):
 
 class Jobs(Base):
     __tablename__ = "bw_jobs"
-    __table_args__ = (UniqueConstraint("name", "plugin_id"),)
 
     name = Column(String(128), primary_key=True)
-    plugin_id = Column(
-        String(64),
-        ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"),
-    )
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"))
     file_name = Column(String(256), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
     reload = Column(Boolean, default=False, nullable=False)
@@ -161,16 +142,8 @@ class Jobs(Base):
 class Plugin_pages(Base):
     __tablename__ = "bw_plugin_pages"
 
-    id = Column(
-        Integer,
-        Identity(start=1, increment=1),
-        primary_key=True,
-    )
-    plugin_id = Column(
-        String(64),
-        ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"),
-        nullable=False,
-    )
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     template_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     template_checksum = Column(String(128), nullable=False)
     actions_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
@@ -181,27 +154,11 @@ class Plugin_pages(Base):
 
 class Jobs_cache(Base):
     __tablename__ = "bw_jobs_cache"
-    __table_args__ = (UniqueConstraint("job_name", "service_id", "file_name"),)
 
-    id = Column(
-        Integer,
-        Identity(start=1, increment=1),
-        primary_key=True,
-    )
-    job_name = Column(
-        String(128),
-        ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"),
-        nullable=False,
-    )
-    service_id = Column(
-        String(64),
-        ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"),
-        nullable=True,
-    )
-    file_name = Column(
-        String(256),
-        nullable=False,
-    )
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False)
+    service_id = Column(String(64), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    file_name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     last_update = Column(DateTime, nullable=True)
     checksum = Column(String(128), nullable=True)
@@ -214,16 +171,8 @@ class Custom_configs(Base):
     __tablename__ = "bw_custom_configs"
     __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
 
-    id = Column(
-        Integer,
-        Identity(start=1, increment=1),
-        primary_key=True,
-    )
-    service_id = Column(
-        String(64),
-        ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"),
-        nullable=True,
-    )
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    service_id = Column(String(64), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
@@ -236,11 +185,7 @@ class Custom_configs(Base):
 class Selects(Base):
     __tablename__ = "bw_selects"
 
-    setting_id = Column(
-        String(256),
-        ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
-        primary_key=True,
-    )
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
     value = Column(String(256), primary_key=True)
 
     setting = relationship("Settings", back_populates="selects")
@@ -271,6 +216,7 @@ class Metadata(Base):
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
     is_pro = Column(Boolean, default=False, nullable=False)
+    pro_license_key = Column(String(256), nullable=True)
     pro_expire = Column(DateTime, nullable=True)
     pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
     pro_services = Column(Integer, default=0, nullable=False)

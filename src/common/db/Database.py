@@ -36,10 +36,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from jobs import file_hash  # type: ignore
+from common_utils import file_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import create_engine, MetaData as sql_metadata, text, inspect
+from sqlalchemy import create_engine, event, MetaData as sql_metadata, text, inspect
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
@@ -48,24 +49,31 @@ from sqlalchemy.exc import (
     SQLAlchemyError,
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.pool import SingletonThreadPool
+from sqlalchemy.pool import QueuePool
+from sqlite3 import Connection as SQLiteConnection
 
 install_as_MySQLdb()
+
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, _):
+    if isinstance(dbapi_connection, SQLiteConnection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.close()
 
 
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
 
-    def __init__(
-        self,
-        logger: Logger,
-        sqlalchemy_string: Optional[str] = None,
-        *,
-        ui: bool = False,
-        pool: bool = True,
-    ) -> None:
+    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None) -> None:
         """Initialize the database"""
-        self.__logger = logger
+        self.logger = logger
+
+        if pool:
+            self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
+
         self.__session_factory = None
         self.__sql_engine = None
 
@@ -74,21 +82,21 @@ class Database:
 
         match = self.DB_STRING_RX.search(sqlalchemy_string)
         if not match:
-            self.__logger.error(f"Invalid database string provided: {sqlalchemy_string}, exiting...")
+            self.logger.error(f"Invalid database string provided: {sqlalchemy_string}, exiting...")
             _exit(1)
 
         if match.group("database").startswith("sqlite"):
             db_path = Path(normpath(match.group("path")))
             if ui:
                 while not db_path.is_file():
-                    self.__logger.warning(f"Waiting for the database file to be created: {db_path}")
+                    self.logger.warning(f"Waiting for the database file to be created: {db_path}")
                     sleep(1)
             else:
                 db_path.parent.mkdir(parents=True, exist_ok=True)
         elif match.group("database").startswith("m") and not match.group("database").endswith("+pymysql"):
             sqlalchemy_string = sqlalchemy_string.replace(
                 match.group("database"), f"{match.group('database')}+pymysql"
-            )  # ? This is mandatory for alemic to work with mariadb and mysql
+            )  # ? This is strongly recommended as pymysql is the new way to connect to mariadb and mysql
         elif match.group("database").startswith("postgresql") and not match.group("database").endswith("+psycopg"):
             sqlalchemy_string = sqlalchemy_string.replace(
                 match.group("database"), f"{match.group('database')}+psycopg"
@@ -97,15 +105,22 @@ class Database:
         self.database_uri = sqlalchemy_string
         error = False
 
-        engine_kwargs = {"future": True, "poolclass": None if pool else SingletonThreadPool, "pool_pre_ping": True, "pool_recycle": 1800}
+        engine_kwargs = {
+            "future": True,
+            "poolclass": QueuePool,
+            "pool_pre_ping": True,
+            "pool_recycle": 1800,
+            "pool_size": 20,
+            "max_overflow": 10,
+        }
 
         try:
             self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
         except ArgumentError:
-            self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
+            self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
         except SQLAlchemyError:
-            self.__logger.error(f"Error when trying to create the engine: {format_exc()}")
+            self.logger.error(f"Error when trying to create the engine: {format_exc()}")
             error = True
         finally:
             if error:
@@ -114,7 +129,7 @@ class Database:
         try:
             assert self.__sql_engine is not None
         except AssertionError:
-            self.__logger.error("The database engine is not initialized")
+            self.logger.error("The database engine is not initialized")
             _exit(1)
 
         not_connected = True
@@ -128,37 +143,30 @@ class Database:
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
                 if retries <= 0:
-                    self.__logger.error(
+                    self.logger.error(
                         f"Can't connect to database : {format_exc()}",
                     )
                     _exit(1)
 
                 if "attempt to write a readonly database" in str(e):
-                    self.__logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
+                    self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
                     self.__sql_engine.dispose(close=True)
                     self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
                 else:
-                    self.__logger.warning(
+                    self.logger.warning(
                         "Can't connect to database, retrying in 5 seconds ...",
                     )
                 retries -= 1
                 sleep(5)
             except BaseException:
-                self.__logger.error(f"Error when trying to connect to the database: {format_exc()}")
+                self.logger.error(f"Error when trying to connect to the database: {format_exc()}")
                 exit(1)
 
-        self.__logger.info("✅ Database connection established")
-
-        self.__session_factory = sessionmaker(bind=self.__sql_engine, autoflush=True, expire_on_commit=False)
         self.suffix_rx = re_compile(r"_\d+$")
-
-        if sqlalchemy_string.startswith("sqlite"):
-            with self.__db_session() as session:
-                session.execute(text("PRAGMA journal_mode=WAL"))
-                session.commit()
+        self.logger.info("✅ Database connection established")
 
     def __del__(self) -> None:
         """Close the database"""
@@ -171,20 +179,21 @@ class Database:
     @contextmanager
     def __db_session(self):
         try:
-            assert self.__session_factory is not None
+            assert self.__sql_engine is not None
         except AssertionError:
-            self.__logger.error("The database session is not initialized")
+            self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        session = scoped_session(self.__session_factory)
-
-        try:
-            yield session
-        except BaseException:
-            session.rollback()
-            raise
-        finally:
-            session.remove()
+        with self.__sql_engine.connect() as conn:
+            session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
+            session = scoped_session(session_factory)
+            try:
+                yield session
+            except BaseException:
+                session.rollback()
+                raise
+            finally:
+                session.remove()
 
     def set_autoconf_load(self, value: bool = True) -> str:
         """Set the autoconf_loaded value"""
@@ -227,7 +236,7 @@ class Database:
 
         return ""
 
-    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
+    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_license_key", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
         """Set the pro metadata values"""
         with self.__db_session() as session:
             try:
@@ -303,15 +312,17 @@ class Database:
             "integration": "unknown",
             "database_version": "Unknown",
             "is_pro": "no",
+            "pro_license_key": "",
             "pro_expire": None,
             "pro_services": 0,
             "pro_overlapped": False,
             "pro_status": "invalid",
             "last_pro_check": None,
+            "default": True,
         }
-        database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
-            with suppress(ProgrammingError, OperationalError):
+            try:
+                database = self.database_uri.split(":")[0].split("+")[0]
                 data["database_version"] = (
                     session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"]
                 )[0]
@@ -321,6 +332,7 @@ class Database:
                         Metadata.version,
                         Metadata.integration,
                         Metadata.is_pro,
+                        Metadata.pro_license_key,
                         Metadata.pro_expire,
                         Metadata.pro_services,
                         Metadata.pro_overlapped,
@@ -336,13 +348,17 @@ class Database:
                             "version": metadata.version,
                             "integration": metadata.integration,
                             "is_pro": metadata.is_pro,
+                            "pro_license_key": metadata.pro_license_key or "",
                             "pro_expire": metadata.pro_expire,
                             "pro_services": metadata.pro_services,
                             "pro_overlapped": metadata.pro_overlapped,
                             "pro_status": metadata.pro_status,
                             "last_pro_check": metadata.last_pro_check,
+                            "default": False,
                         }
                     )
+            except BaseException:
+                self.logger.debug(f"Can't get the metadata: {format_exc()}")
 
         return data
 
@@ -417,16 +433,19 @@ class Database:
         old_data = {}
 
         if inspector and len(inspector.get_table_names()):
-            db_version = self.get_metadata()["version"]
+            metadata = self.get_metadata()
+            db_version = metadata["version"]
+            if metadata["default"]:
+                db_version = "error"
 
             if db_version != bunkerweb_version:
-                self.__logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
+                self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
                 metadata = sql_metadata()
                 metadata.reflect(self.__sql_engine)
 
                 for table_name in Base.metadata.tables.keys():
                     if not inspector.has_table(table_name):
-                        self.__logger.warning(f'Table "{table_name}" is missing')
+                        self.logger.warning(f'Table "{table_name}" is missing')
                         has_all_tables = False
                         continue
 
@@ -519,7 +538,7 @@ class Database:
                             updates[Plugins.checksum] = plugin.get("checksum")
 
                         if updates:
-                            self.__logger.warning(f'Plugin "{plugin["id"]}" already exists, updating it with the new values')
+                            self.logger.warning(f'Plugin "{plugin["id"]}" already exists, updating it with the new values')
                             session.query(Plugins).filter(Plugins.id == plugin["id"]).update(updates)
                     else:
                         to_put.append(
@@ -578,11 +597,11 @@ class Database:
                                 updates[Settings.multiple] = value.get("multiple")
 
                             if updates:
-                                self.__logger.warning(f'Setting "{setting}" already exists, updating it with the new values')
+                                self.logger.warning(f'Setting "{setting}" already exists, updating it with the new values')
                                 session.query(Settings).filter(Settings.id == setting).update(updates)
                         else:
                             if db_plugin:
-                                self.__logger.warning(f'Setting "{setting}" does not exist, creating it')
+                                self.logger.warning(f'Setting "{setting}" does not exist, creating it')
                             to_put.append(Settings(**value))
 
                         db_values = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"])]
@@ -591,7 +610,7 @@ class Database:
                         if select_values:
                             if missing_values:
                                 # Remove selects that are no longer in the list
-                                self.__logger.warning(f'Removing {len(missing_values)} selects from setting "{setting}" as they are no longer in the list')
+                                self.logger.warning(f'Removing {len(missing_values)} selects from setting "{setting}" as they are no longer in the list')
                                 session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
 
                             for select in select_values:
@@ -599,7 +618,7 @@ class Database:
                                     to_put.append(Selects(setting_id=value["id"], value=select))
                         else:
                             if missing_values:
-                                self.__logger.warning(f'Removing all selects from setting "{setting}" as there are no longer any in the list')
+                                self.logger.warning(f'Removing all selects from setting "{setting}" as there are no longer any in the list')
                             session.query(Selects).filter_by(setting_id=value["id"]).delete()
 
                     db_names = [job.name for job in session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"])]
@@ -608,8 +627,9 @@ class Database:
 
                     if missing_names:
                         # Remove jobs that are no longer in the list
-                        self.__logger.warning(f'Removing {len(missing_names)} jobs from plugin "{plugin["id"]}" as they are no longer in the list')
-                        session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
+                        self.logger.warning(f'Removing {len(missing_names)} jobs from plugin "{plugin["id"]}" as they are no longer in the list')
+                        session.query(Jobs).filter(Jobs.name.in_(missing_names), Jobs.plugin_id == plugin["id"]).delete()
+                        session.query(Jobs_cache).filter(Jobs_cache.job_name.in_(missing_names)).delete()
 
                     for job in jobs:
                         db_job = (
@@ -623,7 +643,7 @@ class Database:
                             job["file_name"] = job.pop("file")
                             job["reload"] = job.get("reload", False)
                             if db_plugin:
-                                self.__logger.warning(f'Job "{job["name"]}" does not exist, creating it')
+                                self.logger.warning(f'Job "{job["name"]}" does not exist, creating it')
                             to_put.append(Jobs(plugin_id=plugin["id"], **job))
                         else:
                             updates = {}
@@ -638,13 +658,14 @@ class Database:
                                 updates[Jobs.reload] = job.get("reload", False)
 
                             if updates:
-                                self.__logger.warning(f'Job "{job["name"]}" already exists, updating it with the new values')
+                                self.logger.warning(f'Job "{job["name"]}" already exists, updating it with the new values')
                                 updates[Jobs.last_run] = None
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
 
                     core_ui_path = Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"], "ui")
                     path_ui = core_ui_path if core_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
+                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
 
                     if path_ui.exists():
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
@@ -681,12 +702,12 @@ class Database:
                                     )
 
                                 if updates:
-                                    self.__logger.warning(f'Page for plugin "{plugin["id"]}" already exists, updating it with the new values')
+                                    self.logger.warning(f'Page for plugin "{plugin["id"]}" already exists, updating it with the new values')
                                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
                                 continue
 
                             if db_plugin:
-                                self.__logger.warning(f'Page for plugin "{plugin["id"]}" does not exist, creating it')
+                                self.logger.warning(f'Page for plugin "{plugin["id"]}" does not exist, creating it')
 
                             to_put.append(
                                 Plugin_pages(
@@ -731,7 +752,8 @@ class Database:
                         # Remove services that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_ids)).delete()
                         session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete()
-                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
+                        session.query(Custom_configs).filter(Custom_configs.service_id.in_(missing_ids)).delete()
+                        session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(missing_ids)).delete()
 
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
                 db_drafts = {service.id for service in db_services if service.is_draft}
@@ -1082,11 +1104,15 @@ class Database:
                             )
                             .filter_by(service_id=service.id, setting_id=key)
                         ):
+                            value = service_setting.value
+                            if key == "SERVER_NAME" and service.id not in value.split(" "):
+                                value = f"{service.id} {value}".strip()
+
                             config[f"{service.id}_{key}" + (f"_{service_setting.suffix}" if service_setting.suffix > 0 else "")] = (
-                                service_setting.value
+                                value
                                 if not methods
                                 else {
-                                    "value": service_setting.value,
+                                    "value": value,
                                     "global": False,
                                     "method": service_setting.method,
                                 }
@@ -1162,10 +1188,16 @@ class Database:
 
     def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None):
         job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
-        with self.__db_session() as session:
-            session.query(Jobs_cache).filter_by(job_name=job_name, file_name=file_name, service_id=service_id).delete()
+        filters = {"file_name": file_name}
+        if job_name:
+            filters["job_name"] = job_name
+        if service_id:
+            filters["service_id"] = service_id
 
-    def update_job_cache(
+        with self.__db_session() as session:
+            session.query(Jobs_cache).filter_by(**filters).delete()
+
+    def upsert_job_cache(
         self,
         service_id: Optional[str],
         file_name: str,
@@ -1176,6 +1208,7 @@ class Database:
     ) -> str:
         """Update the plugin cache in the database"""
         job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
+        service_id = service_id or None
         with self.__db_session() as session:
             cache = session.query(Jobs_cache).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
 
@@ -1254,7 +1287,7 @@ class Database:
 
                 if db_plugin:
                     if db_plugin.type not in ("external", "pro"):
-                        self.__logger.warning(
+                        self.logger.warning(
                             f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external or non-pro plugin is forbidden for security reasons)",  # noqa: E501
                         )
                         continue
@@ -1297,6 +1330,9 @@ class Database:
                         changes = True
                         # Remove settings that are no longer in the list
                         session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
+                        session.query(Selects).filter(Selects.setting_id.in_(missing_ids)).delete()
+                        session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_ids)).delete()
+                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
 
                     for setting, value in settings.items():
                         value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
@@ -1375,6 +1411,7 @@ class Database:
                         changes = True
                         # Remove jobs that are no longer in the list
                         session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
+                        session.query(Jobs_cache).filter(Jobs_cache.job_name.in_(missing_names)).delete()
 
                     for job in jobs:
                         db_job = (
@@ -1409,6 +1446,7 @@ class Database:
 
                     tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui")
                     path_ui = tmp_ui_path if tmp_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
+                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
 
                     if path_ui.exists():
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
@@ -1484,7 +1522,7 @@ class Database:
                     db_setting = session.query(Settings).filter_by(id=setting).first()
 
                     if db_setting is not None:
-                        self.__logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
+                        self.logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
                         continue
 
                     value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
@@ -1500,7 +1538,7 @@ class Database:
                     )
 
                     if db_job is not None:
-                        self.__logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
+                        self.logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
                         continue
 
                     job["file_name"] = job.pop("file")
@@ -1510,6 +1548,7 @@ class Database:
                 if page:
                     tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui")
                     path_ui = tmp_ui_path if tmp_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
+                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
 
                     if path_ui.exists():
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
@@ -1681,13 +1720,8 @@ class Database:
             }
 
     def get_job_cache_file(
-        self,
-        job_name: str,
-        file_name: str,
-        *,
-        with_info: bool = False,
-        with_data: bool = True,
-    ) -> Optional[Any]:
+        self, job_name: str, file_name: str, *, service_id: str = "", plugin_id: str = "", with_info: bool = False, with_data: bool = True
+    ) -> Optional[Union[Dict[str, Any], bytes]]:
         """Get job cache file."""
         entities = []
         if with_info:
@@ -1695,27 +1729,74 @@ class Database:
         if with_data:
             entities.append(Jobs_cache.data)
 
-        with self.__db_session() as session:
-            return session.query(Jobs_cache).with_entities(*entities).filter_by(job_name=job_name, file_name=file_name).first()
+        filters = {"job_name": job_name, "file_name": file_name}
+        if service_id:
+            filters["service_id"] = service_id
 
-    def get_jobs_cache_files(self) -> List[Dict[str, Any]]:
+        with self.__db_session() as session:
+            if plugin_id:
+                job = session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first()
+                if not job:
+                    return None
+            data = session.query(Jobs_cache).with_entities(*entities).filter_by(**filters).first()
+
+        if not data:
+            return None
+        elif with_data and not with_info:
+            return data.data
+
+        ret_data = {}
+        if with_info:
+            ret_data["last_update"] = data.last_update.timestamp() if data.last_update is not None else "Never"
+            ret_data["checksum"] = data.checksum
+        if with_data:
+            ret_data["data"] = data.data
+        return ret_data
+
+    def get_jobs_cache_files(self, *, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
         """Get jobs cache files."""
         with self.__db_session() as session:
-            return [
-                {
-                    "job_name": cache.job_name,
-                    "service_id": cache.service_id,
-                    "file_name": cache.file_name,
-                    "data": "Download file to view content",
-                }
-                for cache in (
-                    session.query(Jobs_cache).with_entities(
-                        Jobs_cache.job_name,
-                        Jobs_cache.service_id,
-                        Jobs_cache.file_name,
-                    )
+            filters = {}
+            query = session.query(Jobs_cache).with_entities(Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.data)
+
+            if job_name:
+                query = query.filter_by(job_name=job_name)
+                filters["name"] = job_name
+
+            db_cache = query.all()
+
+            if not db_cache:
+                return []
+
+            if plugin_id:
+                filters["plugin_id"] = plugin_id
+
+            query = session.query(Jobs).with_entities(Jobs.name, Jobs.plugin_id)
+
+            if filters:
+                query = query.filter_by(**filters)
+
+            jobs = {}
+            for job in query:
+                jobs[job.name] = job.plugin_id
+
+            if not jobs:
+                return []
+
+            cache_files = []
+            for cache in db_cache:
+                if cache.job_name not in jobs:
+                    continue
+                cache_files.append(
+                    {
+                        "plugin_id": jobs[cache.job_name],
+                        "job_name": cache.job_name,
+                        "service_id": cache.service_id,
+                        "file_name": cache.file_name,
+                        "data": cache.data,
+                    }
                 )
-            ]
+            return cache_files
 
     def add_instance(self, hostname: str, port: int, server_name: str, changed: Optional[bool] = True) -> str:
         """Add instance."""

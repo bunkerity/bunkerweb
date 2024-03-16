@@ -355,10 +355,10 @@ end
 -- luacheck: ignore 212
 function blacklist:get_data(blacklisted)
 	local data = {}
-	if blacklisted == "ip" then
+	if blacklisted:lower() == "ip" then
 		data["id"] = "ip"
 	else
-		local id, value = blacklisted:match("^(.+) (.+)$")
+		local id, value = blacklisted:match("^(%w+) (.+)$")
 		if id and value then
 			id = id:lower()
 			data["id"] = id

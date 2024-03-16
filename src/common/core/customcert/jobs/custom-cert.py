@@ -1,220 +1,143 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from os import getenv, sep
-from os.path import join, normpath
+from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from base64 import b64decode
+from typing import Tuple, Union
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("utils",),
-        ("db",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from jobs import del_file_in_db, cache_file, cache_hash, file_hash
-from Database import Database  # type: ignore
+from common_utils import bytes_hash  # type: ignore
+from jobs import Job  # type: ignore
 from logger import setup_logger  # type: ignore
 
-logger = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
-db = None
+LOGGER = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
+JOB = Job(LOGGER)
 
 
-def check_cert(cert_path: str, key_path: str, first_server: str) -> bool:
-    try:
+def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], first_server: str) -> Tuple[bool, str]:
+    with suppress(BaseException):
         ret = False
-        if not cert_path or not key_path:
-            logger.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
-            return False
+        if not cert_file or not key_file:
+            return False, "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates"
 
-        cert_path: Path = Path(normpath(cert_path))
-        key_path: Path = Path(normpath(key_path))
+        if isinstance(cert_file, Path):
+            if not cert_file.is_file():
+                return False, f"Certificate file {cert_file} is not a valid file, ignoring the custom certificate"
+            cert_file = cert_file.read_bytes()
 
-        if not cert_path.is_file():
-            logger.warning(f"Certificate file {cert_path} is not a valid file, ignoring the custom certificate")
-            return False
-        elif not key_path.is_file():
-            logger.warning(f"Key file {key_path} is not a valid file, ignoring the custom certificate")
-            return False
+        if isinstance(key_file, Path):
+            if not key_file.is_file():
+                return False, f"Key file {key_file} is not a valid file, ignoring the custom certificate"
+            key_file = key_file.read_bytes()
 
-        cert_cache_path = Path(
-            sep,
-            "var",
-            "cache",
-            "bunkerweb",
-            "customcert",
-            f"{first_server}.cert.pem",
-        )
-        cert_cache_path.parent.mkdir(parents=True, exist_ok=True)
-
-        cert_hash = file_hash(cert_path)
-        old_hash = cache_hash(cert_cache_path, db)
+        cert_hash = bytes_hash(cert_file)
+        old_hash = JOB.cache_hash("cert.pem", service_id=first_server)
         if old_hash != cert_hash:
             ret = True
-            cached, err = cache_file(cert_path, cert_cache_path, cert_hash, db, delete_file=False)
+            cached, err = JOB.cache_file("cert.pem", cert_file, service_id=first_server, checksum=cert_hash, delete_file=False)
             if not cached:
-                logger.error(f"Error while caching custom-cert cert.pem file : {err}")
-        elif not cert_cache_path.is_file():
-            cert_cache_path.write_bytes(cert_path.read_bytes())
-            ret = True
-        key_cache_path = Path(
-            sep,
-            "var",
-            "cache",
-            "bunkerweb",
-            "customcert",
-            f"{first_server}.key.pem",
-        )
-        key_cache_path.parent.mkdir(parents=True, exist_ok=True)
+                LOGGER.error(f"Error while caching custom-cert cert.pem file : {err}")
 
-        key_hash = file_hash(key_path)
-        old_hash = cache_hash(key_cache_path, db)
+        key_hash = bytes_hash(key_file)
+        old_hash = JOB.cache_hash("key.pem", service_id=first_server)
         if old_hash != key_hash:
             ret = True
-            cached, err = cache_file(key_path, key_cache_path, key_hash, db, delete_file=False)
+            cached, err = JOB.cache_file("key.pem", key_file, service_id=first_server, checksum=key_hash, delete_file=False)
             if not cached:
-                logger.error(f"Error while caching custom-cert key.pem file : {err}")
-        elif not key_cache_path.is_file():
-            key_cache_path.write_bytes(key_path.read_bytes())
-            ret = True
+                LOGGER.error(f"Error while caching custom-key key.pem file : {err}")
 
-        return ret
-    except:
-        logger.error(
-            f"Exception while running custom-cert.py (check_cert) :\n{format_exc()}",
-        )
-    return False
+        return ret, ""
+    return False, "exception"
 
 
 status = 0
 
 try:
-    Path(sep, "var", "cache", "bunkerweb", "customcert").mkdir(parents=True, exist_ok=True)
+    all_domains = getenv("SERVER_NAME") or []
 
-    if getenv("MULTISITE", "no") == "no" and getenv("USE_CUSTOM_SSL", "no") == "yes" and getenv("SERVER_NAME", "") != "":
-        db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+    if isinstance(all_domains, str):
+        all_domains = all_domains.split(" ")
 
-        cert_path = getenv("CUSTOM_SSL_CERT", "")
-        key_path = getenv("CUSTOM_SSL_KEY", "")
-        first_server = getenv("SERVER_NAME").split(" ")[0]
+    if not all_domains:
+        LOGGER.info("No services found, exiting ...")
+        sys_exit(0)
 
-        cert_data = b64decode(getenv("CUSTOM_SSL_CERT_DATA", ""))
-        key_data = b64decode(getenv("CUSTOM_SSL_KEY_DATA", ""))
-        for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
-            if data:
-                file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
-                file_path.write_bytes(data)
-                if file == "cert.pem":
-                    cert_path = str(file_path)
-                else:
-                    key_path = str(file_path)
+    skipped_servers = []
+    if not getenv("MULTISITE", "no") == "yes":
+        all_domains = [all_domains[0]]
+        if getenv("USE_CUSTOM_SSL", "no") == "no":
+            LOGGER.info("Custom SSL is not enabled, skipping ...")
+            skipped_servers = all_domains
 
-        if cert_path and key_path:
-            logger.info(f"Checking certificate {cert_path} ...")
-            need_reload = check_cert(cert_path, key_path, first_server)
-            if need_reload:
-                logger.info(f"Detected change for certificate {cert_path}")
-                status = 1
-            else:
-                logger.info(f"No change for certificate {cert_path}")
-        elif not cert_path or not key_path:
-            logger.warning(
-                "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY (or CUSTOM_SSL_CERT_DATA and CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates, clearing cache ..."
-            )
-            cert_cache_path = Path(
-                sep,
-                "var",
-                "cache",
-                "bunkerweb",
-                "customcert",
-                f"{first_server}.cert.pem",
-            )
-            cert_cache_path.unlink(missing_ok=True)
-            del_file_in_db(f"{first_server}.cert.pem", db, service_id=first_server)
-            key_cache_path = Path(
-                sep,
-                "var",
-                "cache",
-                "bunkerweb",
-                "customcert",
-                f"{first_server}.key.pem",
-            )
-            key_cache_path.unlink(missing_ok=True)
-            del_file_in_db(f"{first_server}.key.pem", db, service_id=first_server)
-    elif getenv("MULTISITE", "no") == "yes":
-        servers = getenv("SERVER_NAME") or []
-
-        if isinstance(servers, str):
-            servers = servers.split(" ")
-
-        for first_server in servers:
-            if not first_server or (getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")) != "yes"):
+    if not skipped_servers:
+        for first_server in all_domains:
+            if getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")) == "no":
+                LOGGER.info(f"Custom SSL is not enabled for {first_server}, skipping ...")
+                skipped_servers.append(first_server)
                 continue
 
-            if not db:
-                db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+            cert_file = getenv(f"{first_server}_CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", ""))
+            key_file = getenv(f"{first_server}_CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", ""))
+            cert_data = getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", getenv("CUSTOM_SSL_CERT_DATA", ""))
+            key_data = getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", getenv("CUSTOM_SSL_KEY_DATA", ""))
 
-            cert_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "")
-            key_path = getenv(f"{first_server}_CUSTOM_SSL_KEY", "")
-
-            cert_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", ""))
-            key_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", ""))
-            for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
-                if data != b"":
-                    file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
-                    file_path.parent.mkdir(parents=True, exist_ok=True)
-                    file_path.write_bytes(data)
-                    if file == "cert.pem":
-                        cert_path = str(file_path)
-                    else:
-                        key_path = str(file_path)
-
-            if cert_path and key_path:
-                logger.info(
-                    f"Checking certificate {cert_path} ...",
-                )
-                need_reload = check_cert(cert_path, key_path, first_server)
-                if need_reload:
-                    logger.info(
-                        f"Detected change for certificate {cert_path}",
-                    )
-                    status = 1
+            if cert_file or cert_data and key_file or key_data:
+                if isinstance(cert_file, str):
+                    cert_file = Path(cert_file)
                 else:
-                    logger.info(
-                        f"No change for certificate {cert_path}",
-                    )
-            elif not cert_path or not key_path:
-                logger.warning(
-                    "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY (or CUSTOM_SSL_CERT_DATA and CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates, clearing cache ..."
+                    try:
+                        cert_file = b64decode(cert_data)
+                    except BaseException:
+                        LOGGER.exception(f"Error while decoding cert data, skipping server {first_server}...")
+                        skipped_servers.append(first_server)
+                        continue
+
+                if isinstance(key_file, str):
+                    key_file = Path(key_file)
+                else:
+                    try:
+                        key_file = b64decode(key_data)
+                    except BaseException:
+                        LOGGER.exception(f"Error while decoding key data, skipping server {first_server}...")
+                        skipped_servers.append(first_server)
+                        continue
+
+                LOGGER.info(f"Checking certificate for {first_server} ...")
+                need_reload, err = check_cert(cert_file, key_file, first_server)
+                if err == "exception":
+                    LOGGER.exception(f"Exception while checking {first_server}'s certificate, skipping ...")
+                    skipped_servers.append(first_server)
+                    continue
+                elif err:
+                    LOGGER.warning(f"Error while checking {first_server}'s certificate : {err}")
+                    skipped_servers.append(first_server)
+                    continue
+                elif need_reload:
+                    LOGGER.info(f"Detected change in {first_server}'s certificate")
+                    status = 1
+                    continue
+
+                LOGGER.info(f"No change in {first_server}'s certificate")
+            elif not cert_file or not key_file:
+                LOGGER.warning(
+                    "Variables (CUSTOM_SSL_CERT or CUSTOM_SSL_CERT_DATA) and (CUSTOM_SSL_KEY or CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates"
                 )
-                cert_cache_path = Path(
-                    sep,
-                    "var",
-                    "cache",
-                    "bunkerweb",
-                    "customcert",
-                    f"{first_server}.cert.pem",
-                )
-                cert_cache_path.unlink(missing_ok=True)
-                del_file_in_db(f"{first_server}.cert.pem", db)
-                key_cache_path = Path(
-                    sep,
-                    "var",
-                    "cache",
-                    "bunkerweb",
-                    "customcert",
-                    f"{first_server}.key.pem",
-                )
-                key_cache_path.unlink(missing_ok=True)
-                del_file_in_db(f"{first_server}.key.pem", db)
+                skipped_servers.append(first_server)
+
+    for first_server in skipped_servers:
+        JOB.del_cache("cert.pem", service_id=first_server)
+        JOB.del_cache("key.pem", service_id=first_server)
+except SystemExit as e:
+    status = e.code
 except:
     status = 2
-    logger.error(f"Exception while running custom-cert.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running custom-cert.py :\n{format_exc()}")
 
 sys_exit(status)

@@ -1,7 +1,7 @@
 from operator import itemgetter
 
 
-def limit(**kwargs):
+def pre_render(**kwargs):
     try:
         # Here we will have a list { 'limit_uri_url1': X, 'limit_uri_url2': Y ... }
         data = kwargs["app"].config["INSTANCES"].get_metrics("limit")
@@ -15,6 +15,10 @@ def limit(**kwargs):
                 key = ""
             format_data.append({"url": f"/{key}", "count": int(value)})
         format_data.sort(key=itemgetter("count"), reverse=True)
-        return {"items": format_data}
+        return {"top_limit": format_data}
     except:
-        return {"items": []}
+        return {"top_limit": []}
+
+
+def limit(**kwargs):
+    pass

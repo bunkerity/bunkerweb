@@ -5,10 +5,10 @@ from pathlib import Path
 from requests import request as requests_request, ReadTimeout
 from typing import Literal, Optional, Tuple, Union
 
-from jobs import get_os_info, get_integration, get_version  # type: ignore
+from common_utils import get_os_info, get_integration, get_version  # type: ignore
 
 
-def request(method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
+def request(method: Literal["POST", "GET"], url: str, _id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
     data = {
         "integration": get_integration(),
         "version": get_version(),
@@ -17,13 +17,12 @@ def request(method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optio
     if _id:
         data["id"] = _id
 
-    headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
     try:
         resp = requests_request(
             method,
             f"{getenv('BUNKERNET_SERVER', 'https://api.bunkerweb.io')}{url}",
             json=data,
-            headers=headers,
+            headers={"User-Agent": f"BunkerWeb/{data['version']}"},
             timeout=5,
         )
         status = resp.status_code

@@ -64,9 +64,9 @@ gunicorn==21.2.0 \
     --hash=sha256:3213aa5e8c24949e792bcacfc176fef362e7aac80b76c56f6b5122bf350722f0 \
     --hash=sha256:88ec8bff1d634f98e61b9f65bc4bf3cd918a90806c6f5c48bc5603849ec81033
     # via -r requirements.in
-importlib-metadata==7.0.1 \
-    --hash=sha256:4805911c3a4ec7c3966410053e9ec6a1fecd629117df5adee56dfc9432a1081e \
-    --hash=sha256:f238736bb06590ae52ac1fab06a3a9ef1d8dce2b7a35b5ab329371d6c8f5d2cc
+importlib-metadata==7.0.2 \
+    --hash=sha256:198f568f3230878cb1b44fbd7975f87906c22336dba2e4a7f05278c281fbd792 \
+    --hash=sha256:f4bc4c0c070c490abf4ce96d715f68e95923320370efb66143df00199bb6c100
     # via
     #   -r requirements.in
     #   flask
@@ -145,9 +145,9 @@ markupsafe==2.1.5 \
     #   jinja2
     #   werkzeug
     #   wtforms
-packaging==23.2 \
-    --hash=sha256:048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5 \
-    --hash=sha256:8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7
+packaging==24.0 \
+    --hash=sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5 \
+    --hash=sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9
     # via gunicorn
 pyotp==2.9.0 \
     --hash=sha256:346b6642e0dbdde3b4ff5a930b664ca82abfa116356ed48cc42c7d6590d36f63 \
@@ -160,6 +160,10 @@ pypng==0.20220715.0 \
 python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
     --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
+    # via -r requirements.in
+python-magic==0.4.27 \
+    --hash=sha256:c1ba14b08e4a5f5c31a302b7721239695b2f0f058d125bd5ce1ee36b9d9d3c3b \
+    --hash=sha256:c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3
     # via -r requirements.in
 qrcode==7.4.2 \
     --hash=sha256:581dca7a029bcb2deef5d01068e39093e80ef00b4a61098a2182eac59d01643a \
@@ -283,7 +287,7 @@ wtforms==3.1.2 \
     --hash=sha256:bf831c042829c8cdbad74c27575098d541d039b1faa74c771545ecac916f2c07 \
     --hash=sha256:f8d76180d7239c94c6322f7990ae1216dae3659b7aa1cee94b6318bdffb474b9
     # via flask-wtf
-zipp==3.17.0 \
-    --hash=sha256:0e923e726174922dce09c53c59ad483ff7bbb8e572e00c7f7c46b88556409f31 \
-    --hash=sha256:84e64a1c28cf7e91ed2078bb8cc8c259cb19b76942096c8d7b84947690cabaf0
+zipp==3.18.1 \
+    --hash=sha256:206f5a15f2af3dbaee80769fb7dc6f249695e940acca08dfb2a4769fe61e538b \
+    --hash=sha256:2884ed22e7d8961de1c9a05142eb69a247f120291bc0206a00a7642f09b5b715
     # via importlib-metadata

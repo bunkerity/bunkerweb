@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - id: set-matrix
         run: |
           tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - id: set-matrix
         run: |
           tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
@@ -149,12 +149,12 @@ jobs:
       packages: write
     steps:
       - name: Login to Docker Hub
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

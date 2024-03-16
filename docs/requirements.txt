@@ -200,16 +200,16 @@ idna==3.6 \
     --hash=sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca \
     --hash=sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
     # via requests
-importlib-metadata==7.0.1 \
-    --hash=sha256:4805911c3a4ec7c3966410053e9ec6a1fecd629117df5adee56dfc9432a1081e \
-    --hash=sha256:f238736bb06590ae52ac1fab06a3a9ef1d8dce2b7a35b5ab329371d6c8f5d2cc
+importlib-metadata==7.0.2 \
+    --hash=sha256:198f568f3230878cb1b44fbd7975f87906c22336dba2e4a7f05278c281fbd792 \
+    --hash=sha256:f4bc4c0c070c490abf4ce96d715f68e95923320370efb66143df00199bb6c100
     # via
     #   markdown
     #   mike
     #   mkdocs
-importlib-resources==6.1.2 \
-    --hash=sha256:308abf8474e2dba5f867d279237cd4076482c3de7104a40b41426370e891549b \
-    --hash=sha256:9a0a862501dc38b68adebc82970140c9e4209fc99601782925178f8386339938
+importlib-resources==6.3.0 \
+    --hash=sha256:166072a97e86917a9025876f34286f549b9caf1d10b35a1b372bffa1600c6569 \
+    --hash=sha256:783407aa1cd05550e3aa123e8f7cfaebee35ffa9cb0242919e2d1e4172222705
     # via mike
 jinja2==3.1.3 \
     --hash=sha256:7d6d50dd97d52cbc355597bd845fabfbac3f551e1f99619e39a35ce8c370b5fa \
@@ -218,9 +218,9 @@ jinja2==3.1.3 \
     #   mike
     #   mkdocs
     #   mkdocs-material
-markdown==3.5.2 \
-    --hash=sha256:d43323865d89fc0cb9b20c75fc8ad313af307cc087e84b657d9eec768eddeadd \
-    --hash=sha256:e1ac7b3dc550ee80e602e71c1d168002f062e49f1b11e26a36264dafd4df2ef8
+markdown==3.6 \
+    --hash=sha256:48f276f4d8cfb8ce6527c8f79e2ee29708508bf4d40aa410fbc3b4ee832c850f \
+    --hash=sha256:ed4f41f6daecbeeb96e576ce414c41d2d876daa9a16cb35fa8ed8c2ddfad0224
     # via
     #   mkdocs
     #   mkdocs-material
@@ -311,9 +311,9 @@ mkdocs==1.5.3 \
     #   -r requirements.in
     #   mike
     #   mkdocs-material
-mkdocs-material==9.5.12 \
-    --hash=sha256:5f69cef6a8aaa4050b812f72b1094fda3d079b9a51cf27a247244c03ec455e97 \
-    --hash=sha256:d6f0c269f015e48c76291cdc79efb70f7b33bbbf42d649cfe475522ebee61b1f
+mkdocs-material==9.5.13 \
+    --hash=sha256:5cbe17fee4e3b4980c8420a04cc762d8dc052ef1e10532abd4fce88e5ea9ce6a \
+    --hash=sha256:d8e4caae576312a88fd2609b81cf43d233cdbe36860d67a68702b018b425bd87
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -325,9 +325,9 @@ mkdocs-print-site-plugin==2.3.6 \
     --hash=sha256:01ccb1ceccc87f29e1612bebb77c3bf9980809fbce750fc2113f9d6acea589d4 \
     --hash=sha256:82e5cabcfb7fe3074daecea018f28ccb4bff086f965e3103fe91019a76752f22
     # via -r requirements.in
-packaging==23.2 \
-    --hash=sha256:048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5 \
-    --hash=sha256:8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7
+packaging==24.0 \
+    --hash=sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5 \
+    --hash=sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9
     # via
     #   mkdocs
     #   typepy
@@ -430,9 +430,9 @@ pymdown-extensions==10.7.1 \
     --hash=sha256:c70e146bdd83c744ffc766b4671999796aba18842b268510a329f7f64700d584 \
     --hash=sha256:f5cc7000d7ff0d1ce9395d216017fa4df3dde800afb1fb72d1c7d3fd35e710f4
     # via mkdocs-material
-pyparsing==3.1.1 \
-    --hash=sha256:32c7c0b711493c72ff18a981d24f28aaf9c1fb7ed5e9667c9e84e3db623bdbfb \
-    --hash=sha256:ede28a1a32462f5a9705e07aea48001a08f7cf81a021585011deba701581a0db
+pyparsing==3.1.2 \
+    --hash=sha256:a1bac0ce561155ecc3ed78ca94d3c9378656ad4c94c1270de543f621420f94ad \
+    --hash=sha256:f9db75911801ed778fe61bb643079ff86601aca99fcae6345aa67292038fb742
     # via mike
 pytablewriter==1.2.0 \
     --hash=sha256:0204a4bb684a22140d640f2599f09e137bcdc18b3dd49426f4a555016e246b46 \
@@ -612,9 +612,9 @@ requests==2.31.0 \
     #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.1.1 \
-    --hash=sha256:02fa291a0471b3a18b2b2481ed902af520c69e8ae0919c13da936542754b4c56 \
-    --hash=sha256:5c0806c7d9af348e6dd3777b4f4dbb42c7ad85b190104837488eab9a7c945cf8
+setuptools==69.2.0 \
+    --hash=sha256:0ff4183f8f42cd8fa3acea16c45205521a4ef28f73c6391d8a25e92893134f2e \
+    --hash=sha256:c21c49fb1042386df081cb5d86759792ab89efca84cf114889191cd09aacc80c
     # via mkdocs-material
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
@@ -686,7 +686,7 @@ webencodings==0.5.1 \
     # via
     #   cssselect2
     #   tinycss2
-zipp==3.17.0 \
-    --hash=sha256:0e923e726174922dce09c53c59ad483ff7bbb8e572e00c7f7c46b88556409f31 \
-    --hash=sha256:84e64a1c28cf7e91ed2078bb8cc8c259cb19b76942096c8d7b84947690cabaf0
+zipp==3.18.1 \
+    --hash=sha256:206f5a15f2af3dbaee80769fb7dc6f249695e940acca08dfb2a4769fe61e538b \
+    --hash=sha256:2884ed22e7d8961de1c9a05142eb69a247f120291bc0206a00a7642f09b5b715
     # via pytablewriter

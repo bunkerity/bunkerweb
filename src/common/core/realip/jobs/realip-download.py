@@ -2,43 +2,35 @@
 
 from contextlib import suppress
 from ipaddress import ip_address, ip_network
-from os import _exit, getenv, sep
+from os import getenv, sep
 from os.path import join, normpath
-from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("utils",),
-        ("db",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from requests import get
 
-from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, cache_hash, del_file_in_db, file_hash, is_cached_file
+from common_utils import bytes_hash  # type: ignore
+from jobs import Job  # type: ignore
 
 
 def check_line(line):
-    if "/" in line:
-        with suppress(ValueError):
+    with suppress(ValueError):
+        if "/" in line:
             ip_network(line)
             return True, line
-    else:
-        with suppress(ValueError):
+        else:
             ip_address(line)
             return True, line
     return False, b""
 
 
-logger = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
+REALIP_CACHE_PATH = join(sep, "var", "cache", "bunkerweb", "realip")
 status = 0
 
 try:
@@ -61,37 +53,34 @@ try:
         realip_activated = True
 
     if not realip_activated:
-        logger.info("RealIP is not activated, skipping download...")
-        _exit(0)
+        LOGGER.info("RealIP is not activated, skipping download...")
+        sys_exit(0)
 
-    # Create directories if they don't exist
-    realip_path = Path(sep, "var", "cache", "bunkerweb", "realip")
-    realip_path.mkdir(parents=True, exist_ok=True)
-    tmp_realip_path = Path(sep, "var", "tmp", "bunkerweb", "realip")
-    tmp_realip_path.mkdir(parents=True, exist_ok=True)
-
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+    JOB = Job(LOGGER)
 
     # Get URLs
     urls = [url for url in getenv("REAL_IP_FROM_URLS", "").split(" ") if url]
 
     # Don't go further if the cache is fresh
-    if is_cached_file(realip_path.joinpath("combined.list"), "hour", db):
-        logger.info("RealIP list is already in cache, skipping download...")
+    if JOB.is_cached_file("combined.list", "hour"):
+        LOGGER.info("RealIP list is already in cache, skipping download...")
         if not urls:
-            logger.warning("No URL found, deleting combined.list from cache...")
-            tmp_realip_path.joinpath("combined.list").unlink(missing_ok=True)
-            deleted, err = del_file_in_db("combined.list", db)
+            LOGGER.warning("No URL found, deleting combined.list from cache...")
+            deleted, err = JOB.del_cache("combined.list")
             if not deleted:
-                logger.warning(f"Couldn't delete combined.list from cache : {err}")
-        _exit(0)
+                LOGGER.warning(f"Couldn't delete combined.list from cache : {err}")
+        sys_exit(0)
+
+    if not urls:
+        LOGGER.info("No URL found, skipping download...")
+        sys_exit(0)
 
     # Download and write data to temp file
     i = 0
     content = b""
     for url in urls:
         try:
-            logger.info(f"Downloading RealIP list from {url} ...")
+            LOGGER.info(f"Downloading RealIP list from {url} ...")
             if url.startswith("file://"):
                 with open(normpath(url[7:]), "rb") as f:
                     iterable = f.readlines()
@@ -99,7 +88,7 @@ try:
                 resp = get(url, stream=True, timeout=10)
 
                 if resp.status_code != 200:
-                    logger.warning(f"Got status code {resp.status_code}, skipping...")
+                    LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
                     continue
 
                 iterable = resp.iter_lines()
@@ -116,34 +105,28 @@ try:
                     i += 1
         except:
             status = 2
-            logger.error(f"Exception while getting RealIP list from {url} :\n{format_exc()}")
-
-    tmp_realip_path.joinpath("combined.list").write_bytes(content)
+            LOGGER.error(f"Exception while getting RealIP list from {url} :\n{format_exc()}")
 
     # Check if file has changed
-    new_hash = file_hash(tmp_realip_path.joinpath("combined.list"))
-    old_hash = cache_hash(realip_path.joinpath("combined.list"), db)
+    new_hash = bytes_hash(content)
+    old_hash = JOB.cache_hash("combined.list")
     if new_hash == old_hash:
-        logger.info("New file is identical to cache file, reload is not needed")
-        _exit(0)
+        LOGGER.info("New file is identical to cache file, reload is not needed")
+        sys_exit(0)
 
     # Put file in cache
-    cached, err = cache_file(
-        tmp_realip_path.joinpath("combined.list"),
-        realip_path.joinpath("combined.list"),
-        new_hash,
-        db,
-    )
+    cached, err = JOB.cache_file("combined.list", content, checksum=new_hash)
     if not cached:
-        logger.error(f"Error while caching list : {err}")
-        _exit(2)
+        LOGGER.error(f"Error while caching list : {err}")
+        sys_exit(2)
 
-    logger.info(f"Downloaded {i} trusted IP/net")
+    LOGGER.info(f"Downloaded {i} trusted IP/net")
 
     status = 1
-
+except SystemExit as e:
+    status = e.code
 except:
     status = 2
-    logger.error(f"Exception while running realip-download.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running realip-download.py :\n{format_exc()}")
 
 sys_exit(status)

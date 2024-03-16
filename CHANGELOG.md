@@ -11,17 +11,20 @@
 - [BUGFIX] Database update with external plugins reupload
 - [LINUX] Add logrotate support for the logs
 - [UI] New : add bans management page in the web UI
+- [UI] New : add blocked requests page in the web UI
 - [UI] New : some core plugins pages in the web UI
 - [UI] General : enhance the Content-Security-Policy header in the web UI
 - [UI] General : dark mode enhancement
 - [UI] General : add visual feedback when filtering is matching nothing
-- [UI] Add blocked requests page in the web UI
-- [UI] Global config / service page : remove tabs for select and enhance filtering (plugin name includes)
+- [UI] General : blog news working and add dynamic banner news
+- [UI] Global config page : Add multisite edit, add context filter
+- [UI] Global config / Service page : remove tabs for select and enhance filtering (plugin name, multiple settings and context now includes)
 - [UI] Service page : add the possibility to clone a service in the web UI
 - [UI] Service page : add the possibility to set a service as draft in the web UI
 - [UI] Service page : add services filter when at least 4 services
 - [UI] Configs page : add path filtering related to config presence
-- [UI] Pro license : add home card, show pro plugis on menu and plugins page, resume in account page, alert in case issue with license usage
+- [UI] Pro license : add home card, show pro plugins on menu and plugins page, resume in account page, alert in case issue with license usage
+- [UI] Log page : enhance UX
 - [FEATURE] Add setting REDIS_SSL_VERIFY to activate/disable the SSL certificate verification when using Redis
 - [FEATURE] Add Redis Sentinel fallback to master automatically if no slaves are available
 - [FEATURE] Add Redis Sentinel support for bwcli
@@ -39,8 +42,11 @@
 - [MISC] BunkerWeb will now load the default loading page even on 404 errors when generating the configuration
 - [MISC] Update database schema to support the new pro version and optimize it
 - [MISC] Refactor SSL/TLS logics to make it more consistent
-- [MISC] Use ed5519 key instead of RSA for default/fallback certificates
+- [MISC] Use ECDSA key instead of RSA for selfsigned/default/fallback certificates
 - [MISC] Refactor certbot-new job to optimize the certbot requests
+- [MISC] Refactor jobs utils to make it more consistent
+- [MISC] Review jobs and utils to make it more consistent and better in general
+- [MISC] Change BunkerWeb base Docker image to nginx:1.24.0-alpine-slim
 - [DOCUMENTATION] Update web UI's setup wizard instructions in the documentation
 - [DOCUMENTATION] Update plugins documentation to reflect the new plugin system
 - [DOCUMENTATION] Update ModSecurity documentation to reflect the new changes in the Security Tuning section

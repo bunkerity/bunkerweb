@@ -40,6 +40,33 @@ try:
     if TEST_TYPE == "linux":
         wait_for_service()
 
+    log_info("Trying to stop instance ...")
+
+    action = "stop"
+    while no_errors:
+        log_info(f"Trying to {action} BunkerWeb instance ...")
+
+        try:
+            form = safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
+        except TimeoutException:
+            log_exception("No instance form found, exiting ...")
+            exit(1)
+
+        try:
+            access_page(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']", "instances", False)
+
+            log_info(f"Instance was {action}ed successfully, checking the message ...")
+            assert_alert_message(DRIVER, f"has been {action}ed")
+            no_errors = False
+        except:
+            if retries >= 3:
+                exit(1)
+            retries += 1
+            log_warning("Message list doesn't contain the expected message or is empty, retrying...")
+
+    if TEST_TYPE == "linux":
+        wait_for_service()
+
     log_info("✅ Instances page tests finished successfully")
 except SystemExit as e:
     exit_code = e.code
