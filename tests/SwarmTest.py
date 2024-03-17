@@ -75,6 +75,14 @@ class SwarmTest(Test):
                 i += 1
             if not healthy:
                 proc = run(
+                    'docker stack ps --no-trunc bunkerweb',
+                    cwd="/tmp/swarm",
+                    shell=True,
+                    capture_output=True,
+                )
+                log("SWARM", "❌", f"stdout logs = {proc.stdout.decode()}")
+                log("SWARM", "❌", f"stderr logs = {proc.stderr.decode()}")
+                proc = run(
                     "docker service logs bunkerweb_bunkerweb ;"
                     + " docker service logs bunkerweb_bw-autoconf ;"
                     + " docker service logs bunkerweb_bw-scheduler ;"

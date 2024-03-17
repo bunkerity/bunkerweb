@@ -104,11 +104,16 @@ class News {
         news.tags,
         news.date,
       );
+      const BASE_URL = this.BASE_URL;
       let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
       document
         .querySelector("[data-news-container]")
         .insertAdjacentHTML("afterbegin", cleanHTML);
+      document.querySelector(`.blog-click-${news.slug}`).addEventListener("click", function () { window.open(`${BASE_URL}/blog/post/${news.slug}`, '_blank') });
+      document.querySelectorAll(".blog-click-tag").forEach((tag) => {
+        tag.target = "_blank";
+      });
     });
   }
 
@@ -118,7 +123,7 @@ class News {
     tags.forEach((tag) => {
       tagList += ` <a
       href="${this.BASE_URL}/blog/tag/${tag.slug}"
-      class="my-0 mr-1 rounded bg-secondary hover:brightness-90 hover:-translate-y-0.4 text-white py-1 px-2 text-sm"
+      class="blog-click-tag my-0 mr-1 rounded bg-secondary hover:brightness-90 hover:-translate-y-0.4 text-white py-1 px-2 text-sm"
       >
       ${tag.name}
       </a>`;
@@ -130,19 +135,16 @@ class News {
       >
         <div>
             <img  role="link"
-                onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-                class="cursor-pointer rounded w-full  h-40 m-0 object-cover"
+                class="blog-click-${slug} cursor-pointer rounded w-full  h-40 m-0 object-cover"
                 src="${img}"
                 alt="image"
             />
             <span role="link"
-            onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="block cursor-pointer mt-3 mb-1 text-xl font-semibold text-primary dark:text-white tracking-wide">${title}</span>
+            class="blog-click-${slug} block cursor-pointer mt-3 mb-1 text-xl font-semibold text-primary dark:text-white tracking-wide">${title}</span>
         </div>
         <div>
             <div  role="link"
-            onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="cursor-pointer min-h-[100px] mb-3 dark:text-gray-300 text-gray-600 pt-3">
+            class="blog-click-${slug} cursor-pointer min-h-[100px] mb-3 dark:text-gray-300 text-gray-600 pt-3">
                 ${excerpt}
             </div>
             <div class="min-h-[75px] mt-2 flex flex-wrap justify-start items-end align-bottom">
