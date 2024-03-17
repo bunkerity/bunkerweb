@@ -85,7 +85,7 @@ jobs:
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
       - name: Pull BW linux rhel9 test image
-        if: inputs.TYPE == 'rhel9'
+        if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/rhel9-tests:testing && docker tag ghcr.io/bunkerity/rhel9-tests:testing local/rhel9:latest
       # Do tests
       - name: Run tests
