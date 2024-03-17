@@ -5,9 +5,9 @@
         <h5 class="my-2 font-bold dark:text-white/90 mx-2">SETTINGS</h5>
         {% set tabs = [
             {
-                "name": "Global",
-                "id": "global",
-                "description": "Global informations"
+                "name": "PRO",
+                "id": "pro",
+                "description": "BunkerWeb PRO"
             },
             {
                 "name": "Username",
@@ -55,23 +55,23 @@
                 <!--end tabs-->
             </div>
         </div>
-        {% set global_info = {
+        {% set pro_info = {
                     "message" : "Pro version" if is_pro_version else "Pro version but exceeding services" if pro_status == "active" and pro_overlapped else "Pro version is expired" if pro_status == "expired" else "Pro version suspended" if pro_status == "suspended" else "You are using free version",
                     "link_message" : "All features available" if is_pro_version else "Awaiting compliance" if pro_status == "active" and pro_overlapped else "Renew license" if pro_status == "expired" else "Talk to team" if pro_status == "suspended" else "Upgrade to pro",
                     "icon" : "pro" if is_pro_version else "free"
                 } %}
-        <div data-tab-item="global"
+        <div data-tab-item="pro"
              class="grid grid-cols-12 w-full justify-items-center">
             <div class="col-span-12">
                 <h5 class="text-xl my-1 text-center transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200">
-                    VERSION
+                    PRO
                 </h5>
                 <div class="flex justify-center items-center">
-                    <p class="mb-0 mr-2 dark:text-gray-300">{{ global_info['message'] }}</p>
+                    <p class="mb-0 mr-2 dark:text-gray-300">{{ pro_info['message'] }}</p>
                     <div role="img"
-                         aria-label="version"
+                         aria-label="pro"
                          class="dark:brightness-90 inline-block w-8 h-8 text-center rounded-circle bg-yellow-500">
-                        {% if global_info['icon'] == 'pro' %}
+                        {% if pro_info['icon'] == 'pro' %}
                             <svg class="leading-none text-lg relative scale-[0.6]"
                                  viewBox="0 0 48 46"
                                  fill="none"
@@ -91,12 +91,13 @@
                         {% endif %}
                     </div>
                 </div>
-                {% if global_info['link_message'] %}
-                    <div class="flex justify-center mt-2">
-                        <a class="text-center font-semibold text-yellow-500 underline"
-                           href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro">{{ global_info['link_message'] }}</a>
-                    </div>
+                {% if pro_info['link_message'] %}
+                <div class="flex justify-center mt-2">
+                    <a class="text-center font-semibold text-yellow-500 underline"
+                        href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro">{{ pro_info['link_message'] }}</a>
+                </div>
                 {% endif %}
+
                 {% if is_pro_version %}
                     <div class="mt-2 flex flex-col justify-center items-center">
                         {% if pro_expire %}
@@ -115,6 +116,63 @@
                     </div>
                 {% endif %}
             </div>
+            {% if not is_pro_version and pro_status != "inactive" %}
+            <form
+                class="mt-6 relative col-span-12 grid grid-cols-12 w-full justify-items-center"
+                id="activate-key-form"
+                action="account"
+                method="POST"
+                autocomplete="off">
+                <div class="col-span-12">
+                    <h5 class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0 dark:text-gray-200">ACTIVATE KEY</h5>
+                </div>
+                <input type="hidden" name="operation" value="activate-key" />
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden"
+                    name="next"
+                    value="{{ request.values.get('next', '') }}" />
+                  <div data-input-group
+                 class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                <h5 class="input-title">License key</h5>
+                <label class="sr-only" for="license">License key</label>
+                <input type="password"
+                       id="license"
+                       name="license"
+                       class="col-span-12 regular-input"
+                       placeholder="enter new license key"
+                       value=""
+                       pattern="^.*$"
+                       required />
+                <div data-setting-password-container
+                     class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%] md:top-[53%]">
+                    <button data-setting-password="visible"
+                            class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 576 512">
+                            <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z" />
+                        </svg>
+                    </button>
+                    <button data-setting-password="invisible"
+                            class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 640 512">
+                            <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+                <div class="col-span-12 flex justify-center mt-6">
+                    <button type="submit"
+                            id="activate-key-button"
+                            name="activate-key-button"
+                            class="valid-btn">SAVE</button>
+                </div>
+            </form>
+            {% endif %}
         </div>
         <div data-tab-item="username"
              class="hidden grid grid-cols-12 w-full justify-items-center">

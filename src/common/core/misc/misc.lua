@@ -46,6 +46,15 @@ function misc:access()
 	return self:ret(true, "method " .. method .. " is not allowed", HTTP_NOT_ALLOWED)
 end
 
+function misc:header()
+	-- Add Location header if needed
+	if self.ctx.bw.location_header then
+		ngx.header["Location"] = self.ctx.bw.location_header
+		return self:ret(true, "edited location header")
+	end
+	return self:ret(true, "no location header needed")
+end
+
 function misc:log_default()
 	if self.variables["DISABLE_DEFAULT_SERVER"] == "yes" then
 		self:set_metric("counters", "failed_default", 1)

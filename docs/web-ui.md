@@ -410,7 +410,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
       name: cr-bunkerweb
     rules:
       - apiGroups: [""]
-        resources: ["services", "pods", "configmaps"]
+        resources: ["services", "pods", "configmaps", "secrets"]
         verbs: ["get", "watch", "list"]
       - apiGroups: ["networking.k8s.io"]
         resources: ["ingresses"]
@@ -713,43 +713,11 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 === "Linux"
 
-    If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI SERVICE. Since the web UI is listening on the same machine as BunkerWeb, you will need to set the `UI_HOST` setting `http://127.0.0.1:7000`.
+    If you want to use the setup wizard, you will need to run the following command `export UI_WIZARD=1` before installing BunkerWeb as described in [integrations section](integrations.md#linux) of the documentation (this is an optional step).
 
     !!! tip "Accessing the setup wizard"
 
         You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
-
-    Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
-
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    SERVER_NAME=
-    MULTISITE=yes
-    UI_HOST=http://127.0.0.1:7000
-    ```
-
-    The web UI comes as systemd service named `bunkerweb-ui` which is not enabled by default. If you want to start the web UI when on startup you can run the following command :
-
-    ```shell
-    systemctl enable bunkerweb-ui
-    ```
-
-    Create an empty configuration file for the web UI :
-
-    ```shell
-    echo "" > /etc/bunkerweb/ui.env
-    chown nginx:nginx /etc/bunkerweb/ui.env
-    ```
-
-    Don't forget to restart the `bunkerweb` and `bunkerweb-ui` services :
-
-    ```shell
-    systemctl restart bunkerweb
-    systemctl restart bunkerweb-ui
-    ```
 
 ## Account management
 
@@ -1253,7 +1221,7 @@ After a successful login/password combination, you will be prompted to enter you
       name: cr-bunkerweb
     rules:
       - apiGroups: [""]
-        resources: ["services", "pods", "configmaps"]
+        resources: ["services", "pods", "configmaps", "secrets"]
         verbs: ["get", "watch", "list"]
       - apiGroups: ["networking.k8s.io"]
         resources: ["ingresses"]

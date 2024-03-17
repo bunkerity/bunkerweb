@@ -4,7 +4,7 @@ metadata:
   name: cr-bunkerweb
 rules:
   - apiGroups: [""]
-    resources: ["services", "pods", "configmaps"]
+    resources: ["services", "pods", "configmaps", "secrets"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]

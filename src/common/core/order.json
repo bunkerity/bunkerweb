@@ -31,7 +31,14 @@
     "cors",
     "antibot"
   ],
-  "headers": ["headers", "cors", "reverseproxy", "clientcache", "antibot"],
+  "headers": [
+    "headers",
+    "cors",
+    "reverseproxy",
+    "clientcache",
+    "antibot",
+    "misc"
+  ],
   "log": ["badbehavior", "bunkernet", "errors", "metrics"],
   "preread": [
     "whitelist",
