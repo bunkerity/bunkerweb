@@ -137,7 +137,7 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
             try:
-                if not plugin["data"]:
+                if plugin["data"]:
                     tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
                     tmp_path.write_bytes(plugin["data"])

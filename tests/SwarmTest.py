@@ -171,6 +171,21 @@ class SwarmTest(Test):
                 sleep(1)
                 i += 1
             if not healthy:
+                proc = run(
+                    'docker stack services --format "{{ .Name }}" ' + self._name,
+                    cwd="/tmp/swarm",
+                    shell=True,
+                    capture_output=True,
+                )
+                for service in proc.stdout.decode().splitlines():
+                    proc2 = run(
+                        'docker service ps ' + service,
+                        cwd="/tmp/swarm",
+                        shell=True,
+                        capture_output=True,
+                    )
+                    log("SWARM", "❌", f"stdout logs = {proc2.stdout.decode()}")
+                    log("SWARM", "❌", f"stderr logs = {proc2.stderr.decode()}")
                 raise (Exception("swarm stack is not healthy"))
         except:
             log(
