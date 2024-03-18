@@ -140,10 +140,12 @@ try:
                 resp_data = resp.json()
                 if db_metadata["is_pro"] and resp_data.get("action") == "clean":
                     clean_pro_plugins(db)
+        elif resp.status_code == 429:
+            LOGGER.warning("Too many requests to the remote server while checking BunkerWeb Pro license, please try again later")
+            sys_exit(0)
         elif resp.status_code == 500:
             LOGGER.error("An error occurred with the remote server while checking BunkerWeb Pro license, please try again later")
-            status = 2
-            sys_exit(status)
+            sys_exit(2)
         else:
             resp.raise_for_status()
 
@@ -176,6 +178,9 @@ try:
                     metadata = default_metadata.copy()
                     db.set_pro_metadata(metadata)
                     clean_pro_plugins(db)
+        elif resp.status_code == 429:
+            LOGGER.warning("Too many requests to the remote server while checking BunkerWeb Pro plugins, please try again later")
+            sys_exit(0)
         elif resp.headers.get("Content-Type", "") != "application/octet-stream":
             LOGGER.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}/pro")
             status = 2
@@ -201,6 +206,9 @@ try:
             LOGGER.error(f"Couldn't find Pro plugins for BunkerWeb version {data['version']} at {PREVIEW_ENDPOINT}/v{data['version']}.zip")
             status = 2
             sys_exit(status)
+        elif resp.status_code == 429:
+            LOGGER.warning("Too many requests to the remote server while checking Preview Pro plugins, please try again later")
+            sys_exit(0)
         elif resp.headers.get("Content-Type", "") != "application/zip":
             LOGGER.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {PREVIEW_ENDPOINT}/v{data['version']}.zip")
             status = 2

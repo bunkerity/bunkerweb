@@ -103,8 +103,12 @@ try:
 
     data["bw_instances_number"] = str(len(JOB.db.get_instances()))
 
-    response = post("https://api.bunkerweb.io/data", json=data, headers={"User-Agent": f"BunkerWeb/{data['version']}"}, allow_redirects=True, timeout=10)
-    response.raise_for_status()
+    resp = post("https://api.bunkerweb.io/data", json=data, headers={"User-Agent": f"BunkerWeb/{data['version']}"}, allow_redirects=True, timeout=10)
+
+    if resp.status_code == 429:
+        LOGGER.warning("Anonymous report has been sent too many times, skipping for today")
+    else:
+        resp.raise_for_status()
 
     cached, err = JOB.cache_file("last_report.json", dumps(data, indent=4).encode())
     if not cached:
