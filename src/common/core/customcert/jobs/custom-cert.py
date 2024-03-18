@@ -88,8 +88,8 @@ try:
             cert_data = getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", getenv("CUSTOM_SSL_CERT_DATA", ""))
             key_data = getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", getenv("CUSTOM_SSL_KEY_DATA", ""))
 
-            if cert_file or cert_data and key_file or key_data:
-                if isinstance(cert_file, str):
+            if (cert_file or cert_data) and (key_file or key_data):
+                if cert_file:
                     cert_file = Path(cert_file)
                 else:
                     try:
@@ -99,7 +99,7 @@ try:
                         skipped_servers.append(first_server)
                         continue
 
-                if isinstance(key_file, str):
+                if key_file:
                     key_file = Path(key_file)
                 else:
                     try:
