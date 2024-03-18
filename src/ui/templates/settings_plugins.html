@@ -264,7 +264,8 @@
         </div>
         <!-- end plugin settings not multiple -->
         {% if multList|length > 0 %}
-            <h5 data-multiple-title class="transition duration-300 ease-in-out ml-2 font-bold text-[1.1rem] uppercase dark:text-white/90 mt-2 mb-0">
+            <h5 data-multiple-title
+                class="transition duration-300 ease-in-out ml-2 font-bold text-[1.1rem] uppercase dark:text-white/90 mt-2 mb-0">
                 multiple settings
             </h5>
         {% endif %}
@@ -289,10 +290,7 @@
                         current_endpoint == "global-config"
                         or current_endpoint == "services" and value['context'] == "multisite"
                         ) %}
-                        <div data-setting-container="{{ setting }}_SCHEMA"
-                        data-{{ current_endpoint }}-context="{{ value['context'] }}"
-                             class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4"
-                             id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
+                        <div data-setting-container="{{ setting }}_SCHEMA" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
                             <!-- title and info -->
                             <div class="flex items-center my-1 relative z-10">
                                 <h5 class="input-title">{{ value["label"] }}</h5>
