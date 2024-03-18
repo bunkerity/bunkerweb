@@ -96,13 +96,19 @@ def generate_custom_configs(configs: List[Dict[str, Any]], *, original_path: Uni
         logger.info("Generating new custom configs ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for custom_config in configs:
-            tmp_path = original_path.joinpath(
-                custom_config["type"].replace("_", "-"),
-                custom_config["service_id"] or "",
-                f"{custom_config['name']}.conf",
-            )
-            tmp_path.parent.mkdir(parents=True, exist_ok=True)
-            tmp_path.write_bytes(custom_config["data"])
+            try:
+                if custom_config["data"]:
+                    tmp_path = original_path.joinpath(
+                        custom_config["type"].replace("_", "-"),
+                        custom_config["service_id"] or "",
+                        f"{custom_config['name']}.conf",
+                    )
+                    tmp_path.parent.mkdir(parents=True, exist_ok=True)
+                    tmp_path.write_bytes(custom_config["data"])
+            except BaseException as e:
+                logger.error(
+                    f"Error while generating custom configs \"{custom_config['name']}\"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}: {e}"
+                )
 
     if SCHEDULER and SCHEDULER.apis:
         logger.info("Sending custom configs to BunkerWeb")
@@ -130,19 +136,23 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
         logger.info(f"Generating new {'pro ' if pro else ''}external plugins ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
-            tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
-            tmp_path.parent.mkdir(parents=True, exist_ok=True)
-            tmp_path.write_bytes(plugin["data"])
-            with tar_open(str(tmp_path), "r:gz") as tar:
-                try:
-                    tar.extractall(original_path, filter="fully_trusted")
-                except TypeError:
-                    tar.extractall(original_path)
-            tmp_path.unlink()
+            try:
+                if not plugin["data"]:
+                    tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
+                    tmp_path.parent.mkdir(parents=True, exist_ok=True)
+                    tmp_path.write_bytes(plugin["data"])
+                    with tar_open(str(tmp_path), "r:gz") as tar:
+                        try:
+                            tar.extractall(original_path, filter="fully_trusted")
+                        except TypeError:
+                            tar.extractall(original_path)
+                    tmp_path.unlink()
 
-            for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
-                st = Path(job_file).stat()
-                chmod(job_file, st.st_mode | S_IEXEC)
+                    for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
+                        st = Path(job_file).stat()
+                        chmod(job_file, st.st_mode | S_IEXEC)
+            except BaseException as e:
+                logger.error(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\": {e}")
 
     if SCHEDULER and SCHEDULER.apis:
         logger.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
