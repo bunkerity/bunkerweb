@@ -1,4 +1,4 @@
-FROM nginx:1.24.0-alpine-slim@sha256:9cec4fd40a4e5156b4f4f555ee44a597491b6e8b91380c32b63ed45a4053a763 AS builder
+FROM nginx:1.24.0-alpine-slim@sha256:927eec798eb41b53f9e446aef26482ce4ade9008645ff13608c682cfe66b9503 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
@@ -42,7 +42,7 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-FROM nginx:1.24.0-alpine-slim@sha256:9cec4fd40a4e5156b4f4f555ee44a597491b6e8b91380c32b63ed45a4053a763
+FROM nginx:1.24.0-alpine-slim@sha256:927eec798eb41b53f9e446aef26482ce4ade9008645ff13608c682cfe66b9503
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
