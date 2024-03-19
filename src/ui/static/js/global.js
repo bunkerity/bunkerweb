@@ -110,7 +110,11 @@ class News {
       document
         .querySelector("[data-news-container]")
         .insertAdjacentHTML("afterbegin", cleanHTML);
-      document.querySelector(`.blog-click-${news.slug}`).addEventListener("click", function () { window.open(`${BASE_URL}/blog/post/${news.slug}`, '_blank') });
+      document.querySelectorAll(`.blog-click-${news.slug}`).forEach((slug) => {
+        slug.addEventListener("click", function () {
+          window.open(`${BASE_URL}/blog/post/${news.slug}`, "_blank");
+        });
+      });
       document.querySelectorAll(".blog-click-tag").forEach((tag) => {
         tag.target = "_blank";
       });
