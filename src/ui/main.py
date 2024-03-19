@@ -52,6 +52,7 @@ from src.User import AnonymousUser, User
 
 from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain
 from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 from logging import getLogger
 
 
@@ -87,9 +88,14 @@ app.config["SECRET_KEY"] = getenv("FLASK_SECRET", urandom(32))
 
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
 app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
+app.logger = setup_logger("UI")
+
+gunicorn_access_logger = getLogger("gunicorn.access")
+gunicorn_access_logger.setLevel(app.logger.level)
 gunicorn_logger = getLogger("gunicorn.error")
-app.logger = gunicorn_logger
-app.logger.setLevel(gunicorn_logger.level)
+gunicorn_logger.setLevel(app.logger.level)
+werkzeug_logger = getLogger("werkzeug")
+werkzeug_logger.setLevel(app.logger.level)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -2052,34 +2058,20 @@ def jobs():
 @app.route("/jobs/download", methods=["GET"])
 @login_required
 def jobs_download():
+    plugin_id = request.args.get("plugin_id", "")
     job_name = request.args.get("job_name", None)
     file_name = request.args.get("file_name", None)
+    service_id = request.args.get("service_id", "")
 
-    if not job_name or not file_name:
-        return (
-            jsonify(
-                {
-                    "status": "ko",
-                    "message": "job_name and file_name are required",
-                }
-            ),
-            422,
-        )
+    if not plugin_id or not job_name or not file_name:
+        return jsonify({"status": "ko", "message": "plugin_id, job_name and file_name are required"}), 422
 
-    cache_file = db.get_job_cache_file(job_name, file_name)
+    cache_file = db.get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
 
     if not cache_file:
-        return (
-            jsonify(
-                {
-                    "status": "ko",
-                    "message": "file not found",
-                }
-            ),
-            404,
-        )
+        return jsonify({"status": "ko", "message": "file not found"}), 404
 
-    file = BytesIO(cache_file.data)
+    file = BytesIO(cache_file)
     return send_file(file, as_attachment=True, download_name=file_name)
 
 
