@@ -57,7 +57,7 @@
                             {% endif %}
                             <!-- end service root-->
                             <!-- services folder -->
-                            {% if child['type'] == "folder" and current_endpoint == "configs" and loop.depth != 1 or  child['type'] == "folder" and current_endpoint == "cache" and loop.depth > 2 %}
+                            {% if child['type'] == "folder" and loop.depth != 1 %}
                                 <svg class="col-span-2 h-[2.5rem] w-[2.5rem] fill-primary stroke-gray-100 dark:stroke-gray-400"
                                      xmlns="http://www.w3.org/2000/svg"
                                      fill="none"
@@ -161,7 +161,7 @@
                             <!-- download button -->
                             {% if child['type'] == "file" and child['can_download'] == True %}
                                 {% if current_endpoint == "cache" %}
-                                    <button role="tab"  value="download" data-{{ current_endpoint }}-download="{{ child['name'].split("/")[0] }}" data-{{ current_endpoint }}-file="{{ child['name'].split("/")[1] }}" data-{{ current_endpoint }}-setting-select-dropdown-btn="{{ child['name'].split("/")[0] }}" class="duration-300 border-gray-300 hover:brightness-90 bg-white text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-b border-l border-r hover:bg-gray-100">
+                                    <button role="tab"  value="download" data-{{ current_endpoint }}-download="{{ child['name'] }}" data-{{ current_endpoint }}-job="{{ child['job_name'] }}" class="duration-300 border-gray-300 hover:brightness-90 bg-white text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-b border-l border-r hover:bg-gray-100">
                                         <span class="flex justify-start items-center">
                                             <svg class="h-5.5 w-5.5 stroke-sky-500"
                                                  xmlns="http://www.w3.org/2000/svg"
@@ -242,7 +242,7 @@
 <!-- end main container -->
 <!-- modal -->
 <div data-{{ current_endpoint }}-modal class="hidden w-full h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center">
-    <div class="mx-1 px-4 py-3 w-full max-w-180 flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div class="mx-1 px-4 py-3 w-full max-w-screen-lg flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="w-full flex justify-between">
             <p data-{{ current_endpoint }}-modal-title class="dark:text-white mb-0 font-sans font-semibold leading-normal uppercase text-sm">
                 TITLE
@@ -269,11 +269,11 @@
             <input type="hidden" id="_type" value="file" name="type" />
             <textarea class="hidden" id="content" name="content"></textarea>
             <!-- editor-->
-            <div data-{{ current_endpoint }}-modal-editor id="editor" class="text-base w-full h-48 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800">
+            <div data-{{ current_endpoint }}-modal-editor id="editor" class="text-base w-full h-96 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800">
             </div>
             <!-- editor-->
             <div class="mt-4 w-full justify-end flex">
-                <button type="button" data-{{ current_endpoint }}-modal-close  class="close-btn text-xs mr-2">
+                <button type="button" data-{{ current_endpoint }}-modal-close  class="dark:bg-slate-800 close-btn text-xs mr-2">
                     Close
                 </button>
                 <button data-{{ current_endpoint }}-modal-submit type="submit" class="valid-btn text-xs">

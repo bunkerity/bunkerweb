@@ -20,21 +20,59 @@ class Download {
             .closest("button")
             .hasAttribute(`data-${this.prefix}-download`)
         ) {
+          const dataValue = e.target
+            .closest('div:has(span[data-cache-content=""])')
+            .firstElementChild.getAttribute("data-value");
           const btnEl = e.target.closest("button");
-          const jobName = btnEl.getAttribute("data-cache-download");
-          const fileName = btnEl.getAttribute("data-cache-file");
-          this.sendFileToDL(jobName, fileName);
+          const jobName = btnEl.getAttribute(`data-${this.prefix}-job`);
+          const fileName = btnEl.getAttribute(`data-${this.prefix}-download`);
+          const pluginId = document
+            .querySelector('[data-level="1"]')
+            .getAttribute("data-name");
+          var serviceId = null;
+          if (
+            document.querySelector(
+              '[data-level="2"][data-cache-breadcrumb-item=""]:not(.hidden)',
+            )
+          ) {
+            serviceId = document
+              .querySelector('[data-level="2"]')
+              .getAttribute("data-name");
+          }
+
+          if (dataValue !== "Download file to view content") {
+            this.download(fileName, dataValue);
+          } else {
+            this.sendFileToDL(pluginId, jobName, fileName, serviceId);
+          }
         }
       } catch (err) {}
     });
   }
 
-  async sendFileToDL(jobName, fileName) {
+  download(filename, text) {
+    var element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+    );
+    element.setAttribute("download", filename);
+
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
+
+  async sendFileToDL(pluginId, jobName, fileName, serviceId) {
     window.open(
       `${location.href.replace(
         "cache",
         "jobs",
-      )}/download?job_name=${jobName}&file_name=${fileName}`,
+      )}/download?plugin_id=${pluginId}&job_name=${jobName}&file_name=${fileName}` +
+        (serviceId ? `&service_id=${serviceId}` : ""),
     );
   }
 }

@@ -159,6 +159,7 @@ def path_to_dict(
 
             file_info = {
                 "name": conf["file_name"],
+                "job_name": conf["job_name"],
                 "type": "file",
                 "path": join(
                     path,
