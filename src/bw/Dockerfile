@@ -68,7 +68,7 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
-RUN apk add --no-cache "curl>=8.5.0-r0" "libcurl>=8.5.0-r0" "libcrypto3>=3.0.12-r4" "libexpat>=2.6.0-r0" "libssl3>=3.0.12-r4" "libwebp>=1.2.4-r3" "libx11>=1.8.7-r0" "nghttp2-libs>=1.51.0-r2"
+# There are no CVEs to fix for this image
 
 EXPOSE 8080/tcp 8443/tcp
 

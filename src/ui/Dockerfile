@@ -56,7 +56,7 @@ RUN apk add --no-cache bash libmagic && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
 # Fix CVEs
-RUN apk add --no-cache "libexpat>=2.6.0-r0"
+# There are no CVEs to fix for this image
 
 VOLUME /data
 

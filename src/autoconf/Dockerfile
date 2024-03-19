@@ -56,7 +56,7 @@ RUN apk add --no-cache bash && \
   chmod 660 INTEGRATION
 
 # Fix CVEs
-RUN apk add --no-cache "libexpat>=2.6.0-r0"
+# There are no CVEs to fix for this image
 
 VOLUME /data
 
