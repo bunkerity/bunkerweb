@@ -69,16 +69,17 @@ class Job:
                     extract_path = cache_path.parent
                     if job_cache_file["file_name"].startswith("folder:"):
                         extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
-                    ignored_dirs.add(extract_path)
+                    ignored_dirs.add(extract_path.as_posix())
                     if job_cache_file["job_name"] != job_name:
                         continue
-                    rmtree(extract_path, ignore_errors=True)
-                    extract_path.mkdir(parents=True, exist_ok=True)
-                    with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
-                        try:
-                            tar.extractall(extract_path, filter="fully_trusted")
-                        except TypeError:
-                            tar.extractall(extract_path)
+                    with LOCK:
+                        rmtree(extract_path, ignore_errors=True)
+                        extract_path.mkdir(parents=True, exist_ok=True)
+                        with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
+                            try:
+                                tar.extractall(extract_path, filter="fully_trusted")
+                            except TypeError:
+                                tar.extractall(extract_path)
                     continue
                 elif job_cache_file["job_name"] != job_name:
                     continue
@@ -88,27 +89,29 @@ class Job:
                 self.logger.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
                 ret = False
 
-        if not manual and self.job_path.is_dir():
-            for file in self.job_path.glob("**/*"):
-                skipped = False
-                for ignored_dir in ignored_dirs:
-                    if file.as_posix().startswith(ignored_dir.as_posix()):
+        with LOCK:
+            if not manual and self.job_path.is_dir():
+                for file in self.job_path.rglob("*"):
+                    skipped = False
+                    if file.as_posix().startswith(tuple(ignored_dirs)):
                         skipped = True
                         break
 
-                if skipped:
-                    continue
+                    if skipped:
+                        continue
 
-                self.logger.debug(f"Checking if {file} should be removed")
-                if file not in plugin_cache_files and file.is_file():
-                    self.logger.debug(f"Removing non-cached file {file}")
-                    file.unlink(missing_ok=True)
-                    if file.parent.is_dir() and not list(file.parent.iterdir()):
-                        self.logger.debug(f"Removing empty directory {file.parent}")
-                        rmtree(file.parent, ignore_errors=True)
-                elif file.is_dir() and not list(file.iterdir()):
-                    self.logger.debug(f"Removing empty directory {file}")
-                    rmtree(file, ignore_errors=True)
+                    self.logger.debug(f"Checking if {file} should be removed")
+                    if file not in plugin_cache_files and file.is_file():
+                        self.logger.debug(f"Removing non-cached file {file}")
+                        file.unlink(missing_ok=True)
+                        if file.parent.is_dir() and not list(file.parent.iterdir()):
+                            self.logger.debug(f"Removing empty directory {file.parent}")
+                            rmtree(file.parent, ignore_errors=True)
+                            if file.parent == self.job_path:
+                                break
+                    elif file.is_dir() and not list(file.iterdir()):
+                        self.logger.debug(f"Removing empty directory {file}")
+                        rmtree(file, ignore_errors=True)
 
         return ret
 
