@@ -88,6 +88,14 @@ class TabsSelect {
           //close dropdown and change btn textcontent on mobile
           this.setDropBtnText(tabAtt, text);
           this.closeDropdown();
+          // Change URL fragment
+          if (window.location.pathname.endsWith("global_config")) {
+            window.history.replaceState(
+              null,
+              "",
+              `${window.location.pathname}#${tabAtt}`,
+            );
+          }
         }
       } catch (e) {}
 
@@ -101,6 +109,24 @@ class TabsSelect {
         }
       } catch (err) {}
     });
+
+    // If fragment exists, click on the corresponding tab
+    if (
+      window.location.hash &&
+      window.location.pathname.endsWith("global_config")
+    ) {
+      const fragment = window.location.hash.substring(1);
+      if (fragment) {
+        const tab = this.tabContainer.querySelector(
+          `button[data-tab-select-handler='${fragment}']`,
+        );
+        tab.click();
+        // Scroll to the top of the page (with a delay to ensure the tab is clicked first)
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+        }, 100);
+      }
+    }
   }
 
   resetTabsStyle() {
