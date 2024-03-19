@@ -52,9 +52,7 @@ STREAM support :warning:
 |`TIMERS_LOG_LEVEL`            |`debug`                                                                                                                 |global   |no      |Log level for timers.                                       |
 
 
-## Core settings
-
-### Antibot
+## Antibot
 
 STREAM support :x:
 
@@ -74,7 +72,7 @@ Bot detection by using a challenge.
 |`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
 |`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
 
-### Auth basic
+## Auth basic
 
 STREAM support :x:
 
@@ -88,7 +86,7 @@ Enforce login before accessing a resource or the whole site using HTTP basic aut
 |`AUTH_BASIC_PASSWORD`|`changeme`       |multisite|no      |Password                                        |
 |`AUTH_BASIC_TEXT`    |`Restricted area`|multisite|no      |Text to display                                 |
 
-### Bad behavior
+## Bad behavior
 
 STREAM support :white_check_mark:
 
@@ -102,7 +100,7 @@ Ban IP generating too much 'bad' HTTP status code in a period of time.
 |`BAD_BEHAVIOR_THRESHOLD`   |`10`                         |multisite|no      |Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.    |
 |`BAD_BEHAVIOR_COUNT_TIME`  |`60`                         |multisite|no      |Period of time (in seconds) during which we count 'bad' HTTP status codes.                  |
 
-### Blacklist
+## Blacklist
 
 STREAM support :warning:
 
@@ -133,7 +131,7 @@ Deny access based on internal and external IP/network/rDNS/ASN blacklists.
 |`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.                    |
 |`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
 
-### Brotli
+## Brotli
 
 STREAM support :x:
 
@@ -146,7 +144,7 @@ Compress HTTP requests with the brotli algorithm.
 |`BROTLI_MIN_LENGTH`|`1000`                                                                                                                                                                                                                                                                                                                                                                                                                          |multisite|no      |Minimum length for brotli compression.                 |
 |`BROTLI_COMP_LEVEL`|`6`                                                                                                                                                                                                                                                                                                                                                                                                                             |multisite|no      |The compression level of the brotli algorithm.         |
 
-### BunkerNet
+## BunkerNet
 
 STREAM support :white_check_mark:
 
@@ -157,7 +155,7 @@ Share threat data with other BunkerWeb instances via BunkerNet.
 |`USE_BUNKERNET`   |`yes`                     |multisite|no      |Activate BunkerNet feature.  |
 |`BUNKERNET_SERVER`|`https://api.bunkerweb.io`|global   |no      |Address of the BunkerNet API.|
 
-### CORS
+## CORS
 
 STREAM support :x:
 
@@ -177,7 +175,7 @@ Cross-Origin Resource Sharing.
 |`CORS_ALLOW_HEADERS`          |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header.                  |
 |`CORS_DENY_REQUEST`           |`yes`                                                                               |multisite|no      |Deny request and don't send it to backend if Origin is not allowed.|
 
-### Client cache
+## Client cache
 
 STREAM support :x:
 
@@ -190,7 +188,7 @@ Manage caching for clients.
 |`CLIENT_CACHE_ETAG`      |`yes`                                                       |multisite|no      |Send the HTTP ETag header for static resources.                     |
 |`CLIENT_CACHE_CONTROL`   |`public, max-age=15552000`                                  |multisite|no      |Value of the Cache-Control HTTP header.                             |
 
-### Country
+## Country
 
 STREAM support :white_check_mark:
 
@@ -201,7 +199,7 @@ Deny access based on the country of the client IP.
 |`BLACKLIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).    |
 |`WHITELIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).|
 
-### Custom HTTPS certificate
+## Custom HTTPS certificate
 
 STREAM support :white_check_mark:
 
@@ -215,7 +213,7 @@ Choose custom certificate for HTTPS.
 |`CUSTOM_SSL_CERT_DATA`|       |multisite|no      |Certificate data encoded in base64.                                             |
 |`CUSTOM_SSL_KEY_DATA` |       |multisite|no      |Key data encoded in base64.                                                     |
 
-### DB
+## DB
 
 STREAM support :white_check_mark:
 
@@ -226,7 +224,7 @@ Integrate easily the Database.
 |`DATABASE_URI`      |`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
 |`DATABASE_LOG_LEVEL`|`warning`                                |global |no      |The level to use for database logs.               |
 
-### DNSBL
+## DNSBL
 
 STREAM support :white_check_mark:
 
@@ -237,7 +235,7 @@ Deny access based on external DNSBL servers.
 |`USE_DNSBL` |`yes`                                                                       |multisite|no      |Activate DNSBL feature.|
 |`DNSBL_LIST`|`bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org`|global   |no      |List of DNSBL servers. |
 
-### Errors
+## Errors
 
 STREAM support :x:
 
@@ -248,7 +246,7 @@ Manage default error pages
 |`ERRORS`                 |                                                 |multisite|no      |List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).|
 |`INTERCEPTED_ERROR_CODES`|`400 401 403 404 405 413 429 500 501 502 503 504`|multisite|no      |List of HTTP error code intercepted by BunkerWeb                                                                        |
 
-### Greylist
+## Greylist
 
 STREAM support :warning:
 
@@ -269,7 +267,7 @@ Allow access while keeping security features based on internal and external IP/n
 |`GREYLIST_URI`            |       |multisite|no      |List of URI (PCRE regex), separated with spaces, to put into the greylist.                    |
 |`GREYLIST_URI_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing bad URI to put into the greylist.             |
 
-### Gzip
+## Gzip
 
 STREAM support :x:
 
@@ -282,7 +280,7 @@ Compress HTTP requests with the gzip algorithm.
 |`GZIP_MIN_LENGTH`|`1000`                                                                                                                                                                                                                                                                                                                                                                                                                          |multisite|no      |Minimum length for gzip compression.                 |
 |`GZIP_COMP_LEVEL`|`5`                                                                                                                                                                                                                                                                                                                                                                                                                             |multisite|no      |The compression level of the gzip algorithm.         |
 
-### HTML injection
+## HTML injection
 
 STREAM support :x:
 
@@ -292,7 +290,7 @@ Inject custom HTML code before the </body> tag.
 |-------------|-------|---------|--------|------------------------|
 |`INJECT_BODY`|       |multisite|no      |The HTML code to inject.|
 
-### Headers
+## Headers
 
 STREAM support :x:
 
@@ -315,19 +313,36 @@ Manage HTTP headers sent to clients.
 |`X_CONTENT_TYPE_OPTIONS`             |`nosniff`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |multisite|no      |Value for the X-Content-Type-Options header.                                                  |
 |`X_XSS_PROTECTION`                   |`1; mode=block`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |multisite|no      |Value for the X-XSS-Protection header.                                                        |
 
-### Let's Encrypt
+## Let's Encrypt
 
 STREAM support :white_check_mark:
 
 Automatic creation, renewal and configuration of Let's Encrypt certificates.
 
-|         Setting          |Default| Context |Multiple|                                                                                  Description                                                                                  |
-|--------------------------|-------|---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                         |
-|`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                  |
-|`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Letâ€™s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
+|         Setting          |Default| Context |Multiple|                                                                                 Description                                                                                 |
+|--------------------------|-------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                       |
+|`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
+|`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
 
-### Limit
+## Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+
+
+STREAM support :white_check_mark:
+
+Automatic creation, renewal and configuration of Let's Encrypt certificates using DNS challenges.
+
+|             Setting              | Default | Context |Multiple|                                      Description                                      |
+|----------------------------------|---------|---------|--------|---------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT_DNS`           |`no`     |multisite|no      |Activate automatic Let's Encrypt DNS.                                                  |
+|`LETS_ENCRYPT_DNS_EMAIL`          |         |multisite|no      |The email address to use for Let's Encrypt notifications.                              |
+|`USE_LETS_ENCRYPT_DNS_STAGING`    |`no`     |multisite|no      |Use the Let's Encrypt staging environment.                                             |
+|`LETS_ENCRYPT_DNS_PROVIDER`       |         |multisite|no      |The DNS provider to use for DNS challenges.                                            |
+|`USE_LETS_ENCRYPT_DNS_WILDCARD`   |`yes`    |multisite|no      |Create wildcard certificates for all domains using DNS challenges.                     |
+|`LETS_ENCRYPT_DNS_PROPAGATION`    |`default`|multisite|no      |The time to wait for DNS propagation in seconds.                                       |
+|`LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`|         |multisite|yes     |Configuration item that will be added to the credentials.ini file for the DNS provider.|
+
+## Limit
 
 STREAM support :warning:
 
@@ -343,7 +358,7 @@ Limit maximum number of requests and connections.
 |`LIMIT_CONN_MAX_HTTP2` |`100`  |multisite|no      |Maximum number of streams per IP when using HTTP/2 protocol.                                 |
 |`LIMIT_CONN_MAX_STREAM`|`10`   |multisite|no      |Maximum number of connections per IP when using stream.                                      |
 
-### Metrics
+## Metrics
 
 STREAM support :warning:
 
@@ -355,7 +370,7 @@ Metrics collection and retrieve.
 |`METRICS_MEMORY_SIZE`         |`16m`  |global   |no      |Size of the internal storage for metrics.                |
 |`METRICS_MAX_BLOCKED_REQUESTS`|`100`  |global   |no      |Maximum number of blocked requests to store (per worker).|
 
-### Miscellaneous
+## Miscellaneous
 
 STREAM support :warning:
 
@@ -382,7 +397,7 @@ Miscellaneous settings.
 |`DENY_HTTP_STATUS`           |`403`                  |global   |no      |HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.       |
 |`SEND_ANONYMOUS_REPORT`      |`yes`                  |global   |no      |Send anonymous report to BunkerWeb maintainers.                                                                              |
 
-### ModSecurity
+## ModSecurity
 
 STREAM support :x:
 
@@ -397,7 +412,19 @@ Management of the ModSecurity WAF.
 |`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.   |
 |`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.|
 
-### PHP
+## Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+
+
+STREAM support :x:
+
+BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
+
+|           Setting            |Default| Context |Multiple|                 Description                 |
+|------------------------------|-------|---------|--------|---------------------------------------------|
+|`USE_MONITORING`              |`yes`  |multisite|no      |Enable monitoring of BunkerWeb.              |
+|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global   |no      |Size of the dict to store monitoring metrics.|
+
+## PHP
 
 STREAM support :x:
 
@@ -410,7 +437,7 @@ Manage local or remote PHP-FPM.
 |`LOCAL_PHP`      |       |multisite|no      |Path to the PHP-FPM socket file.                            |
 |`LOCAL_PHP_PATH` |       |multisite|no      |Root folder containing files in the local PHP-FPM instance. |
 
-### Pro
+## Pro
 
 STREAM support :x:
 
@@ -420,7 +447,23 @@ Pro settings for the Pro version of BunkerWeb.
 |-----------------|-------|-------|--------|-------------------------------------------------|
 |`PRO_LICENSE_KEY`|       |global |no      |The License Key for the Pro version of BunkerWeb.|
 
-### Real IP
+## Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+
+
+STREAM support :x:
+
+Prometheus exporter for BunkerWeb
+
+|            Setting            |                       Default                       |Context|Multiple|                              Description                               |
+|-------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
+|`USE_PROMETHEUS_EXPORTER`      |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
+|`PROMETHEUS_EXPORTER_IP`       |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
+|`PROMETHEUS_EXPORTER_PORT`     |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
+|`PROMETHEUS_EXPORTER_DICT_SIZE`|`10M`                                                |global |no      |Size of the dict to store Prometheus metrics.                           |
+|`PROMETHEUS_EXPORTER_ALLOW_IP` |`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
+|`PROMETHEUS_EXPORTER_URL`      |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
+
+## Real IP
 
 STREAM support :warning:
 
@@ -435,7 +478,7 @@ Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.
 |`REAL_IP_HEADER`    |`X-Forwarded-For`                        |multisite|no      |HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.                  |
 |`REAL_IP_RECURSIVE` |`yes`                                    |multisite|no      |Perform a recursive search in the header container IP address.                                          |
 
-### Redirect
+## Redirect
 
 STREAM support :x:
 
@@ -447,7 +490,7 @@ Manage HTTP redirects.
 |`REDIRECT_TO_REQUEST_URI`|`no`   |multisite|no      |Append the requested URI to the redirect address.|
 |`REDIRECT_TO_STATUS_CODE`|`301`  |multisite|no      |Status code to send to client when redirecting.  |
 
-### Redis
+## Redis
 
 STREAM support :white_check_mark:
 
@@ -471,7 +514,29 @@ Redis server configuration when using BunkerWeb in cluster mode.
 |`REDIS_SENTINEL_PASSWORD`|       |global |no      |Redis sentinel password.                                           |
 |`REDIS_SENTINEL_MASTER`  |       |global |no      |Redis sentinel master name.                                        |
 
-### Reverse proxy
+## Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+
+
+STREAM support :x:
+
+Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
+
+|           Setting            |Default |Context|Multiple|                                                           Description                                                            |
+|------------------------------|--------|-------|--------|----------------------------------------------------------------------------------------------------------------------------------|
+|`USE_REPORTING`               |`no`    |global |no      |Enable the reporting feature.                                                                                                     |
+|`REPORTING_USE_SMTP`          |`no`    |global |no      |Enable the send report with email(s).                                                                                             |
+|`REPORTING_USE_WEBHOOK`       |`no`    |global |no      |Enable the send report with webhook.                                                                                              |
+|`REPORTING_SCHEDULE`          |`weekly`|global |no      |The time between sending two reports.                                                                                             |
+|`REPORTING_WEBHOOK_URLS`      |        |global |no      |List of webhooks URLs to receive the report in PDF format (separated by spaces)                                                   |
+|`REPORTING_SMTP_EMAILS`       |        |global |no      |List of emails to receive the report in HTML format (separated by spaces)                                                         |
+|`REPORTING_SMTP_HOST`         |        |global |no      |Host server used for SMTP sending.                                                                                                |
+|`REPORTING_SMTP_FROM_EMAIL`   |        |global |no      |The email address used to send the message. Notice that 2FA must be disabled for this email address.                              |
+|`REPORTING_SMTP_FROM_USER`    |        |global |no      |The user authentication value for sending via the from email address.                                                             |
+|`REPORTING_SMTP_FROM_PASSWORD`|        |global |no      |The password authentication value for sending via the from email address.                                                         |
+|`REPORTING_SMTP_PORT`         |`465`   |global |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
+|`REPORTING_SMTP_SSL`          |`SSL`   |global |no      |Determine whether or not you want a secure connection for SMTP.                                                                   |
+
+## Reverse proxy
 
 STREAM support :warning:
 
@@ -507,7 +572,7 @@ Manage reverse proxy configurations.
 |`REVERSE_PROXY_INCLUDES`               |                                  |multisite|yes     |Additional configuration to include in the location block, separated with spaces.                                            |
 |`REVERSE_PROXY_CUSTOM_HOST`            |                                  |multisite|no      |Override Host header sent to upstream server.                                                                                |
 
-### Reverse scan
+## Reverse scan
 
 STREAM support :white_check_mark:
 
@@ -519,7 +584,7 @@ Scan clients ports to detect proxies or servers.
 |`REVERSE_SCAN_PORTS`  |`22 80 443 3128 8000 8080`|multisite|no      |List of port to scan when using reverse scan feature.             |
 |`REVERSE_SCAN_TIMEOUT`|`500`                     |multisite|no      |Specify the maximum timeout (in ms) when scanning a port.         |
 
-### Self-signed certificate
+## Self-signed certificate
 
 STREAM support :white_check_mark:
 
@@ -531,7 +596,7 @@ Generate self-signed certificate.
 |`SELF_SIGNED_SSL_EXPIRY`  |`365`                 |multisite|no      |Self-signed certificate expiry in days.  |
 |`SELF_SIGNED_SSL_SUBJ`    |`/CN=www.example.com/`|multisite|no      |Self-signed certificate subject.         |
 
-### Sessions
+## Sessions
 
 STREAM support :white_check_mark:
 
@@ -547,7 +612,7 @@ Management of session used by other plugins.
 |`SESSIONS_CHECK_IP`        |`yes`   |global |no      |Destroy session if IP address is different than original one.                    |
 |`SESSIONS_CHECK_USER_AGENT`|`yes`   |global |no      |Destroy session if User-Agent is different than original one.                    |
 
-### UI
+## UI
 
 STREAM support :x:
 
@@ -558,7 +623,7 @@ Integrate easily the BunkerWeb UI.
 |`USE_UI` |`no`   |multisite|no      |Use UI                                      |
 |`UI_HOST`|       |global   |no      |Address of the web UI used for initial setup|
 
-### Whitelist
+## Whitelist
 
 STREAM support :warning:
 
@@ -579,31 +644,3 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
 
-## Pro plugins
-
-### Prometheus exporter
-
-<div style="display:flex; align-items:center">
-    <h3 data-custom-header id="prometheus-exporter">Prometheus exporter</h3>
-
-    <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
-            viewBox="0 0 48 46"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg">
-        <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
-        <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
-    </svg>
-</div>
-
-STREAM support :x:
-
-Prometheus export for BunkerWeb
-
-|            Setting            |                       Default                       |Context|Multiple|                              Description                               |
-|-------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
-|`USE_PROMETHEUS_EXPORTER`      |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
-|`PROMETHEUS_EXPORTER_IP`       |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
-|`PROMETHEUS_EXPORTER_PORT`     |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
-|`PROMETHEUS_EXPORTER_DICT_SIZE`|`10M`                                                |global |no      |Size of the dict to store Prometheus metrics.                           |
-|`PROMETHEUS_EXPORTER_ALLOW_IP` |`127.0.0.1/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
-|`PROMETHEUS_EXPORTER_URL`      |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |

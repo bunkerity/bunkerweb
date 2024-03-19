@@ -13,7 +13,6 @@ loglevel = "info"
 proc_name = "bunkerweb-ui"
 preload_app = True
 reuse_port = True
-pidfile = join(sep, "var", "run", "bunkerweb", "ui.pid")
 worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = join(sep, "var", "tmp", "bunkerweb", "ui")
 worker_class = "gthread"

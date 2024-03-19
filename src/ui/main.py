@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from math import floor
-from os import _exit, getenv, listdir, sep, urandom
+from os import _exit, getenv, getpid, listdir, sep, urandom
 from os.path import basename, dirname, join
 from secrets import choice
 from string import ascii_letters, digits
@@ -180,6 +180,7 @@ elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
         stop(1)
 
 app.logger.info("Database is ready")
+Path(sep, "var", "run", "bunkerweb", "ui.pid").write_text(str(getpid()), encoding="utf-8")
 Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok", encoding="utf-8")
 bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
 
@@ -1038,11 +1039,9 @@ def global_config():
             ),
         ).start()
 
-        try:
+        with suppress(BaseException):
             if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
                 flash("Checking license key to upgrade.", "success")
-        except:
-            pass
 
         return redirect(
             url_for(

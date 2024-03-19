@@ -721,14 +721,19 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 ## Account management
 
-You can change the username, password needed and manage two-factor authentication by **accessing the account page** of the web UI from the menu.
-
-You need to click on `manage account` inside the sidebar menu.
+You can access the account management page by clicking on `manage account` inside the sidebar menu :
 
 <figure markdown>
   ![Overview](assets/img/manage-account.webp){ align=center, width="350" }
   <figcaption>Account page access from menu</figcaption>
 </figure>
+
+### Upgrade to PRO
+
+!!! info "What is BunkerWeb PRO ?"
+    BunkerWeb PRO is an enhanced version of BunkerWeb open-source. Whether it's enhanced security, an enriched user experience, or technical supervision, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs. Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question regarding the PRO version.
+
+TODO : screenshots
 
 ### Username / Password
 
