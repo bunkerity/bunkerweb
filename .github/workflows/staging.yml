@@ -114,7 +114,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+        test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
     uses: ./.github/workflows/tests-ui.yml
     with:
       TEST: ${{ matrix.test }}
@@ -124,7 +124,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+        test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
     uses: ./.github/workflows/tests-ui-linux.yml
     with:
       TEST: ${{ matrix.test }}
