@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
-from hashlib import sha256
 from io import BytesIO
-from os import getenv, listdir, chmod, sep
+from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from uuid import uuid4
-from glob import glob
-from json import JSONDecodeError, loads
+from json import JSONDecodeError, load, loads
 from shutil import copytree, rmtree
 from tarfile import open as tar_open
 from traceback import format_exc
@@ -25,7 +23,7 @@ from requests import get
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from common_utils import get_os_info, get_integration, get_version  # type: ignore
+from common_utils import bytes_hash, get_os_info, get_integration, get_version  # type: ignore
 
 API_ENDPOINT = "https://api.bunkerweb.io"
 PREVIEW_ENDPOINT = "https://assets.bunkerity.com/bw-pro/preview"
@@ -43,7 +41,8 @@ status = 0
 def clean_pro_plugins(db) -> None:
     LOGGER.debug("Cleaning up Pro plugins...")
     # Clean Pro plugins
-    rmtree(PRO_PLUGINS_DIR.joinpath("*"), ignore_errors=True)
+    for plugin in PRO_PLUGINS_DIR.glob("*"):
+        rmtree(plugin, ignore_errors=True)
     # Update database
     db.update_external_plugins([], _type="pro")
 
@@ -62,8 +61,10 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
         LOGGER.error(f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {plugin_path.name} (plugin.json is not valid)")
         return False
 
+    new_plugin_path = PRO_PLUGINS_DIR.joinpath(metadata["id"])
+
     # Don't go further if plugin is already installed
-    if PRO_PLUGINS_DIR.joinpath(metadata["id"], "plugin.json").is_file():
+    if new_plugin_path.is_dir():
         old_version = None
 
         for plugin in db.get_plugins(_type="pro"):
@@ -80,14 +81,13 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
         LOGGER.warning(
             f"{'Preview version of ' if preview else ''}Pro plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it..."
         )
-        rmtree(PRO_PLUGINS_DIR.joinpath(metadata["id"]), ignore_errors=True)
+        rmtree(new_plugin_path, ignore_errors=True)
 
     # Copy the plugin
-    copytree(plugin_path, PRO_PLUGINS_DIR.joinpath(metadata["id"]))
+    copytree(plugin_path, new_plugin_path)
     # Add u+x permissions to jobs files
-    for job_file in glob(PRO_PLUGINS_DIR.joinpath(metadata["id"], "jobs", "*").as_posix()):
-        st = Path(job_file).stat()
-        chmod(job_file, st.st_mode | S_IEXEC)
+    for job_file in new_plugin_path.joinpath("jobs").glob("*"):
+        job_file.chmod(job_file.stat().st_mode | S_IEXEC)
     LOGGER.info(f"✅ {'Preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']}) installed successfully!")
     return True
 
@@ -167,13 +167,19 @@ try:
     if metadata["is_pro"]:
         LOGGER.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated Pro plugins...")
 
-        resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=5, allow_redirects=True)
+        resp = get(f"{API_ENDPOINT}/pro/download", headers=headers, json=data, timeout=5, stream=True, allow_redirects=True)
 
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
             error = True
             if resp.headers.get("Content-Type", "") == "application/json":
-                resp_data = resp.json()
+                resp_data = {}
+                with BytesIO() as resp_content:
+                    for chunk in resp.iter_content(chunk_size=8192):
+                        resp_content += chunk
+                    resp_content.seek(0)
+                    resp_data = load(resp_content)
+
                 if resp_data.get("action") == "clean":
                     metadata = default_metadata.copy()
                     db.set_pro_metadata(metadata)
@@ -200,7 +206,7 @@ try:
             message = "No BunkerWeb Pro license key provided"
         LOGGER.warning(f"{message}, only checking if there are new or updated preview versions of Pro plugins...")
 
-        resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=5, allow_redirects=True)
+        resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=5, stream=True, allow_redirects=True)
 
         if resp.status_code == 404:
             LOGGER.error(f"Couldn't find Pro plugins for BunkerWeb version {data['version']} at {PREVIEW_ENDPOINT}/v{data['version']}.zip")
@@ -220,7 +226,11 @@ try:
         sys_exit(status)
     resp.raise_for_status()
 
-    with BytesIO(resp.content) as plugin_content:
+    with BytesIO() as plugin_content:
+        for chunk in resp.iter_content(chunk_size=8192):
+            plugin_content.write(chunk)
+        plugin_content.seek(0)
+
         with ZipFile(plugin_content) as zf:
             zf.extractall(path=temp_dir)
 
@@ -245,33 +255,29 @@ try:
 
     pro_plugins = []
     pro_plugins_ids = []
-    for plugin in listdir(PRO_PLUGINS_DIR):
-        path = PRO_PLUGINS_DIR.joinpath(plugin)
-        if not path.joinpath("plugin.json").is_file():
-            LOGGER.warning(f"Plugin {plugin} is not valid, deleting it...")
-            rmtree(path, ignore_errors=True)
+    for plugin_path in PRO_PLUGINS_DIR.glob("*"):
+        if not plugin_path.joinpath("plugin.json").is_file():
+            LOGGER.warning(f"Plugin {plugin_path.name} is not valid, deleting it...")
+            rmtree(plugin_path, ignore_errors=True)
             continue
 
-        plugin_file = loads(path.joinpath("plugin.json").read_text(encoding="utf-8"))
+        plugin_file = loads(plugin_path.joinpath("plugin.json").read_text(encoding="utf-8"))
 
         with BytesIO() as plugin_content:
             with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                tar.add(path, arcname=path.name)
+                tar.add(plugin_path, arcname=plugin_path.name)
             plugin_content.seek(0)
             value = plugin_content.getvalue()
 
         plugin_file.update(
             {
                 "type": "pro",
-                "page": False,
+                "page": plugin_path.joinpath("ui").is_dir(),
                 "method": "scheduler",
                 "data": value,
-                "checksum": sha256(value).hexdigest(),
+                "checksum": bytes_hash(value, algorithm="sha256"),
             }
         )
-
-        if "ui" in listdir(path):
-            plugin_file["page"] = True
 
         pro_plugins.append(plugin_file)
         pro_plugins_ids.append(plugin_file["id"])
@@ -298,7 +304,7 @@ except:
     status = 2
     LOGGER.error(f"Exception while running download-pro-plugins.py :\n{format_exc()}")
 
-for plugin_tmp in glob(TMP_DIR.joinpath("*").as_posix()):
+for plugin_tmp in TMP_DIR.glob("*"):
     rmtree(plugin_tmp, ignore_errors=True)
 
 sys_exit(status)

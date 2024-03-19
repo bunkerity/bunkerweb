@@ -1,4 +1,4 @@
-FROM python:3.12.2-alpine3.19@sha256:1a0501213b470de000d8432b3caab9d8de5489e9443c2cc7ccaa6b0aa5c3148e as builder
+FROM python:3.12.2-alpine3.19@sha256:25a82f6f8b720a6a257d58e478a0a5517448006e010c85273f4d9c706819478c as builder
 
 # Install python dependencies
 RUN apk add --no-cache build-base libffi-dev postgresql-dev
@@ -30,7 +30,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.12.2-alpine3.19@sha256:1a0501213b470de000d8432b3caab9d8de5489e9443c2cc7ccaa6b0aa5c3148e
+FROM python:3.12.2-alpine3.19@sha256:25a82f6f8b720a6a257d58e478a0a5517448006e010c85273f4d9c706819478c
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -64,7 +64,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
-RUN apk add --no-cache "libexpat>=2.6.0-r0"
+# There are no CVEs to fix for this image
 
 VOLUME /data
 
