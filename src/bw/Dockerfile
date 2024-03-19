@@ -53,7 +53,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
-RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd libcurl && \
+RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl && \
 	cp helpers/bwcli /usr/bin/ && \
 	mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www/html && \
 	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
