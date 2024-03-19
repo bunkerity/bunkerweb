@@ -186,15 +186,12 @@ try:
         plugin_file.update(
             {
                 "type": "external",
-                "page": False,
+                "page": plugin_path.joinpath("ui").is_dir(),
                 "method": "scheduler",
                 "data": value,
                 "checksum": bytes_hash(value, algorithm="sha256"),
             }
         )
-
-        if "ui" in list(plugin_path.iterdir()):
-            plugin_file["page"] = True
 
         external_plugins.append(plugin_file)
         external_plugins_ids.append(plugin_file["id"])
