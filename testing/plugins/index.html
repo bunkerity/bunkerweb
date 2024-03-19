@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
@@ -28,20 +28,33 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
 
     
     
-<script
-  async
-  defer
-  data-domain="docs.bunkerweb.io"
-  src="https://data.bunkerity.com/js/script.js"
-></script>
-<script defer>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+
+    <script defer>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
@@ -54,7 +67,80 @@
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
       .setAttribute("aria-label", "Search in documentation");
   } catch (err) {}
-</script>
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        // Try to get dynamic content
+        // Else keep static ones
+        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          defaultContent = res.data[0].data;
+          startBannerLoop();
+        })
+        .catch((e) => {
+          startBannerLoop();
+});
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
 
     
       
@@ -133,14 +219,13 @@
         <aside class="md-banner">
           <div class="md-banner__inner md-grid md-typeset">
             
-             📢 Looking for technical support, tailored
-consulting or custom development for BunkerWeb ? Visit the
-<a
-  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-  style="color: #3f6ec6; text-decoration: underline"
-  >BunkerWeb Panel</a
->
-for more information on our enterprise offers. 
+            
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
           </div>
           
         </aside>
@@ -151,11 +236,12 @@ for more information on our enterprise offers.
         
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
-               You're not viewing the
-documentation of the latest version.
-<a href="../..">
-  <strong>Click here to view latest.</strong>
-</a>
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../..">
+        <strong>Click here to view latest.</strong>
+    </a>
 
             </div>
             <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
@@ -802,6 +888,24 @@ documentation of the latest version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting started
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#metadata" class="md-nav__link">
     <span class="md-ellipsis">
       Metadata
@@ -876,6 +980,39 @@ documentation of the latest version.
       Plugin page
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Plugin page">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#actionspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Actions.py
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1025,9 +1162,32 @@ documentation of the latest version.
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>./bw-data/plugins
 </code></pre></div>
-<p>Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :</p>
-<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">101</span>:101<span class="w"> </span>./bw-data
+<div class="admonition warning">
+<p class="admonition-title">Using local folder for persistent data</p>
+<p>The scheduler runs as an <strong>unprivileged user with UID 101 and GID 101</strong> inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+But there is a downside : if you use a <strong>local folder for the persistent data</strong>, you will need to <strong>set the correct permissions</strong> so the unprivileged user can write data to it. Something like that should do the trick :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
+<p>Alternatively, if the folder already exists :</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>If you are using <a href="https://docs.docker.com/engine/security/rootless">Docker in rootless mode</a> or <a href="https://podman.io/">podman</a>, UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>For example, if you have a value of <strong>100000</strong>, the mapped UID/GID will be <strong>100100</strong> (100000 + 100) :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Or if the folder already exists :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+</div>
 <p>Then you can mount the volume when starting your Docker stack :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.5&#39;</span>
 <span class="nt">services</span><span class="p">:</span>
@@ -1184,10 +1344,42 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 </div>
 </div>
 <h2 id="writing-a-plugin">Writing a plugin</h2>
+<h3 id="structure">Structure</h3>
 <div class="admonition tip">
 <p class="admonition-title">Existing plugins</p>
 <p>If the documentation is not enough, you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/common/core">core plugins</a> (already included in BunkerWeb but they are plugins, technically speaking).</p>
 </div>
+<p>What a plugin structure looks like :
+<div class="highlight"><pre><span></span><code>plugin /
+        confs / conf_type.conf
+        ui / actions.py
+             template.html
+        plugin.lua
+        plugin.json
+</code></pre></div></p>
+<ul>
+<li>
+<p><strong>conf_type.conf</strong> : add a <a href="../quickstart-guide/#custom-configurations">custom NGINX configurations.</a></p>
+</li>
+<li>
+<p><strong>actions.py</strong> : script to execute on flask server.
+This script is running on flask context, you have access to lib and utils like <code>jinja2</code>, <code>requests</code>, etc...</p>
+</li>
+<li>
+<p><strong>template.html</strong> : custom plugin page you can access from ui.</p>
+</li>
+<li>
+<p><strong>plugin.lua</strong> : code to execute on NGINX using <a href="https://github.com/openresty/lua-nginx-module">NGING LUA module.</a></p>
+</li>
+<li>
+<p><strong>plugin.json</strong> : metadata, settings and jobs for your settings.</p>
+</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Optional files</p>
+<p>Files like <code>confs</code> and <code>ui</code> ones are optional. Add them only to fit your needs.</p>
+</div>
+<h3 id="getting-started">Getting started</h3>
 <p>The first step is to create a folder that will contain the plugin :</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>myplugin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="nb">cd</span><span class="w"> </span>myplugin
@@ -1559,36 +1751,84 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <h3 id="jobs">Jobs</h3>
 <p>BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named <strong>jobs</strong> and listing them in the <strong>plugin.json</strong> metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.</p>
 <h3 id="plugin-page">Plugin page</h3>
-<p>Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the <a href="../web-ui/">web UI</a>.</p>
-<p>Everything related to the web UI is located inside a subfolder named <strong>ui</strong> at the root directory of your plugin. A template file named <strong>template.html</strong> and located inside the <strong>ui</strong> subfolder contains the client code and logic to display your page. Another file named <strong>actions.py</strong> and also located inside the <strong>ui</strong> subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).</p>
+<p>Everything related to the web UI is located inside the subfolder <strong>ui</strong> as we seen in the <a href="#structure">previous structure section.</a>.</p>
+<h4 id="prerequisites">Prerequisites</h4>
+<p>When you want to create a plugin page, you need two files :</p>
+<ul>
+<li>
+<p><strong>template.html</strong> that will be accessible with a <strong>GET /plugins/&lt;<em>plugin_id</em>&gt;</strong>.</p>
+</li>
+<li>
+<p><strong>actions.py</strong> where you can add some scripting and logic with a <strong>POST /plugins/&lt;<em>plugin_id</em>&gt;</strong>. Notice that this file <strong>need a function with the same name as the plugin</strong> to work. This file is needed even if the function is empty.</p>
+</li>
+</ul>
+<h4 id="basic-example">Basic example</h4>
 <div class="admonition info">
 <p class="admonition-title">Jinja 2 template</p>
 <p>The <strong>template.html</strong> file is a Jinja2 template, please refer to the <a href="https://jinja.palletsprojects.com">Jinja2 documentation</a> if needed.</p>
 </div>
-<p>A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a <strong>actions.py</strong> file in the <strong>ui</strong> folder. Inside the file, <strong>you must define a function that has the same name as the plugin</strong>. This function will be called when the form is submitted. You can then use the <strong>request</strong> object (from the <a href="https://flask.palletsprojects.com">Flask library</a>) to get the values of the form. The form's action must finish with <strong>/plugins/&lt;<em>plugin_id</em>&gt;</strong>. The helper function <code>url_for</code> will generate for you the prefix of the URL : <code>{{ url_for('plugins') }}/plugin_id</code>.</p>
-<p>If you want to display variables generated from your <strong>actions.py</strong> in your template file, you can return a dictionary with variables name as keys and variables value as values. Here is dummy example where we return a single variable :</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">myplugin</span><span class="p">()</span> <span class="p">:</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">}</span>
+<p>We can put aside the <strong>actions.py</strong> file and start <strong>only using the template on a GET situation</strong>. The template can access app context and libs, so you can use Jinja, request or flask utils.</p>
+<p>For example, you can get the request arguments in your template like this :</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>request args : {{ request.args.get() }}.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
 </code></pre></div>
-<p>And we display it in the <strong>template.html</strong> file :
-<div class="highlight"><pre><span></span><code>{% if foo %}
-Content of foo is : {{ foo }}.
-{% endif %}
-</code></pre></div></p>
+<h4 id="actionspy">Actions.py</h4>
+<div class="admonition warning">
+<p class="admonition-title">CSRF Token</p>
 <p>Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;hidden&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;csrf_token&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;{{ csrf_token() }}&quot;</span> <span class="p">/&gt;</span>
 </code></pre></div></p>
-<p>Retrieving user submitted data is pretty simple, thanks to the request module provided by Flask :</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
-
-<span class="k">def</span> <span class="nf">myplugin</span><span class="p">()</span> <span class="p">:</span>
-    <span class="n">my_form_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s2">&quot;my_form_input&quot;</span><span class="p">]</span>
+</div>
+<p>You can power-up your plugin page with additional scripting with the <strong>actions.py</strong> file when sending a <strong>POST /plugins/&lt;<em>plugin_id</em>&gt;</strong>.</p>
+<p>You have two functions by default in <strong>actions.py</strong> :</p>
+<p><strong>pre_render function</strong></p>
+<p>This allows you to retrieve data when you <strong>GET</strong> the template, and to use the data with the pre_render variable available in Jinja to display content more dynamically.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">pre_render</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="o">&lt;</span><span class="n">pre_render_data</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>BunkerWeb will send you this type of response :</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok|ko&quot;</span><span class="p">,</span> <span class="s2">&quot;code&quot;</span> <span class="p">:</span> <span class="n">XXX</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">pre_render_data</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
+</code></pre></div>
+<p><strong>&lt;<em>plugin_id</em>&gt; function</strong></p>
+<p>This allows you to retrieve data when you make a <strong>POST</strong> from the template endpoint, which must be used in AJAX.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">myplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="o">&lt;</span><span class="n">plugin_id_data</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>BunkerWeb will send you this type of response :</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">plugin_id_data</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
+</code></pre></div>
+<p><strong>What you can access from action.py</strong></p>
+<p>Here are the arguments that are passed and access on action.py functions:</p>
+<div class="highlight"><pre><span></span><code><span class="n">function</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Python libraries</p>
-<p>You can use Python libraries that are already available like :
+<p>In addition, you can use Python libraries that are already available like :
 <code>Flask</code>, <code>Flask-Login</code>, <code>Flask-WTF</code>, <code>beautifulsoup4</code>, <code>docker</code>, <code>Jinja2</code>, <code>python-magic</code> and <code>requests</code>. To see the full list, you can have a look at the Web UI <a href="https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt">requirements.txt</a>. If you need external libraries, you can install them inside the <strong>ui</strong> folder of your plugin and then use the classical <strong>import</strong> directive.</p>
 </div>
+<p><strong>Some examples</strong></p>
+<ul>
+<li>Retrieve form submitted data</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span> <span class="nf">myplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">my_form_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s2">&quot;my_form_input&quot;</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">my_form_value</span>
+</code></pre></div>
+<ul>
+<li>Access app config</li>
+</ul>
+<p><strong>action.py</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span> <span class="nf">pre_render</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;CONFIG&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">methods</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">config</span>
+</code></pre></div></p>
+<p><strong>template</strong>
+<div class="highlight"><pre><span></span><code><span class="cm">&lt;!-- metadata + config --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>{{ pre_render }}<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></p>
 
 
 
@@ -1685,10 +1925,10 @@ Content of foo is : {{ foo }}.
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

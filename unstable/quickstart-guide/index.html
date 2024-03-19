@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
@@ -28,20 +28,33 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
 
     
     
-<script
-  async
-  defer
-  data-domain="docs.bunkerweb.io"
-  src="https://data.bunkerity.com/js/script.js"
-></script>
-<script defer>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+
+    <script defer>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
@@ -54,7 +67,80 @@
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
       .setAttribute("aria-label", "Search in documentation");
   } catch (err) {}
-</script>
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        // Try to get dynamic content
+        // Else keep static ones
+        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          defaultContent = res.data[0].data;
+          startBannerLoop();
+        })
+        .catch((e) => {
+          startBannerLoop();
+});
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
 
     
       
@@ -133,14 +219,13 @@
         <aside class="md-banner">
           <div class="md-banner__inner md-grid md-typeset">
             
-             📢 Looking for technical support, tailored
-consulting or custom development for BunkerWeb ? Visit the
-<a
-  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-  style="color: #3f6ec6; text-decoration: underline"
-  >BunkerWeb Panel</a
->
-for more information on our enterprise offers. 
+            
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
           </div>
           
         </aside>
@@ -151,11 +236,12 @@ for more information on our enterprise offers.
         
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
-               You're not viewing the
-documentation of the latest version.
-<a href="../..">
-  <strong>Click here to view latest.</strong>
-</a>
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../..">
+        <strong>Click here to view latest.</strong>
+    </a>
 
             </div>
             <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
@@ -751,6 +837,15 @@ documentation of the latest version.
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#and-now" class="md-nav__link">
+    <span class="md-ellipsis">
+      And now ?
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -924,8 +1019,7 @@ documentation of the latest version.
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Going further</p>
-<pre><code>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/examples) of the repository to get real-world examples.
-</code></pre>
+<p>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples folder</a> of the repository to get real-world examples.</p>
 </div>
 <h2 id="protect-http-applications">Protect HTTP applications</h2>
 <p>Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb : it will act as a classical <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> with extra security features.</p>
@@ -1833,8 +1927,7 @@ REAL_IP_HEADER=proxy_protocol
 <h2 id="protect-udptcp-applications">Protect UDP/TCP applications</h2>
 <div class="admonition warning">
 <p class="admonition-title">Feature is in beta</p>
-<pre><code>This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
-</code></pre>
+<p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
 </div>
 <p>BunkerWeb offers the capability to function as a <strong>generic UDP/TCP reverse proxy</strong>, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the <a href="https://nginx.org/en/docs/stream/ngx_stream_core_module.html">stream module</a> of NGINX.</p>
 <p>It's important to note that not all settings and security features are available when using the stream module. Additional information on this can be found in the <a href="../security-tuning/">security tuning</a> and <a href="../settings/">settings</a> sections of the documentation.</p>
@@ -2856,8 +2949,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <h2 id="ipv6">IPv6</h2>
 <div class="admonition warning">
 <p class="admonition-title">Feature is in beta</p>
-<pre><code>This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
-</code></pre>
+<p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
 </div>
 <p>By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set <code>USE_IPV6=yes</code>. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Docker</label><label for="__tabbed_8_2">Docker autoconf</label></div>
@@ -2936,6 +3028,13 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 </div>
 </div>
 </div>
+<h2 id="and-now">And now ?</h2>
+<p>This quickstart is just a tiny fraction of the functionality that BunkerWeb has to offer. Be curious and see what else BunkerWeb has to offer.</p>
+<p>You can take a detailed look at the many <a href="../settings/">plugins and settings available</a> in this solution.</p>
+<p>Details on the use of certain plugins can also be found on the <a href="../security-tuning/">security tuning page.</a></p>
+<p>For simplified use of the solution, don't hesitate to <a href="../web-ui/">try out the web UI.</a></p>
+<p>Please note that <strong>BunkerWeb comes in both free and pro versions</strong>, with pro features indicated to avoid confusion.</p>
+<p>If you'd like to find out more about the pro version, and use the solution to the full, <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">visit the panel.</a></p>
 
 
 
@@ -3032,10 +3131,10 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

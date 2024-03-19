@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
@@ -28,20 +28,33 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
 
     
     
-<script
-  async
-  defer
-  data-domain="docs.bunkerweb.io"
-  src="https://data.bunkerity.com/js/script.js"
-></script>
-<script defer>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+
+    <script defer>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
@@ -54,7 +67,80 @@
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
       .setAttribute("aria-label", "Search in documentation");
   } catch (err) {}
-</script>
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        // Try to get dynamic content
+        // Else keep static ones
+        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          defaultContent = res.data[0].data;
+          startBannerLoop();
+        })
+        .catch((e) => {
+          startBannerLoop();
+});
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
 
     
       
@@ -133,14 +219,13 @@
         <aside class="md-banner">
           <div class="md-banner__inner md-grid md-typeset">
             
-             📢 Looking for technical support, tailored
-consulting or custom development for BunkerWeb ? Visit the
-<a
-  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-  style="color: #3f6ec6; text-decoration: underline"
-  >BunkerWeb Panel</a
->
-for more information on our enterprise offers. 
+            
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
           </div>
           
         </aside>
@@ -151,11 +236,12 @@ for more information on our enterprise offers.
         
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
-               You're not viewing the
-documentation of the latest version.
-<a href="../..">
-  <strong>Click here to view latest.</strong>
-</a>
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../..">
+        <strong>Click here to view latest.</strong>
+    </a>
 
             </div>
             <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
@@ -838,6 +924,21 @@ documentation of the latest version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ModSecurity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom configurations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -992,6 +1093,72 @@ documentation of the latest version.
   <a href="#auth-request" class="md-nav__link">
     <span class="md-ellipsis">
       Auth request
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-and-reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring and reporting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring and reporting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reporting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reporting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of reporting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get reporting
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prometheus-exporter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prometheus exporter
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pro-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pro metrics
     </span>
   </a>
   
@@ -1495,9 +1662,23 @@ documentation of the latest version.
 <td style="text-align: center;"><code>yes</code></td>
 <td style="text-align: left;">When set to <code>yes</code> and <code>USE_MODSECURITY</code> is also set to <code>yes</code>, the OWASP Core Rule Set will be loaded.</td>
 </tr>
+<tr>
+<td style="text-align: center;"><code>MODSECURITY_CRS_VERSION</code></td>
+<td style="text-align: center;"><code>3</code></td>
+<td style="text-align: left;">Version of the OWASP Core Rule Set to use.</td>
+</tr>
 </tbody>
 </table>
-<p>We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).</p>
+<div class="admonition warning">
+<p class="admonition-title">ModSecurity and the OWASP Core Rule Set</p>
+<p><strong>We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled</strong>. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).</p>
+</div>
+<p>You can choose between the following versions of the OWASP Core Rule Set :</p>
+<ul>
+<li><strong>3</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.5">v3.3.5</a> of the OWASP Core Rule Set (<strong><em>default</em></strong>)</li>
+<li><strong>4</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.0.0">v4.0.0</a> of the OWASP Core Rule Set</li>
+</ul>
+<h3 id="custom-configurations">Custom configurations</h3>
 <p>Tuning ModSecurity and the CRS can be done using <a href="../quickstart-guide/#custom-configurations">custom configurations</a> :</p>
 <ul>
 <li>modsec-crs : before the OWASP Core Rule Set is loaded</li>
@@ -2325,6 +2506,94 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </tr>
 </tbody>
 </table>
+<h2 id="monitoring-and-reporting">Monitoring and reporting</h2>
+<p>Monitoring and reporting means that you are kept informed of the slightest problem and can react as quickly as possible.</p>
+<h3 id="reporting">Reporting</h3>
+<div style="display:flex; align-items:center">
+
+  <h3 data-custom-header id="reporting">Reporting</h3>
+
+  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+        viewBox="0 0 48 46"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+  </svg>
+</div>
+
+<div class="admonition warning">
+<p class="admonition-title">Used of cache data</p>
+<p>A comparison is made every hour with the cached data. If BunkerWeb no longer has access to the cache, the data to be compared will be reset.</p>
+</div>
+<h4 id="types-of-reporting">Types of reporting</h4>
+<p>Pro reporting plugin gives you two types of reports :</p>
+<ul>
+<li>
+<p><strong>regular report</strong>: you can define a period of time, and you'll get a regular report showing the percentage change in data between the previous report and this one, and also key points about your BunkerWeb state.</p>
+</li>
+<li>
+<p><strong>alerts</strong>: every hour, an analysis of the metrics will be carried out, and you can set a threshold for the percentage change in the data. If this threshold is reached, you will receive an alert.</p>
+</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Example</p>
+<p>After one hour, if I go from 300 requests blocked to more than 600 after one hour : in case I have set a threshold of +100%, I'll be alerted.</p>
+</div>
+<h4 id="get-reporting">Get reporting</h4>
+<p>To receive alerts or regular reports, you can use :</p>
+<p><strong>1) webhook</strong></p>
+<p>We are supporting multiple webhooks :</p>
+<ul>
+<li><strong>API</strong> : we will send a JSON of type <code>{"message" : markdownReport }</code>.</li>
+<li><strong>Discord</strong></li>
+<li><strong>Slack</strong></li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Specific webhook</p>
+<p>We listen to our customers, so if you need to make the plugin compatible with a particular webhook, don't hesitate to contact us to discuss it together.</p>
+</div>
+<p><strong>2) SMTP</strong></p>
+<p>You can also use the SMTP protocol. You will need to set the various parameters (user auth, password auth, host...).</p>
+<p>You need to <strong>pay attention</strong> using SMTP:</p>
+<ul>
+<li>
+<p>Make sure that the address used to send the <strong>message does not end up in the spam folder</strong>.</p>
+</li>
+<li>
+<p>The address used must <strong>not have double authentication</strong> to work.</p>
+</li>
+</ul>
+<h3 id="prometheus-exporter">Prometheus exporter</h3>
+<div style="display:flex; align-items:center">
+
+  <h3 data-custom-header id="prometheus-exporter">Prometheus exporter</h3>
+
+  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+        viewBox="0 0 48 46"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+  </svg>
+</div>
+
+<p>TO DO</p>
+<h3 id="pro-metrics">Pro metrics</h3>
+<div style="display:flex; align-items:center">
+
+  <h3 data-custom-header id="pro-metrics">Pro metrics</h3>
+
+  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+        viewBox="0 0 48 46"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+  </svg>
+</div>
+
+<p>TO DO</p>
 
 
 
@@ -2421,10 +2690,10 @@ Consider adding this feature if you want to detect possible open proxies or conn
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

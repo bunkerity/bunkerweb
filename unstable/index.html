@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
@@ -26,20 +26,33 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.7e359304.min.css">
       
       
 
 
     
     
-<script
-  async
-  defer
-  data-domain="docs.bunkerweb.io"
-  src="https://data.bunkerity.com/js/script.js"
-></script>
-<script defer>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+
+    <script defer>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
@@ -52,7 +65,80 @@
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
       .setAttribute("aria-label", "Search in documentation");
   } catch (err) {}
-</script>
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        // Try to get dynamic content
+        // Else keep static ones
+        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          defaultContent = res.data[0].data;
+          startBannerLoop();
+        })
+        .catch((e) => {
+          startBannerLoop();
+});
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
 
     
       
@@ -131,14 +217,13 @@
         <aside class="md-banner">
           <div class="md-banner__inner md-grid md-typeset">
             
-             📢 Looking for technical support, tailored
-consulting or custom development for BunkerWeb ? Visit the
-<a
-  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-  style="color: #3f6ec6; text-decoration: underline"
-  >BunkerWeb Panel</a
->
-for more information on our enterprise offers. 
+            
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
           </div>
           
         </aside>
@@ -149,11 +234,12 @@ for more information on our enterprise offers.
         
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
-               You're not viewing the
-documentation of the latest version.
-<a href="../.">
-  <strong>Click here to view latest.</strong>
-</a>
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../.">
+        <strong>Click here to view latest.</strong>
+    </a>
 
             </div>
             <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
@@ -610,6 +696,30 @@ documentation of the latest version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Professional services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#support-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Support panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pro-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pro version
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -898,7 +1008,7 @@ documentation of the latest version.
 <p><strong>Free as in "freedom"</strong> : BunkerWeb is licensed under the free <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPLv3 license</a>, embracing the principles of freedom and openness. Enjoy the freedom to use, modify, and distribute the software, backed by a supportive community.</p>
 </li>
 <li>
-<p><strong>Professional services</strong> : Get technical support, tailored consulting and custom development directly from the maintainers of BunkerWeb. Visit the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> for more information.</p>
+<p><strong>Professional services</strong> : Get technical support, tailored consulting and custom development directly from the maintainers of BunkerWeb. Visit the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">BunkerWeb Panel</a> for more information.</p>
 </li>
 </ul>
 <h2 id="security-features">Security features</h2>
@@ -937,9 +1047,16 @@ documentation of the latest version.
 
 <p>A demo website protected with BunkerWeb is available at <a href="https://demo.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">demo.bunkerweb.io</a>. Feel free to visit it and perform some security tests.</p>
 <h2 id="professional-services">Professional services</h2>
+<h3 id="support-panel">Support panel</h3>
 <p>Get the most of BunkerWeb by getting professional services directly from the maintainers of the project. From technical support to tailored consulting and development, we are here to assist you in the security of your web services.</p>
 <p>You will find more information by visiting the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>, our dedicated platform for professional services.</p>
 <p>Don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> if you have any question, we will be more than happy to respond to your needs.</p>
+<h3 id="pro-version">Pro version</h3>
+<p>BunkerWeb has a pro version to further improve the security of your applications and make managing them faster and easier (email reporting, more settings options...).</p>
+<p>We have centralised version management and support within the panel for greater ease of use.</p>
+<p>More detailed information about this version can be found <a href="https://www.bunkerweb.io/#services?utm_campaign=self&amp;utm_source=doc">by visiting our website.</a></p>
+<p>If you're interested, upgrade to the pro version in just a few clicks, <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">following the steps here.</a></p>
+<p>Note that in the documentation, it will be mentioned when a feature is for the pro version.</p>
 <h2 id="ecosystem-community-and-resources">Ecosystem, community and resources</h2>
 <p>Official websites, tools and resources about BunkerWeb :</p>
 <ul>
@@ -1053,10 +1170,10 @@ documentation of the latest version.
     </div>
     
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
         <script src="js/print-site.js"></script>
       

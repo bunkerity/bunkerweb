@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
@@ -28,20 +28,33 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
 
     
     
-<script
-  async
-  defer
-  data-domain="docs.bunkerweb.io"
-  src="https://data.bunkerity.com/js/script.js"
-></script>
-<script defer>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+
+    <script defer>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
@@ -54,7 +67,80 @@
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
       .setAttribute("aria-label", "Search in documentation");
   } catch (err) {}
-</script>
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        // Try to get dynamic content
+        // Else keep static ones
+        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          defaultContent = res.data[0].data;
+          startBannerLoop();
+        })
+        .catch((e) => {
+          startBannerLoop();
+});
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
 
     
       
@@ -133,14 +219,13 @@
         <aside class="md-banner">
           <div class="md-banner__inner md-grid md-typeset">
             
-             📢 Looking for technical support, tailored
-consulting or custom development for BunkerWeb ? Visit the
-<a
-  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-  style="color: #3f6ec6; text-decoration: underline"
-  >BunkerWeb Panel</a
->
-for more information on our enterprise offers. 
+            
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
           </div>
           
         </aside>
@@ -151,11 +236,12 @@ for more information on our enterprise offers.
         
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
-               You're not viewing the
-documentation of the latest version.
-<a href="../..">
-  <strong>Click here to view latest.</strong>
-</a>
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../..">
+        <strong>Click here to view latest.</strong>
+    </a>
 
             </div>
             <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
@@ -1792,6 +1878,7 @@ chmod -R 770 bw-data</code></p>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Fedora 39</li>
 <li>Red Hat Enterprise Linux (RHEL) 8.9</li>
+<li>Red Hat Enterprise Linux (RHEL) 9.3</li>
 </ul>
 <p>Please ensure that you have <strong>NGINX 1.24.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <p>To simplify the installation process, Linux package repositories for BunkerWeb are available on <a href="https://packagecloud.io/bunkerity/bunkerweb">PackageCloud</a>. They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for <a href="https://packagecloud.io/bunkerity/bunkerweb/install">manual installation</a> instructions if you prefer.</p>
@@ -1811,13 +1898,16 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.24.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">Testing version</p>
-<p>If you use the <code>testing</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
+<p class="admonition-title">Testing/dev version</p>
+<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
 </div>
+<p>Optional step : if you want to automatically enable the <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
 <p>And finally install BunkerWeb testing :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -1837,13 +1927,16 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.24.0-1~jammy
 </code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">Testing version</p>
-<p>If you use the <code>testing</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
+<p class="admonition-title">Testing/dev version</p>
+<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
 </div>
+<p>Optional step : if you want to automatically enable the <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
 <p>And finally install BunkerWeb testing :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -1853,12 +1946,15 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <p>Fedora already provides NGINX 1.24.0 that we support :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.24.0
 </code></pre></div>
+<p>Optional step : if you want to automatically enable the <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
 <p>And finally install BunkerWeb testing :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
 sed<span class="w"> </span><span class="s1">&#39;s/yum install -y pygpgme --disablerepo=&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;bunkerity_bunkerweb&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;/yum install -y python-gnupg/g&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
 sed<span class="w"> </span><span class="s1">&#39;s/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1884,13 +1980,16 @@ gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
 <p>You should now be able to install NGINX 1.24.0 :</p>
-<p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.24.0
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.24.0
 </code></pre></div>
-And finally install BunkerWeb testing :</p>
+<p>Optional step : if you want to automatically enable the <a href="../web-ui/#setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
+<p>And finally install BunkerWeb testing :</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1923,6 +2022,7 @@ MY_SETTING_2=value2
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Fedora 39</li>
 <li>Red Hat Enterprise Linux (RHEL) 8.9</li>
+<li>Red Hat Enterprise Linux (RHEL) 9.3</li>
 </ul>
 <p>To simplify the deployment and configuration process, <a href="https://docs.ansible.com/ansible/latest/index.html">Ansible</a> can be used as an IT automation tool. Ansible enables you to configure systems, deploy software, and perform advanced IT tasks such as continuous deployments or zero downtime rolling updates.</p>
 <p>For BunkerWeb, there is a dedicated Ansible role available on <a href="https://galaxy.ansible.com/bunkerity/bunkerweb">Ansible Galaxy</a>.</p>
@@ -2196,10 +2296,10 @@ end
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

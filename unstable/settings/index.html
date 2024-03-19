@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
@@ -28,20 +28,33 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
 
     
     
-<script
-  async
-  defer
-  data-domain="docs.bunkerweb.io"
-  src="https://data.bunkerity.com/js/script.js"
-></script>
-<script defer>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+
+    <script defer>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
@@ -54,7 +67,80 @@
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
       .setAttribute("aria-label", "Search in documentation");
   } catch (err) {}
-</script>
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        // Try to get dynamic content
+        // Else keep static ones
+        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          defaultContent = res.data[0].data;
+          startBannerLoop();
+        })
+        .catch((e) => {
+          startBannerLoop();
+});
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
 
     
       
@@ -133,14 +219,13 @@
         <aside class="md-banner">
           <div class="md-banner__inner md-grid md-typeset">
             
-             📢 Looking for technical support, tailored
-consulting or custom development for BunkerWeb ? Visit the
-<a
-  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-  style="color: #3f6ec6; text-decoration: underline"
-  >BunkerWeb Panel</a
->
-for more information on our enterprise offers. 
+            
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
           </div>
           
         </aside>
@@ -151,11 +236,12 @@ for more information on our enterprise offers.
         
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
-               You're not viewing the
-documentation of the latest version.
-<a href="../..">
-  <strong>Click here to view latest.</strong>
-</a>
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../..">
+        <strong>Click here to view latest.</strong>
+    </a>
 
             </div>
             <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
@@ -880,6 +966,15 @@ documentation of the latest version.
 </li>
         
           <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metrics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#miscellaneous" class="md-nav__link">
     <span class="md-ellipsis">
       Miscellaneous
@@ -901,6 +996,15 @@ documentation of the latest version.
   <a href="#php" class="md-nav__link">
     <span class="md-ellipsis">
       PHP
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pro
     </span>
   </a>
   
@@ -982,6 +1086,30 @@ documentation of the latest version.
   <a href="#whitelist" class="md-nav__link">
     <span class="md-ellipsis">
       Whitelist
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pro-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pro plugins
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pro plugins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prometheus-exporter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prometheus exporter
     </span>
   </a>
   
@@ -1355,6 +1483,20 @@ documentation of the latest version.
 <td>global</td>
 <td>no</td>
 <td>Enable IPv6 connectivity.</td>
+</tr>
+<tr>
+<td><code>IS_DRAFT</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Internal use : set to yes when the service is in draft mode.</td>
+</tr>
+<tr>
+<td><code>TIMERS_LOG_LEVEL</code></td>
+<td><code>debug</code></td>
+<td>global</td>
+<td>no</td>
+<td>Log level for timers.</td>
 </tr>
 </tbody>
 </table>
@@ -2037,6 +2179,13 @@ documentation of the latest version.
 <td>no</td>
 <td>The database URI, following the sqlalchemy format.</td>
 </tr>
+<tr>
+<td><code>DATABASE_LOG_LEVEL</code></td>
+<td><code>warning</code></td>
+<td>global</td>
+<td>no</td>
+<td>The level to use for database logs.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="dnsbl">DNSBL</h3>
@@ -2413,7 +2562,7 @@ documentation of the latest version.
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.</td>
+<td>Use the staging environment for Letâ€™s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.</td>
 </tr>
 </tbody>
 </table>
@@ -2479,6 +2628,43 @@ documentation of the latest version.
 <td>multisite</td>
 <td>no</td>
 <td>Maximum number of connections per IP when using stream.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="metrics">Metrics</h3>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /></p>
+<p>Metrics collection and retrieve.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_METRICS</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable collection and retrieval of internal metrics.</td>
+</tr>
+<tr>
+<td><code>METRICS_MEMORY_SIZE</code></td>
+<td><code>16m</code></td>
+<td>global</td>
+<td>no</td>
+<td>Size of the internal storage for metrics.</td>
+</tr>
+<tr>
+<td><code>METRICS_MAX_BLOCKED_REQUESTS</code></td>
+<td><code>100</code></td>
+<td>global</td>
+<td>no</td>
+<td>Maximum number of blocked requests to store (per worker).</td>
 </tr>
 </tbody>
 </table>
@@ -2653,6 +2839,13 @@ documentation of the latest version.
 <td>Enable OWASP Core Rule Set.</td>
 </tr>
 <tr>
+<td><code>MODSECURITY_CRS_VERSION</code></td>
+<td><code>3</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Version of the OWASP Core Rule Set to use.</td>
+</tr>
+<tr>
 <td><code>MODSECURITY_SEC_AUDIT_ENGINE</code></td>
 <td><code>RelevantOnly</code></td>
 <td>multisite</td>
@@ -2716,6 +2909,29 @@ documentation of the latest version.
 <td>multisite</td>
 <td>no</td>
 <td>Root folder containing files in the local PHP-FPM instance.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pro">Pro</h3>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
+<p>Pro settings for the Pro version of BunkerWeb.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PRO_LICENSE_KEY</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>The License Key for the Pro version of BunkerWeb.</td>
 </tr>
 </tbody>
 </table>
@@ -2862,6 +3078,13 @@ documentation of the latest version.
 <td>global</td>
 <td>no</td>
 <td>Use SSL/TLS connection with Redis server.</td>
+</tr>
+<tr>
+<td><code>REDIS_SSL_VERIFY</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Verify the certificate of Redis server.</td>
 </tr>
 <tr>
 <td><code>REDIS_TIMEOUT</code></td>
@@ -3123,6 +3346,13 @@ documentation of the latest version.
 <td>multisite</td>
 <td>yes</td>
 <td>Additional configuration to include in the location block, separated with spaces.</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_CUSTOM_HOST</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Override Host header sent to upstream server.</td>
 </tr>
 </tbody>
 </table>
@@ -3395,6 +3625,77 @@ documentation of the latest version.
 </tr>
 </tbody>
 </table>
+<h2 id="pro-plugins">Pro plugins</h2>
+<h3 id="prometheus-exporter">Prometheus exporter</h3>
+<div style="display:flex; align-items:center">
+    <h3 data-custom-header id="prometheus-exporter">Prometheus exporter</h3>
+
+    <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+            viewBox="0 0 48 46"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+        <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+        <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+    </svg>
+</div>
+
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
+<p>Prometheus export for BunkerWeb</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_PROMETHEUS_EXPORTER</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Enable the Prometheus export.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_IP</code></td>
+<td><code>0.0.0.0</code></td>
+<td>global</td>
+<td>no</td>
+<td>Listening IP of the Prometheus exporter.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_PORT</code></td>
+<td><code>9113</code></td>
+<td>global</td>
+<td>no</td>
+<td>Listening port of the Prometheus exporter.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_DICT_SIZE</code></td>
+<td><code>10M</code></td>
+<td>global</td>
+<td>no</td>
+<td>Size of the dict to store Prometheus metrics.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_ALLOW_IP</code></td>
+<td><code>127.0.0.1/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16</code></td>
+<td>global</td>
+<td>no</td>
+<td>List of IP/networks allowed to contact the Prometheus exporter endpoint.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_URL</code></td>
+<td><code>/metrics</code></td>
+<td>global</td>
+<td>no</td>
+<td>HTTP URL of the Prometheus exporter.</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -3491,10 +3792,10 @@ documentation of the latest version.
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

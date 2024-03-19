@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
@@ -24,20 +24,33 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
 
     
     
-<script
-  async
-  defer
-  data-domain="docs.bunkerweb.io"
-  src="https://data.bunkerity.com/js/script.js"
-></script>
-<script defer>
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+
+    <script defer>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
@@ -50,7 +63,80 @@
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
       .setAttribute("aria-label", "Search in documentation");
   } catch (err) {}
-</script>
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        // Try to get dynamic content
+        // Else keep static ones
+        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          defaultContent = res.data[0].data;
+          startBannerLoop();
+        })
+        .catch((e) => {
+          startBannerLoop();
+});
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
 
     
       
@@ -109,14 +195,13 @@
         <aside class="md-banner">
           <div class="md-banner__inner md-grid md-typeset">
             
-             📢 Looking for technical support, tailored
-consulting or custom development for BunkerWeb ? Visit the
-<a
-  href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-  style="color: #3f6ec6; text-decoration: underline"
-  >BunkerWeb Panel</a
->
-for more information on our enterprise offers. 
+            
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
           </div>
           
         </aside>
@@ -127,11 +212,12 @@ for more information on our enterprise offers.
         
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
-               You're not viewing the
-documentation of the latest version.
-<a href="..//latest">
-  <strong>Click here to view latest.</strong>
-</a>
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="..//latest">
+        <strong>Click here to view latest.</strong>
+    </a>
 
             </div>
             <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
@@ -785,7 +871,7 @@ documentation of the latest version.
 <p><strong>Free as in "freedom"</strong> : BunkerWeb is licensed under the free <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPLv3 license</a>, embracing the principles of freedom and openness. Enjoy the freedom to use, modify, and distribute the software, backed by a supportive community.</p>
 </li>
 <li>
-<p><strong>Professional services</strong> : Get technical support, tailored consulting and custom development directly from the maintainers of BunkerWeb. Visit the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> for more information.</p>
+<p><strong>Professional services</strong> : Get technical support, tailored consulting and custom development directly from the maintainers of BunkerWeb. Visit the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">BunkerWeb Panel</a> for more information.</p>
 </li>
 </ul>
 <h2 id="index-security-features">Security features</h2>
@@ -824,9 +910,16 @@ documentation of the latest version.
 
 <p>A demo website protected with BunkerWeb is available at <a href="https://demo.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">demo.bunkerweb.io</a>. Feel free to visit it and perform some security tests.</p>
 <h2 id="index-professional-services">Professional services</h2>
+<h3 id="index-support-panel">Support panel</h3>
 <p>Get the most of BunkerWeb by getting professional services directly from the maintainers of the project. From technical support to tailored consulting and development, we are here to assist you in the security of your web services.</p>
 <p>You will find more information by visiting the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>, our dedicated platform for professional services.</p>
 <p>Don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> if you have any question, we will be more than happy to respond to your needs.</p>
+<h3 id="index-pro-version">Pro version</h3>
+<p>BunkerWeb has a pro version to further improve the security of your applications and make managing them faster and easier (email reporting, more settings options...).</p>
+<p>We have centralised version management and support within the panel for greater ease of use.</p>
+<p>More detailed information about this version can be found <a href="https://www.bunkerweb.io/#services?utm_campaign=self&amp;utm_source=doc">by visiting our website.</a></p>
+<p>If you're interested, upgrade to the pro version in just a few clicks, <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">following the steps here.</a></p>
+<p>Note that in the documentation, it will be mentioned when a feature is for the pro version.</p>
 <h2 id="index-ecosystem-community-and-resources">Ecosystem, community and resources</h2>
 <p>Official websites, tools and resources about BunkerWeb :</p>
 <ul>
@@ -890,6 +983,10 @@ documentation of the latest version.
 <p>The technical details of all BunkerWeb integrations are available in the <a href="#integrations">integrations section</a> of the documentation.</p>
 </div>
 <h2 id="concepts-settings">Settings</h2>
+<div class="admonition tip">
+<p class="admonition-title">Pro settings</p>
+<p>Some plugins are reserved for the <strong>pro version</strong>. <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">Find out more about the pro version here.</a></p>
+</div>
 <p>Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.</p>
 <p>The configuration of BunkerWeb is done by using what we call the "settings" or "variables". Each setting is identified by a name such as <code>AUTO_LETS_ENCRYPT</code> or <code>USE_ANTIBOT</code>. You can assign values to the settings to configure BunkerWeb.</p>
 <p>Here is a dummy example of a BunkerWeb configuration :</p>
@@ -1864,6 +1961,7 @@ chmod -R 770 bw-data</code></p>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Fedora 39</li>
 <li>Red Hat Enterprise Linux (RHEL) 8.9</li>
+<li>Red Hat Enterprise Linux (RHEL) 9.3</li>
 </ul>
 <p>Please ensure that you have <strong>NGINX 1.24.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <p>To simplify the installation process, Linux package repositories for BunkerWeb are available on <a href="https://packagecloud.io/bunkerity/bunkerweb">PackageCloud</a>. They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for <a href="https://packagecloud.io/bunkerity/bunkerweb/install">manual installation</a> instructions if you prefer.</p>
@@ -1883,13 +1981,16 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.24.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">Testing version</p>
-<p>If you use the <code>testing</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
+<p class="admonition-title">Testing/dev version</p>
+<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
 </div>
+<p>Optional step : if you want to automatically enable the <a href="#web-ui-setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
 <p>And finally install BunkerWeb testing :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -1909,13 +2010,16 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.24.0-1~jammy
 </code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">Testing version</p>
-<p>If you use the <code>testing</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
+<p class="admonition-title">Testing/dev version</p>
+<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
 </div>
+<p>Optional step : if you want to automatically enable the <a href="#web-ui-setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
 <p>And finally install BunkerWeb testing :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -1925,12 +2029,15 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <p>Fedora already provides NGINX 1.24.0 that we support :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.24.0
 </code></pre></div>
+<p>Optional step : if you want to automatically enable the <a href="#web-ui-setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
 <p>And finally install BunkerWeb testing :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
 sed<span class="w"> </span><span class="s1">&#39;s/yum install -y pygpgme --disablerepo=&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;bunkerity_bunkerweb&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;/yum install -y python-gnupg/g&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
 sed<span class="w"> </span><span class="s1">&#39;s/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1956,13 +2063,16 @@ gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
 <p>You should now be able to install NGINX 1.24.0 :</p>
-<p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.24.0
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.24.0
 </code></pre></div>
-And finally install BunkerWeb testing :</p>
+<p>Optional step : if you want to automatically enable the <a href="#web-ui-setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
+<p>And finally install BunkerWeb testing :</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1995,6 +2105,7 @@ MY_SETTING_2=value2
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Fedora 39</li>
 <li>Red Hat Enterprise Linux (RHEL) 8.9</li>
+<li>Red Hat Enterprise Linux (RHEL) 9.3</li>
 </ul>
 <p>To simplify the deployment and configuration process, <a href="https://docs.ansible.com/ansible/latest/index.html">Ansible</a> can be used as an IT automation tool. Ansible enables you to configure systems, deploy software, and perform advanced IT tasks such as continuous deployments or zero downtime rolling updates.</p>
 <p>For BunkerWeb, there is a dedicated Ansible role available on <a href="https://galaxy.ansible.com/bunkerity/bunkerweb">Ansible Galaxy</a>.</p>
@@ -2178,8 +2289,7 @@ end
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Going further</p>
-<pre><code>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/examples) of the repository to get real-world examples.
-</code></pre>
+<p>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples folder</a> of the repository to get real-world examples.</p>
 </div>
 <h2 id="quickstart-guide-protect-http-applications">Protect HTTP applications</h2>
 <p>Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb : it will act as a classical <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> with extra security features.</p>
@@ -3087,8 +3197,7 @@ REAL_IP_HEADER=proxy_protocol
 <h2 id="quickstart-guide-protect-udptcp-applications">Protect UDP/TCP applications</h2>
 <div class="admonition warning">
 <p class="admonition-title">Feature is in beta</p>
-<pre><code>This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
-</code></pre>
+<p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
 </div>
 <p>BunkerWeb offers the capability to function as a <strong>generic UDP/TCP reverse proxy</strong>, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the <a href="https://nginx.org/en/docs/stream/ngx_stream_core_module.html">stream module</a> of NGINX.</p>
 <p>It's important to note that not all settings and security features are available when using the stream module. Additional information on this can be found in the <a href="#security-tuning">security tuning</a> and <a href="#settings">settings</a> sections of the documentation.</p>
@@ -4110,8 +4219,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <h2 id="quickstart-guide-ipv6">IPv6</h2>
 <div class="admonition warning">
 <p class="admonition-title">Feature is in beta</p>
-<pre><code>This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
-</code></pre>
+<p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
 </div>
 <p>By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set <code>USE_IPV6=yes</code>. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="quickstart-guide-__tabbed_8_1" name="quickstart-guide-__tabbed_8" type="radio" /><input id="quickstart-guide-__tabbed_8_2" name="quickstart-guide-__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_8_1">Docker</label><label for="quickstart-guide-__tabbed_8_2">Docker autoconf</label></div>
@@ -4189,7 +4297,14 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 </code></pre></div>
 </div>
 </div>
-</div></section><section class="print-page" id="security-tuning"><h1 id="security-tuning-security-tuning">Security tuning</h1>
+</div>
+<h2 id="quickstart-guide-and-now">And now ?</h2>
+<p>This quickstart is just a tiny fraction of the functionality that BunkerWeb has to offer. Be curious and see what else BunkerWeb has to offer.</p>
+<p>You can take a detailed look at the many <a href="#settings">plugins and settings available</a> in this solution.</p>
+<p>Details on the use of certain plugins can also be found on the <a href="#security-tuning">security tuning page.</a></p>
+<p>For simplified use of the solution, don't hesitate to <a href="#web-ui">try out the web UI.</a></p>
+<p>Please note that <strong>BunkerWeb comes in both free and pro versions</strong>, with pro features indicated to avoid confusion.</p>
+<p>If you'd like to find out more about the pro version, and use the solution to the full, <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">visit the panel.</a></p></section><section class="print-page" id="security-tuning"><h1 id="security-tuning-security-tuning">Security tuning</h1>
 <p>BunkerWeb offers many security features that you can configure with <a href="#settings">settings</a>. Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.</p>
 <div class="admonition tip">
 <p class="admonition-title">Other settings</p>
@@ -4536,9 +4651,23 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <td style="text-align: center;"><code>yes</code></td>
 <td style="text-align: left;">When set to <code>yes</code> and <code>USE_MODSECURITY</code> is also set to <code>yes</code>, the OWASP Core Rule Set will be loaded.</td>
 </tr>
+<tr>
+<td style="text-align: center;"><code>MODSECURITY_CRS_VERSION</code></td>
+<td style="text-align: center;"><code>3</code></td>
+<td style="text-align: left;">Version of the OWASP Core Rule Set to use.</td>
+</tr>
 </tbody>
 </table>
-<p>We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).</p>
+<div class="admonition warning">
+<p class="admonition-title">ModSecurity and the OWASP Core Rule Set</p>
+<p><strong>We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled</strong>. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).</p>
+</div>
+<p>You can choose between the following versions of the OWASP Core Rule Set :</p>
+<ul>
+<li><strong>3</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.5">v3.3.5</a> of the OWASP Core Rule Set (<strong><em>default</em></strong>)</li>
+<li><strong>4</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.0.0">v4.0.0</a> of the OWASP Core Rule Set</li>
+</ul>
+<h3 id="security-tuning-custom-configurations">Custom configurations</h3>
 <p>Tuning ModSecurity and the CRS can be done using <a href="#quickstart-guide-custom-configurations">custom configurations</a> :</p>
 <ul>
 <li>modsec-crs : before the OWASP Core Rule Set is loaded</li>
@@ -5365,7 +5494,95 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>List of variables to set from the authentication provider, separated with ; (values of auth_request_set directives).</td>
 </tr>
 </tbody>
-</table></section><section class="print-page" id="settings"><h1 id="settings-settings">Settings</h1>
+</table>
+<h2 id="security-tuning-monitoring-and-reporting">Monitoring and reporting</h2>
+<p>Monitoring and reporting means that you are kept informed of the slightest problem and can react as quickly as possible.</p>
+<h3 id="security-tuning-reporting">Reporting</h3>
+<div style="display:flex; align-items:center">
+
+  <h3 data-custom-header id="security-tuning-reporting">Reporting</h3>
+
+  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+        viewBox="0 0 48 46"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+  </svg>
+</div>
+
+<div class="admonition warning">
+<p class="admonition-title">Used of cache data</p>
+<p>A comparison is made every hour with the cached data. If BunkerWeb no longer has access to the cache, the data to be compared will be reset.</p>
+</div>
+<h4 id="security-tuning-types-of-reporting">Types of reporting</h4>
+<p>Pro reporting plugin gives you two types of reports :</p>
+<ul>
+<li>
+<p><strong>regular report</strong>: you can define a period of time, and you'll get a regular report showing the percentage change in data between the previous report and this one, and also key points about your BunkerWeb state.</p>
+</li>
+<li>
+<p><strong>alerts</strong>: every hour, an analysis of the metrics will be carried out, and you can set a threshold for the percentage change in the data. If this threshold is reached, you will receive an alert.</p>
+</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Example</p>
+<p>After one hour, if I go from 300 requests blocked to more than 600 after one hour : in case I have set a threshold of +100%, I'll be alerted.</p>
+</div>
+<h4 id="security-tuning-get-reporting">Get reporting</h4>
+<p>To receive alerts or regular reports, you can use :</p>
+<p><strong>1) webhook</strong></p>
+<p>We are supporting multiple webhooks :</p>
+<ul>
+<li><strong>API</strong> : we will send a JSON of type <code>{"message" : markdownReport }</code>.</li>
+<li><strong>Discord</strong></li>
+<li><strong>Slack</strong></li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Specific webhook</p>
+<p>We listen to our customers, so if you need to make the plugin compatible with a particular webhook, don't hesitate to contact us to discuss it together.</p>
+</div>
+<p><strong>2) SMTP</strong></p>
+<p>You can also use the SMTP protocol. You will need to set the various parameters (user auth, password auth, host...).</p>
+<p>You need to <strong>pay attention</strong> using SMTP:</p>
+<ul>
+<li>
+<p>Make sure that the address used to send the <strong>message does not end up in the spam folder</strong>.</p>
+</li>
+<li>
+<p>The address used must <strong>not have double authentication</strong> to work.</p>
+</li>
+</ul>
+<h3 id="security-tuning-prometheus-exporter">Prometheus exporter</h3>
+<div style="display:flex; align-items:center">
+
+  <h3 data-custom-header id="security-tuning-prometheus-exporter">Prometheus exporter</h3>
+
+  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+        viewBox="0 0 48 46"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+  </svg>
+</div>
+
+<p>TO DO</p>
+<h3 id="security-tuning-pro-metrics">Pro metrics</h3>
+<div style="display:flex; align-items:center">
+
+  <h3 data-custom-header id="security-tuning-pro-metrics">Pro metrics</h3>
+
+  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+        viewBox="0 0 48 46"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+  </svg>
+</div>
+
+<p>TO DO</p></section><section class="print-page" id="settings"><h1 id="settings-settings">Settings</h1>
 <div class="admonition info">
 <p class="admonition-title">Settings generator tool</p>
 <p>To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at <a href="https://config.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">config.bunkerweb.io</a>.</p>
@@ -5602,6 +5819,20 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>global</td>
 <td>no</td>
 <td>Enable IPv6 connectivity.</td>
+</tr>
+<tr>
+<td><code>IS_DRAFT</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Internal use : set to yes when the service is in draft mode.</td>
+</tr>
+<tr>
+<td><code>TIMERS_LOG_LEVEL</code></td>
+<td><code>debug</code></td>
+<td>global</td>
+<td>no</td>
+<td>Log level for timers.</td>
 </tr>
 </tbody>
 </table>
@@ -6284,6 +6515,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>no</td>
 <td>The database URI, following the sqlalchemy format.</td>
 </tr>
+<tr>
+<td><code>DATABASE_LOG_LEVEL</code></td>
+<td><code>warning</code></td>
+<td>global</td>
+<td>no</td>
+<td>The level to use for database logs.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="settings-dnsbl">DNSBL</h3>
@@ -6660,7 +6898,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.</td>
+<td>Use the staging environment for Letâ€™s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.</td>
 </tr>
 </tbody>
 </table>
@@ -6726,6 +6964,43 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>multisite</td>
 <td>no</td>
 <td>Maximum number of connections per IP when using stream.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="settings-metrics">Metrics</h3>
+<p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /></p>
+<p>Metrics collection and retrieve.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_METRICS</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable collection and retrieval of internal metrics.</td>
+</tr>
+<tr>
+<td><code>METRICS_MEMORY_SIZE</code></td>
+<td><code>16m</code></td>
+<td>global</td>
+<td>no</td>
+<td>Size of the internal storage for metrics.</td>
+</tr>
+<tr>
+<td><code>METRICS_MAX_BLOCKED_REQUESTS</code></td>
+<td><code>100</code></td>
+<td>global</td>
+<td>no</td>
+<td>Maximum number of blocked requests to store (per worker).</td>
 </tr>
 </tbody>
 </table>
@@ -6900,6 +7175,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>Enable OWASP Core Rule Set.</td>
 </tr>
 <tr>
+<td><code>MODSECURITY_CRS_VERSION</code></td>
+<td><code>3</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Version of the OWASP Core Rule Set to use.</td>
+</tr>
+<tr>
 <td><code>MODSECURITY_SEC_AUDIT_ENGINE</code></td>
 <td><code>RelevantOnly</code></td>
 <td>multisite</td>
@@ -6963,6 +7245,29 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>multisite</td>
 <td>no</td>
 <td>Root folder containing files in the local PHP-FPM instance.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="settings-pro">Pro</h3>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
+<p>Pro settings for the Pro version of BunkerWeb.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PRO_LICENSE_KEY</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>The License Key for the Pro version of BunkerWeb.</td>
 </tr>
 </tbody>
 </table>
@@ -7109,6 +7414,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>global</td>
 <td>no</td>
 <td>Use SSL/TLS connection with Redis server.</td>
+</tr>
+<tr>
+<td><code>REDIS_SSL_VERIFY</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Verify the certificate of Redis server.</td>
 </tr>
 <tr>
 <td><code>REDIS_TIMEOUT</code></td>
@@ -7370,6 +7682,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>multisite</td>
 <td>yes</td>
 <td>Additional configuration to include in the location block, separated with spaces.</td>
+</tr>
+<tr>
+<td><code>REVERSE_PROXY_CUSTOM_HOST</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Override Host header sent to upstream server.</td>
 </tr>
 </tbody>
 </table>
@@ -7641,6 +7960,77 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>List of URLs, separated with spaces, containing bad URI to whitelist.</td>
 </tr>
 </tbody>
+</table>
+<h2 id="settings-pro-plugins">Pro plugins</h2>
+<h3 id="settings-prometheus-exporter">Prometheus exporter</h3>
+<div style="display:flex; align-items:center">
+    <h3 data-custom-header id="settings-prometheus-exporter">Prometheus exporter</h3>
+
+    <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
+            viewBox="0 0 48 46"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+        <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+        <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+    </svg>
+</div>
+
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
+<p>Prometheus export for BunkerWeb</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_PROMETHEUS_EXPORTER</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Enable the Prometheus export.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_IP</code></td>
+<td><code>0.0.0.0</code></td>
+<td>global</td>
+<td>no</td>
+<td>Listening IP of the Prometheus exporter.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_PORT</code></td>
+<td><code>9113</code></td>
+<td>global</td>
+<td>no</td>
+<td>Listening port of the Prometheus exporter.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_DICT_SIZE</code></td>
+<td><code>10M</code></td>
+<td>global</td>
+<td>no</td>
+<td>Size of the dict to store Prometheus metrics.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_ALLOW_IP</code></td>
+<td><code>127.0.0.1/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16</code></td>
+<td>global</td>
+<td>no</td>
+<td>List of IP/networks allowed to contact the Prometheus exporter endpoint.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_URL</code></td>
+<td><code>/metrics</code></td>
+<td>global</td>
+<td>no</td>
+<td>HTTP URL of the Prometheus exporter.</td>
+</tr>
+</tbody>
 </table></section><section class="print-page" id="web-ui"><h1 id="web-ui-web-ui">Web UI</h1>
 <h2 id="web-ui-overview">Overview</h2>
 <p align="center">
@@ -7675,7 +8065,10 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <p>The usage of the web UI implies enabling the <a href="#concepts-multisite-mode">multisite mode</a>.</p>
 </div>
 <h2 id="web-ui-setup-wizard">Setup wizard</h2>
+<div class="admonition info">
+<p class="admonition-title">Wizard</p>
 <p>The setup wizard is a feature that helps you to <strong>configure</strong> and <strong>install the web UI</strong> using a <strong>user-friendly interface</strong>. You will need to set the <code>UI_HOST</code> setting (<code>http://hostname-of-web-ui:7000</code>) and browse the <code>/setup</code> URI of your server to access the setup wizard.</p>
+</div>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/ui-wizard-account.webp" width="350" />
   </p>
@@ -7700,6 +8093,10 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Accessing the setup wizard</p>
+<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+</div>
 <p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.5&quot;</span>
 
@@ -7783,6 +8180,10 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </div>
 <div class="tabbed-block">
 <p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Accessing the setup wizard</p>
+<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+</div>
 <p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.5&quot;</span>
 
@@ -7882,6 +8283,10 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </div>
 <div class="tabbed-block">
 <p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Accessing the setup wizard</p>
+<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+</div>
 <p>Here is the stack boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.5&quot;</span>
 
@@ -8004,6 +8409,10 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </div>
 <div class="tabbed-block">
 <p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI SERVICE. For example, if your web UI service is named <code>svc-bunkerweb-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://svc-bunkerweb-ui:7000</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Accessing the setup wizard</p>
+<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+</div>
 <p>Here is the yaml boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
@@ -8011,7 +8420,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span>
 <span class="nt">rules</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;secrets&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;networking.k8s.io&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ingresses&quot;</span><span class="p p-Indicator">]</span>
@@ -8237,6 +8646,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
 <span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
@@ -8312,27 +8722,11 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI SERVICE. Since the web UI is listening on the same machine as BunkerWeb, you will need to set the <code>UI_HOST</code> setting <code>http://127.0.0.1:7000</code>.</p>
-<p>Here is the <code>/etc/bunkerweb/variables.env</code> boilerplate you can use :</p>
-<div class="highlight"><pre><span></span><code>HTTP_PORT=80
-HTTPS_PORT=443
-DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-API_LISTEN_IP=127.0.0.1
-SERVER_NAME=
-MULTISITE=yes
-UI_HOST=http://127.0.0.1:7000
-</code></pre></div>
-<p>The web UI comes as systemd service named <code>bunkerweb-ui</code> which is not enabled by default. If you want to start the web UI when on startup you can run the following command :</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>bunkerweb-ui
-</code></pre></div>
-<p>Create an empty configuration file for the web UI :</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/etc/bunkerweb/ui.env
-chown<span class="w"> </span>nginx:nginx<span class="w"> </span>/etc/bunkerweb/ui.env
-</code></pre></div>
-<p>Don't forget to restart the <code>bunkerweb</code> and <code>bunkerweb-ui</code> services :</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb
-systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-ui
-</code></pre></div>
+<p>If you want to use the setup wizard, you will need to run the following command <code>export UI_WIZARD=1</code> before installing BunkerWeb as described in <a href="#integrations-linux">integrations section</a> of the documentation (this is an optional step).</p>
+<div class="admonition tip">
+<p class="admonition-title">Accessing the setup wizard</p>
+<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+</div>
 </div>
 </div>
 </div>
@@ -8372,7 +8766,7 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-ui
 </ul>
 <div class="admonition info">
 <p class="admonition-title">Secret key refresh</p>
-<p>A new secret key is <strong>generated each time</strong> you visit the page or submit the form. In case something went wrong (e.g. : expired TOTP code), you will need to copy the new secret key to your authenticator app until 2FA is successfuly enabled.</p>
+<p>A new secret key is <strong>generated each time</strong> you visit the page or submit the form. In case something went wrong (e.g. : expired TOTP code), you will need to copy the new secret key to your authenticator app until 2FA is successfully enabled.</p>
 </div>
 <p>Once enabled, 2FA authentication can be disabled at the same place.</p>
 <figure>
@@ -8793,7 +9187,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cr-bunkerweb</span>
 <span class="nt">rules</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;pods&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configmaps&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;secrets&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;networking.k8s.io&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ingresses&quot;</span><span class="p p-Indicator">]</span>
@@ -9016,6 +9410,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-ui</span>
 <span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
@@ -9215,7 +9610,26 @@ www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
 </code></pre></div>
 </div>
 </div>
-</div></section><section class="print-page" id="troubleshooting"><h1 id="troubleshooting-troubleshooting">Troubleshooting</h1>
+</div>
+<h2 id="web-ui-upgrade-to-pro">Upgrade to PRO</h2>
+<p>In case you have buy a (pro version)[https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro] and you already have a BunkerWeb setup with an UI, you can upgrade doing this :</p>
+<ul>
+<li>access the <strong>global config page</strong>.</li>
+<li>click on the <strong>pro plugin</strong></li>
+<li>fill the <strong>setting Pro License Key</strong></li>
+<li><strong>save</strong> your changes</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Download</p>
+<p>The pro version is downloaded in the background by the scheduler. It may take some time before you see the changes to the UI.</p>
+</div>
+<p>If your license key is valid, the upgrade to the pro version will take place automatically in the background.</p>
+<p>You can check the status of your version by going to the <strong>home page</strong>, you will see this in case of success :</p>
+<figure>
+<p><img align="center," alt="Overview" src="../assets/img/pro-home-card.png" width="450" />
+  </p>
+<figcaption>PRO version card</figcaption>
+</figure></section><section class="print-page" id="troubleshooting"><h1 id="troubleshooting-troubleshooting">Troubleshooting</h1>
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb Panel</p>
 <p>If you are unable to resolve your problems, you can <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">contact us directly via our panel</a>. This centralises all requests relating to the BunkerWeb solution.</p>
@@ -9311,6 +9725,8 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 <h2 id="troubleshooting-permissions">Permissions</h2>
 <p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info <a href="#quickstart-guide-custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
+<h2 id="troubleshooting-disable-security-checks">Disable security checks</h2>
+<p>For debugging purposes, you may need to temporarily disable the security checks made by BunkerWeb. One quick way of doing it is by adding everyone in the whitelist (e.g. <code>WHITELIST_IP=0.0.0.0/0</code>).</p>
 <h2 id="troubleshooting-modsecurity">ModSecurity</h2>
 <p>The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :</p>
 <ul>
@@ -9668,9 +10084,32 @@ sqlite&gt;
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>./bw-data/plugins
 </code></pre></div>
-<p>Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :</p>
-<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">101</span>:101<span class="w"> </span>./bw-data
+<div class="admonition warning">
+<p class="admonition-title">Using local folder for persistent data</p>
+<p>The scheduler runs as an <strong>unprivileged user with UID 101 and GID 101</strong> inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+But there is a downside : if you use a <strong>local folder for the persistent data</strong>, you will need to <strong>set the correct permissions</strong> so the unprivileged user can write data to it. Something like that should do the trick :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
+<p>Alternatively, if the folder already exists :</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>If you are using <a href="https://docs.docker.com/engine/security/rootless">Docker in rootless mode</a> or <a href="https://podman.io/">podman</a>, UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>For example, if you have a value of <strong>100000</strong>, the mapped UID/GID will be <strong>100100</strong> (100000 + 100) :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Or if the folder already exists :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+</div>
 <p>Then you can mount the volume when starting your Docker stack :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.5&#39;</span>
 <span class="nt">services</span><span class="p">:</span>
@@ -9827,10 +10266,42 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 </div>
 </div>
 <h2 id="plugins-writing-a-plugin">Writing a plugin</h2>
+<h3 id="plugins-structure">Structure</h3>
 <div class="admonition tip">
 <p class="admonition-title">Existing plugins</p>
 <p>If the documentation is not enough, you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/common/core">core plugins</a> (already included in BunkerWeb but they are plugins, technically speaking).</p>
 </div>
+<p>What a plugin structure looks like :
+<div class="highlight"><pre><span></span><code>plugin /
+        confs / conf_type.conf
+        ui / actions.py
+             template.html
+        plugin.lua
+        plugin.json
+</code></pre></div></p>
+<ul>
+<li>
+<p><strong>conf_type.conf</strong> : add a <a href="#quickstart-guide-custom-configurations">custom NGINX configurations.</a></p>
+</li>
+<li>
+<p><strong>actions.py</strong> : script to execute on flask server.
+This script is running on flask context, you have access to lib and utils like <code>jinja2</code>, <code>requests</code>, etc...</p>
+</li>
+<li>
+<p><strong>template.html</strong> : custom plugin page you can access from ui.</p>
+</li>
+<li>
+<p><strong>plugin.lua</strong> : code to execute on NGINX using <a href="https://github.com/openresty/lua-nginx-module">NGING LUA module.</a></p>
+</li>
+<li>
+<p><strong>plugin.json</strong> : metadata, settings and jobs for your settings.</p>
+</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Optional files</p>
+<p>Files like <code>confs</code> and <code>ui</code> ones are optional. Add them only to fit your needs.</p>
+</div>
+<h3 id="plugins-getting-started">Getting started</h3>
 <p>The first step is to create a folder that will contain the plugin :</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>myplugin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="nb">cd</span><span class="w"> </span>myplugin
@@ -10202,42 +10673,91 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <h3 id="plugins-jobs">Jobs</h3>
 <p>BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named <strong>jobs</strong> and listing them in the <strong>plugin.json</strong> metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.</p>
 <h3 id="plugins-plugin-page">Plugin page</h3>
-<p>Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the <a href="#web-ui">web UI</a>.</p>
-<p>Everything related to the web UI is located inside a subfolder named <strong>ui</strong> at the root directory of your plugin. A template file named <strong>template.html</strong> and located inside the <strong>ui</strong> subfolder contains the client code and logic to display your page. Another file named <strong>actions.py</strong> and also located inside the <strong>ui</strong> subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).</p>
+<p>Everything related to the web UI is located inside the subfolder <strong>ui</strong> as we seen in the <a href="#plugins-structure">previous structure section.</a>.</p>
+<h4 id="plugins-prerequisites">Prerequisites</h4>
+<p>When you want to create a plugin page, you need two files :</p>
+<ul>
+<li>
+<p><strong>template.html</strong> that will be accessible with a <strong>GET /plugins/&lt;<em>plugin_id</em>&gt;</strong>.</p>
+</li>
+<li>
+<p><strong>actions.py</strong> where you can add some scripting and logic with a <strong>POST /plugins/&lt;<em>plugin_id</em>&gt;</strong>. Notice that this file <strong>need a function with the same name as the plugin</strong> to work. This file is needed even if the function is empty.</p>
+</li>
+</ul>
+<h4 id="plugins-basic-example">Basic example</h4>
 <div class="admonition info">
 <p class="admonition-title">Jinja 2 template</p>
 <p>The <strong>template.html</strong> file is a Jinja2 template, please refer to the <a href="https://jinja.palletsprojects.com">Jinja2 documentation</a> if needed.</p>
 </div>
-<p>A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a <strong>actions.py</strong> file in the <strong>ui</strong> folder. Inside the file, <strong>you must define a function that has the same name as the plugin</strong>. This function will be called when the form is submitted. You can then use the <strong>request</strong> object (from the <a href="https://flask.palletsprojects.com">Flask library</a>) to get the values of the form. The form's action must finish with <strong>/plugins/&lt;<em>plugin_id</em>&gt;</strong>. The helper function <code>url_for</code> will generate for you the prefix of the URL : <code>{{ url_for('plugins') }}/plugin_id</code>.</p>
-<p>If you want to display variables generated from your <strong>actions.py</strong> in your template file, you can return a dictionary with variables name as keys and variables value as values. Here is dummy example where we return a single variable :</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">myplugin</span><span class="p">()</span> <span class="p">:</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">}</span>
+<p>We can put aside the <strong>actions.py</strong> file and start <strong>only using the template on a GET situation</strong>. The template can access app context and libs, so you can use Jinja, request or flask utils.</p>
+<p>For example, you can get the request arguments in your template like this :</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>request args : {{ request.args.get() }}.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
 </code></pre></div>
-<p>And we display it in the <strong>template.html</strong> file :
-<div class="highlight"><pre><span></span><code>{% if foo %}
-Content of foo is : {{ foo }}.
-{% endif %}
-</code></pre></div></p>
+<h4 id="plugins-actionspy">Actions.py</h4>
+<div class="admonition warning">
+<p class="admonition-title">CSRF Token</p>
 <p>Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;hidden&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;csrf_token&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;{{ csrf_token() }}&quot;</span> <span class="p">/&gt;</span>
 </code></pre></div></p>
-<p>Retrieving user submitted data is pretty simple, thanks to the request module provided by Flask :</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
-
-<span class="k">def</span> <span class="nf">myplugin</span><span class="p">()</span> <span class="p">:</span>
-    <span class="n">my_form_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s2">&quot;my_form_input&quot;</span><span class="p">]</span>
+</div>
+<p>You can power-up your plugin page with additional scripting with the <strong>actions.py</strong> file when sending a <strong>POST /plugins/&lt;<em>plugin_id</em>&gt;</strong>.</p>
+<p>You have two functions by default in <strong>actions.py</strong> :</p>
+<p><strong>pre_render function</strong></p>
+<p>This allows you to retrieve data when you <strong>GET</strong> the template, and to use the data with the pre_render variable available in Jinja to display content more dynamically.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">pre_render</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="o">&lt;</span><span class="n">pre_render_data</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>BunkerWeb will send you this type of response :</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok|ko&quot;</span><span class="p">,</span> <span class="s2">&quot;code&quot;</span> <span class="p">:</span> <span class="n">XXX</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">pre_render_data</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
+</code></pre></div>
+<p><strong>&lt;<em>plugin_id</em>&gt; function</strong></p>
+<p>This allows you to retrieve data when you make a <strong>POST</strong> from the template endpoint, which must be used in AJAX.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">myplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="o">&lt;</span><span class="n">plugin_id_data</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>BunkerWeb will send you this type of response :</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">plugin_id_data</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
+</code></pre></div>
+<p><strong>What you can access from action.py</strong></p>
+<p>Here are the arguments that are passed and access on action.py functions:</p>
+<div class="highlight"><pre><span></span><code><span class="n">function</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Python libraries</p>
-<p>You can use Python libraries that are already available like :
+<p>In addition, you can use Python libraries that are already available like :
 <code>Flask</code>, <code>Flask-Login</code>, <code>Flask-WTF</code>, <code>beautifulsoup4</code>, <code>docker</code>, <code>Jinja2</code>, <code>python-magic</code> and <code>requests</code>. To see the full list, you can have a look at the Web UI <a href="https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt">requirements.txt</a>. If you need external libraries, you can install them inside the <strong>ui</strong> folder of your plugin and then use the classical <strong>import</strong> directive.</p>
-</div></section><section class="print-page" id="professional-services"><h1 id="professional-services-professional-services">Professional services</h1>
+</div>
+<p><strong>Some examples</strong></p>
+<ul>
+<li>Retrieve form submitted data</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span> <span class="nf">myplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">my_form_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s2">&quot;my_form_input&quot;</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">my_form_value</span>
+</code></pre></div>
+<ul>
+<li>Access app config</li>
+</ul>
+<p><strong>action.py</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span> <span class="nf">pre_render</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;CONFIG&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">methods</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">config</span>
+</code></pre></div></p>
+<p><strong>template</strong>
+<div class="highlight"><pre><span></span><code><span class="cm">&lt;!-- metadata + config --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>{{ pre_render }}<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></p></section><section class="print-page" id="professional-services"><h1 id="professional-services-professional-services">Professional services</h1>
 <h2 id="professional-services-why-should-i-get-professional-services">Why should I get professional services ?</h2>
 <p>Since BunkerWeb is a free (as in freedom) software, you've the right to use it freely as long as you respect the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPLv3 license</a>.</p>
 <p>But dedicating time to a specific technology may not be easy depending on your business priorities. Not mentioning that cybersecurity is complex domain where being both judge and jury is not recommended.</p>
 <p>Getting professional services in addition to the open-source solution is the ideal solution to cover your business needs. You can focus on your top priorities and rely on a trusted partner when it comes to web security.</p>
 <p>Please note that professionnal services are directly offered by <a href="https://www.bunkerity.com/?utm_campaign=self&amp;utm_source=doc">Bunkerity</a>, the company maintaining the BunkerWeb project, through our <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> online platform.</p>
 <h2 id="professional-services-which-professional-services-do-you-offer">Which professional services do you offer ?</h2>
+<h3 id="professional-services-support">Support</h3>
 <p>We offer technical support around the BunkerWeb solution. By using this service, we will assist you on the technical issues (installation, configuration, false positive, ...).</p>
 <p>According to your needs you have the choice between "one time" and subscriptions offers.</p>
 <p>One important thing to note is that the support service is based on "credit" system where you pay for a number of support hours dedicated for you. Time passed on your requests will be deducted to your credit. In other words, you only pay for real time dedicated to your needs.</p>
@@ -10246,21 +10766,37 @@ Content of foo is : {{ foo }}.
 <li>Consulting : a dedicated expert will give you advices on your project</li>
 <li>Development : if you need specific features in BunkerWeb, we can do it for you</li>
 </ul>
+<p><a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">You can check for technical support here.</a></p>
+<h3 id="professional-services-pro-version">Pro version</h3>
+<p>A BunkerWeb pro version is available.</p>
+<p>With this version you'll get a power-up version with more plugins and details settings.</p>
+<p>Any features from pro version are up to date, and we have an active listening on your feedbacks in order to enhance them and fit your needs.</p>
+<p>Switching to the pro version is done centrally via the panel, which is also used for support.</p>
+<p>If you are interested, please <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">visit the dedicated page.</a></p>
 <h2 id="professional-services-how-can-i-get-more-information">How can I get more information ?</h2>
 <p>You will find more information by visiting the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>, our dedicated platform for professional services.</p>
 <p>Don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> if you have any question, we will be more than happy to respond to your needs.</p></section><section class="print-page" id="about"><h1 id="about-about">About</h1>
 <h2 id="about-who-maintains-bunkerweb">Who maintains BunkerWeb ?</h2>
 <p>BunkerWeb is maintained by <a href="https://www.bunkerity.com/?utm_campaign=self&amp;utm_source=doc">Bunkerity</a>, a French 🇫🇷 company specialized in Cybersecurity 🛡️.</p>
 <h2 id="about-do-you-offer-professional-services">Do you offer professional services ?</h2>
-<p>Yes, we offer professional services related to BunkerWeb such as :</p>
+<p>Yes, we offer professional services related to BunkerWeb.</p>
+<p><strong>We have a <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">dedicated panel</a> to centralize all professional requests.</strong></p>
+<p>You can also contact use at <a href="mailto:contact@bunkerity.com">contact@bunkerity.com</a> if you are interested.</p>
+<h3 id="about-support">Support</h3>
+<p>You can get in touch with us about any of the following :</p>
 <ul>
 <li>Consulting</li>
 <li>Support</li>
 <li>Custom development</li>
 <li>Partnership</li>
 </ul>
-<p><strong>We have a <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">dedicated panel</a> to centralize all professional requests.</strong></p>
-<p>You can also contact use at <a href="mailto:contact@bunkerity.com">contact@bunkerity.com</a> if you are interested.</p>
+<h3 id="about-pro-version">Pro version</h3>
+<p>We have a (pro version of BunkerWeb)[https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro], which includes :</p>
+<ul>
+<li>additional features and plugins</li>
+<li>regular updates to improve your experience</li>
+<li>we take your feedback into account to develop the plugins or offer you custom plugins.</li>
+</ul>
 <h2 id="about-where-to-get-community-support">Where to get community support ?</h2>
 <p>To get free community support, you can use the following media :</p>
 <ul>
@@ -10428,10 +10964,10 @@ JvbFAfI3qteepvnjBQ==
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/latest", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    <script id="__config" type="application/json">{"base": "/latest", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
