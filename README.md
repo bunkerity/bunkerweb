@@ -84,13 +84,29 @@ Learn more about the core security features in the [security tuning](https://doc
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=github). Feel free to visit it and perform some security tests.
 
+## PRO version
+
+When using BunkerWeb you have the choice of the version you want to use : open-source or PRO.
+
+Whether it's enhanced security, an enriched user experience, or technical supervision, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs.
+
+Be it in the documentation or the user interface, the PRO features are annotated with a crown <img src="https://docs.bunkerweb.io/1.5.6/assets/img/pro-icon.svg" alt="crow pro icon" height="32px" width="32px"> to distinguish them from those integrated into the open-source version.
+
+You can upgrade from the open-source version to the PRO one easily and at any time you want. The process is pretty straightforward :
+
+- Claim your [free trial on the BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
+- Once connected to the client area, copy your PRO license key
+- Paste your private key into BunkerWeb using the [web UI](https://docs.bunkerweb.io/1.5.6/web-ui/#upgrade-to-pro) or [specific setting](https://docs.bunkerweb.io/1.5.6/settings/#pro)
+
+Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question regarding the PRO version.
+
 ## Professional services
 
-Maximize your BunkerWeb experience by getting professional services directly from the maintainers of the project. Whether you require technical support, personalized consulting, or development services, we stand ready to assist you in fortifying the security of your web services.
+Get the most of BunkerWeb by getting professional services directly from the maintainers of the project. From technical support to tailored consulting and development, we are here to assist you in the security of your web services.
 
-You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=github), our dedicated platform for professional services.
+You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), our dedicated platform for professional services.
 
-Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=github) if you have any question, we will be more than happy to respond to your needs.
+Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question, we will be more than happy to respond to your needs.
 
 ## Ecosystem, community and resources
 

@@ -59,27 +59,29 @@ To delve deeper into the core security features, we invite you to explore the [s
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc). Feel free to visit it and perform some security tests.
 
-## Professional services
+## PRO version
 
-### Support panel
+When using BunkerWeb you have the choice of the version you want to use : open-source or PRO.
+
+Whether it's enhanced security, an enriched user experience, or technical supervision, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs.
+
+Be it in the documentation or the user interface, the PRO features are annotated with a crown <img src="assets/img/pro-icon.svg" alt="crow pro icon" height="32px" width="32px"> to distinguish them from those integrated into the open-source version.
+
+You can upgrade from the open-source version to the PRO one easily and at any time you want. The process is pretty straightforward :
+
+- Claim your [free trial on the BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
+- Once connected to the client area, copy your PRO license key
+- Paste your private key into BunkerWeb using the [web UI](web-ui.md#upgrade-to-pro) or [specific setting](settings.md#pro)
+
+Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question regarding the PRO version.
+
+## Professional services
 
 Get the most of BunkerWeb by getting professional services directly from the maintainers of the project. From technical support to tailored consulting and development, we are here to assist you in the security of your web services.
 
 You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), our dedicated platform for professional services.
 
 Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question, we will be more than happy to respond to your needs.
-
-### Pro version
-
-BunkerWeb has a pro version to further improve the security of your applications and make managing them faster and easier (email reporting, more settings options...).
-
-We have centralised version management and support within the panel for greater ease of use.
-
-More detailed information about this version can be found [by visiting our website.](https://www.bunkerweb.io/#services?utm_campaign=self&utm_source=doc)
-
-If you're interested, upgrade to the pro version in just a few clicks, [following the steps here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
-
-Note that in the documentation, it will be mentioned when a feature is for the pro version.
 
 ## Ecosystem, community and resources
 
