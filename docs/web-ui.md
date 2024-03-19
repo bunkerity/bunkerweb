@@ -733,7 +733,22 @@ You can access the account management page by clicking on `manage account` insid
 !!! info "What is BunkerWeb PRO ?"
     BunkerWeb PRO is an enhanced version of BunkerWeb open-source. Whether it's enhanced security, an enriched user experience, or technical supervision, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs. Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question regarding the PRO version.
 
-TODO : screenshots
+Once you have your PRO license key from the [BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), you can paste it into the PRO section of the account management page.
+
+<figure markdown>
+  ![PRO upgrade](assets/img/pro-ui-upgrade.webp){ align=center, width="550" }
+  <figcaption>Upgrade to PRO from the web UI</figcaption>
+</figure>
+
+!!! warning "Upgrade time"
+    The PRO version is downloaded in the background by the scheduler, it may take some time to upgrade.
+
+When your BunkerWeb instance has upgraded to the PRO version, you will see your license expiration date and the maximum number of services you can protect.
+
+<figure markdown>
+  ![PRO upgrade](assets/img/ui-pro.webp){ align=center, width="550" }
+  <figcaption>PRO license information</figcaption>
+</figure>
 
 ### Username / Password
 
@@ -1701,25 +1716,3 @@ After a successful login/password combination, you will be prompted to enter you
     ```shell
     systemctl restart bunkerweb
     ```
-
-## Upgrade to PRO
-
-In case you have buy a (pro version)[https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro] and you already have a BunkerWeb setup with an UI, you can upgrade doing this :
-
-- access the **global config page**.
-- click on the **pro plugin**
-- fill the **setting Pro License Key**
-- **save** your changes
-
-!!! warning "Download"
-
-    The pro version is downloaded in the background by the scheduler. It may take some time before you see the changes to the UI.
-
-If your license key is valid, the upgrade to the pro version will take place automatically in the background.
-
-You can check the status of your version by going to the **home page**, you will see this in case of success :
-
-<figure markdown>
-  ![Overview](assets/img/pro-home-card.png){ align=center, width="450" }
-  <figcaption>PRO version card</figcaption>
-</figure>
