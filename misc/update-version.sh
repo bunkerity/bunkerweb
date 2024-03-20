@@ -43,3 +43,8 @@ sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/model.py
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" .github/ISSUE_TEMPLATE/bug_report.yml
 # pyproject
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" pyproject.toml
+# Dockerfiles
+sed -i "s@LABEL version.*@LABEL version \"$NEW_VERSION\"@g" src/bw/Dockerfile
+sed -i "s@LABEL version.*@LABEL version \"$NEW_VERSION\"@g" src/scheduler/Dockerfile
+sed -i "s@LABEL version.*@LABEL version \"$NEW_VERSION\"@g" src/ui/Dockerfile
+sed -i "s@LABEL version.*@LABEL version \"$NEW_VERSION\"@g" src/autoconf/Dockerfile

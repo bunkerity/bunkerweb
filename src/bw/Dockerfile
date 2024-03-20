@@ -70,6 +70,10 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 # Fix CVEs
 # There are no CVEs to fix for this image
 
+LABEL maintainer "Bunkerity <contact@bunkerity.com>"
+LABEL version "1.5.6"
+LABEL url "https://www.bunkerweb.io"
+
 EXPOSE 8080/tcp 8443/tcp
 
 USER nginx:nginx
