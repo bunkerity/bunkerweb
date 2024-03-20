@@ -43,7 +43,7 @@
         res = await response.json();
         if (res.reloading === false) {
           clearInterval(reloading);
-          window.location.replace("{{ next }}");
+          window.location.replace("{{ next }}" + (window.location.hash ? window.location.hash : ""));
         }
       }
     }
