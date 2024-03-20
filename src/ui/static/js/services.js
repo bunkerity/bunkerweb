@@ -711,20 +711,68 @@ class Multiple {
         //remove last child
       } catch (err) {}
 
-      //REMOVE BTN
-      try {
-        if (
-          e.target
-            .closest("button")
-            .hasAttribute(`data-${this.prefix}-multiple-delete`)
-        ) {
-          const multContainer = e.target.closest(
-            "[data-services-settings-multiple]",
-          );
-          multContainer.remove();
-        }
-        //remove last child
-      } catch (err) {}
+        //REMOVE BTN
+        try {
+          if (
+            e.target
+              .closest("button")
+              .hasAttribute(`data-${this.prefix}-multiple-delete`)
+          ) {
+            // We are not removing it really, just hiding it and update values to defaut
+            // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
+            const multContainer = e.target.closest(
+              `[data-${this.prefix}-settings-multiple]`,
+            );
+            multContainer.classList.add("hidden-multiple");
+            // get setting container
+            const settings = multContainer.querySelectorAll(
+              `[data-setting-container]`,
+            );
+            settings.forEach((setting) => {
+              // for regular input
+              try {
+                const inps = setting.querySelectorAll("input");
+                inps.forEach((inp) => {
+
+                  // case checkbox
+                  if (inp.getAttribute("type") === "checkbox") {
+                    const defaultVal = inp.getAttribute("data-default") || "";
+                    
+                    if (defaultVal === "yes" && !inp.checked) {
+                      inp.click();
+                    }
+
+                  }
+
+                  // case regular
+                  if (inp.getAttribute("type") !== "checkbox") {
+                    const defaultVal = inp.getAttribute("data-default") || "";
+                    inp.setAttribute("value", defaultVal);
+                    inp.value = defaultVal;
+                  }
+
+                });
+              } catch(e) {
+
+              }
+              // for select
+              try {
+                const selects = setting.querySelectorAll("button[data-setting-select]");
+                selects.forEach((select) => {
+                  const defaultVal = select.getAttribute("data-default") || "";
+                  select.querySelector('data-setting-select-text').setAttribute("data-value", defaultVal);
+                  select.querySelector('data-setting-select-text').textContent = defaultVal;
+                  const dropdown = document.querySelector(`[data-setting-select-dropdown="${select.getAttribute('data-setting-select')}"]`);
+                  dropdown.querySelector(`button[value=${defaultVal}]`).click();
+                });
+              }catch(e) 
+              {
+                
+              }
+            });
+          }
+          //remove last child
+        } catch (err) {}
     });
   }
 
@@ -907,6 +955,15 @@ class Multiple {
       );
     });
 
+    // rename label
+    const labelEls = schemaCtnrClone.querySelectorAll("label");
+    labelEls.forEach((label) => {
+      label.setAttribute(
+        "for",
+        label.getAttribute("for").replace("_SCHEMA", suffix),
+      );
+    });
+    
     //rename popover
     const popoverBtns = schemaCtnrClone.querySelectorAll("[data-popover-btn]");
     popoverBtns.forEach((popoverBtn) => {

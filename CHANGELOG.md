@@ -9,6 +9,7 @@
 - [BUGFIX] Fix Whitelist core plugin missing a check for empty server_name in multisite mode
 - [BUGFIX] Fix Templator missing some common configs
 - [BUGFIX] Database update with external plugins reupload
+- [BUGFIX] UI delete or edit multiple setting
 - [LINUX] Add logrotate support for the logs
 - [UI] New : add bans management page in the web UI
 - [UI] New : add blocked requests page in the web UI
