@@ -41,10 +41,10 @@ class Config:
                 continue
 
             for k in service:
-                key_without_server_name = k.replace(f"{server_name}_", "")
-                if plugins_settings[key_without_server_name]["context"] == "multisite":
-                    if not global_edit or f"{server_name}_{key_without_server_name}" not in conf:
-                        conf[f"{server_name}_{key_without_server_name}"] = service[k]
+                key_without_suffix = k.rsplit("_", 1)[0] if re_search(r"_\d+$", k) else k
+                if plugins_settings[key_without_suffix]["context"] == "multisite":
+                    if not global_edit or f"{server_name}_{k}" not in conf:
+                        conf[f"{server_name}_{k}"] = service[k]
 
             servers.append(server_name)
 
