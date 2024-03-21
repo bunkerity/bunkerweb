@@ -269,7 +269,7 @@ class ConfigsInfo {
 class SetRootOnlyConf {
   constructor() {
     this.init();
-    this.rootOnly = ["server-stream", "server-http", "modsec", "modsec-crs"];
+    this.rootOnly = ["http", "default-http-server", "stream"];
   }
 
   init() {
