@@ -50,6 +50,7 @@ Second, the script loops over each of the parsed structures. Each iteration cons
     * the variable is in an expansion, e.g., as part of the value of a `msg` action: `msg:'Current value of variable: %{tx.foo}`
 * **Check rule tags** - only tags listed in `util/APPROVED_TAGS` may be used as tags in rules
     * to use a new tag on a rule, it **must** first be registered in the util/APPROVED_TAGS file
+* **Check t:lowercase and (?i) flag** - No combination of t:lowercase and (?i) should appear in the same rule.
 
 Finally, the script prints a report of all unused TX variables. Usually, unused TX variables occur when a rule creates a TX variable (e.g., `setvar:tx.foo=1`) but the value of the variable is never used anywhere else. This will only be revealed after the script has checked all rules.
 
@@ -416,3 +417,39 @@ SecRule ARGS "@rx ^.*$" \
 In this rule file, there are more problems:
 * rule 1001 used an uninitialized variable (`TX:foo`)
 * rule 1002 sets a TX variable which never used
+
+### Test 10 - combination of t:lowercase and (?i) in the same rule
+
+
+```
+SecRule ARGS "@rx (?i)foo" \
+    "id:1,\
+    phase:1,\
+    pass,\
+    t:lowercase,\
+    nolog"
+```
+
+Rule 1 uses a combination of t:lowercase and the (?i) in the regex
+
+```
+./rules-check.py -r examples/test10.conf
+Config file: examples/test10.conf
+ Parsing ok.
+Checking parsed rules...
+examples/test10.conf
+ Ignore case check ok.
+ Action order check ok.
+ Indentation check ok.
+ no 'ctl:auditLogParts' action found.
+ no duplicate id's
+ paranoia-level tags are correct.
+ PL anomaly_scores are correct.
+ All TX variables are set.
+ No new tags added.
+ There are one or more combinations of t:lowercase and (?i) flag.
+  file=examples/test10.conf, line=5, endLine=5, title=t:lowercase and (?i): rule uses (?i) in combination with t:lowercase: 'lowercase'; rule id: 1
+End of checking parsed rules
+Cumulated report about unused TX variables
+ No unused TX variable
+```

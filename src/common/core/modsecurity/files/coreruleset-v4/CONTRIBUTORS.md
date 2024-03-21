@@ -3,26 +3,30 @@
 ## Project Co-Leads:
 
 - [Christian Folini](https://github.com/dune73)
-- [Walter Hop](https://github.com/lifeforms)
 - [Felipe Zipitría](https://github.com/fzipi)
 
 ## Developers:
 
-- [Paul Beckett](https://github.com/53cur3M3)
 - [Franziska Bühler](https://github.com/franbuehler)
-- [Christoph Hansen](https://github.com/emphazer)
+- [Esad Cetiner](https://github.com/esadcetiner)
 - [Ervin Hegedus](https://github.com/airween)
 - [Andrew Howe](https://github.com/RedXanadu)
 - [Karel Knibbe](https://github.com/karelorigin)
 - [Max Leske](https://github.com/theseion)
-- [Andrea Menin](https://github.com/theMiddleBlue)
 - [Matteo Pace](https://github.com/M4tteoP)
 - [Jitendra Patro](https://github.com/Xhoenix)
+- [Jozef Sudolský](https://github.com/azurit)
+
+## Former and Inactive Developers:
+
+- [Paul Beckett](https://github.com/53cur3M3)
+- [Christoph Hansen](https://github.com/emphazer)
+- [Walter Hop](https://github.com/lifeforms) †
+- [Manuel Leos Rivas](https://github.com/spartantri)
+- [Andrea Menin](https://github.com/theMiddleBlue)
 - [Chaim Sanders](https://github.com/csanders-git)
 - [Federico G. Schwindt](https://github.com/fgsch)
-- [Manuel Leos Rivas](https://github.com/spartantri)
 - [Simon Studer](https://github.com/studersi)
-- [Jozef Sudolský](https://github.com/azurit)
 
 ## Contributors:
 
@@ -36,7 +40,6 @@
 - [Peter Bittner](https://github.com/bittner)
 - [Allan Boll](https://github.com/allanbomsft)
 - [Jeremy Brown](https://github.com/jwbrown77)
-- [Esad Cetiner](https://github.com/esadcetiner/)
 - [Brent Clark](https://github.com/brentclark)
 - [Jonathan Claudius](https://github.com/claudijd)
 - [coolt](https://github.com/coolt)
@@ -141,3 +144,5 @@
 - [ThanhPT](https://github.com/thanhpt1708)
 - [Vandan Rohatgi](https://github.com/vandanrohatgi)
 - [NiceYouKnow](https://github.com/NiceYouKnow)
+- [floyd](https://github.com/floyd)
+- [superlgn](https://github.com/superlgn)

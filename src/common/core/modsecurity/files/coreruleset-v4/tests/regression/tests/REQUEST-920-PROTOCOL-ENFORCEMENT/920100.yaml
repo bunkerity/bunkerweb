@@ -87,7 +87,7 @@ tests:
               Host: "localhost"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
-            uri: "www.cnn.com"
+            uri: "www.coreruleset.org"
             version: "HTTP/1.1"
           output:
             status: [400]
@@ -104,7 +104,7 @@ tests:
               Host: "localhost"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
-            uri: "www.cnn.com:80"
+            uri: "www.coreruleset.org:80"
             version: "HTTP/1.1"
           output:
             no_log_contains: "id \"920100\""

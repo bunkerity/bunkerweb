@@ -79,6 +79,7 @@ class Check(object):
         self.dupes          = []    # list of duplicated id's
         self.ids            = {}    # list of rule id's
         self.newtags        = []    # list of new, unlisted tags
+        self.ignorecase     = []    # list of combinations of t:lowercase and (?i)
 
         self.re_tx_var      = re.compile("%\{\}")
 
@@ -601,6 +602,30 @@ class Check(object):
                             })
                     aidx += 1
 
+    def check_lowercase_ignorecase(self):
+        ruleid = 0 
+        for d in self.data:
+            if d['type'].lower() == "secrule":
+                if d['operator'] == "@rx":
+                    regex = d['operator_argument']
+                    if regex.startswith("(?i)"):
+                        if "actions" in d:
+                            aidx = 0        # stores the index of current action
+                            while aidx < len(d['actions']):
+                                # read the action into 'a'
+                                a = d['actions'][aidx]               
+                                if a['act_name'] == "id":
+                                    ruleid = int(a['act_arg'])
+                                if a['act_name'] == 't':
+                                    # check the transform is valid
+                                    if a['act_arg'].lower() == "lowercase":
+                                        self.ignorecase.append({
+                                            'ruleid' : ruleid,
+                                            'line'   : a['lineno'],
+                                            'endLine': a['lineno'],
+                                            'message': "rule uses (?i) in combination with t:lowercase: '%s'; rule id: %d" % (a['act_arg'], ruleid)
+                            })
+                                aidx += 1
 
 def remove_comments(data):
     """
@@ -924,6 +949,19 @@ if __name__ == "__main__":
                 a['title']  = "new unlisted tag"
                 errmsgf(a)
                 retval = 1
+        ### check for t:lowercase in combination with (?i) in regex       
+        c.check_lowercase_ignorecase()
+        if len(c.ignorecase) == 0:
+            msg(" No t:lowercase and (?i) flag used.")
+        else:
+            errmsg(" There are one or more combinations of t:lowercase and (?i) flag.")
+            for a in c.ignorecase:
+                a['indent'] = 2
+                a['file']   = f
+                a['title']  = "t:lowercase and (?i)"
+                errmsgf(a)
+                retval = 1
+
     msg("End of checking parsed rules")
     msg("Cumulated report about unused TX variables")
     has_unused = False
@@ -943,3 +981,4 @@ if __name__ == "__main__":
         msg(" No unused TX variable")
 
     sys.exit(retval)
+

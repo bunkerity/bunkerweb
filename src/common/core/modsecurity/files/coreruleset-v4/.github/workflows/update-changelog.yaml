@@ -1,18 +1,24 @@
 name: Create changelog PRs
+
+# default token permissions: none
+permissions: {}
+
 on:
   schedule:
     - cron: '0 2 * * *' # run at 2 AM UTC
 
 jobs:
   create-changelog-prs:
-    name:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
 
       - name: Set up Python 3
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: 3.12
 

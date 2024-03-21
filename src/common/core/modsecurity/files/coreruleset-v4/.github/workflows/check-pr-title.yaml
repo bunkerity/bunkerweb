@@ -1,4 +1,8 @@
 name: Check PR title
+
+# default token permissions: none
+permissions: {}
+
 on:
   pull_request_target:
     types:
@@ -8,9 +12,12 @@ on:
       - synchronize
 
 jobs:
-  check-pr-title:
+  main:
+    name: Validate PR title
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     steps:
-      - uses: aslafy-z/conventional-pr-title-action@v3
+      - uses: amannn/action-semantic-pull-request@e9fabac35e210fea40ca5b14c0da95a099eff26f # v5.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

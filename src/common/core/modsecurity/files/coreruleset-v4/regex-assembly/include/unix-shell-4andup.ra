@@ -83,7 +83,7 @@ adduser
 agetty
 alias@
 alpine@
-ansible-playbook
+ansible
 apt-get
 aptitude@
 arch@
@@ -136,6 +136,8 @@ check_memory
 check_raid
 check_ssl_cert
 check_statusfile
+chef@
+chef-
 chflags
 chgpasswd
 chgrp
@@ -160,7 +162,7 @@ cpan
 cpio
 cpulimit
 crash@
-cron
+cron@
 crontab
 csplit
 csvtool

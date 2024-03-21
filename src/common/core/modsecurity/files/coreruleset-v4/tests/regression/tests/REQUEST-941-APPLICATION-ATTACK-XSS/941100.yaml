@@ -61,7 +61,7 @@ tests:
             uri: /
             headers:
               User-Agent: "OWASP CRS test agent"
-              Referer: http://www.cnn.com
+              Referer: http://www.coreruleset.org
               Host: localhost
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
