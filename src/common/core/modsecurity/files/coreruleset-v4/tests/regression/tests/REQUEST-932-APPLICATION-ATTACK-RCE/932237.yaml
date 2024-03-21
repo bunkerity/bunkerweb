@@ -285,3 +285,227 @@ tests:
             protocol: "http"
           output:
             log_contains: "id \"932237\""
+  - test_title: 932237-19
+    desc: "Block ad-hoc ansible commands"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible all -m ping"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-20
+    desc: "Block ansible config dump command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-config dump"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-21
+    desc: "Block installing collections from ansible galaxy"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-galaxy collection install community.general"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-22
+    desc: "Block ad-hoc ansible commands using ansible-console"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "code=ansible-console"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-23
+    desc: "Block ansible-doc command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-doc plugin ping"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-24
+    desc: "Block dumping ansible inventory file and variables"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-inventory --list"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-25
+    desc: "Block ansible pull from remote repository"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-pull --url example.com"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-26
+    desc: "Block decrypting ansible secrets"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-vault decrypt secret"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-27
+    desc: "Block execution of ansible playbooks"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-playbook site.yml"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-28
+    desc: "Block decryption of secrets with chef-vault"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef-vault -i secret"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-29
+    desc: "Block execution of chef-shell command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef-shell"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-30
+    desc: "Block execution chef recipie book"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef-run all recipie.rb"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-31
+    desc: "Block execution chef recipie book against a specific node"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef-client -t 1.1.1.1"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-32
+    desc: "Block execution chef command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef report nodes"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"

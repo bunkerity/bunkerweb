@@ -43,7 +43,7 @@ bin/adduser
 bin/agetty
 bin/alias
 bin/alpine
-bin/ansible-playbook
+bin/ansible
 bin/apt
 bin/apt-get
 bin/aptitude
@@ -110,6 +110,7 @@ bin/check_memory
 bin/check_raid
 bin/check_ssl_cert
 bin/check_statusfile
+bin/chef
 bin/chflags
 bin/chgrp
 bin/chmod

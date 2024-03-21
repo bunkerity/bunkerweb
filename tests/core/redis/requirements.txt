@@ -365,9 +365,9 @@ starlette==0.36.3 \
     --hash=sha256:13d429aa93a61dc40bf503e8c801db1f1bca3dc706b10ef2434a36123568f044 \
     --hash=sha256:90a671733cfb35771d8cc605e0b679d23b992f8dcfad48cc60b38cb29aeb7080
     # via fastapi
-trio==0.24.0 \
-    --hash=sha256:c3bd3a4e3e3025cd9a2241eae75637c43fe0b9e88b4c97b9161a55b9e54cd72c \
-    --hash=sha256:ffa09a74a6bf81b84f8613909fb0beaee84757450183a7a2e0b47b455c0cac5d
+trio==0.25.0 \
+    --hash=sha256:9b41f5993ad2c0e5f62d0acca320ec657fdb6b2a2c22b8c7aed6caf154475c4e \
+    --hash=sha256:e6458efe29cc543e557a91e614e2b51710eba2961669329ce9c862d50c6e8e81
     # via
     #   selenium
     #   trio-websocket
@@ -391,9 +391,9 @@ urllib3==2.2.1 \
     # via
     #   requests
     #   selenium
-uvicorn==0.28.0 \
-    --hash=sha256:6623abbbe6176204a4226e67607b4d52cc60ff62cda0ff177613645cefa2ece1 \
-    --hash=sha256:cab4473b5d1eaeb5a0f6375ac4bc85007ffc75c3cc1768816d9e5d589857b067
+uvicorn==0.29.0 \
+    --hash=sha256:2c2aac7ff4f4365c206fd773a39bf4ebd1047c238f8b8268ad996829323473de \
+    --hash=sha256:6a69214c0b6a087462412670b3ef21224fa48cae0e452b5883e8e8bdfdd11dd0
     # via -r requirements.in
 uvloop==0.19.0 \
     --hash=sha256:0246f4fd1bf2bf702e06b0d45ee91677ee5c31242f39aab4ea6fe0c51aedd0fd \

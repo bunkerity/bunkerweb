@@ -58,14 +58,21 @@ class ConfigFiles:
             if files or (dirs and basename(root) not in root_dirs):
                 path_exploded = root.split("/")
                 for file in files:
+                    # root_dirs is index 4 on path exploded
+                    # in case this is a service config, index 5 is the service id and index 6 is the config name
+                    # else index 5 is the config name
+                    service_id = path_exploded[5] if len(path_exploded) >= 6 else None
+                    root_dir = path_exploded[4]
+                    path_result = (service_id, root_dir, file.replace(".conf", ""))
                     with open(join(root, file), "r", encoding="utf-8") as f:
                         custom_configs.append(
                             {
                                 "value": f.read(),
-                                "exploded": (path_exploded.pop() if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", "")),
+                                "exploded": path_result,
                             }
                         )
 
+        print("custom config", custom_configs, flush=True)
         err = self.__db.save_custom_configs(custom_configs, "ui", changed=check_changes)
         if err:
             self.__logger.error(f"Could not save custom configs: {err}")

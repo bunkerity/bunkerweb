@@ -63,7 +63,7 @@ A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](http
 
 When using BunkerWeb you have the choice of the version you want to use : open-source or PRO.
 
-Whether it's enhanced security, an enriched user experience, or technical supervision, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs.
+Whether it's enhanced security, an enriched user experience, or technical monitoring, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs.
 
 Be it in the documentation or the user interface, the PRO features are annotated with a crown <img src="assets/img/pro-icon.svg" alt="crow pro icon" height="32px" width="32px"> to distinguish them from those integrated into the open-source version.
 

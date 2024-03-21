@@ -1030,7 +1030,7 @@ def global_config():
         for variable, value in variables.copy().items():
             for service in services:
                 setting = config.get(f"{service}_{variable}", None)
-                if setting and setting["global"] and value != setting["value"]:
+                if setting and setting["global"] and (setting["value"] != value or setting["value"] == config.get(variable, {"value": None})["value"]):
                     variables[f"{service}_{variable}"] = value
 
         # Reload instances

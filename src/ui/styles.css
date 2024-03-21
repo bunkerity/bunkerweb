@@ -106,6 +106,10 @@
 .popover-settings-svg-multiple {
   @apply cursor-pointer fill-orange-500 dark:stroke-gray-500 stroke-gray-700 h-5.5 w-5.5 ml-2 hover:brightness-75;
 }
+
+.hidden-multiple {
+  @apply !hidden;
+}
 /*--------------------------------------------*/
 /*---------------END SETTINGS_PLUGINS---------*/
 /*---------------------------------------------*/

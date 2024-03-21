@@ -34,12 +34,13 @@ from JobScheduler import JobScheduler
 
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
-HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy")
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
-SCHEDULER_TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.env")
-SCHEDULER_TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
+TMP_PATH = Path(sep, "var", "tmp", "bunkerweb")
+TMP_PATH.mkdir(parents=True, exist_ok=True)
+HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
+SCHEDULER_TMP_ENV_PATH = TMP_PATH.joinpath("scheduler.env")
 SCHEDULER_TMP_ENV_PATH.touch()
 logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
 
@@ -138,15 +139,14 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
         for plugin in plugins:
             try:
                 if plugin["data"]:
-                    tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
-                    tmp_path.parent.mkdir(parents=True, exist_ok=True)
+                    tmp_path = TMP_PATH.joinpath(f"{plugin['id']}_{plugin['name']}.tar.gz")
                     tmp_path.write_bytes(plugin["data"])
                     with tar_open(str(tmp_path), "r:gz") as tar:
                         try:
                             tar.extractall(original_path, filter="fully_trusted")
                         except TypeError:
                             tar.extractall(original_path)
-                    tmp_path.unlink()
+                    tmp_path.unlink(missing_ok=True)
 
                     for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
                         st = Path(job_file).stat()

@@ -4,7 +4,7 @@ Flask==3.0.2
 Flask-Login==0.6.3
 Flask_WTF==1.2.1
 gunicorn[gthread]==21.2.0
-importlib-metadata==7.0.2
+importlib-metadata==7.1.0
 pyotp==2.9.0
 python-magic==0.4.27
 python_dateutil==2.9.0.post0

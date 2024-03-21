@@ -302,27 +302,25 @@ The first step is to install the plugin by putting the plugin files inside the c
 What a plugin structure looks like :
 ```
 plugin /
-        confs / conf_type.conf
+        confs / conf_type / conf_name.conf
         ui / actions.py
              template.html
+        jobs / my-job.py
         plugin.lua
         plugin.json
 ```
 
-- **conf_type.conf** : add a [custom NGINX configurations.](quickstart-guide.md#custom-configurations)
+- **conf_name.conf** : add [custom NGINX configurations](quickstart-guide.md#custom-configurations) (as jinja2 templates)
 
-- **actions.py** : script to execute on flask server.
-This script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
+- **actions.py** : script to execute on flask server, this script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
 
-- **template.html** : custom plugin page you can access from ui.
+- **template.html** : custom plugin page you can access from ui
 
-- **plugin.lua** : code to execute on NGINX using [NGING LUA module.](https://github.com/openresty/lua-nginx-module)
+- **jobs py file** : custom python files executed as jobs by the scheduler
 
-- **plugin.json** : metadata, settings and jobs for your settings.
+- **plugin.lua** : code to execute on NGINX using [NGINX LUA module](https://github.com/openresty/lua-nginx-module)
 
-!!! info "Optional files"
-
-    Files like `confs` and `ui` ones are optional. Add them only to fit your needs.
+- **plugin.json** : metadata, settings and jobs for your settings
 
 ### Getting started
 
@@ -401,7 +399,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream` and `server-stream`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec` and `modsec-crs`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
@@ -431,8 +429,8 @@ local utils     = require "bunkerweb.utils"
 local myplugin = class("myplugin", plugin)
 
 
-function myplugin:initialize()
-    plugin.initialize(self, "myplugin")
+function myplugin:initialize(ctx)
+    plugin.initialize(self, "myplugin", ctx)
     self.dummy = "dummy"
 end
 

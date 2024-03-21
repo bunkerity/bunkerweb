@@ -797,6 +797,7 @@ class Database:
                                 db_ids[server_name] = {"method": method, "is_draft": server_name in drafts}
 
                             key = key.replace(f"{server_name}_", "")
+                            original_key = original_key.replace(f"{server_name}_", "")
                             setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
 
                             if not setting:
@@ -814,7 +815,9 @@ class Database:
                             )
 
                             if not service_setting:
-                                if key != "SERVER_NAME" and ((key not in config and value == setting.default) or (key in config and value == config[key])):
+                                if key != "SERVER_NAME" and (
+                                    (original_key not in config and value == setting.default) or (original_key in config and value == config[original_key])
+                                ):
                                     continue
 
                                 to_put.append(
@@ -827,7 +830,9 @@ class Database:
                                     )
                                 )
                             elif method in (service_setting.method, "autoconf") and service_setting.value != value:
-                                if key != "SERVER_NAME" and ((key not in config and value == setting.default) or (key in config and value == config[key])):
+                                if key != "SERVER_NAME" and (
+                                    (original_key not in config and value == setting.default) or (original_key in config and value == config[original_key])
+                                ):
                                     session.query(Services_settings).filter(
                                         Services_settings.service_id == server_name,
                                         Services_settings.setting_id == key,

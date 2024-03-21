@@ -4,15 +4,15 @@
 
 Since BunkerWeb is a free (as in freedom) software, you've the right to use it freely as long as you respect the [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.en.html).
 
+You can also upgrade BunkerWeb to the PRO version at any time. By doing so, you will get an enhanced experience to assist you in the security of your web services. Our goal is to help you focus on your business needs. The PRO version is updated regularly and we try our best to gather feedbacks from enterprises to include the needed features.
+
 But dedicating time to a specific technology may not be easy depending on your business priorities. Not mentioning that cybersecurity is complex domain where being both judge and jury is not recommended.
 
-Getting professional services in addition to the open-source solution is the ideal solution to cover your business needs. You can focus on your top priorities and rely on a trusted partner when it comes to web security.
+Getting professional services in addition to the open-source or PRO version is the ideal solution to cover your business needs. You can focus on your top priorities and rely on a trusted partner when it comes to web security.
 
 Please note that professionnal services are directly offered by [Bunkerity](https://www.bunkerity.com/?utm_campaign=self&utm_source=doc), the company maintaining the BunkerWeb project, through our [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) online platform.
 
 ## Which professional services do you offer ?
-
-### Support
 
 We offer technical support around the BunkerWeb solution. By using this service, we will assist you on the technical issues (installation, configuration, false positive, ...).
 
@@ -24,20 +24,6 @@ In addition to the support service, we also offer custom services around the Bun
 
 - Consulting : a dedicated expert will give you advices on your project
 - Development : if you need specific features in BunkerWeb, we can do it for you
-
-[You can check for technical support here.](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)
-
-### Pro version
-
-A BunkerWeb pro version is available.
-
-With this version you'll get a power-up version with more plugins and details settings.
-
-Any features from pro version are up to date, and we have an active listening on your feedbacks in order to enhance them and fit your needs.
-
-Switching to the pro version is done centrally via the panel, which is also used for support.
-
-If you are interested, please [visit the dedicated page.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
 
 ## How can I get more information ?
 

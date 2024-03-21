@@ -54,7 +54,7 @@ tests:
               Proxy-Connection: "Keep-Alive"
               # Test needs a missing 'Accept' header
             method: "CONNECT"
-            uri: "www.cnn.com:80"
+            uri: "www.coreruleset.org:80"
             version: "HTTP/1.1"
           output:
             no_log_contains: "id \"920300\""

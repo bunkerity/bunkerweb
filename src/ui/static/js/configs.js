@@ -265,6 +265,33 @@ class ConfigsInfo {
   }
 }
 
+// some configs are root only
+class SetRootOnlyConf {
+  constructor() {
+    this.init();
+    this.rootOnly = ["http", "default-http-server", "stream"];
+  }
+
+  init() {
+    window.addEventListener("DOMContentLoaded", () => {
+      //  remove server when config if root only
+      const itemsToRemove = [];
+      for (let i = 0; i < this.rootOnly.length; i++) {
+        const rootName = this.rootOnly[i];
+        itemsToRemove.push(
+          ...document.querySelectorAll(
+            `[data-path^="/etc/bunkerweb/configs/${rootName}"][data-_type="folder"][data-level="2"]`,
+          ),
+        );
+      }
+      console.log(itemsToRemove);
+      itemsToRemove.forEach((item) => {
+        item.remove();
+      });
+    });
+  }
+}
+
 const setConfigsInfo = new ConfigsInfo();
 const setModal = new FolderModal("configs");
 const setEditor = new FolderEditor();
@@ -272,3 +299,4 @@ const setFolderNav = new FolderNav("configs");
 const setDropdown = new FolderDropdown("configs");
 const setFilterDropdown = new Dropdown("configs");
 const setFilter = new Filter();
+const setRootOnlyConf = new SetRootOnlyConf();

@@ -9,6 +9,7 @@
 - [BUGFIX] Fix Whitelist core plugin missing a check for empty server_name in multisite mode
 - [BUGFIX] Fix Templator missing some common configs
 - [BUGFIX] Database update with external plugins reupload
+- [BUGFIX] UI delete or edit multiple setting
 - [LINUX] Add logrotate support for the logs
 - [UI] New : add bans management page in the web UI
 - [UI] New : add blocked requests page in the web UI
@@ -22,7 +23,7 @@
 - [UI] Service page : add the possibility to clone a service in the web UI
 - [UI] Service page : add the possibility to set a service as draft in the web UI
 - [UI] Service page : add services filter when at least 4 services
-- [UI] Configs page : add path filtering related to config presence
+- [UI] Configs page : add path filtering related to config presence, remove service when config is root only
 - [UI] Pro license : add home card, show pro plugins on menu and plugins page, resume in account page, alert in case issue with license usage
 - [UI] Log page : enhance UX
 - [FEATURE] Add setting REDIS_SSL_VERIFY to activate/disable the SSL certificate verification when using Redis
@@ -58,7 +59,7 @@
 - [DEPS] Updated zlib version to v1.3.1
 - [DEPS] Updated ModSecurity version to v3.0.12
 - [DEPS] Updated coreruleset version to v3.3.5
-- [DEPS] Added coreruleset version v4.0.0
+- [DEPS] Added coreruleset version v4.1.0
 - [DEPS] Updated lua-resty-mlcache version to v2.7.0
 - [DEPS] Updated lua-resty-openssl version to v1.2.1
 - [DEPS] Updated lua-resty-http version to v0.17.2
