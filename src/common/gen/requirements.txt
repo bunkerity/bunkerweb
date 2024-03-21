@@ -114,9 +114,9 @@ docker==7.0.0 \
     --hash=sha256:12ba681f2777a0ad28ffbcc846a69c31b4dfd9752b47eb425a274ee269c5e14b \
     --hash=sha256:323736fb92cd9418fc5e7133bc953e11a9da04f4483f828b527db553f1e7e5a3
     # via -r requirements.in
-google-auth==2.28.2 \
-    --hash=sha256:80b8b4969aa9ed5938c7828308f20f035bc79f9d8fb8120bf9dc8db20b41ba30 \
-    --hash=sha256:9fd67bbcd40f16d9d42f950228e9cf02a2ded4ae49198b27432d0cded5a74c38
+google-auth==2.29.0 \
+    --hash=sha256:672dff332d073227550ffc7457868ac4218d6c500b155fe6cc17d2b13602c360 \
+    --hash=sha256:d452ad095688cd52bae0ad6fafe027f6a6d6f560e810fec20914e17a09526415
     # via kubernetes
 idna==3.6 \
     --hash=sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca \

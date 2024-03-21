@@ -200,16 +200,16 @@ idna==3.6 \
     --hash=sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca \
     --hash=sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
     # via requests
-importlib-metadata==7.0.2 \
-    --hash=sha256:198f568f3230878cb1b44fbd7975f87906c22336dba2e4a7f05278c281fbd792 \
-    --hash=sha256:f4bc4c0c070c490abf4ce96d715f68e95923320370efb66143df00199bb6c100
+importlib-metadata==7.1.0 \
+    --hash=sha256:30962b96c0c223483ed6cc7280e7f0199feb01a0e40cfae4d4450fc6fab1f570 \
+    --hash=sha256:b78938b926ee8d5f020fc4772d487045805a55ddbad2ecf21c6d60938dc7fcd2
     # via
     #   markdown
     #   mike
     #   mkdocs
-importlib-resources==6.3.0 \
-    --hash=sha256:166072a97e86917a9025876f34286f549b9caf1d10b35a1b372bffa1600c6569 \
-    --hash=sha256:783407aa1cd05550e3aa123e8f7cfaebee35ffa9cb0242919e2d1e4172222705
+importlib-resources==6.4.0 \
+    --hash=sha256:50d10f043df931902d4194ea07ec57960f66a80449ff867bfe782b4c486ba78c \
+    --hash=sha256:cdb2b453b8046ca4e3798eb1d84f3cce1446a0e8e7b5ef4efb600f19fc398145
     # via mike
 jinja2==3.1.3 \
     --hash=sha256:7d6d50dd97d52cbc355597bd845fabfbac3f551e1f99619e39a35ce8c370b5fa \
@@ -311,9 +311,9 @@ mkdocs==1.5.3 \
     #   -r requirements.in
     #   mike
     #   mkdocs-material
-mkdocs-material==9.5.13 \
-    --hash=sha256:5cbe17fee4e3b4980c8420a04cc762d8dc052ef1e10532abd4fce88e5ea9ce6a \
-    --hash=sha256:d8e4caae576312a88fd2609b81cf43d233cdbe36860d67a68702b018b425bd87
+mkdocs-material==9.5.14 \
+    --hash=sha256:2a1f8e67cda2587ab93ecea9ba42d0ca61d1d7b5fad8cf690eeaeb39dcd4b9af \
+    --hash=sha256:a45244ac221fda46ecf8337f00ec0e5cb5348ab9ffb203ca2a0c313b0d4dbc27
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
