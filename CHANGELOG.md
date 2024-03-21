@@ -59,7 +59,7 @@
 - [DEPS] Updated zlib version to v1.3.1
 - [DEPS] Updated ModSecurity version to v3.0.12
 - [DEPS] Updated coreruleset version to v3.3.5
-- [DEPS] Added coreruleset version v4.0.0
+- [DEPS] Added coreruleset version v4.1.0
 - [DEPS] Updated lua-resty-mlcache version to v2.7.0
 - [DEPS] Updated lua-resty-openssl version to v1.2.1
 - [DEPS] Updated lua-resty-http version to v0.17.2
