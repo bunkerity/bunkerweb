@@ -297,15 +297,13 @@ class Multiple {
               try {
                 const inps = setting.querySelectorAll("input");
                 inps.forEach((inp) => {
-
                   // case checkbox
                   if (inp.getAttribute("type") === "checkbox") {
                     const defaultVal = inp.getAttribute("data-default") || "";
-                    
+
                     if (defaultVal === "yes" && !inp.checked) {
                       inp.click();
                     }
-
                   }
 
                   // case regular
@@ -314,25 +312,28 @@ class Multiple {
                     inp.setAttribute("value", defaultVal);
                     inp.value = defaultVal;
                   }
-
                 });
-              } catch(e) {
-
-              }
+              } catch (e) {}
               // for select
               try {
-                const selects = setting.querySelectorAll("button[data-setting-select]");
+                const selects = setting.querySelectorAll(
+                  "button[data-setting-select]",
+                );
                 selects.forEach((select) => {
                   const defaultVal = select.getAttribute("data-default") || "";
-                  select.querySelector('data-setting-select-text').setAttribute("data-value", defaultVal);
-                  select.querySelector('data-setting-select-text').textContent = defaultVal;
-                  const dropdown = document.querySelector(`[data-setting-select-dropdown="${select.getAttribute('data-setting-select')}"]`);
+                  select
+                    .querySelector("data-setting-select-text")
+                    .setAttribute("data-value", defaultVal);
+                  select.querySelector("data-setting-select-text").textContent =
+                    defaultVal;
+                  const dropdown = document.querySelector(
+                    `[data-setting-select-dropdown="${select.getAttribute(
+                      "data-setting-select",
+                    )}"]`,
+                  );
                   dropdown.querySelector(`button[value=${defaultVal}]`).click();
                 });
-              }catch(e) 
-              {
-                
-              }
+              } catch (e) {}
             });
           }
           //remove last child

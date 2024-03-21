@@ -75,7 +75,7 @@ class SwarmTest(Test):
                 i += 1
             if not healthy:
                 proc = run(
-                    'docker stack ps --no-trunc bunkerweb',
+                    "docker stack ps --no-trunc bunkerweb",
                     cwd="/tmp/swarm",
                     shell=True,
                     capture_output=True,
@@ -179,7 +179,7 @@ class SwarmTest(Test):
                 )
                 for service in proc.stdout.decode().splitlines():
                     proc2 = run(
-                        'docker service ps ' + service,
+                        "docker service ps " + service,
                         cwd="/tmp/swarm",
                         shell=True,
                         capture_output=True,

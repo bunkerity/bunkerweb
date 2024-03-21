@@ -10,6 +10,7 @@ import zipfile
 import shutil
 from contextlib import suppress
 
+
 def print_md_table(settings) -> MarkdownTableWriter:
     writer = MarkdownTableWriter(
         headers=["Setting", "Default", "Context", "Multiple", "Description"],
@@ -26,6 +27,7 @@ def print_md_table(settings) -> MarkdownTableWriter:
     )
     return writer
 
+
 def stream_support(support) -> str:
     md = "STREAM support "
     if support == "no":
@@ -36,8 +38,10 @@ def stream_support(support) -> str:
         md += ":warning:"
     return md
 
+
 def pro_title(title: str) -> str:
     return f"## {title} <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'>\n"
+
 
 doc = StringIO()
 
