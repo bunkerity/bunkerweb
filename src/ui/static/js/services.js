@@ -718,7 +718,7 @@ class Multiple {
             .closest("button")
             .hasAttribute(`data-${this.prefix}-multiple-delete`)
         ) {
-          // We are not removing it really, just hiding it and update values to defaut
+          // We are not removing it really, just hiding it and update values to default
           // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
           const multContainer = e.target.closest(
             `[data-${this.prefix}-settings-multiple]`,

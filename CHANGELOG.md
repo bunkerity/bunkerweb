@@ -23,7 +23,7 @@
 - [UI] Service page : add the possibility to clone a service in the web UI
 - [UI] Service page : add the possibility to set a service as draft in the web UI
 - [UI] Service page : add services filter when at least 4 services
-- [UI] Configs page : add path filtering related to config presence
+- [UI] Configs page : add path filtering related to config presence, remove service when config is root only
 - [UI] Pro license : add home card, show pro plugins on menu and plugins page, resume in account page, alert in case issue with license usage
 - [UI] Log page : enhance UX
 - [FEATURE] Add setting REDIS_SSL_VERIFY to activate/disable the SSL certificate verification when using Redis
