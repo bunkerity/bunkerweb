@@ -9,7 +9,7 @@ from json import loads as json_loads
 from pathlib import Path
 from re import search as re_search
 from subprocess import run, DEVNULL, STDOUT
-from typing import List, Literal, Tuple
+from typing import List, Literal, Optional, Tuple
 from uuid import uuid4
 
 
@@ -18,7 +18,7 @@ class Config:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
 
-    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, global_edit: bool = False) -> None:
+    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None) -> None:
         """Generates the nginx configuration file from the given configuration
 
         Parameters
@@ -40,11 +40,12 @@ class Config:
             if not server_name:
                 continue
 
-            for k in service:
-                key_without_suffix = k.rsplit("_", 1)[0] if re_search(r"_\d+$", k) else k
-                if plugins_settings[key_without_suffix]["context"] == "multisite":
-                    if not global_edit or f"{server_name}_{k}" not in conf:
-                        conf[f"{server_name}_{k}"] = service[k]
+            for k, v in service.items():
+                if server_name != changed_service and f"{server_name}_{k}" in conf:
+                    continue
+
+                if plugins_settings[k.rsplit("_", 1)[0] if re_search(r"_\d+$", k) else k]["context"] == "multisite":
+                    conf[f"{server_name}_{k}"] = v
 
             servers.append(server_name)
 
@@ -223,7 +224,7 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        self.__gen_conf(config, services, check_changes=check_changes)
+        self.__gen_conf(config, services, check_changes=check_changes, changed_service=variables["SERVER_NAME"])
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
     def edit_global_conf(self, variables: dict) -> str:
@@ -239,7 +240,7 @@ class Config:
         str
             the confirmation message
         """
-        self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False), global_edit=True)
+        self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
         return "The global configuration has been edited."
 
     def delete_service(self, service_name: str, *, check_changes: bool = True) -> Tuple[str, int]:
