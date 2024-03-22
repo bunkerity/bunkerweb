@@ -5,7 +5,8 @@ from functools import partial
 from glob import glob
 from json import loads
 from logging import Logger
-from os import cpu_count, environ, getenv, sep
+from os import cpu_count, environ, getenv, sep, chmod
+from stat import S_IEXEC
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
@@ -180,7 +181,11 @@ class JobScheduler(ApiCaller):
         success = True
         ret = -1
         try:
-            proc = run(join(path, "jobs", file), stdin=DEVNULL, stderr=STDOUT, env=self.__env, check=False)
+            file_path = join(path, "jobs", file)
+            if file_path.startswith("/etc/bunkerweb/plugins") or file_path.startswith("/etc/bunkerweb/pro/plugins"):
+                st = Path(file_path).stat()
+                chmod(file_path, st.st_mode | S_IEXEC)
+            proc = run(file_path, stdin=DEVNULL, stderr=STDOUT, env=self.__env, check=False)
             ret = proc.returncode
         except BaseException:
             success = False
