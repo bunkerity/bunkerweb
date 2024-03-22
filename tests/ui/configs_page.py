@@ -63,7 +63,7 @@ location /hello {
     if TEST_TYPE == "linux":
         wait_for_service()
 
-    assert_alert_message(DRIVER, "was successfully created")
+    assert_alert_message(DRIVER, "Created")
 
     sleep(10)
 
@@ -107,17 +107,17 @@ location /hello {
     assert_button_click(DRIVER, "//button[@data-configs-setting-select-dropdown-btn='withconf' and @value='true']")
 
     is_server_http_folder_hidden = DRIVER.execute_script(
-        f"""return document.querySelector("[data-configs-element='server-http']").classList.contains("hidden")"""
+        """return document.querySelector("[data-configs-element='server-http']").classList.contains("hidden")"""
     )
 
     if is_server_http_folder_hidden:
-        log_error(f"Server http folder should be visible.")
+        log_error("Server http folder should be visible.")
         exit(1)
 
-    is_http_folder_hidden = DRIVER.execute_script(f"""return document.querySelector("[data-configs-element='http']").classList.contains("hidden")""")
+    is_http_folder_hidden = DRIVER.execute_script("""return document.querySelector("[data-configs-element='http']").classList.contains("hidden")""")
 
     if not is_http_folder_hidden:
-        log_error(f"Http folder should be hidden.")
+        log_error("Http folder should be hidden.")
         exit(1)
 
     # Reset
@@ -132,11 +132,11 @@ location /hello {
     assert_button_click(DRIVER, "//div[@data-configs-element='http' and @data-_type='folder']")
 
     is_app1_example_com_folder_hidden = DRIVER.execute_script(
-        f"""return document.querySelector("[data-configs-element='app1.example.com']").classList.contains("hidden")"""
+        """return document.querySelector("[data-configs-element='app1.example.com']").classList.contains("hidden")"""
     )
 
     if not is_app1_example_com_folder_hidden:
-        log_error(f"app1.example.com folder should be hidden.")
+        log_error("app1.example.com folder should be hidden.")
         exit(1)
 
     assert_button_click(DRIVER, "//button[@data-configs-setting-select='globalconf']")
@@ -162,7 +162,7 @@ location /hello {
     if TEST_TYPE == "linux":
         wait_for_service()
 
-    assert_alert_message(DRIVER, "was successfully deleted")
+    assert_alert_message(DRIVER, "Deleted")
 
     sleep(10)
 
@@ -199,7 +199,7 @@ location /hello {
     if TEST_TYPE == "linux":
         wait_for_service()
 
-    assert_alert_message(DRIVER, "was successfully created")
+    assert_alert_message(DRIVER, "Created")
 
     sleep(10)
 
