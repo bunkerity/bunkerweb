@@ -195,7 +195,7 @@ try:
         DEBUG=True,
         INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION),
         CONFIG=Config(db),
-        CONFIGFILES=ConfigFiles(app.logger, db),
+        CONFIGFILES=ConfigFiles(),
         WTF_CSRF_SSL_STRICT=False,
         USER=USER,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
@@ -255,14 +255,8 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
             app.config["TO_FLASH"].append({"content": operation, "type": "success"})
 
             if (was_draft != is_draft or not is_draft) and (moved or deleted):
-                changes = ["config", "custom_configs"]
-                error = app.config["CONFIGFILES"].save_configs(check_changes=False)
-                if error:
-                    app.config["TO_FLASH"].append({"content": error, "type": "error"})
-                    changes.pop()
-
                 # update changes in db
-                ret = db.checked_changes(changes, value=True)
+                ret = db.checked_changes(["config", "custom_configs"], value=True)
                 if ret:
                     app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
                     app.config["TO_FLASH"].append(
@@ -1069,6 +1063,8 @@ def global_config():
 @app.route("/configs", methods=["GET", "POST"])
 @login_required
 def configs():
+    db_configs = db.get_custom_configs()
+
     if request.method == "POST":
         operation = ""
 
@@ -1080,73 +1076,91 @@ def configs():
             "edit",
             "delete",
         ):
-            return redirect_flash_error("Missing operation parameter on /configs.", "configs", True)
+            return redirect_flash_error("Operation parameter is invalid on /configs.", "configs", True)
 
         # Check variables
         variables = deepcopy(request.form.to_dict())
         del variables["csrf_token"]
+
+        if variables["type"] != "file":
+            return redirect_flash_error("Invalid type parameter on /configs.", "configs", True)
 
         operation = app.config["CONFIGFILES"].check_path(variables["path"])
 
         if operation:
             return redirect_flash_error(operation, "configs", True)
 
+        old_name = variables.get("old_name", "").replace(".conf", "")
+        name = variables.get("name", old_name).replace(".conf", "")
+        path_exploded = variables["path"].split(sep)
+        service_id = (path_exploded[5] if len(path_exploded) > 6 else None) or None
+        root_dir = path_exploded[4].replace("-", "_").lower()
+
+        if not old_name and not name:
+            return redirect_flash_error("Missing name parameter on /configs.", "configs", True)
+
+        index = -1
+        for i, db_config in enumerate(db_configs):
+            if db_config["type"] == root_dir and db_config["name"] == name and db_config["service_id"] == service_id:
+                if request.form["operation"] == "new":
+                    return redirect_flash_error(f"Config {name} already exists{f' for service {service_id}' if service_id else ''}", "configs", True)
+                elif db_config["method"] not in ("ui", "manual"):
+                    return redirect_flash_error(
+                        f"Can't edit config {name}{f' for service {service_id}' if service_id else ''} because it was not created by the UI or manually",
+                        "configs",
+                        True,
+                    )
+                index = i
+                break
+
         # New or edit a config
         if request.form["operation"] in ("new", "edit"):
-            if not app.config["CONFIGFILES"].check_name(variables["name"]):
+            if not app.config["CONFIGFILES"].check_name(name):
                 return redirect_flash_error(
                     f"Invalid {variables['type']} name. (Can only contain numbers, letters, underscores, dots and hyphens (min 4 characters and max 64))",
                     "configs",
                     True,
                 )
 
-            if variables["type"] == "file":
-                variables["name"] = f"{variables['name']}.conf"
+            content = BeautifulSoup(variables["content"], "html.parser").get_text()
 
-                if "old_name" in variables:
-                    variables["old_name"] = f"{variables['old_name']}.conf"
+            if request.form["operation"] == "new":
+                db_configs.append({"type": root_dir, "name": name, "service_id": service_id, "data": content, "method": "ui"})
+                operation = f"Created config {name}{f' for service {service_id}' if service_id else ''}"
+            elif request.form["operation"] == "edit":
+                if index == -1:
+                    return redirect_flash_error(
+                        f"Can't edit config {name}{f' for service {service_id}' if service_id else ''} because it doesn't exist", "configs", True
+                    )
 
-                variables["content"] = BeautifulSoup(variables["content"], "html.parser").get_text()
+                if old_name != name:
+                    db_configs[index]["name"] = name
+                elif db_configs[index]["data"] == content:
+                    return redirect_flash_error(
+                        f"Config {name} was not edited because no values were changed{f' for service {service_id}' if service_id else ''}",
+                        "configs",
+                        True,
+                    )
 
-            error = False
-
-            if request.form["operation"] == "new" and variables["type"] == "folder":
-                operation, error = app.config["CONFIGFILES"].create_folder(variables["path"], variables["name"])
-
-            if request.form["operation"] == "new" and variables["type"] == "file":
-                operation, error = app.config["CONFIGFILES"].create_file(variables["path"], variables["name"], variables["content"])
-
-            if request.form["operation"] == "edit" and variables["type"] == "file":
-                operation, error = app.config["CONFIGFILES"].edit_file(
-                    variables["path"],
-                    variables["name"],
-                    variables.get("old_name", variables["name"]),
-                    variables["content"],
-                )
-
-            if request.form["operation"] == "edit" and variables["type"] == "folder":
-                operation, error = app.config["CONFIGFILES"].edit_folder(
-                    variables["path"],
-                    variables["name"],
-                    variables.get("old_name", variables["name"]),
-                )
-
-            if error:
-                return redirect_flash_error(operation, "configs", True)
+                db_configs[index]["data"] = content
+                operation = f"Edited config {name}{f' for service {service_id}' if service_id else ''}"
 
         # Delete a config
-        if request.form["operation"] == "delete":
-            operation, error = app.config["CONFIGFILES"].delete_path(variables["path"])
+        elif request.form["operation"] == "delete":
+            if index == -1:
+                return redirect_flash_error(
+                    f"Can't delete config {name}{f' for service {service_id}' if service_id else ''} because it doesn't exist", "configs", True
+                )
 
-            if error:
-                return redirect_flash_error(operation, "configs", True)
+            del db_configs[index]
+            operation = f"Deleted config {name}{f' for service {service_id}' if service_id else ''}"
+
+        error = db.save_custom_configs([config for config in db_configs if config["method"] == "ui"], "ui")
+        if error:
+            app.logger.error(f"Could not save custom configs: {error}")
+            return redirect_flash_error("Couldn't save custom configs", "configs", True)
 
         flash(operation)
-
-        error = app.config["CONFIGFILES"].save_configs()
-
-        if error:
-            return redirect_flash_error("Couldn't save custom configs to disk", "configs", True)
 
         return redirect(url_for("loading", next=url_for("configs")))
 
@@ -1155,7 +1169,7 @@ def configs():
         folders=[
             path_to_dict(
                 join(sep, "etc", "bunkerweb", "configs"),
-                db_data=db.get_custom_configs(),
+                db_data=db_configs,
                 services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
             )
         ],

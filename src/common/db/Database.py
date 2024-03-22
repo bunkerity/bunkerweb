@@ -962,7 +962,7 @@ class Database:
 
     def save_custom_configs(
         self,
-        custom_configs: List[Dict[str, Tuple[str, List[str]]]],
+        custom_configs: List[Dict[str, Union[str, bytes, Tuple[str, List[str]]]]],
         method: str,
         changed: Optional[bool] = True,
     ) -> str:
@@ -975,59 +975,57 @@ class Database:
             to_put = []
             endl = "\n"
             for custom_config in custom_configs:
-                config = {
-                    "data": custom_config["value"].encode("utf-8") if isinstance(custom_config["value"], str) else custom_config["value"],
-                    "method": method,
+                if method != "ui":
+                    config = {
+                        "data": custom_config["value"],
+                        "method": method,
+                    }
+                    assert isinstance(custom_config["exploded"], tuple) and len(custom_config["exploded"]) == 3, "Invalid exploded custom config"
+
+                    if custom_config["exploded"][0]:
+                        if not session.query(Services).with_entities(Services.id).filter_by(id=custom_config["exploded"][0]).first():
+                            message += f"{endl if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
+
+                        config.update(
+                            {
+                                "service_id": custom_config["exploded"][0],
+                                "type": custom_config["exploded"][1],
+                                "name": custom_config["exploded"][2],
+                            }
+                        )
+                    else:
+                        config.update(
+                            {
+                                "type": custom_config["exploded"][1],
+                                "name": custom_config["exploded"][2],
+                            }
+                        )
+
+                    custom_config = config
+
+                custom_config["type"] = custom_config["type"].replace("-", "_").lower()  # type: ignore
+                custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
+                custom_config["checksum"] = sha256(custom_config["data"]).hexdigest()  # type: ignore
+
+                service_id = custom_config.get("service_id", None) or None
+                filters = {
+                    "type": custom_config["type"],
+                    "name": custom_config["name"],
                 }
-                config["checksum"] = sha256(config["data"]).hexdigest()
 
-                if custom_config["exploded"][0]:
-                    if not session.query(Services).with_entities(Services.id).filter_by(id=custom_config["exploded"][0]).first():
-                        message += f"{endl if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
+                if service_id:
+                    filters["service_id"] = service_id
 
-                    config.update(
-                        {
-                            "service_id": custom_config["exploded"][0],
-                            "type": custom_config["exploded"][1].replace("-", "_").lower(),
-                            "name": custom_config["exploded"][2],
-                        }
-                    )
-                else:
-                    config.update(
-                        {
-                            "type": custom_config["exploded"][1].replace("-", "_").lower(),
-                            "name": custom_config["exploded"][2],
-                        }
-                    )
-
-                custom_conf = (
-                    session.query(Custom_configs)
-                    .with_entities(Custom_configs.checksum, Custom_configs.method)
-                    .filter_by(
-                        service_id=config.get("service_id", None),
-                        type=config["type"],
-                        name=config["name"],
-                    )
-                    .first()
-                )
+                custom_conf = session.query(Custom_configs).with_entities(Custom_configs.checksum, Custom_configs.method).filter_by(**filters).first()
 
                 if not custom_conf:
-                    to_put.append(Custom_configs(**config))
-                elif config["checksum"] != custom_conf.checksum and method in (
-                    custom_conf.method,
-                    "autoconf",
-                ):
-                    session.query(Custom_configs).filter(
-                        Custom_configs.service_id == config.get("service_id", None),
-                        Custom_configs.type == config["type"],
-                        Custom_configs.name == config["name"],
-                    ).update(
-                        {
-                            Custom_configs.data: config["data"],
-                            Custom_configs.checksum: config["checksum"],
-                        }
-                        | ({Custom_configs.method: "autoconf"} if method == "autoconf" else {})
-                    )
+                    to_put.append(Custom_configs(**custom_config))
+                elif custom_config["checksum"] != custom_conf.checksum and method in (custom_conf.method, "autoconf"):
+                    custom_conf.data = custom_config["data"]
+                    custom_conf.checksum = custom_config["checksum"]
+
+                    if method == "autoconf":
+                        custom_conf.method = method
             if changed:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
