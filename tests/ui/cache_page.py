@@ -10,7 +10,7 @@ exit_code = 0
 
 try:
     log_info("Navigating to the cache page ...")
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[7]/a", "cache")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[7]/a", "cache")
 
     log_info('Trying to open "jobs/asn.mmdb" cache file ...')
 

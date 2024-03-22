@@ -16,7 +16,7 @@ exit_code = 0
 
 try:
     log_info("Navigating to the services page to create a new service ...")
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[4]/a", "services")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[4]/a", "services")
 
     assert_button_click(DRIVER, "//button[@data-services-action='new']")
 
@@ -35,7 +35,7 @@ try:
         wait_for_service("app1.example.com")
 
     log_info("Navigating to the configs page ...")
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[5]/a", "configs")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[5]/a", "configs")
 
     log_info("Trying to create a new config ...")
 
@@ -228,7 +228,7 @@ location /hello {
 
     log_info("The config has been created only for the app1.example.com service, trying to delete the service to see if the config gets deleted ...")
 
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[4]/a", "services")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[4]/a", "services")
 
     assert_button_click(DRIVER, "//button[@data-services-action='delete' and @data-services-name='app1.example.com']")
 
@@ -239,7 +239,7 @@ location /hello {
 
     log_info("The service has been deleted, checking if the config has been deleted as well ...")
 
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[5]/a", "configs")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[5]/a", "configs")
 
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
 

@@ -14,7 +14,7 @@ exit_code = 0
 
 try:
     log_info("Navigating to the logs page ...")
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[11]/a", "logs")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[11]/a", "logs")
 
     log_info("Trying filters ...")
 

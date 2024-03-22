@@ -11,7 +11,7 @@ exit_code = 0
 
 try:
     log_info("Navigating to the instances page ...")
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[2]/a", "instances")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[2]/a", "instances")
 
     no_errors = True
     retries = 0
