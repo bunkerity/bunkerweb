@@ -128,8 +128,26 @@ class SwitchTabForm {
   }
 }
 
+class FormatExpire {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    window.addEventListener("DOMContentLoaded", () => {
+      const expireEl = document.querySelector("[data-expire]");
+      if (!expireEl) return;
+
+      expireEl.textContent = expireEl.textContent
+        .replaceAll("-", "/")
+        .split(" ")[0];
+    });
+  }
+}
+
 const setPWBtn = new PwBtn();
 const setSubmit = new SubmitAccount();
 const setTabs = new Tabs();
 const setPopover = new Popover();
 const setSwitchTabForm = new SwitchTabForm();
+const setFormatExpire = new FormatExpire();
