@@ -1384,11 +1384,11 @@ def plugins():
             args=("plugins",),
         ).start()
 
-        # Remove tmp folder
-        if tmp_ui_path.exists():
-            rmtree(str(tmp_ui_path), ignore_errors=True)
-
         return redirect(url_for("loading", next=url_for("plugins"), message="Reloading plugins"))
+
+    # Remove tmp folder
+    if tmp_ui_path.is_dir():
+        rmtree(tmp_ui_path, ignore_errors=True)
 
     plugins = app.config["CONFIG"].get_plugins()
     plugins_internal = 0
