@@ -558,7 +558,10 @@ List of features :
 
 List of settings :
 
-
+|           Setting            |Default|Context|Multiple|                 Description                 |
+|------------------------------|-------|-------|--------|---------------------------------------------|
+|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
+|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
 
 ### Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
 
