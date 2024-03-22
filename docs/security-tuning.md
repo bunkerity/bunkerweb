@@ -547,13 +547,24 @@ You can deploy complex authentication (e.g. SSO), by using the auth request sett
 
 ### Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
 
-TODO
+The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By enabling it, your instance(s) will start collecting various data related to attacks, requests and performance. You can then retrieve them by calling the `/monitoring` API endpoint on regular basis or by using other plugins like the Prometheus exporter one.
+
+List of features :
+
+- Enable collection of various BunkerWeb metrics
+- Retrieve metrics from the API
+- Use in combination with other plugins (e.g. Prometheus exporter)
+- Dedicate UI page to monitor your instance(s)
+
+List of settings :
+
+
 
 ### Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
 
 The Prometheus exporter plugin adds a [Prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) on your BunkerWeb instance(s). When enabled, you can configure your Prometheus instance(s) to scrape a specific endpoint on Bunkerweb and gather internal metrics.
 
-We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/20755) that you can import into your own instance and connect to your own Prometheus datasource.
+We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/20755-bunkerweb/) that you can import into your own instance and connect to your own Prometheus datasource.
 
 **Please note that the use of Prometheus exporter plugin requires to enable the Monitoring plugin (`USE_MONITORING=yes`)**
 
