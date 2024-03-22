@@ -99,11 +99,11 @@
                 {% endif %}
                 {% if is_pro_version %}
                     <div class="mt-2 flex flex-col justify-center items-center">
-                        {% if pro_expire %}
-                            <p class="my-2 mr-2 dark:text-gray-300 text-center">Your license is valid until <span class="font-bold">{{ pro_expire }}</span></p>
-                        {% endif %}
                         {% if pro_services %}
-                            <p class="my-2 mr-2 dark:text-gray-300 text-center font-bold">{{ pro_services }} services plan</p>
+                            <p class="my-2 mr-2 dark:text-gray-300 text-center font-bold">{{ pro_services }} services allowed</p>
+                        {% endif %}
+                        {% if pro_expire %}
+                            <p class="my-2 mr-2 dark:text-gray-300 text-center">License expired : <span data-expire class="font-bold">{{ pro_expire }}</span></p>
                         {% endif %}
                     </div>
                 {% endif %}

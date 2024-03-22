@@ -69,7 +69,7 @@ module.exports = {
     "w-full",
     "text-yellow-500",
     "text-green-500",
-    "text-red-500"
+    "text-red-500",
   ],
 
   presets: [],
