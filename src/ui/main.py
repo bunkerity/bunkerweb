@@ -205,6 +205,7 @@ try:
         DARK_MODE=False,
         CURRENT_TOTP_TOKEN=None,
         SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
+        DB=db,
     )
 except FileNotFoundError as e:
     app.logger.error(repr(e), e.filename)
