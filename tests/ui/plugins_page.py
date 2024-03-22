@@ -17,7 +17,7 @@ exit_code = 0
 
 try:
     log_info("Navigating to the plugins page to create a new service ...")
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[6]/a", "plugins")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[6]/a", "plugins")
 
     for _ in range(5):
         get(f"http://www.example.com{UI_URL}/?id=/etc/passwd")

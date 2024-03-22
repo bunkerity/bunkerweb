@@ -153,6 +153,47 @@ Here is the list of related settings :
 
 Full Let's Encrypt automation is fully working with stream mode as long as you open the `80/tcp` port from the outside. Please note that you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
 
+### Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+
+STREAM support :white_check_mark:
+
+The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. This plugin offers seamless integration with various DNS providers for streamlined certificate management.
+
+- Automatic creation and renewal of Let's Encrypt certificates
+- Integration with DNS providers for DNS challenges
+- Generate wildcard certificates
+- Configuration options for customization and flexibility
+
+Settings of the Let's Encrypt DNS plugin :
+
+| Setting                            | Default   | Context   | Multiple | Description                                                                             |
+| ---------------------------------- | --------- | --------- | -------- | --------------------------------------------------------------------------------------- |
+| `AUTO_LETS_ENCRYPT_DNS`            | `no`      | multisite | no       | Set to `yes` to enable automatic certificate creation and renewal using DNS challenges. |
+| `LETS_ENCRYPT_DNS_EMAIL`           |           | multisite | no       | Email address for Let's Encrypt notifications.                                          |
+| `USE_LETS_ENCRYPT_DNS_STAGING`     | `no`      | multisite | no       | Set to `yes` to use Let's Encrypt staging server.                                       |
+| `LETS_ENCRYPT_DNS_PROVIDER`        |           | multisite | no       | DNS provider for Let's Encrypt DNS challenges.                                          |
+| `USE_LETS_ENCRYPT_DNS_WILDCARD`    | `no`      | multisite | no       | Set to `yes` to automatically generate wildcard domains in certificates.                |
+| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | no       | Time in seconds to wait for DNS propagation.                                            |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | yes      | Credential item for Let's Encrypt DNS provider that contains required credentials.      |
+
+Info :
+
+- The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
+- If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
+
+Available DNS Providers :
+
+| Provider       | Description                  | Mandatory Settings                                                                                    | Link(s)                                                                               |
+| -------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `cloudflare`   | Cloudflare DNS provider      | `dns_cloudflare_api_token`                                                                            | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)             |
+| `digitalocean` | DigitalOcean DNS provider    | `dns_digitalocean_token`                                                                              | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)           |
+| `google`       | Google Cloud DNS provider    | `project_id`, `private_key_id`, `private_key`, `client_email`, `client_email`, `client_x509_cert_url` | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
+| `linode`       | Linode DNS provider          | `dns_linode_key`                                                                                      | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
+| `ovh`          | OVH DNS provider             | `dns_ovh_application_key`, `dns_ovh_application_secret`, `dns_ovh_consumer_key`                       | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                    |
+| `rfc2136`      | RFC 2136 DNS provider        | `dns_rfc2136_server`, `dns_rfc2136_name`, `dns_rfc2136_secret`                                        | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                |
+| `route53`      | Amazon Route 53 DNS provider | `aws_access_key_id`, `aws_secret_access_key`                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                |
+| `scaleway`     | Scaleway DNS provider        | `dns_scaleway_application_token`                                                                      | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst) |
+
 ### Custom certificate
 
 STREAM support :white_check_mark:
@@ -164,7 +205,6 @@ If you want to use your own certificates, here is the list of related settings :
 | `USE_CUSTOM_SSL`  | `no`    | multisite | no       | Use custom HTTPS / SSL/TLS certificate.                                          |
 | `CUSTOM_SSL_CERT` |         | multisite | no       | Full path of the certificate or bundle file (must be readable by the scheduler). |
 | `CUSTOM_SSL_KEY`  |         | multisite | no       | Full path of the key file (must be readable by the scheduler).                   |
-
 
 When `USE_CUSTOM_SSL` is set to `yes`, BunkerWeb will check every day if the custom certificate specified in `CUSTOM_SSL_CERT` is modified and will reload NGINX if that's the case.
 
@@ -505,96 +545,71 @@ You can deploy complex authentication (e.g. SSO), by using the auth request sett
 
 ## Monitoring and reporting
 
-Monitoring and reporting means that you are kept informed of the slightest problem and can react as quickly as possible.
+### Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
 
-### Reporting
+TODO
 
-<div style="display:flex; align-items:center">
+### Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
 
-  <h3 data-custom-header id="reporting">Reporting</h3>
+The Prometheus exporter plugin adds a [Prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) on your BunkerWeb instance(s). When enabled, you can configure your Prometheus instance(s) to scrape a specific endpoint on Bunkerweb and gather internal metrics.
 
-  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
-        viewBox="0 0 48 46"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
-      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
-  </svg>
-</div>
+We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/20755) that you can import into your own instance and connect to your own Prometheus datasource.
 
-!!! warning "Used of cache data"
+**Please note that the use of Prometheus exporter plugin requires to enable the Monitoring plugin (`USE_MONITORING=yes`)**
 
-    A comparison is made every hour with the cached data. If BunkerWeb no longer has access to the cache, the data to be compared will be reset.
+List of features :
 
-#### Types of reporting
+- Prometheus exporter providing internal BunkerWeb metrics
+- Dedicated and configurable port, listen IP and URL
+- Whitelist IP/network for maximum security
 
-Pro reporting plugin gives you two types of reports :
+List of settings :
 
-  - **regular report**: you can define a period of time, and you'll get a regular report showing the percentage change in data between the previous report and this one, and also key points about your BunkerWeb state.
+|           Setting            |                       Default                       |Context|Multiple|                              Description                               |
+|------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
+|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
+|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
+|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
+|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
+|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
 
-  - **alerts**: every hour, an analysis of the metrics will be carried out, and you can set a threshold for the percentage change in the data. If this threshold is reached, you will receive an alert.
+### Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
 
-!!! info "Example"
+The Reporting plugin provides a comprehensive solution for regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information. It offers a wide range of features, including automatic report creation, customization options, and seamless integration with monitoring pro plugin. With the Reporting plugin, you can easily generate and manage reports to monitor the performance and security of your application.
 
-    After one hour, if I go from 300 requests blocked to more than 600 after one hour : in case I have set a threshold of +100%, I'll be alerted.
+List of features :
 
-#### Get reporting
+- Regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information.
+- Integration with Monitoring Pro plugin for seamless integration and enhanced reporting capabilities.
+- Support for webhooks (classic, Discord, and Slack) for real-time notifications.
+- Support for SMTP for email notifications.
+- Configuration options for customization and flexibility.
 
-To receive alerts or regular reports, you can use :
+List of settings :
 
-**1) webhook**
+| Setting                        | Default  | Context  | Description                                                                                                                        |
+| ------------------------------ | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`     | `global` | Enable sending the report via email.                                                                                               |
+| `USE_REPORTING_WEBHOOK`        | `no`     | `global` | Enable sending the report via webhook.                                                                                             |
+| `REPORTING_SCHEDULE`           | `weekly` | `global` | The frequency at which reports are sent.                                                                                           |
+| `REPORTING_WEBHOOK_URLS`       |          | `global` | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
+| `REPORTING_SMTP_EMAILS`        |          | `global` | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
+| `REPORTING_SMTP_HOST`          |          | `global` | The host server used for SMTP sending.                                                                                             |
+| `REPORTING_SMTP_PORT`          | `465`    | `global` | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
+| `REPORTING_SMTP_FROM_EMAIL`    |          | `global` | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
+| `REPORTING_SMTP_FROM_USER`     |          | `global` | The user authentication value for sending via the from email address.                                                              |
+| `REPORTING_SMTP_FROM_PASSWORD` |          | `global` | The password authentication value for sending via the from email address.                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`    | `global` | Determine whether or not to use a secure connection for SMTP.                                                                      |
 
-We are supporting multiple webhooks :
+**Warning:**
 
-  - **API** : we will send a JSON of type `{"message" : markdownReport }`.
-  - **Discord**
-  - **Slack**
+- This plugins requires the Monitoring Pro plugin to be installed and enabled with the `USE_MONITORING` setting set to `yes`.
 
-!!! info "Specific webhook"
+**Info:**
 
-    We listen to our customers, so if you need to make the plugin compatible with a particular webhook, don't hesitate to contact us to discuss it together.
-
-**2) SMTP**
-
-You can also use the SMTP protocol. You will need to set the various parameters (user auth, password auth, host...).
-
-You need to **pay attention** using SMTP:
-
-  - Make sure that the address used to send the **message does not end up in the spam folder**.
-
-  - The address used must **not have double authentication** to work.
-
-
-### Prometheus exporter
-
-<div style="display:flex; align-items:center">
-
-  <h3 data-custom-header id="prometheus-exporter">Prometheus exporter</h3>
-
-  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
-        viewBox="0 0 48 46"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
-      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
-  </svg>
-</div>
-
-TO DO
-
-### Pro metrics
-
-<div style="display:flex; align-items:center">
-
-  <h3 data-custom-header id="pro-metrics">Pro metrics</h3>
-
-  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
-        viewBox="0 0 48 46"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
-      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
-  </svg>
-</div>
-
-TO DO
+- If `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
+- If `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
+- Accepted values for `REPORTING_SCHEDULE` are `daily`, `weekly`and `monthly`.
+- If no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
+- If `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
+- If the job fails, the plugin will retry sending the report in the next execution.

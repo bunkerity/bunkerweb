@@ -251,6 +251,7 @@ try:
 
     if not plugin_nbr:
         LOGGER.info("All Pro plugins are up to date")
+        db.set_pro_metadata(metadata | {"last_pro_check": current_date})
         sys_exit(0)
 
     pro_plugins = []

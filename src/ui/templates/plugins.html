@@ -7,7 +7,7 @@
             {"name" : "TOTAL PLUGINS", "data" : plugins|length|string},
             {"name" : "INTERNAL PLUGINS", "data" : plugins_count_internal|string},
             {"name" : "EXTERNAL PLUGINS", "data" : plugins_count_external|string},
-            {"name" : "PRO PLUGINS", "data" : plugins_count_pro|string},
+            {"name" : "PRO PLUGINS", "data" : plugins_count_pro|string if is_pro_version else plugins_count_pro|string + '  (preview)'},
         ] %}
     <div class="h-fit p-4 col-span-12 md:col-span-5 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <h5 class="col-span-12 mb-4 font-bold dark:text-white/90">INFO</h5>
@@ -154,7 +154,7 @@
         <div data-plugins-list class="grid grid-cols-12 gap-3">
             {% for plugin in plugins %}
                 <div data-plugins-type="{{ plugin['type'] }}"
-                     class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded {% if plugin['type'] != 'pro' or plugin['type'] == 'pro' and is_pro_version %} bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800 {% else %} bg-gray-300 dark:bg-gray-800 {% endif %}">
+                     class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded {% if plugin['type'] != 'pro' or plugin['type'] == 'pro' and is_pro_version %} bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800 {% else %} cursor-not-allowed bg-gray-300 dark:bg-gray-800 {% endif %}">
                     <p data-plugins-content
                        class="{% if plugin['type'] == 'pro' and not is_pro_version %} opacity-80 dark:opacity-60 {% endif %} ml-3 mr-2 break-words mb-0 transition duration-300 ease-in-out text-left text-sm md:text-base text-slate-700 dark:text-gray-200">
                         {{ plugin['name'] }}

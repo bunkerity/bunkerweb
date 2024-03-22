@@ -14,7 +14,7 @@ exit_code = 0
 
 try:
     log_info("Navigating to the bans page ...")
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[9]/a", "bans")
+    access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[9]/a", "bans")
 
     try:
         safe_get_element(DRIVER, By.XPATH, "/html/body/main/div/div[2]/div/h5", error=True)

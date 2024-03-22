@@ -67,6 +67,9 @@ module.exports = {
     "focus:bg-emerald-500/80",
     "col-span-12",
     "w-full",
+    "text-yellow-500",
+    "text-green-500",
+    "text-red-500",
   ],
 
   presets: [],
