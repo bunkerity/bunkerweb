@@ -7,7 +7,7 @@ from glob import glob
 from hashlib import sha256
 from io import BytesIO
 from json import load as json_load
-from os import _exit, chmod, environ, getenv, getpid, listdir, sep, walk
+from os import _exit, environ, getenv, getpid, listdir, sep, walk
 from os.path import basename, dirname, join, normpath
 from pathlib import Path
 from shutil import copy, rmtree
@@ -148,9 +148,8 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
                             tar.extractall(original_path)
                     tmp_path.unlink(missing_ok=True)
 
-                    for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
-                        st = Path(job_file).stat()
-                        chmod(job_file, st.st_mode | S_IEXEC)
+                    for job_file in original_path.joinpath(plugin["id"], "jobs").glob("*"):
+                        job_file.chmod(job_file.stat().st_mode | S_IEXEC)
             except BaseException as e:
                 logger.error(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\": {e}")
 
