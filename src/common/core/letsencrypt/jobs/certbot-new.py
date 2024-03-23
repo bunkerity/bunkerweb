@@ -21,7 +21,7 @@ status = 0
 
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 
-LETS_ENCRYPT_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
+DATA_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt", "etc")
 LETS_ENCRYPT_JOBS_PATH = Path(sep, "usr", "share", "bunkerweb", "core", "letsencrypt", "jobs")
 LETS_ENCRYPT_WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LETS_ENCRYPT_LOGS_DIR = join(sep, "var", "log", "bunkerweb")
@@ -33,7 +33,7 @@ def certbot_new(domains: str, email: str, use_letsencrypt_staging: bool = False)
             CERTBOT_BIN,
             "certonly",
             "--config-dir",
-            LETS_ENCRYPT_PATH.joinpath("etc").as_posix(),
+            DATA_PATH.as_posix(),
             "--work-dir",
             LETS_ENCRYPT_WORK_DIR,
             "--logs-dir",
@@ -112,7 +112,7 @@ try:
             CERTBOT_BIN,
             "certificates",
             "--config-dir",
-            LETS_ENCRYPT_PATH.joinpath("etc").as_posix(),
+            DATA_PATH.as_posix(),
             "--work-dir",
             LETS_ENCRYPT_WORK_DIR,
             "--logs-dir",
@@ -162,8 +162,8 @@ try:
             LOGGER.info(f"Certificate generation succeeded for domain(s) : {domains}")
 
     # Save Let's Encrypt data to db cache
-    if LETS_ENCRYPT_PATH.is_dir() and list(LETS_ENCRYPT_PATH.iterdir()):
-        cached, err = JOB.cache_dir(LETS_ENCRYPT_PATH, job_name="certbot-renew")
+    if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
+        cached, err = JOB.cache_dir(DATA_PATH, job_name="certbot-renew")
         if not cached:
             LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
         else:
