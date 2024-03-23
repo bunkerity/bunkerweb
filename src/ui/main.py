@@ -827,6 +827,8 @@ def instances():
             kwargs={"operation": request.form["operation"]},
         ).start()
 
+        sleep(0.2)
+
         return redirect(
             url_for(
                 "loading",
@@ -1584,7 +1586,6 @@ def custom_plugin(plugin: str):
 
         # Get prerender from action.py
         pre_render = run_action(plugin, "pre_render")
-
         return render_template(
             Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
             username=current_user.get_id(),
