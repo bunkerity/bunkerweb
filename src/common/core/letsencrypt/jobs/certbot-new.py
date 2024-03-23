@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+from itertools import chain
 from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
+from shutil import rmtree
 from subprocess import DEVNULL, STDOUT, Popen, run, PIPE
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -97,15 +99,15 @@ try:
     domains_to_ask = []
     # Multisite case
     if is_multisite:
-        domains_sever_names = {}
+        domains_server_names = {}
 
         for first_server in server_names:
             if not first_server or getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
                 continue
-            domains_sever_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server)
+            domains_server_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server)
     # Singlesite case
     else:
-        domains_sever_names = {server_names[0]: all_domains}
+        domains_server_names = {server_names[0]: all_domains}
 
     proc = run(
         [
@@ -127,11 +129,15 @@ try:
     )
     stdout = proc.stdout
 
+    generated_domains = set()
+
     if proc.returncode != 0:
         LOGGER.error(f"Error while checking certificates :\n{proc.stdout}")
         domains_to_ask = server_names
     else:
-        for first_server, domains in domains_sever_names.items():
+        for first_server, domains in domains_server_names.items():
+            generated_domains.update(domains.split(" "))
+
             current_domains = search(rf"Domains: {first_server}(?P<domains>.*)$", stdout, MULTILINE)
             if not current_domains:
                 domains_to_ask.append(first_server)
@@ -142,7 +148,7 @@ try:
                 continue
             LOGGER.info(f"Certificates already exists for domain(s) {domains}")
 
-    for first_server, domains in domains_sever_names.items():
+    for first_server, domains in domains_server_names.items():
         if first_server not in domains_to_ask:
             continue
 
@@ -156,10 +162,20 @@ try:
         if certbot_new(domains.replace(" ", ","), real_email, use_letsencrypt_staging) != 0:
             status = 2
             LOGGER.error(f"Certificate generation failed for domain(s) {domains} ...")
+            generated_domains.difference_update(domains.split(" "))
             continue
         else:
             status = 1 if status == 0 else status
             LOGGER.info(f"Certificate generation succeeded for domain(s) : {domains}")
+
+    # Remove old certificates
+    for elem in chain(DATA_PATH.glob("archive/*"), DATA_PATH.glob("live/*"), DATA_PATH.glob("renewal/*")):
+        if elem.name.replace(".conf", "") not in generated_domains:
+            LOGGER.debug(f"Removing old certificate {elem}")
+            if elem.is_dir():
+                rmtree(elem, ignore_errors=True)
+            else:
+                elem.unlink(missing_ok=True)
 
     # Save Let's Encrypt data to db cache
     if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
