@@ -820,6 +820,14 @@ def instances():
 
         manage_bunkerweb("instances", request.form["INSTANCE_ID"], operation=request.form["operation"])
 
+        for f in app.config["TO_FLASH"]:
+            if f["type"] == "error":
+                flash(f["content"], "error")
+            else:
+                flash(f["content"])
+
+        app.config["TO_FLASH"].clear()
+
         return redirect(url_for("instances"))
 
     # Display instances
