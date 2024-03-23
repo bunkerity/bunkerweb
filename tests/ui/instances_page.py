@@ -40,6 +40,7 @@ try:
 
     log_info("Trying to stop instance ...")
 
+    no_errors = True
     action = "stop"
     while no_errors:
         log_info(f"Trying to {action} BunkerWeb instance ...")
