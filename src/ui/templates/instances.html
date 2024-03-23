@@ -23,18 +23,18 @@
                         </div>
                         <!-- end state and title-->
                         <!-- detail list -->
-                        <div role="grid" class="grid grid-cols-1 gap-2 mt-4 mb-6 ml-1">
+                        <div role="grid" class="card-detail-container">
                             {% set instance_details = [{"name" : "TYPE", "value" : instance['_type']},{"name" : "HOSTNAME", "value" : instance['hostname']}] %}
                             <!-- detail -->
                             {% for detail in instance_details %}
                                 <div role="row"
-                                     class="flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0">
+                                     class="card-detail-item">
                                     <p role="gridcell"
-                                       class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500">
+                                       class="card-detail-item-title">
                                         {{ detail['name'] }}
                                     </p>
                                     <p role="gridcell"
-                                       class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100">
+                                       class="card-detail-item-subtitle">
                                         {{ detail['value'] }}
                                     </p>
                                 </div>

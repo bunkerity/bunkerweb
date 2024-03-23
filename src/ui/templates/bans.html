@@ -47,16 +47,21 @@
         ] %}
     <div class="{% if bans|length == 0 %}hidden{% endif %} h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
+        <div role="grid" class="card-detail-container">
         {% for info in bans_info %}
-            <div class="mx-1 flex items-center my-4">
-                <p class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 ">
+            <div role="row"
+                    class="card-detail-item">
+                <p role="gridcell"
+                    class="card-detail-item-title">
                     {{ info['name'] }}
                 </p>
-                <p class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-200">
+                <p role="gridcell"
+                    class="card-detail-item-subtitle">
                     {{ info['data'] }}
                 </p>
             </div>
         {% endfor %}
+        </div>
     </div>
     <!-- end info -->
     <!-- filter -->
