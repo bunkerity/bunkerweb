@@ -162,7 +162,6 @@ try:
         if certbot_new(domains.replace(" ", ","), real_email, use_letsencrypt_staging) != 0:
             status = 2
             LOGGER.error(f"Certificate generation failed for domain(s) {domains} ...")
-            generated_domains.difference_update(domains.split(" "))
             continue
         else:
             status = 1 if status == 0 else status
