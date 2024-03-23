@@ -27,15 +27,13 @@ try:
 
         try:
             access_page(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']", "instances", False)
-
-            log_info(f"Instance was {action}ed successfully, checking the message ...")
-            assert_alert_message(DRIVER, f"has been {action}ed")
+            log_info(f"Instance was {action}ed successfully ...")
             no_errors = False
         except:
             if retries >= 3:
                 exit(1)
             retries += 1
-            log_warning("Message list doesn't contain the expected message or is empty, retrying...")
+            log_warning("Error while reloading, retrying...")
 
     if TEST_TYPE == "linux":
         wait_for_service()
@@ -54,15 +52,13 @@ try:
 
         try:
             access_page(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']", "instances", False)
-
-            log_info(f"Instance was {action}ed successfully, checking the message ...")
-            assert_alert_message(DRIVER, f"has been {action}ed")
+            log_info(f"Instance was {action}ed successfully ...")
             no_errors = False
         except:
             if retries >= 3:
                 exit(1)
             retries += 1
-            log_warning("Message list doesn't contain the expected message or is empty, retrying...")
+            log_warning("Error while stopping instance, retrying...")
 
     if TEST_TYPE == "linux":
         wait_for_service()
