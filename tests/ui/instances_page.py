@@ -6,6 +6,7 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 from wizard import DRIVER
 from base import TEST_TYPE
 from utils import access_page, assert_button_click, safe_get_element, wait_for_service
+from time import sleep
 
 exit_code = 0
 
