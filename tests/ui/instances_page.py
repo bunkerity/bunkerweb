@@ -6,6 +6,7 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 from wizard import DRIVER
 from base import TEST_TYPE
 from utils import access_page, assert_button_click, safe_get_element, wait_for_service
+from time import sleep
 
 exit_code = 0
 
@@ -21,9 +22,14 @@ try:
 
         try:
             form = safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
-        except TimeoutException:
-            log_exception("No instance form found, exiting ...")
-            exit(1)
+        except:
+            if retries >= 3:
+                exit(1)
+            retries += 1
+            log_warning("No instance form found, retrying ...")
+            sleep(2)
+            DRIVER.refresh()
+            continue
 
         try:
             access_page(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']", "instances", False)
@@ -45,7 +51,9 @@ try:
 
     try:
         assert_button_click(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']")
-        safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
+        log_info(f"Clicked on stop button, waiting 5s ...")
+        sleep(5)
+        safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]", error=True)
         log_exception("Instance was not stopped successfully, exiting ...")
         exit(1)
     except (TimeoutException, WebDriverException):
