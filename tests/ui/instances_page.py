@@ -22,8 +22,13 @@ try:
         try:
             form = safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
         except TimeoutException:
-            log_exception("No instance form found, exiting ...")
-            exit(1)
+            if retries >= 3:
+                exit(1)
+            retries += 1
+            log_warning("No instance form found, retrying ...")
+            sleep(2)
+            DRIVER.refresh()
+            continue
 
         try:
             access_page(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']", "instances", False)
