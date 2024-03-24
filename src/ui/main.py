@@ -828,6 +828,8 @@ def instances():
 
         app.config["TO_FLASH"].clear()
 
+        sleep(3)
+
         return redirect(url_for("instances"))
 
     # Display instances
