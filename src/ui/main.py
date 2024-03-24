@@ -818,22 +818,19 @@ def instances():
         ):
             return redirect_flash_error("Missing operation parameter on /instances.", "instances")
 
-        app.config["RELOADING"] = True
-        app.config["LAST_RELOAD"] = time()
-        Thread(
-            target=manage_bunkerweb,
-            name="Reloading instances",
-            args=("instances", request.form["INSTANCE_ID"]),
-            kwargs={"operation": request.form["operation"]},
-        ).start()
+        manage_bunkerweb("instances", request.form["INSTANCE_ID"], operation=request.form["operation"])
 
-        return redirect(
-            url_for(
-                "loading",
-                next=url_for("instances"),
-                message=(f"{request.form['operation'].title()}ing" if request.form["operation"] != "stop" else "Stopping") + " instance",
-            )
-        )
+        for f in app.config["TO_FLASH"]:
+            if f["type"] == "error":
+                flash(f["content"], "error")
+            else:
+                flash(f["content"])
+
+        app.config["TO_FLASH"].clear()
+
+        sleep(3)
+
+        return redirect(url_for("instances"))
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
@@ -1584,7 +1581,6 @@ def custom_plugin(plugin: str):
 
         # Get prerender from action.py
         pre_render = run_action(plugin, "pre_render")
-
         return render_template(
             Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
             username=current_user.get_id(),

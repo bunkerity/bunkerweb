@@ -27,7 +27,7 @@ status = 0
 
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 
-LETS_ENCRYPT_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
+DATA_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt", "etc")
 LETS_ENCRYPT_WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LETS_ENCRYPT_LOGS_DIR = join(sep, "var", "log", "bunkerweb")
 
@@ -54,7 +54,7 @@ try:
             "renew",
             "--no-random-sleep-on-renew",
             "--config-dir",
-            LETS_ENCRYPT_PATH.joinpath("etc").as_posix(),
+            DATA_PATH.as_posix(),
             "--work-dir",
             LETS_ENCRYPT_WORK_DIR,
             "--logs-dir",
@@ -75,8 +75,8 @@ try:
         LOGGER.error("Certificates renewal failed")
 
     # Save Let's Encrypt data to db cache
-    if LETS_ENCRYPT_PATH.is_dir() and list(LETS_ENCRYPT_PATH.iterdir()):
-        cached, err = JOB.cache_dir(LETS_ENCRYPT_PATH)
+    if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
+        cached, err = JOB.cache_dir(DATA_PATH)
         if not cached:
             LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
         else:

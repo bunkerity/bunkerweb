@@ -13,7 +13,7 @@ services:
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://myapp
+      - REVERSE_PROXY_HOST=http://myapp:8080
       # proxy protocol settings
       - USE_PROXY_PROTOCOL=yes
       - USE_REAL_IP=yes
@@ -49,7 +49,7 @@ services:
       - bw-docker
 
   myproxy:
-    image: haproxy:2.7-alpine
+    image: haproxy:2.9-alpine
     ports:
       - 80:8080
       - 443:8443
@@ -59,7 +59,7 @@ services:
       - net-proxy
 
   myapp:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 

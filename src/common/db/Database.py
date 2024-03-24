@@ -962,7 +962,21 @@ class Database:
 
     def save_custom_configs(
         self,
-        custom_configs: List[Dict[str, Union[str, bytes, Tuple[str, List[str]]]]],
+        custom_configs: List[
+            Dict[
+                Literal[
+                    "service_id",
+                    "type",
+                    "name",
+                    "data",
+                    "value",
+                    "checksum",
+                    "method",
+                    "exploded",
+                ],
+                Union[str, bytes, List[str]],
+            ]
+        ],
         method: str,
         changed: Optional[bool] = True,
     ) -> str:
@@ -976,11 +990,7 @@ class Database:
             endl = "\n"
             for custom_config in custom_configs:
                 if method != "ui":
-                    config = {
-                        "data": custom_config["value"],
-                        "method": method,
-                    }
-                    assert isinstance(custom_config["exploded"], tuple) and len(custom_config["exploded"]) == 3, "Invalid exploded custom config"
+                    config = {"data": custom_config["value"], "method": method}
 
                     if custom_config["exploded"][0]:
                         if not session.query(Services).with_entities(Services.id).filter_by(id=custom_config["exploded"][0]).first():

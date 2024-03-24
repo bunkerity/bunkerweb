@@ -231,15 +231,43 @@
 /*---------------------------------------------*/
 
 /*---------------------------------------------*/
+/*--------------- CARD------------------------*/
+/*---------------------------------------------*/
+
+.card-detail-container {
+  @apply grid grid-cols-1 gap-2 mt-4 mb-6 ml-1;
+}
+
+.card-detail-item {
+  @apply flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0;
+}
+
+.card-detail-item-title {
+  @apply transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
+}
+
+.card-detail-item-subtitle {
+  @apply break-all transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
+}
+
+/*---------------------------------------------*/
+/*--------------- END CARD --------------------*/
+/*---------------------------------------------*/
+
+/*---------------------------------------------*/
 /*--------------- CORE PLUGINS ----------------*/
 /*---------------------------------------------*/
 
 .core-layout {
-  @apply col-span-12 grid grid-cols-12 gap-4;
+  @apply col-span-12 grid grid-cols-12;
 }
 
 .core-card {
-  @apply h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-lg {
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit transition hover:scale-102 col-span-12 md:col-span-6 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-wrap {
@@ -279,7 +307,7 @@
 }
 
 .core-card-status {
-  @apply col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-fit h-fit transition hover:scale-102 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-fit h-fit transition hover:scale-102 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-status-container {
@@ -311,7 +339,7 @@
 }
 
 .core-card-list {
-  @apply h-fit content-start col-span-12 md:col-span-6 w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit content-start md:col-span-6 overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .w-small.core-card-list {
@@ -367,7 +395,7 @@
 }
 
 .core-card-metrics {
-  @apply h-fit sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-metrics-name {

@@ -32,7 +32,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     services:
 
       myapp:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           - bw-services
 
@@ -48,7 +48,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
           - USE_REVERSE_PROXY=yes
           - REVERSE_PROXY_URL=/
-          - REVERSE_PROXY_HOST=http://myapp
+          - REVERSE_PROXY_HOST=http://myapp:8080
         networks:
           - bw-universe
           - bw-services
@@ -102,7 +102,7 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp:
-    	  image: tutum/hello-world
+    	  image: nginxdemos/nginx-hello
     	  networks:
     	    bw-services:
     		    aliases:
@@ -111,7 +111,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     	    - "bunkerweb.SERVER_NAME=www.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
     	    - "bunkerweb.REVERSE_PROXY_URL=/"
-    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp:8080"
 
     networks:
       bw-services:
@@ -128,7 +128,7 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           bw-services:
               aliases:
@@ -141,7 +141,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - "bunkerweb.SERVER_NAME=www.example.com"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp:8080"
 
     networks:
       bw-services:
@@ -174,7 +174,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     	spec:
     	  containers:
     	  - name: app
-    		image: tutum/hello-world
+    		image: nginxdemos/nginx-hello
     		ports:
     		- containerPort: 80
     ---
@@ -376,17 +376,17 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp1:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           - bw-services
 
       myapp2:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           - bw-services
 
       myapp3:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           - bw-services
 
@@ -403,9 +403,9 @@ You will find more settings about reverse proxy in the [settings section](settin
           - SERVER_NAME=app1.example.com app2.example.com app3.example.com
           - USE_REVERSE_PROXY=yes # Will be applied to all server config
           - REVERSE_PROXY_URL=/ # Will be applied to all server config
-          - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
-          - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
-          - app3.example.com_REVERSE_PROXY_HOST=http://myapp3
+          - app1.example.com_REVERSE_PROXY_HOST=http://myapp1:8080
+          - app2.example.com_REVERSE_PROXY_HOST=http://myapp2:8080
+          - app3.example.com_REVERSE_PROXY_HOST=http://myapp3:8080
         networks:
           - bw-universe
           - bw-services
@@ -458,7 +458,7 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp1:
-    	  image: tutum/hello-world
+    	  image: nginxdemos/nginx-hello
     	  networks:
     	    bw-services:
     		    aliases:
@@ -467,10 +467,10 @@ You will find more settings about reverse proxy in the [settings section](settin
     	    - "bunkerweb.SERVER_NAME=app1.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
     	    - "bunkerweb.REVERSE_PROXY_URL=/"
-    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1:8080"
 
       myapp2:
-    	  image: tutum/hello-world
+    	  image: nginxdemos/nginx-hello
     	  networks:
     	    bw-services:
     		    aliases:
@@ -479,10 +479,10 @@ You will find more settings about reverse proxy in the [settings section](settin
     	    - "bunkerweb.SERVER_NAME=app2.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
     	    - "bunkerweb.REVERSE_PROXY_URL=/"
-    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2:8080"
 
       myapp3:
-    	  image: tutum/hello-world
+    	  image: nginxdemos/nginx-hello
     	  networks:
     	    bw-services:
     		    aliases:
@@ -491,7 +491,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     	    - "bunkerweb.SERVER_NAME=app3.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
     	    - "bunkerweb.REVERSE_PROXY_URL=/"
-    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3:8080"
 
     networks:
       bw-services:
@@ -508,7 +508,7 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp1:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           bw-services:
               aliases:
@@ -521,10 +521,10 @@ You will find more settings about reverse proxy in the [settings section](settin
           - "bunkerweb.SERVER_NAME=app1.example.com"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1:8080"
 
       myapp2:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           bw-services:
               aliases:
@@ -537,10 +537,10 @@ You will find more settings about reverse proxy in the [settings section](settin
           - "bunkerweb.SERVER_NAME=app2.example.com"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2:8080"
 
       myapp3:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           bw-services:
               aliases:
@@ -553,7 +553,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - "bunkerweb.SERVER_NAME=app3.example.com"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3:8080"
 
     networks:
       bw-services:
@@ -586,7 +586,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     	spec:
     	  containers:
     	  - name: app1
-    		image: tutum/hello-world
+    		image: nginxdemos/nginx-hello
     		ports:
     		- containerPort: 80
     ---
@@ -1546,7 +1546,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     myapp:
-      image: tutum/hello-world
+      image: nginxdemos/nginx-hello
       labels:
         - |
           bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=

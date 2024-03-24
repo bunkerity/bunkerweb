@@ -12,7 +12,7 @@ services:
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://myapp
+      - REVERSE_PROXY_HOST=http://myapp:8080
       # real IP settings
       - USE_REAL_IP=yes
       - REAL_IP_FROM=10.10.10.0/24
@@ -55,7 +55,7 @@ services:
       - net-proxy
 
   myapp:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 
