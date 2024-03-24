@@ -21,7 +21,7 @@ try:
 
         try:
             form = safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
-        except TimeoutException:
+        except:
             if retries >= 3:
                 exit(1)
             retries += 1
