@@ -20,9 +20,9 @@ services:
       - |
         CUSTOM_CONF_HTTP_upstream=
         upstream app {
-          server app1:80;
-          server app2:80;
-          server app3:80;
+          server app1:8080;
+          server app2:8080;
+          server app3:8080;
         }
     labels:
       - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
@@ -53,17 +53,17 @@ services:
       - bw-docker
 
   app1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 
   app2:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 
   app3:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 

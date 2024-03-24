@@ -2,7 +2,7 @@ version: "3"
 
 services:
   myapp1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
     deploy:
@@ -13,10 +13,10 @@ services:
         - "bunkerweb.SERVER_NAME=app1.example.com"
         - "bunkerweb.USE_REVERSE_PROXY=yes"
         - "bunkerweb.REVERSE_PROXY_URL=/"
-        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1:8080"
 
   myapp2:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
     deploy:
@@ -27,10 +27,10 @@ services:
         - "bunkerweb.SERVER_NAME=app2.example.com"
         - "bunkerweb.USE_REVERSE_PROXY=yes"
         - "bunkerweb.REVERSE_PROXY_URL=/"
-        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2:8080"
 
   myapp3:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
     deploy:
@@ -41,7 +41,7 @@ services:
         - "bunkerweb.SERVER_NAME=app3.example.com"
         - "bunkerweb.USE_REVERSE_PROXY=yes"
         - "bunkerweb.REVERSE_PROXY_URL=/"
-        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
+        - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3:8080"
 
 networks:
   bw-services:

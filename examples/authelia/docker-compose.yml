@@ -31,13 +31,13 @@ services:
       - auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
       # Applications
       - app1.example.com_REVERSE_PROXY_URL=/
-      - app1.example.com_REVERSE_PROXY_HOST=http://app1
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1:8080
       - app1.example.com_REVERSE_PROXY_AUTH_REQUEST=/authelia
       - app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri
       - app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email
       - app1.example.com_REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email
       - app2.example.com_REVERSE_PROXY_URL=/
-      - app2.example.com_REVERSE_PROXY_HOST=http://app2
+      - app2.example.com_REVERSE_PROXY_HOST=http://app2:8080
       - app2.example.com_REVERSE_PROXY_AUTH_REQUEST=/authelia
       - app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri
       - app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email
@@ -67,11 +67,11 @@ services:
 
   # APPLICATIONS
   app1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
   app2:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 

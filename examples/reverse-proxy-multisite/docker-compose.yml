@@ -17,9 +17,9 @@ services:
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - app1.example.com_REVERSE_PROXY_URL=/
-      - app1.example.com_REVERSE_PROXY_HOST=http://app1
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1:8080
       - app2.example.com_REVERSE_PROXY_URL=/
-      - app2.example.com_REVERSE_PROXY_HOST=http://app2
+      - app2.example.com_REVERSE_PROXY_HOST=http://app2:8080
     labels:
       - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
@@ -49,12 +49,12 @@ services:
       - bw-docker
 
   app1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 
   app2:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 

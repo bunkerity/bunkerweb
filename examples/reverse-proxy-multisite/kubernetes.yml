@@ -45,7 +45,7 @@ spec:
     spec:
       containers:
         - name: app1
-          image: tutum/hello-world
+          image: nginxdemos/nginx-hello
 ---
 apiVersion: v1
 kind: Service
@@ -57,7 +57,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -77,7 +77,7 @@ spec:
     spec:
       containers:
         - name: app2
-          image: tutum/hello-world
+          image: nginxdemos/nginx-hello
 ---
 apiVersion: v1
 kind: Service
@@ -89,4 +89,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 8080
