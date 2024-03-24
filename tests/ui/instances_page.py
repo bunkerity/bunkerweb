@@ -50,9 +50,10 @@ try:
     log_info(f"Trying to {action} BunkerWeb instance ...")
 
     try:
-        assert_button_click(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']", error=True)
+        assert_button_click(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']")
         sleep(5)
-        assert_button_click(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']", error=True)
+        assert_button_click(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']")
+        form = safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]", error=True)
         log_exception("Instance was not stopped successfully, exiting ...")
         exit(1)
     except (TimeoutException, WebDriverException):
