@@ -51,9 +51,9 @@ try:
 
     try:
         assert_button_click(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']")
+        log_info(f"Clicked on stop button, waiting 5s ...")
         sleep(5)
-        assert_button_click(DRIVER, f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']")
-        form = safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]", error=True)
+        safe_get_element(DRIVER, By.XPATH, "//form[starts-with(@id, 'form-instance-')]", error=True)
         log_exception("Instance was not stopped successfully, exiting ...")
         exit(1)
     except (TimeoutException, WebDriverException):
