@@ -2,7 +2,7 @@
   "name": "kubernetes-configs",
   "kinds": ["kubernetes"],
   "timeout": 60,
-  "delay": 60,
+  "delay": 120,
   "tests": [
     {
       "type": "string",
