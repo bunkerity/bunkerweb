@@ -399,7 +399,7 @@ try:
             if job.plugin_id in pro_plugin_ids:
                 continue
 
-            if not job.success:
+            if job.name != "download-pro-plugins" and not job.success:
                 print(
                     f"❌ The job {job.name} (plugin_id: {job.plugin_id}) is in the database but failed, exiting ...",
                     flush=True,
