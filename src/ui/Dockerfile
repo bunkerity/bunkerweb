@@ -1,7 +1,7 @@
 FROM python:3.12.2-alpine3.19@sha256:25a82f6f8b720a6a257d58e478a0a5517448006e010c85273f4d9c706819478c as builder
 
 # Install python dependencies
-RUN apk add --no-cache build-base libffi-dev postgresql-dev
+RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
