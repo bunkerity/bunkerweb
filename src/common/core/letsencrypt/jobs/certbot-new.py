@@ -58,7 +58,7 @@ def certbot_new(domains: str, email: str, use_letsencrypt_staging: bool = False)
         stdin=DEVNULL,
         stderr=PIPE,
         universal_newlines=True,
-        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
     )
     while process.poll() is None:
         if process.stderr:
@@ -124,7 +124,7 @@ try:
         stdout=PIPE,
         stderr=STDOUT,
         text=True,
-        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
         check=False,
     )
     stdout = proc.stdout

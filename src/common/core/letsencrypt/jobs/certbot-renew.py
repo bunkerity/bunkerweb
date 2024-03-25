@@ -63,7 +63,7 @@ try:
         stdin=DEVNULL,
         stderr=PIPE,
         universal_newlines=True,
-        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
     )
     while process.poll() is None:
         if process.stderr:

@@ -79,9 +79,10 @@ try:
     if not skipped_servers:
         for first_server in all_domains:
             if getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")) == "no":
-                LOGGER.info(f"Custom SSL is not enabled for {first_server}, skipping ...")
                 skipped_servers.append(first_server)
                 continue
+
+            LOGGER.info(f"Service {first_server} is using custom SSL certificates, checking ...")
 
             cert_file = getenv(f"{first_server}_CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", ""))
             key_file = getenv(f"{first_server}_CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", ""))

@@ -216,7 +216,6 @@ class Metadata(Base):
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
     is_pro = Column(Boolean, default=False, nullable=False)
-    pro_license_key = Column(String(256), nullable=True)
     pro_expire = Column(DateTime, nullable=True)
     pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
     pro_services = Column(Integer, default=0, nullable=False)

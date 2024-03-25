@@ -394,7 +394,7 @@ def inject_variables():
         is_pro_version=metadata["is_pro"],
         pro_status=metadata["pro_status"],
         pro_services=metadata["pro_services"],
-        pro_expire=metadata["pro_expire"],
+        pro_expire=metadata["pro_expire"].strftime("%d-%m-%Y") if metadata["pro_expire"] else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
         plugins=app.config["CONFIG"].get_plugins(),
     )
