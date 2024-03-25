@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.5.6 - YYYY/MM/DD
+## v1.5.6 - 2024/03/25
 
 - [LINUX] Support RHEL 9.3
 - [BUGFIX] Fix issues with the antibot feature ([#866](https://github.com/bunkerity/bunkerweb/issues/866), [#870](https://github.com/bunkerity/bunkerweb/issues/870))
