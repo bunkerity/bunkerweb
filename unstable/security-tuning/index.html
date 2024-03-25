@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.10ba22f1.min.css">
       
       
 
@@ -895,6 +895,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#lets-encrypt-dns-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Let's Encrypt DNS (PRO)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#custom-certificate" class="md-nav__link">
     <span class="md-ellipsis">
       Custom certificate
@@ -1114,51 +1123,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#reporting" class="md-nav__link">
+  <a href="#monitoring-pro" class="md-nav__link">
     <span class="md-ellipsis">
-      Reporting
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Reporting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#types-of-reporting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Types of reporting
+      Monitoring (PRO)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#get-reporting" class="md-nav__link">
+  <a href="#prometheus-exporter-pro" class="md-nav__link">
     <span class="md-ellipsis">
-      Get reporting
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prometheus-exporter" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prometheus exporter
+      Prometheus exporter (PRO)
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#pro-metrics" class="md-nav__link">
+  <a href="#reporting-pro" class="md-nav__link">
     <span class="md-ellipsis">
-      Pro metrics
+      Reporting (PRO)
     </span>
   </a>
   
@@ -1571,6 +1556,144 @@
 </tbody>
 </table>
 <p>Full Let's Encrypt automation is fully working with stream mode as long as you open the <code>80/tcp</code> port from the outside. Please note that you will need to use the <code>LISTEN_STREAM_PORT_SSL</code> setting in order to choose your listening SSL/TLS port.</p>
+<h3 id="lets-encrypt-dns-pro">Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h3>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. This plugin offers seamless integration with various DNS providers for streamlined certificate management.</p>
+<ul>
+<li>Automatic creation and renewal of Let's Encrypt certificates</li>
+<li>Integration with DNS providers for DNS challenges</li>
+<li>Generate wildcard certificates</li>
+<li>Configuration options for customization and flexibility</li>
+</ul>
+<p>Settings of the Let's Encrypt DNS plugin :</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTO_LETS_ENCRYPT_DNS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Set to <code>yes</code> to enable automatic certificate creation and renewal using DNS challenges.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_DNS_EMAIL</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Email address for Let's Encrypt notifications.</td>
+</tr>
+<tr>
+<td><code>USE_LETS_ENCRYPT_DNS_STAGING</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Set to <code>yes</code> to use Let's Encrypt staging server.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_DNS_PROVIDER</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>DNS provider for Let's Encrypt DNS challenges.</td>
+</tr>
+<tr>
+<td><code>USE_LETS_ENCRYPT_DNS_WILDCARD</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Set to <code>yes</code> to automatically generate wildcard domains in certificates.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_DNS_PROPAGATION</code></td>
+<td><code>default</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Time in seconds to wait for DNS propagation.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code></td>
+<td></td>
+<td>multisite</td>
+<td>yes</td>
+<td>Credential item for Let's Encrypt DNS provider that contains required credentials.</td>
+</tr>
+</tbody>
+</table>
+<p>Info :</p>
+<ul>
+<li>The <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.</li>
+<li>If no <code>LETS_ENCRYPT_DNS_PROPAGATION</code> setting is set, the provider's default propagation time will be used.</li>
+</ul>
+<p>Available DNS Providers :</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Description</th>
+<th>Mandatory Settings</th>
+<th>Link(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cloudflare</code></td>
+<td>Cloudflare DNS provider</td>
+<td><code>dns_cloudflare_api_token</code></td>
+<td><a href="https://certbot-dns-cloudflare.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>digitalocean</code></td>
+<td>DigitalOcean DNS provider</td>
+<td><code>dns_digitalocean_token</code></td>
+<td><a href="https://certbot-dns-digitalocean.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>google</code></td>
+<td>Google Cloud DNS provider</td>
+<td><code>project_id</code>, <code>private_key_id</code>, <code>private_key</code>, <code>client_email</code>, <code>client_email</code>, <code>client_x509_cert_url</code></td>
+<td><a href="https://certbot-dns-google.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>linode</code></td>
+<td>Linode DNS provider</td>
+<td><code>dns_linode_key</code></td>
+<td><a href="https://certbot-dns-linode.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>ovh</code></td>
+<td>OVH DNS provider</td>
+<td><code>dns_ovh_application_key</code>, <code>dns_ovh_application_secret</code>, <code>dns_ovh_consumer_key</code></td>
+<td><a href="https://certbot-dns-ovh.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>rfc2136</code></td>
+<td>RFC 2136 DNS provider</td>
+<td><code>dns_rfc2136_server</code>, <code>dns_rfc2136_name</code>, <code>dns_rfc2136_secret</code></td>
+<td><a href="https://certbot-dns-rfc2136.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>route53</code></td>
+<td>Amazon Route 53 DNS provider</td>
+<td><code>aws_access_key_id</code>, <code>aws_secret_access_key</code></td>
+<td><a href="https://certbot-dns-route53.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>scaleway</code></td>
+<td>Scaleway DNS provider</td>
+<td><code>dns_scaleway_application_token</code></td>
+<td><a href="https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst">Documentation</a></td>
+</tr>
+</tbody>
+</table>
 <h3 id="custom-certificate">Custom certificate</h3>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>If you want to use your own certificates, here is the list of related settings :</p>
@@ -2507,93 +2630,204 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </tbody>
 </table>
 <h2 id="monitoring-and-reporting">Monitoring and reporting</h2>
-<p>Monitoring and reporting means that you are kept informed of the slightest problem and can react as quickly as possible.</p>
-<h3 id="reporting">Reporting</h3>
-<div style="display:flex; align-items:center">
-
-  <h3 data-custom-header id="reporting">Reporting</h3>
-
-  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
-        viewBox="0 0 48 46"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
-      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
-  </svg>
-</div>
-
-<div class="admonition warning">
-<p class="admonition-title">Used of cache data</p>
-<p>A comparison is made every hour with the cached data. If BunkerWeb no longer has access to the cache, the data to be compared will be reset.</p>
-</div>
-<h4 id="types-of-reporting">Types of reporting</h4>
-<p>Pro reporting plugin gives you two types of reports :</p>
+<h3 id="monitoring-pro">Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h3>
+<p>The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By enabling it, your instance(s) will start collecting various data related to attacks, requests and performance. You can then retrieve them by calling the <code>/monitoring</code> API endpoint on regular basis or by using other plugins like the Prometheus exporter one.</p>
+<p>List of features :</p>
 <ul>
-<li>
-<p><strong>regular report</strong>: you can define a period of time, and you'll get a regular report showing the percentage change in data between the previous report and this one, and also key points about your BunkerWeb state.</p>
-</li>
-<li>
-<p><strong>alerts</strong>: every hour, an analysis of the metrics will be carried out, and you can set a threshold for the percentage change in the data. If this threshold is reached, you will receive an alert.</p>
-</li>
+<li>Enable collection of various BunkerWeb metrics</li>
+<li>Retrieve metrics from the API</li>
+<li>Use in combination with other plugins (e.g. Prometheus exporter)</li>
+<li>Dedicate UI page to monitor your instance(s)</li>
 </ul>
-<div class="admonition info">
-<p class="admonition-title">Example</p>
-<p>After one hour, if I go from 300 requests blocked to more than 600 after one hour : in case I have set a threshold of +100%, I'll be alerted.</p>
-</div>
-<h4 id="get-reporting">Get reporting</h4>
-<p>To receive alerts or regular reports, you can use :</p>
-<p><strong>1) webhook</strong></p>
-<p>We are supporting multiple webhooks :</p>
+<p>List of settings :</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_MONITORING</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>no</td>
+<td>Enable monitoring of BunkerWeb.</td>
+</tr>
+<tr>
+<td><code>MONITORING_METRICS_DICT_SIZE</code></td>
+<td><code>10M</code></td>
+<td>global</td>
+<td>no</td>
+<td>Size of the dict to store monitoring metrics.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="prometheus-exporter-pro">Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h3>
+<p>The Prometheus exporter plugin adds a <a href="https://prometheus.io/docs/instrumenting/exporters/">Prometheus exporter</a> on your BunkerWeb instance(s). When enabled, you can configure your Prometheus instance(s) to scrape a specific endpoint on Bunkerweb and gather internal metrics.</p>
+<p>We also provide a <a href="https://grafana.com/grafana/dashboards/20755-bunkerweb/">Grafana dashboard</a> that you can import into your own instance and connect to your own Prometheus datasource.</p>
+<p><strong>Please note that the use of Prometheus exporter plugin requires to enable the Monitoring plugin (<code>USE_MONITORING=yes</code>)</strong></p>
+<p>List of features :</p>
 <ul>
-<li><strong>API</strong> : we will send a JSON of type <code>{"message" : markdownReport }</code>.</li>
-<li><strong>Discord</strong></li>
-<li><strong>Slack</strong></li>
+<li>Prometheus exporter providing internal BunkerWeb metrics</li>
+<li>Dedicated and configurable port, listen IP and URL</li>
+<li>Whitelist IP/network for maximum security</li>
 </ul>
-<div class="admonition info">
-<p class="admonition-title">Specific webhook</p>
-<p>We listen to our customers, so if you need to make the plugin compatible with a particular webhook, don't hesitate to contact us to discuss it together.</p>
-</div>
-<p><strong>2) SMTP</strong></p>
-<p>You can also use the SMTP protocol. You will need to set the various parameters (user auth, password auth, host...).</p>
-<p>You need to <strong>pay attention</strong> using SMTP:</p>
+<p>List of settings :</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_PROMETHEUS_EXPORTER</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Enable the Prometheus export.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_IP</code></td>
+<td><code>0.0.0.0</code></td>
+<td>global</td>
+<td>no</td>
+<td>Listening IP of the Prometheus exporter.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_PORT</code></td>
+<td><code>9113</code></td>
+<td>global</td>
+<td>no</td>
+<td>Listening port of the Prometheus exporter.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_URL</code></td>
+<td><code>/metrics</code></td>
+<td>global</td>
+<td>no</td>
+<td>HTTP URL of the Prometheus exporter.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_ALLOW_IP</code></td>
+<td><code>127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16</code></td>
+<td>global</td>
+<td>no</td>
+<td>List of IP/networks allowed to contact the Prometheus exporter endpoint.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reporting-pro">Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h3>
+<p>The Reporting plugin provides a comprehensive solution for regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information. It offers a wide range of features, including automatic report creation, customization options, and seamless integration with monitoring pro plugin. With the Reporting plugin, you can easily generate and manage reports to monitor the performance and security of your application.</p>
+<p>List of features :</p>
 <ul>
-<li>
-<p>Make sure that the address used to send the <strong>message does not end up in the spam folder</strong>.</p>
-</li>
-<li>
-<p>The address used must <strong>not have double authentication</strong> to work.</p>
-</li>
+<li>Regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information.</li>
+<li>Integration with Monitoring Pro plugin for seamless integration and enhanced reporting capabilities.</li>
+<li>Support for webhooks (classic, Discord, and Slack) for real-time notifications.</li>
+<li>Support for SMTP for email notifications.</li>
+<li>Configuration options for customization and flexibility.</li>
 </ul>
-<h3 id="prometheus-exporter">Prometheus exporter</h3>
-<div style="display:flex; align-items:center">
-
-  <h3 data-custom-header id="prometheus-exporter">Prometheus exporter</h3>
-
-  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
-        viewBox="0 0 48 46"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
-      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
-  </svg>
-</div>
-
-<p>TO DO</p>
-<h3 id="pro-metrics">Pro metrics</h3>
-<div style="display:flex; align-items:center">
-
-  <h3 data-custom-header id="pro-metrics">Pro metrics</h3>
-
-  <svg style="height:1.25rem; width:1.25rem; margin-top: 0.70rem; margin-left: 0.5rem"
-        viewBox="0 0 48 46"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-      <path style="fill:#eab308"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
-      <path style="fill:#eab308"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
-  </svg>
-</div>
-
-<p>TO DO</p>
+<p>List of settings :</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_REPORTING_SMTP</code></td>
+<td><code>no</code></td>
+<td><code>global</code></td>
+<td>Enable sending the report via email.</td>
+</tr>
+<tr>
+<td><code>USE_REPORTING_WEBHOOK</code></td>
+<td><code>no</code></td>
+<td><code>global</code></td>
+<td>Enable sending the report via webhook.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SCHEDULE</code></td>
+<td><code>weekly</code></td>
+<td><code>global</code></td>
+<td>The frequency at which reports are sent.</td>
+</tr>
+<tr>
+<td><code>REPORTING_WEBHOOK_URLS</code></td>
+<td></td>
+<td><code>global</code></td>
+<td>List of webhook URLs to receive the report in Markdown (separated by spaces).</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_EMAILS</code></td>
+<td></td>
+<td><code>global</code></td>
+<td>List of email addresses to receive the report in HTML format (separated by spaces).</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_HOST</code></td>
+<td></td>
+<td><code>global</code></td>
+<td>The host server used for SMTP sending.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_PORT</code></td>
+<td><code>465</code></td>
+<td><code>global</code></td>
+<td>The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
+<td></td>
+<td><code>global</code></td>
+<td>The email address used as the sender. Note that 2FA must be disabled for this email address.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_FROM_USER</code></td>
+<td></td>
+<td><code>global</code></td>
+<td>The user authentication value for sending via the from email address.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
+<td></td>
+<td><code>global</code></td>
+<td>The password authentication value for sending via the from email address.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_SSL</code></td>
+<td><code>SSL</code></td>
+<td><code>global</code></td>
+<td>Determine whether or not to use a secure connection for SMTP.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Warning:</strong></p>
+<ul>
+<li>This plugins requires the Monitoring Pro plugin to be installed and enabled with the <code>USE_MONITORING</code> setting set to <code>yes</code>.</li>
+</ul>
+<p><strong>Info:</strong></p>
+<ul>
+<li>If <code>USE_REPORTING_SMTP</code> is set to <code>yes</code>, the setting <code>REPORTING_SMTP_EMAILS</code> must be set.</li>
+<li>If <code>USE_REPORTING_WEBHOOK</code> is set to <code>yes</code>, the setting <code>REPORTING_WEBHOOK_URLS</code> must be set.</li>
+<li>Accepted values for <code>REPORTING_SCHEDULE</code> are <code>daily</code>, <code>weekly</code>and <code>monthly</code>.</li>
+<li>If no <code>REPORTING_SMTP_FROM_USER</code> and <code>REPORTING_SMTP_FROM_PASSWORD</code> are set, the plugin will try to send the email without authentication.</li>
+<li>If <code>REPORTING_SMTP_FROM_USER</code> isn't set but <code>REPORTING_SMTP_FROM_PASSWORD</code> is set, the plugin will use the <code>REPORTING_SMTP_FROM_EMAIL</code> as the username.</li>
+<li>If the job fails, the plugin will retry sending the report in the next execution.</li>
+</ul>
 
 
 
@@ -2693,7 +2927,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
+      <script src="../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

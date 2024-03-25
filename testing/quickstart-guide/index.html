@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.10ba22f1.min.css">
       
       
 
@@ -1031,7 +1031,7 @@
 <span class="nt">services</span><span class="p">:</span>
 
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
@@ -1047,7 +1047,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REVERSE_PROXY=yes</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REVERSE_PROXY_URL=/</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REVERSE_PROXY_HOST=http://myapp</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REVERSE_PROXY_HOST=http://myapp:8080</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
@@ -1097,7 +1097,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">      </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">aliases</span><span class="p">:</span>
@@ -1106,7 +1106,7 @@
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp:8080&quot;</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
@@ -1120,7 +1120,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">aliases</span><span class="p">:</span>
@@ -1133,7 +1133,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp:8080&quot;</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
@@ -1162,7 +1162,7 @@
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">        </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="nn">---</span>
@@ -1304,17 +1304,17 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp1</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">myapp2</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">myapp3</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
@@ -1331,9 +1331,9 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=app1.example.com app2.example.com app3.example.com</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REVERSE_PROXY=yes</span><span class="w"> </span><span class="c1"># Will be applied to all server config</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REVERSE_PROXY_URL=/</span><span class="w"> </span><span class="c1"># Will be applied to all server config</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1.example.com_REVERSE_PROXY_HOST=http://myapp1</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2.example.com_REVERSE_PROXY_HOST=http://myapp2</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3.example.com_REVERSE_PROXY_HOST=http://myapp3</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1.example.com_REVERSE_PROXY_HOST=http://myapp1:8080</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app2.example.com_REVERSE_PROXY_HOST=http://myapp2:8080</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app3.example.com_REVERSE_PROXY_HOST=http://myapp3:8080</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
@@ -1383,7 +1383,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp1</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">      </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">aliases</span><span class="p">:</span>
@@ -1392,10 +1392,10 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app1.example.com&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp1&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp1:8080&quot;</span>
 
 <span class="w">  </span><span class="nt">myapp2</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">      </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">aliases</span><span class="p">:</span>
@@ -1404,10 +1404,10 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app2.example.com&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp2&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp2:8080&quot;</span>
 
 <span class="w">  </span><span class="nt">myapp3</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">      </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">aliases</span><span class="p">:</span>
@@ -1416,7 +1416,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app3.example.com&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp3&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp3:8080&quot;</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
@@ -1430,7 +1430,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp1</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">aliases</span><span class="p">:</span>
@@ -1443,10 +1443,10 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app1.example.com&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp1&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp1:8080&quot;</span>
 
 <span class="w">  </span><span class="nt">myapp2</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">aliases</span><span class="p">:</span>
@@ -1459,10 +1459,10 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app2.example.com&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp2&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp2:8080&quot;</span>
 
 <span class="w">  </span><span class="nt">myapp3</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">aliases</span><span class="p">:</span>
@@ -1475,7 +1475,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=app3.example.com&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp3&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://myapp3:8080&quot;</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
@@ -1504,7 +1504,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app1</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">        </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="nn">---</span>
@@ -2284,7 +2284,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </ul>
 <p>Here is a dummy example using a docker-compose file :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">myapp</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutum/hello-world</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
 <span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <span class="w">      </span><span class="no">bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=</span>
@@ -3118,7 +3118,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
+      <script src="../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

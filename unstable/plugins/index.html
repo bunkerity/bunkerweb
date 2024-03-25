@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.10ba22f1.min.css">
       
       
 
@@ -1351,34 +1351,33 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 </div>
 <p>What a plugin structure looks like :
 <div class="highlight"><pre><span></span><code>plugin /
-        confs / conf_type.conf
+        confs / conf_type / conf_name.conf
         ui / actions.py
              template.html
+        jobs / my-job.py
         plugin.lua
         plugin.json
 </code></pre></div></p>
 <ul>
 <li>
-<p><strong>conf_type.conf</strong> : add a <a href="../quickstart-guide/#custom-configurations">custom NGINX configurations.</a></p>
+<p><strong>conf_name.conf</strong> : add <a href="../quickstart-guide/#custom-configurations">custom NGINX configurations</a> (as jinja2 templates)</p>
 </li>
 <li>
-<p><strong>actions.py</strong> : script to execute on flask server.
-This script is running on flask context, you have access to lib and utils like <code>jinja2</code>, <code>requests</code>, etc...</p>
+<p><strong>actions.py</strong> : script to execute on flask server, this script is running on flask context, you have access to lib and utils like <code>jinja2</code>, <code>requests</code>, etc...</p>
 </li>
 <li>
-<p><strong>template.html</strong> : custom plugin page you can access from ui.</p>
+<p><strong>template.html</strong> : custom plugin page you can access from ui</p>
 </li>
 <li>
-<p><strong>plugin.lua</strong> : code to execute on NGINX using <a href="https://github.com/openresty/lua-nginx-module">NGING LUA module.</a></p>
+<p><strong>jobs py file</strong> : custom python files executed as jobs by the scheduler</p>
 </li>
 <li>
-<p><strong>plugin.json</strong> : metadata, settings and jobs for your settings.</p>
+<p><strong>plugin.lua</strong> : code to execute on NGINX using <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA module</a></p>
+</li>
+<li>
+<p><strong>plugin.json</strong> : metadata, settings and jobs for your settings</p>
 </li>
 </ul>
-<div class="admonition info">
-<p class="admonition-title">Optional files</p>
-<p>Files like <code>confs</code> and <code>ui</code> ones are optional. Add them only to fit your needs.</p>
-</div>
 <h3 id="getting-started">Getting started</h3>
 <p>The first step is to create a folder that will contain the plugin :</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>myplugin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1566,7 +1565,7 @@ This script is running on flask context, you have access to lib and utils like <
 </tbody>
 </table>
 <h3 id="configurations">Configurations</h3>
-<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="../quickstart-guide/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>stream</code> and <code>server-stream</code>).</p>
+<p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="../quickstart-guide/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>stream</code>, <code>server-stream</code>, <code>modsec</code> and <code>modsec-crs</code>).</p>
 <p>Here is an example for a configuration template file inside the <strong>confs/server-http</strong> folder named <strong>example.conf</strong> :</p>
 <div class="highlight"><pre><span></span><code>location /setting {
     default_type &#39;text/plain&#39;;
@@ -1587,8 +1586,8 @@ This script is running on flask context, you have access to lib and utils like <
 <span class="kd">local</span> <span class="n">myplugin</span> <span class="o">=</span> <span class="n">class</span><span class="p">(</span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span> <span class="n">plugin</span><span class="p">)</span>
 
 
-<span class="kr">function</span> <span class="nc">myplugin</span><span class="p">:</span><span class="nf">initialize</span><span class="p">()</span>
-    <span class="n">plugin</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="s2">&quot;myplugin&quot;</span><span class="p">)</span>
+<span class="kr">function</span> <span class="nc">myplugin</span><span class="p">:</span><span class="nf">initialize</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+    <span class="n">plugin</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="s2">&quot;myplugin&quot;</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
     <span class="n">self</span><span class="p">.</span><span class="n">dummy</span> <span class="o">=</span> <span class="s2">&quot;dummy&quot;</span>
 <span class="kr">end</span>
 
@@ -1928,7 +1927,7 @@ This script is running on flask context, you have access to lib and utils like <
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.c8d2eff1.min.js"></script>
+      <script src="../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
