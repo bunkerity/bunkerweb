@@ -121,9 +121,10 @@ try:
     if not skipped_servers:
         for first_server in servers:
             if getenv(f"{first_server}_GENERATE_SELF_SIGNED_SSL", getenv("GENERATE_SELF_SIGNED_SSL", "no")) != "yes":
-                LOGGER.info(f"Self-signed SSL is not enabled for {first_server}, skipping certificate generation ...")
                 skipped_servers.append(first_server)
                 continue
+
+            LOGGER.info(f"Service {first_server} is using self-signed SSL certificates, checking ...")
 
             ret, ret_status = generate_cert(
                 first_server,
