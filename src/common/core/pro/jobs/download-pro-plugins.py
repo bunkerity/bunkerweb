@@ -39,7 +39,7 @@ status = 0
 
 
 def clean_pro_plugins(db) -> None:
-    LOGGER.debug("Cleaning up Pro plugins...")
+    LOGGER.warning("Cleaning up Pro plugins...")
     # Clean Pro plugins
     for plugin in PRO_PLUGINS_DIR.glob("*"):
         rmtree(plugin, ignore_errors=True)
@@ -98,11 +98,6 @@ try:
     current_date = datetime.now()
     pro_license_key = getenv("PRO_LICENSE_KEY")
 
-    # If we already checked today, skip the check
-    if pro_license_key == db_metadata["pro_license_key"] and db_metadata["last_pro_check"] and current_date.day == db_metadata["last_pro_check"].day:
-        LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
-        sys_exit(0)
-
     LOGGER.info("Checking BunkerWeb Pro license key...")
 
     data = {
@@ -136,10 +131,16 @@ try:
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
             error = True
+            clean = False
             if resp.headers.get("Content-Type", "") == "application/json":
                 resp_data = resp.json()
-                if db_metadata["is_pro"] and resp_data.get("action") == "clean":
-                    clean_pro_plugins(db)
+                clean = db_metadata["is_pro"] and resp_data.get("action") == "clean"
+
+            if clean:
+                clean_pro_plugins(db)
+            else:
+                LOGGER.warning("Skipping the check for BunkerWeb Pro license...")
+                sys_exit(0)
         elif resp.status_code == 429:
             LOGGER.warning("Too many requests to the remote server while checking BunkerWeb Pro license, please try again later")
             sys_exit(0)
@@ -152,14 +153,22 @@ try:
             metadata = resp.json()["data"]
             LOGGER.debug(f"Got BunkerWeb Pro license metadata: {metadata}")
             metadata["pro_expire"] = datetime.strptime(metadata["pro_expire"], "%Y-%m-%d") if metadata["pro_expire"] else None
-            if metadata["pro_expire"] and metadata["pro_expire"] < datetime.now():
-                metadata["pro_status"] = "expired"
             if metadata["pro_services"] < int(data["service_number"]):
                 metadata["pro_overlapped"] = True
             metadata["is_pro"] = metadata["pro_status"] == "active"
 
     metadata = default_metadata | metadata
     db.set_pro_metadata(metadata)
+
+    # If we already checked today, skip the check
+    if (
+        metadata["is_pro"] == db_metadata["is_pro"]
+        and pro_license_key == db_metadata["pro_license_key"]
+        and db_metadata["last_pro_check"]
+        and current_date.day == db_metadata["last_pro_check"].day
+    ):
+        LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
+        sys_exit(0)
 
     if metadata["is_pro"] != db_metadata["is_pro"]:
         clean_pro_plugins(db)
@@ -172,18 +181,24 @@ try:
         if resp.status_code == 403:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
             error = True
+            clean = False
             if resp.headers.get("Content-Type", "") == "application/json":
                 resp_data = {}
                 with BytesIO() as resp_content:
                     for chunk in resp.iter_content(chunk_size=8192):
-                        resp_content += chunk
+                        resp_content.write(chunk)
                     resp_content.seek(0)
                     resp_data = load(resp_content)
 
-                if resp_data.get("action") == "clean":
-                    metadata = default_metadata.copy()
-                    db.set_pro_metadata(metadata)
-                    clean_pro_plugins(db)
+                clean = resp_data.get("action") == "clean"
+
+            if clean:
+                metadata = default_metadata.copy()
+                db.set_pro_metadata(metadata)
+                clean_pro_plugins(db)
+            else:
+                LOGGER.warning("Skipping the check for new or updated Pro plugins...")
+                sys_exit(0)
         elif resp.status_code == 429:
             LOGGER.warning("Too many requests to the remote server while checking BunkerWeb Pro plugins, please try again later")
             sys_exit(0)
@@ -191,13 +206,16 @@ try:
             LOGGER.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}/pro")
             status = 2
             sys_exit(status)
+        elif resp.status_code != 500:
+            resp.raise_for_status()
 
     if not metadata["is_pro"]:
         if metadata["pro_overlapped"]:
-            message = (
+            LOGGER.warning(
                 f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']}"
             )
-        elif pro_license_key:
+
+        if pro_license_key:
             message = "Your BunkerWeb Pro license " + (
                 STATUS_MESSAGES.get(metadata["pro_status"], "is not valid or has expired") if not error else "is not valid or has expired"
             )
@@ -219,12 +237,13 @@ try:
             LOGGER.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {PREVIEW_ENDPOINT}/v{data['version']}.zip")
             status = 2
             sys_exit(status)
+        elif resp.status_code != 500:
+            resp.raise_for_status()
 
     if resp.status_code == 500:
         LOGGER.error("An error occurred with the remote server, please try again later")
         status = 2
         sys_exit(status)
-    resp.raise_for_status()
 
     with BytesIO() as plugin_content:
         for chunk in resp.iter_content(chunk_size=8192):
