@@ -157,9 +157,6 @@ try:
                 metadata["pro_overlapped"] = True
             metadata["is_pro"] = metadata["pro_status"] == "active"
 
-    metadata = default_metadata | metadata
-    db.set_pro_metadata(metadata)
-
     # If we already checked today, skip the check
     if (
         metadata["is_pro"] == db_metadata["is_pro"]
@@ -169,6 +166,10 @@ try:
     ):
         LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
         sys_exit(0)
+
+    default_metadata["last_pro_check"] = current_date
+    metadata = default_metadata | metadata
+    db.set_pro_metadata(metadata)
 
     if metadata["is_pro"] != db_metadata["is_pro"]:
         clean_pro_plugins(db)
@@ -270,7 +271,6 @@ try:
 
     if not plugin_nbr:
         LOGGER.info("All Pro plugins are up to date")
-        db.set_pro_metadata(metadata | {"last_pro_check": current_date})
         sys_exit(0)
 
     pro_plugins = []
@@ -315,7 +315,6 @@ try:
         LOGGER.error(f"Couldn't update Pro plugins to database: {err}")
         sys_exit(2)
 
-    db.set_pro_metadata(metadata | {"last_pro_check": current_date})
     status = 1
     LOGGER.info("🚀 Pro plugins downloaded and installed successfully!")
 except SystemExit as e:
