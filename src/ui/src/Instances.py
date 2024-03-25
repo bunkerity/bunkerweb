@@ -271,7 +271,7 @@ class Instances:
     def reload_instances(self) -> Union[list[str], str]:
         not_reloaded: list[str] = []
         for instance in self.get_instances():
-            if instance.health is False:
+            if not instance.health:
                 not_reloaded.append(instance.name)
                 continue
 

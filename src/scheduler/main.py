@@ -252,7 +252,7 @@ if __name__ == "__main__":
         env["DATABASE_URI"] = db.database_uri
 
         # Instantiate scheduler
-        SCHEDULER = JobScheduler(env | environ.copy(), logger, INTEGRATION, db=db)
+        SCHEDULER = JobScheduler(env | environ, logger, INTEGRATION, db=db)
 
         if INTEGRATION in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
             # Automatically setup the scheduler apis
@@ -370,7 +370,7 @@ if __name__ == "__main__":
         logger.info("Running plugins download jobs ...")
 
         # Update the environment variables of the scheduler
-        SCHEDULER.env = env | environ.copy()
+        SCHEDULER.env = env | environ
         if not SCHEDULER.run_single("download-plugins"):
             logger.warning("download-plugins job failed at first start, plugins settings set by the user may not be up to date ...")
         if not SCHEDULER.run_single("download-pro-plugins"):
@@ -454,7 +454,7 @@ if __name__ == "__main__":
 
             if RUN_JOBS_ONCE:
                 # Update the environment variables of the scheduler
-                SCHEDULER.env = env | environ.copy()
+                SCHEDULER.env = env | environ
                 SCHEDULER.setup()
 
                 # Only run jobs once

@@ -102,10 +102,10 @@ for pro in glob(f"v{version}/*/plugin.json"):
                 core_settings[pro_plugin["name"]]["is_pro"] = True
 
 # Print plugins and their settings
-for name, data in dict(sorted(core_settings.items())).items():
+for data in dict(sorted(core_settings.items())).values():
     pro_crown = ""
     if "is_pro" in data:
-        pro_crown = f" <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)\n"
+        pro_crown = " <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)\n"
     print(f"## {data['name']}{pro_crown}\n", file=doc)
     print(f"{stream_support(data['stream'])}\n", file=doc)
     print(f"{data['description']}\n", file=doc)

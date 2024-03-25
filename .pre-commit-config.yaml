@@ -17,7 +17,7 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/psf/black
-    rev: 6fdf8a4af28071ed1d079c01122b34c5d587207a # frozen: 24.2.0
+    rev: 552baf822992936134cbd31a38f69c8cfe7c0f05 # frozen: 24.3.0
     hooks:
       - id: black
         name: Black Python Formatter
@@ -50,7 +50,7 @@ repos:
         args: ["--max-line-length=160", "--ignore=E266,E402,E501,E722,W503"]
 
   - repo: https://github.com/dosisod/refurb
-    rev: a9a4edd45687e664dee0905ba1c848bda227d1d6 # frozen: v1.28.0
+    rev: 2e31f0033b6c00bf99912fc6a8b5fd00460c9ba0 # frozen: v2.0.0
     hooks:
       - id: refurb
         name: Refurb Python Refactoring Tool
@@ -72,6 +72,6 @@ repos:
       - id: gitleaks
 
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: 3f77b826548d8dc2d26675f077361c92773b50a7 # frozen: v0.9.0
+    rev: 2491238703a5d3415bb2b7ff11388bf775372f29 # frozen: v0.10.0
     hooks:
       - id: shellcheck

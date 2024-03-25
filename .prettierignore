@@ -18,3 +18,4 @@ src/ui/static/js/utils/purify/*
 src/ui/templates/*
 src/common/core/*/ui/*
 datepicker-foundation.css
+examples/
