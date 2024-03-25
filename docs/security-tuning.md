@@ -153,7 +153,7 @@ Here is the list of related settings :
 
 Full Let's Encrypt automation is fully working with stream mode as long as you open the `80/tcp` port from the outside. Please note that you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
 
-### Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Let's Encrypt DNS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :white_check_mark:
 
@@ -549,7 +549,7 @@ You can deploy complex authentication (e.g. SSO), by using the auth request sett
 
 ## Monitoring and reporting
 
-### Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By enabling it, your instance(s) will start collecting various data related to attacks, requests and performance. You can then retrieve them by calling the `/monitoring` API endpoint on regular basis or by using other plugins like the Prometheus exporter one.
 
@@ -567,7 +567,7 @@ The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By 
 |`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
 |`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
 
-### Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 The Prometheus exporter plugin adds a [Prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) on your BunkerWeb instance(s). When enabled, you can configure your Prometheus instance(s) to scrape a specific endpoint on Bunkerweb and gather internal metrics.
 
@@ -591,7 +591,7 @@ We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/207
 |`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
 |`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
 
-### Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 !!! warning "Monitoring plugin needed"
     This plugins requires the Monitoring Pro plugin to be installed and enabled with the `USE_MONITORING` setting set to `yes`.
