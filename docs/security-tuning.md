@@ -153,18 +153,22 @@ Here is the list of related settings :
 
 Full Let's Encrypt automation is fully working with stream mode as long as you open the `80/tcp` port from the outside. Please note that you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
 
-### Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+### Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :white_check_mark:
 
-The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. This plugin offers seamless integration with various DNS providers for streamlined certificate management.
+The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. 
+
+This plugin offers seamless integration with various DNS providers for streamlined certificate management.
+
+**List of features** 
 
 - Automatic creation and renewal of Let's Encrypt certificates
 - Integration with DNS providers for DNS challenges
 - Generate wildcard certificates
 - Configuration options for customization and flexibility
 
-Settings of the Let's Encrypt DNS plugin :
+**Settings of the Let's Encrypt DNS plugin** 
 
 | Setting                            | Default   | Context   | Multiple | Description                                                                             |
 | ---------------------------------- | --------- | --------- | -------- | --------------------------------------------------------------------------------------- |
@@ -176,12 +180,12 @@ Settings of the Let's Encrypt DNS plugin :
 | `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | no       | Time in seconds to wait for DNS propagation.                                            |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | yes      | Credential item for Let's Encrypt DNS provider that contains required credentials.      |
 
-Info :
+!!! info "Information and behavior"
+    - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
+    
+    - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
 
-- The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
-- If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
-
-Available DNS Providers :
+**Available DNS Providers**
 
 | Provider       | Description                  | Mandatory Settings                                                                                    | Link(s)                                                                               |
 | -------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -545,25 +549,25 @@ You can deploy complex authentication (e.g. SSO), by using the auth request sett
 
 ## Monitoring and reporting
 
-### Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+### Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By enabling it, your instance(s) will start collecting various data related to attacks, requests and performance. You can then retrieve them by calling the `/monitoring` API endpoint on regular basis or by using other plugins like the Prometheus exporter one.
 
-List of features :
+**List of features**
 
 - Enable collection of various BunkerWeb metrics
 - Retrieve metrics from the API
 - Use in combination with other plugins (e.g. Prometheus exporter)
 - Dedicate UI page to monitor your instance(s)
 
-List of settings :
+**List of settings**
 
 |           Setting            |Default|Context|Multiple|                 Description                 |
 |------------------------------|-------|-------|--------|---------------------------------------------|
 |`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
 |`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
 
-### Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+### Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 The Prometheus exporter plugin adds a [Prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) on your BunkerWeb instance(s). When enabled, you can configure your Prometheus instance(s) to scrape a specific endpoint on Bunkerweb and gather internal metrics.
 
@@ -571,13 +575,13 @@ We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/207
 
 **Please note that the use of Prometheus exporter plugin requires to enable the Monitoring plugin (`USE_MONITORING=yes`)**
 
-List of features :
+**List of features**
 
 - Prometheus exporter providing internal BunkerWeb metrics
 - Dedicated and configurable port, listen IP and URL
 - Whitelist IP/network for maximum security
 
-List of settings :
+**List of settings**
 
 |           Setting            |                       Default                       |Context|Multiple|                              Description                               |
 |------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
@@ -587,11 +591,15 @@ List of settings :
 |`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
 |`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
 
-### Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+### Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+!!! warning "Monitoring plugin needed"
+    This plugins requires the Monitoring Pro plugin to be installed and enabled with the `USE_MONITORING` setting set to `yes`.
+
 
 The Reporting plugin provides a comprehensive solution for regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information. It offers a wide range of features, including automatic report creation, customization options, and seamless integration with monitoring pro plugin. With the Reporting plugin, you can easily generate and manage reports to monitor the performance and security of your application.
 
-List of features :
+**List of features**
 
 - Regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information.
 - Integration with Monitoring Pro plugin for seamless integration and enhanced reporting capabilities.
@@ -599,7 +607,7 @@ List of features :
 - Support for SMTP for email notifications.
 - Configuration options for customization and flexibility.
 
-List of settings :
+**List of settings**
 
 | Setting                        | Default  | Context  | Description                                                                                                                        |
 | ------------------------------ | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -615,15 +623,11 @@ List of settings :
 | `REPORTING_SMTP_FROM_PASSWORD` |          | `global` | The password authentication value for sending via the from email address.                                                          |
 | `REPORTING_SMTP_SSL`           | `SSL`    | `global` | Determine whether or not to use a secure connection for SMTP.                                                                      |
 
-**Warning:**
 
-- This plugins requires the Monitoring Pro plugin to be installed and enabled with the `USE_MONITORING` setting set to `yes`.
-
-**Info:**
-
-- If `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
-- If `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
-- Accepted values for `REPORTING_SCHEDULE` are `daily`, `weekly`and `monthly`.
-- If no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
-- If `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
-- If the job fails, the plugin will retry sending the report in the next execution.
+!!! info "Information and behavior"
+    - case `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
+    - case `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
+    - Accepted values for `REPORTING_SCHEDULE` are `daily`, `weekly`and `monthly`.
+    - case no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
+    - case `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
+    - case the job fails, the plugin will retry sending the report in the next execution.

@@ -40,7 +40,7 @@ def stream_support(support) -> str:
 
 
 def pro_title(title: str) -> str:
-    return f"## {title} <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'>\n"
+    return f"## {title} <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'>\n"
 
 
 doc = StringIO()
@@ -105,7 +105,7 @@ for pro in glob(f"v{version}/*/plugin.json"):
 for data in dict(sorted(core_settings.items())).values():
     pro_crown = ""
     if "is_pro" in data:
-        pro_crown = " <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)\n"
+        pro_crown = " <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)\n"
     print(f"## {data['name']}{pro_crown}\n", file=doc)
     print(f"{stream_support(data['stream'])}\n", file=doc)
     print(f"{data['description']}\n", file=doc)

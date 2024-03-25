@@ -45,7 +45,7 @@ class SubmitAccount {
       "focus:valid:!ring-red-500",
       "active:!border-red-500",
       "active:valid:!border-red-500",
-      "valid:!border-red-500",
+      "valid:!border-red-500"
     );
     this.pwAlertEl.classList.add("opacity-0");
     this.pwAlertEl.setAttribute("aria-hidden", "true");
@@ -59,7 +59,7 @@ class SubmitAccount {
       "focus:valid:!ring-red-500",
       "active:!border-red-500",
       "active:valid:!border-red-500",
-      "valid:!border-red-500",
+      "valid:!border-red-500"
     );
     this.pwAlertEl.classList.remove("opacity-0");
     this.pwAlertEl.setAttribute("aria-hidden", "false");
@@ -77,14 +77,14 @@ class PwBtn {
       const passwordContainer = e.target.closest("[data-input-group]");
       const inpEl = passwordContainer.querySelector("input");
       const invBtn = passwordContainer.querySelector(
-        '[data-setting-password="invisible"]',
+        '[data-setting-password="invisible"]'
       );
       const visBtn = passwordContainer.querySelector(
-        '[data-setting-password="visible"]',
+        '[data-setting-password="visible"]'
       );
       inpEl.setAttribute(
         "type",
-        inpEl.getAttribute("type") === "password" ? "text" : "password",
+        inpEl.getAttribute("type") === "password" ? "text" : "password"
       );
 
       if (inpEl.getAttribute("type") === "password") {
@@ -128,26 +128,8 @@ class SwitchTabForm {
   }
 }
 
-class FormatExpire {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    window.addEventListener("DOMContentLoaded", () => {
-      const expireEl = document.querySelector("[data-expire]");
-      if (!expireEl) return;
-
-      expireEl.textContent = expireEl.textContent
-        .replaceAll("-", "/")
-        .split(" ")[0];
-    });
-  }
-}
-
 const setPWBtn = new PwBtn();
 const setSubmit = new SubmitAccount();
 const setTabs = new Tabs();
 const setPopover = new Popover();
 const setSwitchTabForm = new SwitchTabForm();
-const setFormatExpire = new FormatExpire();

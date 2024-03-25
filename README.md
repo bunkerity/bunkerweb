@@ -90,7 +90,7 @@ When using BunkerWeb you have the choice of the version you want to use : open-s
 
 Whether it's enhanced security, an enriched user experience, or technical supervision, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs.
 
-Be it in the documentation or the user interface, the PRO features are annotated with a crown <img src="https://docs.bunkerweb.io/1.5.6/assets/img/pro-icon.svg" alt="crow pro icon" height="32px" width="32px"> to distinguish them from those integrated into the open-source version.
+Be it in the documentation or the user interface, the PRO features are annotated with a crown <img src="https://docs.bunkerweb.io/1.5.6/assets/img/pro-icon.svg" alt="crow pro icon" height="24px" width="24px"> to distinguish them from those integrated into the open-source version.
 
 You can upgrade from the open-source version to the PRO one easily and at any time you want. The process is pretty straightforward :
 
