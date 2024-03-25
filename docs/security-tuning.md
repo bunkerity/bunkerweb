@@ -549,14 +549,14 @@ You can deploy complex authentication (e.g. SSO), by using the auth request sett
 
 The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By enabling it, your instance(s) will start collecting various data related to attacks, requests and performance. You can then retrieve them by calling the `/monitoring` API endpoint on regular basis or by using other plugins like the Prometheus exporter one.
 
-List of features :
+**List of features**
 
 - Enable collection of various BunkerWeb metrics
 - Retrieve metrics from the API
 - Use in combination with other plugins (e.g. Prometheus exporter)
 - Dedicate UI page to monitor your instance(s)
 
-List of settings :
+**List of settings**
 
 |           Setting            |Default|Context|Multiple|                 Description                 |
 |------------------------------|-------|-------|--------|---------------------------------------------|
@@ -571,13 +571,13 @@ We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/207
 
 **Please note that the use of Prometheus exporter plugin requires to enable the Monitoring plugin (`USE_MONITORING=yes`)**
 
-List of features :
+**List of features**
 
 - Prometheus exporter providing internal BunkerWeb metrics
 - Dedicated and configurable port, listen IP and URL
 - Whitelist IP/network for maximum security
 
-List of settings :
+**List of settings**
 
 |           Setting            |                       Default                       |Context|Multiple|                              Description                               |
 |------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
@@ -589,9 +589,13 @@ List of settings :
 
 ### Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
+!!! warning "Monitoring plugin needed"
+    This plugins requires the Monitoring Pro plugin to be installed and enabled with the `USE_MONITORING` setting set to `yes`.
+
+
 The Reporting plugin provides a comprehensive solution for regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information. It offers a wide range of features, including automatic report creation, customization options, and seamless integration with monitoring pro plugin. With the Reporting plugin, you can easily generate and manage reports to monitor the performance and security of your application.
 
-List of features :
+**List of features**
 
 - Regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information.
 - Integration with Monitoring Pro plugin for seamless integration and enhanced reporting capabilities.
@@ -599,7 +603,7 @@ List of features :
 - Support for SMTP for email notifications.
 - Configuration options for customization and flexibility.
 
-List of settings :
+**List of settings**
 
 | Setting                        | Default  | Context  | Description                                                                                                                        |
 | ------------------------------ | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -615,15 +619,11 @@ List of settings :
 | `REPORTING_SMTP_FROM_PASSWORD` |          | `global` | The password authentication value for sending via the from email address.                                                          |
 | `REPORTING_SMTP_SSL`           | `SSL`    | `global` | Determine whether or not to use a secure connection for SMTP.                                                                      |
 
-**Warning:**
 
-- This plugins requires the Monitoring Pro plugin to be installed and enabled with the `USE_MONITORING` setting set to `yes`.
-
-**Info:**
-
-- If `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
-- If `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
-- Accepted values for `REPORTING_SCHEDULE` are `daily`, `weekly`and `monthly`.
-- If no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
-- If `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
-- If the job fails, the plugin will retry sending the report in the next execution.
+!!! info "Information and behavior"
+    - case `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
+    - case `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
+    - Accepted values for `REPORTING_SCHEDULE` are `daily`, `weekly`and `monthly`.
+    - case no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
+    - case `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
+    - case the job fails, the plugin will retry sending the report in the next execution.
