@@ -157,14 +157,18 @@ Full Let's Encrypt automation is fully working with stream mode as long as you o
 
 STREAM support :white_check_mark:
 
-The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. This plugin offers seamless integration with various DNS providers for streamlined certificate management.
+The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. 
+
+This plugin offers seamless integration with various DNS providers for streamlined certificate management.
+
+**List of features** 
 
 - Automatic creation and renewal of Let's Encrypt certificates
 - Integration with DNS providers for DNS challenges
 - Generate wildcard certificates
 - Configuration options for customization and flexibility
 
-Settings of the Let's Encrypt DNS plugin :
+**Settings of the Let's Encrypt DNS plugin** 
 
 | Setting                            | Default   | Context   | Multiple | Description                                                                             |
 | ---------------------------------- | --------- | --------- | -------- | --------------------------------------------------------------------------------------- |
@@ -176,12 +180,12 @@ Settings of the Let's Encrypt DNS plugin :
 | `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | no       | Time in seconds to wait for DNS propagation.                                            |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | yes      | Credential item for Let's Encrypt DNS provider that contains required credentials.      |
 
-Info :
+!!! info "Information and behavior"
+    - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
+    
+    - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
 
-- The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
-- If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
-
-Available DNS Providers :
+**Available DNS Providers**
 
 | Provider       | Description                  | Mandatory Settings                                                                                    | Link(s)                                                                               |
 | -------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
