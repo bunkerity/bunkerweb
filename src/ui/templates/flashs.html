@@ -1,6 +1,6 @@
 <!-- float button-->
 {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if pro_status == "active" and pro_overlapped %}
+    {% if pro_overlapped %}
         {% set messages = messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
     {% endif %}
     <div data-flash-group
