@@ -325,7 +325,7 @@ Automatic creation, renewal and configuration of Let's Encrypt certificates.
 |`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
 |`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
 
-## Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+## Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM support :white_check_mark:
@@ -412,17 +412,17 @@ Management of the ModSecurity WAF.
 |`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.   |
 |`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.|
 
-## Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+## Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM support :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-|           Setting            |Default| Context |Multiple|                 Description                 |
-|------------------------------|-------|---------|--------|---------------------------------------------|
-|`USE_MONITORING`              |`yes`  |multisite|no      |Enable monitoring of BunkerWeb.              |
-|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global   |no      |Size of the dict to store monitoring metrics.|
+|           Setting            |Default|Context|Multiple|                 Description                 |
+|------------------------------|-------|-------|--------|---------------------------------------------|
+|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
+|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
 
 ## PHP
 
@@ -447,21 +447,20 @@ Pro settings for the Pro version of BunkerWeb.
 |-----------------|-------|-------|--------|-------------------------------------------------|
 |`PRO_LICENSE_KEY`|       |global |no      |The License Key for the Pro version of BunkerWeb.|
 
-## Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+## Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM support :x:
 
-Prometheus exporter for BunkerWeb
+Prometheus exporter for BunkerWeb internal metrics.
 
-|            Setting            |                       Default                       |Context|Multiple|                              Description                               |
-|-------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
-|`USE_PROMETHEUS_EXPORTER`      |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
-|`PROMETHEUS_EXPORTER_IP`       |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
-|`PROMETHEUS_EXPORTER_PORT`     |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
-|`PROMETHEUS_EXPORTER_DICT_SIZE`|`10M`                                                |global |no      |Size of the dict to store Prometheus metrics.                           |
-|`PROMETHEUS_EXPORTER_ALLOW_IP` |`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
-|`PROMETHEUS_EXPORTER_URL`      |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
+|           Setting            |                       Default                       |Context|Multiple|                              Description                               |
+|------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
+|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
+|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
+|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
+|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
+|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
 
 ## Real IP
 
@@ -514,7 +513,7 @@ Redis server configuration when using BunkerWeb in cluster mode.
 |`REDIS_SENTINEL_PASSWORD`|       |global |no      |Redis sentinel password.                                           |
 |`REDIS_SENTINEL_MASTER`  |       |global |no      |Redis sentinel master name.                                        |
 
-## Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)
+## Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM support :x:
@@ -523,18 +522,17 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 
 |           Setting            |Default |Context|Multiple|                                                           Description                                                            |
 |------------------------------|--------|-------|--------|----------------------------------------------------------------------------------------------------------------------------------|
-|`USE_REPORTING`               |`no`    |global |no      |Enable the reporting feature.                                                                                                     |
-|`REPORTING_USE_SMTP`          |`no`    |global |no      |Enable the send report with email(s).                                                                                             |
-|`REPORTING_USE_WEBHOOK`       |`no`    |global |no      |Enable the send report with webhook.                                                                                              |
-|`REPORTING_SCHEDULE`          |`weekly`|global |no      |The time between sending two reports.                                                                                             |
-|`REPORTING_WEBHOOK_URLS`      |        |global |no      |List of webhooks URLs to receive the report in PDF format (separated by spaces)                                                   |
-|`REPORTING_SMTP_EMAILS`       |        |global |no      |List of emails to receive the report in HTML format (separated by spaces)                                                         |
-|`REPORTING_SMTP_HOST`         |        |global |no      |Host server used for SMTP sending.                                                                                                |
-|`REPORTING_SMTP_FROM_EMAIL`   |        |global |no      |The email address used to send the message. Notice that 2FA must be disabled for this email address.                              |
+|`USE_REPORTING_SMTP`          |`no`    |global |no      |Enable sending the report via email.                                                                                              |
+|`USE_REPORTING_WEBHOOK`       |`no`    |global |no      |Enable sending the report via webhook.                                                                                            |
+|`REPORTING_SCHEDULE`          |`weekly`|global |no      |The frequency at which reports are sent.                                                                                          |
+|`REPORTING_WEBHOOK_URLS`      |        |global |no      |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
+|`REPORTING_SMTP_EMAILS`       |        |global |no      |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
+|`REPORTING_SMTP_HOST`         |        |global |no      |The host server used for SMTP sending.                                                                                            |
+|`REPORTING_SMTP_PORT`         |`465`   |global |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
+|`REPORTING_SMTP_FROM_EMAIL`   |        |global |no      |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
 |`REPORTING_SMTP_FROM_USER`    |        |global |no      |The user authentication value for sending via the from email address.                                                             |
 |`REPORTING_SMTP_FROM_PASSWORD`|        |global |no      |The password authentication value for sending via the from email address.                                                         |
-|`REPORTING_SMTP_PORT`         |`465`   |global |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
-|`REPORTING_SMTP_SSL`          |`SSL`   |global |no      |Determine whether or not you want a secure connection for SMTP.                                                                   |
+|`REPORTING_SMTP_SSL`          |`SSL`   |global |no      |Determine whether or not to use a secure connection for SMTP.                                                                     |
 
 ## Reverse proxy
 
