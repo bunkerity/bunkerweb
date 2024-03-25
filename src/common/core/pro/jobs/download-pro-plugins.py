@@ -96,9 +96,9 @@ try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     db_metadata = db.get_metadata()
     current_date = datetime.now()
-    pro_license_key = getenv("PRO_LICENSE_KEY")
+    pro_license_key = getenv("PRO_LICENSE_KEY", "").strip()
 
-    LOGGER.info("Checking BunkerWeb Pro license key...")
+    LOGGER.info("Checking BunkerWeb Pro status...")
 
     data = {
         "integration": get_integration(),
@@ -109,7 +109,6 @@ try:
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
     default_metadata = {
         "is_pro": False,
-        "pro_license_key": None,
         "pro_expire": None,
         "pro_status": "invalid",
         "pro_overlapped": False,
@@ -122,8 +121,6 @@ try:
     temp_dir.mkdir(parents=True, exist_ok=True)
 
     if pro_license_key:
-        default_metadata["pro_license_key"] = (pro_license_key := pro_license_key.strip())
-
         LOGGER.info("BunkerWeb Pro license provided, checking if it's valid...")
         headers["Authorization"] = f"Bearer {pro_license_key}"
         resp = get(f"{API_ENDPOINT}/pro/status", headers=headers, json=data, timeout=5, allow_redirects=True)
@@ -157,12 +154,11 @@ try:
                 metadata["pro_overlapped"] = True
             metadata["is_pro"] = metadata["pro_status"] == "active"
 
-    # If we already checked today, skip the check
+    # ? If we already checked today, skip the check and if the metadata is the same, skip the check
     if (
-        metadata["is_pro"] == db_metadata["is_pro"]
-        and pro_license_key == db_metadata["pro_license_key"]
+        metadata.get("is_pro", False) == db_metadata["is_pro"]
         and db_metadata["last_pro_check"]
-        and current_date.day == db_metadata["last_pro_check"].day
+        and current_date.replace(hour=0, minute=0, second=0, microsecond=0) == db_metadata["last_pro_check"].replace(hour=0, minute=0, second=0, microsecond=0)
     ):
         LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
         sys_exit(0)

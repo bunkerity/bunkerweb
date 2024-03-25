@@ -236,7 +236,7 @@ class Database:
 
         return ""
 
-    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_license_key", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
+    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
         """Set the pro metadata values"""
         with self.__db_session() as session:
             try:
@@ -312,7 +312,6 @@ class Database:
             "integration": "unknown",
             "database_version": "Unknown",
             "is_pro": "no",
-            "pro_license_key": "",
             "pro_expire": None,
             "pro_services": 0,
             "pro_overlapped": False,
@@ -332,7 +331,6 @@ class Database:
                         Metadata.version,
                         Metadata.integration,
                         Metadata.is_pro,
-                        Metadata.pro_license_key,
                         Metadata.pro_expire,
                         Metadata.pro_services,
                         Metadata.pro_overlapped,
@@ -348,7 +346,6 @@ class Database:
                             "version": metadata.version,
                             "integration": metadata.integration,
                             "is_pro": metadata.is_pro,
-                            "pro_license_key": metadata.pro_license_key or "",
                             "pro_expire": metadata.pro_expire,
                             "pro_services": metadata.pro_services,
                             "pro_overlapped": metadata.pro_overlapped,
