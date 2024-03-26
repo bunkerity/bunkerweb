@@ -176,7 +176,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     	  - name: app
     		image: nginxdemos/nginx-hello
     		ports:
-    		- containerPort: 80
+    		- containerPort: 8080
     ---
     apiVersion: v1
     kind: Service
@@ -188,7 +188,7 @@ You will find more settings about reverse proxy in the [settings section](settin
       ports:
     	- protocol: TCP
     	  port: 80
-    	  targetPort: 80
+    	  targetPort: 8080
     ```
 
     Here is the corresponding Ingress definition to serve and protect the web application :
@@ -588,7 +588,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     	  - name: app1
     		image: nginxdemos/nginx-hello
     		ports:
-    		- containerPort: 80
+    		- containerPort: 8080
     ---
     apiVersion: v1
     kind: Service
@@ -600,7 +600,7 @@ You will find more settings about reverse proxy in the [settings section](settin
       ports:
     	- protocol: TCP
     	  port: 80
-    	  targetPort: 80
+    	  targetPort: 8080
     ```
 
     Here is the corresponding Ingress definition to serve and protect the web applications :
