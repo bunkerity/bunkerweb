@@ -33,6 +33,8 @@ In the HTTP protocol, the Host header is used to determine which server the clie
 
 You can disable any request containing undefined or unknown Host value by setting `DISABLE_DEFAULT_SERVER` to `yes` (default : `no`). Please note that clients won't even receive a response, the TCP connection will be closed (using the special 444 status code of NGINX).
 
+If you want to close SSL/TLS connection if [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication) is undefined or unknown, you can set `DISABLE_DEFAULT_SERVER_STRICT_SNI` to `yes` (default : `no`). On the one hand, you can block attackers as soon as possible at SSL/TLS level but, in the other hand, you may have issues if your BunkerWeb instance is behind a reverse proxy configured to send HTTPS requests without SNI.
+
 ### Allowed methods
 
 STREAM support :x:
