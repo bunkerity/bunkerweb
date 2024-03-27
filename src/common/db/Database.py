@@ -177,7 +177,7 @@ class Database:
             self.__sql_engine.dispose()
 
     @contextmanager
-    def __db_session(self):
+    def __db_session(self, raise_error: bool = False) -> Any:
         try:
             assert self.__sql_engine is not None
         except AssertionError:
@@ -449,11 +449,15 @@ class Database:
                     with self.__db_session() as session:
                         old_data[table_name] = session.query(metadata.tables[table_name]).all()
 
-                # Drop all missing tables
+                # Rename the old tables
+                db_version_id = db_version.replace(".", "_")
                 for table_name in metadata.tables.keys():
                     if table_name not in Base.metadata.tables:
                         with self.__db_session() as session:
-                            session.execute(text(f"DROP TABLE {table_name}"))
+                            if inspector.has_table(f"{table_name}_{db_version_id}"):
+                                self.logger.warning(f'Table "{table_name}" already exists, dropping it to make room for the new one')
+                                session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
+                            session.execute(text(f"ALTER TABLE {table_name} RENAME TO {table_name}_{db_version_id}"))
 
                 Base.metadata.drop_all(self.__sql_engine)
 
