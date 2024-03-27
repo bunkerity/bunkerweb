@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from glob import glob
 from os import R_OK, W_OK, X_OK, access, getenv, sep
-from os.path import join, normpath
+from os.path import join
 from pathlib import Path
 from shutil import rmtree
 from subprocess import DEVNULL, STDOUT, run
@@ -42,13 +42,20 @@ if __name__ == "__main__":
         parser.add_argument("--no-linux-reload", action="store_true", help="disable linux reload")
         args = parser.parse_args()
 
-        settings_path = Path(normpath(args.settings))
-        templates_path = Path(normpath(args.templates))
-        core_path = Path(normpath(args.core))
-        plugins_path = Path(normpath(args.plugins))
-        pro_plugins_path = Path(normpath(args.pro_plugins))
-        output_path = Path(normpath(args.output))
-        target_path = Path(normpath(args.target))
+        settings_path = Path(args.settings)
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
+        templates_path = Path(args.templates)
+        templates_path.mkdir(parents=True, exist_ok=True)
+        core_path = Path(args.core)
+        core_path.mkdir(parents=True, exist_ok=True)
+        plugins_path = Path(args.plugins)
+        plugins_path.mkdir(parents=True, exist_ok=True)
+        pro_plugins_path = Path(args.pro_plugins)
+        pro_plugins_path.mkdir(parents=True, exist_ok=True)
+        output_path = Path(args.output)
+        output_path.mkdir(parents=True, exist_ok=True)
+        target_path = Path(args.target)
+        target_path.mkdir(parents=True, exist_ok=True)
 
         logger.info("Generator started ...")
         logger.info(f"Settings : {settings_path}")
@@ -62,7 +69,8 @@ if __name__ == "__main__":
         integration = get_integration()
 
         if args.variables:
-            variables_path = Path(normpath(args.variables))
+            variables_path = Path(args.variables)
+            variables_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(f"Variables : {variables_path}")
 
             # Check existences and permissions

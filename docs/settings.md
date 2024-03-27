@@ -325,7 +325,7 @@ Automatic creation, renewal and configuration of Let's Encrypt certificates.
 |`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
 |`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
 
-## Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Let's Encrypt DNS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM support :white_check_mark:
@@ -376,26 +376,27 @@ STREAM support :warning:
 
 Miscellaneous settings.
 
-|           Setting           |        Default        | Context |Multiple|                                                         Description                                                         |
-|-----------------------------|-----------------------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------|
-|`DISABLE_DEFAULT_SERVER`     |`no`                   |global   |no      |Close connection if the request vhost is unknown.                                                                            |
-|`REDIRECT_HTTP_TO_HTTPS`     |`no`                   |multisite|no      |Redirect all HTTP request to HTTPS.                                                                                          |
-|`AUTO_REDIRECT_HTTP_TO_HTTPS`|`yes`                  |multisite|no      |Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.                                    |
-|`ALLOWED_METHODS`            |`GET|POST|HEAD`        |multisite|no      |Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.                                                 |
-|`MAX_CLIENT_SIZE`            |`10m`                  |multisite|no      |Maximum body size (0 for infinite).                                                                                          |
-|`SERVE_FILES`                |`yes`                  |multisite|no      |Serve files from the local folder.                                                                                           |
-|`ROOT_FOLDER`                |                       |multisite|no      |Root folder containing files to serve (/var/www/html/{server_name} if unset).                                                |
-|`SSL_PROTOCOLS`              |`TLSv1.2 TLSv1.3`      |multisite|no      |The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.                      |
-|`HTTP2`                      |`yes`                  |multisite|no      |Support HTTP2 protocol when HTTPS is enabled.                                                                                |
-|`LISTEN_HTTP`                |`yes`                  |multisite|no      |Respond to (insecure) HTTP requests.                                                                                         |
-|`USE_OPEN_FILE_CACHE`        |`no`                   |multisite|no      |Enable open file cache feature                                                                                               |
-|`OPEN_FILE_CACHE`            |`max=1000 inactive=20s`|multisite|no      |Open file cache directive                                                                                                    |
-|`OPEN_FILE_CACHE_ERRORS`     |`yes`                  |multisite|no      |Enable open file cache for errors                                                                                            |
-|`OPEN_FILE_CACHE_MIN_USES`   |`2`                    |multisite|no      |Enable open file cache minimum uses                                                                                          |
-|`OPEN_FILE_CACHE_VALID`      |`30s`                  |multisite|no      |Open file cache valid time                                                                                                   |
-|`EXTERNAL_PLUGIN_URLS`       |                       |global   |no      |List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).|
-|`DENY_HTTP_STATUS`           |`403`                  |global   |no      |HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.       |
-|`SEND_ANONYMOUS_REPORT`      |`yes`                  |global   |no      |Send anonymous report to BunkerWeb maintainers.                                                                              |
+|              Setting              |        Default        | Context |Multiple|                                                         Description                                                         |
+|-----------------------------------|-----------------------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------|
+|`DISABLE_DEFAULT_SERVER`           |`no`                   |global   |no      |Deny HTTP request if the request vhost is unknown.                                                                           |
+|`DISABLE_DEFAULT_SERVER_STRICT_SNI`|`no`                   |global   |no      |Close SSL/TLS connection if the SNI is unknown.                                                                              |
+|`REDIRECT_HTTP_TO_HTTPS`           |`no`                   |multisite|no      |Redirect all HTTP request to HTTPS.                                                                                          |
+|`AUTO_REDIRECT_HTTP_TO_HTTPS`      |`yes`                  |multisite|no      |Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.                                    |
+|`ALLOWED_METHODS`                  |`GET|POST|HEAD`        |multisite|no      |Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.                                                 |
+|`MAX_CLIENT_SIZE`                  |`10m`                  |multisite|no      |Maximum body size (0 for infinite).                                                                                          |
+|`SERVE_FILES`                      |`yes`                  |multisite|no      |Serve files from the local folder.                                                                                           |
+|`ROOT_FOLDER`                      |                       |multisite|no      |Root folder containing files to serve (/var/www/html/{server_name} if unset).                                                |
+|`SSL_PROTOCOLS`                    |`TLSv1.2 TLSv1.3`      |multisite|no      |The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.                      |
+|`HTTP2`                            |`yes`                  |multisite|no      |Support HTTP2 protocol when HTTPS is enabled.                                                                                |
+|`LISTEN_HTTP`                      |`yes`                  |multisite|no      |Respond to (insecure) HTTP requests.                                                                                         |
+|`USE_OPEN_FILE_CACHE`              |`no`                   |multisite|no      |Enable open file cache feature                                                                                               |
+|`OPEN_FILE_CACHE`                  |`max=1000 inactive=20s`|multisite|no      |Open file cache directive                                                                                                    |
+|`OPEN_FILE_CACHE_ERRORS`           |`yes`                  |multisite|no      |Enable open file cache for errors                                                                                            |
+|`OPEN_FILE_CACHE_MIN_USES`         |`2`                    |multisite|no      |Enable open file cache minimum uses                                                                                          |
+|`OPEN_FILE_CACHE_VALID`            |`30s`                  |multisite|no      |Open file cache valid time                                                                                                   |
+|`EXTERNAL_PLUGIN_URLS`             |                       |global   |no      |List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).|
+|`DENY_HTTP_STATUS`                 |`403`                  |global   |no      |HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.       |
+|`SEND_ANONYMOUS_REPORT`            |`yes`                  |global   |no      |Send anonymous report to BunkerWeb maintainers.                                                                              |
 
 ## ModSecurity
 
@@ -412,7 +413,7 @@ Management of the ModSecurity WAF.
 |`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.   |
 |`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.|
 
-## Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM support :x:
@@ -447,7 +448,7 @@ Pro settings for the Pro version of BunkerWeb.
 |-----------------|-------|-------|--------|-------------------------------------------------|
 |`PRO_LICENSE_KEY`|       |global |no      |The License Key for the Pro version of BunkerWeb.|
 
-## Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM support :x:
@@ -513,7 +514,7 @@ Redis server configuration when using BunkerWeb in cluster mode.
 |`REDIS_SENTINEL_PASSWORD`|       |global |no      |Redis sentinel password.                                           |
 |`REDIS_SENTINEL_MASTER`  |       |global |no      |Redis sentinel master name.                                        |
 
-## Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM support :x:
@@ -641,3 +642,4 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
+

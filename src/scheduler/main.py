@@ -35,8 +35,11 @@ from JobScheduler import JobScheduler
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
+Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
+EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
+PRO_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 TMP_PATH = Path(sep, "var", "tmp", "bunkerweb")
 TMP_PATH.mkdir(parents=True, exist_ok=True)
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")

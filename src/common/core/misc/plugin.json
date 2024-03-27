@@ -8,9 +8,18 @@
     "DISABLE_DEFAULT_SERVER": {
       "context": "global",
       "default": "no",
-      "help": "Close connection if the request vhost is unknown.",
+      "help": "Deny HTTP request if the request vhost is unknown.",
       "id": "disable-default-server",
       "label": "Disable default server",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "DISABLE_DEFAULT_SERVER_STRICT_SNI": {
+      "context": "global",
+      "default": "no",
+      "help": "Close SSL/TLS connection if the SNI is unknown.",
+      "id": "disable-default-server-strict-sni",
+      "label": "Disable default server strict SNI",
       "regex": "^(yes|no)$",
       "type": "check"
     },
