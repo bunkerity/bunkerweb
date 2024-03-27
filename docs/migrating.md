@@ -46,7 +46,7 @@ The default value of some settings have changed and we have added many other set
 
 !!! warning "Read this if you were a 1.5.X user"
 
-    We often add new features and settings to BunkerWeb. We recommend you read the [changelog](changelog.md) and the [settings](settings.md) sections of the documentation.
+    We often add new features and settings to BunkerWeb. We recommend you read the [settings](settings.md) sections of the documentation or the GitHub releases to see what's new.
 
 ### Database
 
