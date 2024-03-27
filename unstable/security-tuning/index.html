@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.15">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.10ba22f1.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
@@ -1325,6 +1325,7 @@
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
 <p>In the HTTP protocol, the Host header is used to determine which server the client wants to send the request to. That header is facultative and may be missing from the request or can be set as an unknown value. This is a common case, a lot of bots are scanning the Internet and are trying to exploit services or simply doing some fingerprinting.</p>
 <p>You can disable any request containing undefined or unknown Host value by setting <code>DISABLE_DEFAULT_SERVER</code> to <code>yes</code> (default : <code>no</code>). Please note that clients won't even receive a response, the TCP connection will be closed (using the special 444 status code of NGINX).</p>
+<p>If you want to close SSL/TLS connection if <a href="https://en.wikipedia.org/wiki/Server_Name_Indication">Server Name Indication (SNI)</a> is undefined or unknown, you can set <code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code> to <code>yes</code> (default : <code>no</code>). On the one hand, you can block attackers as soon as possible at SSL/TLS level but, in the other hand, you may have issues if your BunkerWeb instance is behind a reverse proxy configured to send HTTPS requests without SNI.</p>
 <h3 id="allowed-methods">Allowed methods</h3>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
 <p>You can control the allowed HTTP methods by listing them (separated with "|") in the <code>ALLOWED_METHODS</code> setting (default : <code>GET|POST|HEAD</code>). Clients sending a method which is not listed will get a "405 - Method Not Allowed".</p>
@@ -1556,16 +1557,18 @@
 </tbody>
 </table>
 <p>Full Let's Encrypt automation is fully working with stream mode as long as you open the <code>80/tcp</code> port from the outside. Please note that you will need to use the <code>LISTEN_STREAM_PORT_SSL</code> setting in order to choose your listening SSL/TLS port.</p>
-<h3 id="lets-encrypt-dns-pro">Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h3>
+<h3 id="lets-encrypt-dns-pro">Let's Encrypt DNS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></p>
-<p>The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. This plugin offers seamless integration with various DNS providers for streamlined certificate management.</p>
+<p>The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. </p>
+<p>This plugin offers seamless integration with various DNS providers for streamlined certificate management.</p>
+<p><strong>List of features</strong> </p>
 <ul>
 <li>Automatic creation and renewal of Let's Encrypt certificates</li>
 <li>Integration with DNS providers for DNS challenges</li>
 <li>Generate wildcard certificates</li>
 <li>Configuration options for customization and flexibility</li>
 </ul>
-<p>Settings of the Let's Encrypt DNS plugin :</p>
+<p><strong>Settings of the Let's Encrypt DNS plugin</strong> </p>
 <table>
 <thead>
 <tr>
@@ -1628,12 +1631,18 @@
 </tr>
 </tbody>
 </table>
-<p>Info :</p>
+<div class="admonition info">
+<p class="admonition-title">Information and behavior</p>
 <ul>
-<li>The <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.</li>
-<li>If no <code>LETS_ENCRYPT_DNS_PROPAGATION</code> setting is set, the provider's default propagation time will be used.</li>
+<li>
+<p>The <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.</p>
+</li>
+<li>
+<p>If no <code>LETS_ENCRYPT_DNS_PROPAGATION</code> setting is set, the provider's default propagation time will be used.</p>
+</li>
 </ul>
-<p>Available DNS Providers :</p>
+</div>
+<p><strong>Available DNS Providers</strong></p>
 <table>
 <thead>
 <tr>
@@ -2630,16 +2639,16 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </tbody>
 </table>
 <h2 id="monitoring-and-reporting">Monitoring and reporting</h2>
-<h3 id="monitoring-pro">Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h3>
+<h3 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By enabling it, your instance(s) will start collecting various data related to attacks, requests and performance. You can then retrieve them by calling the <code>/monitoring</code> API endpoint on regular basis or by using other plugins like the Prometheus exporter one.</p>
-<p>List of features :</p>
+<p><strong>List of features</strong></p>
 <ul>
 <li>Enable collection of various BunkerWeb metrics</li>
 <li>Retrieve metrics from the API</li>
 <li>Use in combination with other plugins (e.g. Prometheus exporter)</li>
 <li>Dedicate UI page to monitor your instance(s)</li>
 </ul>
-<p>List of settings :</p>
+<p><strong>List of settings</strong></p>
 <table>
 <thead>
 <tr>
@@ -2667,17 +2676,17 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </tr>
 </tbody>
 </table>
-<h3 id="prometheus-exporter-pro">Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h3>
+<h3 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>The Prometheus exporter plugin adds a <a href="https://prometheus.io/docs/instrumenting/exporters/">Prometheus exporter</a> on your BunkerWeb instance(s). When enabled, you can configure your Prometheus instance(s) to scrape a specific endpoint on Bunkerweb and gather internal metrics.</p>
 <p>We also provide a <a href="https://grafana.com/grafana/dashboards/20755-bunkerweb/">Grafana dashboard</a> that you can import into your own instance and connect to your own Prometheus datasource.</p>
 <p><strong>Please note that the use of Prometheus exporter plugin requires to enable the Monitoring plugin (<code>USE_MONITORING=yes</code>)</strong></p>
-<p>List of features :</p>
+<p><strong>List of features</strong></p>
 <ul>
 <li>Prometheus exporter providing internal BunkerWeb metrics</li>
 <li>Dedicated and configurable port, listen IP and URL</li>
 <li>Whitelist IP/network for maximum security</li>
 </ul>
-<p>List of settings :</p>
+<p><strong>List of settings</strong></p>
 <table>
 <thead>
 <tr>
@@ -2726,9 +2735,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </tr>
 </tbody>
 </table>
-<h3 id="reporting-pro">Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h3>
+<h3 id="reporting-pro">Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<div class="admonition warning">
+<p class="admonition-title">Monitoring plugin needed</p>
+<p>This plugins requires the Monitoring Pro plugin to be installed and enabled with the <code>USE_MONITORING</code> setting set to <code>yes</code>.</p>
+</div>
 <p>The Reporting plugin provides a comprehensive solution for regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information. It offers a wide range of features, including automatic report creation, customization options, and seamless integration with monitoring pro plugin. With the Reporting plugin, you can easily generate and manage reports to monitor the performance and security of your application.</p>
-<p>List of features :</p>
+<p><strong>List of features</strong></p>
 <ul>
 <li>Regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information.</li>
 <li>Integration with Monitoring Pro plugin for seamless integration and enhanced reporting capabilities.</li>
@@ -2736,7 +2749,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <li>Support for SMTP for email notifications.</li>
 <li>Configuration options for customization and flexibility.</li>
 </ul>
-<p>List of settings :</p>
+<p><strong>List of settings</strong></p>
 <table>
 <thead>
 <tr>
@@ -2815,19 +2828,17 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </tr>
 </tbody>
 </table>
-<p><strong>Warning:</strong></p>
+<div class="admonition info">
+<p class="admonition-title">Information and behavior</p>
 <ul>
-<li>This plugins requires the Monitoring Pro plugin to be installed and enabled with the <code>USE_MONITORING</code> setting set to <code>yes</code>.</li>
-</ul>
-<p><strong>Info:</strong></p>
-<ul>
-<li>If <code>USE_REPORTING_SMTP</code> is set to <code>yes</code>, the setting <code>REPORTING_SMTP_EMAILS</code> must be set.</li>
-<li>If <code>USE_REPORTING_WEBHOOK</code> is set to <code>yes</code>, the setting <code>REPORTING_WEBHOOK_URLS</code> must be set.</li>
+<li>case <code>USE_REPORTING_SMTP</code> is set to <code>yes</code>, the setting <code>REPORTING_SMTP_EMAILS</code> must be set.</li>
+<li>case <code>USE_REPORTING_WEBHOOK</code> is set to <code>yes</code>, the setting <code>REPORTING_WEBHOOK_URLS</code> must be set.</li>
 <li>Accepted values for <code>REPORTING_SCHEDULE</code> are <code>daily</code>, <code>weekly</code>and <code>monthly</code>.</li>
-<li>If no <code>REPORTING_SMTP_FROM_USER</code> and <code>REPORTING_SMTP_FROM_PASSWORD</code> are set, the plugin will try to send the email without authentication.</li>
-<li>If <code>REPORTING_SMTP_FROM_USER</code> isn't set but <code>REPORTING_SMTP_FROM_PASSWORD</code> is set, the plugin will use the <code>REPORTING_SMTP_FROM_EMAIL</code> as the username.</li>
-<li>If the job fails, the plugin will retry sending the report in the next execution.</li>
+<li>case no <code>REPORTING_SMTP_FROM_USER</code> and <code>REPORTING_SMTP_FROM_PASSWORD</code> are set, the plugin will try to send the email without authentication.</li>
+<li>case <code>REPORTING_SMTP_FROM_USER</code> isn't set but <code>REPORTING_SMTP_FROM_PASSWORD</code> is set, the plugin will use the <code>REPORTING_SMTP_FROM_EMAIL</code> as the username.</li>
+<li>case the job fails, the plugin will retry sending the report in the next execution.</li>
 </ul>
+</div>
 
 
 

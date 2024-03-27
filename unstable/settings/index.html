@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.15">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.10ba22f1.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
@@ -2562,7 +2562,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="lets-encrypt-dns-pro">Let's Encrypt DNS <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h2>
+<h2 id="lets-encrypt-dns-pro">Let's Encrypt DNS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatic creation, renewal and configuration of Let's Encrypt certificates using DNS challenges.</p>
 <table>
@@ -2748,7 +2748,14 @@
 <td><code>no</code></td>
 <td>global</td>
 <td>no</td>
-<td>Close connection if the request vhost is unknown.</td>
+<td>Deny HTTP request if the request vhost is unknown.</td>
+</tr>
+<tr>
+<td><code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Close SSL/TLS connection if the SNI is unknown.</td>
 </tr>
 <tr>
 <td><code>REDIRECT_HTTP_TO_HTTPS</code></td>
@@ -2929,7 +2936,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="monitoring-pro">Monitoring <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h2>
+<h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
@@ -2946,7 +2953,7 @@
 <tr>
 <td><code>USE_MONITORING</code></td>
 <td><code>yes</code></td>
-<td>multisite</td>
+<td>global</td>
 <td>no</td>
 <td>Enable monitoring of BunkerWeb.</td>
 </tr>
@@ -3026,9 +3033,9 @@
 </tr>
 </tbody>
 </table>
-<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h2>
+<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
-<p>Prometheus exporter for BunkerWeb</p>
+<p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
 <thead>
 <tr>
@@ -3062,11 +3069,11 @@
 <td>Listening port of the Prometheus exporter.</td>
 </tr>
 <tr>
-<td><code>PROMETHEUS_EXPORTER_DICT_SIZE</code></td>
-<td><code>10M</code></td>
+<td><code>PROMETHEUS_EXPORTER_URL</code></td>
+<td><code>/metrics</code></td>
 <td>global</td>
 <td>no</td>
-<td>Size of the dict to store Prometheus metrics.</td>
+<td>HTTP URL of the Prometheus exporter.</td>
 </tr>
 <tr>
 <td><code>PROMETHEUS_EXPORTER_ALLOW_IP</code></td>
@@ -3074,13 +3081,6 @@
 <td>global</td>
 <td>no</td>
 <td>List of IP/networks allowed to contact the Prometheus exporter endpoint.</td>
-</tr>
-<tr>
-<td><code>PROMETHEUS_EXPORTER_URL</code></td>
-<td><code>/metrics</code></td>
-<td>global</td>
-<td>no</td>
-<td>HTTP URL of the Prometheus exporter.</td>
 </tr>
 </tbody>
 </table>
@@ -3300,7 +3300,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="reporting-pro">Reporting <img src='/assets/img/pro-icon.svg' alt='crow pro icon' height='32px' width='32px'> (PRO)</h2>
+<h2 id="reporting-pro">Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
@@ -3315,60 +3315,60 @@
 </thead>
 <tbody>
 <tr>
-<td><code>USE_REPORTING</code></td>
+<td><code>USE_REPORTING_SMTP</code></td>
 <td><code>no</code></td>
 <td>global</td>
 <td>no</td>
-<td>Enable the reporting feature.</td>
+<td>Enable sending the report via email.</td>
 </tr>
 <tr>
-<td><code>REPORTING_USE_SMTP</code></td>
+<td><code>USE_REPORTING_WEBHOOK</code></td>
 <td><code>no</code></td>
 <td>global</td>
 <td>no</td>
-<td>Enable the send report with email(s).</td>
-</tr>
-<tr>
-<td><code>REPORTING_USE_WEBHOOK</code></td>
-<td><code>no</code></td>
-<td>global</td>
-<td>no</td>
-<td>Enable the send report with webhook.</td>
+<td>Enable sending the report via webhook.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SCHEDULE</code></td>
 <td><code>weekly</code></td>
 <td>global</td>
 <td>no</td>
-<td>The time between sending two reports.</td>
+<td>The frequency at which reports are sent.</td>
 </tr>
 <tr>
 <td><code>REPORTING_WEBHOOK_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of webhooks URLs to receive the report in PDF format (separated by spaces)</td>
+<td>List of webhook URLs to receive the report in Markdown (separated by spaces).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_EMAILS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of emails to receive the report in HTML format (separated by spaces)</td>
+<td>List of email addresses to receive the report in HTML format (separated by spaces).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_HOST</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>Host server used for SMTP sending.</td>
+<td>The host server used for SMTP sending.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_PORT</code></td>
+<td><code>465</code></td>
+<td>global</td>
+<td>no</td>
+<td>The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>The email address used to send the message. Notice that 2FA must be disabled for this email address.</td>
+<td>The email address used as the sender. Note that 2FA must be disabled for this email address.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_USER</code></td>
@@ -3385,18 +3385,11 @@
 <td>The password authentication value for sending via the from email address.</td>
 </tr>
 <tr>
-<td><code>REPORTING_SMTP_PORT</code></td>
-<td><code>465</code></td>
-<td>global</td>
-<td>no</td>
-<td>The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).</td>
-</tr>
-<tr>
 <td><code>REPORTING_SMTP_SSL</code></td>
 <td><code>SSL</code></td>
 <td>global</td>
 <td>no</td>
-<td>Determine whether or not you want a secure connection for SMTP.</td>
+<td>Determine whether or not to use a secure connection for SMTP.</td>
 </tr>
 </tbody>
 </table>

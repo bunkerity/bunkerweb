@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.15">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.10ba22f1.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
       
       
 
@@ -209,7 +209,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#migrating-from-14x" class="md-skip">
+        <a href="#migrating" class="md-skip">
           Skip to content
         </a>
       
@@ -676,6 +676,16 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#migrating-from-14x" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migrating from 1.4.X
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating from 1.4.X">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#scheduler" class="md-nav__link">
     <span class="md-ellipsis">
       Scheduler
@@ -683,8 +693,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#database" class="md-nav__link">
     <span class="md-ellipsis">
       Database
@@ -692,8 +702,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#redis" class="md-nav__link">
     <span class="md-ellipsis">
       Redis
@@ -701,13 +711,42 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#default-values-and-new-settings" class="md-nav__link">
     <span class="md-ellipsis">
       Default values and new settings
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-from-15x" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migrating from 1.5.X
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating from 1.5.X">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -937,16 +976,17 @@
   
 
 
-<h1 id="migrating-from-14x">Migrating from 1.4.X</h1>
+<h1 id="migrating">Migrating</h1>
+<h2 id="migrating-from-14x">Migrating from 1.4.X</h2>
 <div class="admonition warning">
 <p class="admonition-title">Read this if you were a 1.4.X user</p>
 <p>A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a> folder of the repository.</p>
 </div>
-<h2 id="scheduler">Scheduler</h2>
+<h3 id="scheduler">Scheduler</h3>
 <p>Back to the 1.4.X releases, jobs (like Let's Encrypt certificate generation/renewal or blacklists download) <strong>were executed in the same container as BunkerWeb</strong>. For the purpose of <a href="https://en.wikipedia.org/wiki/Separation_of_concerns">separation of concerns</a>, we decided to create a <strong>separate service</strong> which is now responsible for managing jobs.</p>
 <p>Called <strong>Scheduler</strong>, this service also generates the final configuration used by BunkerWeb and acts as an intermediary between autoconf and BunkerWeb. In other words, the scheduler is the <strong>brain of the BunkerWeb 1.5.X stack</strong>.</p>
 <p>You will find more information about the scheduler <a href="../concepts/#scheduler">here</a>.</p>
-<h2 id="database">Database</h2>
+<h3 id="database">Database</h3>
 <p>BunkerWeb configuration is <strong>no more stored in a plain file</strong> (located at <code>/etc/nginx/variables.env</code> if you didn't know it). That's it, we now support a <strong>fully-featured database as a backend</strong> to store settings, cache, custom configs, ... 🥳</p>
 <p>Using a real database offers many advantages :</p>
 <ul>
@@ -956,13 +996,201 @@
 </ul>
 <p>Please note that we actually support, <strong>SQLite</strong>, <strong>MySQL</strong>, <strong>MariaDB</strong> and <strong>PostgreSQL</strong> as backends.</p>
 <p>You will find more information about the database <a href="../concepts/#database">here</a>.</p>
-<h2 id="redis">Redis</h2>
+<h3 id="redis">Redis</h3>
 <p>When BunkerWeb 1.4.X was used in cluster mode (Swarm or Kubernetes integrations), <strong>data were not shared among the nodes</strong>. For example, if an attacker was banned via the "bad behavior" feature on a specific node, <strong>he could still connect to the other nodes</strong>.</p>
 <p>Security is not the only reason to have a shared data store for clustered integrations, <strong>caching</strong> is also another one. We can now <strong>store results</strong> of time-consuming operations like (reverse) dns lookups so they are <strong>available for other nodes</strong>.</p>
 <p>We actually support <strong>Redis</strong> as a backend for the shared data store.</p>
 <p>See the list of <a href="../settings/#redis">redis settings</a> and the corresponding documentation of your integration for more information.</p>
-<h2 id="default-values-and-new-settings">Default values and new settings</h2>
+<h3 id="default-values-and-new-settings">Default values and new settings</h3>
 <p>The default value of some settings have changed and we have added many other settings, we recommend you read the <a href="../security-tuning/">security tuning</a> and <a href="../settings/">settings</a> sections of the documentation.</p>
+<h2 id="migrating-from-15x">Migrating from 1.5.X</h2>
+<div class="admonition warning">
+<p class="admonition-title">Read this if you were a 1.5.X user</p>
+<p>We often add new features and settings to BunkerWeb. We recommend you read the <a href="../settings/">settings</a> sections of the documentation or the GitHub releases to see what's new.</p>
+</div>
+<h3 id="database_1">Database</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Backup the database</strong>:</p>
+<ul>
+<li>Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.</li>
+<li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
+</ul>
+</li>
+<li>
+<p><strong>Update the Docker Compose file</strong>: Update the Docker Compose file to use the new version of the database image.</p>
+</li>
+<li>
+<p><strong>Restart the containers</strong>: Restart the containers to apply the changes.
+    <div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>down
+docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check the logs</strong>: Check the logs of the scheduler container to ensure that the migration was successful.
+    <div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>logs<span class="w"> </span>&lt;your_scheduler_service_name&gt;
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Verify the database</strong>: Verify that the database upgrade was successful by checking the data and configurations in the new database container.</p>
+</li>
+<li>
+<p>(Optional) <strong>In case of issues</strong>: If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in <strong>step 1</strong>.</p>
+</li>
+<li>
+<p>(Optional) <strong>Rollback if the restore fails</strong>: If the restore fails, you can rollback to the previous version of the database by following these steps:</p>
+<ol>
+<li>
+<p>Stop all containers.
+    <div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>down
+</code></pre></div></p>
+</li>
+<li>
+<p>Connect to your database</p>
+</li>
+<li>
+<p>Drop the new tables created during the upgrade.
+    <div class="highlight"><pre><span></span><code><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_custom_configs</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_global_values</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_instances</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_jobs</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_jobs_cache</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_metadata</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_plugin_pages</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_plugins</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_selects</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_services</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_services_settings</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_settings</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_ui_users</span><span class="p">;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Locate the old tables in the database backup and restore them.</p>
+<ul>
+<li>SQLite:
+    <div class="highlight"><pre><span></span><code><span class="p">.</span><span class="n">tables</span>
+</code></pre></div></li>
+<li>MySQL/MariaDB:
+    <div class="highlight"><pre><span></span><code><span class="k">SHOW</span><span class="w"> </span><span class="n">TABLES</span><span class="p">;</span>
+</code></pre></div></li>
+<li>PostgreSQL:
+    <div class="highlight"><pre><span></span><code><span class="err">\</span><span class="n">dt</span>
+</code></pre></div></li>
+</ul>
+</li>
+<li>
+<p>You should see tables with names like <code>&lt;table_name&gt;_&lt;old_version&gt;</code>. These are the old tables that were renamed during the upgrade.</p>
+</li>
+<li>
+<p>Rename the old tables to the original table names.
+    <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">table_name</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">old_version</span><span class="o">&gt;</span><span class="w"> </span><span class="k">RENAME</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="o">&lt;</span><span class="k">table_name</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></p>
+</li>
+</ol>
+</li>
+<li>
+<p>If you have any questions or need assistance, feel free to reach out to the BunkerWeb community for support.</p>
+<ul>
+<li><a href="https://github.com/bunkerity/bunkerweb/issues/new?assignees=&amp;labels=bug&amp;projects=&amp;template=bug_report.yml&amp;title=%5BBUG%5D+">Create an issue on GitHub</a></li>
+<li><a href="https://discord.bunkerity.com">Join the BunkerWeb Discord server</a></li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Backup the database</strong>:</p>
+<ul>
+<li>Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.</li>
+<li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
+</ul>
+</li>
+<li>
+<p><strong>Update BunkerWeb</strong>:</p>
+<ul>
+<li>Update BunkerWeb to the latest version by following the instructions in the <a href="../integrations/#linux">integration Linux page</a>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Check the logs</strong>: Check the logs of the scheduler service to ensure that the migration was successful.
+    <div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>bunkerweb-scheduler<span class="w"> </span>--no-pager
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Verify the database</strong>: Verify that the database upgrade was successful by checking the data and configurations in the new database.</p>
+</li>
+<li>
+<p>(Optional) <strong>In case of issues</strong>: If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in <strong>step 1</strong>.</p>
+</li>
+<li>
+<p>(Optional) <strong>Rollback if the restore fails</strong>: If the restore fails, you can rollback to the previous version of the database by following these steps:</p>
+<ol>
+<li>
+<p>Stop the BunkerWeb services.
+    <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-scheduler
+systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+</code></pre></div></p>
+</li>
+<li>
+<p>Connect to your database</p>
+</li>
+<li>
+<p>Drop the new tables created during the upgrade.
+    <div class="highlight"><pre><span></span><code><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_custom_configs</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_global_values</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_instances</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_jobs</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_jobs_cache</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_metadata</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_plugin_pages</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_plugins</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_selects</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_services</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_services_settings</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_settings</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">bw_ui_users</span><span class="p">;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Locate the old tables in the database backup and restore them.</p>
+<ul>
+<li>SQLite:
+    <div class="highlight"><pre><span></span><code><span class="p">.</span><span class="n">tables</span>
+</code></pre></div></li>
+<li>MySQL/MariaDB:
+    <div class="highlight"><pre><span></span><code><span class="k">SHOW</span><span class="w"> </span><span class="n">TABLES</span><span class="p">;</span>
+</code></pre></div></li>
+<li>PostgreSQL:
+    <div class="highlight"><pre><span></span><code><span class="err">\</span><span class="n">dt</span>
+</code></pre></div></li>
+</ul>
+</li>
+<li>
+<p>You should see tables with names like <code>&lt;table_name&gt;_&lt;old_version&gt;</code>. These are the old tables that were renamed during the upgrade.</p>
+</li>
+<li>
+<p>Rename the old tables to the original table names.
+    <div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">table_name</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">old_version</span><span class="o">&gt;</span><span class="w"> </span><span class="k">RENAME</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="o">&lt;</span><span class="k">table_name</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></p>
+</li>
+</ol>
+</li>
+<li>
+<p>If you have any questions or need assistance, feel free to reach out to the BunkerWeb community for support.</p>
+<ul>
+<li><a href="https://github.com/bunkerity/bunkerweb/issues/new?assignees=&amp;labels=bug&amp;projects=&amp;template=bug_report.yml&amp;title=%5BBUG%5D+">Create an issue on GitHub</a></li>
+<li><a href="https://discord.bunkerity.com">Join the BunkerWeb Discord server</a></li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+</div>
 
 
 
