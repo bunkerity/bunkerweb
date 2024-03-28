@@ -39,6 +39,10 @@ if [ -f /etc/os-release ]; then
             do_and_check_cmd cp -f /var/tmp/ui.env /etc/bunkerweb/ui.env
         fi
     fi
+    if [ -f /var/tmp/db.sqlite3 ]; then
+        echo "ℹ️ Copy /var/tmp/db.sqlite3 to /var/lib/bunkerweb/db.sqlite3"
+        do_and_check_cmd cp -f /var/tmp/db.sqlite3 /var/lib/bunkerweb/db.sqlite3
+    fi
 else
     echo "❌ Error: /etc/os-release not found"
     exit 1

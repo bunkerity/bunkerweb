@@ -35,7 +35,7 @@ for test in tests/core/* ; do
 done
 shopt -u globstar
 # linux
-sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/*.sh
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/beforeInstall.sh
 # db
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/Database.py
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/model.py
