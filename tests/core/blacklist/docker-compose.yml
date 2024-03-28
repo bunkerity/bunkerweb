@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.6
+    image: bunkerity/bunkerweb:1.5.7
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE=yes"
@@ -55,7 +55,7 @@ services:
         ipv4_address: 1.0.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.6
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     pull_policy: never
     depends_on:
       - bw

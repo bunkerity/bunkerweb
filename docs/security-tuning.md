@@ -159,18 +159,18 @@ Full Let's Encrypt automation is fully working with stream mode as long as you o
 
 STREAM support :white_check_mark:
 
-The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. 
+The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges.
 
 This plugin offers seamless integration with various DNS providers for streamlined certificate management.
 
-**List of features** 
+**List of features**
 
 - Automatic creation and renewal of Let's Encrypt certificates
 - Integration with DNS providers for DNS challenges
 - Generate wildcard certificates
 - Configuration options for customization and flexibility
 
-**Settings of the Let's Encrypt DNS plugin** 
+**Settings of the Let's Encrypt DNS plugin**
 
 | Setting                            | Default   | Context   | Multiple | Description                                                                             |
 | ---------------------------------- | --------- | --------- | -------- | --------------------------------------------------------------------------------------- |
@@ -184,7 +184,7 @@ This plugin offers seamless integration with various DNS providers for streamlin
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
-    
+
     - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
 
 **Available DNS Providers**
@@ -539,7 +539,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.6/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 

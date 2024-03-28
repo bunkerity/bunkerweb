@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.6
+    image: bunkerity/bunkerweb:1.5.7
     ports:
       - 80:8080
       - 443:8443
@@ -34,7 +34,7 @@ services:
       - net-app2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.6
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     depends_on:
       - mybunker
     environment:

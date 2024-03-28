@@ -72,7 +72,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunker
 # There are no CVEs to fix for this image
 
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
-LABEL version "1.5.6"
+LABEL version "1.5.7"
 LABEL url "https://www.bunkerweb.io"
 
 VOLUME /data
