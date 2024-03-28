@@ -29,7 +29,7 @@ local function file_write_mod(file, data)
   assert(fp:close())
 end
 
-local text = file_read(FILE_ROLLING_H)
+local text = file_read(FILE_ROLLING_H):gsub("#error.-\n", "")
 local relver = file_read(FILE_RELVER_TXT):match("(%d+)")
 
 if relver then

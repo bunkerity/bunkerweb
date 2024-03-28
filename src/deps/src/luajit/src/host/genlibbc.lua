@@ -138,65 +138,73 @@ local function fixup_dump(dump, fixup)
   return { dump = ndump, startbc = startbc, sizebc = sizebc }
 end
 
-local function find_defs(src)
+local function find_defs(src, mode)
   local defs = {}
   for name, code in string.gmatch(src, "LJLIB_LUA%(([^)]*)%)%s*/%*(.-)%*/") do
-    local env = {}
     local tcode, fixup = transform_lua(code)
-    local func = assert(load(tcode, "", nil, env))()
-    defs[name] = fixup_dump(string.dump(func, true), fixup)
+    local func = assert(load(tcode, "", mode))
+    defs[name] = fixup_dump(string.dump(func, mode), fixup)
     defs[#defs+1] = name
   end
   return defs
 end
 
-local function gen_header(defs)
+local function gen_header(defs32, defs64)
   local t = {}
   local function w(x) t[#t+1] = x end
   w("/* This is a generated file. DO NOT EDIT! */\n\n")
   w("static const int libbc_endian = ") w(isbe and 1 or 0) w(";\n\n")
-  local s, sb = "", ""
-  for i,name in ipairs(defs) do
-    local d = defs[name]
-    s = s .. d.dump
-    sb = sb .. string.char(i) .. ("\0"):rep(d.startbc - 1)
-	    .. (isbe and "\0\0\0\255" or "\255\0\0\0"):rep(d.sizebc)
-	    .. ("\0"):rep(#d.dump - d.startbc - d.sizebc*4)
-  end
-  w("static const uint8_t libbc_code[] = {\n")
-  local n = 0
-  for i=1,#s do
-    local x = string.byte(s, i)
-    local xb = string.byte(sb, i)
-    if xb == 255 then
-      local name = BCN[x]
-      local m = #name + 4
-      if n + m > 78 then n = 0; w("\n") end
-      n = n + m
-      w("BC_"); w(name)
-    else
-      local m = x < 10 and 2 or (x < 100 and 3 or 4)
-      if xb == 0 then
-	if n + m > 78 then n = 0; w("\n") end
-      else
-	local name = defs[xb]:gsub("_", ".")
-	if n ~= 0 then w("\n") end
-	w("/* "); w(name); w(" */ ")
-	n = #name + 7
-      end
-      n = n + m
-      w(x)
+  for j,defs in ipairs{defs64, defs32} do
+    local s, sb = "", ""
+    for i,name in ipairs(defs) do
+      local d = defs[name]
+      s = s .. d.dump
+      sb = sb .. string.char(i) .. ("\0"):rep(d.startbc - 1)
+	      .. (isbe and "\0\0\0\255" or "\255\0\0\0"):rep(d.sizebc)
+	      .. ("\0"):rep(#d.dump - d.startbc - d.sizebc*4)
     end
-    w(",")
+    if j == 1 then
+      w("static const uint8_t libbc_code[] = {\n#if LJ_FR2\n")
+    else
+      w("\n#else\n")
+    end
+    local n = 0
+    for i=1,#s do
+      local x = string.byte(s, i)
+      local xb = string.byte(sb, i)
+      if xb == 255 then
+	local name = BCN[x]
+	local m = #name + 4
+	if n + m > 78 then n = 0; w("\n") end
+	n = n + m
+	w("BC_"); w(name)
+      else
+	local m = x < 10 and 2 or (x < 100 and 3 or 4)
+	if xb == 0 then
+	  if n + m > 78 then n = 0; w("\n") end
+	else
+	  local name = defs[xb]:gsub("_", ".")
+	  if n ~= 0 then w("\n") end
+	  w("/* "); w(name); w(" */ ")
+	  n = #name + 7
+	end
+	n = n + m
+	w(x)
+      end
+      w(",")
+    end
   end
-  w("\n0\n};\n\n")
+  w("\n#endif\n0\n};\n\n")
   w("static const struct { const char *name; int ofs; } libbc_map[] = {\n")
-  local m = 0
-  for _,name in ipairs(defs) do
-    w('{"'); w(name); w('",'); w(m) w('},\n')
-    m = m + #defs[name].dump
+  local m32, m64 = 0, 0
+  for i,name in ipairs(defs32) do
+    assert(name == defs64[i])
+    w('{"'); w(name); w('",'); w(m32) w('},\n')
+    m32 = m32 + #defs32[name].dump
+    m64 = m64 + #defs64[name].dump
+    assert(m32 == m64)
   end
-  w("{NULL,"); w(m); w("}\n};\n\n")
+  w("{NULL,"); w(m32); w("}\n};\n\n")
   return table.concat(t)
 end
 
@@ -219,7 +227,8 @@ end
 
 local outfile = parse_arg(arg)
 local src = read_files(arg)
-local defs = find_defs(src)
-local hdr = gen_header(defs)
+local defs32 = find_defs(src, "Wdts")
+local defs64 = find_defs(src, "Xdts")
+local hdr = gen_header(defs32, defs64)
 write_file(outfile, hdr)
 

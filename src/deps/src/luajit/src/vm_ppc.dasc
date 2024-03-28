@@ -1720,9 +1720,10 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |//-- Base library: iterators -------------------------------------------
   |
-  |.ffunc next
+  |.ffunc_1 next
   |  cmplwi NARGS8:RC, 8
   |    lwz TAB:CARG1, WORD_LO(BASE)
+  |    lwz CARG2, WORD_HI(BASE)
   |  blt ->fff_fallback
   |.if ENDIAN_LE
   |   add TMP1, BASE, NARGS8:RC
@@ -1730,7 +1731,9 @@ static void build_subroutines(BuildCtx *ctx)
   |.else
   |   stwx TISNIL, BASE, NARGS8:RC      // Set missing 2nd arg to nil.
   |.endif
+  |  checktab CARG2
   |   lwz PC, FRAME_PC(BASE)
+  |  bne ->fff_fallback
   |   stp BASE, L->base                 // Add frame since C call can throw.
   |   stp BASE, L->top                  // Dummy frame length is ok.
   |  la CARG2, 8(BASE)
@@ -5703,8 +5706,8 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  crand 4*cr0+eq, 4*cr0+eq, 4*cr7+eq
     |    add TMP3, PC, TMP0
     |  bne cr0, >5
-    |  lus TMP1, 0xfffe
-    |  ori TMP1, TMP1, 0x7fff
+    |  lus TMP1, (LJ_KEYINDEX >> 16)
+    |  ori TMP1, TMP1, (LJ_KEYINDEX & 0xffff)
     |  stw ZERO, WORD_LO-8(RA)          // Initialize control var.
     |  stw TMP1, WORD_HI-8(RA)
     |    addis PC, TMP3, -(BCBIAS_J*4 >> 16)
