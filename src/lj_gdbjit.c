@@ -637,7 +637,7 @@ static void LJ_FASTCALL gdbjit_debugabbrev(GDBJITctx *ctx)
   DUV(DW_AT_low_pc);	DUV(DW_FORM_addr);
   DUV(DW_AT_high_pc);	DUV(DW_FORM_addr);
   DUV(DW_AT_stmt_list);	DUV(DW_FORM_data4);
-  DB(0); DB(0);
+  DB(0); DB(0); DB(0);
 
   ctx->p = p;
 }

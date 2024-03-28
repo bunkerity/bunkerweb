@@ -411,6 +411,7 @@ int lj_lex_setup(lua_State *L, LexState *ls)
   ls->linenumber = 1;
   ls->lastline = 1;
   ls->endmark = 0;
+  ls->fr2 = LJ_FR2;  /* Generate native bytecode by default. */
   lex_next(ls);  /* Read-ahead first char. */
   if (ls->c == 0xef && ls->p + 2 <= ls->pe && (uint8_t)ls->p[0] == 0xbb &&
       (uint8_t)ls->p[1] == 0xbf) {  /* Skip UTF-8 BOM (if buffered). */

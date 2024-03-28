@@ -653,11 +653,11 @@ static void asm_conv(ASMState *as, IRIns *ir)
 		     rset_exclude(RSET_GPR, dest));
 	  emit_fg(as, MIPSI_TRUNC_L_D, tmp, left);  /* Delay slot. */
 #if !LJ_TARGET_MIPSR6
-	 emit_branch(as, MIPSI_BC1T, 0, 0, l_end);
-	 emit_fgh(as, MIPSI_C_OLT_D, 0, left, tmp);
+	emit_branch(as, MIPSI_BC1T, 0, 0, l_end);
+	emit_fgh(as, MIPSI_C_OLT_D, 0, left, tmp);
 #else
-	 emit_branch(as, MIPSI_BC1NEZ, 0, (left&31), l_end);
-	 emit_fgh(as, MIPSI_CMP_LT_D, left, left, tmp);
+	emit_branch(as, MIPSI_BC1NEZ, 0, (tmp&31), l_end);
+	emit_fgh(as, MIPSI_CMP_LT_D, tmp, left, tmp);
 #endif
 	  emit_lsptr(as, MIPSI_LDC1, (tmp & 31),
 		     (void *)&as->J->k64[LJ_K64_2P63],
@@ -670,11 +670,11 @@ static void asm_conv(ASMState *as, IRIns *ir)
 		     rset_exclude(RSET_GPR, dest));
 	  emit_fg(as, MIPSI_TRUNC_L_S, tmp, left);  /* Delay slot. */
 #if !LJ_TARGET_MIPSR6
-	 emit_branch(as, MIPSI_BC1T, 0, 0, l_end);
-	 emit_fgh(as, MIPSI_C_OLT_S, 0, left, tmp);
+	emit_branch(as, MIPSI_BC1T, 0, 0, l_end);
+	emit_fgh(as, MIPSI_C_OLT_S, 0, left, tmp);
 #else
-	 emit_branch(as, MIPSI_BC1NEZ, 0, (left&31), l_end);
-	 emit_fgh(as, MIPSI_CMP_LT_S, left, left, tmp);
+	emit_branch(as, MIPSI_BC1NEZ, 0, (tmp&31), l_end);
+	emit_fgh(as, MIPSI_CMP_LT_S, tmp, left, tmp);
 #endif
 	  emit_lsptr(as, MIPSI_LWC1, (tmp & 31),
 		     (void *)&as->J->k32[LJ_K32_2P63],
@@ -690,8 +690,8 @@ static void asm_conv(ASMState *as, IRIns *ir)
 	MIPSIns mi = irt_is64(ir->t) ?
 	  (st == IRT_NUM ? MIPSI_TRUNC_L_D : MIPSI_TRUNC_L_S) :
 	  (st == IRT_NUM ? MIPSI_TRUNC_W_D : MIPSI_TRUNC_W_S);
-	emit_tg(as, irt_is64(ir->t) ? MIPSI_DMFC1 : MIPSI_MFC1, dest, left);
-	emit_fg(as, mi, left, left);
+	emit_tg(as, irt_is64(ir->t) ? MIPSI_DMFC1 : MIPSI_MFC1, dest, tmp);
+	emit_fg(as, mi, tmp, left);
 #endif
       }
     }
