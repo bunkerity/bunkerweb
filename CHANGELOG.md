@@ -4,6 +4,7 @@
 
 - [LINUX] Fix potential issues when removing the bunkerweb package
 - [FEATURE] Add an automatic renaming of old database tables when upgrading to a new version in order to avoid data loss
+- [MISC] Remove potential false positives with ModSecurity on the jobs page of the web UI
 - [DOCUMENTATION] Add documentation about the procedure to follow when upgrading from a version prior to 1.5.0
 - [DEPS] Updated LuaJIT version to v2.1-20240314
 
