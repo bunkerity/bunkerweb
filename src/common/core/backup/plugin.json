@@ -50,5 +50,10 @@
       "every": "day",
       "reload": false
     }
-  ]
+  ],
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py",
+    "restore": "restore.py"
+  }
 }

@@ -6,6 +6,7 @@ from datetime import datetime
 from glob import glob
 from hashlib import sha256
 from io import BytesIO
+from itertools import chain
 from json import load as json_load
 from os import _exit, environ, getenv, getpid, listdir, sep, walk
 from os.path import basename, dirname, join, normpath
@@ -45,6 +46,7 @@ TMP_PATH.mkdir(parents=True, exist_ok=True)
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 SCHEDULER_TMP_ENV_PATH = TMP_PATH.joinpath("scheduler.env")
 SCHEDULER_TMP_ENV_PATH.touch()
+DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
 
 
@@ -151,7 +153,7 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
                             tar.extractall(original_path)
                     tmp_path.unlink(missing_ok=True)
 
-                    for job_file in original_path.joinpath(plugin["id"], "jobs").glob("*"):
+                    for job_file in chain(original_path.joinpath(plugin["id"], "jobs").glob("*"), original_path.joinpath(plugin["id"], "bwcli").glob("*")):
                         job_file.chmod(job_file.stat().st_mode | S_IEXEC)
             except BaseException as e:
                 logger.error(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\": {e}")
@@ -563,6 +565,13 @@ if __name__ == "__main__":
             while RUN and not NEED_RELOAD:
                 SCHEDULER.run_pending()
                 sleep(1)
+                current_time = datetime.now()
+
+                while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
+                    logger.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
+                    sleep(1)
+
+                DB_LOCK_FILE.unlink(missing_ok=True)
 
                 changes = db.check_changes()
 

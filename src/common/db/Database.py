@@ -76,7 +76,7 @@ class Database:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
 
         self.__session_factory = None
-        self.__sql_engine = None
+        self.sql_engine = None
 
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
@@ -116,7 +116,7 @@ class Database:
         }
 
         try:
-            self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
+            self.sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
         except ArgumentError:
             self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
@@ -128,7 +128,7 @@ class Database:
                 _exit(1)
 
         try:
-            assert self.__sql_engine is not None
+            assert self.sql_engine is not None
         except AssertionError:
             self.logger.error("The database engine is not initialized")
             _exit(1)
@@ -138,7 +138,7 @@ class Database:
 
         while not_connected:
             try:
-                with self.__sql_engine.connect() as conn:
+                with self.sql_engine.connect() as conn:
                     conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
                     conn.execute(text("DROP TABLE test"))
                 not_connected = False
@@ -151,8 +151,8 @@ class Database:
 
                 if "attempt to write a readonly database" in str(e):
                     self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
-                    self.__sql_engine.dispose(close=True)
-                    self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
+                    self.sql_engine.dispose(close=True)
+                    self.sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
@@ -174,18 +174,18 @@ class Database:
         if self.__session_factory:
             self.__session_factory.close_all()
 
-        if self.__sql_engine:
-            self.__sql_engine.dispose()
+        if self.sql_engine:
+            self.sql_engine.dispose()
 
     @contextmanager
     def __db_session(self, raise_error: bool = False) -> Any:
         try:
-            assert self.__sql_engine is not None
+            assert self.sql_engine is not None
         except AssertionError:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        with self.__sql_engine.connect() as conn:
+        with self.sql_engine.connect() as conn:
             session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
             session = scoped_session(session_factory)
             try:
@@ -423,9 +423,9 @@ class Database:
 
     def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
-        assert self.__sql_engine is not None, "The database engine is not initialized"
+        assert self.sql_engine is not None, "The database engine is not initialized"
 
-        inspector = inspect(self.__sql_engine)
+        inspector = inspect(self.sql_engine)
         db_version = None
         has_all_tables = True
         old_data = {}
@@ -439,7 +439,7 @@ class Database:
             if db_version != bunkerweb_version:
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
                 metadata = sql_metadata()
-                metadata.reflect(self.__sql_engine)
+                metadata.reflect(self.sql_engine)
 
                 for table_name in Base.metadata.tables.keys():
                     if not inspector.has_table(table_name):
@@ -460,13 +460,13 @@ class Database:
                                 session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
                             session.execute(text(f"ALTER TABLE {table_name} RENAME TO {table_name}_{db_version_id}"))
 
-                Base.metadata.drop_all(self.__sql_engine)
+                Base.metadata.drop_all(self.sql_engine)
 
         if has_all_tables and db_version and db_version == bunkerweb_version:
             return False, ""
 
         try:
-            Base.metadata.create_all(self.__sql_engine, checkfirst=True)
+            Base.metadata.create_all(self.sql_engine, checkfirst=True)
         except BaseException:
             return False, format_exc()
 
