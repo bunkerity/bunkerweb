@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from datetime import datetime, timedelta
+from json import dumps, loads
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -30,9 +31,10 @@ try:
 
     JOB = Job(LOGGER)
 
-    last_backup = JOB.get_cache("last_backup.txt")
-    if last_backup:
-        last_backup = datetime.fromisoformat(last_backup.decode())
+    last_backup = loads(JOB.get_cache("backup.json") or "{}")
+    last_backup_date = last_backup.get("date", None)
+    if last_backup_date:
+        last_backup_date = datetime.fromisoformat(last_backup_date)
 
     current_time = datetime.now()
     backup_period = getenv("BACKUP_SCHEDULE", "daily")
@@ -42,7 +44,7 @@ try:
         "monthly": timedelta(weeks=4).total_seconds(),
     }
 
-    if last_backup and last_backup.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp():
+    if last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp():
         LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
         sys_exit(0)
 
@@ -73,9 +75,11 @@ try:
             LOGGER.warning(f"Removing old backup file: {file}, as the rotation limit has been reached ...")
             file.unlink()
 
-    cached, err = JOB.cache_file("last_backup.txt", current_time.isoformat().encode())
+    backup_files = sorted([file.name for file in backup_dir.glob("backup-*.zip")])
+
+    cached, err = JOB.cache_file("backup.json", dumps({"date": current_time.isoformat(), "files": backup_files}, indent=2).encode())
     if not cached:
-        LOGGER.error(f"Failed to cache last_backup.txt :\n{err}")
+        LOGGER.error(f"Failed to cache backup.json :\n{err}")
         status = 2
 except SystemExit as e:
     status = e.code

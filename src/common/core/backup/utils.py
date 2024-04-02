@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
+from json import dumps, loads
 from os import environ, getenv
 from os.path import join, sep
 from pathlib import Path
@@ -15,6 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import bytes_hash  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from model import Base  # type: ignore
@@ -38,16 +40,16 @@ def acquire_db_lock():
 
 def backup_database(current_time: datetime, backup_dir: Path = BACKUP_DIR):
     """Backup the database."""
-    database_uri = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
+    db = Database(LOGGER)
 
-    database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = database_uri.split(":")[0].split("+")[0]  # type: ignore
+    database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = db.database_uri.split(":")[0].split("+")[0]  # type: ignore
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
     LOGGER.debug(f"Backup file path: {backup_file}")
 
     if database == "sqlite":
-        match = DB_STRING_RX.search(database_uri)
+        match = DB_STRING_RX.search(db.database_uri)
         if not match:
-            LOGGER.error(f"Invalid database string provided: {database_uri}, skipping backup ...")
+            LOGGER.error(f"Invalid database string provided: {db.database_uri}, skipping backup ...")
             sys_exit(1)
 
         db_path = Path(match.group("path"))
@@ -56,16 +58,16 @@ def backup_database(current_time: datetime, backup_dir: Path = BACKUP_DIR):
 
         proc = run(["sqlite3", db_path.as_posix(), ".dump"], stdout=PIPE, stderr=PIPE)
     else:
-        db_host = database_uri.rsplit("@", 1)[1].split("/")[0].split(":")
+        db_host = db.database_uri.rsplit("@", 1)[1].split("/")[0].split(":")
         db_port = None
         if len(db_host) == 1:
             db_host = db_host[0]
         else:
             db_host, db_port = db_host
 
-        db_user = database_uri.split("://")[1].split(":")[0]
-        db_password = database_uri.split("://")[1].split(":")[1].rsplit("@", 1)[0]
-        db_database_name = database_uri.split("/")[-1]
+        db_user = db.database_uri.split("://")[1].split(":")[0]
+        db_password = db.database_uri.split("://")[1].split(":")[1].rsplit("@", 1)[0]
+        db_database_name = db.database_uri.split("/")[-1]
 
         if database in ("mariadb", "mysql"):
             LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
@@ -92,6 +94,14 @@ def backup_database(current_time: datetime, backup_dir: Path = BACKUP_DIR):
         zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
 
     backup_file.chmod(0o600)
+
+    backup_data = loads(db.get_job_cache_file("backup-data", "backup.json") or "{}")
+    backup_data["files"] = sorted([file.name for file in backup_dir.glob("backup-*.zip")])
+    content = dumps(backup_data, indent=2).encode()
+    checksum = bytes_hash(content)
+    err = db.upsert_job_cache(None, "backup.json", content, job_name="backup-data", checksum=checksum)
+    if err:
+        LOGGER.error(f"Failed to update the backup.json cache file: {err}")
 
     LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
 

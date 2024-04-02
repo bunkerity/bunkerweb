@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+    <input type="csrf_token"
+           name="csrf_token"
+           value="{{ csrf_token }}"
+           class="hidden"
+           hidden />
+    <div class="core-layout">
+        {% if is_used %}
+            <div class="core-card">
+                <h5 class="core-card-title">INFO</h5>
+                <div class="core-card-text-container">
+                    <p data-info class="core-card-text">{{ plugin.get("description") }}</p>
+                </div>
+            </div>
+            <!-- end info -->
+            <div class="core-layout-separator"></div>
+            {% if pre_render["status"] and pre_render["status"] == "ko" or "error" in pre_render["data"] %}
+                <div class="flex justify-center col-span-12">
+                    <p class="text-white">Error during pre rendering</p>
+                    <div class="ml-2">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="w-6 h-6 stroke-red-500 fill-white">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                    </div>
+                </div>
+            {% endif %}
+            {% if pre_render["status"] and pre_render["status"] == "ok" and "error" not in pre_render["data"] %}
+                <div class="core-card">
+                    <div class="core-card-wrap">
+                        <h5 class="core-card-title">Last Backup</h5>
+                    </div>
+                    <div class="core-card-text-container">
+                        <p data-info class="core-card-text">{{ pre_render["data"]["date"] }}</p>
+                    </div>
+                </div>
+                <div class="core-card-list">
+                    <div class="core-card-list-title-container">
+                        <h5 class="core-card-list-title">Backup files</h5>
+                    </div>
+                    <div class="core-card-list-container">
+                        <!-- list container-->
+                        <div class="core-card-list-wrap">
+                            <!-- list -->
+                            <ul class="col-span-12 w-full">
+                                {% for item in pre_render['data']["files"] %}
+                                    <li class="core-card-list-item">
+                                        <p class="core-card-list-item-content col-span-12">{{ item }}</p>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <!-- end list-->
+                        </div>
+                        <!-- end list container-->
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="core-card">
+                <div class="core-card-wrap">
+                    <h5 class="core-card-title">Deactivated</h5>
+                    <!-- icon -->
+                    <div role="img" class="core-card-svg-container">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="core-card-deactivated-svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <!-- end icon -->
+                </div>
+                <div class="core-card-text-container">
+                    <p data-info class="core-card-text">This plugin need to be activated to access page.</p>
+                </div>
+            </div>
+            <!-- end info -->
+        {% endif %}
+    </div>
+{% endblock %}
