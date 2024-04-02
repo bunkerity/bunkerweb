@@ -7,7 +7,7 @@ from hashlib import sha256
 from inspect import getsourcefile
 from logging import Logger
 from os import _exit, getenv, listdir, sep
-from os.path import basename, normpath, join
+from os.path import basename, join
 from pathlib import Path
 from re import compile as re_compile
 from sys import _getframe, path as sys_path
@@ -87,7 +87,7 @@ class Database:
             _exit(1)
 
         if match.group("database").startswith("sqlite"):
-            db_path = Path(normpath(match.group("path")))
+            db_path = Path(match.group("path"))
             if ui:
                 while not db_path.is_file():
                     self.logger.warning(f"Waiting for the database file to be created: {db_path}")
