@@ -10,4 +10,4 @@ python-magic==0.4.27
 python_dateutil==2.9.0.post0
 qrcode==7.4.2
 regex==2023.12.25
-werkzeug==3.0.1
+werkzeug==3.0.2
