@@ -1,0 +1,54 @@
+{
+  "id": "backup",
+  "name": "Backup",
+  "description": "Backup your data to a custom location. Ensure the safety and availability of your important files by creating regular backups.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_BACKUP": {
+      "context": "global",
+      "default": "yes",
+      "help": "Enable or disable the backup feature",
+      "id": "use-backup",
+      "label": "Activate automatic backup",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "BACKUP_DIRECTORY": {
+      "context": "global",
+      "default": "/var/lib/bunkerweb/backups",
+      "help": "The directory where the backup will be stored",
+      "id": "backup-directory",
+      "label": "Backup directory",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "BACKUP_SCHEDULE": {
+      "context": "global",
+      "default": "daily",
+      "help": "The frequency of the backup",
+      "id": "backup-schedule",
+      "label": "Backup schedule",
+      "regex": "^(daily|weekly|monthly)$",
+      "type": "select",
+      "select": ["daily", "weekly", "monthly"]
+    },
+    "BACKUP_ROTATION": {
+      "context": "global",
+      "default": "7",
+      "help": "The number of backups to keep",
+      "id": "backup-rotation",
+      "label": "Backup rotation",
+      "regex": "^[1-9][0-9]*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "backup-data",
+      "file": "backup-data.py",
+      "every": "day",
+      "reload": false
+    }
+  ]
+}
