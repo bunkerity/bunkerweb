@@ -215,7 +215,7 @@ class BwcliCommands(Base):
     __tablename__ = "bw_cli_commands"
     __table_args__ = (UniqueConstraint("plugin_id", "name"),)
 
-    id = Column(Integer, primary_key=True, default=1)
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     name = Column(String(64), nullable=False)
     plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     file_name = Column(String(256), nullable=False)

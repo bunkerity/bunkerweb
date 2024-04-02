@@ -9,7 +9,7 @@ from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from redis import StrictRedis, Sentinel
-from subprocess import STDOUT, run
+from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from typing import Any, Optional, Tuple
 
@@ -57,6 +57,7 @@ class CLI(ApiCaller):
         self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
         variables_path = Path(sep, "etc", "nginx", "variables.env")
         self.__variables = {}
+        self.__db = None
         if variables_path.is_file():
             self.__variables = dotenv_values(variables_path)
 
@@ -65,8 +66,8 @@ class CLI(ApiCaller):
 
             self.__logger.info("Getting variables from database")
 
-            db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
-            self.__variables = db.get_config()
+            self.__db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
+            self.__variables = self.__db.get_config()
 
         assert isinstance(self.__variables, dict), "Failed to get variables from database"
 
@@ -282,17 +283,14 @@ class CLI(ApiCaller):
         return True, cli_str
 
     def custom(self, plugin_id: str, command: str, *args: str, debug: bool = False) -> Tuple[bool, str]:
-        if not Path(sep, "usr", "share", "bunkerweb", "db").exists():
+        if not self.__db:
             raise Exception("This command can only be executed on the scheduler")
 
-        from Database import Database  # type: ignore
-
-        db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
         found = False
         plugin_type = "core"
         file_name = None
 
-        for db_plugin in db.get_plugins():
+        for db_plugin in self.__db.get_plugins():
             if db_plugin["id"] == plugin_id:
                 found = True
                 plugin_type = db_plugin["type"]
@@ -315,7 +313,12 @@ class CLI(ApiCaller):
         if not command_path.is_file():
             return False, f"Command {command} not found for plugin {plugin_id} (file {command_path} not found)"
 
-        proc = run([command_path, *args], stdout=STDOUT, stderr=STDOUT, check=False, env=db.get_config() | environ | ({"LOG_LEVEL": "DEBUG"} if debug else {}))
+        cmd = [command_path.as_posix()]
+        if args:
+            cmd.extend(args)
+
+        self.__logger.debug(f"Executing command {' '.join(cmd)}")
+        proc = run(cmd, stdin=DEVNULL, stderr=STDOUT, check=False, env=self.__variables | environ | ({"LOG_LEVEL": "DEBUG"} if debug else {}))  # type: ignore
 
         if proc.returncode != 0:
             return False, f"Command {command} failed"
