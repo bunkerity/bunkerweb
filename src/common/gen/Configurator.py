@@ -125,6 +125,8 @@ class Configurator:
                 self.__logger.warning(f"Ignoring {_type} plugin {file} : {msg}")
                 return
 
+            data["page"] = "ui" in listdir(dirname(file))
+
             if _type != "core":
                 plugin_content = BytesIO()
                 with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
@@ -135,7 +137,6 @@ class Configurator:
                 data.update(
                     {
                         "type": _type,
-                        "page": "ui" in listdir(dirname(file)),
                         "method": "manual",
                         "data": value,
                         "checksum": sha256(value).hexdigest(),
