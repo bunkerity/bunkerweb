@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from io import BytesIO
+from itertools import chain
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -86,7 +87,7 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
     # Copy the plugin
     copytree(plugin_path, new_plugin_path)
     # Add u+x permissions to jobs files
-    for job_file in new_plugin_path.joinpath("jobs").glob("*"):
+    for job_file in chain(new_plugin_path.joinpath("jobs").glob("*"), new_plugin_path.joinpath("bwcli").glob("*")):
         job_file.chmod(job_file.stat().st_mode | S_IEXEC)
     LOGGER.info(f"✅ {'Preview version of ' if preview else ''}Pro plugin {metadata['id']} (version {metadata['version']}) installed successfully!")
     return True
