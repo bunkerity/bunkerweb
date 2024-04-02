@@ -62,6 +62,7 @@ class Plugins(Base):
     settings = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
     jobs = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
     pages = relationship("Plugin_pages", back_populates="plugin", cascade="all")
+    commands = relationship("BwcliCommands", back_populates="plugin", cascade="all")
 
 
 class Settings(Base):
@@ -208,6 +209,18 @@ class Users(Base):
     is_two_factor_enabled = Column(Boolean, nullable=False, default=False)
     secret_token = Column(String(32), nullable=True, unique=True, default=None)
     method = Column(METHODS_ENUM, nullable=False, default="manual")
+
+
+class BwcliCommands(Base):
+    __tablename__ = "bw_cli_commands"
+    __table_args__ = (UniqueConstraint("plugin_id", "name"),)
+
+    id = Column(Integer, primary_key=True, default=1)
+    name = Column(String(64), nullable=False)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    file_name = Column(String(256), nullable=False)
+
+    plugin = relationship("Plugins", back_populates="commands")
 
 
 class Metadata(Base):
