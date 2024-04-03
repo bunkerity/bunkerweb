@@ -3,6 +3,7 @@
 ## v1.5.7 - ????/??/??
 
 - [LINUX] Fix potential issues when removing the bunkerweb package
+- [BUGFIX] Fix rare error when the cache is not properly initialized and jobs are executed
 - [FEATURE] Add an automatic renaming of old database tables when upgrading to a new version in order to avoid data loss
 - [FEATURE] Add the possibility to add custom bwcli commands in plugins
 - [FEATURE] Add backup plugin to backup and restore easily the database
