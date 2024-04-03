@@ -92,7 +92,7 @@ if [ "$integration" == "docker" ] ; then
         i=$((i+1))
     done
     if [ $i -ge 120 ] ; then
-        docker-compose logs
+        docker compose logs
         echo "❌ Docker stack is not healthy"
         exit 1
     fi
@@ -142,14 +142,14 @@ fi
 # Start tests
 if [ "$integration" == "docker" ] ; then
     echo "TEST_FILE=$test" > .env
-    docker-compose -f docker-compose.test.yml build
+    docker compose -f docker-compose.test.yml build
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "❌ Build failed"
         exit 1
     fi
 
-    docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
+    docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
 else
     python3 "$test"
 fi
