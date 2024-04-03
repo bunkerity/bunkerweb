@@ -1245,10 +1245,9 @@ def plugins():
                         except BadZipFile:
                             errors += 1
                             error = 1
-                            flash(
-                                f"{file} is not a valid zip file. ({folder_name or temp_folder_name})",
-                                "error",
-                            )
+                            message = f"{file} is not a valid zip file. ({folder_name or temp_folder_name})"
+                            app.logger.exception(message)
+                            flash(message, "error")
                     else:
                         try:
                             with tar_open(str(tmp_ui_path.joinpath(file)), errorlevel=2) as tar_file:
@@ -1265,24 +1264,21 @@ def plugins():
                         except ReadError:
                             errors += 1
                             error = 1
-                            flash(
-                                f"Couldn't read file {file} ({folder_name or temp_folder_name})",
-                                "error",
-                            )
+                            message = f"Couldn't read file {file} ({folder_name or temp_folder_name})"
+                            app.logger.exception(message)
+                            flash(message, "error")
                         except CompressionError:
                             errors += 1
                             error = 1
-                            flash(
-                                f"{file} is not a valid tar file ({folder_name or temp_folder_name})",
-                                "error",
-                            )
+                            message = f"{file} is not a valid tar file ({folder_name or temp_folder_name})"
+                            app.logger.exception(message)
+                            flash(message, "error")
                         except HeaderError:
                             errors += 1
                             error = 1
-                            flash(
-                                f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})",
-                                "error",
-                            )
+                            message = f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})"
+                            app.logger.exception(message)
+                            flash(message, "error")
 
                     if is_dir:
                         dirs = [d for d in listdir(str(temp_folder_path)) if temp_folder_path.joinpath(d).is_dir()]
@@ -1452,7 +1448,8 @@ def upload_plugin():
         if not uploaded_file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
             return {"status": "ko"}, 422
 
-        folder_name = Path(secure_filename(uploaded_file.filename)).stem
+        file_name = Path(secure_filename(uploaded_file.filename)).name
+        folder_name = file_name.replace(".tar.gz", "").replace(".tar.xz", "").replace(".zip", "")
 
         with BytesIO(uploaded_file.read()) as io:
             io.seek(0, 0)
@@ -1488,7 +1485,7 @@ def upload_plugin():
             if len(plugins) <= 1:
                 io.seek(0, 0)
                 # deepcode ignore PT: The folder name is being sanitized before
-                tmp_ui_path.joinpath(folder_name).write_bytes(io.read())
+                tmp_ui_path.joinpath(file_name).write_bytes(io.read())
                 return {"status": "ok"}, 201
 
         for plugin in plugins:
