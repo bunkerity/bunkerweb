@@ -86,6 +86,19 @@ Enforce login before accessing a resource or the whole site using HTTP basic aut
 |`AUTH_BASIC_PASSWORD`|`changeme`       |multisite|no      |Password                                        |
 |`AUTH_BASIC_TEXT`    |`Restricted area`|multisite|no      |Text to display                                 |
 
+## Backup
+
+STREAM support :x:
+
+Backup your data to a custom location. Ensure the safety and availability of your important files by creating regular backups.
+
+|     Setting      |          Default           |Context|Multiple|                 Description                 |
+|------------------|----------------------------|-------|--------|---------------------------------------------|
+|`USE_BACKUP`      |`yes`                       |global |no      |Enable or disable the backup feature         |
+|`BACKUP_DIRECTORY`|`/var/lib/bunkerweb/backups`|global |no      |The directory where the backup will be stored|
+|`BACKUP_SCHEDULE` |`daily`                     |global |no      |The frequency of the backup                  |
+|`BACKUP_ROTATION` |`7`                         |global |no      |The number of backups to keep                |
+
 ## Bad behavior
 
 STREAM support :white_check_mark:
@@ -319,11 +332,12 @@ STREAM support :white_check_mark:
 
 Automatic creation, renewal and configuration of Let's Encrypt certificates.
 
-|         Setting          |Default| Context |Multiple|                                                                                 Description                                                                                 |
-|--------------------------|-------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                       |
-|`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
-|`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
+|           Setting            |Default| Context |Multiple|                                                                                 Description                                                                                 |
+|------------------------------|-------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT`           |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                       |
+|`EMAIL_LETS_ENCRYPT`          |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
+|`USE_LETS_ENCRYPT_STAGING`    |`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
+|`LETS_ENCRYPT_CLEAR_OLD_CERTS`|`no`   |global   |no      |Clear old certificates when renewing.                                                                                                                                        |
 
 ## Let's Encrypt DNS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -642,4 +656,3 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
-

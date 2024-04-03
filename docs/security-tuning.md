@@ -564,10 +564,10 @@ The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By 
 
 **List of settings**
 
-|           Setting            |Default|Context|Multiple|                 Description                 |
-|------------------------------|-------|-------|--------|---------------------------------------------|
-|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
-|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
+| Setting                        | Default | Context | Multiple | Description                                   |
+| ------------------------------ | ------- | ------- | -------- | --------------------------------------------- |
+| `USE_MONITORING`               | `yes`   | global  | no       | Enable monitoring of BunkerWeb.               |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`   | global  | no       | Size of the dict to store monitoring metrics. |
 
 ### Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
@@ -585,13 +585,13 @@ We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/207
 
 **List of settings**
 
-|           Setting            |                       Default                       |Context|Multiple|                              Description                               |
-|------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
-|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
-|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
-|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
-|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
-|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
+| Setting                        | Default                                               | Context | Multiple | Description                                                              |
+| ------------------------------ | ----------------------------------------------------- | ------- | -------- | ------------------------------------------------------------------------ |
+| `USE_PROMETHEUS_EXPORTER`      | `no`                                                  | global  | no       | Enable the Prometheus export.                                            |
+| `PROMETHEUS_EXPORTER_IP`       | `0.0.0.0`                                             | global  | no       | Listening IP of the Prometheus exporter.                                 |
+| `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global  | no       | Listening port of the Prometheus exporter.                               |
+| `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global  | no       | HTTP URL of the Prometheus exporter.                                     |
+| `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global  | no       | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
 ### Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
@@ -633,3 +633,85 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
     - case no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
     - case `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
     - case the job fails, the plugin will retry sending the report in the next execution.
+
+## Backup and restore
+
+### Backup
+
+Data is invaluable, especially in digital environments where it's susceptible to loss due to various factors such as hardware failures, software errors, or human mistakes. To mitigate such risks and ensure the safety and availability of your important files, it's crucial to establish a robust backup system. This section outlines the backup functionality provided by BunkerWeb, allowing you to securely store your data in a custom location through regular backups.
+
+!!! info "Information and behavior"
+
+    The importance of backups cannot be overstated. They serve as a safety net against data loss scenarios, providing a means to restore your system to a previous state in case of unexpected events. Regular backups not only safeguard your data but also offer peace of mind, knowing that you have a reliable mechanism in place to recover from any mishaps.
+
+
+| Setting            | Default                      | Context | Multiple | Description                                   |
+| ------------------ | ---------------------------- | ------- | -------- | --------------------------------------------- |
+| `USE_BACKUP`       | `yes`                        | global  | no       | Enable or disable the backup feature          |
+| `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | no       | The directory where the backup will be stored |
+| `BACKUP_SCHEDULE`  | `daily`                      | global  | no       | The frequency of the backup                   |
+| `BACKUP_ROTATION`  | `7`                          | global  | no       | The number of backups to keep                 |
+
+### Manual Backup
+
+To manually initiate a backup, execute the following command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup save
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup save
+    ```
+
+This command will create a backup of your database and store it in the backup directory specified in the `BACKUP_DIRECTORY` setting.
+
+You can also specify a custom directory for the backup by providing the `BACKUP_DIRECTORY` environment variable when executing the command:
+
+=== "Linux"
+
+    ```bash
+    BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory -v /path/to/backup/directory:/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+    ```
+
+### Manual Restore
+
+To manually initiate a restore, execute the following command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup restore
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup restore
+    ```
+
+This command will create a temporary backup of your database and restore it to the latest backup available in the backup directory specified in the `BACKUP_DIRECTORY` setting.
+
+You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup restore /path/to/backup/file
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it -v /path/to/backup/file:/path/to/backup/file <scheduler_container> bwcli plugin backup restore /path/to/backup/file
+    ```
