@@ -5,6 +5,8 @@
 - [LINUX] Fix potential issues when removing the bunkerweb package
 - [FEATURE] Add an automatic renaming of old database tables when upgrading to a new version in order to avoid data loss
 - [FEATURE] Add the possibility to add custom bwcli commands in plugins
+- [FEATURE] Add backup plugin to backup and restore easily the database
+- [FEATURE] Add LETS_ENCRYPT_CLEAR_OLD_CERTS setting to control if old certificates should be removed when generating Let's Encrypt certificates (default is no)
 - [MISC] Remove potential false positives with ModSecurity on the jobs page of the web UI
 - [MISC] Fix rare bug when downloading new mmdb files
 - [DOCUMENTATION] Add documentation about the procedure to follow when upgrading from a version prior to 1.5.0
