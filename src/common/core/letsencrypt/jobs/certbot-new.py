@@ -168,13 +168,15 @@ try:
             LOGGER.info(f"Certificate generation succeeded for domain(s) : {domains}")
 
     # Remove old certificates
-    for elem in chain(DATA_PATH.glob("archive/*"), DATA_PATH.glob("live/*"), DATA_PATH.glob("renewal/*")):
-        if elem.name.replace(".conf", "") not in generated_domains:
-            LOGGER.debug(f"Removing old certificate {elem}")
-            if elem.is_dir():
-                rmtree(elem, ignore_errors=True)
-            else:
-                elem.unlink(missing_ok=True)
+    if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
+        LOGGER.info("Clear old certificates is activated, removing old / no longer used certificates...")
+        for elem in chain(DATA_PATH.glob("archive/*"), DATA_PATH.glob("live/*"), DATA_PATH.glob("renewal/*")):
+            if elem.name.replace(".conf", "") not in generated_domains:
+                LOGGER.warning(f"Removing old certificate {elem}")
+                if elem.is_dir():
+                    rmtree(elem, ignore_errors=True)
+                else:
+                    elem.unlink(missing_ok=True)
 
     # Save Let's Encrypt data to db cache
     if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
