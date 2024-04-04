@@ -39,7 +39,7 @@ try:
         LOGGER.info(f"Creating directory {directory} as it does not exist")
         directory.mkdir(parents=True, exist_ok=True)
 
-    backup_database(datetime.now(), directory)
+    backup_database(datetime.now(), backup_dir=directory)
 except SystemExit as se:
     status = se.code
 except:
