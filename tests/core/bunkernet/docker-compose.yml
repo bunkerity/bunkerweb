@@ -13,7 +13,7 @@ services:
       HTTP_PORT: "80"
       USE_BLACKLIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
 
       # ? BUNKERNET settings
       USE_BUNKERNET: "yes"
@@ -40,7 +40,7 @@ services:
       - bw-docker
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
     networks:
       - bw-universe
       - bw-docker

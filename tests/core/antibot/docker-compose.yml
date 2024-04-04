@@ -15,7 +15,7 @@ services:
       USE_REVERSE_PROXY: "yes"
       REVERSE_PROXY_HOST: "http://app1:8080"
       REVERSE_PROXY_URL: "/"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
 
       # ? ANTIBOT settings
       USE_ANTIBOT: "no"
@@ -42,7 +42,7 @@ services:
       - bw-docker
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
     networks:
       - bw-universe
       - bw-docker

@@ -16,7 +16,7 @@ services:
       USE_BUNKERNET: "no"
       SEND_ANONYMOUS_REPORT: "no"
       BLACKLIST_IP_URLS: ""
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
       SESSIONS_NAME: "test"
       USE_REVERSE_SCAN: "no"
       USE_ANTIBOT: "no"
@@ -58,7 +58,7 @@ services:
       - bw-docker
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
     networks:
       - bw-universe
       - bw-docker

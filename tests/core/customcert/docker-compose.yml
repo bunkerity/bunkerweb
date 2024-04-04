@@ -16,7 +16,7 @@ services:
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
 
       # ? CUSTOM_CERT settings
       USE_CUSTOM_SSL: "no"
@@ -46,7 +46,7 @@ services:
       - ./init/certs:/certs
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
     networks:
       - bw-universe
       - bw-docker
