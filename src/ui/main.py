@@ -412,7 +412,7 @@ def set_csp_header(response):
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: https://assets.bunkerity.com;"
         + " font-src 'self' data:;"
-        + (" connect-src *;" if not app.config["USER"] else "")
+        + " connect-src *;"
     )
     return response
 
@@ -503,31 +503,34 @@ def setup():
         return redirect(url_for("home"))
 
     db_config = app.config["CONFIG"].get_config(methods=False)
+    db_user = db.get_ui_user()
 
     for server_name in db_config["SERVER_NAME"].split(" "):
         if db_config.get(f"{server_name}_USE_UI", "no") == "yes":
             return redirect(url_for("login"), 301)
 
     if request.method == "POST":
-
         is_request_form("setup")
 
-        if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check", "server_name", "ui_host", "ui_url")):
-            return redirect_flash_error(
-                "Missing either admin_username, admin_password, admin_password_check, server_name, ui_host, ui_url or auto_lets_encrypt parameter.", "setup"
-            )
+        required_keys = ["server_name", "ui_host", "ui_url"]
+        if not db_user:
+            required_keys.extend(["admin_username", "admin_password", "admin_password_check"])
 
-        if len(request.form["admin_username"]) > 256:
-            return redirect_flash_error("The admin username is too long. It must be less than 256 characters.", "setup")
+        if not any(key in request.form for key in required_keys):
+            return redirect_flash_error(f"Missing either one of the following parameters: {', '.join(required_keys)}.", "setup")
 
-        if request.form["admin_password"] != request.form["admin_password_check"]:
-            return redirect_flash_error("The passwords do not match.", "setup")
+        if not db_user:
+            if len(request.form["admin_username"]) > 256:
+                return redirect_flash_error("The admin username is too long. It must be less than 256 characters.", "setup")
 
-        if not USER_PASSWORD_RX.match(request.form["admin_password"]):
-            return redirect_flash_error(
-                "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
-                "setup",
-            )
+            if request.form["admin_password"] != request.form["admin_password_check"]:
+                return redirect_flash_error("The passwords do not match.", "setup")
+
+            if not USER_PASSWORD_RX.match(request.form["admin_password"]):
+                return redirect_flash_error(
+                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
+                    "setup",
+                )
 
         server_names = db_config["SERVER_NAME"].split(" ")
         if request.form["server_name"] in server_names:
@@ -540,13 +543,14 @@ def setup():
         if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
             return redirect_flash_error("The hostname is not valid.", "setup")
 
-        app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"], method="ui")
+        if not db_user:
+            app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"], method="ui")
 
-        ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
-        if ret:
-            return redirect_flash_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
+            ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
+            if ret:
+                return redirect_flash_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
-        flash("The admin user was created successfully", "success")
+            flash("The admin user was created successfully", "success")
 
         app.config["RELOADING"] = True
         app.config["LAST_RELOAD"] = time()
@@ -575,6 +579,7 @@ def setup():
 
     return render_template(
         "setup.html",
+        ui_user=db_user,
         username=getenv("ADMIN_USERNAME", ""),
         password=getenv("ADMIN_PASSWORD", ""),
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
