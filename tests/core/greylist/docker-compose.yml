@@ -13,7 +13,7 @@ services:
       HTTP_PORT: "80"
       USE_BUNKERNET: "no"
       SEND_ANONYMOUS_REPORT: "no"
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
 
       # ? GREYLIST settings
       USE_GREYLIST: "no"

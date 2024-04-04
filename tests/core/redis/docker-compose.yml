@@ -16,7 +16,7 @@ services:
       USE_BUNKERNET: "no"
       SEND_ANONYMOUS_REPORT: "no"
       BLACKLIST_IP_URLS: ""
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
       SESSIONS_NAME: "test"
       USE_REVERSE_SCAN: "no"
       USE_ANTIBOT: "no"

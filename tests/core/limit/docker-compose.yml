@@ -15,7 +15,7 @@ services:
       USE_BLACKLIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
       BAD_BEHAVIOR_STATUS_CODES: "400 401 403 405 429 444"
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
 
       # ? LIMIT settings
       USE_LIMIT_REQ: "no"

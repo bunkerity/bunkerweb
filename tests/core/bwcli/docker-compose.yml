@@ -13,7 +13,7 @@ services:
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
       USE_REDIS: "yes"
       REDIS_HOST: "bw-redis"
       CUSTOM_CONF_SERVER_HTTP_ready: |

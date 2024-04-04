@@ -15,7 +15,7 @@ services:
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
       GENERATE_SELF_SIGNED_SSL: "no"
       REMOTE_PHP: "bw-php"
       REMOTE_PHP_PATH: "/app"

@@ -16,7 +16,7 @@ services:
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
 
       # ? CUSTOM_CERT settings
       USE_CUSTOM_SSL: "no"

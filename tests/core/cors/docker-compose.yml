@@ -19,7 +19,7 @@ services:
       SEND_ANONYMOUS_REPORT: "no"
       REMOTE_PHP: "app1"
       REMOTE_PHP_PATH: "/app"
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
       GENERATE_SELF_SIGNED_SSL: "no"
       ALLOWED_METHODS: "GET|POST|HEAD|OPTIONS"
 

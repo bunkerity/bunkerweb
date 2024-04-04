@@ -17,7 +17,7 @@ services:
       USE_REVERSE_PROXY: "yes"
       REVERSE_PROXY_HOST: "http://app1:8080"
       REVERSE_PROXY_URL: "/"
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
 
       # ? GZIP settings
       USE_GZIP: "no"
