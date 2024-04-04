@@ -3,10 +3,7 @@ from os import getenv
 from subprocess import PIPE, Popen
 from time import sleep
 from traceback import format_exc
-from typing import List, Optional, Tuple, Union
-
-from docker import DockerClient
-from docker.models.containers import Container
+from typing import List, Tuple, Union
 
 try:
     use_backup = getenv("USE_BACKUP", "no") == "yes"
@@ -16,8 +13,11 @@ try:
     if backup_rotation < 1:
         backup_rotation = 1
 
-    scheduler_instance: Optional[Container] = None
+    scheduler_instance = None
     if getenv("TEST_TYPE", "docker") == "docker":
+        from docker import DockerClient
+        from docker.models.containers import Container
+
         docker_client = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
 
         scheduler_instances = docker_client.containers.list(filters={"label": "bunkerweb.SCHEDULER"})
@@ -27,6 +27,7 @@ try:
             exit(1)
 
         scheduler_instance = scheduler_instances[0]  # type: ignore
+        assert isinstance(scheduler_instance, Container), "Scheduler instance is not a container"
 
     def exec_command(command: Union[str, List[str]]) -> Tuple[int, str, str]:
         if scheduler_instance:
