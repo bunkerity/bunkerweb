@@ -4,13 +4,13 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==2.9.0 \
-    --hash=sha256:68a9adee0e6e9dd8a9c1b6d8cef8c3df7d42646082c50418fe5b94dd0366e189 \
-    --hash=sha256:f7fb2aa4f7ccd132f4ece307d9de6d30b94b2a08c302531f4f43f85ed18673ea
+acme==2.10.0 \
+    --hash=sha256:4a46172573608195a44a13e10f2b7c862cfd1f4046a913c765a936ba1bb7261d \
+    --hash=sha256:de110d6550f22094c920ad6022f4b329380a6bd8f58dd671135c6226c3a470cc
     # via certbot
-certbot==2.9.0 \
-    --hash=sha256:3eafe967523704dac854df36bcca5e5fa949cdd9df835651b0f3712b1cd90c05 \
-    --hash=sha256:7220857f3ed87317bc628e716cf26276ae5894fa79bfe9b7057b79822328561e
+certbot==2.10.0 \
+    --hash=sha256:3a7ccd70b941783610d73f66ae1e3daf59141e9170eb466604098a53cc3f5f5b \
+    --hash=sha256:892aa57d4db74af174aec5e4bb7f7537b200de2545a066c049d03a53215f0e4e
     # via -r requirements.in
 certifi==2024.2.2 \
     --hash=sha256:0569859f95fc761b18b45ef421b1290a0f65f147e92a1e5eb3e635f9a5e4e66f \
@@ -317,12 +317,6 @@ requests==2.31.0 \
 schedule==1.2.1 \
     --hash=sha256:14cdeb083a596aa1de6dc77639a1b2ac8bf6eaafa82b1c9279d3612823063d01 \
     --hash=sha256:843bc0538b99c93f02b8b50e3e39886c06f2d003b24f48e1aa4cadfa3f341279
-    # via importlib-metadata
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==69.2.0 \
-    --hash=sha256:0ff4183f8f42cd8fa3acea16c45205521a4ef28f73c6391d8a25e92893134f2e \
-    --hash=sha256:c21c49fb1042386df081cb5d86759792ab89efca84cf114889191cd09aacc80c
     # via -r requirements.in
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
@@ -335,6 +329,12 @@ urllib3==2.2.1 \
 zipp==3.18.1 \
     --hash=sha256:206f5a15f2af3dbaee80769fb7dc6f249695e940acca08dfb2a4769fe61e538b \
     --hash=sha256:2884ed22e7d8961de1c9a05142eb69a247f120291bc0206a00a7642f09b5b715
+    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==69.2.0 \
+    --hash=sha256:0ff4183f8f42cd8fa3acea16c45205521a4ef28f73c6391d8a25e92893134f2e \
+    --hash=sha256:c21c49fb1042386df081cb5d86759792ab89efca84cf114889191cd09aacc80c
     # via
     #   acme
     #   certbot
