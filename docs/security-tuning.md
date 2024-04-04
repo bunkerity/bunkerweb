@@ -700,7 +700,7 @@ To manually initiate a restore, execute the following command:
     docker exec -it <scheduler_container> bwcli plugin backup restore
     ```
 
-This command will create a temporary backup of your database and restore it to the latest backup available in the backup directory specified in the `BACKUP_DIRECTORY` setting.
+This command will create a temporary backup of your database in `/var/tmp/bunkerweb/backups` and restore your database to the latest backup available in the backup directory specified in the `BACKUP_DIRECTORY` setting.
 
 You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
 
@@ -715,3 +715,19 @@ You can also specify a custom backup file for the restore by providing the path 
     ```bash
     docker exec -it -v /path/to/backup/file:/path/to/backup/file <scheduler_container> bwcli plugin backup restore /path/to/backup/file
     ```
+
+!!! example "In case of failure"
+
+    Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again but with the `BACKUP_DIRECTORY` setting set to `/var/tmp/bunkerweb/backups`:
+
+    === "Linux"
+
+        ```bash
+        BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups bwcli plugin backup restore
+        ```
+
+    === "Docker"
+
+        ```bash
+        docker exec -it -e BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups -v /var/tmp/bunkerweb/backups:/var/tmp/bunkerweb/backups <scheduler_container> bwcli plugin backup restore
+        ```

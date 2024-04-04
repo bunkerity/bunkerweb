@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from datetime import datetime
 from os.path import join, sep
 from pathlib import Path
-from shutil import rmtree
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
@@ -51,14 +50,12 @@ try:
 
     LOGGER.info("Backing up the current database before restoring the backup ...")
     current_time = datetime.now()
-    tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backup", current_time.strftime("%Y-%m-%d_%H-%M-%S"))
+    tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
     tmp_backup_dir.mkdir(parents=True, exist_ok=True)
     backup_database(current_time, tmp_backup_dir)
 
     LOGGER.info(f"Restoring backup {backup_file} ...")
     restore_database(backup_file)
-
-    rmtree(tmp_backup_dir.parent, ignore_errors=True)
 except SystemExit as se:
     status = se.code
 except:
