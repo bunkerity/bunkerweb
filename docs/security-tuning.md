@@ -684,6 +684,40 @@ You can also specify a custom directory for the backup by providing the `BACKUP_
     docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory -v /path/to/backup/directory:/path/to/backup/directory <scheduler_container> bwcli plugin backup save
     ```
 
+!!! note "Specifications for MariaDB/MySQL"
+
+    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:
+
+    ```bash
+    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
+    ```
+
+    To resolve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
+
+    ```sql
+    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
+    ```
+
+    If you're using the Docker integration, you can add the following command to the `docker-compose.yml` file to automatically change the authentication plugin:
+
+    === "MariaDB"
+
+        ```yaml
+        bw-db:
+            image: mariadb:<version>
+            command: --default-authentication-plugin=mysql_native_password
+            ...
+        ```
+
+    === "MySQL"
+
+        ```yaml
+        bw-db:
+            image: mysql:<version>
+            command: --default-authentication-plugin=mysql_native_password
+            ...
+        ```
+
 ### Manual Restore
 
 To manually initiate a restore, execute the following command:
