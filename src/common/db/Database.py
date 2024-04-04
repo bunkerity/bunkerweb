@@ -495,7 +495,8 @@ class Database:
             db_ids = []
             if db_plugins:
                 db_ids = [plugin.id for plugin in db_plugins]
-                ids = [plugin["id"] for plugin in default_plugins]
+                ids = [plugin["id"] for plugin in default_plugins if "id" in plugin]
+                ids.append("general")
                 missing_ids = [plugin for plugin in db_ids if plugin not in ids]
 
                 if missing_ids:
