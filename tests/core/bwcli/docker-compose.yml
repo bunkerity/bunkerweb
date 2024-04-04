@@ -34,6 +34,8 @@ services:
     depends_on:
       - bw
       - bw-docker
+    labels:
+      - "bunkerweb.SCHEDULER=yes"
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
       LOG_LEVEL: "info"
