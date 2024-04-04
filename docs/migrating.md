@@ -50,149 +50,264 @@ The default value of some settings have changed and we have added many other set
 
 ### Database
 
-=== "Docker"
+1. **Backup the database**:
+      - Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.
+      - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
 
-    1. **Backup the database**:
-        - Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.
-        - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
+    === "1\.5\.7 and later"
 
-    2. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the database image.
+        === "Docker"
 
-    3. **Restart the containers**: Restart the containers to apply the changes.
-        ```bash
-        docker-compose down
-        docker-compose up -d
-        ```
-
-    4. **Check the logs**: Check the logs of the scheduler container to ensure that the migration was successful.
-        ```bash
-        docker-compose logs <your_scheduler_service_name>
-        ```
-
-    5. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
-
-    6. (Optional) **In case of issues**: If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in **step 1**.
-
-    7. (Optional) **Rollback if the restore fails**: If the restore fails, you can rollback to the previous version of the database by following these steps:
-
-        1. Stop all containers.
             ```bash
-            docker-compose down
+            docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory -v /path/to/backup/directory:/path/to/backup/directory <scheduler_container> bwcli plugin backup save
             ```
 
-        2. Connect to your database
+        === "Linux"
 
-        3. Drop the new tables created during the upgrade.
-            ```sql
-            DROP TABLE IF EXISTS bw_custom_configs;
-            DROP TABLE IF EXISTS bw_global_values;
-            DROP TABLE IF EXISTS bw_instances;
-            DROP TABLE IF EXISTS bw_jobs;
-            DROP TABLE IF EXISTS bw_jobs_cache;
-            DROP TABLE IF EXISTS bw_metadata;
-            DROP TABLE IF EXISTS bw_plugin_pages;
-            DROP TABLE IF EXISTS bw_plugins;
-            DROP TABLE IF EXISTS bw_selects;
-            DROP TABLE IF EXISTS bw_services;
-            DROP TABLE IF EXISTS bw_services_settings;
-            DROP TABLE IF EXISTS bw_settings;
-            DROP TABLE IF EXISTS bw_ui_users;
+            ```bash
+            BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
             ```
 
-        4. Locate the old tables in the database backup and restore them.
-            * SQLite:
-                ```sql
-                .tables
-                ```
-            * MySQL/MariaDB:
-                ```sql
-                SHOW TABLES;
-                ```
-            * PostgreSQL:
-                ```sql
-                \dt
+    === "1\.5\.6 and earlier"
+
+        === "SQLite"
+
+            === "Docker"
+
+                We first need to install the `sqlite` package in the container.
+
+                ```bash
+                docker exec -u 0 -it <scheduler_container> apk add sqlite
                 ```
 
-        5. You should see tables with names like `<table_name>_<old_version>`. These are the old tables that were renamed during the upgrade.
+                Then, backup the database.
 
-        6. Rename the old tables to the original table names.
-            ```sql
-            ALTER TABLE <table_name>_<old_version> RENAME TO <table_name>;
+                ```bash
+                docker exec -it <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 ".dump" > /path/to/backup/directory/backup.sql
+                ```
+
+            === "Linux"
+
+                ```bash
+                sqlite3 /var/lib/bunkerweb/db.sqlite3 ".dump" > /path/to/backup/directory/backup.sql
+                ```
+
+        === "MySQL/MariaDB"
+
+            === "Docker"
+
+                ```bash
+                docker exec -it <database_container> mysqldump -u <username> -p <database_name> > /path/to/backup/directory/backup.sql
+                ```
+
+            === "Linux"
+
+                ```bash
+                mysqldump -u <username> -p <database_name> > /path/to/backup/directory/backup.sql
+                ```
+
+        === "PostgreSQL"
+
+            === "Docker"
+
+                ```bash
+                docker exec -it <database_container> pg_dump -U <username> -d <database_name> > /path/to/backup/directory/backup.sql
+                ```
+
+            === "Linux"
+
+                ```bash
+                pg_dump -U <username> -d <database_name> > /path/to/backup/directory/backup.sql
+                ```
+
+2. **Upgrade BunkerWeb**:
+      - Upgrade BunkerWeb to the latest version.
+
+    === "Docker"
+
+        1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
+            ```yaml
+            services:
+                bunkerweb:
+                    image: bunkerity/bunkerweb:1.5.7
+                    ...
+                bw-scheduler:
+                    image: bunkerity/bunkerweb-scheduler:1.5.7
+                    ...
+                bw-autoconf:
+                    image: bunkerity/bunkerweb-autoconf:1.5.7
+                    ...
+                bw-ui:
+                    image: bunkerity/bunkerweb-ui:1.5.7
+                    ...
             ```
 
-     8. If you have any questions or need assistance, feel free to reach out to the BunkerWeb community for support.
+        2. **Restart the containers**: Restart the containers to apply the changes.
+            ```bash
+            docker compose down
+            docker compose up -d
+            ```
 
-        - [Create an issue on GitHub](https://github.com/bunkerity/bunkerweb/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml&title=%5BBUG%5D+)
-        - [Join the BunkerWeb Discord server](https://discord.bunkerity.com)
+    === "Linux"
 
-
-=== "Linux"
-
-    1. **Backup the database**:
-        - Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.
-        - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
-
-    2. **Update BunkerWeb**:
-        - Update BunkerWeb to the latest version by following the instructions in the [integration Linux page](integrations.md#linux).
-
-    3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
-        ```bash
-        journalctl -u bunkerweb-scheduler --no-pager
-        ```
-
-    4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database.
-
-    5. (Optional) **In case of issues**: If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in **step 1**.
-
-    6. (Optional) **Rollback if the restore fails**: If the restore fails, you can rollback to the previous version of the database by following these steps:
-
-        1. Stop the BunkerWeb services.
+        1. **Stop the services**:
             ```bash
             systemctl stop bunkerweb-scheduler
             systemctl stop bunkerweb-ui
             ```
 
-        2. Connect to your database
+        2. **Update BunkerWeb**:
+            - Update BunkerWeb to the latest version by following the instructions in the [integration Linux page](integrations.md#linux).
 
-        3. Drop the new tables created during the upgrade.
-            ```sql
-            DROP TABLE IF EXISTS bw_custom_configs;
-            DROP TABLE IF EXISTS bw_global_values;
-            DROP TABLE IF EXISTS bw_instances;
-            DROP TABLE IF EXISTS bw_jobs;
-            DROP TABLE IF EXISTS bw_jobs_cache;
-            DROP TABLE IF EXISTS bw_metadata;
-            DROP TABLE IF EXISTS bw_plugin_pages;
-            DROP TABLE IF EXISTS bw_plugins;
-            DROP TABLE IF EXISTS bw_selects;
-            DROP TABLE IF EXISTS bw_services;
-            DROP TABLE IF EXISTS bw_services_settings;
-            DROP TABLE IF EXISTS bw_settings;
-            DROP TABLE IF EXISTS bw_ui_users;
+
+3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
+
+    === "Docker"
+
+        ```bash
+        docker compose logs <scheduler_container>
+        ```
+
+    === "Linux"
+
+        ```bash
+        journalctl -u bunkerweb --no-pager
+        ```
+
+4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
+
+!!! failure "In case of issues"
+    If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in [step 1](#__tabbed_1_1).
+
+    === "Docker"
+
+        1. **Restore the backup**.
+
+            === "SQLite"
+
+                1. **Remove the existing database file.**
+
+                    ```bash
+                    docker exec -u 0 -i <scheduler_container> rm -f /var/lib/bunkerweb/db.sqlite3
+                    ```
+
+                2. **Restore the backup.**
+
+                    ```bash
+                    docker exec -i -T <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+                    ```
+
+            === "MySQL/MariaDB"
+
+                3. **Stop the Scheduler container.**
+
+                    ```bash
+                    docker compose down <scheduler_container>
+                    ```
+
+                4. **Restore the backup.**
+
+                    ```bash
+                    docker exec -e MYSQL_PWD=<your_password> -i -T <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
+                    ```
+
+            === "PostgreSQL"
+
+                5. **Stop the Scheduler container.**
+
+                    ```bash
+                    docker compose down <scheduler_container>
+                    ```
+
+                6. **Remove the existing database.**
+
+                    ```bash
+                    docker exec -i <database_container> dropdb -U <username> --force <database_name>
+                    ```
+
+                7. **Recreate the database.**
+
+                    ```bash
+                    docker exec -i <database_container> createdb -U <username> <database_name>
+                    ```
+
+                8. **Restore the backup.**
+
+                    ```bash
+                    docker exec -i -T <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
+                    ```
+
+        2. **Downgrade BunkerWeb**.
+
+            ```yaml
+            services:
+                bunkerweb:
+                    image: bunkerity/bunkerweb:<old_version>
+                    ...
+                bw-scheduler:
+                    image: bunkerity/bunkerweb-scheduler:<old_version>
+                    ...
+                bw-autoconf:
+                    image: bunkerity/bunkerweb-autoconf:<old_version>
+                    ...
+                bw-ui:
+                    image: bunkerity/bunkerweb-ui:<old_version>
+                    ...
             ```
 
-        4. Locate the old tables in the database backup and restore them.
-            * SQLite:
-                ```sql
-                .tables
-                ```
-            * MySQL/MariaDB:
-                ```sql
-                SHOW TABLES;
-                ```
-            * PostgreSQL:
-                ```sql
-                \dt
-                ```
+        3. **Restart the containers**.
 
-        5. You should see tables with names like `<table_name>_<old_version>`. These are the old tables that were renamed during the upgrade.
-
-        6. Rename the old tables to the original table names.
-            ```sql
-            ALTER TABLE <table_name>_<old_version> RENAME TO <table_name>;
+            ```bash
+            docker compose down
+            docker compose up -d
             ```
 
-    7. If you have any questions or need assistance, feel free to reach out to the BunkerWeb community for support.
+    === "Linux"
 
-        - [Create an issue on GitHub](https://github.com/bunkerity/bunkerweb/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml&title=%5BBUG%5D+)
-        - [Join the BunkerWeb Discord server](https://discord.bunkerity.com)
+        4. **Stop the services**.
+
+            ```bash
+            systemctl stop bunkerweb-scheduler
+            systemctl stop bunkerweb-ui
+            ```
+
+        5. **Restore the backup**.
+
+            === "SQLite"
+
+                ```bash
+                rm -f /var/lib/bunkerweb/db.sqlite3
+                sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+                ```
+
+            === "MySQL/MariaDB"
+
+                ```bash
+                mysql -u <username> -p <database_name> < /path/to/backup/directory/backup.sql
+                ```
+
+            === "PostgreSQL"
+
+                1. **Remove the existing database.**
+
+                    ```bash
+                    dropdb -U <username> --force <database_name>
+                    ```
+
+                2. **Recreate the database.**
+
+                    ```bash
+                    createdb -U <username> <database_name>
+                    ```
+
+                3. **Restore the backup.**
+
+                    ```bash
+                    psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
+                    ```
+
+        6. **Downgrade BunkerWeb**.
+            - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
+
+    - [Create an issue on GitHub](https://github.com/bunkerity/bunkerweb/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml&title=%5BBUG%5D+)
+    - [Join the BunkerWeb Discord server](https://discord.bunkerity.com)
