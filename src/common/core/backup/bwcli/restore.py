@@ -52,10 +52,10 @@ try:
     current_time = datetime.now()
     tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
     tmp_backup_dir.mkdir(parents=True, exist_ok=True)
-    backup_database(current_time, tmp_backup_dir)
+    db = backup_database(current_time, backup_dir=tmp_backup_dir)
 
     LOGGER.info(f"Restoring backup {backup_file} ...")
-    restore_database(backup_file)
+    restore_database(backup_file, db)
 except SystemExit as se:
     status = se.code
 except:

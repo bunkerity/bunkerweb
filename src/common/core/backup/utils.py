@@ -38,9 +38,9 @@ def acquire_db_lock():
     DB_LOCK_FILE.touch()
 
 
-def backup_database(current_time: datetime, backup_dir: Path = BACKUP_DIR):
+def backup_database(current_time: datetime, db: Database = None, backup_dir: Path = BACKUP_DIR) -> Database:
     """Backup the database."""
-    db = Database(LOGGER)
+    db = db or Database(LOGGER)
 
     database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = db.database_uri.split(":")[0].split("+")[0]  # type: ignore
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
@@ -104,11 +104,12 @@ def backup_database(current_time: datetime, backup_dir: Path = BACKUP_DIR):
         LOGGER.error(f"Failed to update the backup.json cache file: {err}")
 
     LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
+    return db
 
 
-def restore_database(backup_file: Path):
+def restore_database(backup_file: Path, db: Database = None) -> Database:
     """Restore the database from a backup."""
-    db = Database(LOGGER)
+    db = db or Database(LOGGER)
     Base.metadata.drop_all(db.sql_engine)
     database: Literal["sqlite", "mariadb", "mysql", "postgresql"] = db.database_uri.split(":")[0].split("+")[0]  # type: ignore
 
@@ -183,3 +184,4 @@ def restore_database(backup_file: Path):
         LOGGER.error(f"Error while applying changes to the database: {err}, you may need to reload the application")
 
     LOGGER.info(f"💾 Database restored successfully from {backup_file}")
+    return db

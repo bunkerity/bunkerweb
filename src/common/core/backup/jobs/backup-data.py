@@ -55,7 +55,7 @@ try:
         LOGGER.info("First start of the scheduler, skipping backup ...")
         sys_exit(0)
 
-    backup_database(current_time)
+    backup_database(current_time, JOB.db, backup_dir)
 
     backup_rotation = int(getenv("BACKUP_ROTATION", "7"))
 
