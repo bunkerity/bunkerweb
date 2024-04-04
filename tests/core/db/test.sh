@@ -542,6 +542,18 @@ do
         echo "💾 Test \"$test\" succeeded ✅"
     fi
 
+    if [ "$test" = "upgrade" ] ; then
+        scheduler_logs="$(docker compose logs bw-scheduler)"
+        if echo "$scheduler_logs" | grep -q "❌" ; then
+            echo "💾 Upgrade test failed ❌"
+            echo "🛡️ Showing BunkerWeb Scheduler logs ..."
+            echo "$scheduler_logs"
+            exit 1
+        else
+            echo "💾 Upgrade test succeeded ✅"
+        fi
+    fi
+
     manual=1
     cleanup_stack
     manual=0
