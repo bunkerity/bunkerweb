@@ -3,7 +3,7 @@
   "name": "Backup",
   "description": "Backup your data to a custom location. Ensure the safety and availability of your important files by creating regular backups.",
   "version": "1.0",
-  "stream": "no",
+  "stream": "yes",
   "settings": {
     "USE_BACKUP": {
       "context": "global",

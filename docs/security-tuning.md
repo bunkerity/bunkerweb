@@ -553,6 +553,8 @@ You can deploy complex authentication (e.g. SSO), by using the auth request sett
 
 ### Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
+STREAM support :x:
+
 The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By enabling it, your instance(s) will start collecting various data related to attacks, requests and performance. You can then retrieve them by calling the `/monitoring` API endpoint on regular basis or by using other plugins like the Prometheus exporter one.
 
 **List of features**
@@ -570,6 +572,8 @@ The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By 
 | `MONITORING_METRICS_DICT_SIZE` | `10M`   | global  | no       | Size of the dict to store monitoring metrics. |
 
 ### Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+STREAM support :x:
 
 The Prometheus exporter plugin adds a [Prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) on your BunkerWeb instance(s). When enabled, you can configure your Prometheus instance(s) to scrape a specific endpoint on Bunkerweb and gather internal metrics.
 
@@ -595,9 +599,10 @@ We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/207
 
 ### Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
+STREAM support :x:
+
 !!! warning "Monitoring plugin needed"
     This plugins requires the Monitoring Pro plugin to be installed and enabled with the `USE_MONITORING` setting set to `yes`.
-
 
 The Reporting plugin provides a comprehensive solution for regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information. It offers a wide range of features, including automatic report creation, customization options, and seamless integration with monitoring pro plugin. With the Reporting plugin, you can easily generate and manage reports to monitor the performance and security of your application.
 
@@ -625,7 +630,6 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
 | `REPORTING_SMTP_FROM_PASSWORD` |          | `global` | The password authentication value for sending via the from email address.                                                          |
 | `REPORTING_SMTP_SSL`           | `SSL`    | `global` | Determine whether or not to use a secure connection for SMTP.                                                                      |
 
-
 !!! info "Information and behavior"
     - case `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
     - case `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
@@ -636,7 +640,9 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
 
 ## Backup and restore
 
-### Backup
+STREAM support :white_check_mark:
+
+### Automated backup
 
 Data is invaluable, especially in digital environments where it's susceptible to loss due to various factors such as hardware failures, software errors, or human mistakes. To mitigate such risks and ensure the safety and availability of your important files, it's crucial to establish a robust backup system. This section outlines the backup functionality provided by BunkerWeb, allowing you to securely store your data in a custom location through regular backups.
 
@@ -652,7 +658,7 @@ Data is invaluable, especially in digital environments where it's susceptible to
 | `BACKUP_SCHEDULE`  | `daily`                      | global  | no       | The frequency of the backup                   |
 | `BACKUP_ROTATION`  | `7`                          | global  | no       | The number of backups to keep                 |
 
-### Manual Backup
+### Manual backup
 
 To manually initiate a backup, execute the following command:
 
@@ -718,7 +724,7 @@ You can also specify a custom directory for the backup by providing the `BACKUP_
             ...
         ```
 
-### Manual Restore
+### Manual restore
 
 To manually initiate a restore, execute the following command:
 

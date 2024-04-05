@@ -88,7 +88,7 @@ Enforce login before accessing a resource or the whole site using HTTP basic aut
 
 ## Backup
 
-STREAM support :x:
+STREAM support :white_check_mark:
 
 Backup your data to a custom location. Ensure the safety and availability of your important files by creating regular backups.
 
@@ -656,3 +656,4 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
+
