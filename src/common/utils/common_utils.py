@@ -6,6 +6,14 @@ from platform import machine
 from typing import Dict, Union
 
 
+def dict_to_frozenset(d):
+    if isinstance(d, list):
+        return tuple(sorted(d))
+    elif isinstance(d, dict):
+        return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
+    return d
+
+
 def get_version() -> str:
     return Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
 
@@ -78,5 +86,5 @@ def bytes_hash(bio: Union[str, bytes, BytesIO], *, algorithm: str = "sha512") ->
         if not data:
             break
         _hash.update(data)
-    bio.seek(0)
+    bio.seek(0, 0)
     return _hash.hexdigest()
