@@ -22,6 +22,43 @@
 
         === "Linux"
 
+            !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
+                If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+
+                === "MySQL/MariaDB"
+
+                    1. **Install the MySQL repository configuration package**
+
+                        ```bash
+                        sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
+                        ```
+
+                    2. **Enable the MySQL repository**
+
+                        ```bash
+                        sudo dnf config-manager --enable mysql80-community
+                        ```
+
+                    3. **Install the MySQL client**
+
+                        ```bash
+                        sudo dnf install mysql-community-client
+                        ```
+
+                === "PostgreSQL"
+
+                    1. **Install the PostgreSQL repository configuration package**
+
+                        ```bash
+                        dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
+                        ```
+
+                    2. **Install the PostgreSQL client**
+
+                        ```bash
+                        dnf install postgresql<version>
+                        ```
+
             ```bash
             BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
             ```
