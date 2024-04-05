@@ -11,13 +11,13 @@ COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
-COPY src/common/db/requirements.txt.armv7 /tmp/req/requirements-db.txt.armv7
+COPY src/common/db/requirements.armv7.txt /tmp/req/requirements-db.armv7.txt
 
 WORKDIR /usr/share/bunkerweb
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.txt.armv7 /tmp/req/requirements-db.txt ; fi && \
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.armv7.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.armv7.txt ; fi && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
@@ -46,7 +46,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash libgcc libstdc++ libpq openssl libmagic && \
+RUN apk add --no-cache bash libgcc libstdc++ libpq openssl libmagic mariadb-client postgresql-client sqlite && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
   cp helpers/bwcli /usr/bin/ && \
@@ -72,7 +72,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunker
 # There are no CVEs to fix for this image
 
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
-LABEL version "1.5.6"
+LABEL version "1.5.7"
 LABEL url "https://www.bunkerweb.io"
 
 VOLUME /data

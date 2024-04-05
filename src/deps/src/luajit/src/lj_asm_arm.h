@@ -2042,11 +2042,12 @@ static void asm_stack_restore(ASMState *as, SnapShot *snap)
   SnapEntry *map = &as->T->snapmap[snap->mapofs];
   SnapEntry *flinks = &as->T->snapmap[snap_nextofs(as->T, snap)-1];
   MSize n, nent = snap->nent;
+  int32_t bias = 0;
   /* Store the value of all modified slots to the Lua stack. */
   for (n = 0; n < nent; n++) {
     SnapEntry sn = map[n];
     BCReg s = snap_slot(sn);
-    int32_t ofs = 8*((int32_t)s-1);
+    int32_t ofs = 8*((int32_t)s-1) - bias;
     IRRef ref = snap_ref(sn);
     IRIns *ir = IR(ref);
     if ((sn & SNAP_NORESTORE))
@@ -2065,6 +2066,12 @@ static void asm_stack_restore(ASMState *as, SnapShot *snap)
       emit_lso(as, ARMI_STR, tmp, RID_BASE, ofs+4);
 #else
       Reg src = ra_alloc1(as, ref, RSET_FPR);
+      if (LJ_UNLIKELY(ofs < -1020 || ofs > 1020)) {
+	int32_t adj = ofs & 0xffffff00;  /* K12-friendly. */
+	bias += adj;
+	ofs -= adj;
+	emit_addptr(as, RID_BASE, -adj);
+      }
       emit_vlso(as, ARMI_VSTR_D, src, RID_BASE, ofs);
 #endif
     } else {
@@ -2093,6 +2100,7 @@ static void asm_stack_restore(ASMState *as, SnapShot *snap)
     }
     checkmclim(as);
   }
+  emit_addptr(as, RID_BASE, bias);
   lj_assertA(map + nent == flinks, "inconsistent frames in snapshot");
 }
 

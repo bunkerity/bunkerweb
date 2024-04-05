@@ -23,6 +23,7 @@ LJ_DATA const char *lj_err_allmsg;
 LJ_FUNC GCstr *lj_err_str(lua_State *L, ErrMsg em);
 LJ_FUNCA_NORET void LJ_FASTCALL lj_err_throw(lua_State *L, int errcode);
 LJ_FUNC_NORET void lj_err_mem(lua_State *L);
+LJ_FUNC_NORET void LJ_FASTCALL lj_err_stkov(lua_State *L);
 LJ_FUNC_NORET void LJ_FASTCALL lj_err_run(lua_State *L);
 #if LJ_HASJIT
 LJ_FUNCA_NORET void LJ_FASTCALL lj_err_trace(lua_State *L, int errcode);

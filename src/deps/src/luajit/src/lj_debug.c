@@ -64,6 +64,7 @@ static BCPos debug_framepc(lua_State *L, GCfunc *fn, cTValue *nextframe)
     if (cf == NULL || (char *)cframe_pc(cf) == (char *)cframe_L(cf))
       return NO_BCPOS;
     ins = cframe_pc(cf);  /* Only happens during error/hook handling. */
+    if (!ins) return NO_BCPOS;
   } else {
     if (frame_islua(nextframe)) {
       ins = frame_pc(nextframe);

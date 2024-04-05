@@ -10,6 +10,7 @@ import zipfile
 import shutil
 from contextlib import suppress
 
+from os import getenv
 
 def print_md_table(settings) -> MarkdownTableWriter:
     writer = MarkdownTableWriter(
@@ -84,8 +85,11 @@ for core in glob("src/common/core/*/plugin.json"):
                 core_settings[core_plugin["name"]] = core_plugin
 
 # Get PRO plugins
-with open("src/VERSION", "r") as f:
-    version = f.read().strip()
+if getenv("VERSION"):
+    version = getenv("VERSION")
+else:
+    with open("src/VERSION", "r") as f:
+        version = f.read().strip()
 url = f"https://assets.bunkerity.com/bw-pro/preview/v{version}.zip"
 response = requests.get(url)
 response.raise_for_status()

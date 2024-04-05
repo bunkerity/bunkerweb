@@ -121,58 +121,62 @@
                                    name="next"
                                    value="{{ request.values.get('next', '') }}" />
                             <h2 class="col-span-12 block text-left font-bold my-4 text-2xl">Account</h2>
-                            <!-- username inpt-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
-                                    Username<strong class="required-mark">*</strong>
-                                </h5>
-                                <label class="sr-only" for="admin_username">Username</label>
-                                <input type="text"
-                                       id="admin_username"
-                                       name="admin_username"
-                                       class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                       placeholder="enter username"
-                                       value="{{ username }}"
-                                       pattern="(.*?)"
-                                       maxlength="256"
-                                       required />
-                            </div>
-                            <!-- end username inpt-->
-                            <!-- password inpt-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
-                                    Password<strong class="required-mark">*</strong>
-                                </h5>
-                                <label class="sr-only" for="admin_password">Password</label>
-                                <input type="password"
-                                       id="admin_password"
-                                       name="admin_password"
-                                       class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                       placeholder="enter password"
-                                       value="{{ password }}"
-                                       pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
-                                       minlength="8"
-                                       required />
-                            </div>
-                            <!-- end password inpt-->
-                            <!-- password inpt-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
-                                    Confirm Password<strong class="required-mark">*</strong>
-                                </h5>
-                                <label class="sr-only" for="admin_password_check">Confirm Password</label>
-                                <input type="password"
-                                       id="admin_password_check"
-                                       name="admin_password_check"
-                                       class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                       placeholder="confirm password"
-                                       value="{{ password }}"
-                                       pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
-                                       minlength="8"
-                                       required />
-                                <strong class="opacity-0 font-normal text-sm text-red-500" data-pw-alert>Value does not match password</strong>
-                            </div>
-                            <!-- end password inpt-->
+                            {% if not ui_user %}
+                                <!-- username inpt-->
+                                <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                                    <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                        Username<strong class="required-mark">*</strong>
+                                    </h5>
+                                    <label class="sr-only" for="admin_username">Username</label>
+                                    <input type="text"
+                                           id="admin_username"
+                                           name="admin_username"
+                                           class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                           placeholder="enter username"
+                                           value="{{ username }}"
+                                           pattern="(.*?)"
+                                           maxlength="256"
+                                           required />
+                                </div>
+                                <!-- end username inpt-->
+                                <!-- password inpt-->
+                                <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                                    <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                        Password<strong class="required-mark">*</strong>
+                                    </h5>
+                                    <label class="sr-only" for="admin_password">Password</label>
+                                    <input type="password"
+                                           id="admin_password"
+                                           name="admin_password"
+                                           class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                           placeholder="enter password"
+                                           value="{{ password }}"
+                                           pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                                           minlength="8"
+                                           required />
+                                </div>
+                                <!-- end password inpt-->
+                                <!-- password inpt-->
+                                <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                                    <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                        Confirm Password<strong class="required-mark">*</strong>
+                                    </h5>
+                                    <label class="sr-only" for="admin_password_check">Confirm Password</label>
+                                    <input type="password"
+                                           id="admin_password_check"
+                                           name="admin_password_check"
+                                           class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                           placeholder="confirm password"
+                                           value="{{ password }}"
+                                           pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                                           minlength="8"
+                                           required />
+                                    <strong class="opacity-0 font-normal text-sm text-red-500" data-pw-alert>Value does not match password</strong>
+                                </div>
+                                <!-- end password inpt-->
+                            {% else %}
+                                <h6 class="col-span-12 block text-left font-bold mb-4 mt-2">🧑‍🚀 An admin user already exists</h6>
+                            {% endif %}
                             <!-- email inpt-->
                             <div class="flex flex-col relative col-span-12 mx-2 max-w-[400px] w-full">
                                 <h5 class="text-base mb-1 transition duration-300 ease-in-out text-md font-bold m-0">Email</h5>
@@ -511,9 +515,11 @@
 
       class SubmitForm {
         constructor() {
-          this.pwEl = document.querySelector("#admin_password");
-          this.pwCheckEl = document.querySelector("#admin_password_check");
-          this.pwAlertEl = document.querySelector("[data-pw-alert]");
+          {% if not ui_user %}
+            this.pwEl = document.querySelector("#admin_password");
+            this.pwCheckEl = document.querySelector("#admin_password_check");
+            this.pwAlertEl = document.querySelector("[data-pw-alert]");
+          {% endif %}
           this.formEl = document.querySelector("#setup-form");
           this.servInp = document.querySelector("#server_name");
           this.sslCheck = document.querySelector("#auto_lets_encrypt");
@@ -529,15 +535,17 @@
         }
 
         init() {
-          // Check password to send
-          this.checkSamePW();
-          this.pwCheckEl.addEventListener("input", (e) => {
+          {% if not ui_user %}
+            // Check password to send
             this.checkSamePW();
-          });
+            this.pwCheckEl.addEventListener("input", (e) => {
+              this.checkSamePW();
+            });
 
-          this.pwEl.addEventListener("input", (e) => {
-            this.checkSamePW();
-          });
+            this.pwEl.addEventListener("input", (e) => {
+              this.checkSamePW();
+            });
+          {% endif %}
 
           // Case error and display msg
           window.addEventListener("click", (e) => {
@@ -554,9 +562,11 @@
 
           // Submit
           this.formEl.addEventListener("submit", (e) => {
-            // Case not same PW
-            if (this.pwEl.value !== this.pwCheckEl.value)
-              return e.preventDefault();
+            {% if not ui_user %}
+              // Case not same PW
+              if (this.pwEl.value !== this.pwCheckEl.value)
+                return e.preventDefault();
+            {% endif %}
 
             e.preventDefault();
 
@@ -622,15 +632,17 @@
           document.querySelector('#newsletter-form').submit();
         }
 
-        checkSamePW() {
-          if (!this.pwEl.value || !this.pwCheckEl.value)
+        {% if not ui_user %}
+          checkSamePW() {
+            if (!this.pwEl.value || !this.pwCheckEl.value)
+              return this.hidePWAlert();
+
+            if (this.pwEl.value !== this.pwCheckEl.value)
+              return this.showPWAlert();
+
             return this.hidePWAlert();
-
-          if (this.pwEl.value !== this.pwCheckEl.value)
-            return this.showPWAlert();
-
-          return this.hidePWAlert();
-        }
+          }
+        {% endif %}
 
         showErrMsg() {
           this.flashMsg.classList.remove("hidden");
@@ -642,29 +654,31 @@
           this.flashMsg.setAttribute("aria-hidden", "true");
         }
 
-        hidePWAlert() {
-          this.pwCheckEl.classList.remove(
-            "focus:!border-red-500",
-            "focus:valid:!border-red-500",
-            "active:!border-red-500",
-            "active:valid:!border-red-500",
-            "valid:!border-red-500"
-          );
-          this.pwAlertEl.classList.add("opacity-0");
-          this.pwAlertEl.setAttribute("aria-hidden", "true");
-        }
+        {% if not ui_user %}
+          hidePWAlert() {
+            this.pwCheckEl.classList.remove(
+              "focus:!border-red-500",
+              "focus:valid:!border-red-500",
+              "active:!border-red-500",
+              "active:valid:!border-red-500",
+              "valid:!border-red-500"
+            );
+            this.pwAlertEl.classList.add("opacity-0");
+            this.pwAlertEl.setAttribute("aria-hidden", "true");
+          }
 
-        showPWAlert() {
-          this.pwCheckEl.classList.add(
-            "focus:!border-red-500",
-            "focus:valid:!border-red-500",
-            "active:!border-red-500",
-            "active:valid:!border-red-500",
-            "valid:!border-red-500"
-          );
-          this.pwAlertEl.classList.remove("opacity-0");
-          this.pwAlertEl.setAttribute("aria-hidden", "false");
-        }
+          showPWAlert() {
+            this.pwCheckEl.classList.add(
+              "focus:!border-red-500",
+              "focus:valid:!border-red-500",
+              "active:!border-red-500",
+              "active:valid:!border-red-500",
+              "valid:!border-red-500"
+            );
+            this.pwAlertEl.classList.remove("opacity-0");
+            this.pwAlertEl.setAttribute("aria-hidden", "false");
+          }
+        {% endif %}
 
         showLoader() {
           this.loaderMsg.textContent = "Setting up...";

@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.6
+    image: bunkerity/bunkerweb:1.5.7
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE=yes"
@@ -35,14 +35,14 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.6
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     pull_policy: never
     depends_on:
       - bw
       - bw-docker
     environment:
       DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: "debug"
     networks:
       - bw-universe
       - bw-docker

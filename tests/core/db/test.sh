@@ -61,7 +61,7 @@ else
     export GLOBAL_HTTP_PORT="80"
     export GLOBAL_HTTPS_PORT="443"
     export GLOBAL_DNS_RESOLVERS="9.9.9.9 8.8.8.8 8.8.4.4"
-    export GLOBAL_LOG_LEVEL="info"
+    export GLOBAL_LOG_LEVEL="debug"
     export GLOBAL_USE_BUNKERNET="no"
     export GLOBAL_USE_BLACKLIST="no"
     export GLOBAL_SEND_ANONYMOUS_REPORT="no"
@@ -540,6 +540,18 @@ do
         exit 1
     else
         echo "💾 Test \"$test\" succeeded ✅"
+    fi
+
+    if [ "$test" = "upgrade" ] ; then
+        scheduler_logs="$(docker compose logs bw-scheduler)"
+        if echo "$scheduler_logs" | grep -q "❌" ; then
+            echo "💾 Upgrade test failed ❌"
+            echo "🛡️ Showing BunkerWeb Scheduler logs ..."
+            echo "$scheduler_logs"
+            exit 1
+        else
+            echo "💾 Upgrade test succeeded ✅"
+        fi
     fi
 
     manual=1

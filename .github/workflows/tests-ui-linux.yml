@@ -84,7 +84,7 @@ jobs:
           echo 'DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4' | sudo tee -a /etc/bunkerweb/variables.env
           echo 'API_LISTEN_IP=127.0.0.1' | sudo tee -a /etc/bunkerweb/variables.env
           echo "MULTISITE=yes" | sudo tee -a /etc/bunkerweb/variables.env
-          echo "LOG_LEVEL=info" | sudo tee -a /etc/bunkerweb/variables.env
+          echo "LOG_LEVEL=debug" | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_BUNKERNET=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_BLACKLIST=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "SEND_ANONYMOUS_REPORT=no" | sudo tee -a /etc/bunkerweb/variables.env

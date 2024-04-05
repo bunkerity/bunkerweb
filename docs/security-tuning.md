@@ -159,18 +159,18 @@ Full Let's Encrypt automation is fully working with stream mode as long as you o
 
 STREAM support :white_check_mark:
 
-The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges. 
+The Let's Encrypt DNS plugin facilitates the automatic creation, renewal, and configuration of Let's Encrypt certificates using DNS challenges.
 
 This plugin offers seamless integration with various DNS providers for streamlined certificate management.
 
-**List of features** 
+**List of features**
 
 - Automatic creation and renewal of Let's Encrypt certificates
 - Integration with DNS providers for DNS challenges
 - Generate wildcard certificates
 - Configuration options for customization and flexibility
 
-**Settings of the Let's Encrypt DNS plugin** 
+**Settings of the Let's Encrypt DNS plugin**
 
 | Setting                            | Default   | Context   | Multiple | Description                                                                             |
 | ---------------------------------- | --------- | --------- | -------- | --------------------------------------------------------------------------------------- |
@@ -184,7 +184,7 @@ This plugin offers seamless integration with various DNS providers for streamlin
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
-    
+
     - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is set, the provider's default propagation time will be used.
 
 **Available DNS Providers**
@@ -539,7 +539,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.6/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 
@@ -553,6 +553,8 @@ You can deploy complex authentication (e.g. SSO), by using the auth request sett
 
 ### Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
+STREAM support :x:
+
 The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By enabling it, your instance(s) will start collecting various data related to attacks, requests and performance. You can then retrieve them by calling the `/monitoring` API endpoint on regular basis or by using other plugins like the Prometheus exporter one.
 
 **List of features**
@@ -564,12 +566,14 @@ The monitoring plugin lets you collect and retrieve metrics about BunkerWeb. By 
 
 **List of settings**
 
-|           Setting            |Default|Context|Multiple|                 Description                 |
-|------------------------------|-------|-------|--------|---------------------------------------------|
-|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
-|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
+| Setting                        | Default | Context | Multiple | Description                                   |
+| ------------------------------ | ------- | ------- | -------- | --------------------------------------------- |
+| `USE_MONITORING`               | `yes`   | global  | no       | Enable monitoring of BunkerWeb.               |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`   | global  | no       | Size of the dict to store monitoring metrics. |
 
 ### Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+STREAM support :x:
 
 The Prometheus exporter plugin adds a [Prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) on your BunkerWeb instance(s). When enabled, you can configure your Prometheus instance(s) to scrape a specific endpoint on Bunkerweb and gather internal metrics.
 
@@ -585,19 +589,20 @@ We also provide a [Grafana dashboard](https://grafana.com/grafana/dashboards/207
 
 **List of settings**
 
-|           Setting            |                       Default                       |Context|Multiple|                              Description                               |
-|------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
-|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
-|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
-|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
-|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
-|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
+| Setting                        | Default                                               | Context | Multiple | Description                                                              |
+| ------------------------------ | ----------------------------------------------------- | ------- | -------- | ------------------------------------------------------------------------ |
+| `USE_PROMETHEUS_EXPORTER`      | `no`                                                  | global  | no       | Enable the Prometheus export.                                            |
+| `PROMETHEUS_EXPORTER_IP`       | `0.0.0.0`                                             | global  | no       | Listening IP of the Prometheus exporter.                                 |
+| `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global  | no       | Listening port of the Prometheus exporter.                               |
+| `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global  | no       | HTTP URL of the Prometheus exporter.                                     |
+| `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global  | no       | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
 ### Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
+STREAM support :x:
+
 !!! warning "Monitoring plugin needed"
     This plugins requires the Monitoring Pro plugin to be installed and enabled with the `USE_MONITORING` setting set to `yes`.
-
 
 The Reporting plugin provides a comprehensive solution for regular reporting of important data from BunkerWeb, including global statistics, attacks, bans, requests, reasons, and AS information. It offers a wide range of features, including automatic report creation, customization options, and seamless integration with monitoring pro plugin. With the Reporting plugin, you can easily generate and manage reports to monitor the performance and security of your application.
 
@@ -625,7 +630,6 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
 | `REPORTING_SMTP_FROM_PASSWORD` |          | `global` | The password authentication value for sending via the from email address.                                                          |
 | `REPORTING_SMTP_SSL`           | `SSL`    | `global` | Determine whether or not to use a secure connection for SMTP.                                                                      |
 
-
 !!! info "Information and behavior"
     - case `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
     - case `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
@@ -633,3 +637,137 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
     - case no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
     - case `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
     - case the job fails, the plugin will retry sending the report in the next execution.
+
+## Backup and restore
+
+STREAM support :white_check_mark:
+
+### Automated backup
+
+Data is invaluable, especially in digital environments where it's susceptible to loss due to various factors such as hardware failures, software errors, or human mistakes. To mitigate such risks and ensure the safety and availability of your important files, it's crucial to establish a robust backup system. This section outlines the backup functionality provided by BunkerWeb, allowing you to securely store your data in a custom location through regular backups.
+
+!!! info "Information and behavior"
+
+    The importance of backups cannot be overstated. They serve as a safety net against data loss scenarios, providing a means to restore your system to a previous state in case of unexpected events. Regular backups not only safeguard your data but also offer peace of mind, knowing that you have a reliable mechanism in place to recover from any mishaps.
+
+
+| Setting            | Default                      | Context | Multiple | Description                                   |
+| ------------------ | ---------------------------- | ------- | -------- | --------------------------------------------- |
+| `USE_BACKUP`       | `yes`                        | global  | no       | Enable or disable the backup feature          |
+| `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | no       | The directory where the backup will be stored |
+| `BACKUP_SCHEDULE`  | `daily`                      | global  | no       | The frequency of the backup                   |
+| `BACKUP_ROTATION`  | `7`                          | global  | no       | The number of backups to keep                 |
+
+### Manual backup
+
+To manually initiate a backup, execute the following command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup save
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup save
+    ```
+
+This command will create a backup of your database and store it in the backup directory specified in the `BACKUP_DIRECTORY` setting.
+
+You can also specify a custom directory for the backup by providing the `BACKUP_DIRECTORY` environment variable when executing the command:
+
+=== "Linux"
+
+    ```bash
+    BACKUP_DIRECTORY=/path/to/backup/directory bwcli plugin backup save
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory -v /path/to/backup/directory:/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+    ```
+
+!!! note "Specifications for MariaDB/MySQL"
+
+    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:
+
+    ```bash
+    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
+    ```
+
+    To resolve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
+
+    ```sql
+    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
+    ```
+
+    If you're using the Docker integration, you can add the following command to the `docker-compose.yml` file to automatically change the authentication plugin:
+
+    === "MariaDB"
+
+        ```yaml
+        bw-db:
+            image: mariadb:<version>
+            command: --default-authentication-plugin=mysql_native_password
+            ...
+        ```
+
+    === "MySQL"
+
+        ```yaml
+        bw-db:
+            image: mysql:<version>
+            command: --default-authentication-plugin=mysql_native_password
+            ...
+        ```
+
+### Manual restore
+
+To manually initiate a restore, execute the following command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup restore
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup restore
+    ```
+
+This command will create a temporary backup of your database in `/var/tmp/bunkerweb/backups` and restore your database to the latest backup available in the backup directory specified in the `BACKUP_DIRECTORY` setting.
+
+You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup restore /path/to/backup/file
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it -v /path/to/backup/file:/path/to/backup/file <scheduler_container> bwcli plugin backup restore /path/to/backup/file
+    ```
+
+!!! example "In case of failure"
+
+    Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again but with the `BACKUP_DIRECTORY` setting set to `/var/tmp/bunkerweb/backups`:
+
+    === "Linux"
+
+        ```bash
+        BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups bwcli plugin backup restore
+        ```
+
+    === "Docker"
+
+        ```bash
+        docker exec -it -e BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups -v /var/tmp/bunkerweb/backups:/var/tmp/bunkerweb/backups <scheduler_container> bwcli plugin backup restore
+        ```

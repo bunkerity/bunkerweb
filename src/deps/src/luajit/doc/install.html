@@ -269,6 +269,7 @@ for any supported target:
 <li>Yes, you need a toolchain for both your host <em>and</em> your target!</li>
 <li>Both host and target architectures must have the same pointer size.</li>
 <li>E.g. if you want to cross-compile to a 32 bit target on a 64 bit host, you need to install the multilib development package (e.g. <tt>libc6-dev-i386</tt> on Debian/Ubuntu) and build a 32 bit host part (<tt>HOST_CC="gcc -m32"</tt>).</li>
+<li>On some distro versions, multilib conflicts with cross-compilers. The workaround is to install the x86 cross-compiler package <tt>gcc-i686-linux-gnu</tt> and use it to build the host part (<tt>HOST_CC=i686-linux-gnu-gcc</tt>).</li>
 <li>64 bit targets always require compilation on a 64 bit host.</li>
 </ul>
 <p>

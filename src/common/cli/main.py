@@ -50,6 +50,13 @@ if __name__ == "__main__":
         # Bans subparser
         parser_bans = subparsers.add_parser("bans", help="list current bans")
 
+        # Plugin subparser
+        parser_plugin = subparsers.add_parser("plugin", help="execute a custom command from a plugin")
+        parser_plugin.add_argument("plugin_id", help="the plugin id that you want to execute the command on")
+        parser_plugin.add_argument("command", type=str, help="the command to execute on the plugin")
+        parser_plugin.add_argument("arg", nargs="*", help="the arguments to pass to the command")
+        parser_plugin.add_argument("-d", "--debug", action="store_true", help="sets the LOG_LEVEL env variable to DEBUG")
+
         # Parse args
         args = parser.parse_args()
 
@@ -64,12 +71,17 @@ if __name__ == "__main__":
             ret, err = cli.ban(args.ip, args.exp, args.reason)
         elif args.command == "bans":
             ret, err = cli.bans()
+        else:
+            ret, err = cli.custom(args.plugin_id, args.command, *args.arg, debug=args.debug)
 
         if not ret:
             logger.error(f"CLI command status : ❌ (fail)\n{err}")
             _exit(1)
         else:
-            logger.info(f"CLI command status : ✔️ (success)\n{err}")
+            if err:
+                err = f"\n{err}"
+
+            logger.info(f"CLI command status : ✔️ (success){err}")
             _exit(0)
 
     except SystemExit as se:

@@ -15,7 +15,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from maxminddb import MODE_FD, open_database
+from maxminddb import open_database
 from requests import RequestException, Response, get
 
 from logger import setup_logger  # type: ignore
@@ -97,11 +97,11 @@ try:
         # Decompress it
         LOGGER.info("Decompressing mmdb file ...")
         file_content.seek(0)
-        content = BytesIO(decompress(file_content.getvalue()))
+        tmp_path.write_bytes(decompress(file_content.getvalue()))
 
         if job_cache:
             # Check if file has changed
-            new_hash = bytes_hash(content)
+            new_hash = file_hash(tmp_path)
             if new_hash == job_cache["checksum"]:
                 LOGGER.info("New file is identical to cache file, reload is not needed")
                 sys_exit(0)
@@ -111,14 +111,10 @@ try:
     if tmp_path.is_file():
         with open_database(tmp_path.as_posix()) as reader:
             pass
-    else:
-        with open_database(content, mode=MODE_FD) as reader:
-            pass
-        tmp_path = None
 
     # Move it to cache folder
     LOGGER.info("Moving mmdb file to cache ...")
-    cached, err = JOB.cache_file("country.mmdb", tmp_path or content, checksum=new_hash)
+    cached, err = JOB.cache_file("country.mmdb", tmp_path, checksum=new_hash)
     if not cached:
         LOGGER.error(f"Error while caching mmdb file : {err}")
         sys_exit(2)

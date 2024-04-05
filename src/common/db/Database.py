@@ -7,7 +7,7 @@ from hashlib import sha256
 from inspect import getsourcefile
 from logging import Logger
 from os import _exit, getenv, listdir, sep
-from os.path import basename, normpath, join
+from os.path import basename, join
 from pathlib import Path
 from re import compile as re_compile
 from sys import _getframe, path as sys_path
@@ -29,6 +29,7 @@ from model import (
     Custom_configs,
     Selects,
     Users,
+    BwcliCommands,
     Metadata,
 )
 
@@ -75,7 +76,7 @@ class Database:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
 
         self.__session_factory = None
-        self.__sql_engine = None
+        self.sql_engine = None
 
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
@@ -86,7 +87,7 @@ class Database:
             _exit(1)
 
         if match.group("database").startswith("sqlite"):
-            db_path = Path(normpath(match.group("path")))
+            db_path = Path(match.group("path"))
             if ui:
                 while not db_path.is_file():
                     self.logger.warning(f"Waiting for the database file to be created: {db_path}")
@@ -115,7 +116,7 @@ class Database:
         }
 
         try:
-            self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
+            self.sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
         except ArgumentError:
             self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
@@ -127,7 +128,7 @@ class Database:
                 _exit(1)
 
         try:
-            assert self.__sql_engine is not None
+            assert self.sql_engine is not None
         except AssertionError:
             self.logger.error("The database engine is not initialized")
             _exit(1)
@@ -137,7 +138,7 @@ class Database:
 
         while not_connected:
             try:
-                with self.__sql_engine.connect() as conn:
+                with self.sql_engine.connect() as conn:
                     conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
                     conn.execute(text("DROP TABLE test"))
                 not_connected = False
@@ -150,8 +151,8 @@ class Database:
 
                 if "attempt to write a readonly database" in str(e):
                     self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
-                    self.__sql_engine.dispose(close=True)
-                    self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
+                    self.sql_engine.dispose(close=True)
+                    self.sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
@@ -173,18 +174,18 @@ class Database:
         if self.__session_factory:
             self.__session_factory.close_all()
 
-        if self.__sql_engine:
-            self.__sql_engine.dispose()
+        if self.sql_engine:
+            self.sql_engine.dispose()
 
     @contextmanager
     def __db_session(self, raise_error: bool = False) -> Any:
         try:
-            assert self.__sql_engine is not None
+            assert self.sql_engine is not None
         except AssertionError:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        with self.__sql_engine.connect() as conn:
+        with self.sql_engine.connect() as conn:
             session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
             session = scoped_session(session_factory)
             try:
@@ -308,7 +309,7 @@ class Database:
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
         data = {
-            "version": "1.5.6",
+            "version": "1.5.7",
             "integration": "unknown",
             "database_version": "Unknown",
             "is_pro": "no",
@@ -422,9 +423,9 @@ class Database:
 
     def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
-        assert self.__sql_engine is not None, "The database engine is not initialized"
+        assert self.sql_engine is not None, "The database engine is not initialized"
 
-        inspector = inspect(self.__sql_engine)
+        inspector = inspect(self.sql_engine)
         db_version = None
         has_all_tables = True
         old_data = {}
@@ -438,7 +439,7 @@ class Database:
             if db_version != bunkerweb_version:
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
                 metadata = sql_metadata()
-                metadata.reflect(self.__sql_engine)
+                metadata.reflect(self.sql_engine)
 
                 for table_name in Base.metadata.tables.keys():
                     if not inspector.has_table(table_name):
@@ -459,13 +460,13 @@ class Database:
                                 session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
                             session.execute(text(f"ALTER TABLE {table_name} RENAME TO {table_name}_{db_version_id}"))
 
-                Base.metadata.drop_all(self.__sql_engine)
+                Base.metadata.drop_all(self.sql_engine)
 
         if has_all_tables and db_version and db_version == bunkerweb_version:
             return False, ""
 
         try:
-            Base.metadata.create_all(self.__sql_engine, checkfirst=True)
+            Base.metadata.create_all(self.sql_engine, checkfirst=True)
         except BaseException:
             return False, format_exc()
 
@@ -489,6 +490,31 @@ class Database:
 
         to_put = []
         with self.__db_session() as session:
+            db_plugins = session.query(Plugins).with_entities(Plugins.id).all()
+
+            db_ids = []
+            if db_plugins:
+                db_ids = [plugin.id for plugin in db_plugins]
+                ids = [plugin["id"] for plugin in default_plugins if "id" in plugin]
+                ids.append("general")
+                missing_ids = [plugin for plugin in db_ids if plugin not in ids]
+
+                if missing_ids:
+                    # Remove plugins that are no longer in the list
+                    session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
+                    session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
+                    session.query(BwcliCommands).filter(BwcliCommands.plugin_id.in_(missing_ids)).delete()
+
+                    for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_ids)):
+                        session.query(Jobs_cache).filter(Jobs_cache.job_name == plugin_job.name).delete()
+                        session.query(Jobs).filter(Jobs.name == plugin_job.name).delete()
+
+                    for plugin_setting in session.query(Settings).with_entities(Settings.id).filter(Settings.plugin_id.in_(missing_ids)):
+                        session.query(Selects).filter(Selects.setting_id == plugin_setting.id).delete()
+                        session.query(Services_settings).filter(Services_settings.setting_id == plugin_setting.id).delete()
+                        session.query(Global_values).filter(Global_values.setting_id == plugin_setting.id).delete()
+                        session.query(Settings).filter(Settings.id == plugin_setting.id).delete()
+
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
@@ -496,6 +522,7 @@ class Database:
                 for plugin in plugins:
                     settings = {}
                     jobs = []
+                    commands = {}
                     if "id" not in plugin:
                         settings = plugin
                         plugin = {
@@ -509,6 +536,9 @@ class Database:
                         settings = plugin.pop("settings", {})
                         jobs = plugin.pop("jobs", [])
                         plugin.pop("page", False)
+                        commands = plugin.pop("bwcli", {})
+                        if not isinstance(commands, dict):
+                            commands = {}
 
                     db_plugin = session.query(Plugins).filter_by(id=plugin["id"]).first()
                     if db_plugin:
@@ -664,21 +694,32 @@ class Database:
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
 
-                    core_ui_path = Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"], "ui")
-                    path_ui = core_ui_path if core_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
-                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
+                    plugin_path = (
+                        Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"])
+                        if plugin.get("type", "core") == "core"
+                        else (
+                            Path(sep, "etc", "bunkerweb", "plugins", plugin["id"])
+                            if plugin.get("type", "core") == "external"
+                            else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"])
+                        )
+                    )
 
-                    if path_ui.exists():
+                    path_ui = plugin_path.joinpath("ui")
+
+                    db_plugin_page = (
+                        session.query(Plugin_pages)
+                        .with_entities(
+                            Plugin_pages.template_checksum,
+                            Plugin_pages.actions_checksum,
+                        )
+                        .filter_by(plugin_id=plugin["id"])
+                        .first()
+                    )
+                    remove = not path_ui.is_dir() and db_plugin_page
+
+                    if path_ui.is_dir():
+                        remove = True
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
-                            db_plugin_page = (
-                                session.query(Plugin_pages)
-                                .with_entities(
-                                    Plugin_pages.template_checksum,
-                                    Plugin_pages.actions_checksum,
-                                )
-                                .filter_by(plugin_id=plugin["id"])
-                                .first()
-                            )
                             template = path_ui.joinpath("template.html").read_bytes()
                             actions = path_ui.joinpath("actions.py").read_bytes()
                             template_checksum = sha256(template).hexdigest()
@@ -705,20 +746,60 @@ class Database:
                                 if updates:
                                     self.logger.warning(f'Page for plugin "{plugin["id"]}" already exists, updating it with the new values')
                                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
+                                remove = False
+                            else:
+                                if db_plugin:
+                                    self.logger.warning(f'Page for plugin "{plugin["id"]}" does not exist, creating it')
+
+                                to_put.append(
+                                    Plugin_pages(
+                                        plugin_id=plugin["id"],
+                                        template_file=template,
+                                        template_checksum=template_checksum,
+                                        actions_file=actions,
+                                        actions_checksum=actions_checksum,
+                                    )
+                                )
+                                remove = False
+
+                    if db_plugin_page and remove:
+                        self.logger.warning(f'Removing page for plugin "{plugin["id"]}" as it no longer exists')
+                        session.query(Plugin_pages).filter_by(plugin_id=plugin["id"]).delete()
+
+                    db_names = [command.name for command in session.query(BwcliCommands).with_entities(BwcliCommands.name).filter_by(plugin_id=plugin["id"])]
+                    missing_names = [command for command in db_names if command not in commands]
+
+                    if missing_names:
+                        # Remove commands that are no longer in the list
+                        self.logger.warning(f'Removing {len(missing_names)} commands from plugin "{plugin["id"]}" as they are no longer in the list')
+                        session.query(BwcliCommands).filter(BwcliCommands.name.in_(missing_names), BwcliCommands.plugin_id == plugin["id"]).delete()
+
+                    for command, file_name in commands.items():
+                        db_command = session.query(BwcliCommands).with_entities(BwcliCommands.file_name).filter_by(name=command, plugin_id=plugin["id"]).first()
+                        command_path = plugin_path.joinpath("bwcli", file_name)
+
+                        if command not in db_names or not db_command:
+                            if db_plugin:
+                                self.logger.warning(f'Command "{command}" does not exist, creating it')
+
+                            if not command_path.is_file():
+                                self.logger.warning(f'Command "{command}"\'s file "{file_name}" does not exist in the plugin directory, skipping it')
                                 continue
 
-                            if db_plugin:
-                                self.logger.warning(f'Page for plugin "{plugin["id"]}" does not exist, creating it')
+                            to_put.append(BwcliCommands(name=command, plugin_id=plugin["id"], file_name=file_name))
+                        else:
+                            updates = {}
 
-                            to_put.append(
-                                Plugin_pages(
-                                    plugin_id=plugin["id"],
-                                    template_file=template,
-                                    template_checksum=template_checksum,
-                                    actions_file=actions,
-                                    actions_checksum=actions_checksum,
-                                )
-                            )
+                            if file_name != db_command.file_name:
+                                updates[BwcliCommands.file_name] = file_name
+
+                            if updates:
+                                self.logger.warning(f'Command "{command}" already exists, updating it with the new values')
+                                if not command_path.is_file():
+                                    self.logger.warning(f'Command "{command}"\'s file "{file_name}" does not exist in the plugin directory, removing it')
+                                    session.query(BwcliCommands).filter_by(name=command, plugin_id=plugin["id"]).delete()
+                                    continue
+                                session.query(BwcliCommands).filter_by(name=command, plugin_id=plugin["id"]).update(updates)
 
             try:
                 session.add_all(to_put)
@@ -1267,6 +1348,7 @@ class Database:
                     # Remove plugins that are no longer in the list
                     session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
+                    session.query(BwcliCommands).filter(BwcliCommands.plugin_id.in_(missing_ids)).delete()
 
                     for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_ids)):
                         session.query(Jobs_cache).filter(Jobs_cache.job_name == plugin_job.name).delete()
@@ -1282,6 +1364,9 @@ class Database:
                 settings = plugin.pop("settings", {})
                 jobs = plugin.pop("jobs", [])
                 page = plugin.pop("page", False)
+                commands = plugin.pop("bwcli", {})
+                if not isinstance(commands, dict):
+                    commands = {}
                 plugin["type"] = _type
                 db_plugin = (
                     session.query(Plugins)
@@ -1458,22 +1543,33 @@ class Database:
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
 
-                    tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui")
-                    path_ui = tmp_ui_path if tmp_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
-                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
+                    plugin_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"])
+                    plugin_path = (
+                        plugin_path
+                        if plugin_path.is_dir()
+                        else (
+                            Path(sep, "etc", "bunkerweb", "plugins", plugin["id"])
+                            if _type == "external"
+                            else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"])
+                        )
+                    )
 
-                    if path_ui.exists():
+                    path_ui = plugin_path.joinpath("ui")
+
+                    db_plugin_page = (
+                        session.query(Plugin_pages)
+                        .with_entities(
+                            Plugin_pages.template_checksum,
+                            Plugin_pages.actions_checksum,
+                        )
+                        .filter_by(plugin_id=plugin["id"])
+                        .first()
+                    )
+                    remove = not path_ui.is_dir() and db_plugin_page
+
+                    if path_ui.is_dir():
+                        remove = True
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
-                            db_plugin_page = (
-                                session.query(Plugin_pages)
-                                .with_entities(
-                                    Plugin_pages.template_checksum,
-                                    Plugin_pages.actions_checksum,
-                                )
-                                .filter_by(plugin_id=plugin["id"])
-                                .first()
-                            )
-
                             if not db_plugin_page:
                                 changes = True
                                 template = path_ui.joinpath("template.html").read_bytes()
@@ -1488,6 +1584,7 @@ class Database:
                                         actions_checksum=sha256(actions).hexdigest(),
                                     )
                                 )
+                                remove = False
                             else:
                                 updates = {}
                                 template_path = path_ui.joinpath("template.html")
@@ -1514,6 +1611,43 @@ class Database:
                                 if updates:
                                     changes = True
                                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
+
+                                remove = False
+
+                    if db_plugin_page and remove:
+                        changes = True
+                        session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).delete()
+
+                    db_names = [command.name for command in session.query(BwcliCommands).with_entities(BwcliCommands.name).filter_by(plugin_id=plugin["id"])]
+                    missing_names = [command for command in db_names if command not in commands]
+
+                    if missing_names:
+                        # Remove commands that are no longer in the list
+                        session.query(BwcliCommands).filter(BwcliCommands.name.in_(missing_names), BwcliCommands.plugin_id == plugin["id"]).delete()
+
+                    for command, file_name in commands.items():
+                        db_command = session.query(BwcliCommands).with_entities(BwcliCommands.file_name).filter_by(name=command, plugin_id=plugin["id"]).first()
+                        command_path = plugin_path.joinpath("bwcli", file_name)
+
+                        if command not in db_names or not db_command:
+                            if not command_path.is_file():
+                                self.logger.warning(f'Command "{command}"\'s file "{file_name}" does not exist in the plugin directory, skipping it')
+                                continue
+
+                            changes = True
+                            to_put.append(BwcliCommands(name=command, plugin_id=plugin["id"], file_name=file_name))
+                        else:
+                            updates = {}
+
+                            if file_name != db_command.file_name:
+                                updates[BwcliCommands.file_name] = file_name
+
+                            if updates:
+                                changes = True
+                                if not command_path.is_file():
+                                    session.query(BwcliCommands).filter_by(name=command, plugin_id=plugin["id"]).delete()
+                                    continue
+                                session.query(BwcliCommands).filter_by(name=command, plugin_id=plugin["id"]).update(updates)
 
                     continue
 
@@ -1559,11 +1693,19 @@ class Database:
                     job["reload"] = job.get("reload", False)
                     to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
-                if page:
-                    tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui")
-                    path_ui = tmp_ui_path if tmp_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
-                    path_ui = path_ui if path_ui.exists() else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"], "ui")
+                plugin_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"])
+                plugin_path = (
+                    plugin_path
+                    if plugin_path.is_dir()
+                    else (
+                        Path(sep, "etc", "bunkerweb", "plugins", plugin["id"])
+                        if _type == "external"
+                        else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"])
+                    )
+                )
 
+                if page:
+                    path_ui = plugin_path.joinpath("ui")
                     if path_ui.exists():
                         if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
                             db_plugin_page = (
@@ -1615,6 +1757,13 @@ class Database:
                                 if updates:
                                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
 
+                for command, file_name in plugin.get("bwcli", {}).items():
+                    if not plugin_path.joinpath("bwcli", file_name).is_file():
+                        self.logger.warning(f'Command "{command}"\'s file "{file_name}" does not exist in the plugin directory, skipping it')
+                        continue
+
+                    to_put.append(BwcliCommands(name=command, plugin_id=plugin["id"], file_name=file_name))
+
             if changes:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
@@ -1656,6 +1805,7 @@ class Database:
                     "method": plugin.method,
                     "page": page is not None,
                     "settings": {},
+                    "bwcli": {},
                     "checksum": plugin.checksum,
                 } | ({"data": plugin.data} if with_data else {})
 
@@ -1688,6 +1838,9 @@ class Database:
                         data["settings"][setting.id]["select"] = [
                             select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting.id)
                         ]
+
+                for command in session.query(BwcliCommands).with_entities(BwcliCommands.name, BwcliCommands.file_name).filter_by(plugin_id=plugin.id):
+                    data["bwcli"][command.name] = command.file_name
 
                 plugins.append(data)
 

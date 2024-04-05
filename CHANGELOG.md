@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.5.7 - ????/??/??
+
+- [LINUX] Fix potential issues when removing the bunkerweb package
+- [BUGFIX] Fix rare error when the cache is not properly initialized and jobs are executed
+- [FEATURE] Add an automatic renaming of old database tables when upgrading to a new version in order to avoid data loss
+- [FEATURE] Add the possibility to add custom bwcli commands in plugins
+- [FEATURE] Add backup plugin to backup and restore easily the database
+- [FEATURE] Add LETS_ENCRYPT_CLEAR_OLD_CERTS setting to control if old certificates should be removed when generating Let's Encrypt certificates (default is no)
+- [FEATURE] Add DISABLE_DEFAULT_SERVER_STRICT_SNI setting to allow/block requests when SNI is unknown or unset (default is no)
+- [MISC] Remove potential false positives with ModSecurity on the jobs page of the web UI
+- [MISC] Fix rare bug when downloading new mmdb files
+- [DOCUMENTATION] Add procedure to follow when upgrading from 1.5.7+
+- [DOCUMENTATION] Add documentation about the procedure to follow when upgrading from a version prior to 1.5.0
+- [DEPS] Updated LuaJIT version to v2.1-20240314
+
 ## v1.5.6 - 2024/03/25
 
 - [LINUX] Support RHEL 9.3

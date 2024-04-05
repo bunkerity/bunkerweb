@@ -3,7 +3,7 @@
 from contextlib import suppress
 from math import floor
 from os import _exit, getenv, getpid, listdir, sep, urandom
-from os.path import basename, dirname, join
+from os.path import basename, dirname, isabs, join
 from secrets import choice
 from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
@@ -28,7 +28,7 @@ from hashlib import sha256
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, dumps, loads as json_loads
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
@@ -42,6 +42,7 @@ from tarfile import CompressionError, HeaderError, ReadError, TarError, open as 
 from threading import Thread
 from tempfile import NamedTemporaryFile
 from time import sleep, time
+from werkzeug.utils import secure_filename
 from zipfile import BadZipFile, ZipFile
 
 from src.Instances import Instances
@@ -411,7 +412,7 @@ def set_csp_header(response):
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: https://assets.bunkerity.com;"
         + " font-src 'self' data:;"
-        + (" connect-src *;" if not app.config["USER"] else "")
+        + " connect-src *;"
     )
     return response
 
@@ -492,6 +493,7 @@ def loading():
 
 @app.route("/check", methods=["GET"])
 def check():
+    # deepcode ignore TooPermissiveCors: We need to allow all origins for the wizard
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
@@ -501,31 +503,34 @@ def setup():
         return redirect(url_for("home"))
 
     db_config = app.config["CONFIG"].get_config(methods=False)
+    db_user = db.get_ui_user()
 
     for server_name in db_config["SERVER_NAME"].split(" "):
         if db_config.get(f"{server_name}_USE_UI", "no") == "yes":
             return redirect(url_for("login"), 301)
 
     if request.method == "POST":
-
         is_request_form("setup")
 
-        if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check", "server_name", "ui_host", "ui_url")):
-            return redirect_flash_error(
-                "Missing either admin_username, admin_password, admin_password_check, server_name, ui_host, ui_url or auto_lets_encrypt parameter.", "setup"
-            )
+        required_keys = ["server_name", "ui_host", "ui_url"]
+        if not db_user:
+            required_keys.extend(["admin_username", "admin_password", "admin_password_check"])
 
-        if len(request.form["admin_username"]) > 256:
-            return redirect_flash_error("The admin username is too long. It must be less than 256 characters.", "setup")
+        if not any(key in request.form for key in required_keys):
+            return redirect_flash_error(f"Missing either one of the following parameters: {', '.join(required_keys)}.", "setup")
 
-        if request.form["admin_password"] != request.form["admin_password_check"]:
-            return redirect_flash_error("The passwords do not match.", "setup")
+        if not db_user:
+            if len(request.form["admin_username"]) > 256:
+                return redirect_flash_error("The admin username is too long. It must be less than 256 characters.", "setup")
 
-        if not USER_PASSWORD_RX.match(request.form["admin_password"]):
-            return redirect_flash_error(
-                "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
-                "setup",
-            )
+            if request.form["admin_password"] != request.form["admin_password_check"]:
+                return redirect_flash_error("The passwords do not match.", "setup")
+
+            if not USER_PASSWORD_RX.match(request.form["admin_password"]):
+                return redirect_flash_error(
+                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).",
+                    "setup",
+                )
 
         server_names = db_config["SERVER_NAME"].split(" ")
         if request.form["server_name"] in server_names:
@@ -538,16 +543,18 @@ def setup():
         if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
             return redirect_flash_error("The hostname is not valid.", "setup")
 
-        app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"], method="ui")
+        if not db_user:
+            app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"], method="ui")
 
-        ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
-        if ret:
-            return redirect_flash_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
+            ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
+            if ret:
+                return redirect_flash_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
-        flash("The admin user was created successfully", "success")
+            flash("The admin user was created successfully", "success")
 
         app.config["RELOADING"] = True
         app.config["LAST_RELOAD"] = time()
+        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -572,6 +579,7 @@ def setup():
 
     return render_template(
         "setup.html",
+        ui_user=db_user,
         username=getenv("ADMIN_USERNAME", ""),
         password=getenv("ADMIN_PASSWORD", ""),
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
@@ -696,6 +704,7 @@ def account():
             # Reload instances
             app.config["RELOADING"] = True
             app.config["LAST_RELOAD"] = time()
+            # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
             Thread(
                 target=manage_bunkerweb,
                 name="Reloading instances",
@@ -819,6 +828,7 @@ def instances():
             return redirect_flash_error("Missing operation parameter on /instances.", "instances")
         app.config["RELOADING"] = True
         app.config["LAST_RELOAD"] = time()
+        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -922,6 +932,7 @@ def services():
         # Reload instances
         app.config["RELOADING"] = True
         app.config["LAST_RELOAD"] = time()
+        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -1030,6 +1041,7 @@ def global_config():
         # Reload instances
         app.config["RELOADING"] = True
         app.config["LAST_RELOAD"] = time()
+        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -1238,10 +1250,9 @@ def plugins():
                         except BadZipFile:
                             errors += 1
                             error = 1
-                            flash(
-                                f"{file} is not a valid zip file. ({folder_name or temp_folder_name})",
-                                "error",
-                            )
+                            message = f"{file} is not a valid zip file. ({folder_name or temp_folder_name})"
+                            app.logger.exception(message)
+                            flash(message, "error")
                     else:
                         try:
                             with tar_open(str(tmp_ui_path.joinpath(file)), errorlevel=2) as tar_file:
@@ -1250,30 +1261,29 @@ def plugins():
                                 except KeyError:
                                     is_dir = True
                                 try:
+                                    # deepcode ignore TarSlip: We don't need to check for tar slip as we are checking the files when they are uploaded
                                     tar_file.extractall(str(temp_folder_path), filter="data")
                                 except TypeError:
+                                    # deepcode ignore TarSlip: We don't need to check for tar slip as we are checking the files when they are uploaded
                                     tar_file.extractall(str(temp_folder_path))
                         except ReadError:
                             errors += 1
                             error = 1
-                            flash(
-                                f"Couldn't read file {file} ({folder_name or temp_folder_name})",
-                                "error",
-                            )
+                            message = f"Couldn't read file {file} ({folder_name or temp_folder_name})"
+                            app.logger.exception(message)
+                            flash(message, "error")
                         except CompressionError:
                             errors += 1
                             error = 1
-                            flash(
-                                f"{file} is not a valid tar file ({folder_name or temp_folder_name})",
-                                "error",
-                            )
+                            message = f"{file} is not a valid tar file ({folder_name or temp_folder_name})"
+                            app.logger.exception(message)
+                            flash(message, "error")
                         except HeaderError:
                             errors += 1
                             error = 1
-                            flash(
-                                f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})",
-                                "error",
-                            )
+                            message = f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})"
+                            app.logger.exception(message)
+                            flash(message, "error")
 
                     if is_dir:
                         dirs = [d for d in listdir(str(temp_folder_path)) if temp_folder_path.joinpath(d).is_dir()]
@@ -1392,6 +1402,7 @@ def plugins():
         # Reload instances
         app.config["RELOADING"] = True
         app.config["LAST_RELOAD"] = time()
+        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
@@ -1436,8 +1447,14 @@ def upload_plugin():
     tmp_ui_path.mkdir(parents=True, exist_ok=True)
 
     for uploaded_file in request.files.values():
+        if not uploaded_file.filename:
+            continue
+
         if not uploaded_file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
             return {"status": "ko"}, 422
+
+        file_name = Path(secure_filename(uploaded_file.filename)).name
+        folder_name = file_name.replace(".tar.gz", "").replace(".tar.xz", "").replace(".zip", "")
 
         with BytesIO(uploaded_file.read()) as io:
             io.seek(0, 0)
@@ -1448,23 +1465,32 @@ def upload_plugin():
                         if file.endswith("plugin.json"):
                             plugins.append(basename(dirname(file)))
                     if len(plugins) > 1:
+                        for file in zip_file.namelist():
+                            if isabs(file) or ".." in file:
+                                return {"status": "ko"}, 422
+
                         zip_file.extractall(str(tmp_ui_path) + "/")
-                folder_name = uploaded_file.filename.replace(".zip", "")
             else:
                 with tar_open(fileobj=io) as tar_file:
                     for file in tar_file.getnames():
                         if file.endswith("plugin.json"):
                             plugins.append(basename(dirname(file)))
                     if len(plugins) > 1:
+                        for member in tar_file.getmembers():
+                            if isabs(member.name) or ".." in member.name:
+                                return {"status": "ko"}, 422
+
                         try:
+                            # deepcode ignore TarSlip: The files in the tar are being inspected before extraction
                             tar_file.extractall(str(tmp_ui_path) + "/", filter="data")
                         except TypeError:
+                            # deepcode ignore TarSlip: The files in the tar are being inspected before extraction
                             tar_file.extractall(str(tmp_ui_path) + "/")
-                folder_name = uploaded_file.filename.replace(".tar.gz", "").replace(".tar.xz", "")
 
             if len(plugins) <= 1:
                 io.seek(0, 0)
-                tmp_ui_path.joinpath(uploaded_file.filename).write_bytes(io.read())
+                # deepcode ignore PT: The folder name is being sanitized before
+                tmp_ui_path.joinpath(file_name).write_bytes(io.read())
                 return {"status": "ok"}, 201
 
         for plugin in plugins:
@@ -1474,7 +1500,8 @@ def upload_plugin():
                 tgz.seek(0, 0)
                 tmp_ui_path.joinpath(f"{plugin}.tar.gz").write_bytes(tgz.read())
 
-        rmtree(str(tmp_ui_path.joinpath(folder_name)), ignore_errors=True)
+        # deepcode ignore PT: The folder name is being sanitized before
+        rmtree(tmp_ui_path.joinpath(folder_name), ignore_errors=True)
 
     return {"status": "ok"}, 201
 
@@ -1584,7 +1611,10 @@ def custom_plugin(plugin: str):
         # Get prerender from action.py
         pre_render = run_action(plugin, "pre_render")
         return render_template(
-            Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
+            # deepcode ignore Ssti: We trust the plugin template
+            Environment(
+                loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/"), autoescape=select_autoescape(["html"])
+            ).from_string(page.decode("utf-8")),
             username=current_user.get_id(),
             current_endpoint=plugin,
             plugin=curr_plugin,
@@ -1778,14 +1808,14 @@ def logs_container(container_id):
     if docker_client:
         try:
             if INTEGRATION != "Swarm":
-                docker_logs = docker_client.containers.get(container_id).logs(
+                docker_logs = docker_client.containers.get(container_id).logs(  # type: ignore
                     stdout=True,
                     stderr=True,
                     since=datetime.fromtimestamp(last_update),
                     timestamps=True,
                 )
             else:
-                docker_logs = docker_client.services.get(container_id).logs(
+                docker_logs = docker_client.services.get(container_id).logs(  # type: ignore
                     stdout=True,
                     stderr=True,
                     since=datetime.fromtimestamp(last_update),
@@ -2079,12 +2109,15 @@ def jobs_download():
     if not plugin_id or not job_name or not file_name:
         return jsonify({"status": "ko", "message": "plugin_id, job_name and file_name are required"}), 422
 
+    file_name = secure_filename(file_name)
+
     cache_file = db.get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
 
     if not cache_file:
         return jsonify({"status": "ko", "message": "file not found"}), 404
 
     file = BytesIO(cache_file)
+    # deepcode ignore PT: We sanitize the file name
     return send_file(file, as_attachment=True, download_name=file_name)
 
 

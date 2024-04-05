@@ -88,7 +88,7 @@ jobs:
           echo "USE_BUNKERNET=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_BLACKLIST=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "SEND_ANONYMOUS_REPORT=no" | sudo tee -a /etc/bunkerweb/variables.env
-          echo "LOG_LEVEL=info" | sudo tee -a /etc/bunkerweb/variables.env
+          echo "LOG_LEVEL=debug" | sudo tee -a /etc/bunkerweb/variables.env
           sudo chown nginx:nginx /etc/bunkerweb/variables.env
           sudo chmod 777 /etc/bunkerweb/variables.env
       - name: Install BunkerWeb

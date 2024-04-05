@@ -62,6 +62,7 @@ class Plugins(Base):
     settings = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
     jobs = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
     pages = relationship("Plugin_pages", back_populates="plugin", cascade="all")
+    commands = relationship("BwcliCommands", back_populates="plugin", cascade="all")
 
 
 class Settings(Base):
@@ -210,6 +211,18 @@ class Users(Base):
     method = Column(METHODS_ENUM, nullable=False, default="manual")
 
 
+class BwcliCommands(Base):
+    __tablename__ = "bw_cli_commands"
+    __table_args__ = (UniqueConstraint("plugin_id", "name"),)
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    name = Column(String(64), nullable=False)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    file_name = Column(String(256), nullable=False)
+
+    plugin = relationship("Plugins", back_populates="commands")
+
+
 class Metadata(Base):
     __tablename__ = "bw_metadata"
 
@@ -230,4 +243,4 @@ class Metadata(Base):
     config_changed = Column(Boolean, default=False, nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.5.6", nullable=False)
+    version = Column(String(32), default="1.5.7", nullable=False)
