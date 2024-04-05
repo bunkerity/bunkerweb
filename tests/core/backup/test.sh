@@ -73,8 +73,8 @@ cleanup_stack () {
             unset DATABASE_URI
             unset USE_BACKUP
             unset BACKUP_DIRECTORY
-            unset BACKUP_SCHEDULE
             unset BACKUP_ROTATION
+            sudo rm -rf /var/lib/bunkerweb/*
         fi
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
             return
@@ -103,8 +103,9 @@ cleanup_stack () {
             fi
         fi
     else
-        sudo systemctl stop bunkerweb
         sudo truncate -s 0 /var/log/bunkerweb/error.log
+        sudo rm -rf /var/lib/bunkerweb/*
+        sudo systemctl stop bunkerweb
     fi
 
     # shellcheck disable=SC2181
@@ -267,8 +268,8 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@BACKUP_ROTATION: ".*"$@BACKUP_ROTATION: "2"@' {} \;
         else
             sudo sed -i 's@USE_BACKUP=no@USE_BACKUP=yes@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@BACKUP_DIRECTORY=/var/lib/bunkerweb/backups@BACKUP_DIRECTORY=/var/lib/bunkerweb/tmp_backups@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@BACKUP_ROTATION=7@BACKUP_ROTATION=2@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BACKUP_DIRECTORY=.*$@BACKUP_DIRECTORY=/var/lib/bunkerweb/tmp_backups@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BACKUP_ROTATION=.*$@BACKUP_ROTATION=2@' /etc/bunkerweb/variables.env
             unset USE_BACKUP
             export BACKUP_DIRECTORY="/var/lib/bunkerweb/tmp_backups"
             export BACKUP_ROTATION="2"

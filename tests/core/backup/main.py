@@ -1,12 +1,13 @@
 from datetime import datetime
-from os import getenv
+from os import getenv, sep
+from pathlib import Path
 from subprocess import PIPE, Popen
 from time import sleep
 from traceback import format_exc
 from typing import List, Tuple, Union
 
 try:
-    use_backup = getenv("USE_BACKUP", "no") == "yes"
+    use_backup = getenv("USE_BACKUP", "yes") == "yes"
     backup_dir = getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups")
     backup_rotation = int(getenv("BACKUP_ROTATION", "7"))
 
@@ -49,6 +50,7 @@ try:
         if result[0] != 0:
             print(f"❌ Backup failed:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
             exit(1)
+        sleep(1)
 
     print("ℹ️ Checking backup directory ...", flush=True)
 
@@ -91,11 +93,13 @@ try:
             print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)
             exit(1)
 
+        sleep(3)
+
         ready = False
+        healthy_path = Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy")
         while not ready and (datetime.now() - current_time).seconds < 60:
             print("⏳ Waiting for BunkerWeb to be ready, retrying in 1s ...", flush=True)
-            exit_code, stdout, stderr = exec_command(["sudo", "grep", "BunkerWeb is ready", "/var/log/bunkerweb/error.log"])
-            if exit_code == 0:
+            if healthy_path.is_file():
                 ready = True
             sleep(1)
 
