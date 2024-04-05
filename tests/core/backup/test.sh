@@ -46,6 +46,7 @@ if [ "$integration" == "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
+    sudo rm -rf /var/lib/bunkerweb/*
     echo "DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_BACKUP=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "BACKUP_DIRECTORY=/var/lib/bunkerweb/backups" | sudo tee -a /etc/bunkerweb/variables.env
@@ -56,7 +57,6 @@ fi
 
 manual=0
 end=0
-# shellcheck disable=SC2120
 cleanup_stack () {
     exit_code=$?
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
@@ -84,12 +84,7 @@ cleanup_stack () {
     echo "💾 Cleaning up current stack ..."
 
     if [ "$integration" == "docker" ] ; then
-        soft_cleanup=$1
-        if [ "$soft_cleanup" = "1" ] ; then
-            docker compose down
-        else
-            docker compose down -v --remove-orphans
-        fi
+        docker compose down -v --remove-orphans
 
         if [[ $end -eq 0 && $exit_code = 1 ]] && [ $manual = 0 ] ; then
             echo "💾 Removing bw-docker network ..."
