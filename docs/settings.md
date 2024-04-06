@@ -99,6 +99,25 @@ Backup your data to a custom location. Ensure the safety and availability of you
 |`BACKUP_SCHEDULE` |`daily`                     |global |no      |The frequency of the backup                  |
 |`BACKUP_ROTATION` |`7`                         |global |no      |The number of backups to keep                |
 
+## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :white_check_mark:
+
+Automatically backup your data to an S3 bucket
+
+|           Setting           |Default|Context|Multiple|                Description                 |
+|-----------------------------|-------|-------|--------|--------------------------------------------|
+|`USE_BACKUP_S3`              |`no`   |global |no      |Enable or disable the S3 backup feature     |
+|`BACKUP_S3_SCHEDULE`         |`daily`|global |no      |The frequency of the backup                 |
+|`BACKUP_S3_ROTATION`         |`7`    |global |no      |The number of backups to keep               |
+|`BACKUP_S3_ENDPOINT`         |       |global |no      |The S3 endpoint                             |
+|`BACKUP_S3_BUCKET`           |       |global |no      |The S3 bucket                               |
+|`BACKUP_S3_REGION`           |       |global |no      |The S3 region                               |
+|`BACKUP_S3_ACCESS_KEY_ID`    |       |global |no      |The S3 access key ID                        |
+|`BACKUP_S3_ACCESS_KEY_SECRET`|       |global |no      |The S3 access key secret                    |
+|`BACKUP_S3_COMP_LEVEL`       |`6`    |global |no      |The compression level of the backup zip file|
+
 ## Bad behavior
 
 STREAM support :white_check_mark:
@@ -355,6 +374,7 @@ Automatic creation, renewal and configuration of Let's Encrypt certificates usin
 |`USE_LETS_ENCRYPT_DNS_WILDCARD`   |`yes`    |multisite|no      |Create wildcard certificates for all domains using DNS challenges.                     |
 |`LETS_ENCRYPT_DNS_PROPAGATION`    |`default`|multisite|no      |The time to wait for DNS propagation in seconds.                                       |
 |`LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`|         |multisite|yes     |Configuration item that will be added to the credentials.ini file for the DNS provider.|
+|`LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS`|`no`     |global   |no      |Clear old certificates when renewing.                                                  |
 
 ## Limit
 
@@ -383,6 +403,13 @@ Metrics collection and retrieve.
 |`USE_METRICS`                 |`yes`  |multisite|no      |Enable collection and retrieval of internal metrics.     |
 |`METRICS_MEMORY_SIZE`         |`16m`  |global   |no      |Size of the internal storage for metrics.                |
 |`METRICS_MAX_BLOCKED_REQUESTS`|`100`  |global   |no      |Maximum number of blocked requests to store (per worker).|
+
+## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :white_check_mark:
+
+Migration of BunkerWeb configuration between instances made easy via the web UI
 
 ## Miscellaneous
 
@@ -656,4 +683,3 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
-
