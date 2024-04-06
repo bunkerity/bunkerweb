@@ -44,7 +44,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add ui user, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash libmagic && \
+RUN apk add --no-cache bash libmagic mariadb-client postgresql-client sqlite && \
   addgroup -g 101 ui && \
   adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
   echo "Docker" > INTEGRATION && \
