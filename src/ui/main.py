@@ -340,6 +340,9 @@ def run_action(plugin: str, function_name: str = ""):
         if message or not isinstance(res, dict) and not res:
             return {"status": "ko", "code": 500, "message": message or "The plugin did not return a valid response"}
 
+    if isinstance(res, Response):
+        return res
+
     return {"status": "ok", "code": 200, "data": res}
 
 
@@ -1625,11 +1628,19 @@ def custom_plugin(plugin: str):
         )
 
     action_result = run_action(plugin)
+
+    if isinstance(action_result, Response):
+        app.logger.info(f"Plugin {plugin} action executed successfully")
+        return action_result
+
     # case error
     if action_result["status"] == "ko":
         return error_message(action_result["message"]), action_result["code"]
 
     app.logger.info(f"Plugin {plugin} action executed successfully")
+
+    if request.content_type == "application/x-www-form-urlencoded":
+        return redirect(f"{url_for('plugins')}/{plugin}", code=303)
     return jsonify({"message": "ok", "data": action_result["data"]}), 200
 
 
