@@ -316,5 +316,14 @@
       "alert",
       "emerg"
     ]
+  },
+  "STATIC_INSTANCES": {
+    "context": "global",
+    "default": "",
+    "help": "List of additional BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 fqdn-or-ip:5000)",
+    "id": "static-instances",
+    "label": "Static instances",
+    "regex": "^.*$",
+    "type": "text"
   }
 }
