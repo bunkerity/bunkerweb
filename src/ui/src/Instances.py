@@ -8,7 +8,8 @@ from typing import Any, List, Optional, Tuple, Union
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-from dotenv import dotenv_values
+from dotenv import dotenv_values # type: ignore
+from Database import Database # type: ignore
 
 
 class Instance:
@@ -134,10 +135,11 @@ class Instance:
 
 
 class Instances:
-    def __init__(self, docker_client, kubernetes_client, integration: str):
+    def __init__(self, docker_client, kubernetes_client, integration: str, db):
         self.__docker_client = docker_client
         self.__kubernetes_client = kubernetes_client
         self.__integration = integration
+        self.__db = db
 
     def __instance_from_id(self, _id) -> Instance:
         instances: list[Instance] = self.get_instances()
@@ -147,8 +149,34 @@ class Instances:
 
         raise ValueError(f"Can't find instance with _id {_id}")
 
-    def get_instances(self) -> list[Instance]:
+    def get_instances(self, override_instances=None) -> list[Instance]:
         instances = []
+        # Override case : only return instances from DB
+        if override_instances is None:
+            config = self.__db.get_config()
+            override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+        if override_instances:
+            for instance in self.__db.get_instances():
+                instances.append(
+                    Instance(
+                        instance["hostname"],
+                        instance["hostname"],
+                        instance["hostname"],
+                        "override",
+                        "up",
+                        None,
+                        ApiCaller(
+                            [
+                                API(
+                                    f"http://{instance["hostname"]}:{str(instance["port"])}",
+                                    instance.server_name,
+                                )
+                            ]
+                        )
+                    )
+
+                )
+            return instances
         # Docker instances (containers or services)
         if self.__docker_client is not None:
             for instance in self.__docker_client.containers.list(all=True, filters={"label": "bunkerweb.INSTANCE"}):

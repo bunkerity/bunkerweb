@@ -77,7 +77,8 @@ class CLI(ApiCaller):
         if self.__use_redis:
             self.__logger.info("Fetching redis configuration")
             redis_host = self.__get_variable("REDIS_HOST")
-            if redis_host:
+            sentinel_hosts = self.__get_variable("REDIS_SENTINEL_HOSTS")
+            if redis_host or sentinel_hosts:
                 redis_port = self.__get_variable("REDIS_PORT", "6379")
                 assert isinstance(redis_port, str), "REDIS_PORT is not a string"
                 if not redis_port.isdigit():
@@ -106,8 +107,6 @@ class CLI(ApiCaller):
                     self.__logger.error(f"REDIS_KEEPALIVE_POOL is not a valid number of connections: {redis_keepalive_pool}, defaulting to 10")
                     redis_keepalive_pool = "10"
                 redis_keepalive_pool = int(redis_keepalive_pool)
-
-                self.__logger.info("Redis configuration is valid")
 
                 redis_ssl = self.__get_variable("REDIS_SSL", "no") == "yes"
                 username = self.__get_variable("REDIS_USERNAME", None) or None
@@ -177,7 +176,7 @@ class CLI(ApiCaller):
                     self.__use_redis = False
                 self.__logger.info("Connected to redis")
             else:
-                self.__logger.error("USE_REDIS is set to yes but REDIS_HOST is not set, disabling redis")
+                self.__logger.error("USE_REDIS is set to yes but REDIS_HOST or REDIS_SENTINEL_HOSTS is not set, disabling redis")
                 self.__use_redis = False
 
         if self.__integration == "linux":

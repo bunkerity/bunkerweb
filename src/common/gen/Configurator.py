@@ -197,6 +197,8 @@ class Configurator:
                     "NJS_VERSION",
                     "PKG_RELEASE",
                     "DOCKER_HOST",
+                    "SLAVE_MODE",
+                    "MASTER_MODE",
                 )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")

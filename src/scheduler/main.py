@@ -30,6 +30,7 @@ from common_utils import bytes_hash, dict_to_frozenset, get_integration  # type:
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
+from API import API
 
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
@@ -69,6 +70,9 @@ SCHEDULER_TMP_ENV_PATH.touch()
 
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
+
+SLAVE_MODE = environ.get("SLAVE_MODE", "no") == "yes"
+MASTER_MODE = environ.get("MASTER_MODE", "no") == "yes"
 
 
 def handle_stop(signum, frame):
@@ -198,6 +202,53 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
         if not ret:
             logger.error(f"Sending {'pro ' if pro else ''}external plugins failed, configuration will not work as expected...")
 
+def generate_caches(plugins: List[Any], db: Database):
+    for plugin in plugins:
+        job_cache_files = db.get_jobs_cache_files(plugin_id=plugin["id"])
+        plugin_cache_files = set()
+        ignored_dirs = set()
+        job_path = Path(sep, "var", "cache", "bunkerweb", plugin["id"])
+        for job_cache_file in job_cache_files:
+            cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
+            plugin_cache_files.add(cache_path)
+
+            try:
+                if job_cache_file["file_name"].endswith(".tgz"):
+                    extract_path = cache_path.parent
+                    if job_cache_file["file_name"].startswith("folder:"):
+                        extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
+                    ignored_dirs.add(extract_path.as_posix())
+                    rmtree(extract_path, ignore_errors=True)
+                    extract_path.mkdir(parents=True, exist_ok=True)
+                    with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
+                        try:
+                            tar.extractall(extract_path, filter="fully_trusted")
+                        except TypeError:
+                            tar.extractall(extract_path)
+                else:
+                    cache_path.parent.mkdir(parents=True, exist_ok=True)
+                    cache_path.write_bytes(job_cache_file["data"])
+            except BaseException as e:
+                logger.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
+        if job_path.is_dir():
+            for file in job_path.rglob("*"):
+                skipped = False
+                if file.as_posix().startswith(tuple(ignored_dirs)):
+                    skipped = True
+                if skipped:
+                    continue
+                logger.debug(f"Checking if {file} should be removed")
+                if file not in plugin_cache_files and file.is_file():
+                    logger.debug(f"Removing non-cached file {file}")
+                    file.unlink(missing_ok=True)
+                    if file.parent.is_dir() and not list(file.parent.iterdir()):
+                        logger.debug(f"Removing empty directory {file.parent}")
+                        rmtree(file.parent, ignore_errors=True)
+                        if file.parent == job_path:
+                            break
+                elif file.is_dir() and not list(file.iterdir()):
+                    logger.debug(f"Removing empty directory {file}")
+                    rmtree(file, ignore_errors=True)
 
 def api_to_instance(api):
     hostname_port = api.endpoint.replace("http://", "").replace("https://", "").replace("/", "").split(":")
@@ -206,6 +257,62 @@ def api_to_instance(api):
         "env": {"API_HTTP_PORT": int(hostname_port[1]), "API_SERVER_NAME": api.host},
     }
 
+def run_in_slave_mode(db: Database, dotenv_env: Dict[str, Any]):
+    # Instantiate db
+    db = Database(logger, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
+
+    # Wait for init
+    while not db.is_initialized():
+        logger.warning("Database is not initialized, retrying in 5s ...")
+        sleep(5)
+
+    # Wait for first config
+    env = db.get_config()
+    while not db.is_first_config_saved() or not env:
+        logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
+        sleep(5)
+        env = db.get_config()
+    
+    # Download plugins
+    pro_plugins = db.get_plugins(_type="pro", with_data=True)
+    generate_external_plugins(pro_plugins, original_path=PRO_PLUGINS_PATH)
+    external_plugins = db.get_plugins(_type="external", with_data=True)
+    generate_external_plugins(external_plugins)
+
+    # Download custom configs
+    generate_custom_configs(db.get_custom_configs())
+
+    # Download caches
+    generate_caches(pro_plugins + external_plugins, db)
+
+    # Gen config
+    content = ""
+    for k, v in env.items():
+        content += f"{k}={v}\n"
+    SCHEDULER_TMP_ENV_PATH.write_text(content)
+    proc = subprocess_run(
+        [
+            "python3",
+            join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
+            "--settings",
+            join(sep, "usr", "share", "bunkerweb", "settings.json"),
+            "--templates",
+            join(sep, "usr", "share", "bunkerweb", "confs"),
+            "--output",
+            join(sep, "etc", "nginx"),
+            "--variables",
+            str(SCHEDULER_TMP_ENV_PATH),
+        ],
+        stdin=DEVNULL,
+        stderr=STDOUT,
+        check=False,
+    )
+    if proc.returncode != 0:
+        logger.error("Config generator failed, configuration will not work as expected...")
+
+    # TODO : check nginx status + check DB status
+    while True:
+        sleep(5)
 
 if __name__ == "__main__":
     try:
@@ -231,6 +338,10 @@ if __name__ == "__main__":
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
         db = Database(logger, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
+
+        if SLAVE_MODE:
+            run_in_slave_mode(db, dotenv_env)
+            stop(1)
 
         if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
             while not db.is_initialized():
@@ -280,8 +391,15 @@ if __name__ == "__main__":
 
         env["DATABASE_URI"] = db.database_uri
 
+        # Override instances if needed
+        override_instances = env.get("OVERRIDE_INSTANCES", "")
+        apis=[]
+        if override_instances:
+            for instance in override_instances.split(" "):
+                apis.append(API(instance))
+
         # Instantiate scheduler
-        SCHEDULER = JobScheduler(env | environ, logger, INTEGRATION, db=db)
+        SCHEDULER = JobScheduler(env | environ, logger, INTEGRATION, db=db, apis=apis)
 
         if INTEGRATION in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
             # Automatically setup the scheduler apis
@@ -462,7 +580,7 @@ if __name__ == "__main__":
                     if event["Action"] == "start":
                         db.checked_changes(value=True)
 
-        if INTEGRATION == "Docker":
+        if INTEGRATION == "Docker" and not override_instances:
             Thread(target=listen_for_instances_reload, args=(db,), name="listen_for_instances_reload").start()
 
         while True:
@@ -490,19 +608,22 @@ if __name__ == "__main__":
                     content += f"{k}={v}\n"
                 SCHEDULER_TMP_ENV_PATH.write_text(content)
                 # run the generator
+                args = [
+                    "python3",
+                    join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
+                    "--settings",
+                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    "--templates",
+                    join(sep, "usr", "share", "bunkerweb", "confs"),
+                    "--output",
+                    join(sep, "etc", "nginx"),
+                    "--variables",
+                    str(SCHEDULER_TMP_ENV_PATH),
+                ]
+                if MASTER_MODE:
+                    args.append("--no-linux-reload")
                 proc = subprocess_run(
-                    [
-                        "python3",
-                        join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
-                        "--settings",
-                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                        "--templates",
-                        join(sep, "usr", "share", "bunkerweb", "confs"),
-                        "--output",
-                        join(sep, "etc", "nginx"),
-                        "--variables",
-                        str(SCHEDULER_TMP_ENV_PATH),
-                    ],
+                    args,
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,

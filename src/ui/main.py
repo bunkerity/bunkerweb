@@ -194,7 +194,7 @@ bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encodin
 try:
     app.config.update(
         DEBUG=True,
-        INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION),
+        INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION, db),
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(),
         WTF_CSRF_SSL_STRICT=False,
@@ -634,8 +634,10 @@ def home():
     if r and r.status_code == 200:
         remote_version = basename(r.url).strip().replace("v", "")
 
-    instances = app.config["INSTANCES"].get_instances()
     config = app.config["CONFIG"].get_config(with_drafts=True)
+    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
+    
     instance_health_count = 0
 
     for instance in instances:
@@ -848,7 +850,9 @@ def instances():
         )
 
     # Display instances
-    instances = app.config["INSTANCES"].get_instances()
+    config = app.config["CONFIG"].get_config()
+    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
     return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id())
 
 
@@ -1664,7 +1668,10 @@ def cache():
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    return render_template("logs.html", instances=app.config["INSTANCES"].get_instances(), username=current_user.get_id())
+    config = app.config["CONFIG"].get_config(with_drafts=True)
+    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
+    return render_template("logs.html", instances=instances, username=current_user.get_id())
 
 
 @app.route("/logs/local", methods=["GET"])
