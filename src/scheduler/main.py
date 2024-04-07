@@ -578,59 +578,68 @@ if __name__ == "__main__":
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
+            errors = 0
             while RUN and not NEED_RELOAD:
-                SCHEDULER.run_pending()
-                sleep(1)
-                current_time = datetime.now()
-
-                while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
-                    logger.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
+                try:
+                    SCHEDULER.run_pending()
                     sleep(1)
+                    current_time = datetime.now()
 
-                DB_LOCK_FILE.unlink(missing_ok=True)
+                    while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
+                        logger.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
+                        sleep(1)
 
-                changes = db.check_changes()
+                    DB_LOCK_FILE.unlink(missing_ok=True)
 
-                if isinstance(changes, str):
-                    logger.error(f"An error occurred when checking for changes in the database : {changes}")
-                    stop(1)
+                    changes = db.check_changes()
 
-                # check if the plugins have changed since last time
-                if changes["pro_plugins_changed"]:
-                    logger.info("Pro plugins changed, generating ...")
-                    PRO_PLUGINS_NEED_GENERATION = True
-                    CONFIG_NEED_GENERATION = True
-                    RUN_JOBS_ONCE = True
-                    NEED_RELOAD = True
+                    if isinstance(changes, str):
+                        logger.error(f"An error occurred when checking for changes in the database : {changes}")
+                        stop(1)
 
-                if changes["external_plugins_changed"]:
-                    logger.info("External plugins changed, generating ...")
-                    PLUGINS_NEED_GENERATION = True
-                    CONFIG_NEED_GENERATION = True
-                    RUN_JOBS_ONCE = True
-                    NEED_RELOAD = True
+                    # check if the plugins have changed since last time
+                    if changes["pro_plugins_changed"]:
+                        logger.info("Pro plugins changed, generating ...")
+                        PRO_PLUGINS_NEED_GENERATION = True
+                        CONFIG_NEED_GENERATION = True
+                        RUN_JOBS_ONCE = True
+                        NEED_RELOAD = True
 
-                # check if the custom configs have changed since last time
-                if changes["custom_configs_changed"]:
-                    logger.info("Custom configs changed, generating ...")
-                    CONFIGS_NEED_GENERATION = True
-                    CONFIG_NEED_GENERATION = True
-                    NEED_RELOAD = True
+                    if changes["external_plugins_changed"]:
+                        logger.info("External plugins changed, generating ...")
+                        PLUGINS_NEED_GENERATION = True
+                        CONFIG_NEED_GENERATION = True
+                        RUN_JOBS_ONCE = True
+                        NEED_RELOAD = True
 
-                # check if the config have changed since last time
-                if changes["config_changed"]:
-                    logger.info("Config changed, generating ...")
-                    CONFIG_NEED_GENERATION = True
-                    RUN_JOBS_ONCE = True
-                    NEED_RELOAD = True
+                    # check if the custom configs have changed since last time
+                    if changes["custom_configs_changed"]:
+                        logger.info("Custom configs changed, generating ...")
+                        CONFIGS_NEED_GENERATION = True
+                        CONFIG_NEED_GENERATION = True
+                        NEED_RELOAD = True
 
-                # check if the instances have changed since last time
-                if changes["instances_changed"]:
-                    logger.info("Instances changed, generating ...")
-                    INSTANCES_NEED_GENERATION = True
-                    CONFIGS_NEED_GENERATION = True
-                    CONFIG_NEED_GENERATION = True
-                    NEED_RELOAD = True
+                    # check if the config have changed since last time
+                    if changes["config_changed"]:
+                        logger.info("Config changed, generating ...")
+                        CONFIG_NEED_GENERATION = True
+                        RUN_JOBS_ONCE = True
+                        NEED_RELOAD = True
+
+                    # check if the instances have changed since last time
+                    if changes["instances_changed"]:
+                        logger.info("Instances changed, generating ...")
+                        INSTANCES_NEED_GENERATION = True
+                        CONFIGS_NEED_GENERATION = True
+                        CONFIG_NEED_GENERATION = True
+                        NEED_RELOAD = True
+                except BaseException:
+                    logger.debug(format_exc())
+                    if errors > 5:
+                        logger.error(f"An error occurred when executing the scheduler : {format_exc()}")
+                        stop(1)
+                    errors += 1
+                    sleep(5)
 
             if NEED_RELOAD:
                 CHANGES.clear()

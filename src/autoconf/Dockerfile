@@ -66,6 +66,7 @@ RUN apk add --no-cache bash && \
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
 LABEL version "1.5.7"
 LABEL url "https://www.bunkerweb.io"
+LABEL bunkerweb.type "autoconf"
 
 VOLUME /data
 

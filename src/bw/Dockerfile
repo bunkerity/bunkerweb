@@ -73,6 +73,8 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
 LABEL version "1.5.7"
 LABEL url "https://www.bunkerweb.io"
+LABEL bunkerweb.type "bunkerweb"
+LABEL bunkerweb.INSTANCE "bunkerweb"
 
 EXPOSE 8080/tcp 8443/tcp
 
