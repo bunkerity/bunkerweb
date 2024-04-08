@@ -635,7 +635,7 @@ def home():
         remote_version = basename(r.url).strip().replace("v", "")
 
     config = app.config["CONFIG"].get_config(with_drafts=True)
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    override_instances = config["OVERRIDE_INSTANCES"] != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
     
     instance_health_count = 0
@@ -851,7 +851,7 @@ def instances():
 
     # Display instances
     config = app.config["CONFIG"].get_config()
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    override_instances = config["OVERRIDE_INSTANCES"] != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
     return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id())
 
@@ -1669,7 +1669,7 @@ def cache():
 @login_required
 def logs():
     config = app.config["CONFIG"].get_config(with_drafts=True)
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    override_instances = config["OVERRIDE_INSTANCES"] != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
     return render_template("logs.html", instances=instances, username=current_user.get_id())
 
