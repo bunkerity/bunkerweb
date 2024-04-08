@@ -154,7 +154,7 @@ class Instances:
         # Override case : only return instances from DB
         if override_instances is None:
             config = self.__db.get_config()
-            override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+            override_instances = config["OVERRIDE_INSTANCES"] != ""
         if override_instances:
             for instance in self.__db.get_instances():
                 instances.append(
