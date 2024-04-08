@@ -169,7 +169,7 @@ class Instances:
                             [
                                 API(
                                     f"http://{instance["hostname"]}:{str(instance["port"])}",
-                                    instance.server_name,
+                                    instance["server_name"],
                                 )
                             ]
                         )
