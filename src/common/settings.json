@@ -316,5 +316,14 @@
       "alert",
       "emerg"
     ]
+  },
+  "OVERRIDE_INSTANCES": {
+    "context": "global",
+    "default": "",
+    "help": "List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 fqdn-or-ip:5000)",
+    "id": "override-instances",
+    "label": "Override instances",
+    "regex": "^.*$",
+    "type": "text"
   }
 }
