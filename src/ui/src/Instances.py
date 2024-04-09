@@ -168,7 +168,7 @@ class Instances:
                         ApiCaller(
                             [
                                 API(
-                                    f"http://{instance["hostname"]}:{str(instance["port"])}",
+                                    f"http://{instance['hostname']}:{str(instance['port'])}",
                                     instance["server_name"],
                                 )
                             ]
