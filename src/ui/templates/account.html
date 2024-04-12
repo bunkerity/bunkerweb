@@ -115,14 +115,13 @@
                     </div>
                 {% endif %}
             </div>
-            {% if not is_pro_version and pro_status != "inactive" %}
                 <form class="mt-6 relative col-span-12 grid grid-cols-12 w-full justify-items-center"
                       id="activate-key-form"
                       action="account"
                       method="POST"
                       autocomplete="off">
                     <div class="col-span-12">
-                        <h5 class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0 dark:text-gray-200">ACTIVATE KEY</h5>
+                        <h5 class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0 dark:text-gray-200">{%if is_pro_version %}UPDATE KEY {% else %} ACTIVATE KEY {% endif %}</h5>
                     </div>
                     <input type="hidden" name="operation" value="activate-key" />
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -170,7 +169,6 @@
                                 class="valid-btn">SAVE</button>
                     </div>
                 </form>
-            {% endif %}
         </div>
         <div data-tab-item="username"
              class="hidden grid grid-cols-12 w-full justify-items-center">
@@ -245,7 +243,7 @@
                             id="username-button"
                             name="username-button"
                             value="username"
-                            class="edit-btn">Edit</button>
+                            class="valid-btn">Save</button>
                 </div>
             </form>
             <!-- end update username -->
@@ -376,7 +374,7 @@
                 <strong class="opacity-0 font-normal text-sm text-red-500" data-pw-alert>Value does not match password</strong>
             </div>
             <div class="col-span-12 flex justify-center">
-                <button type="submit" id="pw-button" name="pw-button" class="edit-btn">Edit</button>
+                <button type="submit" id="pw-button" name="pw-button" class="valid-btn">Save</button>
             </div>
         </form>
         <form data-tab-item="totp"
