@@ -284,7 +284,6 @@ class SetRootOnlyConf {
           ),
         );
       }
-      console.log(itemsToRemove);
       itemsToRemove.forEach((item) => {
         item.remove();
       });
