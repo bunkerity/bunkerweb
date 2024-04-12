@@ -100,9 +100,9 @@ charset-normalizer==3.3.2 \
     --hash=sha256:fd1abc0d89e30cc4e02e4064dc67fcc51bd941eb395c502aac3ec19fab46b519 \
     --hash=sha256:ff8fa367d09b717b2a17a052544193ad76cd49979c805768879cb63d9ca50561
     # via requests
-idna==3.6 \
-    --hash=sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca \
-    --hash=sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
+idna==3.7 \
+    --hash=sha256:028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc \
+    --hash=sha256:82fee1fc78add43492d3a1898bfa6d8a904cc97d8427f683ed8e798d07761aa0
     # via requests
 maxminddb==2.6.0 \
     --hash=sha256:048e85e74828d1c7327df4ca452a4b859dd2ca2b9746c978fe613138cae65b97 \
@@ -153,11 +153,11 @@ maxminddb==2.6.0 \
     --hash=sha256:fa1f45ca2b2b60bd3c88cea33bb8ca948f3dd44795049477248c804e2c02b726 \
     --hash=sha256:fa897a9ae335559d26d63656d4d34f4a9a0e63be3cb67624fdcd448b7d010536 \
     --hash=sha256:fb8d69564a3b682d8f1dd79a97b52f6525a2a4939ef9a23c7b108ec2f973a42a
-    # via -r requirements.in
+    # via -r init/requirements.in
 requests==2.31.0 \
     --hash=sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f \
     --hash=sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1
-    # via -r requirements.in
+    # via -r init/requirements.in
 urllib3==2.2.1 \
     --hash=sha256:450b20ec296a467077128bff42b73080516e71b56ff59a60a02bef2232c4fa9d \
     --hash=sha256:d0570876c61ab9e520d776c38acbbb5b05a776d3f9ff98a5c8fd5162a444cf19
