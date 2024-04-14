@@ -118,7 +118,7 @@ google-auth==2.29.0 \
     --hash=sha256:672dff332d073227550ffc7457868ac4218d6c500b155fe6cc17d2b13602c360 \
     --hash=sha256:d452ad095688cd52bae0ad6fafe027f6a6d6f560e810fec20914e17a09526415
     # via kubernetes
-idna==3.6 \
+idna==3.7 \
     --hash=sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca \
     --hash=sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
     # via requests
