@@ -354,7 +354,7 @@ class FilterSettings {
   runFilter() {
     this.resetFilter();
     //get inp format
-    const inpValue = this.input.value.trim().toLowerCase();
+    const inpValue = this.input.value.trim().toLowerCase().replaceAll("_", " ");
 
     //loop all tabs
     this.tabsEls.forEach((tab) => {
@@ -374,7 +374,22 @@ class FilterSettings {
             .querySelector("h5")
             .textContent.trim()
             .toLowerCase();
-          if (!title.includes(inpValue) && inpValue !== "") {
+          // Try to get
+          const settingEl =
+            setting.querySelector("input")?.getAttribute("id") ||
+            setting.querySelector("select")?.getAttribute("id") ||
+            "";
+          const settingId = settingEl.trim().toLowerCase().replaceAll("_", " ");
+
+          if (
+            !title
+              .trim()
+              .toLowerCase()
+              .replaceAll("_", " ")
+              .includes(inpValue) &&
+            inpValue !== "" &&
+            !settingId.includes(inpValue)
+          ) {
             needToHide = true;
           }
 
@@ -430,7 +445,20 @@ class FilterSettings {
             .querySelector("h5")
             .textContent.trim()
             .toLowerCase();
-          if (!title.includes(inpValue) && inpValue !== "") {
+          const settingEl =
+            multSetting.querySelector("input")?.getAttribute("id") ||
+            setting.querySelector("select")?.getAttribute("id") ||
+            "";
+          const settingId = settingEl.trim().toLowerCase().replaceAll("_", " ");
+          if (
+            !title
+              .trim()
+              .toLowerCase()
+              .replaceAll("_", " ")
+              .includes(inpValue) &&
+            inpValue !== "" &&
+            !settingId.includes(inpValue)
+          ) {
             needToHideMult = true;
           }
 
@@ -470,7 +498,9 @@ class FilterSettings {
             multSetting.classList.add("hidden");
             multSettingHiddenCount++;
           }
-        } catch (err) {}
+        } catch (err) {
+          console.log(err);
+        }
       });
 
       // check for each multiple groups if all are hidden
@@ -553,7 +583,10 @@ class FilterSettings {
             needHideTab = true;
         } catch (e) {}
 
-        if (!tabTxt.includes(inpValue)) needHideTab = true;
+        if (
+          !tabTxt.trim().toLowerCase().replaceAll("_", " ").includes(inpValue)
+        )
+          needHideTab = true;
 
         if (needHideTab) {
           tab.classList.add("!hidden");
