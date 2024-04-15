@@ -57,7 +57,7 @@
                         {% if multList.append(value['multiple']) %}{% endif %}
                     {% endif %}
                     {% if not value['multiple'] %}
-                        <div data-setting-container data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-0 sm:mx-2 md:mx-3 lg:mx-4 my-2 col-span-12 md:my-3 md:col-span-6  2xl:my-3 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}">
+                        <div data-setting-container data-{{ current_endpoint }}-type="{{ plugin['type'] }}" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-0 sm:mx-2 md:mx-3 lg:mx-4 my-2 col-span-12 md:my-3 md:col-span-6  2xl:my-3 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}">
                             <!-- title and info -->
                             <div class="flex items-center my-1 relative z-10">
                                 <h5 class="input-title">{{ value["label"] }}</h5>
@@ -290,7 +290,7 @@
                         current_endpoint == "global-config"
                         or current_endpoint == "services" and value['context'] == "multisite"
                         ) %}
-                        <div data-setting-container="{{ setting }}_SCHEMA" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
+                        <div data-setting-container="{{ setting }}_SCHEMA" data-{{ current_endpoint }}-type="{{ plugin['type'] }}" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
                             <!-- title and info -->
                             <div class="flex items-center my-1 relative z-10">
                                 <h5 class="input-title">{{ value["label"] }}</h5>

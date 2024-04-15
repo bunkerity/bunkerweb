@@ -1,5 +1,6 @@
 from traceback import format_exc
 
+
 def pre_render(**kwargs):
     try:
         data = kwargs["app"].config["INSTANCES"].get_metrics("cors")
@@ -14,8 +15,11 @@ def pre_render(**kwargs):
         }
 
     except BaseException:
-        print(format_exc(), flush=True)        
-        return {"counter_failed_cors": {"value": "unknown", "title": "CORS", "subtitle": "request blocked", "subtitle_color": "error", "svg_color": "red"}, "error" : format_exc()}
+        print(format_exc(), flush=True)
+        return {
+            "counter_failed_cors": {"value": "unknown", "title": "CORS", "subtitle": "request blocked", "subtitle_color": "error", "svg_color": "red"},
+            "error": format_exc(),
+        }
 
 
 def cors(**kwargs):

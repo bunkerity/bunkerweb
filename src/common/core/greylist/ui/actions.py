@@ -1,5 +1,6 @@
 from traceback import format_exc
 
+
 def pre_render(**kwargs):
     try:
         data = kwargs["app"].config["INSTANCES"].get_metrics("greylist")

@@ -1,6 +1,7 @@
 from operator import itemgetter
 from traceback import format_exc
 
+
 def pre_render(**kwargs):
     try:
         # Here we will have a list { 'counter_403': X, 'counter_401': Y ... }

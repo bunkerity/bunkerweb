@@ -1,5 +1,6 @@
 from traceback import format_exc
 
+
 def pre_render(**kwargs):
     metrics = {
         "counter_blacklist_url": {"value": "unknown", "title": "URL", "subtitle": "denied", "subtitle_color": "error", "svg_color": "red"},
@@ -15,7 +16,7 @@ def pre_render(**kwargs):
             metrics[key]["value"] = data.get(key, 0)
         return metrics
     except BaseException:
-        print(format_exc(), flush=True)        
+        print(format_exc(), flush=True)
         metrics["error"] = format_exc()
         return metrics
 

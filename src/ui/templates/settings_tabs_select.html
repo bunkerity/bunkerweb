@@ -28,9 +28,10 @@
                     and check_settings(plugin["settings"], "multisite") or current_endpoint == "global-config" %}
                     <button role="option"
                             data-tab-select-handler="{{ plugin['id'] }}"
+                            data-tab-plugin-type="{{ plugin['type'] }}"
                             data-select="false"
                             id="edit-{{ current_endpoint }}-{{ plugin['id'] }}-tab"
-                            class="                    {% if loop.first %}active first{% endif %} {% if loop.last %}last{% endif %}  settings-tabs-select-dropdown-btn">
+                            class="{% if loop.first %}active first{% endif %} {% if loop.last %}last{% endif %}  settings-tabs-select-dropdown-btn">
                         {{ plugin['name'] }}
                     </button>
                 {% endif %}

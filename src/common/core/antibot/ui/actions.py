@@ -15,7 +15,10 @@ def pre_render(**kwargs):
         }
     except BaseException:
         print(format_exc(), flush=True)
-        return {"counter_failed_challenges": {"value": "unknown", "title": "Challenge", "subtitle": "Failed", "subtitle_color": "info", "svg_color": "blue"}, "error" : format_exc()}
+        return {
+            "counter_failed_challenges": {"value": "unknown", "title": "Challenge", "subtitle": "Failed", "subtitle_color": "info", "svg_color": "blue"},
+            "error": format_exc(),
+        }
 
 
 def antibot(**kwargs):

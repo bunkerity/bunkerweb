@@ -1,5 +1,6 @@
 from traceback import format_exc
 
+
 def pre_render(**kwargs):
     ping = {}
     data = {}
@@ -25,13 +26,13 @@ def pre_render(**kwargs):
         }
 
     except BaseException:
-        print(format_exc(), flush=True)  
-        error += format_exc()      
+        print(format_exc(), flush=True)
+        error += format_exc()
         data = {"counter_redis_nb_keys": {"value": "unknown", "title": "REDIS KEYS", "subtitle": "total number", "subtitle_color": "info", "svg_color": "sky"}}
 
     if error:
         return ping | data | {"error": error}
-    
+
     return ping | data
 
 

@@ -637,7 +637,7 @@ def home():
     config = app.config["CONFIG"].get_config(with_drafts=True)
     override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
-    
+
     instance_health_count = 0
 
     for instance in instances:

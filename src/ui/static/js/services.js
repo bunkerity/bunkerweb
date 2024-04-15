@@ -1523,6 +1523,18 @@ const checkServiceModalKeyword = new CheckNoMatchFilter(
   document.querySelector("[data-services-nomatch]"),
 );
 
+const checkServiceModalSelect = new CheckNoMatchFilter(
+  document.querySelectorAll(
+    "button[data-services-setting-select-dropdown-btn]",
+  ),
+  "select",
+  document
+    .querySelector("[data-services-modal-form]")
+    .querySelectorAll("[data-plugin-item]"),
+  document.querySelector("[data-services-modal-form]"),
+  document.querySelector("[data-services-nomatch]"),
+);
+
 try {
   const checkServiceCardKeyword = new CheckNoMatchFilter(
     document.querySelectorAll("input#service-name-keyword"),
