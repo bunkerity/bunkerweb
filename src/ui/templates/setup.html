@@ -128,7 +128,8 @@
                                         Username<strong class="required-mark">*</strong>
                                     </h5>
                                     <label class="sr-only" for="admin_username">Username</label>
-                                    <input type="text"
+                                    <input tabindex="1" 
+                                           type="text"
                                            id="admin_username"
                                            name="admin_username"
                                            class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
@@ -145,7 +146,8 @@
                                         Password<strong class="required-mark">*</strong>
                                     </h5>
                                     <label class="sr-only" for="admin_password">Password</label>
-                                    <input type="password"
+                                    <input tabindex="1"
+                                           type="password"
                                            id="admin_password"
                                            name="admin_password"
                                            class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
@@ -162,7 +164,8 @@
                                         Confirm Password<strong class="required-mark">*</strong>
                                     </h5>
                                     <label class="sr-only" for="admin_password_check">Confirm Password</label>
-                                    <input type="password"
+                                    <input tabindex="1" 
+                                           type="password"
                                            id="admin_password_check"
                                            name="admin_password_check"
                                            class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
@@ -181,7 +184,8 @@
                             <div class="flex flex-col relative col-span-12 mx-2 max-w-[400px] w-full">
                                 <h5 class="text-base mb-1 transition duration-300 ease-in-out text-md font-bold m-0">Email</h5>
                                 <label class="sr-only" for="newsletter-email">email</label>
-                                <input type="email"
+                                <input tabindex="1"
+                                       type="email"
                                        id="newsletter-email"
                                        name="EMAIL"
                                        class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
@@ -194,6 +198,7 @@
                                 <div data-checkbox-handler="newsletter-check"
                                      class="relative mb-7 md:mb-0 z-10">
                                     <input data-check
+                                           tabindex="1"
                                            type="checkbox"
                                            id="newsletter-check"
                                            name="newsletter-check"
@@ -225,7 +230,8 @@
                                     UI Host (REVERSE_PROXY_HOST)<strong class="required-mark">*</strong>
                                 </h5>
                                 <label class="sr-only" for="ui_host">ui host</label>
-                                <input type="text"
+                                <input tabindex="1"
+                                       type="text"
                                        id="ui_host"
                                        name="ui_host"
                                        value="{{ ui_host }}"
@@ -241,7 +247,8 @@
                                     UI URL (REVERSE_PROXY_URL)<strong class="required-mark">*</strong>
                                 </h5>
                                 <label class="sr-only" for="ui_url">ui url</label>
-                                <input type="text"
+                                <input tabindex="1"
+                                       type="text"
                                        id="ui_url"
                                        name="ui_url"
                                        class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
@@ -257,7 +264,8 @@
                                     Server name<strong class="required-mark">*</strong>
                                 </h5>
                                 <label class="sr-only" for="server_name">server name</label>
-                                <input type="text"
+                                <input tabindex="1" 
+                                       type="text"
                                        id="server_name"
                                        name="server_name"
                                        class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
@@ -271,7 +279,8 @@
                             <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
                                 <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Check server name DNS</h5>
                                 <div class="flex justify-start items-center">
-                                    <button id="check-server-name"
+                                    <button tabindex="1"
+                                            id="check-server-name"
                                             class="flex justify-start w-fit tracking-wide inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
                                         <span>check</span>
                                         <span aria-check-color
@@ -287,7 +296,8 @@
                                 <label class="sr-only" for="auto_lets_encrypt">auto let's encrypt</label>
                                 <div data-checkbox-handler="auto_lets_encrypt"
                                      class="relative mb-7 md:mb-0 z-10">
-                                    <input data-check
+                                    <input tabindex="1"
+                                           data-check
                                            type="checkbox"
                                            id="auto_lets_encrypt"
                                            name="auto_lets_encrypt"
@@ -312,7 +322,8 @@
                                    data-resume>http://</p>
                             </div>
                             <div class="col-span-12 flex justify-center">
-                                <button type="submit"
+                                <button tabindex="2"
+                                        type="submit"
                                         id="setup-button"
                                         name="setup-button"
                                         value="setup"
