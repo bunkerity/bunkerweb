@@ -1,4 +1,66 @@
-import { Tabs, Popover } from "./utils/settings.js";
+import { Tabs } from "./utils/settings.js";
+
+class TabPopover {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    window.addEventListener("pointerover", (e) => {
+      //POPOVER LOGIC
+      try {
+        if (
+          e.target.closest("button").hasAttribute(`data-popover-btn`) ||
+          e.target.closest("svg").hasAttribute(`data-popover-btn`)
+        ) {
+          this.showPopover(e.target);
+        }
+      } catch (err) {}
+    });
+
+    window.addEventListener("pointerout", (e) => {
+      //POPOVER LOGIC
+      try {
+        if (
+          e.target.closest("button").hasAttribute(`data-popover-btn`) ||
+          e.target.closest("svg").hasAttribute(`data-popover-btn`)
+        ) {
+          this.hidePopover(e.target);
+        }
+      } catch (err) {}
+    });
+  }
+
+  showPopover(el) {
+    const btn = el.closest("button").hasAttribute("data-popover-btn")
+      ? el.closest("button")
+      : el.closest("svg");
+    const popoverName = btn.getAttribute("data-popover-btn");
+    //toggle curr popover
+    const popover = btn.parentElement.querySelector(
+      `[data-popover-content=${popoverName}]`,
+    );
+    popover.classList.add("transition-all", "delay-200", "opacity-0");
+    popover.classList.remove("hidden");
+    setTimeout(() => {
+      popover.classList.remove("opacity-0");
+    }, 10);
+  }
+
+  hidePopover(el) {
+    const btn = el.closest("button").hasAttribute("data-popover-btn")
+      ? el.closest("button")
+      : el.closest("svg");
+    const popoverName = btn.getAttribute("data-popover-btn");
+    //toggle curr popover
+    const popover = btn.parentElement.querySelector(
+      `[data-popover-content=${popoverName}]`,
+    );
+    popover.classList.add("hidden");
+    popover.classList.remove("transition-all", "delay-200");
+  }
+}
+
 
 class SubmitAccount {
   constructor() {
@@ -131,5 +193,5 @@ class SwitchTabForm {
 const setPWBtn = new PwBtn();
 const setSubmit = new SubmitAccount();
 const setTabs = new Tabs();
-const setPopover = new Popover();
+const setTabPopover = new TabPopover();
 const setSwitchTabForm = new SwitchTabForm();

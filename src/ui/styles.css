@@ -92,6 +92,11 @@
 }
 
 .popover-settings-container {
+  @apply z-[1000] h-fit max-w-[250px] transition-all duration-500 dark:brightness-90 transition rounded-md p-3 -translate-y-7 fixed bg-blue-500;
+}
+
+
+.popover-tab {
   @apply transition-all duration-500 dark:brightness-90 transition z-50 rounded-md p-3 left-0 -translate-y-7 bottom-0 absolute bg-blue-500;
 }
 

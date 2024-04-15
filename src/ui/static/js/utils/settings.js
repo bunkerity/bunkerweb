@@ -1,9 +1,19 @@
 class Popover {
   constructor() {
     this.init();
+    this.visiblePopover = null;
+    this.relateBtn = null;
   }
 
   init() {
+    window.addEventListener("scroll", (e) => { 
+      try {
+        this.hidePopover(this.relateBtn);
+      }catch(e) {
+
+      }
+       }, true);
+
     window.addEventListener("pointerover", (e) => {
       //POPOVER LOGIC
       try {
@@ -38,11 +48,17 @@ class Popover {
     const popover = btn.parentElement.querySelector(
       `[data-popover-content=${popoverName}]`,
     );
+    
     popover.classList.add("transition-all", "delay-200", "opacity-0");
     popover.classList.remove("hidden");
+
+    this.visiblePopover = popover;
+    this.relateBtn = btn;
+    this.updatePos();
+
     setTimeout(() => {
       popover.classList.remove("opacity-0");
-    }, 10);
+    }, 100);
   }
 
   hidePopover(el) {
@@ -57,6 +73,19 @@ class Popover {
     popover.classList.add("hidden");
     popover.classList.remove("transition-all", "delay-200");
   }
+
+  updatePos() {
+    const btn = this.relateBtn;
+    const popover = this.visiblePopover;
+
+    const btnRect = btn.getBoundingClientRect();
+    const btnTop = btnRect.y;
+    const btnLeft = btnRect.x;
+
+    popover.style.top = `${btnTop - popover.getBoundingClientRect().height + 20}px`;
+    popover.style.left = `${btnLeft - popover.getBoundingClientRect().width / 3}px`;
+  }
+
 }
 
 class TabsSelect {
