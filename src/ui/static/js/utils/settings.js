@@ -140,22 +140,27 @@ class TabsSelect {
     });
 
     // If fragment exists, click on the corresponding tab
-    if (
-      window.location.hash &&
-      window.location.pathname.endsWith("global_config")
-    ) {
-      const fragment = window.location.hash.substring(1);
-      if (fragment) {
-        const tab = this.tabContainer.querySelector(
-          `button[data-tab-select-handler='${fragment}']`,
-        );
-        tab.click();
-        // Scroll to the top of the page (with a delay to ensure the tab is clicked first)
-        setTimeout(() => {
-          window.scrollTo(0, 0);
-        }, 100);
+    try {
+      if (
+        window.location.hash &&
+        window.location.pathname.endsWith("global_config")
+      ) {
+        const fragment = window.location.hash.substring(1);
+        if (fragment) {
+          const tab = this.tabContainer.querySelector(
+            `button[data-tab-select-handler='${fragment}']`,
+          );
+          tab.click();
+          // Scroll to the top of the page (with a delay to ensure the tab is clicked first)
+          setTimeout(() => {
+            window.scrollTo(0, 0);
+          }, 100);
+        }
       }
+    }catch(e) {
+
     }
+  
   }
 
   resetTabsStyle() {
