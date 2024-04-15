@@ -15,14 +15,14 @@
         <!-- end info -->   <div class="core-layout-separator"></div>
 
           {% if pre_render["status"] and pre_render["status"] == "ko" or "error" in pre_render["data"] %}
-  <div class="flex justify-center col-span-12">
-         <p class="text-white">Error during pre rendering</p>
-      <div class="ml-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 stroke-red-500 fill-white">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-          </svg>
-      </div>
-  </div>
+          <div class="my-2 flex justify-center col-span-12">
+            <div class="mr-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 stroke-red-500 fill-white">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+            </div>
+                <p class="px-1 text-white break-words">(Pre rendering error) {{ pre_render["data"].get("error", "No log to show") }}</p>
+        </div>
   {% endif %}
 
   {% if pre_render["status"] and pre_render["status"] == "ok" and "error" not in pre_render["data"] %}

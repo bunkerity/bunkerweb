@@ -1,6 +1,6 @@
 from datetime import datetime
 from json import loads
-
+from traceback import format_exc
 
 def pre_render(app, *args, **kwargs):
     try:
@@ -10,9 +10,9 @@ def pre_render(app, *args, **kwargs):
             data["date"] = datetime.fromisoformat(data["date"]).strftime("%Y-%m-%d %H:%M:%S")
 
         return data
-    except:
-        return {"date": None, "files": []}
-
+    except BaseException:
+        print(format_exc(), flush=True)
+        return {"date": None, "files": [], "error" : format_exc()}
 
 def backup(**kwargs):
     pass

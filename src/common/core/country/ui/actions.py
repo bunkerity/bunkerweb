@@ -1,3 +1,5 @@
+from traceback import format_exc
+
 def pre_render(**kwargs):
     try:
         data = kwargs["app"].config["INSTANCES"].get_metrics("country")
@@ -10,9 +12,11 @@ def pre_render(**kwargs):
                 "svg_color": "red",
             }
         }
-    except:
+    except BaseException:
+        print(format_exc(), flush=True)
         return {
-            "counter_failed_country": {"value": "unknown", "title": "Country", "subtitle": "request blocked", "subtitle_color": "error", "svg_color": "red"}
+            "counter_failed_country": {"value": "unknown", "title": "Country", "subtitle": "request blocked", "subtitle_color": "error", "svg_color": "red"},
+            "error": format_exc(),
         }
 
 

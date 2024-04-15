@@ -1,3 +1,5 @@
+from traceback import format_exc
+
 def pre_render(**kwargs):
     try:
         data = kwargs["app"].config["INSTANCES"].get_metrics("whitelist")
@@ -11,7 +13,8 @@ def pre_render(**kwargs):
             }
         }
 
-    except:
+    except BaseException:
+        print(format_exc(), flush=True)
         return {
             "counter_passed_whitelist": {
                 "value": "unknown",
@@ -19,7 +22,8 @@ def pre_render(**kwargs):
                 "subtitle": "request passed",
                 "subtitle_color": "success",
                 "svg_color": "green",
-            }
+            },
+            "error": format_exc(),
         }
 
 

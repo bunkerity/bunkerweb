@@ -1,3 +1,5 @@
+from traceback import format_exc
+
 def pre_render(**kwargs):
     try:
         data = kwargs["app"].config["INSTANCES"].get_metrics("misc")
@@ -18,8 +20,8 @@ def pre_render(**kwargs):
                 "svg_color": "lime",
             },
         }
-
-    except:
+    except BaseException:
+        print(format_exc(), flush=True)        
         return {
             "counter_failed_default": {
                 "value": "unknown",
@@ -29,6 +31,7 @@ def pre_render(**kwargs):
                 "svg_color": "sky",
             },
             "counter_failed_method": {"value": "unknown", "title": "DISALLOWED METHODS", "subtitle": "count", "subtitle_color": "info", "svg_color": "lime"},
+            "error" : format_exc()
         }
 
 
