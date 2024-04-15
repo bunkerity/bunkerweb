@@ -249,7 +249,8 @@ class ServiceModal {
         inpName === "OLD_SERVER_NAME" ||
         inpName === "is_draft" ||
         inpName === "operation" ||
-        inpName === "settings-filter"
+        inpName === "settings-filter" ||
+        inp.hasAttribute("data-combobox")
       )
         return;
 

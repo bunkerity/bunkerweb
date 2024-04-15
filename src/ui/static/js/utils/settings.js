@@ -218,8 +218,17 @@ class TabsSelect {
     const dropdown = this.tabContainer.querySelector(
       "[data-tab-select-dropdown]",
     );
+    const combobox = dropdown.querySelector("[data-combobox]");
+    if (combobox) {
+      // simulate clear combobox wit keyboard
+      combobox.value = "";
+    }
     dropdown.classList.toggle("hidden");
     dropdown.classList.toggle("flex");
+    // Case open, try to focus on combobox input
+    if (!dropdown.classList.contains("hidden") && combobox) {
+      combobox.focus();
+    }
 
     this.updateTabArrow();
   }
@@ -270,6 +279,10 @@ class FilterSettings {
     this.typeTxtEl = document.querySelector(
       `span[data-${this.prefix}-setting-select-text="type"]`,
     );
+    this.comboboxEl = document.querySelector(
+      `[data-${this.prefix}-tabs-select] [data-combobox]`,
+    );
+    this.isComboCheck = false;
     this.tabContainer = tabContainer;
     this.contentContainer = contentContainer;
     this.tabsEls = this.tabContainer.querySelectorAll(
@@ -284,6 +297,16 @@ class FilterSettings {
       if (this.input) {
         this.input.addEventListener("input", () => {
           this.runFilter();
+        });
+      }
+
+      if (this.comboboxEl) {
+        this.comboboxEl.addEventListener("input", () => {
+          this.runComboFilter();
+        });
+
+        this.comboboxEl.addEventListener("focusin", () => {
+          this.runComboFilter();
         });
       }
 
@@ -310,6 +333,24 @@ class FilterSettings {
     });
   }
 
+  runComboFilter() {
+    // Case combobox, we want to filter tabs only and not settings
+    this.tabsEls.forEach((tab) => {
+      tab.classList.remove("hidden");
+
+      const tabName = tab.getAttribute(`data-tab-select-handler`);
+      // check tab name matching combobox value
+      if (this.comboboxEl) {
+        const comboboxValue = this.comboboxEl.value;
+        if (!tabName.toLowerCase().includes(comboboxValue.toLowerCase())) {
+          tab.classList.add("hidden");
+          return;
+        }
+      }
+    });
+    return;
+  }
+
   runFilter() {
     this.resetFilter();
     //get inp format
@@ -318,6 +359,7 @@ class FilterSettings {
     //loop all tabs
     this.tabsEls.forEach((tab) => {
       const tabName = tab.getAttribute(`data-tab-select-handler`);
+
       //get settings of tabs except multiples
       const settings = this.getSettingsFromTab(tab);
 
