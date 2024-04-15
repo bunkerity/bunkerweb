@@ -243,7 +243,7 @@
 }
 
 .card-detail-item {
-  @apply flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0;
+  @apply flex items-center col-span-1 py-1 sm:py-0;
 }
 
 .card-detail-item-title {
