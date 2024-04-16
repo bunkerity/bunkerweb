@@ -23,7 +23,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - name: Delete ARM VM
-        uses: scaleway/action-scw@c718eca1fcb9fec1fb1433752d61599c6a0ad2e9
+        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
         with:
           args: instance server delete ${{ secrets.ARM_ID }} zone=fr-par-2 with-ip=true with-volumes=all force-shutdown=true
           access-key: ${{ secrets.SCW_ACCESS_KEY }}

@@ -92,6 +92,10 @@
 }
 
 .popover-settings-container {
+  @apply z-[1000] h-fit max-w-[250px] transition-all duration-500 dark:brightness-90 transition rounded-md p-3 -translate-y-7 fixed bg-blue-500;
+}
+
+.popover-tab {
   @apply transition-all duration-500 dark:brightness-90 transition z-50 rounded-md p-3 left-0 -translate-y-7 bottom-0 absolute bg-blue-500;
 }
 
@@ -239,7 +243,7 @@
 }
 
 .card-detail-item {
-  @apply flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0;
+  @apply flex items-center col-span-1 py-1 sm:py-0;
 }
 
 .card-detail-item-title {
@@ -339,7 +343,7 @@
 }
 
 .core-card-list {
-  @apply ml-2 mr-2 mb-2 mt-2 h-fit content-start md:col-span-6 overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit content-start md:col-span-6 overflow-x-hidden overflow-y-auto grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .w-small.core-card-list {

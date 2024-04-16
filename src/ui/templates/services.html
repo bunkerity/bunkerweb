@@ -37,7 +37,7 @@
     <!-- end actions -->
     {% if services|length >= 4 %}
         <!-- service info and actions -->
-        <div class="p-0 sm:mx-2 md:mx-4 md:px-4 grid grid-cols-12 col-span-12 md:gap-x-4 gap-y-4 relative min-w-0 break-words rounded-2xl bg-clip-border">
+        <div class="p-0 sm:mx-2 md:mx-4 grid grid-cols-12 col-span-12 md:gap-x-4 gap-y-4 relative min-w-0 break-words rounded-2xl bg-clip-border">
             <!-- info-->
             {% set services_info = [
                             {"name" : "SERVICES TOTAL", "data" : services|length|string},
@@ -171,7 +171,7 @@
     {% endif %}
     <!-- end service info and actions -->
     <!-- services container-->
-    <div class="p-0 sm:mx-2 md:mx-4 md:px-4 grid grid-cols-12 col-span-12 md:gap-x-4 gap-y-4 relative min-w-0 break-words rounded-2xl bg-clip-border">
+    <div class="p-0 sm:mx-2 md:mx-4 md:px-1 grid grid-cols-12 col-span-12 md:gap-x-4 gap-y-4 relative min-w-0 break-words rounded-2xl bg-clip-border">
         {% if services|length == 0 %}
             <div class="col-span-12 sm:col-span-4 sm:col-start-5">
                 <div class="transition duration-300 ease-in-out dark:opacity-90 text-center relative w-full p-4 text-white bg-blue-500 rounded-lg">

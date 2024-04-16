@@ -202,6 +202,7 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
         if not ret:
             logger.error(f"Sending {'pro ' if pro else ''}external plugins failed, configuration will not work as expected...")
 
+
 def generate_caches(plugins: List[Any], db: Database):
     for plugin in plugins:
         job_cache_files = db.get_jobs_cache_files(plugin_id=plugin["id"])
@@ -250,12 +251,14 @@ def generate_caches(plugins: List[Any], db: Database):
                     logger.debug(f"Removing empty directory {file}")
                     rmtree(file, ignore_errors=True)
 
+
 def api_to_instance(api):
     hostname_port = api.endpoint.replace("http://", "").replace("https://", "").replace("/", "").split(":")
     return {
         "hostname": hostname_port[0],
         "env": {"API_HTTP_PORT": int(hostname_port[1]), "API_SERVER_NAME": api.host},
     }
+
 
 def run_in_slave_mode(db: Database, dotenv_env: Dict[str, Any]):
     # Instantiate db
@@ -272,7 +275,7 @@ def run_in_slave_mode(db: Database, dotenv_env: Dict[str, Any]):
         logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
         sleep(5)
         env = db.get_config()
-    
+
     # Download plugins
     pro_plugins = db.get_plugins(_type="pro", with_data=True)
     generate_external_plugins(pro_plugins, original_path=PRO_PLUGINS_PATH)
@@ -313,6 +316,7 @@ def run_in_slave_mode(db: Database, dotenv_env: Dict[str, Any]):
     # TODO : check nginx status + check DB status
     while True:
         sleep(5)
+
 
 if __name__ == "__main__":
     try:
@@ -393,7 +397,7 @@ if __name__ == "__main__":
 
         # Override instances if needed
         override_instances = env.get("OVERRIDE_INSTANCES", "")
-        apis=[]
+        apis = []
         if override_instances:
             for instance in override_instances.split(" "):
                 apis.append(API(instance))

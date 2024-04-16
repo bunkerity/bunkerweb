@@ -16,6 +16,55 @@ try:
 
     log_info("Trying filters ...")
 
+    log_info("Start trying combobox filter ...")
+    select_plugin = safe_get_element(DRIVER, By.XPATH, "//button[@data-tab-select-dropdown-btn='']")
+    assert_button_click(DRIVER, select_plugin)
+    select_combobox = safe_get_element(DRIVER, By.XPATH, "//input[@data-combobox='']")
+    select_combobox.send_keys("no plugin matching normally")
+
+    # All tabs should be hidden
+    total_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('[data-tab-select-handler]').length""")
+    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+
+    if total_tabs != hidden_tabs:
+        log_error("All tabs should be hidden.")
+        exit(1)
+
+    # Reset
+    select_combobox.send_keys(Keys.CONTROL, "a")
+    select_combobox.send_keys(Keys.BACKSPACE)
+
+    # Show only one tab
+    select_combobox.send_keys("blacklist")
+
+    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+
+    if hidden_tabs != total_tabs - 1:
+        log_error("Only one tab should be visible.")
+        exit(1)
+
+    # Click on the visible tab
+    assert_button_click(DRIVER, "//button[@data-tab-select-handler='blacklist']")
+
+    # Reopen select and check if combobox input is empty
+    assert_button_click(DRIVER, select_plugin)
+    combo_value = select_combobox.get_property("value")
+
+    if combo_value:
+        log_error("Combobox input should be empty.")
+        exit(1)
+
+    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+
+    if hidden_tabs:
+        log_error("All tabs should be visible.")
+        exit(1)
+
+    # Reset to general
+    assert_button_click(DRIVER, "//button[@data-tab-select-handler='general']")
+
+    log_info("Combobox filtering done, trying filter keywords ...")
+
     # Set keyword with no matching settings
     input_keyword = safe_get_element(DRIVER, By.ID, "keyword")
     input_keyword.send_keys("dqz48 é84 dzq 584dz5qd4")
@@ -52,6 +101,27 @@ try:
     input_keyword.send_keys(Keys.CONTROL, "a")
     input_keyword.send_keys(Keys.BACKSPACE)
 
+    # Try match using setting id (type USE_SETTING)
+
+    input_keyword.send_keys("HTTP_PORT")
+
+    # Check that the matching element is shown and other card hide
+    is_http_port_hidden = DRIVER.execute_script("return document.querySelector('#form-edit-global-config-http-port').classList.contains('hidden')")
+
+    if is_http_port_hidden:
+        log_error("hidden http port should be match.")
+        exit(1)
+
+    is_https_port_hidden = DRIVER.execute_script("return document.querySelector('#form-edit-global-config-https-port').classList.contains('hidden')")
+
+    if not is_https_port_hidden:
+        log_error("Setting https port should not be match.")
+        exit(1)
+
+    # Reset
+    input_keyword.send_keys(Keys.CONTROL, "a")
+    input_keyword.send_keys(Keys.BACKSPACE)
+    
     log_info("Matching a setting done, try context global filter ...")
 
     select_context = safe_get_element(DRIVER, By.XPATH, "//button[@data-global-config-setting-select='context']")

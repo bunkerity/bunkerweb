@@ -66,11 +66,11 @@ jobs:
           REG_USER: ${{ github.actor }}
           REG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: inputs.TYPE == 'k8s'
-      - uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3.2
+      - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4.0.0
         if: inputs.TYPE == 'k8s'
         with:
           version: "v1.28.2"
-      - uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
+      - uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4.2.0
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'

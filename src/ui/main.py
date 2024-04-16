@@ -401,6 +401,7 @@ def inject_variables():
         pro_expire=metadata["pro_expire"].strftime("%d-%m-%Y") if metadata["pro_expire"] else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
         plugins=app.config["CONFIG"].get_plugins(),
+        bw_version="1.5.7"
     )
 
 
@@ -637,7 +638,7 @@ def home():
     config = app.config["CONFIG"].get_config(with_drafts=True)
     override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
-    
+
     instance_health_count = 0
 
     for instance in instances:

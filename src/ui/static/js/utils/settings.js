@@ -1,9 +1,21 @@
 class Popover {
   constructor() {
     this.init();
+    this.visiblePopover = null;
+    this.relateBtn = null;
   }
 
   init() {
+    window.addEventListener(
+      "scroll",
+      (e) => {
+        try {
+          this.hidePopover(this.relateBtn);
+        } catch (e) {}
+      },
+      true,
+    );
+
     window.addEventListener("pointerover", (e) => {
       //POPOVER LOGIC
       try {
@@ -38,11 +50,17 @@ class Popover {
     const popover = btn.parentElement.querySelector(
       `[data-popover-content=${popoverName}]`,
     );
+
     popover.classList.add("transition-all", "delay-200", "opacity-0");
     popover.classList.remove("hidden");
+
+    this.visiblePopover = popover;
+    this.relateBtn = btn;
+    this.updatePos();
+
     setTimeout(() => {
       popover.classList.remove("opacity-0");
-    }, 10);
+    }, 100);
   }
 
   hidePopover(el) {
@@ -56,6 +74,22 @@ class Popover {
     );
     popover.classList.add("hidden");
     popover.classList.remove("transition-all", "delay-200");
+  }
+
+  updatePos() {
+    const btn = this.relateBtn;
+    const popover = this.visiblePopover;
+
+    const btnRect = btn.getBoundingClientRect();
+    const btnTop = btnRect.y;
+    const btnLeft = btnRect.x;
+
+    popover.style.top = `${
+      btnTop - popover.getBoundingClientRect().height + 20
+    }px`;
+    popover.style.left = `${
+      btnLeft - popover.getBoundingClientRect().width / 3
+    }px`;
   }
 }
 
@@ -111,22 +145,24 @@ class TabsSelect {
     });
 
     // If fragment exists, click on the corresponding tab
-    if (
-      window.location.hash &&
-      window.location.pathname.endsWith("global_config")
-    ) {
-      const fragment = window.location.hash.substring(1);
-      if (fragment) {
-        const tab = this.tabContainer.querySelector(
-          `button[data-tab-select-handler='${fragment}']`,
-        );
-        tab.click();
-        // Scroll to the top of the page (with a delay to ensure the tab is clicked first)
-        setTimeout(() => {
-          window.scrollTo(0, 0);
-        }, 100);
+    try {
+      if (
+        window.location.hash &&
+        window.location.pathname.endsWith("global_config")
+      ) {
+        const fragment = window.location.hash.substring(1);
+        if (fragment) {
+          const tab = this.tabContainer.querySelector(
+            `button[data-tab-select-handler='${fragment}']`,
+          );
+          tab.click();
+          // Scroll to the top of the page (with a delay to ensure the tab is clicked first)
+          setTimeout(() => {
+            window.scrollTo(0, 0);
+          }, 100);
+        }
       }
-    }
+    } catch (e) {}
   }
 
   resetTabsStyle() {
@@ -182,8 +218,17 @@ class TabsSelect {
     const dropdown = this.tabContainer.querySelector(
       "[data-tab-select-dropdown]",
     );
+    const combobox = dropdown.querySelector("[data-combobox]");
+    if (combobox) {
+      // simulate clear combobox wit keyboard
+      combobox.value = "";
+    }
     dropdown.classList.toggle("hidden");
     dropdown.classList.toggle("flex");
+    // Case open, try to focus on combobox input
+    if (!dropdown.classList.contains("hidden") && combobox) {
+      combobox.focus();
+    }
 
     this.updateTabArrow();
   }
@@ -231,6 +276,13 @@ class FilterSettings {
     this.contextTxtEl = document.querySelector(
       `span[data-${this.prefix}-setting-select-text="context"]`,
     );
+    this.typeTxtEl = document.querySelector(
+      `span[data-${this.prefix}-setting-select-text="type"]`,
+    );
+    this.comboboxEl = document.querySelector(
+      `[data-${this.prefix}-tabs-select] [data-combobox]`,
+    );
+    this.isComboCheck = false;
     this.tabContainer = tabContainer;
     this.contentContainer = contentContainer;
     this.tabsEls = this.tabContainer.querySelectorAll(
@@ -248,15 +300,31 @@ class FilterSettings {
         });
       }
 
+      if (this.comboboxEl) {
+        this.comboboxEl.addEventListener("input", () => {
+          this.runComboFilter();
+        });
+
+        this.comboboxEl.addEventListener("focusin", () => {
+          this.runComboFilter();
+        });
+      }
+
       window.addEventListener("click", (e) => {
         try {
           if (
-            e.target.hasAttribute(
-              "data-global-config-setting-select-dropdown-btn",
+            (e.target.hasAttribute(
+              `data-${this.prefix}-setting-select-dropdown-btn`,
             ) &&
-            e.target.getAttribute(
-              "data-global-config-setting-select-dropdown-btn",
-            ) === "context"
+              e.target.getAttribute(
+                `data-${this.prefix}-setting-select-dropdown-btn`,
+              ) === `context`) ||
+            (e.target.hasAttribute(
+              `data-${this.prefix}-setting-select-dropdown-btn`,
+            ) &&
+              e.target.getAttribute(
+                `data-${this.prefix}-setting-select-dropdown-btn`,
+              ) === `type`)
           ) {
             return this.runFilter();
           }
@@ -265,14 +333,33 @@ class FilterSettings {
     });
   }
 
+  runComboFilter() {
+    // Case combobox, we want to filter tabs only and not settings
+    this.tabsEls.forEach((tab) => {
+      tab.classList.remove("hidden");
+
+      const tabName = tab.getAttribute(`data-tab-select-handler`);
+      // check tab name matching combobox value
+      if (this.comboboxEl) {
+        const comboboxValue = this.comboboxEl.value;
+        if (!tabName.toLowerCase().includes(comboboxValue.toLowerCase())) {
+          tab.classList.add("hidden");
+          return;
+        }
+      }
+    });
+    return;
+  }
+
   runFilter() {
     this.resetFilter();
     //get inp format
-    const inpValue = this.input.value.trim().toLowerCase();
+    const inpValue = this.input.value.trim().toLowerCase().replaceAll("_", " ");
 
     //loop all tabs
     this.tabsEls.forEach((tab) => {
       const tabName = tab.getAttribute(`data-tab-select-handler`);
+
       //get settings of tabs except multiples
       const settings = this.getSettingsFromTab(tab);
 
@@ -287,7 +374,22 @@ class FilterSettings {
             .querySelector("h5")
             .textContent.trim()
             .toLowerCase();
-          if (!title.includes(inpValue) && inpValue !== "") {
+          // Try to get
+          const settingEl =
+            setting.querySelector("input")?.getAttribute("id") ||
+            setting.querySelector("select")?.getAttribute("id") ||
+            "";
+          const settingId = settingEl.trim().toLowerCase().replaceAll("_", " ");
+
+          if (
+            !title
+              .trim()
+              .toLowerCase()
+              .replaceAll("_", " ")
+              .includes(inpValue) &&
+            inpValue !== "" &&
+            !settingId.includes(inpValue)
+          ) {
             needToHide = true;
           }
 
@@ -299,9 +401,25 @@ class FilterSettings {
 
               if (currContextFilter !== "all") {
                 const settingContext = setting
-                  .getAttribute("data-global-config-context")
+                  .getAttribute(`data-${this.prefix}-context`)
                   .toLowerCase();
                 if (settingContext !== currContextFilter) {
+                  needToHide = true;
+                }
+              }
+            }
+          } catch (e) {}
+
+          // check type if filter exists
+          try {
+            if (this.typeTxtEl) {
+              const currTypeFilter = this.typeTxtEl.textContent.toLowerCase();
+
+              if (currTypeFilter !== "all") {
+                const settingContext = setting
+                  .getAttribute(`data-${this.prefix}-type`)
+                  .toLowerCase();
+                if (settingContext !== currTypeFilter) {
                   needToHide = true;
                 }
               }
@@ -327,7 +445,20 @@ class FilterSettings {
             .querySelector("h5")
             .textContent.trim()
             .toLowerCase();
-          if (!title.includes(inpValue) && inpValue !== "") {
+          const settingEl =
+            multSetting.querySelector("input")?.getAttribute("id") ||
+            setting.querySelector("select")?.getAttribute("id") ||
+            "";
+          const settingId = settingEl.trim().toLowerCase().replaceAll("_", " ");
+          if (
+            !title
+              .trim()
+              .toLowerCase()
+              .replaceAll("_", " ")
+              .includes(inpValue) &&
+            inpValue !== "" &&
+            !settingId.includes(inpValue)
+          ) {
             needToHideMult = true;
           }
 
@@ -339,9 +470,24 @@ class FilterSettings {
 
               if (currContextFilter !== "all") {
                 const settingContext = multSetting
-                  .getAttribute("data-global-config-context")
+                  .getAttribute(`data-${this.prefix}-context`)
                   .toLowerCase();
                 if (settingContext !== currContextFilter) {
+                  needToHideMult = true;
+                }
+              }
+            }
+          } catch (e) {}
+
+          try {
+            if (this.typeTxtEl) {
+              const currtypeFilter = this.typeTxtEl.textContent.toLowerCase();
+
+              if (currtypeFilter !== "all") {
+                const settingtype = multSetting
+                  .getAttribute(`data-${this.prefix}-type`)
+                  .toLowerCase();
+                if (settingtype !== currtypeFilter) {
                   needToHideMult = true;
                 }
               }
@@ -352,7 +498,9 @@ class FilterSettings {
             multSetting.classList.add("hidden");
             multSettingHiddenCount++;
           }
-        } catch (err) {}
+        } catch (err) {
+          console.log(err);
+        }
       });
 
       // check for each multiple groups if all are hidden
@@ -409,7 +557,7 @@ class FilterSettings {
         multTitle.classList.add("hidden");
       }
 
-      //case no setting or no multiple match, check if match at least tab name
+      // case no setting or no multiple match, check if match at least tab name
       // if no context, else we don't care about name
       if (
         settingCount === settingHiddenCount &&
@@ -417,13 +565,28 @@ class FilterSettings {
       ) {
         const tabName = tab.getAttribute(`data-tab-select-handler`);
         const tabTxt = tab.textContent.trim().toLowerCase();
+        const tabType = tab.getAttribute(`data-tab-plugin-type`);
         let needHideTab = false;
         try {
-          if (this.contextTxtEl.textContent.toLowerCase() !== "all")
+          if (
+            this.contextTxtEl &&
+            this.contextTxtEl.textContent.toLowerCase() !== "all"
+          )
             needHideTab = true;
         } catch (e) {}
 
-        if (!tabTxt.includes(inpValue)) needHideTab = true;
+        try {
+          if (
+            this.typeTxtEl &&
+            this.typeTxtEl.textContent.toLowerCase() !== tabType
+          )
+            needHideTab = true;
+        } catch (e) {}
+
+        if (
+          !tabTxt.trim().toLowerCase().replaceAll("_", " ").includes(inpValue)
+        )
+          needHideTab = true;
 
         if (needHideTab) {
           tab.classList.add("!hidden");

@@ -1,3 +1,6 @@
+from traceback import format_exc
+
+
 def pre_render(**kwargs):
     try:
         data = kwargs["app"].config["INSTANCES"].get_metrics("dnsbl")
@@ -10,8 +13,12 @@ def pre_render(**kwargs):
                 "svg_color": "red",
             }
         }
-    except:
-        return {"counter_failed_dnsbl": {"value": "unknown", "title": "DNSBL", "subtitle": "request blocked", "subtitle_color": "error", "svg_color": "red"}}
+    except BaseException:
+        print(format_exc(), flush=True)
+        return {
+            "counter_failed_dnsbl": {"value": "unknown", "title": "DNSBL", "subtitle": "request blocked", "subtitle_color": "error", "svg_color": "red"},
+            "error": format_exc(),
+        }
 
 
 def dnsbl(**kwargs):

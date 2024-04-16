@@ -8,8 +8,7 @@ from typing import Any, List, Optional, Tuple, Union
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-from dotenv import dotenv_values # type: ignore
-from Database import Database # type: ignore
+from dotenv import dotenv_values  # type: ignore
 
 
 class Instance:
@@ -168,13 +167,12 @@ class Instances:
                         ApiCaller(
                             [
                                 API(
-                                    f"http://{instance['hostname']}:{str(instance['port'])}",
+                                    f"http://{instance['hostname']}:{instance['port']}",
                                     instance["server_name"],
                                 )
                             ]
-                        )
+                        ),
                     )
-
                 )
             return instances
         # Docker instances (containers or services)

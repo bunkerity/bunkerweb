@@ -249,7 +249,8 @@ class ServiceModal {
         inpName === "OLD_SERVER_NAME" ||
         inpName === "is_draft" ||
         inpName === "operation" ||
-        inpName === "settings-filter"
+        inpName === "settings-filter" ||
+        inp.hasAttribute("data-combobox")
       )
         return;
 
@@ -1516,6 +1517,18 @@ const setMultiple = new Multiple("services");
 const checkServiceModalKeyword = new CheckNoMatchFilter(
   document.querySelector("input#settings-filter"),
   "input",
+  document
+    .querySelector("[data-services-modal-form]")
+    .querySelectorAll("[data-plugin-item]"),
+  document.querySelector("[data-services-modal-form]"),
+  document.querySelector("[data-services-nomatch]"),
+);
+
+const checkServiceModalSelect = new CheckNoMatchFilter(
+  document.querySelectorAll(
+    "button[data-services-setting-select-dropdown-btn]",
+  ),
+  "select",
   document
     .querySelector("[data-services-modal-form]")
     .querySelectorAll("[data-plugin-item]"),

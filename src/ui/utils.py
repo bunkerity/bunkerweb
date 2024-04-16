@@ -44,6 +44,9 @@ def get_remain(seconds):
     return " ".join(time_parts), term
 
 
+SHOWN_FILE_TYPES = ("text/plain", "text/html", "text/css", "text/javascript", "application/json", "application/xml")
+
+
 def path_to_dict(
     path: str,
     *,
@@ -157,6 +160,8 @@ def path_to_dict(
             mime = Magic(mime=True)
             file_type = mime.from_buffer(conf["data"])
 
+            print(file_type, flush=True)
+
             file_info = {
                 "name": conf["file_name"],
                 "job_name": conf["job_name"],
@@ -170,7 +175,7 @@ def path_to_dict(
                 "can_edit": False,
                 "can_delete": False,
                 "can_download": True,
-                "content": "Download file to view content" if file_type != "text/plain" else conf["data"].decode("utf-8"),
+                "content": conf["data"].decode("utf-8") if file_type in SHOWN_FILE_TYPES else "Download file to view content",
             }
 
             if conf["service_id"]:

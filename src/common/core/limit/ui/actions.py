@@ -1,4 +1,5 @@
 from operator import itemgetter
+from traceback import format_exc
 
 
 def pre_render(**kwargs):
@@ -16,8 +17,9 @@ def pre_render(**kwargs):
             format_data.append({"url": f"/{key}", "count": int(value)})
         format_data.sort(key=itemgetter("count"), reverse=True)
         return {"top_limit": format_data}
-    except:
-        return {"top_limit": []}
+    except BaseException:
+        print(format_exc(), flush=True)
+        return {"top_limit": [], "error": format_exc()}
 
 
 def limit(**kwargs):

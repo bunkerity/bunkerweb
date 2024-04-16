@@ -386,7 +386,6 @@ class Banner {
     //]
     // Try to get data from api
     if (sessionStorage.getItem("bannerNews") !== null) {
-      console.log(JSON.parse(sessionStorage.getItem("bannerNews")));
       return this.updateBanner(
         JSON.parse(sessionStorage.getItem("bannerNews")),
       );

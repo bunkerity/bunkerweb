@@ -170,11 +170,11 @@
         </div>
     </div>
     <div data-bans-list-container
-         class=" {% if bans|length == 0 %}hidden{% endif %} w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+         class=" {% if bans|length == 0 %}hidden{% endif %} w-full overflow-hidden grid grid-cols-12 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="col-span-12">
             <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">BANS LIST</h5>
         </div>
-        <div class="col-span-12 overflow-y-auto overflow-x-auto">
+        <div class=" max-h-100 sm:max-h-125 col-span-12 overflow-y-auto overflow-x-auto">
             <div data-bans-bans-list>
                 <!-- list container-->
                 {% set bans_headers = [

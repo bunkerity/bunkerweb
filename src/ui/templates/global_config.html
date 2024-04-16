@@ -29,16 +29,28 @@
                 "global",
                 "multisite"
             ]
+        },
+        {
+            "type": "select",
+            "name": "Type",
+            "id": "type",
+            "value": "all",
+            "values": [
+                "all",
+                "core",
+                "external",
+                "pro"
+            ]
         }
     ] %}
     <div data-global-config-filter
-         class="h-fit p-4 col-span-12 md:col-span-6 lg:col-span-5 2xl:col-span-4 3xl:col-span-3 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+         class="h-fit p-4 col-span-12 md:col-span-6 3xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
         <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
             {% for filter in filters %}
                 {% if filter['type'] == 'input' %}
                     <!-- search inpt-->
-                    <div class="flex flex-col relative col-span-12">
+                    <div class="flex flex-col relative col-span-12 md:col-span-6">
                         <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                             {{ filter['name'] }}
                         </h5>
@@ -55,7 +67,7 @@
                 {% endif %}
                 {% if filter['type'] == 'select' %}
                     <!-- select -->
-                    <div class="flex flex-col relative col-span-12">
+                    <div class="flex flex-col relative col-span-12 md:col-span-6">
                         <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                             {{ filter['name'] }}
                         </h5>
@@ -80,6 +92,7 @@
                              role="listbox"
                              data-global-config-setting-select-dropdown="{{ filter['id'] }}"
                              class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
+
                             {% for value in filter['values'] %}
                                 <button role="option"
                                         data-global-config-setting-select-dropdown-btn="{{ filter['id'] }}"

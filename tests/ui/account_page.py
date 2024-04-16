@@ -48,7 +48,7 @@ try:
 
     # execute script using create password_input
     DRIVER.execute_script(f"return arguments[0].value = '{UI_PASSWORD}'", password_input)
-    assert_button_click(DRIVER, "//button[@id='username-button' and @class='edit-btn']")
+    assert_button_click(DRIVER, "//button[@id='username-button' and @class='valid-btn']")
 
     try:
         title = safe_get_element(DRIVER, By.XPATH, "/html/body/main/div[1]/div/h1", error=True)
@@ -114,7 +114,7 @@ try:
 
     new_password_check_input.send_keys("P@ssw0rd")
 
-    assert_button_click(DRIVER, "//button[@id='pw-button' and @class='edit-btn']")
+    assert_button_click(DRIVER, "//button[@id='pw-button' and @class='valid-btn']")
 
     try:
         title = safe_get_element(DRIVER, By.XPATH, "/html/body/main/div[1]/div/h1", error=True)
