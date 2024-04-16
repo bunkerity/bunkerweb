@@ -14,7 +14,6 @@
                 </div>
             </div>
             <!-- end info -->
-            <div class="core-layout-separator"></div>
             {% if pre_render["status"] and pre_render["status"] == "ko" or "error" in pre_render["data"] %}
             <div class="my-2 flex justify-center col-span-12">
                 <div class="mr-1">
@@ -28,32 +27,35 @@
             {% if pre_render["status"] and pre_render["status"] == "ok" and "error" not in pre_render["data"] %}
                 <div class="core-card">
                     <div class="core-card-wrap">
-                        <h5 class="core-card-title">Last Backup</h5>
+                        <h5 class="core-card-title">LAST BACKUP</h5>
                     </div>
                     <div class="core-card-text-container">
-                        <p data-info class="core-card-text">{{ pre_render["data"]["date"] }}</p>
+                        <p data-info class="core-card-text">{{ pre_render["data"].get("date", "No backup found") }}</p>
                     </div>
                 </div>
-                <div class="core-card-list">
-                    <div class="core-card-list-title-container">
-                        <h5 class="core-card-list-title">Backup files</h5>
-                    </div>
-                    <div class="core-card-list-container">
-                        <!-- list container-->
-                        <div class="core-card-list-wrap">
-                            <!-- list -->
-                            <ul class="col-span-12 w-full">
-                                {% for item in pre_render['data']["files"] %}
-                                    <li class="core-card-list-item">
-                                        <p class="core-card-list-item-content col-span-12">{{ item }}</p>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <!-- end list-->
+                {% if pre_render['data'].get("files", [])|length > 0 %}
+                    <div class="core-layout-separator"></div>
+                    <div class="core-card-list">
+                        <div class="core-card-list-title-container">
+                            <h5 class="core-card-list-title">BACKUP FILES</h5>
                         </div>
-                        <!-- end list container-->
+                        <div class="core-card-list-container">
+                            <!-- list container-->
+                            <div class="core-card-list-wrap">
+                                <!-- list -->
+                                <ul class="col-span-12 w-full">
+                                    {% for item in pre_render['data']["files"] %}
+                                        <li class="core-card-list-item">
+                                            <p class="core-card-list-item-content col-span-12">{{ item }}</p>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <!-- end list-->
+                            </div>
+                            <!-- end list container-->
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             {% endif %}
         {% else %}
             <div class="core-card">
