@@ -1457,6 +1457,7 @@ class Database:
                                 Settings.regex,
                                 Settings.type,
                                 Settings.multiple,
+                                Settings.order,
                             )
                             .filter_by(id=setting)
                             .first()
