@@ -314,21 +314,12 @@ class Upload {
     let name = file.name;
     if (name.length >= 12) {
       let splitName = name.split(".");
-      // get extension
-      const allowExt = ["zip", ".tar.gz", ".tar.xz"];
-      let ext = null;
-      allowExt.forEach((el) => {
-        // check if allow ext in name
-        if (name.includes(el)) {
-          ext = el;
-        }
-      });
       name = splitName[0].substring(0, 13) + "... ." + splitName[1];
     }
 
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "plugins/upload");
-    xhr.setRequestHeader("Content-Type", `application/${ext}`);    
+    xhr.setRequestHeader("Content-Type", `application/octet-stream`);    
     let fileSize;
 
     xhr.upload.addEventListener("progress", ({ loaded, total }) => {
