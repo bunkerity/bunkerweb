@@ -118,6 +118,10 @@ try:
         log_error("Setting https port should not be match.")
         exit(1)
 
+    # Reset
+    input_keyword.send_keys(Keys.CONTROL, "a")
+    input_keyword.send_keys(Keys.BACKSPACE)
+    
     log_info("Matching a setting done, try context global filter ...")
 
     select_context = safe_get_element(DRIVER, By.XPATH, "//button[@data-global-config-setting-select='context']")
