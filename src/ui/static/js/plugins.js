@@ -319,7 +319,6 @@ class Upload {
 
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "plugins/upload");
-    xhr.setRequestHeader("Content-Type", `application/octet-stream`);    
     let fileSize;
 
     xhr.upload.addEventListener("progress", ({ loaded, total }) => {
