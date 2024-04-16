@@ -1,6 +1,6 @@
 bcrypt==4.1.2
 beautifulsoup4==4.12.3
-Flask==3.0.2
+Flask==3.0.3
 Flask-Login==0.6.3
 Flask_WTF==1.2.1
 gunicorn[gthread]==21.2.0
