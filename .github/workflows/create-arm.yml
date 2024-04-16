@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - name: Get ARM availabilities
         id: availabilities
-        uses: scaleway/action-scw@c718eca1fcb9fec1fb1433752d61599c6a0ad2e9
+        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
         with:
           args: instance server-type get zone=fr-par-2
           export-config: true
@@ -53,7 +53,7 @@ jobs:
           JSON: ${{ steps.availabilities.outputs.json }}
       - name: Create ARM VM
         id: scw
-        uses: scaleway/action-scw@c718eca1fcb9fec1fb1433752d61599c6a0ad2e9
+        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
         with:
           args: instance server create zone=fr-par-2 type=${{ env.TYPE }} root-volume=block:50GB
       - name: Get info
@@ -62,7 +62,7 @@ jobs:
           echo "id=${{ fromJson(steps.scw.outputs.json).id }}" >> "$GITHUB_OUTPUT"
           echo "ip=${{ fromJson(steps.scw.outputs.json).public_ip.address }}" >> "$GITHUB_OUTPUT"
       - name: Wait for VM
-        uses: scaleway/action-scw@c718eca1fcb9fec1fb1433752d61599c6a0ad2e9
+        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
         with:
           args: instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH
