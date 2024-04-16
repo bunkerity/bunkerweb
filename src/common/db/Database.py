@@ -586,6 +586,7 @@ class Database:
                             )
                         )
 
+                    order = 0
                     for setting, value in settings.items():
                         value.update(
                             {
@@ -627,13 +628,16 @@ class Database:
                             if value.get("multiple") != db_setting.multiple:
                                 updates[Settings.multiple] = value.get("multiple")
 
+                            if order != db_setting.order:
+                                updates[Settings.order] = order
+
                             if updates:
                                 self.logger.warning(f'Setting "{setting}" already exists, updating it with the new values')
                                 session.query(Settings).filter(Settings.id == setting).update(updates)
                         else:
                             if db_plugin:
                                 self.logger.warning(f'Setting "{setting}" does not exist, creating it')
-                            to_put.append(Settings(**value))
+                            to_put.append(Settings(**value | {"order": order}))
 
                         db_values = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"])]
                         missing_values = [select for select in db_values if select not in select_values]
@@ -651,6 +655,8 @@ class Database:
                             if missing_values:
                                 self.logger.warning(f'Removing all selects from setting "{setting}" as there are no longer any in the list')
                             session.query(Selects).filter_by(setting_id=value["id"]).delete()
+
+                        order += 1
 
                     db_names = [job.name for job in session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"])]
                     job_names = [job["name"] for job in jobs]
@@ -1137,11 +1143,15 @@ class Database:
         with self.__db_session() as session:
             config = {}
             multisite = []
-            for setting in session.query(Settings).with_entities(
-                Settings.id,
-                Settings.context,
-                Settings.default,
-                Settings.multiple,
+            for setting in (
+                session.query(Settings)
+                .with_entities(
+                    Settings.id,
+                    Settings.context,
+                    Settings.default,
+                    Settings.multiple,
+                )
+                .order_by(Settings.order)
             ):
                 default = setting.default or ""
                 config[setting.id] = default if not methods else {"value": default, "global": True, "method": "default"}
@@ -1433,6 +1443,7 @@ class Database:
                         session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_ids)).delete()
                         session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
 
+                    order = 0
                     for setting, value in settings.items():
                         value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
                         db_setting = (
@@ -1456,7 +1467,7 @@ class Database:
                             for select in value.pop("select", []):
                                 to_put.append(Selects(setting_id=value["id"], value=select))
 
-                            to_put.append(Settings(**value))
+                            to_put.append(Settings(**value | {"order": order}))
                         else:
                             updates = {}
 
@@ -1484,6 +1495,9 @@ class Database:
                             if value.get("multiple") != db_setting.multiple:
                                 updates[Settings.multiple] = value.get("multiple")
 
+                            if order != db_setting.order:
+                                updates[Settings.order] = order
+
                             if updates:
                                 changes = True
                                 session.query(Settings).filter(Settings.id == setting).update(updates)
@@ -1501,6 +1515,8 @@ class Database:
                                 if select not in db_values:
                                     changes = True
                                     to_put.append(Selects(setting_id=setting, value=select))
+
+                        order += 1
 
                     db_names = [job.name for job in session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"])]
                     job_names = [job["name"] for job in jobs]
@@ -1666,6 +1682,7 @@ class Database:
                     )
                 )
 
+                order = 0
                 for setting, value in settings.items():
                     db_setting = session.query(Settings).filter_by(id=setting).first()
 
@@ -1678,7 +1695,8 @@ class Database:
                     for select in value.pop("select", []):
                         to_put.append(Selects(setting_id=value["id"], value=select))
 
-                    to_put.append(Settings(**value))
+                    to_put.append(Settings(**value | {"order": order}))
+                    order += 1
 
                 for job in jobs:
                     db_job = (
@@ -1823,6 +1841,7 @@ class Database:
                         Settings.multiple,
                     )
                     .filter_by(plugin_id=plugin.id)
+                    .order_by(Settings.order)
                 ):
                     data["settings"][setting.id] = {
                         "context": setting.context,

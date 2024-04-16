@@ -82,6 +82,7 @@ class Settings(Base):
     regex = Column(String(1024), nullable=False)
     type = Column(SETTINGS_TYPES_ENUM, nullable=False)
     multiple = Column(String(128), nullable=True)
+    order = Column(Integer, default=0, nullable=False)
 
     selects = relationship("Selects", back_populates="setting", cascade="all")
     services = relationship("Services_settings", back_populates="setting", cascade="all")
