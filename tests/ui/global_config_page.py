@@ -23,11 +23,9 @@ try:
     select_combobox.send_keys("no plugin matching normally")
 
     # All tabs should be hidden
-    total_tabs = DRIVER.execute_script(
-        f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('[data-tab-select-handler]').length"""
-    )
+    total_tabs = DRIVER.execute_script("""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('[data-tab-select-handler]').length""")
     hidden_tabs = DRIVER.execute_script(
-        f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+        """return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
     )
 
     if total_tabs != hidden_tabs:
@@ -42,7 +40,7 @@ try:
     select_combobox.send_keys("blacklist")
 
     hidden_tabs = DRIVER.execute_script(
-        f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+        """return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
     )
 
     if hidden_tabs != total_tabs - 1:
@@ -61,7 +59,7 @@ try:
         exit(1)
 
     hidden_tabs = DRIVER.execute_script(
-        f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+        """return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
     )
 
     if hidden_tabs:
