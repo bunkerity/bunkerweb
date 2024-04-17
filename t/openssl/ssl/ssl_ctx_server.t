@@ -53,6 +53,7 @@ our $ClientContentBy = qq{
 no_long_string();
 
 env_to_nginx("CI_SKIP_NGINX_C");
+env_to_nginx("CI_SKIP_KONG_SSL_FUNCS");
 
 run_tests();
 
