@@ -17,7 +17,11 @@
         === "Docker"
 
             ```bash
-            docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory -v /path/to/backup/directory:/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+            docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+            ```
+
+            ```bash
+            docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
             ```
 
         === "Linux"
@@ -47,13 +51,13 @@
 
                 === "PostgreSQL"
 
-                    1. **Install the PostgreSQL repository configuration package**
+                    4. **Install the PostgreSQL repository configuration package**
 
                         ```bash
                         dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
                         ```
 
-                    2. **Install the PostgreSQL client**
+                    5. **Install the PostgreSQL client**
 
                         ```bash
                         dnf install postgresql<version>
@@ -145,13 +149,13 @@
 
     === "Linux"
 
-        1. **Stop the services**:
+        3. **Stop the services**:
             ```bash
             systemctl stop bunkerweb-scheduler
             systemctl stop bunkerweb-ui
             ```
 
-        2. **Update BunkerWeb**:
+        4. **Update BunkerWeb**:
             - Update BunkerWeb to the latest version by following the instructions in the [integration Linux page](integrations.md#linux).
 
 

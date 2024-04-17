@@ -725,7 +725,11 @@ You can also specify a custom directory for the backup by providing the `BACKUP_
 === "Docker"
 
     ```bash
-    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory -v /path/to/backup/directory:/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+    ```
+
+    ```bash
+    docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
     ```
 
 !!! note "Specifications for MariaDB/MySQL"
@@ -791,7 +795,11 @@ You can also specify a custom backup file for the restore by providing the path 
 === "Docker"
 
     ```bash
-    docker exec -it -v /path/to/backup/file:/path/to/backup/file <scheduler_container> bwcli plugin backup restore /path/to/backup/file
+    docker cp /path/to/backup/file <scheduler_container>:/path/to/backup/file
+    ```
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup restore /path/to/backup/file
     ```
 
 !!! example "In case of failure"
@@ -807,5 +815,9 @@ You can also specify a custom backup file for the restore by providing the path 
     === "Docker"
 
         ```bash
-        docker exec -it -e BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups -v /var/tmp/bunkerweb/backups:/var/tmp/bunkerweb/backups <scheduler_container> bwcli plugin backup restore
+        docker cp <scheduler_container>:/var/tmp/bunkerweb/backups /var/tmp/bunkerweb/backups
+        ```
+
+        ```bash
+        docker exec -it -e BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups <scheduler_container> bwcli plugin backup restore
         ```
