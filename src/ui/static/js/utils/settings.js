@@ -225,8 +225,14 @@ class TabsSelect {
     }
     dropdown.classList.toggle("hidden");
     dropdown.classList.toggle("flex");
+
     // Case open, try to focus on combobox input
-    if (!dropdown.classList.contains("hidden") && combobox) {
+    // Unless already input focused (avoid conflict with search)
+    if (
+      !dropdown.classList.contains("hidden") &&
+      combobox &&
+      combobox.getAttribute("data-focus") !== "false"
+    ) {
       combobox.focus();
     }
 
@@ -288,6 +294,9 @@ class FilterSettings {
     this.tabsEls = this.tabContainer.querySelectorAll(
       `[data-tab-select-handler]`,
     );
+    this.comboboxEl = this.tabContainer
+      .querySelector("[data-tab-select-dropdown]")
+      .querySelector("[data-combobox]");
 
     this.init();
   }
@@ -300,11 +309,13 @@ class FilterSettings {
         });
       }
 
+      // Update plugin items based on current input
       if (this.comboboxEl) {
         this.comboboxEl.addEventListener("input", () => {
           this.runComboFilter();
         });
 
+        // Allow to run combobox filter when opening dropdown (because reset and focus on open)
         this.comboboxEl.addEventListener("focusin", () => {
           this.runComboFilter();
         });
@@ -352,7 +363,13 @@ class FilterSettings {
   }
 
   runFilter() {
+    // Reset previous state to start fresh
     this.resetFilter();
+    // get current tab, this will be used to show other plugin tab if current is hidden after filter
+    const tabNameBeforeFilter =
+      this.tabContainer
+        ?.querySelector("[data-tab-select-dropdown-btn]")
+        ?.getAttribute("data-tab-id") || "";
     //get inp format
     const inpValue = this.input.value.trim().toLowerCase().replaceAll("_", " ");
 
@@ -612,37 +629,68 @@ class FilterSettings {
 
     // case no tab match
     if (isAllHidden) {
+      // we want to show message "No match"
       this.tabContainer
         .querySelector("[data-tab-select-dropdown-btn]")
         .setAttribute("data-tab-id", "no-match");
-      return (this.tabContainer.querySelector(
+      this.tabContainer.querySelector(
         "[data-tab-select-dropdown-btn] span",
-      ).textContent = "No match");
+      ).textContent = "No match";
+      // we want to close dropdown in case open previsouly
+      this.toggleDropdown(true, true, false);
+      return;
     }
 
-    // click first not hidden tab
-    const currTabEl = this.tabContainer.querySelector(
+    // case at least one match
+    const currTabBtn = this.tabContainer.querySelector(
+      `[data-tab-select-handler='${tabNameBeforeFilter}']`,
+    );
+
+    // case the previous plugin is still visible, set is as active by clicking it again
+    if (currTabBtn && !currTabBtn.classList.contains("!hidden")) {
+      currTabBtn.click();
+    }
+
+    // case the previous plugin is hidden, click on the first not hidden tab
+    if (currTabBtn?.classList?.contains("!hidden") || !currTabBtn) {
+      firstNotHiddenEl.click();
+    }
+
+    // furthermore, open dropdown so user can see remain plugins in case the first one is not the one he is looking for
+    // and if more than one plugin available
+    const hiddenTabsEl = this.tabContainer.querySelectorAll(
+      `[data-tab-select-handler][class*="!hidden"]`,
+    );
+
+    if (hiddenTabsEl.length < this.tabsEls.length - 1)
+      this.toggleDropdown(true, false, true);
+    return;
+  }
+
+  toggleDropdown(
+    avoidComboFocus = false,
+    disableOpen = false,
+    disableClose = false,
+  ) {
+    const dropdownEl = this.tabContainer.querySelector(
+      "[data-tab-select-dropdown]",
+    );
+    const dropdownBtn = this.tabContainer.querySelector(
       "[data-tab-select-dropdown-btn]",
     );
-
-    const currTabName = currTabEl.getAttribute("data-tab-id");
-
-    // case previously no match
-    if (currTabName === "no-match" && !isAllHidden) {
-      return firstNotHiddenEl.click();
-    }
-
-    const currTabBtn = this.tabContainer.querySelector(
-      `[data-tab-select-handler='${currTabName}']`,
-    );
-
-    if (!currTabBtn.classList.contains("!hidden")) {
-      return currTabBtn.click();
-    }
-
-    if (currTabBtn.classList.contains("!hidden")) {
-      return firstNotHiddenEl.click();
-    }
+    if (this.comboboxEl && avoidComboFocus)
+      this.comboboxEl.setAttribute("data-focus", "false");
+    let canClick = true;
+    // check if can click based on next dropdown state
+    if (disableClose && !dropdownEl.classList.contains("hidden"))
+      canClick = false;
+    if (disableOpen && dropdownEl.classList.contains("hidden"))
+      canClick = false;
+    if (canClick) dropdownBtn.click();
+    // Case avoid focus on combobox, we need to reset here because the focusin event is not triggered
+    if (this.comboboxEl && avoidComboFocus) this.runComboFilter();
+    // Reset to default state
+    if (this.comboboxEl) this.comboboxEl.setAttribute("data-focus", "true");
   }
 
   resetFilter() {
