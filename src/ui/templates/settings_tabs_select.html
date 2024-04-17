@@ -22,7 +22,7 @@
              role="listbox"
              data-tab-select-dropdown
              class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto max-h-[350px]">
-             <input data-combobox type="text" placeholder="Search plugin" class="cursor-text first border rounded-t border-gray-100 text-left focus:outline outline-none text-sm leading-5.6 ease block w-full appearance-none border-gray-300 dark:border-gray-200 bg-white dark:bg-gray-400 bg-clip-padding px-3 py-1 font-normal text-gray-800 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-600">
+             <input data-combobox type="text" placeholder="Search plugin" class="cursor-text first border rounded-t border-gray-100 text-left focus:outline outline-none text-sm leading-5.6 ease block w-full appearance-none border-gray-300 dark:border-gray-200 bg-white dark:bg-gray-400 bg-clip-padding px-6 py-1.5 font-normal text-gray-800 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-600">
             {% set first_el = "True" %}
             {% for plugin in plugins %}
                 {% if current_endpoint == "services" and plugin["settings"]
