@@ -343,7 +343,15 @@
 }
 
 .core-card-list {
-  @apply ml-2 mr-2 mb-2 mt-2 h-fit content-start md:col-span-6 overflow-x-hidden overflow-y-auto grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 content-start md:col-span-6 overflow-x-hidden overflow-y-auto grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-list.no-data {
+  @apply place-content-stretch;
+}
+
+.core-card-list-no-data {
+  @apply pb-[2rem] text-2xl text-center mb-0;
 }
 
 .w-small.core-card-list {
