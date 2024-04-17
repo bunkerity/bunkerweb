@@ -3,8 +3,12 @@
     {% set methods = ["all"] %}
     {% set codes = ["all"] %}
     {% set reasons = ["all"] %}
+    {% set reasons_count = {} %}
+    {% set code_count = {} %}
     {% set countries = ["all"] %}
     {% for report in reports %}
+        reasons_count[report["reason"]] = reasons_count.get(report["reason"], 0) + 1
+        code_count[report["status"]] = code_count.get(report["status"], 0) + 1
         {% if report["method"] not in methods %}
             {% if methods.append(report["method"]) %}{% endif %}
         {% endif %}
@@ -18,6 +22,11 @@
             {% if countries.append(report["country"]) %}{% endif %}
         {% endif %}
     {% endfor %}
+
+    {% set top_reason = max(reasons_count, key=reasons_count.get) %}
+    {% set top_code = max(code_count, key=code_count.get) %}
+    {% set total_report = reports|length %}
+
     <div class="{% if reports|length == 0 %}w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words {% else %}hidden{% endif %} ">
         <div class="col-span-12 flex flex-col justify-center items-center h-fit">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +44,7 @@
     {% if reports|length != 0 %}
         {% set reports_info = [
                     {"name" : "REPORTING TOTAL", "data" : total_report|string},
-                    {"name" : "TOP REASON", "data" : total_reason|string},
+                    {"name" : "TOP REASON", "data" : top_reason|string},
                     {"name" : "TOP STATUS CODE", "data" : top_code|string},
                 ] %}
         <div class=" h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">

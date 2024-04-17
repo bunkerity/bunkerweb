@@ -69,8 +69,12 @@ try:
     select_combobox.send_keys("no plugin matching normally")
 
     # All tabs should be hidden
-    total_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('[data-tab-select-handler]').length""")
-    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+    total_tabs = DRIVER.execute_script(
+        f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('[data-tab-select-handler]').length"""
+    )
+    hidden_tabs = DRIVER.execute_script(
+        f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+    )
 
     if total_tabs != hidden_tabs:
         log_error("All tabs should be hidden.")
@@ -83,7 +87,9 @@ try:
     # Show only one tab
     select_combobox.send_keys("blacklist")
 
-    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+    hidden_tabs = DRIVER.execute_script(
+        f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+    )
 
     if hidden_tabs != total_tabs - 1:
         log_error("Only one tab should be visible.")
@@ -100,7 +106,9 @@ try:
         log_error("Combobox input should be empty.")
         exit(1)
 
-    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+    hidden_tabs = DRIVER.execute_script(
+        f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+    )
 
     if hidden_tabs:
         log_error("All tabs should be visible.")
@@ -445,7 +453,6 @@ try:
         exit(1)
 
     log_info("Service app3.example.com is present, trying service card filters...")
-
 
     # Set keyword with no matching settings
     input_card_keyword = safe_get_element(DRIVER, By.ID, "service-name-keyword")

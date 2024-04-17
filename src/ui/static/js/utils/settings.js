@@ -220,7 +220,7 @@ class TabsSelect {
     );
     const combobox = dropdown.querySelector("[data-combobox]");
     if (combobox) {
-      // simulate clear combobox wit keyboard
+      // simulate clear combobox with keyboard
       combobox.value = "";
     }
     dropdown.classList.toggle("hidden");

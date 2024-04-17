@@ -192,7 +192,7 @@
                                     <div id="{{ value['id'] }}-dropdown"
                                          role="listbox"
                                          data-setting-select-dropdown="{{ value['id'] }}"
-                                         class="hidden z-[20] absolute h-full flex-col w-full mt-2">
+                                         class="hidden z-[20] fixed h-full flex-col mt-2 max-h-[250px] overflow-auto">
                                         {% for item in value['select'] %}
                                             {% if global_config[setting]['value'] and
                                                 global_config[setting]['value'] == item or not global_config[setting]['value']
@@ -417,7 +417,7 @@
                                     <div id="{{ value['id'] }}-dropdown"
                                          role="listbox"
                                          data-setting-select-dropdown="{{ value['id'] }}"
-                                         class="hidden z-[20] absolute h-full flex-col w-full mt-2">
+                                         class="hidden z-[20] fixed h-full flex-col mt-2 max-h-[250px] overflow-auto">
                                         {% for item in value['select'] %}
                                             {% if value['default'] == item %}
                                                 <button role="option"
