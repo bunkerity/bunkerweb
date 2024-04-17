@@ -21,7 +21,7 @@
         </div>
         <!-- end info -->
 
-        {% if pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or not pre_render.get("data") %}
+        {% if pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or not pre_render.get("data") %} <div class="core-layout-separator"></div>
         <div class="my-2 flex justify-center col-span-12">
             <div class="mr-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 stroke-red-500 fill-white">
