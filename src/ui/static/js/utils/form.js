@@ -54,27 +54,25 @@ class Checkbox {
 class Select {
   constructor() {
     this.init();
-    this.openDropdownEls = [];
   }
 
   init() {
     // Add event listener to close dropdown if scroll event is triggered on window
     window.addEventListener("scroll", () => {
-      if (!this.openDropdownEls.length) return;
+      this.dropsToHide = document.querySelectorAll(
+        '[data-setting-select-dropdown][class*="flex"]',
+      );
+      if (!this.dropsToHide.length) return;
 
-      this.elsToRemove = [];
-      this.openDropdownEls.forEach((dropdown) => {
+      this.dropsToHide.forEach((dropdown) => {
         const btn = dropdown
           .closest("div[data-setting-container]")
           .querySelector("button[data-setting-select]");
+
+        if (dropdown.classList.contains("hidden")) return;
         btn.click();
         // Add dropdown to remove list
-        this.elsToRemove.push(dropdown);
       });
-      // Update openDropdownEls array deleting all dropdowns that were closed using elsToRemove array
-      this.openDropdownEls = this.openDropdownEls.filter(
-        (dropdown) => !this.elsToRemove.includes(dropdown),
-      );
     });
 
     window.addEventListener("click", (e) => {
@@ -186,7 +184,6 @@ class Select {
     dropdownChevron.classList.toggle("rotate-180");
     // case open, we want to move dropdown position next to his data-select-container
     if (!dropdownEl.classList.contains("hidden")) {
-      this.openDropdownEls.push(dropdownEl);
       const selectContainer = btn.closest("div[data-select-container]");
       const selectContainerRect = selectContainer.getBoundingClientRect();
       const top = selectContainerRect.top + selectContainerRect.height;
@@ -195,6 +192,17 @@ class Select {
       dropdownEl.style.top = `${top}px`;
       dropdownEl.style.left = `${left}px`;
       dropdownEl.style.width = `${width}px`;
+      // Check dropdown height, if out of screen, move it up
+      const dropdownRect = dropdownEl.getBoundingClientRect();
+      const dropdownHeight = dropdownRect.height;
+      const dropdownBottom = dropdownRect.bottom;
+      const windowHeight = window.innerHeight;
+
+      if (dropdownBottom > windowHeight) {
+        dropdownEl.style.top = `${
+          top - dropdownHeight - selectContainerRect.height - 15
+        }px`;
+      }
     }
   }
 }

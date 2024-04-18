@@ -658,6 +658,10 @@ class FilterSettings {
 
     // furthermore, open dropdown so user can see remain plugins in case the first one is not the one he is looking for
     // and if more than one plugin available
+    // but we want to avoid dropdown open if  active element is input keyword and value is empty
+    if (document.activeElement === this.input && this.input.value === "")
+      return;
+
     const hiddenTabsEl = this.tabContainer.querySelectorAll(
       `[data-tab-select-handler][class*="!hidden"]`,
     );
@@ -672,6 +676,8 @@ class FilterSettings {
     disableOpen = false,
     disableClose = false,
   ) {
+    // avoid this on mobile
+    if (window.innerWidth < 768) return;
     const dropdownEl = this.tabContainer.querySelector(
       "[data-tab-select-dropdown]",
     );
