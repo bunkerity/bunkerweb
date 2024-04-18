@@ -979,6 +979,10 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     !!! warning "Testing/dev version"
         If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
 
+        ```shell
+        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
+        ```
+
     Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
 
     ```shell
@@ -1021,6 +1025,10 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
 
     !!! warning "Testing/dev version"
         If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+
+        ```shell
+        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
+        ```
 
     Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
 
