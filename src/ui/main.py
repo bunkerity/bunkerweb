@@ -330,11 +330,12 @@ def run_action(plugin: str, function_name: str = ""):
         if tmp_dir:
             sys_path.pop()
             rmtree(tmp_dir, ignore_errors=True)
-            
+
         app.logger.exception("An error occurred while importing the plugin")
         return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
 
     res = None
+    message = None
 
     try:
         # Try to get the custom plugin custom function and call it
@@ -360,7 +361,8 @@ def run_action(plugin: str, function_name: str = ""):
             sys_path.pop()
             rmtree(tmp_dir, ignore_errors=True)
 
-        app.logger.exception(message)
+        if message:
+            app.logger.exception(message)
         if message or not isinstance(res, dict) and not res:
             return {"status": "ko", "code": 500, "message": message or "The plugin did not return a valid response"}
 
