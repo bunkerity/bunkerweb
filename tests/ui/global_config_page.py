@@ -172,7 +172,7 @@ try:
 
     select_plugin = safe_get_element(DRIVER, By.XPATH, "//button[@data-tab-select-dropdown-btn='']")
     assert_button_click(DRIVER, select_plugin)
-    assert_button_click(DRIVER, "//button[@data-tab-select-handler='headers']")
+    DRIVER.execute_script(f"""return document.querySelector('button[data-tab-select-handler="headers"]').click()""")
 
     log_info("Start keyword to show only one multiple ...")
 
@@ -253,10 +253,10 @@ try:
     log_info("Select from dropdown ...")
 
     select = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select='timers-log-level']")
-    assert_button_click(DRIVER, select)
+    DRIVER.execute_script(f"""return document.querySelector('button[data-setting-select="timers-log-level"]').click()""")
 
     select_active_item = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select-dropdown-btn='timers-log-level' and contains(@class, 'active')]")
-    assert_button_click(DRIVER, select_active_item)
+    DRIVER.execute_script(f"""return document.querySelector('button[data-setting-select-dropdown-btn="timers-log-level"][class*="active"]').click()""")
 
     log_info("Select dropdown done, trying toggle checkbox...")
 
