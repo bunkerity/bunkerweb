@@ -1602,6 +1602,7 @@ class Database:
                         .with_entities(
                             Plugin_pages.template_checksum,
                             Plugin_pages.actions_checksum,
+                            Plugin_pages.obfuscation_checksum,
                         )
                         .filter_by(plugin_id=plugin["id"])
                         .first()
@@ -1778,6 +1779,7 @@ class Database:
                                 .with_entities(
                                     Plugin_pages.template_checksum,
                                     Plugin_pages.actions_checksum,
+                                    Plugin_pages.obfuscation_checksum,
                                 )
                                 .filter_by(plugin_id=plugin["id"])
                                 .first()
