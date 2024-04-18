@@ -636,7 +636,7 @@ class FilterSettings {
       this.tabContainer.querySelector(
         "[data-tab-select-dropdown-btn] span",
       ).textContent = "No match";
-      // we want to close dropdown in case open previsouly
+      // we want to close dropdown in case open previously
       this.toggleDropdown(true, true, false);
       return;
     }

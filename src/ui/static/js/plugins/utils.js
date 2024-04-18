@@ -1,11 +1,13 @@
 class Ping {
   constructor(
     url = `${location.origin}${location.pathname}`,
-    statusTextEl = null,
-    statusColorEl = null,
-    key_to_check = "ping",
+    btnEl = null, // disabled while fethching
+    statusTextEl = null, // update text with fetching result
+    statusColorEl = null, // update color with fetching result
+    key_to_check = "ping", // key to check in response data
   ) {
     this.url = url;
+    this.btnEl = btnEl;
     this.statusColorEl = statusColorEl;
     this.statusTextEl = statusTextEl;
     this.key_to_check = key_to_check;
@@ -165,8 +167,14 @@ class Ping {
 
     this.alertEl.classList.remove("hidden");
 
-    if (type !== "fetch")
+    if (type === "fetch") {
+      this.btnEl.setAttribute("disabled", "disabled");
+    }
+
+    if (type !== "fetch") {
+      this.btnEl.removeAttribute("disabled");
       setTimeout(() => this.alertEl.classList.add("hidden"), 5000);
+    }
   }
 
   getAlertType(type) {

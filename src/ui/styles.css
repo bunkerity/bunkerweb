@@ -530,6 +530,10 @@
   @apply text-sm tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
+.core-card-upload-btn {
+  @apply w-fit disabled:hover:translate-y-0 disabled:cursor-not-allowed disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 tracking-wide dark:brightness-125 hover:brightness-75 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md;
+}
+
 .core-card-test-status-container {
   @apply mx-1 flex justify-center items-center;
 }

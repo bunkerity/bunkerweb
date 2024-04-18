@@ -70,6 +70,7 @@ module.exports = {
     "text-yellow-500",
     "text-green-500",
     "text-red-500",
+    "text-sky-500",
   ],
 
   presets: [],
