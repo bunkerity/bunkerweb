@@ -1845,7 +1845,7 @@ class Database:
                                 if updates:
                                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
 
-                for command, file_name in plugin.get("bwcli", {}).items():
+                for command, file_name in commands.items():
                     if not plugin_path.joinpath("bwcli", file_name).is_file():
                         self.logger.warning(f'Command "{command}"\'s file "{file_name}" does not exist in the plugin directory, skipping it')
                         continue
