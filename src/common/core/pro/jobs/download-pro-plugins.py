@@ -96,6 +96,7 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
 try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     db_metadata = db.get_metadata()
+    db_config = db.get_config()
     current_date = datetime.now()
     pro_license_key = getenv("PRO_LICENSE_KEY", "").strip()
 
@@ -157,7 +158,8 @@ try:
 
     # ? If we already checked today, skip the check and if the metadata is the same, skip the check
     if (
-        metadata.get("is_pro", False) == db_metadata["is_pro"]
+        pro_license_key == db_config["PRO_LICENSE_KEY"]
+        and metadata.get("is_pro", False) == db_metadata["is_pro"]
         and db_metadata["last_pro_check"]
         and current_date.replace(hour=0, minute=0, second=0, microsecond=0) == db_metadata["last_pro_check"].replace(hour=0, minute=0, second=0, microsecond=0)
     ):
