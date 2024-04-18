@@ -1876,6 +1876,7 @@ class Database:
         with self.__db_session() as session:
             return {
                 job.name: {
+                    "plugin_id": job.plugin_id,
                     "every": job.every,
                     "reload": job.reload,
                     "success": job.success,
@@ -1898,6 +1899,7 @@ class Database:
                 for job in (
                     session.query(Jobs).with_entities(
                         Jobs.name,
+                        Jobs.plugin_id,
                         Jobs.every,
                         Jobs.reload,
                         Jobs.success,

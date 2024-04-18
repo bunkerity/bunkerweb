@@ -48,17 +48,10 @@
                 <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
                 <div role="grid" class="card-detail-container">
                     {% for info in services_info %}
-                    <div role="row"
-                            class="card-detail-item">
-                        <p role="gridcell"
-                            class="card-detail-item-title">
-                            {{ info['name'] }}
-                        </p>
-                        <p role="gridcell"
-                            class="card-detail-item-subtitle">
-                            {{ info['data'] }}
-                        </p>
-                    </div>
+                        <div role="row" class="card-detail-item">
+                            <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
+                            <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
+                        </div>
                     {% endfor %}
                 </div>
             </div>

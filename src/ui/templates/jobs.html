@@ -14,19 +14,12 @@
     <div class="h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
         <div role="grid" class="card-detail-container">
-        {% for info in jobs_info %}
-            <div role="row"
-                    class="card-detail-item">
-                <p role="gridcell"
-                    class="card-detail-item-title">
-                    {{ info['name'] }}
-                </p>
-                <p role="gridcell"
-                    class="card-detail-item-subtitle">
-                    {{ info['data'] }}
-                </p>
-            </div>
-        {% endfor %}
+            {% for info in jobs_info %}
+                <div role="row" class="card-detail-item">
+                    <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
+                    <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
+                </div>
+            {% endfor %}
         </div>
     </div>
     <!-- end info -->
@@ -251,7 +244,8 @@
                                             <div data-jobs-setting-select-dropdown="{{ job_name }}"
                                                  class="hidden z-100 absolute h-full flex-col w-full translate-y-0.5">
                                                 {% for file in value['cache'] %}
-                                                    <button data-jobs-download="{{ job_name }}"
+                                                    <button data-jobs-plugin="{{ value['plugin_id'] }}"
+                                                            data-jobs-download="{{ job_name }}"
                                                             data-jobs-file="{{ file['file_name'] }}"
                                                             data-jobs-setting-select-dropdown-btn="{{ job_name }}"
                                                             value="files"

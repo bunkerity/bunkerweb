@@ -35,14 +35,14 @@
         <!-- logo and version -->
         <div class="w-full">
             <a aria-label="link to home"
-            class="flex justify-center px-8 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700"
-            href="{% if current_endpoint == 'home' %}#{% else %}loading?next={{ url_for("home") }}{% endif %}">
+               class="flex justify-center px-8 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700"
+               href="{% if current_endpoint == 'home' %}#{% else %}loading?next={{ url_for("home") }}{% endif %}">
                 <img src="images/logo-menu-2.png"
-                    class="hidden dark:inline w-28 sm:w-36 transition-all duration-200 h-8 sm:h-10"
-                    alt="main logo" />
+                     class="hidden dark:inline w-28 sm:w-36 transition-all duration-200 h-8 sm:h-10"
+                     alt="main logo" />
                 <img src="images/logo-menu.png"
-                    class="dark:hidden inline w-28 sm:w-36 transition-all duration-200 h-8 sm:h-10"
-                    alt="main logo" />
+                     class="dark:hidden inline w-28 sm:w-36 transition-all duration-200 h-8 sm:h-10"
+                     alt="main logo" />
             </a>
         </div>
         <div class="mt-2 w-full px-1">
@@ -50,197 +50,194 @@
                 {{ username }}
             </h1>
             <a class="block underline mb-2 text-gray-600 dark:text-gray-400 text-sm text-center hover:brightness-90"
-            href="{% if current_endpoint == 'account' %}#{% else %}loading?next={{ url_for("account") }}{% endif %}">manage account
+               href="{% if current_endpoint == 'account' %}#{% else %}loading?next={{ url_for("account") }}{% endif %}">manage account
             </a>
         </div>
-
         <hr class="h-px mt-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent" />
         <!-- end logo version -->
     </div>
-
-        <!-- list items -->
-        <div class="items-center block w-auto overflow-auto grow basis-full">
-            <!-- default anchor -->
-            <ul class="flex flex-col pl-0 mb-0">
-                {% set paths = [
-                    "home",
-                    "instances",
-                    "global_config",
-                    "services",
-                    "configs",
-                    "plugins",
-                    "cache",
-                    "reports",
-                    "bans",
-                    "jobs",
-                    "logs"
-                ] %}
-                <!-- loop paths -->
-                {% for path in paths %}
-                    <li class="mt-0.5 w-full">
-                        <a class="{% if current_endpoint == path %} font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/10 hover:bg-primary/30 {% else %} dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} dark:text-gray-200 py-1 ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm"
-                           href="{% if current_endpoint == path %}#{% else %}loading?next={{ url_for(path) }}{% endif %}">
-                            <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
-                                {% if path == "home" %}
-                                    <svg class="stroke-sky-500 h-6 w-6 relative"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "instances" %}
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor"
-                                         class="stroke-stone-500 h-5.5 w-5.5 relative">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "global_config" %}
-                                    <svg class="stroke-blue-400 h-6 w-6 relative"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "services" %}
-                                    <svg class="stroke-orange-500 h-6 w-6 relative"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "configs" %}
-                                    <svg class="stroke-blue-500 h-6 w-6 relative"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "plugins" %}
-                                    <svg class="stroke-yellow-400 h-6 w-6 relative"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "cache" %}
-                                    <svg class="stroke-pink-600 h-5.5 w-5.5 relative"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "reports" %}
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor"
-                                         class="stroke-amber-500 dark:stroke-amber-500 h-6 w-6 relative">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "bans" %}
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor"
-                                         class="stroke-red-500 dark:stroke-red-500 h-6 w-6 relative">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "jobs" %}
-                                    <svg class="stroke-emerald-600 h-6 w-6 relative"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
-                                    </svg>
-                                {% endif %}
-                                {% if path == "logs" %}
-                                    <svg class="stroke-gray-600 dark:fill-gray-500 h-6 w-6 relative"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                    </svg>
-                                {% endif %}
-                            </div>
-                            <span class="ml-1 duration-300 dark:text-gray-200 pointer-events-none ease">{{ path[0]|upper }}{{ path[1:].replace('_', ' ') }}</span>
-                        </a>
-                    </li>
-                {% endfor %}
-                <!-- end loop paths-->
-            </ul>
-            <!-- end default anchor -->
-            <ul>
-                <li class="w-full mt-4">
-                    <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-gray-400 dark:opacity-100 opacity-60">
-                        PLUGINS PAGE
-                    </h6>
+    <!-- list items -->
+    <div class="items-center block w-auto overflow-auto grow basis-full">
+        <!-- default anchor -->
+        <ul class="flex flex-col pl-0 mb-0">
+            {% set paths = [
+                "home",
+                "instances",
+                "global_config",
+                "services",
+                "configs",
+                "plugins",
+                "cache",
+                "reports",
+                "bans",
+                "jobs",
+                "logs"
+            ] %}
+            <!-- loop paths -->
+            {% for path in paths %}
+                <li class="mt-0.5 w-full">
+                    <a class="{% if current_endpoint == path %} font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/10 hover:bg-primary/30 {% else %} dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} dark:text-gray-200 py-1 ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm"
+                       href="{% if current_endpoint == path %}#{% else %}loading?next={{ url_for(path) }}{% endif %}">
+                        <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
+                            {% if path == "home" %}
+                                <svg class="stroke-sky-500 h-6 w-6 relative"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "instances" %}
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor"
+                                     class="stroke-stone-500 h-5.5 w-5.5 relative">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "global_config" %}
+                                <svg class="stroke-blue-400 h-6 w-6 relative"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "services" %}
+                                <svg class="stroke-orange-500 h-6 w-6 relative"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "configs" %}
+                                <svg class="stroke-blue-500 h-6 w-6 relative"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "plugins" %}
+                                <svg class="stroke-yellow-400 h-6 w-6 relative"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "cache" %}
+                                <svg class="stroke-pink-600 h-5.5 w-5.5 relative"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "reports" %}
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor"
+                                     class="stroke-amber-500 dark:stroke-amber-500 h-6 w-6 relative">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "bans" %}
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor"
+                                     class="stroke-red-500 dark:stroke-red-500 h-6 w-6 relative">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "jobs" %}
+                                <svg class="stroke-emerald-600 h-6 w-6 relative"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
+                                </svg>
+                            {% endif %}
+                            {% if path == "logs" %}
+                                <svg class="stroke-gray-600 dark:fill-gray-500 h-6 w-6 relative"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                            {% endif %}
+                        </div>
+                        <span class="ml-1 duration-300 dark:text-gray-200 pointer-events-none ease">{{ path[0]|upper }}{{ path[1:].replace('_', ' ') }}</span>
+                    </a>
                 </li>
-                {% for plugin in plugins %}
-                    {% if plugin['page'] %}
-                        <li class="mt-0.5 w-full">
-                            <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-gray-200 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-                               href="{{ request.url_root }}plugins/{{ plugin['id'] }}">
-                                <div class="mr-2 flex flex-wrap items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
-                                    {% if plugin['type'] != "pro" %}
+            {% endfor %}
+            <!-- end loop paths-->
+        </ul>
+        <!-- end default anchor -->
+        <ul>
+            <li class="w-full mt-4">
+                <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-gray-400 dark:opacity-100 opacity-60">
+                    PLUGINS PAGE
+                </h6>
+            </li>
+            {% for plugin in plugins %}
+                {% if plugin['page'] %}
+                    <li class="mt-0.5 w-full">
+                        <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-gray-200 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+                           href="{{ request.url_root }}plugins/{{ plugin['id'] }}">
+                            <div class="mr-2 flex flex-wrap items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
+                                {% if plugin['type'] != "pro" %}
                                     <svg class="fill-gray-500 h-5 w-5 relative"
                                          xmlns="http://www.w3.org/2000/svg"
                                          viewBox="0 0 384 512">
                                         <path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z" />
                                     </svg>
-                                    {% endif %}
-                                    {% if plugin['type'] == "pro" %}
+                                {% endif %}
+                                {% if plugin['type'] == "pro" %}
                                     <svg class="h-5 w-5 dark:brightness-90  relative"
-                                    viewBox="0 0 48 46"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                   <path class="fill-yellow-500"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
-                                   <path class="fill-yellow-500"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
-                               </svg>
-                                    {% endif %}
-                                </div>
-                                <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">{{ plugin['name'] }}</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-            <!-- end plugin list -->
-        </div>
-            <!-- end top sidebar -->
-
-        <!-- end list items -->
-            <!-- bottom sidebar  -->
+                                         viewBox="0 0 48 46"
+                                         fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path class="fill-yellow-500"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+                                        <path class="fill-yellow-500"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+                                    </svg>
+                                {% endif %}
+                            </div>
+                            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">{{ plugin['name'] }}</span>
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        <!-- end plugin list -->
+    </div>
+    <!-- end top sidebar -->
+    <!-- end list items -->
+    <!-- bottom sidebar  -->
     <div class="flex flex-col justify-end mx-4 mt-2 mb-4">
         <!-- dark/light mode -->
         <div class="min-h-6 ml-12 my-4 flex justify-start">

@@ -4,64 +4,53 @@
     {% set codes = ["all"] %}
     {% set reasons = ["all"] %}
     {% set countries = ["all"] %}
-    {% set reasons_count = {}  %}
+    {% set reasons_count = {} %}
     {% set codes_count = {} %}
     {% set countries_count = {} %}
     {% set methods_count = {} %}
     {% for report in reports %}
-
         {% if reasons_count.update({report["reason"]|string : reasons_count.get(report["reason"], 0) + 1}) %}{% endif %}
         {% if codes_count.update({report["status"]|string : codes_count.get(report["status"], 0) + 1}) %}{% endif %}
         {% if countries_count.update({report["country"]|string : codes_count.get(report["country"], 0) + 1}) %}{% endif %}
         {% if methods_count.update({report["method"]|string : methods_count.get(report["method"], 0) + 1}) %}{% endif %}
-
         {% if report["method"] not in methods %}
             {% if methods.append(report["method"]) %}{% endif %}
         {% endif %}
-
         {% if report["status"] not in codes %}
             {% if codes.append(report["status"]) %}{% endif %}
         {% endif %}
-
         {% if report["reason"] not in reasons %}
             {% if reasons.append(report["reason"]) %}{% endif %}
         {% endif %}
-
         {% if report["country"] not in countries %}
             {% if countries.append(report["country"]) %}{% endif %}
         {% endif %}
     {% endfor %}
-
-    {% set top_reason = { "count" : 0, "name" : "unknown"} %}
+    {% set top_reason = {"count": 0, "name": "unknown"} %}
     {% for key, value in reasons_count.items() %}
         {% if value|int > top_reason["count"]|int %}
             {% if top_reason.update({"count": value, "name" : key|string}) %}{% endif %}
         {% endif %}
     {% endfor %}
-
-    {% set top_code = { "count" : 0, "name" : "unknown"} %}
+    {% set top_code = {"count": 0, "name": "unknown"} %}
     {% for key, value in codes_count.items() %}
         {% if value|int > top_code["count"]|int %}
             {% if top_code.update({ "count" : value|string, "name" : key}) %}{% endif %}
         {% endif %}
     {% endfor %}
-
-    {% set top_country = { "count" : 0, "name" : "unknown"} %}
+    {% set top_country = {"count": 0, "name": "unknown"} %}
     {% for key, value in countries_count.items() %}
         {% if value|int > top_country["count"]|int %}
             {% if top_country.update({ "count" : value|string, "name" : key}) %}{% endif %}
         {% endif %}
     {% endfor %}
-
-    {% set top_method = { "count" : 0, "name" : "unknown"} %}
+    {% set top_method = {"count": 0, "name": "unknown"} %}
     {% for key, value in methods_count.items() %}
         {% if value|int > top_method["count"]|int %}
             {% if top_method.update({ "count" : value|string, "name" : key}) %}{% endif %}
         {% endif %}
     {% endfor %}
-
     {% set total_report = reports|length %}
-
     <div class="{% if reports|length == 0 %}w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words {% else %}hidden{% endif %} ">
         <div class="col-span-12 flex flex-col justify-center items-center h-fit">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -87,18 +76,11 @@
         <div class=" h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
             <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
             <div role="grid" class="card-detail-container">
-            {% for info in reports_info %}
-                <div role="row"
-                        class="card-detail-item">
-                    <p role="gridcell"
-                        class="card-detail-item-title">
-                        {{ info['name'] }}
-                    </p>
-                    <p role="gridcell"
-                        class="card-detail-item-subtitle">
-                        {{ info['data'] }}
-                    </p>
-                </div>
+                {% for info in reports_info %}
+                    <div role="row" class="card-detail-item">
+                        <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
+                        <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
+                    </div>
                 {% endfor %}
             </div>
         </div>

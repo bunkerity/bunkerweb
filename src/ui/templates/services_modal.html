@@ -46,59 +46,75 @@
             <div class="flex flex-col md:flex-row justify-start w-full items-start md:items-end gap-y-3 gap-x-4">
                 <div class="w-full sm:min-w-[250px] max-w-[300px]">{% include "settings_tabs_select.html" %}</div>
                 <div class="flex flex-col sm:flex-row">
-                <!-- search inpt-->
-                <div class="sm:mx-2 mb-1 min-w-[200px] flex flex-col relative col-span-12 md:col-span-6">
-                    <h5 class="hidden sm:block my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                        Search
-                    </h5>
-                    <label class="sr-only" for="settings-filter">search</label>
-                    <input type="text"
-                           id="settings-filter"
-                           name="settings-filter"
-                           class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                           placeholder="keyword"
-                           pattern="(.*?)"
-                           required />
-                </div>
-                <!-- end search inpt-->
-                <!-- type plugin -->
-                <div class="hidden mx-2 mb-1 min-w-[200px] sm:flex flex-col relative col-span-12 md:col-span-6">
-                    <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                        Type
-                    </h5>
-                    <button aria-controls="filter-type" data-services-setting-select="type" class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                        <span aria-description="current filter state value" id="services-type" data-name="services-type" data-services-setting-select-text="type">all</span>
-                        <!-- chevron -->
-                        <svg data-services-setting-select="type" class="transition-transform h-4 w-4 fill-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                            <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"></path>
-                        </svg>
-                    </button>
-                    <!-- end chevron -->
-                    <!-- dropdown-->
-                    <div id="filter-type" role="listbox" data-services-setting-select-dropdown="type" class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
-
-                            <button role="option" data-services-setting-select-dropdown-btn="type" value="all" class="dark:bg-primary bg-primary text-gray-300 border-t rounded-t   border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                    <!-- search inpt-->
+                    <div class="sm:mx-2 mb-1 min-w-[200px] flex flex-col relative col-span-12 md:col-span-6">
+                        <h5 class="hidden sm:block my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
+                            Search
+                        </h5>
+                        <label class="sr-only" for="settings-filter">search</label>
+                        <input type="text"
+                               id="settings-filter"
+                               name="settings-filter"
+                               class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                               placeholder="keyword"
+                               pattern="(.*?)"
+                               required />
+                    </div>
+                    <!-- end search inpt-->
+                    <!-- type plugin -->
+                    <div class="hidden mx-2 mb-1 min-w-[200px] sm:flex flex-col relative col-span-12 md:col-span-6">
+                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">Type</h5>
+                        <button aria-controls="filter-type"
+                                data-services-setting-select="type"
+                                class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
+                            <span aria-description="current filter state value"
+                                  id="services-type"
+                                  data-name="services-type"
+                                  data-services-setting-select-text="type">all</span>
+                            <!-- chevron -->
+                            <svg data-services-setting-select="type"
+                                 class="transition-transform h-4 w-4 fill-gray-500"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 512 512">
+                                <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z">
+                                </path>
+                            </svg>
+                        </button>
+                        <!-- end chevron -->
+                        <!-- dropdown-->
+                        <div id="filter-type"
+                             role="listbox"
+                             data-services-setting-select-dropdown="type"
+                             class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
+                            <button role="option"
+                                    data-services-setting-select-dropdown-btn="type"
+                                    value="all"
+                                    class="dark:bg-primary bg-primary text-gray-300 border-t rounded-t   border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
                                 all
                             </button>
-
-                            <button role="option" data-services-setting-select-dropdown-btn="type" value="core" class=" bg-white dark:bg-slate-700   border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                            <button role="option"
+                                    data-services-setting-select-dropdown-btn="type"
+                                    value="core"
+                                    class=" bg-white dark:bg-slate-700   border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
                                 core
                             </button>
-
-                            <button role="option" data-services-setting-select-dropdown-btn="type" value="external" class=" bg-white dark:bg-slate-700   border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                            <button role="option"
+                                    data-services-setting-select-dropdown-btn="type"
+                                    value="external"
+                                    class=" bg-white dark:bg-slate-700   border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
                                 external
                             </button>
-
-                            <button role="option" data-services-setting-select-dropdown-btn="type" value="pro" class=" bg-white dark:bg-slate-700  rounded-b border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                            <button role="option"
+                                    data-services-setting-select-dropdown-btn="type"
+                                    value="pro"
+                                    class=" bg-white dark:bg-slate-700  rounded-b border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
                                 pro
                             </button>
-
+                        </div>
+                        <!-- end dropdown-->
                     </div>
-                    <!-- end dropdown-->
+                    <!-- end type plugin-->
                 </div>
-                <!-- end type plugin-->
-                </div>
-
             </div>
             <div class="w-full min-w-[300px] my-1 sm:my-0">
                 <hr class="separator" />
