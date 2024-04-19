@@ -15,7 +15,7 @@
                 <p class="core-card-text-doc">More information available <a href="https://docs.bunkerweb.io/{{ bw_version }}/security-tuning/#backup-and-restore"  class="core-card-text-doc-link">in the documentation</a>.</p>
             </div>
             <!-- end info -->
-            {% if pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or not pre_render.get("data") %} <div class="core-layout-separator"></div>
+            {% if pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or pre_render.get("data") is not mapping %} <div class="core-layout-separator"></div>
             <div class="my-2 flex justify-center col-span-12">
                 <div class="mr-1">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 stroke-red-500 fill-white">
@@ -25,7 +25,7 @@
                     <p class="px-1 text-white break-words">(Pre rendering error) {{ pre_render.get("data", { "error" : "No log to show" }).get("error", "No log to show") }}</p>
             </div>
             {% endif %}
-            {% if pre_render.get("status", False) and pre_render.get("status", False) == "ok" and pre_render.get("data") and "error" not in pre_render.get("data", {})  %}
+            {% if pre_render.get("status", False) and pre_render.get("status", False) == "ok" and pre_render.get("data") is mapping and "error" not in pre_render.get("data", {})  %}
                 <div class="core-card">
                     <div class="core-card-wrap">
                         <h5 class="core-card-title">LAST BACKUP</h5>
