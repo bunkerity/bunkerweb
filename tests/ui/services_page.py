@@ -395,12 +395,12 @@ try:
         retry += 1
         with suppress(RequestException):
             req = get("http://app2.example.com")
-            if req.status_code < 400 and retry >= 5:
+            if req.status_code < 400 and retry >= 5 and "Nothing to see here..." not in req.text:
                 log_error("The service is still working, exiting ...")
                 log_error(f"Status code = {str(req.status_code)}")
                 log_error(f"Content = {req.text}")
                 exit(1)
-            if req.status_code < 400 and retry < 5:
+            if req.status_code < 400 and retry < 5 and "Nothing to see here..." not in req.text:
                 log_error("The service is still working, retry in 5 seconds ...")
                 sleep(5)
 
