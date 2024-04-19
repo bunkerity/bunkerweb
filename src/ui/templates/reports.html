@@ -204,89 +204,92 @@
                 <h5 class="font-bold dark:text-white/90 mx-2 text-white">No reports match</h5>
             </div>
         </div>
-        <div data-reports-list-container
-             class="w-full overflow-hidden grid grid-cols-12 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        <div   class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
             <div class="col-span-12">
-                <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">REPORTING</h5>
+                <h5 class="mx-2 font-bold dark:text-white/90 mx-2">REPORTING LIST</h5>
             </div>
-            <div class=" max-h-100 sm:max-h-125  col-span-12 overflow-y-auto overflow-x-auto">
-                <!-- list container-->
-                <div class="min-w-[1300px] w-full grid grid-cols-12 rounded p-2">
-                    {% set reports_header = [
-                        {
-                            "name": "Date",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "IP",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "Country",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "Method",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "URL",
-                            "position": "col-span-2"
-                        },
-                        {
-                            "name": "Code",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "User agent",
-                            "position": "col-span-2"
-                        },
-                        {
-                            "name": "Reason",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "Data",
-                            "position": "col-span-2"
-                        }
-                    ] %}
-                    <!-- header-->
-                    {% for header in reports_header %}
-                        <p class="dark:text-gray-100 flex justify-center h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
-                            {{ header['name'] }}
-                        </p>
-                    {% endfor %}
-                    <!-- end header-->
-                    <!-- list -->
-                    <ul class="col-span-12 w-full" data-reports-list>
-                        {% for report in reports %}
-                            <li data-reports-item
-                                class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
-                                <p class="text-center flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
-                                   data-reports-date="{{ report['date'] }}">{{ report['date'] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
-                                   data-reports-ip="{{ report['ip'] }}">{{ report['ip'] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
-                                   data-reports-country="{{ report['country'] }}">{{ report['country'] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
-                                   data-reports-method="{{ report['method'] }}">{{ report["method"] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1"
-                                   data-reports-url="{{ report['url'] }}">{{ report['url'] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
-                                   data-reports-status="{{ report['status'] }}">{{ report["status"] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 "
-                                   data-reports-user_agent="{{ report['user_agent'] }}">{{ report["user_agent"] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
-                                   data-reports-reason="{{ report['reason'] }}">{{ report["reason"] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1"
-                                   data-reports-data="{{ report['data'] }}">{{ report["data"] }}</p>
-                            </li>
+            <div data-reports-list-container
+                    class="w-full overflow-auto grid grid-cols-12 col-span-12 p-4 relative">
+                   <div class=" max-h-100 sm:max-h-125  col-span-12 overflow-y-auto overflow-x-auto">
+                    <!-- list container-->
+                    <div class="overflow-hidden min-w-[1300px] w-full grid grid-cols-12 rounded p-2">
+                        {% set reports_header = [
+                            {
+                                "name": "Date",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "IP",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "Country",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "Method",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "URL",
+                                "position": "col-span-2"
+                            },
+                            {
+                                "name": "Code",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "User agent",
+                                "position": "col-span-2"
+                            },
+                            {
+                                "name": "Reason",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "Data",
+                                "position": "col-span-2"
+                            }
+                        ] %}
+                        <!-- header-->
+                        {% for header in reports_header %}
+                            <p class="dark:text-gray-100 flex justify-center h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
+                                {{ header['name'] }}
+                            </p>
                         {% endfor %}
-                    </ul>
-                    <!-- end list-->
+                        <!-- end header-->
+                        <!-- list -->
+                        <ul class="col-span-12 w-full" data-reports-list>
+                            {% for report in reports %}
+                                <li data-reports-item
+                                    class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
+                                    <p class="text-center flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
+                                        data-reports-date="{{ report['date'] }}">{{ report['date'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
+                                        data-reports-ip="{{ report['ip'] }}">{{ report['ip'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
+                                        data-reports-country="{{ report['country'] }}">{{ report['country'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
+                                        data-reports-method="{{ report['method'] }}">{{ report["method"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1"
+                                        data-reports-url="{{ report['url'] }}">{{ report['url'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
+                                        data-reports-status="{{ report['status'] }}">{{ report["status"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 "
+                                        data-reports-user_agent="{{ report['user_agent'] }}">{{ report["user_agent"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
+                                        data-reports-reason="{{ report['reason'] }}">{{ report["reason"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1"
+                                        data-reports-data="{{ report['data'] }}">{{ report["data"] }}</p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <!-- end list-->
+                    </div>
+                    <!-- end list container-->
                 </div>
-                <!-- end list container-->
             </div>
         </div>
+
     {% endif %}
 {% endblock content %}

@@ -404,7 +404,6 @@ try:
                 log_error("The service is still working, retry in 5 seconds ...")
                 sleep(5)
 
-
     log_info("Create another service app3.example.com to get filters (need at least 4 services on page)")
 
     try:

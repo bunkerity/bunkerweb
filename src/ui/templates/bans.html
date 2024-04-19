@@ -162,110 +162,112 @@
             <h5 class="font-bold dark:text-white/90 mx-2 text-white">No bans match</h5>
         </div>
     </div>
-    <div data-bans-list-container
-         class=" {% if bans|length == 0 %}hidden{% endif %} w-full overflow-hidden grid grid-cols-12 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="col-span-12">
-            <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">BANS LIST</h5>
+            <h5 class="mx-2 font-bold dark:text-white/90 mx-2">BANS LIST</h5>
         </div>
-        <div class=" max-h-100 sm:max-h-125 col-span-12 overflow-y-auto overflow-x-auto">
-            <div data-bans-bans-list>
-                <!-- list container-->
-                {% set bans_headers = [
-                    {
-                        "name": "Select",
-                        "position": "col-span-1"
-                    },
-                    {
-                        "name": "IP",
-                        "position": "col-span-2"
-                    },
-                    {
-                        "name": "Reason",
-                        "position": "col-span-2"
-                    },
-                    {
-                        "name": "Ban start",
-                        "position": "col-span-2"
-                    },
-                    {
-                        "name": "Ban end",
-                        "position": "col-span-2"
-                    },
-                    {
-                        "name": "Remain",
-                        "position": "col-span-3"
-                    },
-                    {
-                        "name": "Term",
-                        "position": "hidden"
-                    }
-                ] %}
-                <div class="overflow-hidden min-w-[1150px] w-full grid grid-cols-12 rounded p-2">
-                    <!-- header-->
-                    {% for header in bans_headers %}
-                        <p class="dark:text-gray-100 h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
-                            {{ header['name'] }}
-                        </p>
-                    {% endfor %}
-                    <!-- end header-->
-                    <!-- list -->
-                    <ul class="col-span-12 w-full" data-bans-list>
-                        {% for ban in bans %}
-                            <li data-bans-item
-                                data-bans-list-item="{{ ban }}"
-                                class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
-                                <div data-bans-ban-select
-                                     data-checkbox-handler="ban-item-{{ loop.index }}"
-                                     class="relative mb-7 md:mb-0 z-10 ml-2">
-                                    <label class="sr-only" for="ban-item-{{ loop.index }}">Ban ip {{ loop.index }}</label>
-                                    <input id="ban-item-{{ loop.index }}"
-                                           name="ban-item-{{ loop.index }}"
-                                           data-default-method="ui"
-                                           data-default-value="no"
-                                           data-checked="false"
-                                           id="checkbox-ban-item-{{ loop.index }}"
-                                           class="checkbox"
-                                           type="checkbox"
-                                           value="no" />
-                                    <svg data-checkbox-handler="ban-item-{{ loop.index }}"
-                                         class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         viewBox="0 0 512 512">
-                                        <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
-                                        </path>
-                                    </svg>
-                                </div>
-                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
-                                   data-bans-ip="{{ ban['ip'] }}">{{ ban['ip'] }}</p>
-                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
-                                   data-bans-reason="{{ ban['reason'] }}">{{ ban['reason'] }}</p>
-                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
-                                   data-bans-ban_start="{{ ban['ban_start'] }}">{{ ban['ban_start'] }}</p>
-                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
-                                   data-bans-ban_end="{{ ban['ban_end'] }}">{{ ban['ban_end'] }}</p>
-                                <p class="dark:text-gray-400 text-sm col-span-3 m-0 my-1"
-                                   data-bans-remain="{{ ban['remain'] }}">{{ ban['remain'] }}</p>
-                                <p class="hidden" data-bans-term="{{ ban['term'] }}">{{ ban['term'] }}</p>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    <!-- end list-->
-                </div>
-                <!-- end list container-->
-            </div>
-        </div>
-        <form id="unban-items"
-              action="bans"
-              method="post"
-              class="w-full col-span-12 justify-center flex mt-6 mb-3">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="operation" value="unban">
-            <input data-unban-inp type="hidden" name="data" value="">
-            <button data-unban-btn
-                    disabled
-                    type="submit"
-                    class="valid-btn mr-3 text-base">UNBAN</button>
-        </form>
-    </div>
+        <div data-bans-list-container
+        class=" {% if bans|length == 0 %}hidden{% endif %} w-full overflow-auto grid grid-cols-12 col-span-12 p-4 relative">
+       <div class=" max-h-100 sm:max-h-125 col-span-12 overflow-y-auto overflow-x-auto">
+           <div data-bans-bans-list>
+               <!-- list container-->
+               {% set bans_headers = [
+                   {
+                       "name": "Select",
+                       "position": "col-span-1"
+                   },
+                   {
+                       "name": "IP",
+                       "position": "col-span-2"
+                   },
+                   {
+                       "name": "Reason",
+                       "position": "col-span-2"
+                   },
+                   {
+                       "name": "Ban start",
+                       "position": "col-span-2"
+                   },
+                   {
+                       "name": "Ban end",
+                       "position": "col-span-2"
+                   },
+                   {
+                       "name": "Remain",
+                       "position": "col-span-3"
+                   },
+                   {
+                       "name": "Term",
+                       "position": "hidden"
+                   }
+               ] %}
+               <div class="overflow-hidden min-w-[1150px] w-full grid grid-cols-12 rounded p-2">
+                   <!-- header-->
+                   {% for header in bans_headers %}
+                       <p class="dark:text-gray-100 h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
+                           {{ header['name'] }}
+                       </p>
+                   {% endfor %}
+                   <!-- end header-->
+                   <!-- list -->
+                   <ul class="col-span-12 w-full" data-bans-list>
+                       {% for ban in bans %}
+                           <li data-bans-item
+                               data-bans-list-item="{{ ban }}"
+                               class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
+                               <div data-bans-ban-select
+                                    data-checkbox-handler="ban-item-{{ loop.index }}"
+                                    class="relative mb-7 md:mb-0 z-10 ml-2">
+                                   <label class="sr-only" for="ban-item-{{ loop.index }}">Ban ip {{ loop.index }}</label>
+                                   <input id="ban-item-{{ loop.index }}"
+                                          name="ban-item-{{ loop.index }}"
+                                          data-default-method="ui"
+                                          data-default-value="no"
+                                          data-checked="false"
+                                          id="checkbox-ban-item-{{ loop.index }}"
+                                          class="checkbox"
+                                          type="checkbox"
+                                          value="no" />
+                                   <svg data-checkbox-handler="ban-item-{{ loop.index }}"
+                                        class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 512 512">
+                                       <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
+                                       </path>
+                                   </svg>
+                               </div>
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                                  data-bans-ip="{{ ban['ip'] }}">{{ ban['ip'] }}</p>
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                                  data-bans-reason="{{ ban['reason'] }}">{{ ban['reason'] }}</p>
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                                  data-bans-ban_start="{{ ban['ban_start'] }}">{{ ban['ban_start'] }}</p>
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                                  data-bans-ban_end="{{ ban['ban_end'] }}">{{ ban['ban_end'] }}</p>
+                               <p class="dark:text-gray-400 text-sm col-span-3 m-0 my-1"
+                                  data-bans-remain="{{ ban['remain'] }}">{{ ban['remain'] }}</p>
+                               <p class="hidden" data-bans-term="{{ ban['term'] }}">{{ ban['term'] }}</p>
+                           </li>
+                       {% endfor %}
+                   </ul>
+                   <!-- end list-->
+               </div>
+               <!-- end list container-->
+           </div>
+       </div>
+       <form id="unban-items"
+             action="bans"
+             method="post"
+             class="w-full col-span-12 justify-center flex mt-6 mb-3">
+           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+           <input type="hidden" name="operation" value="unban">
+           <input data-unban-inp type="hidden" name="data" value="">
+           <button data-unban-btn
+                   disabled
+                   type="submit"
+                   class="valid-btn mr-3 text-base">UNBAN</button>
+       </form>
+   </div>
+</div>
     {% include "bans_modal.html" %}
 {% endblock content %}
