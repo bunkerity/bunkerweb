@@ -442,9 +442,71 @@ BunkerNet is a crowdsourced database of malicious requests shared between all Bu
 
 If you enable BunkerNet, malicious requests will be sent to a remote server and will be analyzed by our systems. By doing so, we can extract malicious data from everyone's reports and give back the results to each BunkerWeb instances participating into BunkerNet.
 
-At the moment, that feature should be considered in "beta". We only extract malicious IP and we are very strict about how we do it to avoid any "poisoning". We strongly recommend activating it (which is the default) because the more instances participate, the more data we have to improve the algorithm.
+Besides the enhanced security, enabling BunkerNet will let you benefit from extra features such as the integration with CrowdSec Console.
 
 The setting used to enable or disable BunkerNet is `USE_BUNKERNET` (default : `yes`).
+
+### CrowdSec Console integration
+
+If you don't already know about it, [CrowdSec](https://www.crowdsec.net/?utm_campaign=bunkerweb&utm_source=doc) is an open-source cybersecurity solution leveraging crowdsourced intelligence to mitigate cyber threats. Think of it like Waze but applied to cybersecurity : when a specific server is attacked, other systems around the globe will be informed and protected from the same attackers. You will find more information on their website [here](https://www.crowdsec.net/about?utm_campaign=bunkerweb&utm_source=blog).
+
+Thanks to a partnership with CrowdSec, you can enroll your BunkerWeb instances to your [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration). In other words, the attacks blocked by BunkerWeb will be visible the same way it does for attacks blocked by CrowdSec Security Engines.
+
+Please note that CrowdSec doesn't need to be installed at all (even if we recommend you to try it with the [CrowdSec plugin for BunkerWeb](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec) to enhance the security of your web services) and you can still enroll your Security Engines into the same Console account.
+
+**Step #1 : create your CrowdSec Console account**
+
+Go to the [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration) and register your account if you don't already have one. Once it's done, write down your enroll key by going to "Security Engines", then "Engines" and click on "Add Security Engine" :
+
+<figure markdown>
+  ![Overview](assets/img/crowdity1.png){ align=center }
+  <figcaption>Get your Crowdsec Console enroll key</figcaption>
+</figure>
+
+**Step #2 : get your BunkerNet ID**
+
+Activating the BunkerNet feature (which is the case by default) is mandatory if you want to enroll your BunkerWeb instance(s) into your CrowdSec console. You can do it by setting `USE_BUNKERNET` to `yes`.
+
+Get your BunkerNet ID on Docker :
+
+```shell
+docker exec my-bw-scheduler cat /var/cache/bunkerweb/bunkernet/instance.id
+```
+
+Get your BunkerNet ID on Linux :
+
+```shell
+cat /var/cache/bunkerweb/bunkernet/instance.id
+```
+
+**Step #3 : enroll your instance using the Panel**
+
+Once you have noted your BunkerNet ID and CrowdSec Console enroll key, you can [order the free product "BunkerNet / CrowdSec" on the Panel](https://panel.bunkerweb.io/order/bunkernet/11?utm_campaign=self&utm_source=doc). Please note that you will need to create an account if you don't already have one.
+
+You can now select the "BunkerNet / CrowdSec" service and fill out the form by pasting your BunkerNet ID and CrowdSec Console enroll key :
+
+<figure markdown>
+  ![Overview](assets/img/crowdity2.png){ align=center }
+  <figcaption>Enroll your BunkerWeb instance into the CrowdSec Console</figcaption>
+</figure>
+
+**Step #4 : accept new security engine on the Console**
+
+Last but not least, you need to go back to your CrowdSec Console and accept the new Security Engine :
+
+<figure markdown>
+  ![Overview](assets/img/crowdity3.png){ align=center }
+  <figcaption>Accept enroll into the CrowdSec Console</figcaption>
+</figure>
+
+**Congratulations, your BunkerWeb instance is now enrolled into your CrowdSec Console !**
+
+Pro tip : when viewing your alerts, click on "columns" and tick the "context" checkbox to get access to BunkerWeb specific data.
+
+<figure markdown>
+  ![Overview](assets/img/crowdity4.png){ align=center }
+  <figcaption>BunkerWeb data shown in the context column</figcaption>
+</figure>
 
 ## DNSBL
 
