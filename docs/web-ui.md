@@ -855,6 +855,7 @@ After a successful login/password combination, you will be prompted to enter you
           - www.example.com_REVERSE_PROXY_URL=/changeme
           - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
           - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+          - www.example.com_MAX_CLIENT_SIZE=50m
         networks:
           - bw-universe
           - bw-services
@@ -1040,7 +1041,7 @@ After a successful login/password combination, you will be prompted to enter you
           - "bunkerweb.REVERSE_PROXY_URL=/changeme"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
           - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-
+          - "bunkerweb.MAX_CLIENT_SIZE=50m"
     volumes:
       bw-data:
 
@@ -1195,7 +1196,7 @@ After a successful login/password combination, you will be prompted to enter you
             - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
             - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
             - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-
+            - "bunkerweb.MAX_CLIENT_SIZE=50m"
     volumes:
       bw-data:
 
@@ -1549,6 +1550,7 @@ After a successful login/password combination, you will be prompted to enter you
       annotations:
         bunkerweb.io/www.example.com_USE_UI: "yes"
         bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: '400 404 405 413 429 500 501 502 503 504'
+        bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: '50m'
     spec:
       rules:
         - host: www.example.com
@@ -1602,6 +1604,7 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+    www.example.com_MAX_CLIENT_SIZE=50m
     ```
 
     Don't forget to restart the `bunkerweb` service :
@@ -1635,6 +1638,7 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+    www.example.com_MAX_CLIENT_SIZE=50m
     ```
 
     The variable `enable_ui` can be set to `true` in order to activate the web UI service and the variable `custom_ui` can be used to specify the configuration file for the web UI :
@@ -1709,6 +1713,7 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+    www.example.com_MAX_CLIENT_SIZE=50m
     ```
 
     Don't forget to restart the `bunkerweb` service :
