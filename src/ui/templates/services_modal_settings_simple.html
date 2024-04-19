@@ -1,0 +1,35 @@
+
+<div data-simple class="flex flex-col">
+    <div class="flex flex-col w-full items-end gap-y-3 gap-x-4">
+        <h2 data-simple-step></h2>
+        <p data-simple-description></p>
+    </div>
+    <div class="w-full min-w-[300px] my-1 sm:my-0">
+        <hr class="separator" />
+    </div>
+</div>
+
+<!-- new and edit form -->
+<form data-simple data-services-simple-modal-form
+        class="w-full h-[90vh] overflow-auto flex flex-col justify-between"
+        id="form-simple-new"
+        method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" id="simple_operation" value="new" name="simple_operation" />
+    <input type="hidden" value="" name="simple_OLD_SERVER_NAME" />
+    <input type="hidden" value="no" name="simple_is_draft" />
+    <input type="hidden" value="yes" name="simple_is_simple_mode" />
+
+    <!-- action button -->
+    <div class="w-full flex-col items-center justify-center flex mt-10">
+        <div class="flex justify-center">
+            <button data-services-modal-close
+                    type="button"
+                    class="dark:bg-slate-800 close-btn mb-4 mr-3 text-base">Close</button>
+            <button data-services-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
+        </div>
+        <!-- end action button-->
+        <p data-simple-services-modal-error-msg
+            class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
+    </div>
+</form>

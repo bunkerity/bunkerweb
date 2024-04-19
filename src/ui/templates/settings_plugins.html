@@ -1,7 +1,7 @@
 {% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- plugin item -->
 {% for plugin in plugins %}
-    <div data-plugin-item="{{ plugin['id'] }}"
+    <div data-advanced data-plugin-item="{{ plugin['id'] }}"
          id="{{ plugin['id'] }}"
          class="{% if loop.index != 1 %}hidden{% endif %} w-full px-1">
         <!-- title and desc -->
@@ -485,5 +485,5 @@
             {% endfor %}
             <!-- end multiple settings -->
         </div>
-    {% endfor %}
-    <!-- end plugin item -->
+{% endfor %}
+<!-- end plugin item -->
