@@ -390,11 +390,17 @@ try:
 
     log_info("Service app2.example.com has been set as draft, making sure it's not working anymore ...")
 
-    for _ in range(5):
+    retry = 0
+    for x in range(5):
+        retry += 1
         with suppress(RequestException):
-            if get("http://app2.example.com").status_code < 400:
+            if get("http://app2.example.com").status_code < 400 and retry >= 5:
                 log_error("The service is still working, exiting ...")
                 exit(1)
+            if get("http://app2.example.com").status_code < 400 and retry < 5:
+                log_error("The service is still working, retry in 5 seconds ...")
+                sleep(5)
+
 
     log_info("Create another service app3.example.com to get filters (need at least 4 services on page)")
 
