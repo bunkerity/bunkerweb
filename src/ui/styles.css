@@ -286,6 +286,14 @@
   @apply transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-300;
 }
 
+.core-card-text-doc {
+  @apply transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-300 px-1 mt-4 mb-2;
+}
+
+.core-card-text-doc-link {
+  @apply hover:brightness-90 cursor-pointer mt-2 underline text-primary;
+}
+
 .center.core-card-text {
   @apply text-center;
 }
