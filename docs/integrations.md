@@ -1118,7 +1118,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     And finally install BunkerWeb 1.5.7 :
 
     ```shell
-	  dnf install -y epel-release && \
+	  sudo dnf install -y epel-release && \
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
     sudo -E dnf install -y bunkerweb-1.5.7
