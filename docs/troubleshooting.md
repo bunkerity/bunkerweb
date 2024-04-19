@@ -470,3 +470,10 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
     ```
 
     You should now be able to log into the web UI only using your username and password.
+
+**Upload plugin**
+
+It may not be possible to upload a plugin from the UI in certain situations:
+
+- Missing package to manage compressed files on your integration, in which case you will need to add the necessary packages
+- Safari browser : the 'safe mode' may prevent you from being able to add a plugin. You will need to make the necessary changes on your machine

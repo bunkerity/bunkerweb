@@ -442,9 +442,71 @@ BunkerNet is a crowdsourced database of malicious requests shared between all Bu
 
 If you enable BunkerNet, malicious requests will be sent to a remote server and will be analyzed by our systems. By doing so, we can extract malicious data from everyone's reports and give back the results to each BunkerWeb instances participating into BunkerNet.
 
-At the moment, that feature should be considered in "beta". We only extract malicious IP and we are very strict about how we do it to avoid any "poisoning". We strongly recommend activating it (which is the default) because the more instances participate, the more data we have to improve the algorithm.
+Besides the enhanced security, enabling BunkerNet will let you benefit from extra features such as the integration with CrowdSec Console.
 
 The setting used to enable or disable BunkerNet is `USE_BUNKERNET` (default : `yes`).
+
+### CrowdSec Console integration
+
+If you don't already know about it, [CrowdSec](https://www.crowdsec.net/?utm_campaign=bunkerweb&utm_source=doc) is an open-source cybersecurity solution leveraging crowdsourced intelligence to mitigate cyber threats. Think of it like Waze but applied to cybersecurity : when a specific server is attacked, other systems around the globe will be informed and protected from the same attackers. You will find more information on their website [here](https://www.crowdsec.net/about?utm_campaign=bunkerweb&utm_source=blog).
+
+Thanks to a partnership with CrowdSec, you can enroll your BunkerWeb instances to your [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration). In other words, the attacks blocked by BunkerWeb will be visible the same way it does for attacks blocked by CrowdSec Security Engines.
+
+Please note that CrowdSec doesn't need to be installed at all (even if we recommend you to try it with the [CrowdSec plugin for BunkerWeb](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec) to enhance the security of your web services) and you can still enroll your Security Engines into the same Console account.
+
+**Step #1 : create your CrowdSec Console account**
+
+Go to the [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration) and register your account if you don't already have one. Once it's done, write down your enroll key by going to "Security Engines", then "Engines" and click on "Add Security Engine" :
+
+<figure markdown>
+  ![Overview](assets/img/crowdity1.png){ align=center }
+  <figcaption>Get your Crowdsec Console enroll key</figcaption>
+</figure>
+
+**Step #2 : get your BunkerNet ID**
+
+Activating the BunkerNet feature (which is the case by default) is mandatory if you want to enroll your BunkerWeb instance(s) into your CrowdSec console. You can do it by setting `USE_BUNKERNET` to `yes`.
+
+Get your BunkerNet ID on Docker :
+
+```shell
+docker exec my-bw-scheduler cat /var/cache/bunkerweb/bunkernet/instance.id
+```
+
+Get your BunkerNet ID on Linux :
+
+```shell
+cat /var/cache/bunkerweb/bunkernet/instance.id
+```
+
+**Step #3 : enroll your instance using the Panel**
+
+Once you have noted your BunkerNet ID and CrowdSec Console enroll key, you can [order the free product "BunkerNet / CrowdSec" on the Panel](https://panel.bunkerweb.io/order/bunkernet/11?utm_campaign=self&utm_source=doc). Please note that you will need to create an account if you don't already have one.
+
+You can now select the "BunkerNet / CrowdSec" service and fill out the form by pasting your BunkerNet ID and CrowdSec Console enroll key :
+
+<figure markdown>
+  ![Overview](assets/img/crowdity2.png){ align=center }
+  <figcaption>Enroll your BunkerWeb instance into the CrowdSec Console</figcaption>
+</figure>
+
+**Step #4 : accept new security engine on the Console**
+
+Last but not least, you need to go back to your CrowdSec Console and accept the new Security Engine :
+
+<figure markdown>
+  ![Overview](assets/img/crowdity3.png){ align=center }
+  <figcaption>Accept enroll into the CrowdSec Console</figcaption>
+</figure>
+
+**Congratulations, your BunkerWeb instance is now enrolled into your CrowdSec Console !**
+
+Pro tip : when viewing your alerts, click on "columns" and tick the "context" checkbox to get access to BunkerWeb specific data.
+
+<figure markdown>
+  ![Overview](assets/img/crowdity4.png){ align=center }
+  <figcaption>BunkerWeb data shown in the context column</figcaption>
+</figure>
 
 ## DNSBL
 
@@ -640,9 +702,11 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
 
 ## Backup and restore
 
+### Backup
+
 STREAM support :white_check_mark:
 
-### Automated backup
+#### Automated backup
 
 !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
     If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
@@ -696,7 +760,7 @@ Data is invaluable, especially in digital environments where it's susceptible to
 | `BACKUP_SCHEDULE`  | `daily`                      | global  | no       | The frequency of the backup                   |
 | `BACKUP_ROTATION`  | `7`                          | global  | no       | The number of backups to keep                 |
 
-### Manual backup
+#### Manual backup
 
 To manually initiate a backup, execute the following command:
 
@@ -725,7 +789,11 @@ You can also specify a custom directory for the backup by providing the `BACKUP_
 === "Docker"
 
     ```bash
-    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory -v /path/to/backup/directory:/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+    docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+    ```
+
+    ```bash
+    docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
     ```
 
 !!! note "Specifications for MariaDB/MySQL"
@@ -762,7 +830,7 @@ You can also specify a custom directory for the backup by providing the `BACKUP_
             ...
         ```
 
-### Manual restore
+#### Manual restore
 
 To manually initiate a restore, execute the following command:
 
@@ -791,7 +859,11 @@ You can also specify a custom backup file for the restore by providing the path 
 === "Docker"
 
     ```bash
-    docker exec -it -v /path/to/backup/file:/path/to/backup/file <scheduler_container> bwcli plugin backup restore /path/to/backup/file
+    docker cp /path/to/backup/file <scheduler_container>:/path/to/backup/file
+    ```
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup restore /path/to/backup/file
     ```
 
 !!! example "In case of failure"
@@ -807,5 +879,291 @@ You can also specify a custom backup file for the restore by providing the path 
     === "Docker"
 
         ```bash
-        docker exec -it -e BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups -v /var/tmp/bunkerweb/backups:/var/tmp/bunkerweb/backups <scheduler_container> bwcli plugin backup restore
+        docker cp <scheduler_container>:/var/tmp/bunkerweb/backups /var/tmp/bunkerweb/backups
         ```
+
+        ```bash
+        docker exec -it -e BACKUP_DIRECTORY=/var/tmp/bunkerweb/backups <scheduler_container> bwcli plugin backup restore
+        ```
+
+### Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+STREAM support :white_check_mark:
+
+The Backup S3 tool seamlessly automates data protection, similar to the community backup plugin. However, it stands out by securely storing backups directly in an S3 bucket.
+
+By activating this feature, you're proactively safeguarding your **data's integrity**. Storing backups **remotely** shields crucial information from threats like **hardware failures**, **cyberattacks**, or **natural disasters**. This ensures both **security** and **availability**, enabling swift recovery during **unexpected events**, preserving **operational continuity**, and ensuring **peace of mind**.
+
+!!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
+    If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+
+    === "MySQL/MariaDB"
+
+        1. **Install the MySQL repository configuration package**
+
+            ```bash
+            sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
+            ```
+
+        2. **Enable the MySQL repository**
+
+            ```bash
+            sudo dnf config-manager --enable mysql80-community
+            ```
+
+        3. **Install the MySQL client**
+
+            ```bash
+            sudo dnf install mysql-community-client
+            ```
+
+    === "PostgreSQL"
+
+        1. **Install the PostgreSQL repository configuration package**
+
+            ```bash
+            dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
+            ```
+
+        2. **Install the PostgreSQL client**
+
+            ```bash
+            dnf install postgresql<version>
+            ```
+
+**List of features**
+
+- Automatic data backup to an S3 bucket
+- Flexible scheduling options: daily, weekly, or monthly
+- Rotation management for controlling the number of backups to keep
+- Customizable compression level for backup files
+
+**List of settings**
+
+| Setting                       | Default | Context | Description                                      |
+| ----------------------------- | ------- | ------- | ------------------------------------------------ |
+| `USE_BACKUP_S3`               | `no`    | global  | Enable or disable the S3 backup feature          |
+| `BACKUP_S3_SCHEDULE`          | `daily` | global  | Frequency of the backup (daily, weekly, monthly) |
+| `BACKUP_S3_ROTATION`          | `7`     | global  | Number of backups to keep                        |
+| `BACKUP_S3_ENDPOINT`          |         | global  | S3 endpoint                                      |
+| `BACKUP_S3_BUCKET`            |         | global  | S3 bucket name                                   |
+| `BACKUP_S3_REGION`            |         | global  | S3 region                                        |
+| `BACKUP_S3_ACCESS_KEY_ID`     |         | global  | S3 access key ID                                 |
+| `BACKUP_S3_ACCESS_KEY_SECRET` |         | global  | S3 access key secret                             |
+| `BACKUP_S3_COMP_LEVEL`        | `6`     | global  | Compression level of the backup zip file (1-9)   |
+
+#### Manual backup
+
+To manually initiate a backup, execute the following command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup_s3 save
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup_s3 save
+    ```
+
+This command will create a backup of your database and store it in the S3 bucket specified in the `BACKUP_S3_BUCKET` setting.
+
+You can also specify a custom S3 bucket for the backup by providing the `BACKUP_S3_BUCKET` environment variable when executing the command:
+
+=== "Linux"
+
+    ```bash
+    BACKUP_S3_BUCKET=your-bucket-name bwcli plugin backup_s3 save
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name <scheduler_container> bwcli plugin backup_s3 save
+    ```
+
+!!! note "Specifications for MariaDB/MySQL"
+
+    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:
+
+    ```bash
+    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
+    ```
+
+    To resolve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
+
+    ```sql
+    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
+    ```
+
+    If you're using the Docker integration, you can add the following command to the `docker-compose.yml` file to automatically change the authentication plugin:
+
+    === "MariaDB"
+
+        ```yaml
+        bw-db:
+            image: mariadb:<version>
+            command: --default-authentication-plugin=mysql_native_password
+            ...
+        ```
+
+    === "MySQL"
+
+        ```yaml
+        bw-db:
+            image: mysql:<version>
+            command: --default-authentication-plugin=mysql_native_password
+            ...
+        ```
+
+#### Manual restore
+
+To manually initiate a restore, execute the following command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup_s3 restore
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+    ```
+
+This command will create a temporary backup of your database in the S3 bucket specified in the `BACKUP_S3_BUCKET` setting and restore your database to the latest backup available in the bucket.
+
+You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin backup_s3 restore s3_backup_file.zip
+    ```
+
+=== "Docker"
+
+    ```bash
+    docker exec -it <scheduler_container> bwcli plugin backup restore s3_backup_file.zip
+    ```
+
+!!! example "In case of failure"
+
+    Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:
+
+    === "Linux"
+
+        ```bash
+        bwcli plugin backup_s3 restore
+        ```
+
+    === "Docker"
+
+        ```bash
+        docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+        ```
+
+## Migration of BunkerWeb
+
+### Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+STREAM support :white_check_mark:
+
+The Migration tool **revolutionizes** BunkerWeb configuration transfers between instances with its **user-friendly web interface**, simplifying the entire migration journey. Whether you're upgrading systems, scaling infrastructure, or transitioning environments, this tool empowers you to effortlessly transfer **settings, preferences, and data** with unmatched ease and confidence. Say goodbye to cumbersome manual processes and hello to a **seamless, hassle-free migration experience**.
+
+**List of features**
+
+- **Effortless Migration:** Easily transfer BunkerWeb configurations between instances without the complexities of manual procedures.
+
+- **Intuitive Web Interface:** Navigate through the migration process effortlessly with a user-friendly web interface designed for intuitive operation.
+
+- **Cross-Database Compatibility:** Enjoy seamless migration across various database platforms, including SQLite, MySQL, MariaDB, and PostgreSQL, ensuring compatibility with your preferred database environment.
+
+#### Create a migration file
+
+To manually create a migration file, execute the following command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin migration create /path/to/migration/file
+    ```
+
+=== "Docker"
+
+    1. Create a migration file:
+
+        ```bash
+        docker exec -it <scheduler_container> bwcli plugin migration create /path/to/migration/file
+        ```
+
+    2. Copy the migration file to your local machine:
+
+        ```bash
+        docker cp <scheduler_container>:/path/to/migration/file /path/to/migration/file
+        ```
+
+This command will create a backup of your database and store it in the backup directory specified in the command.
+
+!!! note "Specifications for MariaDB/MySQL"
+
+    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:
+
+    ```bash
+    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
+    ```
+
+    To resolve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
+
+    ```sql
+    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
+    ```
+
+    If you're using the Docker integration, you can add the following command to the `docker-compose.yml` file to automatically change the authentication plugin:
+
+    === "MariaDB"
+
+        ```yaml
+        bw-db:
+            image: mariadb:<version>
+            command: --default-authentication-plugin=mysql_native_password
+            ...
+        ```
+
+    === "MySQL"
+
+        ```yaml
+        bw-db:
+            image: mysql:<version>
+            command: --default-authentication-plugin=mysql_native_password
+            ...
+        ```
+
+#### Initialize a migration
+
+To manually initialize a migration, execute the following command:
+
+=== "Linux"
+
+    ```bash
+    bwcli plugin migration migrate /path/to/migration/file
+    ```
+
+=== "Docker"
+
+    1. Copy the migration file to the container:
+
+        ```bash
+        docker cp /path/to/migration/file <scheduler_container>:/path/to/migration/file
+        ```
+
+    2. Initialize the migration:
+
+        ```bash
+        docker exec -it <scheduler_container> bwcli plugin migration migrate /path/to/migration/file
+        ```
+
+This command seamlessly migrates your BunkerWeb data to precisely match the configuration outlined in the migration file.

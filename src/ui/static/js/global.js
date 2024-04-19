@@ -234,7 +234,7 @@ class darkMode {
       body: JSON.stringify({ darkmode: isDark }),
     };
     const send = await fetch(
-      `${location.href.split("/").slice(0, -1).join("/")}/darkmode`,
+      document.querySelector("[data-mode-link]").getAttribute("data-mode-link"),
       data,
     );
   }

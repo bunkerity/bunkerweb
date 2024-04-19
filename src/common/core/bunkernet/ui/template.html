@@ -10,27 +10,27 @@
         <div class="core-card">
             <h5 class="core-card-title">INFO</h5>
             <div class="core-card-text-container">
-                <p data-info class="core-card-text">{{plugin.get('description')}}</p> 
+                <p data-info class="core-card-text">{{plugin.get('description')}}</p>
             </div>
-            <p class="core-card-text mt-4 mb-2">More information available <a href="https://docs.bunkerweb.io/{{ bw_version }}/security-tuning/#bunkernet"  class="hover:brightness-90 cursor-pointer mt-2 underline text-primary">in the documentation</a>.</p>
+            <p class="core-card-text-doc">More information available <a href="https://docs.bunkerweb.io/{{ bw_version }}/security-tuning/#bunkernet"  class="core-card-text-doc-link">in the documentation</a>.</p>
         </div>
-        <!-- end info -->   <div class="core-layout-separator"></div>
+        <!-- end info -->
 
-          {% if pre_render["status"] and pre_render["status"] == "ko" or "error" in pre_render["data"] %}
+          {% if pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or pre_render.get("data") is not mapping %} <div class="core-layout-separator"></div>
           <div class="my-2 flex justify-center col-span-12">
             <div class="mr-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 stroke-red-500 fill-white">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
             </div>
-                <p class="px-1 text-white break-words">(Pre rendering error) {{ pre_render["data"].get("error", "No log to show") }}</p>
+                <p class="px-1 text-white break-words">(Pre rendering error) {{ pre_render.get("data", { "error" : "No log to show" }).get("error", "No log to show") }}</p>
         </div>
   {% endif %}
 
-  {% if pre_render["status"] and pre_render["status"] == "ok" and "error" not in pre_render["data"] %}
+  {% if pre_render.get("status", False) and pre_render.get("status", False) == "ok" and pre_render.get("data") is mapping and "error" not in pre_render.get("data", {})  %}
 
 
-            {% for key, value in pre_render["data"].items() %}
+            {% for key, value in pre_render.get("data", {}).items() %}
 
                 {% if key.startswith("ping_") %}
                 <div class="core-card-status">

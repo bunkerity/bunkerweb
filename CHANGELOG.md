@@ -10,6 +10,17 @@
 - [FEATURE] Add backup plugin to backup and restore easily the database
 - [FEATURE] Add LETS_ENCRYPT_CLEAR_OLD_CERTS setting to control if old certificates should be removed when generating Let's Encrypt certificates (default is no)
 - [FEATURE] Add DISABLE_DEFAULT_SERVER_STRICT_SNI setting to allow/block requests when SNI is unknown or unset (default is no)
+- [UI] General : fix tooltip crop because of overflow
+- [UI] General : fix select setting crop because of overflow and check if select is out of viewport to determine visible position
+- [UI] General : show logs on UI when pre rendering issue
+- [UI] Global config : fix script error while fragment relate to a missing plugin
+- [UI] Global config / services page : filtering settings now open plugin select to highlight remaining plugin
+- [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
+- [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
+- [UI] Reporting page : fix missing data and add new ones
+- [UI] Account page : keep license key form even if pro register to easy update
+
+
 - [DOCUMENTATION] Add upgrade procedure for 1.5.7+
 - [MISC] Support custom bwcli commands using plugins
 - [DEPS] Updated LuaJIT version to v2.1-20240314

@@ -57,6 +57,24 @@ class Select {
   }
 
   init() {
+    // Add event listener to close dropdown if scroll event is triggered on window
+    window.addEventListener("scroll", () => {
+      this.dropsToHide = document.querySelectorAll(
+        '[data-setting-select-dropdown][class*="flex"]',
+      );
+      if (!this.dropsToHide.length) return;
+
+      this.dropsToHide.forEach((dropdown) => {
+        const btn = dropdown
+          .closest("div[data-setting-container]")
+          .querySelector("button[data-setting-select]");
+
+        if (dropdown.classList.contains("hidden")) return;
+        btn.click();
+        // Add dropdown to remove list
+      });
+    });
+
     window.addEventListener("click", (e) => {
       //CASE NO BTN SELECT CLICKED
       try {
@@ -164,6 +182,28 @@ class Select {
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");
     dropdownChevron.classList.toggle("rotate-180");
+    // case open, we want to move dropdown position next to his data-select-container
+    if (!dropdownEl.classList.contains("hidden")) {
+      const selectContainer = btn.closest("div[data-select-container]");
+      const selectContainerRect = selectContainer.getBoundingClientRect();
+      const top = selectContainerRect.top + selectContainerRect.height;
+      const left = selectContainerRect.left;
+      const width = selectContainerRect.width;
+      dropdownEl.style.top = `${top}px`;
+      dropdownEl.style.left = `${left}px`;
+      dropdownEl.style.width = `${width}px`;
+      // Check dropdown height, if out of screen, move it up
+      const dropdownRect = dropdownEl.getBoundingClientRect();
+      const dropdownHeight = dropdownRect.height;
+      const dropdownBottom = dropdownRect.bottom;
+      const windowHeight = window.innerHeight;
+
+      if (dropdownBottom > windowHeight) {
+        dropdownEl.style.top = `${
+          top - dropdownHeight - selectContainerRect.height - 15
+        }px`;
+      }
+    }
   }
 }
 

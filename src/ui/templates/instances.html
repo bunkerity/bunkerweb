@@ -27,16 +27,9 @@
                             {% set instance_details = [{"name" : "TYPE", "value" : instance['_type']},{"name" : "HOSTNAME", "value" : instance['hostname']}] %}
                             <!-- detail -->
                             {% for detail in instance_details %}
-                                <div role="row"
-                                     class="card-detail-item">
-                                    <p role="gridcell"
-                                       class="card-detail-item-title">
-                                        {{ detail['name'] }}
-                                    </p>
-                                    <p role="gridcell"
-                                       class="card-detail-item-subtitle">
-                                        {{ detail['value'] }}
-                                    </p>
+                                <div role="row" class="card-detail-item">
+                                    <p role="gridcell" class="card-detail-item-title">{{ detail['name'] }}</p>
+                                    <p role="gridcell" class="card-detail-item-subtitle">{{ detail['value'] }}</p>
                                 </div>
                             {% endfor %}
                             <!-- end detail -->

@@ -360,17 +360,18 @@ class Download {
             .hasAttribute(`data-${this.prefix}-download`)
         ) {
           const btnEl = e.target.closest("button");
+          const pluginId = btnEl.getAttribute("data-jobs-plugin");
           const jobName = btnEl.getAttribute("data-jobs-download");
           const fileName = btnEl.getAttribute("data-jobs-file");
-          this.sendFileToDL(jobName, fileName);
+          this.sendFileToDL(pluginId, jobName, fileName);
         }
       } catch (err) {}
     });
   }
 
-  async sendFileToDL(jobName, fileName) {
+  async sendFileToDL(pluginId, jobName, fileName) {
     window.open(
-      `${location.href}/download?job_name=${jobName}&file_name=${fileName}`,
+      `${location.href}/download?plugin_id=${pluginId}&job_name=${jobName}&file_name=${fileName}`,
     );
   }
 }

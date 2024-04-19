@@ -113,8 +113,10 @@ function start() {
     stop_nginx
 
     # Check if we are in slave/master mode
-    export MASTER_MODE="$(grep "^MASTER_MODE=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    export SLAVE_MODE="$(grep "^SLAVE_MODE=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    MASTER_MODE="$(grep "^MASTER_MODE=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    export MASTER_MODE
+    SLAVE_MODE="$(grep "^SLAVE_MODE=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    export SLAVE_MODE
 
     if [ "$MASTER_MODE" != "yes" ] ; then
         # Generate temp conf for jobs and start nginx

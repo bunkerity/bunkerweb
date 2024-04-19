@@ -10,42 +10,42 @@
     <title>BunkerWeb UI</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
     <!-- tailwind style -->
-    <link rel="stylesheet" type="text/css" href="./css/plugins.css" />
-    <link rel="stylesheet" type="text/css" href="./css/dashboard.css" />
-    <script type="module" src="./js/global.js" nonce="{{ script_nonce }}"></script>
-    <script src="./js/plugins/utils.js" nonce="{{ script_nonce }}"></script>
+    <link rel="stylesheet" href="css/plugins.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <script type="module" src="js/global.js" nonce="{{ script_nonce }}"></script>
+    <script src="js/plugins/utils.js" nonce="{{ script_nonce }}"></script>
     <script async
-            src="./js/utils/purify/purify.min.js"
+            src="js/utils/purify/purify.min.js"
             nonce="{{ script_nonce }}"></script>
-    <script src="./js/editor/ace.js" nonce="{{ script_nonce }}"></script>
+    <script src="js/editor/ace.js" nonce="{{ script_nonce }}"></script>
     {% if current_endpoint == "global_config" %}
-        <script type="module" src="./js/global_config.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/global_config.js" nonce="{{ script_nonce }}"></script>
     {% elif current_endpoint == "configs" %}
-        <script type="module" src="./js/configs.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/configs.js" nonce="{{ script_nonce }}"></script>
     {% elif current_endpoint == "services" %}
-        <script type="module" src="./js/services.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/services.js" nonce="{{ script_nonce }}"></script>
     {% elif current_endpoint == "plugins" %}
-        <script type="module" src="./js/plugins.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/plugins.js" nonce="{{ script_nonce }}"></script>
     {% elif current_endpoint == "cache" %}
-        <script type="module" src="./js/cache.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/cache.js" nonce="{{ script_nonce }}"></script>
     {% elif current_endpoint == "logs" %}
-        <link rel="stylesheet" type="text/css" href="./css/flatpickr.css" />
-        <link rel="stylesheet" type="text/css" href="./css/flatpickr.dark.css" />
-        <script defer src="./js/utils/flatpickr.js" nonce="{{ script_nonce }}"></script>
-        <script type="module" src="./js/logs.js" nonce="{{ script_nonce }}"></script>
+        <link rel="stylesheet" href="css/flatpickr.css" />
+        <link rel="stylesheet" href="css/flatpickr.dark.css" />
+        <script defer src="js/utils/flatpickr.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/logs.js" nonce="{{ script_nonce }}"></script>
         <link rel="stylesheet"
-              type="text/css"
-              href="./css/datepicker-foundation.css" />
+            
+              href="css/datepicker-foundation.css" />
     {% elif current_endpoint == "jobs" %}
-        <script type="module" src="./js/jobs.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/jobs.js" nonce="{{ script_nonce }}"></script>
     {% elif current_endpoint == "account" %}
-        <script type="module" src="./js/account.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/account.js" nonce="{{ script_nonce }}"></script>
     {% elif current_endpoint == "reports" %}
-        <script type="module" src="./js/reports.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/reports.js" nonce="{{ script_nonce }}"></script>
     {% elif current_endpoint == "bans" %}
-        <link rel="stylesheet" type="text/css" href="./css/flatpickr.css" />
-        <link rel="stylesheet" type="text/css" href="./css/flatpickr.dark.css" />
-        <script defer src="./js/utils/flatpickr.js" nonce="{{ script_nonce }}"></script>
-        <script type="module" src="./js/bans.js" nonce="{{ script_nonce }}"></script>
+        <link rel="stylesheet" href="css/flatpickr.css" />
+        <link rel="stylesheet" href="css/flatpickr.dark.css" />
+        <script defer src="js/utils/flatpickr.js" nonce="{{ script_nonce }}"></script>
+        <script type="module" src="js/bans.js" nonce="{{ script_nonce }}"></script>
     {% endif %}
 </head>

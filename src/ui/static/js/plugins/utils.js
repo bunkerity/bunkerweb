@@ -1,11 +1,13 @@
 class Ping {
   constructor(
     url = `${location.origin}${location.pathname}`,
-    statusTextEl = null,
-    statusColorEl = null,
-    key_to_check = "ping",
+    btnEl = null, // disabled while fethching
+    statusTextEl = null, // update text with fetching result
+    statusColorEl = null, // update color with fetching result
+    key_to_check = "ping", // key to check in response data
   ) {
     this.url = url;
+    this.btnEl = btnEl;
     this.statusColorEl = statusColorEl;
     this.statusTextEl = statusTextEl;
     this.key_to_check = key_to_check;
@@ -82,6 +84,30 @@ class Ping {
 
   // Key of fetch data need to match key of this.data
   updateEl(data) {
+    // Show error
+    if (data?.error) {
+      const error = data?.error || "Action exception, no details available";
+      console.log(error);
+      // Remove previous data-action-error
+      const prevError = document.querySelectorAll("[data-action-error]");
+      if (prevError.length) prevError.forEach((el) => el.remove());
+      // Add this one
+      const error_html = `<div data-action-error class="core-layout-separator"></div>
+      <div data-action-error class="my-2 flex justify-center col-span-12">
+        <div class="mr-1">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 stroke-red-500 fill-white">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+        </div>
+          <p class="px-1 text-white break-words">(Action error) ${error}</p>
+      </div>
+      `;
+      // add HTML at the end of .core-layout
+      document
+        .querySelector("div.core-layout")
+        .insertAdjacentHTML("beforeend", error_html);
+    }
+
     try {
       const successValues = [
         "success",
@@ -141,8 +167,14 @@ class Ping {
 
     this.alertEl.classList.remove("hidden");
 
-    if (type !== "fetch")
+    if (type === "fetch") {
+      this.btnEl.setAttribute("disabled", "disabled");
+    }
+
+    if (type !== "fetch") {
+      this.btnEl.removeAttribute("disabled");
       setTimeout(() => this.alertEl.classList.add("hidden"), 5000);
+    }
   }
 
   getAlertType(type) {

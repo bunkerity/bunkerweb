@@ -150,6 +150,8 @@ class Plugin_pages(Base):
     template_checksum = Column(String(128), nullable=False)
     actions_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     actions_checksum = Column(String(128), nullable=False)
+    obfuscation_file = Column(LargeBinary(length=(2**32) - 1), default=None, nullable=True)
+    obfuscation_checksum = Column(String(128), default=None, nullable=True)
 
     plugin = relationship("Plugins", back_populates="pages")
 

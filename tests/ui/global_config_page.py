@@ -23,8 +23,10 @@ try:
     select_combobox.send_keys("no plugin matching normally")
 
     # All tabs should be hidden
-    total_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('[data-tab-select-handler]').length""")
-    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+    total_tabs = DRIVER.execute_script("""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('[data-tab-select-handler]').length""")
+    hidden_tabs = DRIVER.execute_script(
+        """return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+    )
 
     if total_tabs != hidden_tabs:
         log_error("All tabs should be hidden.")
@@ -37,7 +39,9 @@ try:
     # Show only one tab
     select_combobox.send_keys("blacklist")
 
-    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+    hidden_tabs = DRIVER.execute_script(
+        """return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+    )
 
     if hidden_tabs != total_tabs - 1:
         log_error("Only one tab should be visible.")
@@ -54,7 +58,9 @@ try:
         log_error("Combobox input should be empty.")
         exit(1)
 
-    hidden_tabs = DRIVER.execute_script(f"""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length""")
+    hidden_tabs = DRIVER.execute_script(
+        """return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('button[data-tab-select-handler][class*="hidden"]').length"""
+    )
 
     if hidden_tabs:
         log_error("All tabs should be visible.")
@@ -121,7 +127,7 @@ try:
     # Reset
     input_keyword.send_keys(Keys.CONTROL, "a")
     input_keyword.send_keys(Keys.BACKSPACE)
-    
+
     log_info("Matching a setting done, try context global filter ...")
 
     select_context = safe_get_element(DRIVER, By.XPATH, "//button[@data-global-config-setting-select='context']")
@@ -166,7 +172,7 @@ try:
 
     select_plugin = safe_get_element(DRIVER, By.XPATH, "//button[@data-tab-select-dropdown-btn='']")
     assert_button_click(DRIVER, select_plugin)
-    assert_button_click(DRIVER, "//button[@data-tab-select-handler='headers']")
+    DRIVER.execute_script(f"""return document.querySelector('button[data-tab-select-handler="headers"]').click()""")
 
     log_info("Start keyword to show only one multiple ...")
 
@@ -247,10 +253,10 @@ try:
     log_info("Select from dropdown ...")
 
     select = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select='timers-log-level']")
-    assert_button_click(DRIVER, select)
+    DRIVER.execute_script(f"""return document.querySelector('button[data-setting-select="timers-log-level"]').click()""")
 
     select_active_item = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select-dropdown-btn='timers-log-level' and contains(@class, 'active')]")
-    assert_button_click(DRIVER, select_active_item)
+    DRIVER.execute_script(f"""return document.querySelector('button[data-setting-select-dropdown-btn="timers-log-level"][class*="active"]').click()""")
 
     log_info("Select dropdown done, trying toggle checkbox...")
 

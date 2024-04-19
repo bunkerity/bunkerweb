@@ -9,6 +9,7 @@ from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 from typing import Union
+from uuid import uuid4
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -302,18 +303,39 @@ def run_action(plugin: str, function_name: str = ""):
     if module is None:
         return {"status": "ko", "code": 404, "message": "The actions.py file for the plugin does not exist"}
 
+    obfuscation = db.get_plugin_obfuscation(plugin)
+    tmp_dir = None
+
     try:
         # Try to import the custom plugin
-        with NamedTemporaryFile(mode="wb", suffix=".py", delete=True) as temp:
-            temp.write(module)
-            temp.flush()
-            temp.seek(0)
-            loader = SourceFileLoader("actions", temp.name)
+        if obfuscation:
+            tmp_dir = Path(sep, "var", "tmp", "bunkerweb", "ui", "action", str(uuid4()))
+            tmp_dir.mkdir(parents=True, exist_ok=True)
+
+            action_file = tmp_dir.joinpath("actions.py")
+            with ZipFile(BytesIO(obfuscation), "r") as zip_ref:
+                zip_ref.extractall(tmp_dir)
+            action_file.write_bytes(module)
+            sys_path.append(tmp_dir.as_posix())
+            loader = SourceFileLoader("actions", action_file.as_posix())
             actions = loader.load_module()
+        else:
+            with NamedTemporaryFile(mode="wb", suffix=".py", delete=True) as temp:
+                temp.write(module)
+                temp.flush()
+                temp.seek(0)
+                loader = SourceFileLoader("actions", temp.name)
+                actions = loader.load_module()
     except:
+        if tmp_dir:
+            sys_path.pop()
+            rmtree(tmp_dir, ignore_errors=True)
+
+        app.logger.exception("An error occurred while importing the plugin")
         return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
 
     res = None
+    message = None
 
     try:
         # Try to get the custom plugin custom function and call it
@@ -332,11 +354,15 @@ def run_action(plugin: str, function_name: str = ""):
     finally:
         if sbin_nginx_path.is_file():
             # Remove the custom plugin from the shared library
-            if sys_path:
-                sys_path.pop()
             sys_modules.pop("actions", None)
             del actions
 
+        if tmp_dir:
+            sys_path.pop()
+            rmtree(tmp_dir, ignore_errors=True)
+
+        if message:
+            app.logger.exception(message)
         if message or not isinstance(res, dict) and not res:
             return {"status": "ko", "code": 500, "message": message or "The plugin did not return a valid response"}
 
@@ -401,7 +427,7 @@ def inject_variables():
         pro_expire=metadata["pro_expire"].strftime("%d-%m-%Y") if metadata["pro_expire"] else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
         plugins=app.config["CONFIG"].get_plugins(),
-        bw_version="1.5.7"
+        bw_version=bw_version,
     )
 
 
@@ -572,6 +598,7 @@ def setup():
                     "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
                     "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
                     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
+                    "MAX_CLIENT_SIZE": "50m",
                 },
                 request.form["server_name"],
                 request.form["server_name"],
