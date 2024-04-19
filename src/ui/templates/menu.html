@@ -248,6 +248,7 @@
             <input {% if dark_mode == True %}checked{% endif %}
                    id="darkMode"
                    data-dark-toggle
+                   data-mode-link="{{ url_for('darkmode') }}"
                    class="dark:brightness-125 hover:brightness-75 rounded-10 duration-300 ease-in-out after:rounded-circle after:shadow-2xl after:duration-300 checked:after:translate-x-5.3 h-5 mt-0.5 relative float-left w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-primary checked:bg-primary checked:bg-none checked:bg-right"
                    type="checkbox" />
             <label for="darkMode"

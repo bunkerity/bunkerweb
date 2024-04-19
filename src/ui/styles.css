@@ -291,7 +291,7 @@
 }
 
 .core-card-text-doc-link {
-  @apply hover:brightness-90 cursor-pointer mt-2 underline text-primary;
+  @apply hover:brightness-90 cursor-pointer mt-2 underline text-sky-500;
 }
 
 .center.core-card-text {
