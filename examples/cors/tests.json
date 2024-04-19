@@ -2,6 +2,7 @@
   "name": "cors",
   "kinds": ["docker", "autoconf", "linux"],
   "timeout": 120,
+  "delay": 120,
   "tests": [
     {
       "type": "string",
