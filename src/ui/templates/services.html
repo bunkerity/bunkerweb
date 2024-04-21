@@ -39,23 +39,14 @@
         <!-- service info and actions -->
         <div class="p-0 sm:mx-2 md:mx-4 grid grid-cols-12 col-span-12 md:gap-x-4 gap-y-4 relative min-w-0 break-words rounded-2xl bg-clip-border">
             <!-- info-->
-            {% set services_info = [
+            {% set infos = [
                             {"name" : "SERVICES TOTAL", "data" : services|length|string},
                             {"name" : "TOTAL DRAFT", "data" : draft_services|length|string},
                             {"name" : "TOTAL ONLINE", "data" : online_services|length|string},
-                        ] %}
-            <div class="h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-                <div role="grid" class="card-detail-container">
-                    {% for info in services_info %}
-                        <div role="row" class="card-detail-item">
-                            <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
-                            <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <!-- end info -->
+                        ]
+            %}
+            {% include "card_info.html" %}
+
             <!-- filter -->
             {% set filters = [
                             {

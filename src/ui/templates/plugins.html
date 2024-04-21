@@ -3,24 +3,14 @@
     {%
     include "plugins_modal.html" %}
     <!-- info -->
-    {% set plugins_info = [
+    {% set infos = [
             {"name" : "TOTAL PLUGINS", "data" : plugins|length|string},
             {"name" : "INTERNAL PLUGINS", "data" : plugins_count_internal|string},
             {"name" : "EXTERNAL PLUGINS", "data" : plugins_count_external|string},
             {"name" : "PRO PLUGINS", "data" : plugins_count_pro|string if is_pro_version else plugins_count_pro|string + '  (preview)'},
         ] %}
-    <div class="h-fit p-4 col-span-12 md:col-span-5 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <h5 class="col-span-12 mb-4 font-bold dark:text-white/90">INFO</h5>
-        <div role="grid" class="card-detail-container">
-            {% for info in plugins_info %}
-                <div role="row" class="card-detail-item">
-                    <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
-                    <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    <!-- end info -->
+    {% include "card_info.html" %}
+
     <!-- upload layout -->
     <div data-plugins-upload
          class="p-4 col-span-12 md:col-span-7 2xl:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">

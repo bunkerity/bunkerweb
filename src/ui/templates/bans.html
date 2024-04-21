@@ -41,22 +41,12 @@
         </div>
     </div>
     <!-- info-->
-    {% set bans_info = [
+    {% set infos = [
             {"name" : "BANS TOTAL", "data" : bans|length|string},
             {"name" : "TOP REASON", "data" : top_reason|string},
         ] %}
-    <div class="{% if bans|length == 0 %}hidden{% endif %} h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-        <div role="grid" class="card-detail-container">
-            {% for info in bans_info %}
-                <div role="row" class="card-detail-item">
-                    <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
-                    <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    <!-- end info -->
+    {% set is_info_hidden = True if bans|length == 0 else False %}
+    {% include "card_info.html" %}
     <!-- filter -->
     {% set filters = [
             {
@@ -162,12 +152,12 @@
             <h5 class="font-bold dark:text-white/90 mx-2 text-white">No bans match</h5>
         </div>
     </div>
-    <div class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div class="{% if bans|length == 0 %}hidden{% endif %} overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="col-span-12">
             <h5 class="mx-2 font-bold dark:text-white/90 mx-2">BANS LIST</h5>
         </div>
         <div data-bans-list-container
-        class=" {% if bans|length == 0 %}hidden{% endif %} w-full overflow-auto grid grid-cols-12 col-span-12 p-4 relative">
+        class="w-full overflow-auto grid grid-cols-12 col-span-12 p-4 relative">
        <div class=" max-h-100 sm:max-h-125 col-span-12 overflow-y-auto overflow-x-auto">
            <div data-bans-bans-list>
                <!-- list container-->

@@ -66,25 +66,15 @@
     </div>
     <!-- info-->
     {% if reports|length != 0 %}
-        {% set reports_info = [
+        {% set infos = [
                     {"name" : "REPORTING TOTAL", "data" : total_report|string or "0"},
                     {"name" : "TOP METHOD", "data" : top_method['name']|string},
                     {"name" : "TOP REASON", "data" : top_reason['name']|string},
                     {"name" : "TOP COUNTRY", "data" : top_country['name']|string},
                     {"name" : "TOP STATUS CODE", "data" : top_code['name']|string},
                 ] %}
-        <div class=" h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-            <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-            <div role="grid" class="card-detail-container">
-                {% for info in reports_info %}
-                    <div role="row" class="card-detail-item">
-                        <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
-                        <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-        <!-- end info -->
+        {% include "card_info.html" %}
+
         <!-- filter -->
         {% set filters = [
                     {
