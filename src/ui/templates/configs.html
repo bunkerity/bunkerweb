@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+    {% set attribute_name = "configs" %}
+
     {% set infos = [
         {
             "id": "total-conf",
@@ -12,6 +14,7 @@
             "data": "unknown"
         }
     ] %}
+
     {% include "card_info.html" %}
     <!-- end info -->
     <!-- filter -->
@@ -36,72 +39,9 @@
                 "true"
             ]
         }
-    ] %}
-    <div data-configs-filter
-         class="h-fit col-span-12 md:col-span-8 lg:col-span-5 2xl:col-span-4 3xl:col-span-3 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
-        <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
-            {% for filter in filters %}
-                {% if filter['type'] == 'input' %}
-                    <!-- search inpt-->
-                    <div class="flex flex-col relative col-span-12">
-                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                            {{ filter['name'] }}
-                        </h5>
-                        <label for="{{ filter['id'] }}" class="sr-only">{{ filter['label'] }}</label>
-                        <input type="text"
-                               id="{{ filter['id'] }}"
-                               name="{{ filter['id'] }}"
-                               class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                               placeholder="{{ filter['placeholder'] }}"
-                               pattern="{{ filter['pattern'] }}"
-                               required />
-                    </div>
-                    <!-- end search inpt-->
-                {% endif %}
-                {% if filter['type'] == 'select' %}
-                    <!-- select -->
-                    <div class="flex flex-col relative col-span-12">
-                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                            {{ filter['name'] }}
-                        </h5>
-                        <button aria-controls="filter-{{ filter['id'] }}"
-                                data-configs-setting-select="{{ filter['id'] }}"
-                                class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                            <span aria-description="current filter state value"
-                                  id="configs{{ filter['id'] }}"
-                                  data-name="configs{{ filter['id'] }}"
-                                  data-configs-setting-select-text="{{ filter['id'] }}">{{ filter['value'] }}</span>
-                            <!-- chevron -->
-                            <svg data-configs-setting-select="{{ filter['id'] }}"
-                                 class="transition-transform h-4 w-4 fill-gray-500"
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 viewBox="0 0 512 512">
-                                <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
-                            </svg>
-                        </button>
-                        <!-- end chevron -->
-                        <!-- dropdown-->
-                        <div id="filter-{{ filter['id'] }}"
-                             role="listbox"
-                             data-configs-setting-select-dropdown="{{ filter['id'] }}"
-                             class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
-                            {% for value in filter['values'] %}
-                                <button role="option"
-                                        data-configs-setting-select-dropdown-btn="{{ filter['id'] }}"
-                                        value="{{ value }}"
-                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
-                                    {{ value }}
-                                </button>
-                            {% endfor %}
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-                    <!-- end select  -->
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
+    ]
+    %}
+    {% include "card_filter.html" %}
     <!-- end filter -->
     {% include "file_manager.html" %}
 {% endblock content %}

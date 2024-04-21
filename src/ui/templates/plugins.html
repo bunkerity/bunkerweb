@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+    {% set attribute_name = "plugins" %}
+
     {%
     include "plugins_modal.html" %}
     <!-- info -->
@@ -12,7 +14,7 @@
     {% include "card_info.html" %}
 
     <!-- upload layout -->
-    <div data-plugins-upload
+    <div data-{{attribute_name}}-upload
          class="p-4 col-span-12 md:col-span-7 2xl:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <h5 class="col-span-12 mb-4 font-bold dark:text-gray-100">UPLOAD / RELOAD</h5>
         <div class="mx-2 p-0 col-span-12 grid grid-cols-12">
@@ -70,83 +72,20 @@
             ]
         }
     ] %}
-    <div data-plugins-filter
-         class="h-fit p-4 col-span-12 md:col-span-6 2xl:col-span-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
-        <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
-            {% for filter in filters %}
-                {% if filter['type'] == 'input' %}
-                    <!-- search inpt-->
-                    <div class="flex flex-col relative col-span-12 md:col-span-6">
-                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                            {{ filter['name'] }}
-                        </h5>
-                        <label for="{{ filter['id'] }}" class="sr-only">{{ filter['label'] }}</label>
-                        <input type="text"
-                               id="{{ filter['id'] }}"
-                               name="{{ filter['id'] }}"
-                               class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                               placeholder="{{ filter['placeholder'] }}"
-                               pattern="{{ filter['pattern'] }}"
-                               required />
-                    </div>
-                    <!-- end search inpt-->
-                {% endif %}
-                {% if filter['type'] == 'select' %}
-                    <!-- select -->
-                    <div class="flex flex-col relative col-span-12 md:col-span-6">
-                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                            {{ filter['name'] }}
-                        </h5>
-                        <button aria-controls="filter-{{ filter['id'] }}"
-                                data-plugins-setting-select="{{ filter['id'] }}"
-                                class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                            <span aria-description="current filter state value"
-                                  id="plugins-{{ filter['id'] }}"
-                                  data-name="plugins-{{ filter['id'] }}"
-                                  data-plugins-setting-select-text="{{ filter['id'] }}">{{ filter['value'] }}</span>
-                            <!-- chevron -->
-                            <svg data-plugins-setting-select="{{ filter['id'] }}"
-                                 class="transition-transform h-4 w-4 fill-gray-500"
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 viewBox="0 0 512 512">
-                                <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
-                            </svg>
-                        </button>
-                        <!-- end chevron -->
-                        <!-- dropdown-->
-                        <div id="filter-{{ filter['id'] }}"
-                             role="listbox"
-                             data-plugins-setting-select-dropdown="{{ filter['id'] }}"
-                             class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
-                            {% for value in filter['values'] %}
-                                <button role="option"
-                                        data-plugins-setting-select-dropdown-btn="{{ filter['id'] }}"
-                                        value="{{ value }}"
-                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
-                                    {{ value }}
-                                </button>
-                            {% endfor %}
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-                    <!-- end select  -->
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-    <!-- end filter -->
-    <div   class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    {% include "card_filter.html" %}
+    {% include "filter_nomatch.html" %}
+
+    <div data-{{attribute_name}}-list-container   class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="col-span-12">
             <h5 class="mx-2 font-bold dark:text-white/90 mx-2">PLUGINS LIST</h5>
         </div>
-        <div data-plugins-list-container
+        <div
         class="min-h-[55vh] max-h-80 overflow-auto p-2 col-span-12 relative">
-       <div data-plugins-list class="grid grid-cols-12 gap-3">
+       <div data-{{attribute_name}}-list class="grid grid-cols-12 gap-3">
            {% for plugin in plugins %}
-               <div data-plugins-type="{{ plugin['type'] }}"
+               <div data-{{attribute_name}}-type="{{ plugin['type'] }}"
                     class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded {% if plugin['type'] != 'pro' or plugin['type'] == 'pro' and is_pro_version %} bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800 {% else %} cursor-not-allowed bg-gray-300 dark:bg-gray-800 {% endif %}">
-                   <p data-plugins-content
+                   <p data-{{attribute_name}}-content
                       class="{% if plugin['type'] == 'pro' and not is_pro_version %} opacity-80 dark:opacity-60 {% endif %} ml-3 mr-2 break-words mb-0 transition duration-300 ease-in-out text-left text-sm md:text-base text-slate-700 dark:text-gray-200">
                        {{ plugin['name'] }}
                    </p>
@@ -164,7 +103,7 @@
                            </a>
                        {% endif %}
                        {% if plugin['type'] == "external" %}
-                           <button data-plugins-action="delete"
+                           <button data-{{attribute_name}}-action="delete"
                                    name="{{ plugin['id'] }}"
                                    aria-label="delete plugin"
                                    class="z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px">
@@ -192,20 +131,6 @@
                    </div>
                </div>
            {% endfor %}
-       </div>
-   </div>
-   <div data-plugins-nomatch
-        class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
-       <div class="col-span-12 flex flex-col justify-center items-center h-fit">
-           <svg xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="mb-2 w-8 h-8 stroke-white">
-               <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
-           </svg>
-           <h5 class="font-bold dark:text-white/90 mx-2 text-white">No plugins match</h5>
        </div>
    </div>
     </div>
