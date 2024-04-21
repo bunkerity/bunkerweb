@@ -257,11 +257,11 @@ try:
 
         reverse_proxy_host_input = safe_get_element(DRIVER, By.ID, "REVERSE_PROXY_HOST")
         assert isinstance(reverse_proxy_host_input, WebElement), "Reverse proxy host input is not a WebElement"
-        reverse_proxy_host_input.send_keys("http://app1:8080")
+        DRIVER.execute_script(f"""return document.querySelector('input#REVERSE_PROXY_HOST[data-setting-input]').value = 'http://app1:8080' """)
 
         reverse_proxy_url_input = safe_get_element(DRIVER, By.ID, "REVERSE_PROXY_URL")
         assert isinstance(reverse_proxy_url_input, WebElement), "Reverse proxy url input is not a WebElement"
-        reverse_proxy_url_input.send_keys("/")
+        DRIVER.execute_script(f"""return document.querySelector('input#REVERSE_PROXY_URL[data-setting-input]').value = '/' """)
 
     log_info("Set new service values, trying to save ...")
 
