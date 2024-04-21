@@ -1,0 +1,18 @@
+{% if setting_input %}
+    {% set inp_label = setting_input['label'] %}
+    {% set inp_regex = setting_input['regex'] %}
+    {% set inp_name = setting_input['name'] %}
+    {% set inp_name_mult = inp_name + "_SCHEMA" if setting_input["is_multiple"] else inp_name %}
+    <!-- invalid feedback -->
+    <div role="alert"
+            data-invalid="{{ inp_name_mult }}"
+            aria-label="show when invalid input"
+            class="block md:absolute hidden md:hidden text-sm text-red-500">
+        Invalid value
+        <span class="sr-only">                                
+            {{ inp_label }} is invalid and must match this pattern:
+            {{ inp_regex|safe }}
+        </span>
+    </div>
+    <!--end invalid feedback-->
+{% endif %}

@@ -1,0 +1,127 @@
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
+<!-- plugin item -->
+
+{% for plugin in plugin_simple %}
+    <div data-simple id="{{ plugin['plugin_id'] }}-simple"
+         class="w-full px-1">
+        <!-- title and desc -->
+        <div class="col-span-12" data-setting-header>
+            <div class="flex justify-start items-center">
+                <h5 class="my-2 transition duration-300 ease-in-out ml-2 mr-1 font-bold text-base uppercase dark:text-white/90 mb-0">
+                    {{ plugin['label'] }}
+                </h5>
+            </div>
+        </div>
+        {# get number of multiple groups for the plugin #}
+        {% set multList = [] %}
+        <!-- end title and desc -->
+        <div class="w-full grid grid-cols-12">
+            <!-- plugin settings not multiple -->
+            {% for setting, value in plugin["setting"].items() %}
+                {% set setting_input = { "name" : setting, "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "is_multiple" : True} %}
+
+                    {% if value['multiple'] and value['multiple'] not in multList %}
+                        {% if multList.append(value['multiple']) %}{% endif %}
+                    {% endif %}
+                    {% if not value['multiple'] %}
+                        <div data-setting-container data-{{ current_endpoint }}-type="{{ plugin['type'] }}" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-0 sm:mx-2 md:mx-3 lg:mx-4 my-2 col-span-12 md:my-3 md:col-span-6  2xl:my-3 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}">
+                            <!-- title and info -->
+                            <div class="flex items-center my-1 relative z-10">
+                                <h5 class="input-title">{{ value["label"] }}</h5>
+                                <!-- popover -->
+                                <button type="button" data-popover-btn="{{ setting }}">
+                                    <svg class="popover-settings-svg"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 512 512">
+                                        <path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z" />
+                                    </svg>
+                                </button>
+                                <div role="alert"
+                                     aria-description="show detail"
+                                     class="popover-settings-container  hidden"
+                                     data-popover-content="{{ setting }}">
+                                    <p class="popover-settings-text">{{ value['help'] }}</p>
+                                </div>
+                                <!-- end popover -->
+                            </div>
+                            <!-- end title and info -->
+                            {% include "setting_input.html"%}
+                            {% include "setting_select.html"%}
+                            {% include "setting_checkbox.html"%}
+                            {% include "setting_invalid.html"%}
+                        </div>
+                    {% endif %}
+            {% endfor %}
+            <!-- end plugin settings -->
+        </div>
+        <!-- end plugin settings not multiple -->
+        {% if multList|length > 0 %}
+            <h5 data-multiple-title
+                class="transition duration-300 ease-in-out ml-2 font-bold text-[1.1rem] uppercase dark:text-white/90 mt-2 mb-0">
+                multiple settings
+            </h5>
+        {% endif %}
+        {% for multiple in multList %}
+            <!-- plugin multiple handler -->
+            <div data-multiple-handler="{{ multiple }}"
+                 class="flex items-center mx-2 mb-2 mt-5 col-span-12 ">
+                <h5 class="input-title max-w-[150px] sm:max-w-[350px]">{{ multiple.replace('-', ' ').replace('_', ' ')|upper }}</h5>
+                <button data-{{ current_endpoint }}-multiple-add="{{ multiple }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                    Add
+                </button>
+                <button data-{{ current_endpoint }}-multiple-toggle="{{ multiple }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                    SHOW / HIDE
+                </button>
+            </div>
+            <!-- end plugin multiple handler-->
+            <!-- multiple settings -->
+            <div data-{{ current_endpoint }}-settings-multiple="{{ multiple }}_SCHEMA" class="bg-gray-50 dark:bg-slate-900/30 hidden w-full my-4 grid-cols-12 border dark:border-gray-700 rounded">
+                {% for setting, value in plugin["setting"].items() %}
+                    {% set setting_input = { "name" : setting, "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "is_multiple" : True} %}
+
+                    {# render only setting that match the multiple id and context #}
+                    {% if value['multiple'] == multiple and (
+                        current_endpoint == "global-config"
+                        or current_endpoint == "services" and value['context'] == "multisite"
+                        ) %}
+                        <div data-setting-container="{{ setting }}_SCHEMA" data-{{ current_endpoint }}-type="{{ plugin['type'] }}" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
+                            <!-- title and info -->
+                            <div class="flex items-center my-1 relative z-10">
+                                <h5 class="input-title">{{ value["label"] }}</h5>
+                                <!-- popover -->
+                                <button type="button" data-popover-btn="{{ setting }}_SCHEMA">
+                                    <svg class="popover-settings-svg"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 512 512">
+                                        <path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z" />
+                                    </svg>
+                                </button>
+                                <div role="alert"
+                                     aria-description="show detail"
+                                     class="popover-settings-container  hidden"
+                                     data-popover-content="{{ setting }}_SCHEMA">
+                                    <p class="popover-settings-text">{{ value['help'] }}</p>
+                                </div>
+                                <!-- end popover -->
+                            </div>
+
+                            {% include "setting_input.html"%}
+                            {% include "setting_select.html"%}
+                            {% include "setting_checkbox.html"%}
+                            {% include "setting_invalid.html"%}                       
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div data-multiple-delete-container
+                         class="col-span-12 flex justify-center my-4">
+                        <button data-{{ current_endpoint }}-multiple-delete="{{ plugin['name'] }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                            Remove
+                        </button>
+                    </div>
+                    <!-- end plugin settings -->
+                </div>
+            {% endfor %}
+            <!-- end multiple settings -->
+        </div>
+{% endfor %}
+<!-- end plugin item -->

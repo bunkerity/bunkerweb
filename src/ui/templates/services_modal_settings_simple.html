@@ -1,17 +1,33 @@
+{% set steps = [
+{ 
+    "name" : "STEP 1 - SERVER NAME",
+    "description" : "We need this to...",
+    "settings" : [
+                  {"plugin_id" : "general", "setting_id": "SERVER_NAME", "label" : "What is your host ?", "levels" : {"standard" : "", "advanced" : "", "high" : ""} }, 
+                 ],
+    "configs": [
+        {"name": "my_config_1", "type": "modsec", "data": "..."},
+        {"name": "my_config_2", "type": "server-http", "data": "..."}
+    ]
+},
+]
+%}
 
-<div data-simple class="flex flex-col">
-    <div class="flex flex-col w-full items-end gap-y-3 gap-x-4">
-        <h2 data-simple-step></h2>
-        <p data-simple-description></p>
-    </div>
-    <div class="w-full min-w-[300px] my-1 sm:my-0">
-        <hr class="separator" />
-    </div>
-</div>
+{# Get setting for each settings on steps #}
+
+{% for step in steps %}
+        {% for setting in step.get('settings') %}
+            {% for plugin in plugins %}
+                {% if setting["plugin_id"] == plugin["id"]%}
+                    {% if setting.update({"setting" : plugin["settings"][setting["setting_id"]]})%}{%endif%}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+{% endfor %}
 
 <!-- new and edit form -->
 <form data-simple data-services-simple-modal-form
-        class="w-full h-[90vh] overflow-auto flex flex-col justify-between"
+        class="!hidden w-full h-[90vh] overflow-auto flex flex-col justify-between"
         id="form-simple-new"
         method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -19,17 +35,30 @@
     <input type="hidden" value="" name="simple_OLD_SERVER_NAME" />
     <input type="hidden" value="no" name="simple_is_draft" />
     <input type="hidden" value="yes" name="simple_is_simple_mode" />
+    {% for step in steps %}
+    <div data-step="{{loop.index}}" class="flex flex-col">
+        <div class="flex flex-col w-full items-start mt-2">
+            <h2 class="ml-2 mr-1 text-xl transition duration-300 ease-in-out font-bold text-md uppercase dark:text-white/90 mb-0" data-simple-step>{{ step.get("name")}}</h2>
+            <p class="ml-2 mr-1 text-sm dark:text-gray-300 mb-1" data-simple-description>{{ step.get("description")}}</p>
+        </div>
+        <div class="w-full min-w-[300px] my-1 sm:my-0">
+            <hr class="separator" />
+        </div>
+            {% include "settings_simple.html" %}
+
+    </div>
+    {% endfor %}
 
     <!-- action button -->
     <div class="w-full flex-col items-center justify-center flex mt-10">
         <div class="flex justify-center">
-            <button data-services-modal-close
+            <button data-services-simple-modal-close
                     type="button"
                     class="dark:bg-slate-800 close-btn mb-4 mr-3 text-base">Close</button>
-            <button data-services-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
+            <button data-services-simple-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
         </div>
         <!-- end action button-->
-        <p data-simple-services-modal-error-msg
+        <p data-services-simple-modal-error-msg
             class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
     </div>
 </form>
