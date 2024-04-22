@@ -88,7 +88,6 @@ jobs:
           echo "USE_BUNKERNET=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_BLACKLIST=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "SEND_ANONYMOUS_REPORT=no" | sudo tee -a /etc/bunkerweb/variables.env
-          echo "DISABLE_DEFAULT_SERVER=yes" | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_CLIENT_CACHE=yes" | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_GZIP=yes" | sudo tee -a /etc/bunkerweb/variables.env
           echo "DATASTORE_MEMORY_SIZE=384m" | sudo tee -a /etc/bunkerweb/variables.env
