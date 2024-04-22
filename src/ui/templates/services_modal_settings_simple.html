@@ -1,9 +1,21 @@
 {% set steps = [
 {
-    "name" : "STEP 1 - SERVER NAME",
-    "description" : "We need this to...",
+    "name" : "STEP 1 - STARTING UP",
+    "description" : "we  need some information to get started.",
     "settings" : [
-                  {"plugin_id" : "general", "setting_id": "SERVER_NAME", "label" : "What is your host ?", "levels" : {"standard" : "", "advanced" : "", "high" : ""} },
+                    {"plugin_id" : "general", "setting_id": "SERVER_NAME", "title" : "DEFINE HOST", "subtitle" : "We need this to connect BunkerWeb to your application. You need to set your domain name.", "levels" : False },
+                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "levels" : False, "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(standard|advanced|bunker)$', 'type': 'select', 'select': ['standard', 'advanced', 'bunker']} }
+                    ],
+    "configs": [
+        {"name": "my_config_1", "type": "modsec", "data": "..."},
+        {"name": "my_config_2", "type": "server-http", "data": "..."}
+    ]
+},
+{
+    "name" : "STEP 2 - ANTIBOT",
+    "description" : "Avoid spammer and bot to access your website.",
+    "settings" : [
+                  {"plugin_id" : "antibot", "setting_id": "USE_ANTIBOT", "title" : "Define the type of your antibot", "subtitle" : "Javascript, Captcha or Cookie don't need additionnal settings to be fill. Recaptcha, Hcaptcha and Turnstile need secret key and site key delivered from providers.",  "levels" : {"standard" : "no", "advanced" : "no", "high" : "no"} },
                  ],
     "configs": [
         {"name": "my_config_1", "type": "modsec", "data": "..."},
@@ -31,22 +43,24 @@
         id="form-simple-new"
         method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    <input type="hidden" id="simple_operation" value="new" name="simple_operation" />
-    <input type="hidden" value="" name="simple_OLD_SERVER_NAME" />
-    <input type="hidden" value="no" name="simple_is_draft" />
-    <input type="hidden" value="yes" name="simple_is_simple_mode" />
+    <input type="hidden" value="new" name="operation" />
+    <input type="hidden" value="" name="OLD_SERVER_NAME" />
+    <input type="hidden" value="no" name="is_draft" />
+    <input type="hidden" value="mode" name="easy" />
+    
     {% for step in steps %}
-    <div data-step="{{loop.index}}" class="flex flex-col">
+    <div data-step="{{loop.index}}" class="flex flex-col {% if loop.index != 1 %} hidden {% endif %}">
         <div class="flex flex-col w-full items-start mt-2">
             <h2 class="ml-2 mr-1 text-xl transition duration-300 ease-in-out font-bold text-md uppercase dark:text-white/90 mb-0" data-simple-step>{{ step.get("name")}}</h2>
-            <p class="ml-2 mr-1 text-sm dark:text-gray-300 mb-1" data-simple-description>{{ step.get("description")}}</p>
+            <p class="ml-2 mr-1 text-base dark:text-gray-300 mb-1" data-simple-description>{{ step.get("description")}}</p>
         </div>
         <div class="w-full min-w-[300px] my-1 sm:my-0">
             <hr class="separator" />
         </div>
+            {% set plugin_simple = step.get('settings') %}
             {% include "settings_simple.html" %}
 
-    </div>
+        </div>
     {% endfor %}
 
     <!-- action button -->
@@ -55,10 +69,15 @@
             <button data-services-simple-modal-close
                     type="button"
                     class="dark:bg-slate-800 close-btn mb-4 mr-3 text-base">Close</button>
-            <button data-services-simple-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
+            <button data-simple-back
+                    type="button"
+                    disabled
+                    class="dark:bg-slate-800 info-btn mb-4 mr-3 text-base">Back</button>
+            <button data-simple-next type="button" class="mb-4 valid-btn">Continue</button>
+            <button data-services-modal-submit type="submit" class="hidden mb-4 valid-btn">Save</button>
         </div>
         <!-- end action button-->
-        <p data-services-simple-modal-error-msg
+        <p data-services-modal-error-msg
             class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
     </div>
 </form>

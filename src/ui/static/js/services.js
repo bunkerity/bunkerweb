@@ -16,9 +16,6 @@ class ServiceModal {
     this.modalTabsHeader = this.modal.querySelector([
       "[data-services-tabs-select-header]",
     ]);
-    this.modalErrMsg = this.modal.querySelector(
-      "[data-services-modal-error-msg]",
-    );
     this.modalCard = this.modal.querySelector("[data-services-modal-card]");
     this.switchModeBtn = this.modal.querySelector(
       "[data-toggle-settings-mode-btn]",
@@ -31,6 +28,15 @@ class ServiceModal {
     this.submitBtn = document.querySelector(
       "button[data-services-modal-submit]",
     );
+    // simple el
+    this.simpleForm = this.modal.querySelector("[data-services-simple-modal-form]");
+    this.nextBtn = this.modal.querySelector("button[data-simple-next]");
+    this.backBtn = this.modal.querySelector("button[data-simple-back]");
+    this.saveSimpleBtn = this.modal.querySelector("button[data-services-simple-modal-submit]");
+    // list els
+    this.serverNameInps = this.modal.querySelectorAll('input[name="SERVER_NAME"][data-setting-input]');
+    this.submitBtns = this.modal.querySelectorAll('button[data-services-modal-submit]');
+
     //container
     this.container = document.querySelector("main");
     this.currAction = "";
@@ -66,7 +72,17 @@ class ServiceModal {
   }
 
   init() {
-    this.disabledSaveCases();
+      // Get list of server name from services card
+    // When the server name input is matching existing server name that is not the current modal one
+    // Disable the submit button
+        window.addEventListener("DOMContentLoaded", () => {
+          this.serverNameInps.forEach((serverNameInput) => {
+            serverNameInput.addEventListener("input", () => {
+              // Case input is empty
+              this.checkServNameInput();
+            });
+          });
+      });
     this.modal.addEventListener("click", (e) => {
       // update draft mode
       try {
@@ -77,9 +93,10 @@ class ServiceModal {
             .classList.contains("hidden")
             ? true
             : false;
+
           this.setIsDraft(currModeIsDraft, this.currMethod);
         }
-      } catch (e) {}
+      } catch (err) { }
 
       //close
       try {
@@ -115,6 +132,7 @@ class ServiceModal {
             .closest("[data-services-service]")
             .querySelector("[data-old-service-name]")
             .getAttribute("data-value");
+
           this.setForm(
             action,
             serviceName,
@@ -130,10 +148,8 @@ class ServiceModal {
             .querySelector("[data-services-settings]")
             .getAttribute("data-value");
           const obj = JSON.parse(servicesSettings);
-          this.updateModalData(obj);
+          this.updateModalData(obj, false, false, false);
           //show modal
-          this.resetFilterInp();
-          this.changeSubmitBtn("SAVE", "valid-btn");
           this.openModal();
         }
       } catch (err) {}
@@ -163,17 +179,7 @@ class ServiceModal {
             .querySelector("[data-services-settings]")
             .getAttribute("data-value");
           const obj = JSON.parse(servicesSettings);
-          this.updateModalData(obj, true, true);
-          // server name is unset
-          const inpServName = document.querySelector("input#SERVER_NAME");
-          inpServName.getAttribute("value", "");
-          inpServName.removeAttribute("disabled", "");
-          inpServName.value = "";
-          // clone is UI creation, so no setting should be disabled
-
-          //show modal
-          this.resetFilterInp();
-          this.changeSubmitBtn("CREATE", "valid-btn");
+          this.updateModalData(obj, true, true, true, true);
           this.openModal(); //server name is unset
         }
       } catch (err) {}
@@ -196,16 +202,7 @@ class ServiceModal {
             method,
           );
           //set default value with method default
-          this.setSettingsDefault();
-          //server name is unset
-          const inpServName = document.querySelector("input#SERVER_NAME");
-          inpServName.getAttribute("value", "");
-          inpServName.removeAttribute("disabled", "");
-          inpServName.value = "";
-
-          //show modal
-          this.resetFilterInp();
-          this.changeSubmitBtn("CREATE", "valid-btn");
+          this.updateModalData({}, true, true, true, true);
           this.openModal();
         }
       } catch (err) {}
@@ -234,21 +231,57 @@ class ServiceModal {
     });
   }
 
+  resetSimpleForm() {
+    // reset button
+    this.backBtn.setAttribute("disabled", "");
+    this.nextBtn.removeAttribute("disabled");
+
+    // set current security level to input
+  }
+
   resetFilterInp() {
     const inpFilter = document.querySelector('input[name="settings-filter"]');
     inpFilter.value = "";
     inpFilter.dispatchEvent(new Event("input"));
   }
 
-  changeSubmitBtn(text, btnType) {
-    this.submitBtn.textContent = text;
-    this.submitBtn.classList.remove(
-      "delete-btn",
-      "valid-btn",
-      "edit-btn",
-      "info-btn",
-    );
-    this.submitBtn.classList.add(btnType);
+  changeSubmitBtn(action) {
+    if(action === "delete") return;
+    const text = action === "edit" ? "SAVE" : "CREATE";
+
+    this.submitBtns.forEach((btn) => {
+      btn.textContent = text;
+      btn.classList.remove(
+        "delete-btn",
+        "valid-btn",
+        "edit-btn",
+        "info-btn",
+      );
+      btn.classList.add("valid-btn");
+    });
+  }
+
+  resetServerName() {
+    this.serverNameInps.forEach((inpServName) => {
+      inpServName.getAttribute("value", "");
+      inpServName.removeAttribute("disabled", "");
+      inpServName.value = "";
+    });
+  }
+
+  isAvoidInpList(inp, inpName) {
+    if (
+      inpName === "csrf_token" ||
+      inpName === "OLD_SERVER_NAME" ||
+      inpName === "mode" ||
+      inpName === "security-level" ||
+      inpName === "is_draft" ||
+      inpName === "operation" ||
+      inpName === "settings-filter" ||
+      inp.hasAttribute("data-combobox")
+    )
+      return true;
+    return false;
   }
 
   setSettingsDefault() {
@@ -256,15 +289,8 @@ class ServiceModal {
     inps.forEach((inp) => {
       //form related values are excludes
       const inpName = inp.getAttribute("name");
-      if (
-        inpName === "csrf_token" ||
-        inpName === "OLD_SERVER_NAME" ||
-        inpName === "is_draft" ||
-        inpName === "operation" ||
-        inpName === "settings-filter" ||
-        inp.hasAttribute("data-combobox")
-      )
-        return;
+
+      if (this.isAvoidInpList(inp, inpName)) return;
 
       //for all other settings values
       const defaultMethod = inp.getAttribute("data-default-method");
@@ -334,17 +360,18 @@ class ServiceModal {
   setIsDraft(isDraft, method) {
     const draftVal = isDraft ? "yes" : "no";
 
-    document.querySelectorAll('input[name="is_draft"]').forEach((inp) => {
+    const draftInps = this.modal.querySelectorAll('input[name="is_draft"]');
+
+    draftInps.forEach((inp) => {
       inp.setAttribute("value", draftVal);
       inp.value = draftVal;
     });
 
     //Update draft button
-    const btn = document.querySelector("button[data-toggle-draft-btn]");
+    const btn = this.modal.querySelector("button[data-toggle-draft-btn]");
 
     if (
-      (!["ui", "default"].includes(method) && this.currAction !== "clone") ||
-      this.currAction === "delete"
+      (!["ui", "default"].includes(method) && this.currAction !== "clone")
     ) {
       return btn.classList.add("hidden");
     }
@@ -362,63 +389,48 @@ class ServiceModal {
 
   setForm(action, serviceName, oldServName, formEl, isDraft, method) {
     this.currAction = action;
-    this.setIsDraft(isDraft === "yes" ? true : false, method);
-
     this.modalTitle.textContent = `${action} ${serviceName}`;
-
     const operation = action === "clone" ? "new" : action;
+    
+    // update operation and other hidden inputs for all mode in modal
+    const operationInps = this.modal.querySelectorAll('input[name="operation"]');
+    operationInps.forEach((inp) => {
+      inp.setAttribute("value", operation);
+      inp.value = operation;
+    });
+    
+    // show / hide components
+    this.hideForms();
+    this.setCardViewportHeight(action === "delete" ? false : true);
+    this.SetSelectTabsVisible(action === "delete" ? false : true);
+    this.setHeaderActionsVisible(action === "delete" ? false : true);
+    this.changeSubmitBtn(action);
 
-    formEl.setAttribute("id", `form-${operation}-${serviceName}`);
-    const opeInp = formEl.querySelector(`input[name="operation"]`);
-    opeInp.setAttribute("value", operation);
-    opeInp.value = operation;
+    if (action === "edit" || action === "new" || action === "clone") {
+      this.formNewEdit.classList.remove("hidden");
+      this.simpleForm.classList.remove("hidden");
 
-    if (action === "edit" || action === "new") {
-      this.showNewEditForm();
-      const oldNameInp = formEl.querySelector(`input[name="OLD_SERVER_NAME"]`);
-      oldNameInp.setAttribute("value", oldServName);
-      oldNameInp.value = oldServName;
-    }
+      const oldNameValue = action === "edit" ? oldServName : "";
 
-    if (action === "clone") {
-      this.showNewEditForm();
-      const oldNameInp = formEl.querySelector(`input[name="OLD_SERVER_NAME"]`);
-      oldNameInp.setAttribute("value", "");
-      oldNameInp.value = "";
+      const oldNameInps = this.modal.querySelectorAll('input[name="OLD_SERVER_NAME"]');
+      oldNameInps.forEach((inp) => { 
+        inp.setAttribute("value", oldNameValue);
+        inp.value = oldNameValue;
+    });
+
     }
 
     if (action === "delete") {
-      this.showDeleteForm();
+      this.formDelete.classList.remove("hidden");
       formEl.querySelector(`[data-services-modal-text]`).textContent =
         `Are you sure you want to delete ${serviceName} ?`;
       const nameInp = formEl.querySelector(`input[name="SERVER_NAME"]`);
       nameInp.setAttribute("value", serviceName);
       nameInp.value = serviceName;
     }
-  }
 
-  // Get list of server name from services card
-  // When the server name input is matching existing server name that is not the current modal one
-  // Disable the submit button
-  disabledSaveCases() {
-    window.addEventListener("DOMContentLoaded", () => {
-      const serverNameInput = document.querySelector(
-        'input[name="SERVER_NAME"]',
-      );
+    this.setIsDraft(isDraft === "yes" ? true : false, method);
 
-      window.addEventListener("click", (e) => {
-        if (e.target.hasAttribute("data-services-action")) {
-          // focus on input server name
-          serverNameInput.focus();
-          this.checkServNameInput();
-        }
-      });
-
-      serverNameInput.addEventListener("input", () => {
-        // Case input is empty
-        this.checkServNameInput();
-      });
-    });
   }
 
   // Switch settings mode and update button
@@ -450,86 +462,94 @@ class ServiceModal {
   }
 
   checkServNameInput() {
-    const serverNameInput = document.querySelector('input[name="SERVER_NAME"]');
-
-    if (serverNameInput.value === "") {
-      this.modalErrMsg.textContent = "Server name cannot be empty";
-      this.modalErrMsg.classList.remove("hidden");
-      return this.submitBtn.setAttribute("disabled", "");
-    }
-
-    // Case conflict with another server name
-    const serverNames = document.querySelectorAll("[data-services-service]");
-    const serverNameValue = serverNameInput.getAttribute("value");
-
-    // Case inp name is current server name
-    if (serverNameInput.value === serverNameValue) {
-      return this.submitBtn.removeAttribute("disabled");
-    }
-    // case inp name is not current server name, check if it is same as another
-    for (let i = 0; i < serverNames.length; i++) {
-      const name = serverNames[i].getAttribute("data-services-service");
-      if (name === serverNameValue) continue;
-
-      if (name === serverNameInput.value) {
-        this.modalErrMsg.textContent = "Server name already exists";
-        this.modalErrMsg.classList.remove("hidden");
-        return this.submitBtn.setAttribute("disabled", "");
+    this.serverNameInps.forEach((serverNameInput) => {
+      const modalErrMsg = serverNameInput.closest("form").querySelector("[data-services-modal-error-msg]");
+      if (serverNameInput.value === "") {
+        modalErrMsg.textContent = "Server name cannot be empty";
+        modalErrMsg.classList.remove("hidden");
+        return serverNameInput.closest("form").querySelector('button[data-services-modal-submit]').setAttribute("disabled", "");
       }
+  
+      // Case conflict with another server name
+      const serverNames = document.querySelectorAll("[data-services-service]");
+      const serverNameValue = serverNameInput.getAttribute("value");
+
+      // case inp name is not current server name, check if it is same as another
+      for (let i = 0; i < serverNames.length; i++) {
+        const name = serverNames[i].getAttribute("data-services-service");
+        if (name === serverNameValue) continue;
+  
+        if (name === serverNameInput.value) {
+          modalErrMsg.textContent = "Server name already exists";
+          modalErrMsg.classList.remove("hidden");
+          return serverNameInput.closest("form").querySelector('button[data-services-modal-submit]').setAttribute("disabled", "");
+        }
+      }
+
+      modalErrMsg.classList.add("hidden");
+      return serverNameInput.closest("form").querySelector('button[data-services-modal-submit]').removeAttribute("disabled");
+    })
+
+  }
+
+  setHeaderActionsVisible(setVisible) {
+    if (setVisible) {
+    this.modal.querySelector('[data-toggle-draft-btn]').classList.remove("hidden");
+    this.modal.querySelector('[data-toggle-settings-mode-btn]').classList.remove("hidden");
     }
 
-    this.modalErrMsg.textContent = "";
-    this.modalErrMsg.classList.add("hidden");
-    return this.submitBtn.removeAttribute("disabled");
+    if (!setVisible) {
+    this.modal.querySelector('[data-toggle-draft-btn]').classList.add("hidden");
+    this.modal.querySelector('[data-toggle-settings-mode-btn]').classList.add("hidden");
+    }
   }
 
-  showNewEditForm() {
-    this.cardViewport();
-    this.showSelectTabs();
-    this.hideForms();
-    this.formNewEdit.classList.remove("hidden");
-  }
+  setCardViewportHeight(setAsViewport) {
 
-  showDeleteForm() {
-    this.cardNoViewport();
-    this.hideSelectTabs();
-    this.hideForms();
+    if(setAsViewport) {
+      this.modalCard.classList.add("h-[90vh]");
+      this.modalCard.classList.add("w-full");
+    }
 
-    this.formDelete.classList.remove("hidden");
-  }
-
-  cardViewport() {
-    this.modalCard.classList.add("h-[90vh]");
-    this.modalCard.classList.add("w-full");
-  }
-
-  cardNoViewport() {
-    this.modalCard.classList.remove("h-[90vh]");
-    this.modalCard.classList.remove("w-full");
+    if(!setAsViewport) {
+      this.modalCard.classList.remove("h-[90vh]");
+      this.modalCard.classList.remove("w-full");
+    }
   }
 
   hideForms() {
     this.formNewEdit.classList.add("hidden");
+    this.simpleForm.classList.add("hidden");
     this.formDelete.classList.add("hidden");
   }
 
-  hideSelectTabs() {
-    this.modalTabs.classList.remove("grid");
-    this.modalTabs.classList.add("hidden");
+  SetSelectTabsVisible(setVisible) {
+    if (setVisible) {
+      this.modalTabs.classList.add("grid");
+      this.modalTabs.classList.remove("hidden");
+      this.modalTabsHeader.classList.add("flex");
+      this.modalTabsHeader.classList.remove("hidden");
+    }
 
-    this.modalTabsHeader.classList.remove("flex");
-    this.modalTabsHeader.classList.add("hidden");
+    if (!setVisible) {
+      this.modalTabs.classList.remove("grid");
+      this.modalTabs.classList.add("hidden");
+  
+      this.modalTabsHeader.classList.remove("flex");
+      this.modalTabsHeader.classList.add("hidden");
+    }
   }
 
-  showSelectTabs() {
-    this.modalTabs.classList.add("grid");
-    this.modalTabs.classList.remove("hidden");
-    this.modalTabsHeader.classList.add("flex");
-    this.modalTabsHeader.classList.remove("hidden");
-  }
 
-  updateModalData(settings, forceEnabled = false, setMethodUI = false) {
-    //use this to select inputEl and change value
+  updateModalData(settings = {}, forceEnabled = false, setMethodUI = false, emptyServerName = false) {
+    
+    // check if at least one key in settings
+    if (Object.keys(settings).length === 0) {
+      this.setSettingsDefault();
+    }
+
+    if (Object.keys(settings).length > 0) {
+      //use this to select inputEl and change value
     for (const [key, data] of Object.entries(settings)) {
       //change format to match id
       const value = data["value"];
@@ -541,14 +561,7 @@ class ServiceModal {
         inps.forEach((inp) => {
           //form related values are excludes
           const inpName = inp.getAttribute("name");
-          if (
-            inpName === "csrf_token" ||
-            inpName === "OLD_SERVER_NAME" ||
-            inpName === "is_draft" ||
-            inpName === "operation" ||
-            inpName === "settings-filter"
-          )
-            return;
+          if (this.isAvoidInpList(inp, inpName)) return;
 
           //SET DISABLED / ENABLED
           //for regular input
@@ -598,6 +611,12 @@ class ServiceModal {
         });
       } catch (err) {}
     }
+    }
+    
+
+    this.resetFilterInp();
+    if(emptyServerName) this.resetServerName();
+    this.checkServNameInput();
   }
 
   setDisabledState(inp, method, global) {
@@ -1069,7 +1088,9 @@ class Multiple {
         if (
           inpName === "csrf_token" ||
           inpName === "OLD_SERVER_NAME" ||
-          inpName === "is_draft" ||
+          inpName === "is_draft" ||        
+          inpName === "mode" ||
+          inpName === "security-level" ||
           inpName === "operation" ||
           inpName === "settings-filter"
         )
@@ -1096,7 +1117,7 @@ class Multiple {
           inp.checked = true;
         }
 
-        if (inp.getAttribute("type") !== "checkbox") {
+        if (inp.getAttribute("type") !== "checkbox" ) {
           inp.setAttribute("value", value);
           inp.value = value;
           inp.setAttribute("data-method", method);
