@@ -60,7 +60,7 @@ class Popover {
 
     setTimeout(() => {
       popover.classList.remove("opacity-0");
-    }, 100);
+    }, 150);
   }
 
   hidePopover(el) {

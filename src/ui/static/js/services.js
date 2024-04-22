@@ -524,7 +524,10 @@ class ServiceModal {
     //Update draft button
     const btn = this.modal.querySelector("button[data-toggle-draft-btn]");
 
-    if (!["ui", "default"].includes(method) && this.currAction !== "clone") {
+    if (
+      (!["ui", "default"].includes(method) && this.currAction !== "clone") ||
+      this.currAction === "delete"
+    ) {
       return btn.classList.add("hidden");
     }
 

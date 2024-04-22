@@ -901,6 +901,11 @@ def services():
         # Check variables
         variables = deepcopy(request.form.to_dict())
         del variables["csrf_token"]
+
+        # Delete custom client variables
+        del variables["SECURITY_LEVEL"]
+        del variables["mode"]
+
         is_draft = variables.pop("is_draft", "no") == "yes"
 
         if "OLD_SERVER_NAME" not in request.form and request.form["operation"] == "edit":
