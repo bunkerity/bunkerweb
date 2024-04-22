@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {% set attribute_name = "services" %}
     {% set methods = ["all"] %}
     {% set states = ["all", "draft", "online"] %}
     {% set draft_services = [] %}
@@ -15,12 +16,12 @@
         {% endif %}
     {% endfor %}
     <!-- actions -->
-    <div data-services-service
+    <div data-{{attribute_name}}-service
          class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">
         <div data-is-draft class="hidden" data-value="no"></div>
         <div data-service-method class="hidden" data-value="ui"></div>
-        <button data-services-action="new"
-                data-services-name="service"
+        <button data-{{attribute_name}}-action="new"
+                data-{{attribute_name}}-name="service"
                 type="button"
                 class="dark:bg-green-500/90 duration-300 dark:text-gray-100 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
             <span class="mr-2">new service</span>
@@ -39,23 +40,14 @@
         <!-- service info and actions -->
         <div class="p-0 sm:mx-2 md:mx-4 grid grid-cols-12 col-span-12 md:gap-x-4 gap-y-4 relative min-w-0 break-words rounded-2xl bg-clip-border">
             <!-- info-->
-            {% set services_info = [
+            {% set infos = [
                             {"name" : "SERVICES TOTAL", "data" : services|length|string},
                             {"name" : "TOTAL DRAFT", "data" : draft_services|length|string},
                             {"name" : "TOTAL ONLINE", "data" : online_services|length|string},
-                        ] %}
-            <div class="h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-                <div role="grid" class="card-detail-container">
-                    {% for info in services_info %}
-                        <div role="row" class="card-detail-item">
-                            <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
-                            <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <!-- end info -->
+                        ]
+            %}
+            {% include "card_info.html" %}
+
             <!-- filter -->
             {% set filters = [
                             {
@@ -81,85 +73,8 @@
                                 "values": states
                             }
                         ] %}
-            <div data-services-filter
-                 class="h-fit col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-4 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
-                <div class="mx-2 grid grid-cols-12 gap-4">
-                    {% for filter in filters %}
-                        {% if filter['type'] == 'input' %}
-                            <!-- search inpt-->
-                            <div class="flex flex-col relative col-span-12 md:col-span-6">
-                                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                                    {{ filter['name'] }}
-                                </h5>
-                                <label for="{{ filter['id'] }}" class="sr-only">{{ filter['label'] }}</label>
-                                <input type="text"
-                                       id="{{ filter['id'] }}"
-                                       name="{{ filter['id'] }}"
-                                       class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                       placeholder="{{ filter['placeholder'] }}"
-                                       pattern="{{ filter['pattern'] }}"
-                                       required />
-                            </div>
-                            <!-- end search inpt-->
-                        {% endif %}
-                        {% if filter['type'] == 'select' %}
-                            <!-- select -->
-                            <div class="flex flex-col relative col-span-12 md:col-span-6">
-                                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                                    {{ filter['name'] }}
-                                </h5>
-                                <button aria-controls="filter-{{ filter['id'] }}"
-                                        data-services-setting-select="{{ filter['id'] }}"
-                                        class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                                    <span aria-description="current filter state value"
-                                          id="services-{{ filter['id'] }}"
-                                          data-name="services-{{ filter['id'] }}"
-                                          data-services-setting-select-text="{{ filter['id'] }}">{{ filter['value'] }}</span>
-                                    <!-- chevron -->
-                                    <svg data-services-setting-select="{{ filter['id'] }}"
-                                         class="transition-transform h-4 w-4 fill-gray-500"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         viewBox="0 0 512 512">
-                                        <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
-                                    </svg>
-                                </button>
-                                <!-- end chevron -->
-                                <!-- dropdown-->
-                                <div id="filter-{{ filter['id'] }}"
-                                     role="listbox"
-                                     data-services-setting-select-dropdown="{{ filter['id'] }}"
-                                     class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
-                                    {% for value in filter['values'] %}
-                                        <button role="option"
-                                                data-services-setting-select-dropdown-btn="{{ filter['id'] }}"
-                                                value="{{ value }}"
-                                                class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
-                                            {{ value }}
-                                        </button>
-                                    {% endfor %}
-                                </div>
-                                <!-- end dropdown-->
-                            </div>
-                            <!-- end select  -->
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            <div data-services-nomatch-card
-                 class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
-                <div class="col-span-12 flex flex-col justify-center items-center h-fit">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke-width="1.5"
-                         stroke="currentColor"
-                         class="mb-2 w-8 h-8 stroke-white">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
-                    </svg>
-                    <h5 class="font-bold dark:text-white/90 mx-2 text-white">No services match</h5>
-                </div>
-            </div>
+            {% include "card_filter.html" %}
+            {% include "filter_nomatch.html" %}
         </div>
     {% endif %}
     <!-- end service info and actions -->
@@ -176,10 +91,10 @@
             <!-- end filter -->
             {% for service in services %}
                 {% set id_server_name = service["SERVER_NAME"]['value'].replace(".", "-") %}
-                <div data-services-card
-                     data-services-service="{{ service['SERVER_NAME']['value'] }}"
+                <div data-{{attribute_name}}-card
+                     data-{{attribute_name}}-service="{{ service['SERVER_NAME']['value'] }}"
                      class="dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                    <div data-services-settings
+                    <div data-{{attribute_name}}-settings
                          class="hidden"
                          data-value="{{ service['settings'] }}"></div>
                     <div data-old-service-name
@@ -192,13 +107,13 @@
                          class="hidden"
                          data-value="{{ service['SERVER_NAME']['method'] }}"></div>
                     <div class="flex justify-between items-start">
-                        <h5 data-services-name="{{ service["SERVER_NAME"]['value'] }}"
+                        <h5 data-{{attribute_name}}-name="{{ service["SERVER_NAME"]['value'] }}"
                             class="transition duration-300 ease-in-out text-center sm:text-left mb-1 font-bold dark:text-white/90">
                             {{ service["SERVER_NAME"]['value'] }}
                         </h5>
                         {% if service.get('IS_DRAFT', "no") == "yes" and service["SERVER_NAME"]['method'] in ["ui", "default"] %}
                             <button class="group relative">
-                                <p data-services-state="draft"
+                                <p data-{{attribute_name}}-state="draft"
                                    class="dark:text-gray-300 -z-10 opacity-0 group-hover:z-10 group-hover:opacity-100 transition fixed bg-white dark:bg-slate-800 rounded right-12 px-1 py-0.5">
                                     Draft
                                 </p>
@@ -211,7 +126,7 @@
                             </button>
                         {% else %}
                             <button class="group relative">
-                                <p data-services-state="online"
+                                <p data-{{attribute_name}}-state="online"
                                    class="dark:text-gray-300 -z-10 opacity-0 group-hover:z-10 group-hover:opacity-100 transition fixed bg-white dark:bg-slate-800 rounded right-12 px-1 py-0.5">
                                     Online
                                 </p>
@@ -225,7 +140,7 @@
                             </button>
                         {% endif %}
                     </div>
-                    <h6 data-services-method="{{ service["SERVER_NAME"]['method'] }}"
+                    <h6 data-{{attribute_name}}-method="{{ service["SERVER_NAME"]['method'] }}"
                         class="text-left sm:mb-2 font-semibold text-gray-600 dark:text-white/80">
                         {{ service["SERVER_NAME"]['method'] }}
                     </h6>
@@ -350,9 +265,9 @@
                             {% endif %}
                         {% endif %}
                         {% for button in action_buttons %}
-                            <button data-services-action="{{ button['name'] }}"
+                            <button data-{{attribute_name}}-action="{{ button['name'] }}"
                                     aria-label="{{ button['label'] }}"
-                                    data-services-name="{{ service['SERVER_NAME']['value'] }}"
+                                    data-{{attribute_name}}-name="{{ service['SERVER_NAME']['value'] }}"
                                     class="dark:brightness-90 z-20 mx-1 bg-{{ button['color'] }} hover:bg-{{ button['color'] }}/80 focus:bg-{{ button['color'] }}/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md">
                                 {% if button['name'] == "clone" %}
                                     <svg xmlns="http://www.w3.org/2000/svg"

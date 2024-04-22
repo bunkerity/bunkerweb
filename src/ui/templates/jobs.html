@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {% set attribute_name = "jobs" %}
     {% set run_times = ["all"] %}
     {% for job_name, value in jobs.items() %}
         {% if value['every'] not in run_times %}
@@ -7,22 +8,13 @@
         {% endif %}
     {% endfor %}
     <!-- info-->
-    {% set jobs_info = [
+    {% set infos = [
             {"name" : "JOBS TOTAL", "data" : jobs|length|string},
             {"name" : "JOBS ERRORS", "data" : jobs_errors|string},
-        ] %}
-    <div class="h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-        <div role="grid" class="card-detail-container">
-            {% for info in jobs_info %}
-                <div role="row" class="card-detail-item">
-                    <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
-                    <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    <!-- end info -->
+        ]
+    %}
+    {% include "card_info.html" %}
+
     <!-- filter -->
     {% set filters = [
             {
@@ -63,91 +55,14 @@
                 "values": run_times
             }
         ] %}
-    <div data-jobs-filter
-         class="h-fit col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-5 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
-        <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
-            {% for filter in filters %}
-                {% if filter['type'] == 'input' %}
-                    <!-- search inpt-->
-                    <div class="flex flex-col relative col-span-12 md:col-span-6">
-                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                            {{ filter['name'] }}
-                        </h5>
-                        <label for="{{ filter['id'] }}" class="sr-only">{{ filter['label'] }}</label>
-                        <input type="text"
-                               id="{{ filter['id'] }}"
-                               name="{{ filter['id'] }}"
-                               class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                               placeholder="{{ filter['placeholder'] }}"
-                               pattern="{{ filter['pattern'] }}"
-                               required />
-                    </div>
-                    <!-- end search inpt-->
-                {% endif %}
-                {% if filter['type'] == 'select' %}
-                    <!-- select -->
-                    <div class="flex flex-col relative col-span-12 md:col-span-6">
-                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                            {{ filter['name'] }}
-                        </h5>
-                        <button aria-controls="filter-{{ filter['id'] }}"
-                                data-jobs-setting-select="{{ filter['id'] }}"
-                                class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                            <span aria-description="current filter state value"
-                                  id="jobs-{{ filter['id'] }}"
-                                  data-name="jobs-{{ filter['id'] }}"
-                                  data-jobs-setting-select-text="{{ filter['id'] }}">{{ filter['value'] }}</span>
-                            <!-- chevron -->
-                            <svg data-jobs-setting-select="{{ filter['id'] }}"
-                                 class="transition-transform h-4 w-4 fill-gray-500"
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 viewBox="0 0 512 512">
-                                <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
-                            </svg>
-                        </button>
-                        <!-- end chevron -->
-                        <!-- dropdown-->
-                        <div id="filter-{{ filter['id'] }}"
-                             role="listbox"
-                             data-jobs-setting-select-dropdown="{{ filter['id'] }}"
-                             class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
-                            {% for value in filter['values'] %}
-                                <button role="option"
-                                        data-jobs-setting-select-dropdown-btn="{{ filter['id'] }}"
-                                        value="{{ value }}"
-                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
-                                    {{ value }}
-                                </button>
-                            {% endfor %}
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-                    <!-- end select  -->
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-    <!-- end filter -->
-    <div data-jobs-nomatch
-         class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
-        <div class="col-span-12 flex flex-col justify-center items-center h-fit">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 fill="none"
-                 viewBox="0 0 24 24"
-                 stroke-width="1.5"
-                 stroke="currentColor"
-                 class="mb-2 w-8 h-8 stroke-white">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
-            </svg>
-            <h5 class="font-bold dark:text-white/90 mx-2 text-white">No jobs match</h5>
-        </div>
-    </div>
-    <div   class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    {% include "card_filter.html" %}
+    {% include "filter_nomatch.html" %}
+
+    <div data-{{attribute_name}}-list-container   class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="col-span-12">
-            <h5 class="mx-4 mt-2 font-bold dark:text-white/90 mx-2">JOBS LIST</h5>
+            <h5 class="mx-2 font-bold dark:text-white/90 mx-2">JOBS LIST</h5>
         </div>
-        <div data-jobs-list-container
+        <div
         class="relative min-w-[900px] w-full overflow-auto grid grid-cols-12 max-h-100 sm:max-h-125">
 
        <div class="col-span-12">
@@ -187,7 +102,7 @@
                {% endfor %}
                <!-- end header-->
                <!-- list -->
-               <ul class="col-span-12 w-full" data-jobs-list>
+               <ul class="col-span-12 w-full" data-{{attribute_name}}-list>
                    {% for job_name, value in jobs.items() %}
                        <!-- job item-->
                        {% set jobs_data = [
@@ -198,16 +113,16 @@
                                                    {"type" : "check", "filter_name" : "success", "value" : value['success'], "custom_class" : "col-span-1"},
                                                    {"type" : "select", "filter_name" : "success", "value" : value['success'], "custom_class" : "col-span-3"},
                                                ] %}
-                       <li data-jobs-item
+                       <li data-{{attribute_name}}-item
                            class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
                            {% for data in jobs_data %}
                                {% if data['type'] == "text" %}
-                                   <p class="{{ data['custom_class'] }} dark:text-gray-400  text-sm  m-0 my-1" data-jobs-{{ data['filter_name'] }}="{{ data['value'] }}">
+                                   <p class="{{ data['custom_class'] }} dark:text-gray-400  text-sm  m-0 my-1" data-{{attribute_name}}-{{ data['filter_name'] }}="{{ data['value'] }}">
                                        {{ data['value'] }}
                                    </p>
                                {% endif %}
                                {% if data['type'] == "check" and data['value'] %}
-                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm  m-0 my-1" data-jobs-{{ data['filter_name'] }}="true">
+                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm  m-0 my-1" data-{{attribute_name}}-{{ data['filter_name'] }}="true">
                                        <svg class="fill-green-500 h-5 w-5"
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 512 512">
@@ -216,7 +131,7 @@
                                    </p>
                                {% endif %}
                                {% if data['type'] == "check" and not data['value'] %}
-                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm m-0 my-1" data-jobs-{{ data['filter_name'] }}="false">
+                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm m-0 my-1" data-{{attribute_name}}-{{ data['filter_name'] }}="false">
                                        <svg class="fill-red-500 h-5 w-5"
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 512 512">
@@ -226,15 +141,15 @@
                                {% endif %}
                                {% if data['type'] == "select" %}
                                    <div class="{{ data['custom_class'] }} relative dark:text-gray-400 text-sm m-0 my-1"
-                                        data-jobs-files>
+                                        data-{{attribute_name}}-files>
                                        {% if value['cache'] %}
-                                           <button data-jobs-setting-select="{{ job_name }}"
+                                           <button data-{{attribute_name}}-setting-select="{{ job_name }}"
                                                    class="py-1 text-sm disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left leading-6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
                                                <span id="jobs-{{ job_name }}"
                                                      data-name="jobs-{{ job_name }}"
-                                                     data-jobs-setting-select-text="{{ job_name }}">files</span>
+                                                     data-{{attribute_name}}-setting-select-text="{{ job_name }}">files</span>
                                                <!-- chevron -->
-                                               <svg data-jobs-setting-select="{{ job_name }}"
+                                               <svg data-{{attribute_name}}-setting-select="{{ job_name }}"
                                                     class="transition-transform h-4 w-4 fill-gray-500"
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 512 512">
@@ -243,13 +158,13 @@
                                            </button>
                                            <!-- end chevron -->
                                            <!-- dropdown-->
-                                           <div data-jobs-setting-select-dropdown="{{ job_name }}"
+                                           <div data-{{attribute_name}}-setting-select-dropdown="{{ job_name }}"
                                                 class="hidden z-100 absolute h-full flex-col w-full translate-y-0.5">
                                                {% for file in value['cache'] %}
-                                                   <button data-jobs-plugin="{{ value['plugin_id'] }}"
-                                                           data-jobs-download="{{ job_name }}"
-                                                           data-jobs-file="{{ file['file_name'] }}"
-                                                           data-jobs-setting-select-dropdown-btn="{{ job_name }}"
+                                                   <button data-{{attribute_name}}-plugin="{{ value['plugin_id'] }}"
+                                                           data-{{attribute_name}}-download="{{ job_name }}"
+                                                           data-{{attribute_name}}-file="{{ file['file_name'] }}"
+                                                           data-{{attribute_name}}-setting-select-dropdown-btn="{{ job_name }}"
                                                            value="files"
                                                            class="{% if loop.index == loop.length %}rounded-b-lg {% endif %}{% if loop.first %}rounded-t-lg{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 bg-white dark:bg-slate-700 text-gray-700">
                                                        <span class="flex justify-start items-center">
@@ -281,5 +196,5 @@
        </div>
    </div>
     </div>
- 
+
 {% endblock content %}

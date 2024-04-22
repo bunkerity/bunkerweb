@@ -10,6 +10,8 @@
             {% if terms.append(ban["term"]) %}{% endif %}
         {% endif %}
     {% endfor %}
+    {% set attribute_name = "bans" %}
+
     <!-- actions -->
     <div class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">
         <button data-add-ban
@@ -41,22 +43,12 @@
         </div>
     </div>
     <!-- info-->
-    {% set bans_info = [
+    {% set infos = [
             {"name" : "BANS TOTAL", "data" : bans|length|string},
             {"name" : "TOP REASON", "data" : top_reason|string},
         ] %}
-    <div class="{% if bans|length == 0 %}hidden{% endif %} h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-        <div role="grid" class="card-detail-container">
-            {% for info in bans_info %}
-                <div role="row" class="card-detail-item">
-                    <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
-                    <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    <!-- end info -->
+    {% set is_info_hidden = True if bans|length == 0 else False %}
+    {% include "card_info.html" %}
     <!-- filter -->
     {% set filters = [
             {
@@ -82,190 +74,115 @@
                 "values": terms
             }
         ] %}
-    <div data-bans-filter
-         class="{% if bans|length == 0 %}hidden{% endif %} h-fit col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-5 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
-        <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
-            {% for filter in filters %}
-                {% if filter['type'] == 'input' %}
-                    <!-- search inpt-->
-                    <div class="flex flex-col relative col-span-12 md:col-span-6">
-                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                            {{ filter['name'] }}
-                        </h5>
-                        <label for="{{ filter['id'] }}" class="sr-only">{{ filter['label'] }}</label>
-                        <input type="text"
-                               id="{{ filter['id'] }}"
-                               name="{{ filter['id'] }}"
-                               class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                               placeholder="{{ filter['placeholder'] }}"
-                               pattern="{{ filter['pattern'] }}"
-                               required />
-                    </div>
-                    <!-- end search inpt-->
-                {% endif %}
-                {% if filter['type'] == 'select' %}
-                    <!-- select -->
-                    <div class="flex flex-col relative col-span-12 md:col-span-6">
-                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                            {{ filter['name'] }}
-                        </h5>
-                        <button aria-controls="filter-{{ filter['id'] }}"
-                                data-bans-setting-select="{{ filter['id'] }}"
-                                class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                            <span aria-description="current filter state value"
-                                  id="bans-{{ filter['id'] }}"
-                                  data-name="bans-{{ filter['id'] }}"
-                                  data-bans-setting-select-text="{{ filter['id'] }}">{{ filter['value'] }}</span>
-                            <!-- chevron -->
-                            <svg data-bans-setting-select="{{ filter['id'] }}"
-                                 class="transition-transform h-4 w-4 fill-gray-500"
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 viewBox="0 0 512 512">
-                                <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
-                            </svg>
-                        </button>
-                        <!-- end chevron -->
-                        <!-- dropdown-->
-                        <div id="filter-{{ filter['id'] }}"
-                             role="listbox"
-                             data-bans-setting-select-dropdown="{{ filter['id'] }}"
-                             class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
-                            {% for value in filter['values'] %}
-                                <button role="option"
-                                        data-bans-setting-select-dropdown-btn="{{ filter['id'] }}"
-                                        value="{{ value }}"
-                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
-                                    {{ value }}
-                                </button>
-                            {% endfor %}
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-                    <!-- end select  -->
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-    <!-- end filter -->
-    <div data-bans-nomatch
-         class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
-        <div class="col-span-12 flex flex-col justify-center items-center h-fit">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 fill="none"
-                 viewBox="0 0 24 24"
-                 stroke-width="1.5"
-                 stroke="currentColor"
-                 class="mb-2 w-8 h-8 stroke-white">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
-            </svg>
-            <h5 class="font-bold dark:text-white/90 mx-2 text-white">No bans match</h5>
-        </div>
-    </div>
-    <div data-bans-list-container
-         class=" {% if bans|length == 0 %}hidden{% endif %} w-full overflow-hidden grid grid-cols-12 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        {% include "card_filter.html" %}
+        {% include "filter_nomatch.html" %}
+
+    <div data-{{attribute_name}}-list-container class="{% if bans|length == 0 %}hidden{% endif %} overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="col-span-12">
-            <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">BANS LIST</h5>
+            <h5 class="mx-2 font-bold dark:text-white/90 mx-2">BANS LIST</h5>
         </div>
-        <div class=" max-h-100 sm:max-h-125 col-span-12 overflow-y-auto overflow-x-auto">
-            <div data-bans-bans-list>
-                <!-- list container-->
-                {% set bans_headers = [
-                    {
-                        "name": "Select",
-                        "position": "col-span-1"
-                    },
-                    {
-                        "name": "IP",
-                        "position": "col-span-2"
-                    },
-                    {
-                        "name": "Reason",
-                        "position": "col-span-2"
-                    },
-                    {
-                        "name": "Ban start",
-                        "position": "col-span-2"
-                    },
-                    {
-                        "name": "Ban end",
-                        "position": "col-span-2"
-                    },
-                    {
-                        "name": "Remain",
-                        "position": "col-span-3"
-                    },
-                    {
-                        "name": "Term",
-                        "position": "hidden"
-                    }
-                ] %}
-                <div class="overflow-hidden min-w-[1150px] w-full grid grid-cols-12 rounded p-2">
-                    <!-- header-->
-                    {% for header in bans_headers %}
-                        <p class="dark:text-gray-100 h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
-                            {{ header['name'] }}
-                        </p>
-                    {% endfor %}
-                    <!-- end header-->
-                    <!-- list -->
-                    <ul class="col-span-12 w-full" data-bans-list>
-                        {% for ban in bans %}
-                            <li data-bans-item
-                                data-bans-list-item="{{ ban }}"
-                                class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
-                                <div data-bans-ban-select
-                                     data-checkbox-handler="ban-item-{{ loop.index }}"
-                                     class="relative mb-7 md:mb-0 z-10 ml-2">
-                                    <label class="sr-only" for="ban-item-{{ loop.index }}">Ban ip {{ loop.index }}</label>
-                                    <input id="ban-item-{{ loop.index }}"
-                                           name="ban-item-{{ loop.index }}"
-                                           data-default-method="ui"
-                                           data-default-value="no"
-                                           data-checked="false"
-                                           id="checkbox-ban-item-{{ loop.index }}"
-                                           class="checkbox"
-                                           type="checkbox"
-                                           value="no" />
-                                    <svg data-checkbox-handler="ban-item-{{ loop.index }}"
-                                         class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         viewBox="0 0 512 512">
-                                        <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
-                                        </path>
-                                    </svg>
-                                </div>
-                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
-                                   data-bans-ip="{{ ban['ip'] }}">{{ ban['ip'] }}</p>
-                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
-                                   data-bans-reason="{{ ban['reason'] }}">{{ ban['reason'] }}</p>
-                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
-                                   data-bans-ban_start="{{ ban['ban_start'] }}">{{ ban['ban_start'] }}</p>
-                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
-                                   data-bans-ban_end="{{ ban['ban_end'] }}">{{ ban['ban_end'] }}</p>
-                                <p class="dark:text-gray-400 text-sm col-span-3 m-0 my-1"
-                                   data-bans-remain="{{ ban['remain'] }}">{{ ban['remain'] }}</p>
-                                <p class="hidden" data-bans-term="{{ ban['term'] }}">{{ ban['term'] }}</p>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    <!-- end list-->
-                </div>
-                <!-- end list container-->
-            </div>
-        </div>
-        <form id="unban-items"
-              action="bans"
-              method="post"
-              class="w-full col-span-12 justify-center flex mt-6 mb-3">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="operation" value="unban">
-            <input data-unban-inp type="hidden" name="data" value="">
-            <button data-unban-btn
-                    disabled
-                    type="submit"
-                    class="valid-btn mr-3 text-base">UNBAN</button>
-        </form>
-    </div>
+        <div
+        class="w-full overflow-auto grid grid-cols-12 col-span-12 p-4 relative">
+       <div class=" max-h-100 sm:max-h-125 col-span-12 overflow-y-auto overflow-x-auto">
+           <div data-{{attribute_name}}-bans-list>
+               <!-- list container-->
+               {% set bans_headers = [
+                   {
+                       "name": "Select",
+                       "position": "col-span-1"
+                   },
+                   {
+                       "name": "IP",
+                       "position": "col-span-2"
+                   },
+                   {
+                       "name": "Reason",
+                       "position": "col-span-2"
+                   },
+                   {
+                       "name": "Ban start",
+                       "position": "col-span-2"
+                   },
+                   {
+                       "name": "Ban end",
+                       "position": "col-span-2"
+                   },
+                   {
+                       "name": "Remain",
+                       "position": "col-span-3"
+                   },
+                   {
+                       "name": "Term",
+                       "position": "hidden"
+                   }
+               ] %}
+               <div class="overflow-hidden min-w-[1150px] w-full grid grid-cols-12 rounded p-2">
+                   <!-- header-->
+                   {% for header in bans_headers %}
+                       <p class="dark:text-gray-100 h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
+                           {{ header['name'] }}
+                       </p>
+                   {% endfor %}
+                   <!-- end header-->
+                   <!-- list -->
+                   <ul class="col-span-12 w-full" data-{{attribute_name}}-list>
+                       {% for ban in bans %}
+                           <li data-{{attribute_name}}-item
+                               data-{{attribute_name}}-list-item="{{ ban }}"
+                               class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
+                               <div data-{{attribute_name}}-ban-select
+                                    data-checkbox-handler="ban-item-{{ loop.index }}"
+                                    class="relative mb-7 md:mb-0 z-10 ml-2">
+                                   <label class="sr-only" for="ban-item-{{ loop.index }}">Ban ip {{ loop.index }}</label>
+                                   <input id="ban-item-{{ loop.index }}"
+                                          name="ban-item-{{ loop.index }}"
+                                          data-default-method="ui"
+                                          data-default-value="no"
+                                          data-checked="false"
+                                          id="checkbox-ban-item-{{ loop.index }}"
+                                          class="checkbox"
+                                          type="checkbox"
+                                          value="no" />
+                                   <svg data-checkbox-handler="ban-item-{{ loop.index }}"
+                                        class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 512 512">
+                                       <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
+                                       </path>
+                                   </svg>
+                               </div>
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                                  data-{{attribute_name}}-ip="{{ ban['ip'] }}">{{ ban['ip'] }}</p>
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                                  data-{{attribute_name}}-reason="{{ ban['reason'] }}">{{ ban['reason'] }}</p>
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                                  data-{{attribute_name}}-ban_start="{{ ban['ban_start'] }}">{{ ban['ban_start'] }}</p>
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                                  data-{{attribute_name}}-ban_end="{{ ban['ban_end'] }}">{{ ban['ban_end'] }}</p>
+                               <p class="dark:text-gray-400 text-sm col-span-3 m-0 my-1"
+                                  data-{{attribute_name}}-remain="{{ ban['remain'] }}">{{ ban['remain'] }}</p>
+                               <p class="hidden" data-{{attribute_name}}-term="{{ ban['term'] }}">{{ ban['term'] }}</p>
+                           </li>
+                       {% endfor %}
+                   </ul>
+                   <!-- end list-->
+               </div>
+               <!-- end list container-->
+           </div>
+       </div>
+       <form id="unban-items"
+             action="bans"
+             method="post"
+             class="w-full col-span-12 justify-center flex mt-6 mb-3">
+           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+           <input type="hidden" name="operation" value="unban">
+           <input data-unban-inp type="hidden" name="data" value="">
+           <button data-unban-btn
+                   disabled
+                   type="submit"
+                   class="valid-btn mr-3 text-base">UNBAN</button>
+       </form>
+   </div>
+</div>
     {% include "bans_modal.html" %}
 {% endblock content %}

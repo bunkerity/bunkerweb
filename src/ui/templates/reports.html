@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {% set attribute_name = "reports" %}
     {% set methods = ["all"] %}
     {% set codes = ["all"] %}
     {% set reasons = ["all"] %}
@@ -66,25 +67,15 @@
     </div>
     <!-- info-->
     {% if reports|length != 0 %}
-        {% set reports_info = [
+        {% set infos = [
                     {"name" : "REPORTING TOTAL", "data" : total_report|string or "0"},
                     {"name" : "TOP METHOD", "data" : top_method['name']|string},
                     {"name" : "TOP REASON", "data" : top_reason['name']|string},
                     {"name" : "TOP COUNTRY", "data" : top_country['name']|string},
                     {"name" : "TOP STATUS CODE", "data" : top_code['name']|string},
                 ] %}
-        <div class=" h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-            <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
-            <div role="grid" class="card-detail-container">
-                {% for info in reports_info %}
-                    <div role="row" class="card-detail-item">
-                        <p role="gridcell" class="card-detail-item-title">{{ info['name'] }}</p>
-                        <p role="gridcell" class="card-detail-item-subtitle">{{ info['data'] }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-        <!-- end info -->
+        {% include "card_info.html" %}
+
         <!-- filter -->
         {% set filters = [
                     {
@@ -124,169 +115,95 @@
                         "values": reasons
                     }
                 ] %}
-        <div data-reports-filter
-             class="h-fit col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-5 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-            <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
-            <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
-                {% for filter in filters %}
-                    {% if filter['type'] == 'input' %}
-                        <!-- search inpt-->
-                        <div class="flex flex-col relative col-span-12 md:col-span-6">
-                            <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                                {{ filter['name'] }}
-                            </h5>
-                            <label for="{{ filter['id'] }}" class="sr-only">{{ filter['label'] }}</label>
-                            <input type="text"
-                                   id="{{ filter['id'] }}"
-                                   name="{{ filter['id'] }}"
-                                   class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                   placeholder="{{ filter['placeholder'] }}"
-                                   pattern="{{ filter['pattern'] }}"
-                                   required />
-                        </div>
-                        <!-- end search inpt-->
-                    {% endif %}
-                    {% if filter['type'] == 'select' %}
-                        <!-- select -->
-                        <div class="flex flex-col relative col-span-12 md:col-span-6">
-                            <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
-                                {{ filter['name'] }}
-                            </h5>
-                            <button aria-controls="filter-{{ filter['id'] }}"
-                                    data-reports-setting-select="{{ filter['id'] }}"
-                                    class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                                <span aria-description="current filter state value"
-                                      id="reports-{{ filter['id'] }}"
-                                      data-name="reports-{{ filter['id'] }}"
-                                      data-reports-setting-select-text="{{ filter['id'] }}">{{ filter['value'] }}</span>
-                                <!-- chevron -->
-                                <svg data-reports-setting-select="{{ filter['id'] }}"
-                                     class="transition-transform h-4 w-4 fill-gray-500"
-                                     xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="0 0 512 512">
-                                    <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
-                                </svg>
-                            </button>
-                            <!-- end chevron -->
-                            <!-- dropdown-->
-                            <div id="filter-{{ filter['id'] }}"
-                                 role="listbox"
-                                 data-reports-setting-select-dropdown="{{ filter['id'] }}"
-                                 class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
-                                {% for value in filter['values'] %}
-                                    <button role="option"
-                                            data-reports-setting-select-dropdown-btn="{{ filter['id'] }}"
-                                            value="{{ value }}"
-                                            class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
-                                        {{ value }}
-                                    </button>
-                                {% endfor %}
-                            </div>
-                            <!-- end dropdown-->
-                        </div>
-                        <!-- end select  -->
-                    {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        <!-- end filter -->
-        <div data-reports-nomatch
-             class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
-            <div class="col-span-12 flex flex-col justify-center items-center h-fit">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke-width="1.5"
-                     stroke="currentColor"
-                     class="mb-2 w-8 h-8 stroke-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
-                </svg>
-                <h5 class="font-bold dark:text-white/90 mx-2 text-white">No reports match</h5>
-            </div>
-        </div>
-        <div data-reports-list-container
-             class="w-full overflow-hidden grid grid-cols-12 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        {% include "card_filter.html" %}
+        {% include "filter_nomatch.html" %}
+
+        <div data-{{attribute_name}}-list-container  class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
             <div class="col-span-12">
-                <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">REPORTING</h5>
+                <h5 class="mx-2 font-bold dark:text-white/90 mx-2">REPORTING LIST</h5>
             </div>
-            <div class=" max-h-100 sm:max-h-125  col-span-12 overflow-y-auto overflow-x-auto">
-                <!-- list container-->
-                <div class="min-w-[1300px] w-full grid grid-cols-12 rounded p-2">
-                    {% set reports_header = [
-                        {
-                            "name": "Date",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "IP",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "Country",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "Method",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "URL",
-                            "position": "col-span-2"
-                        },
-                        {
-                            "name": "Code",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "User agent",
-                            "position": "col-span-2"
-                        },
-                        {
-                            "name": "Reason",
-                            "position": "col-span-1"
-                        },
-                        {
-                            "name": "Data",
-                            "position": "col-span-2"
-                        }
-                    ] %}
-                    <!-- header-->
-                    {% for header in reports_header %}
-                        <p class="dark:text-gray-100 flex justify-center h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
-                            {{ header['name'] }}
-                        </p>
-                    {% endfor %}
-                    <!-- end header-->
-                    <!-- list -->
-                    <ul class="col-span-12 w-full" data-reports-list>
-                        {% for report in reports %}
-                            <li data-reports-item
-                                class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
-                                <p class="text-center flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
-                                   data-reports-date="{{ report['date'] }}">{{ report['date'] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
-                                   data-reports-ip="{{ report['ip'] }}">{{ report['ip'] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
-                                   data-reports-country="{{ report['country'] }}">{{ report['country'] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
-                                   data-reports-method="{{ report['method'] }}">{{ report["method"] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1"
-                                   data-reports-url="{{ report['url'] }}">{{ report['url'] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
-                                   data-reports-status="{{ report['status'] }}">{{ report["status"] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 "
-                                   data-reports-user_agent="{{ report['user_agent'] }}">{{ report["user_agent"] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
-                                   data-reports-reason="{{ report['reason'] }}">{{ report["reason"] }}</p>
-                                <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1"
-                                   data-reports-data="{{ report['data'] }}">{{ report["data"] }}</p>
-                            </li>
+            <div
+                    class="w-full overflow-auto grid grid-cols-12 col-span-12 p-4 relative">
+                   <div class=" max-h-100 sm:max-h-125  col-span-12 overflow-y-auto overflow-x-auto">
+                    <!-- list container-->
+                    <div class="overflow-hidden min-w-[1300px] w-full grid grid-cols-12 rounded p-2">
+                        {% set reports_header = [
+                            {
+                                "name": "Date",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "IP",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "Country",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "Method",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "URL",
+                                "position": "col-span-2"
+                            },
+                            {
+                                "name": "Code",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "User agent",
+                                "position": "col-span-2"
+                            },
+                            {
+                                "name": "Reason",
+                                "position": "col-span-1"
+                            },
+                            {
+                                "name": "Data",
+                                "position": "col-span-2"
+                            }
+                        ] %}
+                        <!-- header-->
+                        {% for header in reports_header %}
+                            <p class="dark:text-gray-100 flex justify-center h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
+                                {{ header['name'] }}
+                            </p>
                         {% endfor %}
-                    </ul>
-                    <!-- end list-->
+                        <!-- end header-->
+                        <!-- list -->
+                        <ul class="col-span-12 w-full" data-{{attribute_name}}-list>
+                            {% for report in reports %}
+                                <li data-{{attribute_name}}-item
+                                    class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
+                                    <p class="text-center flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
+                                        data-{{attribute_name}}-date="{{ report['date'] }}">{{ report['date'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
+                                        data-{{attribute_name}}-ip="{{ report['ip'] }}">{{ report['ip'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1"
+                                        data-{{attribute_name}}-country="{{ report['country'] }}">{{ report['country'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
+                                        data-{{attribute_name}}-method="{{ report['method'] }}">{{ report["method"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1"
+                                        data-{{attribute_name}}-url="{{ report['url'] }}">{{ report['url'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
+                                        data-{{attribute_name}}-status="{{ report['status'] }}">{{ report["status"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 "
+                                        data-{{attribute_name}}-user_agent="{{ report['user_agent'] }}">{{ report["user_agent"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 "
+                                        data-{{attribute_name}}-reason="{{ report['reason'] }}">{{ report["reason"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1"
+                                        data-{{attribute_name}}-data="{{ report['data'] }}">{{ report["data"] }}</p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <!-- end list-->
+                    </div>
+                    <!-- end list container-->
                 </div>
-                <!-- end list container-->
             </div>
         </div>
+
     {% endif %}
 {% endblock content %}

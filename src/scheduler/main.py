@@ -719,8 +719,7 @@ if __name__ == "__main__":
                     changes = db.check_changes()
 
                     if isinstance(changes, str):
-                        logger.error(f"An error occurred when checking for changes in the database : {changes}")
-                        stop(1)
+                        raise Exception(f"An error occurred when checking for changes in the database : {changes}")
 
                     # check if the plugins have changed since last time
                     if changes["pro_plugins_changed"]:

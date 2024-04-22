@@ -20,6 +20,9 @@ class ServiceModal {
       "[data-services-modal-error-msg]",
     );
     this.modalCard = this.modal.querySelector("[data-services-modal-card]");
+    this.switchModeBtn = this.modal.querySelector(
+      "[data-toggle-settings-mode-btn]",
+    );
     //modal forms
     this.formNewEdit = this.modal.querySelector("[data-services-modal-form]");
     this.formDelete = this.modal.querySelector(
@@ -86,6 +89,15 @@ class ServiceModal {
           this.closeModal();
         }
       } catch (err) {}
+    });
+
+    this.switchModeBtn.addEventListener("click", () => {
+      const currMode = this.switchModeBtn.getAttribute(
+        "data-toggle-settings-mode-btn",
+      );
+      const switchMode = currMode === "advanced" ? "simple" : "advanced";
+
+      this.setSettingMode(switchMode);
     });
 
     this.container.addEventListener("click", (e) => {
@@ -409,6 +421,34 @@ class ServiceModal {
     });
   }
 
+  // Switch settings mode and update button
+  setSettingMode(mode) {
+    const elsToShow =
+      mode === "advanced"
+        ? document.querySelectorAll("[data-advanced]")
+        : document.querySelectorAll("[data-simple]");
+    const elsToHide =
+      mode === "advanced"
+        ? document.querySelectorAll("[data-simple]")
+        : document.querySelectorAll("[data-advanced]");
+    elsToHide.forEach((setting) => {
+      setting.classList.add("!hidden");
+    });
+    elsToShow.forEach((setting) => {
+      setting.classList.remove("!hidden");
+    });
+    // button
+    this.switchModeBtn.setAttribute("data-toggle-settings-mode-btn", mode);
+    const switchEls = this.switchModeBtn.querySelectorAll(
+      "[data-toggle-settings-mode]",
+    );
+    switchEls.forEach((el) => {
+      el.getAttribute("data-toggle-settings-mode") === mode
+        ? el.classList.remove("hidden")
+        : el.classList.add("hidden");
+    });
+  }
+
   checkServNameInput() {
     const serverNameInput = document.querySelector('input[name="SERVER_NAME"]');
 
@@ -582,8 +622,10 @@ class ServiceModal {
   }
 
   openModal() {
-    //switch to first setting
-    document.querySelector("button[data-tab-select-handler]").click();
+    try {
+      //switch to first setting
+      document.querySelector("button[data-tab-select-handler]").click();
+    } catch (e) {}
     //show modal el
     this.modal.classList.add("flex");
     this.modal.classList.remove("hidden");
