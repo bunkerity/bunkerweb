@@ -1101,7 +1101,7 @@ class Database:
             to_put = []
             endl = "\n"
             for custom_config in custom_configs:
-                if method != "ui":
+                if "exploded" in custom_config:
                     config = {"data": custom_config["value"], "method": method}
 
                     if custom_config["exploded"][0]:
