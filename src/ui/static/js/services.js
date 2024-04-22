@@ -36,8 +36,8 @@ class ServiceModal {
     );
     this.nextBtn = this.modal.querySelector("button[data-simple-next]");
     this.backBtn = this.modal.querySelector("button[data-simple-back]");
-    this.saveSimpleBtn = this.modal.querySelector(
-      "button[data-services-simple-modal-submit]",
+    this.saveSimpleBtn = this.simpleForm.querySelector(
+      "button[data-services-modal-submit]",
     );
     // list els
     this.serverNameInps = this.modal.querySelectorAll(
@@ -91,6 +91,7 @@ class ServiceModal {
         });
       });
     });
+
     this.modal.addEventListener("click", (e) => {
       // update draft mode
       try {
@@ -123,6 +124,16 @@ class ServiceModal {
       const switchMode = currMode === "advanced" ? "simple" : "advanced";
 
       this.setSettingMode(switchMode);
+      this.checkVisibleInpsValidity();
+    });
+
+    this.nextBtn.addEventListener("click", () => {
+      this.nextSimpleStep();
+      this.checkVisibleInpsValidity();
+    });
+
+    this.backBtn.addEventListener("click", () => {
+      this.prevSimpleStep();
       this.checkVisibleInpsValidity();
     });
 
@@ -252,7 +263,10 @@ class ServiceModal {
     const firstStep = this.simpleForm.querySelector("[data-step='1']");
     firstStep.classList.remove("hidden");
     // we want to update settings by current security level
-    this.setSettingsByAtt(this.simpleForm);
+    const securityLevelValue = this.simpleForm.querySelector(
+      '[data-setting-select-text="security-level"]',
+    );
+    this.setSettingsByAtt(this.simpleForm, "");
   }
 
   nextSimpleStep() {
@@ -263,26 +277,59 @@ class ServiceModal {
     const nextStep = this.simpleForm.querySelector(
       `[data-step="${+currStepNum + 1}"]`,
     );
-    const nextStepPlusOne = this.simpleForm.querySelector(
-      `[data-step="${+currStepNum + 2}"]`,
-    );
-
-    // Handle case last step or not
-    if (nextStepPlusOne) {
-      this.nextBtn.classList.remove("hidden");
-      this.saveSimpleBtn.classList.add("hidden");
-    }
-
-    if (!nextStepPlusOne) {
-      this.nextBtn.classList.add("hidden");
-      this.saveSimpleBtn.classList.remove("hidden");
-    }
-
     // hide current step and show next one
     currStep.classList.add("hidden");
     nextStep.classList.remove("hidden");
 
-    this.checkCurrInpSimple();
+    this.updateSimpleActions();
+  }
+
+  prevSimpleStep() {
+    // get current step
+    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStepNum = currStep.getAttribute("data-step");
+    // get next step and  next step + 1 to determine if continue or save
+    const prevStep = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum - 1}"]`,
+    );
+
+    // hide current step and show next one
+    currStep.classList.add("hidden");
+    prevStep.classList.remove("hidden");
+
+    this.updateSimpleActions();
+  }
+
+  updateSimpleActions() {
+    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStepNum = currStep.getAttribute("data-step");
+    // get next step and  next step + 1 to determine if continue or save
+    const prevStep = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum - 1}"]`,
+    );
+
+    const nextStep = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum + 1}"]`,
+    );
+
+    // Handle case last step or not
+    if (nextStep) {
+      this.nextBtn.classList.remove("hidden");
+      this.saveSimpleBtn.classList.add("hidden");
+    }
+
+    if (!nextStep) {
+      this.nextBtn.classList.add("hidden");
+      this.saveSimpleBtn.classList.remove("hidden");
+    }
+
+    if (prevStep) {
+      this.backBtn.removeAttribute("disabled");
+    }
+
+    if (!prevStep) {
+      this.backBtn.setAttribute("disabled", "");
+    }
   }
 
   resetFilterInp() {
