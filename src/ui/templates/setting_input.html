@@ -8,7 +8,7 @@
     {% set inp_regex = setting_input['regex'] %}
     {% set global_config_method = global_config.get(inp_name, {'method' : inp_method }).get('method') %}
     {% set global_config_value = global_config.get(inp_name, {'value' : inp_value }).get('value') %}
-    
+
     <div class="relative flex items-center">
         <label class="sr-only" for="{{ inp_name_mult }}">{{ inp_name }}</label>
         <input {% if inp_name == "SERVER_NAME" %}required{% endif %}

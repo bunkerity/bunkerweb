@@ -38,7 +38,7 @@
 {% endfor %}
 
 <!-- new and edit form -->
-<form data-simple data-services-simple-modal-form
+<form data-simple data-services-modal-form
         class="!hidden w-full h-[90vh] overflow-auto flex flex-col justify-between"
         id="form-simple-new"
         method="POST">
@@ -47,7 +47,7 @@
     <input type="hidden" value="" name="OLD_SERVER_NAME" />
     <input type="hidden" value="no" name="is_draft" />
     <input type="hidden" value="mode" name="easy" />
-    
+
     {% for step in steps %}
     <div data-step="{{loop.index}}" class="flex flex-col {% if loop.index != 1 %} hidden {% endif %}">
         <div class="flex flex-col w-full items-start mt-2">

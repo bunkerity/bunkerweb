@@ -21,7 +21,9 @@ class ServiceModal {
       "[data-toggle-settings-mode-btn]",
     );
     //modal forms
-    this.formNewEdit = this.modal.querySelector("[data-services-modal-form]");
+    this.formNewEdit = this.modal.querySelector(
+      "[data-advanced][data-services-modal-form]",
+    );
     this.formDelete = this.modal.querySelector(
       "[data-services-modal-form-delete]",
     );
@@ -29,14 +31,21 @@ class ServiceModal {
       "button[data-services-modal-submit]",
     );
     // simple el
-    this.simpleForm = this.modal.querySelector("[data-services-simple-modal-form]");
+    this.simpleForm = this.modal.querySelector(
+      "[data-simple][data-services-modal-form]",
+    );
     this.nextBtn = this.modal.querySelector("button[data-simple-next]");
     this.backBtn = this.modal.querySelector("button[data-simple-back]");
-    this.saveSimpleBtn = this.modal.querySelector("button[data-services-simple-modal-submit]");
+    this.saveSimpleBtn = this.modal.querySelector(
+      "button[data-services-simple-modal-submit]",
+    );
     // list els
-    this.serverNameInps = this.modal.querySelectorAll('input[name="SERVER_NAME"][data-setting-input]');
-    this.submitBtns = this.modal.querySelectorAll('button[data-services-modal-submit]');
-
+    this.serverNameInps = this.modal.querySelectorAll(
+      'input[name="SERVER_NAME"][data-setting-input]',
+    );
+    this.submitBtns = this.modal.querySelectorAll(
+      "button[data-services-modal-submit]",
+    );
     //container
     this.container = document.querySelector("main");
     this.currAction = "";
@@ -72,17 +81,16 @@ class ServiceModal {
   }
 
   init() {
-      // Get list of server name from services card
+    // Get list of server name from services card
     // When the server name input is matching existing server name that is not the current modal one
     // Disable the submit button
-        window.addEventListener("DOMContentLoaded", () => {
-          this.serverNameInps.forEach((serverNameInput) => {
-            serverNameInput.addEventListener("input", () => {
-              // Case input is empty
-              this.checkServNameInput();
-            });
-          });
+    window.addEventListener("DOMContentLoaded", () => {
+      [this.formNewEdit, this.simpleForm].forEach((form) => {
+        form.addEventListener("input", (e) => {
+          this.checkVisibleInpsValidity();
+        });
       });
+    });
     this.modal.addEventListener("click", (e) => {
       // update draft mode
       try {
@@ -96,7 +104,7 @@ class ServiceModal {
 
           this.setIsDraft(currModeIsDraft, this.currMethod);
         }
-      } catch (err) { }
+      } catch (err) {}
 
       //close
       try {
@@ -115,6 +123,7 @@ class ServiceModal {
       const switchMode = currMode === "advanced" ? "simple" : "advanced";
 
       this.setSettingMode(switchMode);
+      this.checkVisibleInpsValidity();
     });
 
     this.container.addEventListener("click", (e) => {
@@ -231,12 +240,49 @@ class ServiceModal {
     });
   }
 
-  resetSimpleForm() {
+  resetSimpleMode() {
     // reset button
     this.backBtn.setAttribute("disabled", "");
     this.nextBtn.removeAttribute("disabled");
+    // hidden all steps and show first one
+    const steps = this.simpleForm.querySelectorAll("[data-step]");
+    steps.forEach((step) => {
+      step.classList.add("hidden");
+    });
+    const firstStep = this.simpleForm.querySelector("[data-step='1']");
+    firstStep.classList.remove("hidden");
+    // we want to update settings by current security level
+    this.setSettingsByAtt(this.simpleForm);
+  }
 
-    // set current security level to input
+  nextSimpleStep() {
+    // get current step
+    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStepNum = currStep.getAttribute("data-step");
+    // get next step and  next step + 1 to determine if continue or save
+    const nextStep = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum + 1}"]`,
+    );
+    const nextStepPlusOne = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum + 2}"]`,
+    );
+
+    // Handle case last step or not
+    if (nextStepPlusOne) {
+      this.nextBtn.classList.remove("hidden");
+      this.saveSimpleBtn.classList.add("hidden");
+    }
+
+    if (!nextStepPlusOne) {
+      this.nextBtn.classList.add("hidden");
+      this.saveSimpleBtn.classList.remove("hidden");
+    }
+
+    // hide current step and show next one
+    currStep.classList.add("hidden");
+    nextStep.classList.remove("hidden");
+
+    this.checkCurrInpSimple();
   }
 
   resetFilterInp() {
@@ -246,17 +292,12 @@ class ServiceModal {
   }
 
   changeSubmitBtn(action) {
-    if(action === "delete") return;
+    if (action === "delete") return;
     const text = action === "edit" ? "SAVE" : "CREATE";
 
     this.submitBtns.forEach((btn) => {
       btn.textContent = text;
-      btn.classList.remove(
-        "delete-btn",
-        "valid-btn",
-        "edit-btn",
-        "info-btn",
-      );
+      btn.classList.remove("delete-btn", "valid-btn", "edit-btn", "info-btn");
       btn.classList.add("valid-btn");
     });
   }
@@ -284,53 +325,64 @@ class ServiceModal {
     return false;
   }
 
-  setSettingsDefault() {
-    const inps = this.modal.querySelectorAll("input");
-    inps.forEach((inp) => {
-      //form related values are excludes
-      const inpName = inp.getAttribute("name");
+  setCheckbox(inp, method, value) {
+    if (inp.getAttribute("type") === "checkbox" && inp.tagName === "INPUT") {
+      try {
+        if (inp.hasAttribute("aria-checked")) {
+          value === "yes"
+            ? inp.setAttribute("aria-checked", "true")
+            : inp.setAttribute("aria-checked", "false");
+        }
+      } catch (err) {}
 
+      try {
+        value === "yes"
+          ? inp.setAttribute("data-checked", "true")
+          : inp.setAttribute("data-checked", "false");
+      } catch (err) {}
+
+      inp.setAttribute("value", value);
+      inp.setAttribute("data-method", method);
+      inp.checked = true;
+    }
+  }
+
+  setInput(inp, method, value) {
+    if (inp.getAttribute("type") !== "checkbox" && inp.tagName === "INPUT") {
+      inp.setAttribute("value", value);
+      inp.value = value;
+      inp.setAttribute("data-method", method);
+    }
+  }
+
+  // By default, loop on all settings to disabled them
+  setSettingsByAtt(
+    parentEl = this.modal,
+    attMethodName = "data-default-method",
+    attValueName = "data-default-value",
+  ) {
+    // Start with input-like (input, checkbox)
+    const inps = parentEl.querySelectorAll("input");
+    inps.forEach((inp) => {
+      // form related values are excludes
+      const inpName = inp.getAttribute("name");
       if (this.isAvoidInpList(inp, inpName)) return;
 
       //for all other settings values
-      const defaultMethod = inp.getAttribute("data-default-method");
-      const defaultVal = inp.getAttribute("data-default-value");
+      const defaultMethod = inp.getAttribute(attMethodName);
+      const defaultVal = inp.getAttribute(attValueName);
 
-      //SET VALUE
-      if (inp.getAttribute("type") === "checkbox") {
-        try {
-          if (inp.hasAttribute("aria-checked")) {
-            defaultVal === "yes"
-              ? inp.setAttribute("aria-checked", "true")
-              : inp.setAttribute("aria-checked", "false");
-          }
-        } catch (err) {}
+      this.setCheckbox(inp, defaultMethod, defaultVal);
+      this.setInput(inp, defaultMethod, defaultVal);
 
-        try {
-          defaultVal === "yes"
-            ? inp.setAttribute("data-checked", "true")
-            : inp.setAttribute("data-checked", "false");
-        } catch (err) {}
-
-        inp.setAttribute("value", defaultVal);
-        inp.setAttribute("data-method", defaultMethod);
-        inp.checked = true;
-      }
-
-      if (inp.getAttribute("type") !== "checkbox") {
-        inp.setAttribute("value", defaultVal);
-        inp.value = defaultVal;
-        inp.setAttribute("data-method", defaultMethod);
-      }
-
-      //SET METHOD
-      this.setDisabledDefault(inp, defaultMethod);
+      this.setDisabledByMethod(inp, defaultMethod);
     });
 
-    const selects = this.modal.querySelectorAll("select");
+    // Select only
+    const selects = parentEl.querySelectorAll("select");
     selects.forEach((select) => {
-      const defaultMethod = select.getAttribute("data-default-method");
-      const defaultVal = select.getAttribute("data-default-value");
+      const defaultMethod = select.getAttribute(attMethodName);
+      const defaultVal = select.getAttribute(attValueName);
       //click the custom select dropdown to update select value
       select.parentElement
         .querySelector(
@@ -345,11 +397,11 @@ class ServiceModal {
         )}]`,
       );
 
-      this.setDisabledDefault(btnCustom, defaultMethod);
+      this.setDisabledByMethod(btnCustom, defaultMethod);
     });
   }
 
-  setDisabledDefault(inp, method) {
+  setDisabledByMethod(inp, method) {
     if (method === "ui" || method === "default") {
       inp.removeAttribute("disabled");
     } else {
@@ -370,9 +422,7 @@ class ServiceModal {
     //Update draft button
     const btn = this.modal.querySelector("button[data-toggle-draft-btn]");
 
-    if (
-      (!["ui", "default"].includes(method) && this.currAction !== "clone")
-    ) {
+    if (!["ui", "default"].includes(method) && this.currAction !== "clone") {
       return btn.classList.add("hidden");
     }
 
@@ -391,14 +441,16 @@ class ServiceModal {
     this.currAction = action;
     this.modalTitle.textContent = `${action} ${serviceName}`;
     const operation = action === "clone" ? "new" : action;
-    
+
     // update operation and other hidden inputs for all mode in modal
-    const operationInps = this.modal.querySelectorAll('input[name="operation"]');
+    const operationInps = this.modal.querySelectorAll(
+      'input[name="operation"]',
+    );
     operationInps.forEach((inp) => {
       inp.setAttribute("value", operation);
       inp.value = operation;
     });
-    
+
     // show / hide components
     this.hideForms();
     this.setCardViewportHeight(action === "delete" ? false : true);
@@ -412,12 +464,13 @@ class ServiceModal {
 
       const oldNameValue = action === "edit" ? oldServName : "";
 
-      const oldNameInps = this.modal.querySelectorAll('input[name="OLD_SERVER_NAME"]');
-      oldNameInps.forEach((inp) => { 
+      const oldNameInps = this.modal.querySelectorAll(
+        'input[name="OLD_SERVER_NAME"]',
+      );
+      oldNameInps.forEach((inp) => {
         inp.setAttribute("value", oldNameValue);
         inp.value = oldNameValue;
-    });
-
+      });
     }
 
     if (action === "delete") {
@@ -430,7 +483,6 @@ class ServiceModal {
     }
 
     this.setIsDraft(isDraft === "yes" ? true : false, method);
-
   }
 
   // Switch settings mode and update button
@@ -461,57 +513,121 @@ class ServiceModal {
     });
   }
 
-  checkServNameInput() {
-    this.serverNameInps.forEach((serverNameInput) => {
-      const modalErrMsg = serverNameInput.closest("form").querySelector("[data-services-modal-error-msg]");
-      if (serverNameInput.value === "") {
-        modalErrMsg.textContent = "Server name cannot be empty";
-        modalErrMsg.classList.remove("hidden");
-        return serverNameInput.closest("form").querySelector('button[data-services-modal-submit]').setAttribute("disabled", "");
-      }
-  
-      // Case conflict with another server name
-      const serverNames = document.querySelectorAll("[data-services-service]");
-      const serverNameValue = serverNameInput.getAttribute("value");
+  checkVisibleInpsValidity() {
+    try {
+      const forms = [this.formNewEdit, this.simpleForm];
+      forms.forEach((form) => {
+        // Check that there is a visible container to check
+        const formMode = form.hasAttribute("data-simple")
+          ? "simple"
+          : "advanced";
+        // For advanced, we want to check all inputs
+        // For simple, we want to check only current step inputs to continue
+        const inps =
+          formMode === "simple"
+            ? form.querySelectorAll(
+                "[data-step]:not(.hidden) input[data-setting-input]",
+              )
+            : form.querySelectorAll(
+                "[data-plugin-item]:not(.hidden) input[data-setting-input], [data-plugin-item][class*='hidden'] input[data-setting-input]",
+              );
+        // merge input with visible and not visible
+        if (inps.length <= 0) return;
 
-      // case inp name is not current server name, check if it is same as another
-      for (let i = 0; i < serverNames.length; i++) {
-        const name = serverNames[i].getAttribute("data-services-service");
-        if (name === serverNameValue) continue;
-  
-        if (name === serverNameInput.value) {
-          modalErrMsg.textContent = "Server name already exists";
-          modalErrMsg.classList.remove("hidden");
-          return serverNameInput.closest("form").querySelector('button[data-services-modal-submit]').setAttribute("disabled", "");
+        let isAllValid = true;
+        let invalidInpName = "";
+        let invalidInp = null;
+
+        for (let i = 0; i < inps.length; i++) {
+          // for all inputs
+          if (!inps[i].validity.valid) {
+            invalidInp = inps[i];
+            isAllValid = false;
+            invalidInpName = inps[i].getAttribute("name");
+            break;
+          }
+
+          // special case for SERVER_NAME
+          if (
+            inps[i].getAttribute("name") === "SERVER_NAME" &&
+            inps[i].value !== ""
+          ) {
+            // Case conflict with another server name
+            const serverNames = document.querySelectorAll(
+              "[data-services-service]",
+            );
+            const serverNameValue = inps[i].getAttribute("value");
+            serverNames.forEach((serverName) => {
+              const name = serverName.getAttribute("data-services-service");
+              if (name === serverNameValue) return;
+              if (name === inps[i].value) {
+                invalidInpName = inps[i]?.getAttribute("name");
+                isAllValid = false;
+              }
+            });
+          }
         }
-      }
 
-      modalErrMsg.classList.add("hidden");
-      return serverNameInput.closest("form").querySelector('button[data-services-modal-submit]').removeAttribute("disabled");
-    })
+        const errMsg = form.querySelector("[data-services-modal-error-msg]");
+        if (!isAllValid) {
+          // Wait a little that modal is fully open to focus on invalid input, because not working when element is hidden
+          setTimeout(() => {
+            invalidInp.focus();
+          }, 30);
+          errMsg.textContent = `${invalidInpName} must be valid to submit`;
+          errMsg.classList.remove("hidden");
+          formMode == "simple"
+            ? this.nextBtn.setAttribute("disabled", "")
+            : null;
+          formMode == "advanced"
+            ? form
+                .querySelector("button[data-services-modal-submit]")
+                .setAttribute("disabled", "")
+            : null;
+        }
 
+        if (isAllValid) {
+          errMsg.classList.add("hidden");
+          formMode == "simple"
+            ? this.nextBtn.removeAttribute("disabled")
+            : null;
+          formMode == "advanced"
+            ? form
+                .querySelector("button[data-services-modal-submit]")
+                .removeAttribute("disabled")
+            : null;
+        }
+      });
+    } catch (e) {}
   }
 
   setHeaderActionsVisible(setVisible) {
     if (setVisible) {
-    this.modal.querySelector('[data-toggle-draft-btn]').classList.remove("hidden");
-    this.modal.querySelector('[data-toggle-settings-mode-btn]').classList.remove("hidden");
+      this.modal
+        .querySelector("[data-toggle-draft-btn]")
+        .classList.remove("hidden");
+      this.modal
+        .querySelector("[data-toggle-settings-mode-btn]")
+        .classList.remove("hidden");
     }
 
     if (!setVisible) {
-    this.modal.querySelector('[data-toggle-draft-btn]').classList.add("hidden");
-    this.modal.querySelector('[data-toggle-settings-mode-btn]').classList.add("hidden");
+      this.modal
+        .querySelector("[data-toggle-draft-btn]")
+        .classList.add("hidden");
+      this.modal
+        .querySelector("[data-toggle-settings-mode-btn]")
+        .classList.add("hidden");
     }
   }
 
   setCardViewportHeight(setAsViewport) {
-
-    if(setAsViewport) {
+    if (setAsViewport) {
       this.modalCard.classList.add("h-[90vh]");
       this.modalCard.classList.add("w-full");
     }
 
-    if(!setAsViewport) {
+    if (!setAsViewport) {
       this.modalCard.classList.remove("h-[90vh]");
       this.modalCard.classList.remove("w-full");
     }
@@ -534,89 +650,67 @@ class ServiceModal {
     if (!setVisible) {
       this.modalTabs.classList.remove("grid");
       this.modalTabs.classList.add("hidden");
-  
+
       this.modalTabsHeader.classList.remove("flex");
       this.modalTabsHeader.classList.add("hidden");
     }
   }
 
+  updateModalData(
+    settings = {},
+    forceEnabled = false,
+    setMethodUI = false,
+    emptyServerName = false,
+  ) {
+    // Reset all settings when opening modal
+    this.setSettingsByAtt();
 
-  updateModalData(settings = {}, forceEnabled = false, setMethodUI = false, emptyServerName = false) {
-    
-    // check if at least one key in settings
-    if (Object.keys(settings).length === 0) {
-      this.setSettingsDefault();
-    }
-
+    // Case we have settings, like when we edit a service
+    // We need to update the settings with the right values
     if (Object.keys(settings).length > 0) {
-      //use this to select inputEl and change value
-    for (const [key, data] of Object.entries(settings)) {
-      //change format to match id
-      const value = data["value"];
-      const method = setMethodUI ? "ui" : data["method"];
-      const global = data["global"];
-      try {
-        const inps = this.modal.querySelectorAll(`[name='${key}']`);
+      // use this to select inputEl and change value
+      for (const [key, data] of Object.entries(settings)) {
+        //change format to match id
+        const value = data["value"];
+        const method = setMethodUI ? "ui" : data["method"];
+        const global = data["global"];
+        try {
+          const inps = this.modal.querySelectorAll(`[name='${key}']`);
 
-        inps.forEach((inp) => {
-          //form related values are excludes
-          const inpName = inp.getAttribute("name");
-          if (this.isAvoidInpList(inp, inpName)) return;
+          inps.forEach((inp) => {
+            //form related values are excludes
+            const inpName = inp.getAttribute("name");
 
-          //SET DISABLED / ENABLED
-          //for regular input
-          if (
-            inp.tagName === "INPUT" &&
-            inp.getAttribute("type") !== "checkbox"
-          ) {
-            inp.setAttribute("value", value);
-            inp.value = value;
-            inp.setAttribute("data-method", method);
-          }
-          //for checkbox
-          if (
-            inp.tagName === "INPUT" &&
-            inp.getAttribute("type") === "checkbox"
-          ) {
-            try {
-              if (inp.hasAttribute("aria-checked")) {
-                value === "yes"
-                  ? inp.setAttribute("aria-checked", "true")
-                  : inp.setAttribute("aria-checked", "false");
-              }
-            } catch (err) {}
+            if (this.isAvoidInpList(inp, inpName)) return;
 
-            try {
-              value === "yes"
-                ? inp.setAttribute("data-checked", "true")
-                : inp.setAttribute("data-checked", "false");
-            } catch (err) {}
+            //SET DISABLED / ENABLED
+            //for regular input
+            this.setCheckbox(inp, method, value);
+            this.setInput(inp, method, value);
 
-            inp.setAttribute("value", value);
-            inp.setAttribute("data-method", method);
-            inp.checked = true;
-          }
-          //for select
-          if (inp.tagName === "SELECT") {
-            inp.parentElement
-              .querySelector(
-                `button[data-setting-select-dropdown-btn][value='${value}']`,
-              )
-              .click();
-            inp.setAttribute("data-method", method);
-          }
+            //for select
+            if (inp.tagName === "SELECT") {
+              inp.parentElement
+                .querySelector(
+                  `button[data-setting-select-dropdown-btn][value='${value}']`,
+                )
+                .click();
+              inp.setAttribute("data-method", method);
+            }
 
-          if (!forceEnabled) this.setDisabledState(inp, method, global);
-          if (forceEnabled) inp.removeAttribute("disabled");
-        });
-      } catch (err) {}
+            if (!forceEnabled) this.setDisabledState(inp, method, global);
+            if (forceEnabled) inp.removeAttribute("disabled");
+          });
+        } catch (err) {}
+      }
     }
-    }
-    
 
+    // Reset simple mode, we want to override default value by default security level
+    // this.resetSimpleMode();
+
+    // Global reset
     this.resetFilterInp();
-    if(emptyServerName) this.resetServerName();
-    this.checkServNameInput();
+    if (emptyServerName) this.resetServerName();
   }
 
   setDisabledState(inp, method, global) {
@@ -645,6 +739,7 @@ class ServiceModal {
       //switch to first setting
       document.querySelector("button[data-tab-select-handler]").click();
     } catch (e) {}
+    this.checkVisibleInpsValidity();
     //show modal el
     this.modal.classList.add("flex");
     this.modal.classList.remove("hidden");
@@ -1088,7 +1183,7 @@ class Multiple {
         if (
           inpName === "csrf_token" ||
           inpName === "OLD_SERVER_NAME" ||
-          inpName === "is_draft" ||        
+          inpName === "is_draft" ||
           inpName === "mode" ||
           inpName === "security-level" ||
           inpName === "operation" ||
@@ -1117,7 +1212,7 @@ class Multiple {
           inp.checked = true;
         }
 
-        if (inp.getAttribute("type") !== "checkbox" ) {
+        if (inp.getAttribute("type") !== "checkbox") {
           inp.setAttribute("value", value);
           inp.value = value;
           inp.setAttribute("data-method", method);
