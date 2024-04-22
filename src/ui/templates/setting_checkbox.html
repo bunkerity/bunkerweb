@@ -5,6 +5,7 @@
     {% set inp_regex = setting_input['regex'] %}
     {% set inp_default = setting_input['default'] %}
     {% set inp_value = setting_input['value'] %}
+    {% set inp_levels = setting_input['levels'] %}
     {% set global_config_method = global_config.get(inp_name, {'method' : inp_method }).get('method') %}
     {% set global_config_value = global_config.get(inp_name, {'value' : inp_value }).get('value') %}
 
@@ -22,7 +23,11 @@
                 class="checkbox"
                 type="checkbox"
                 data-pattern="{{ inp_regex|safe }}"
-                value="{{ global_config_value }}" />
+                value="{{ global_config_value }}"
+                {% for level_name, value in inp_levels.items() %}
+                 data-security-level-{{level_name}}="{{value}}"
+                {% endfor %}
+                />
         <svg data-checkbox-handler="{{ inp_id }}"
                 class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
                 xmlns="http://www.w3.org/2000/svg"

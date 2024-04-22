@@ -248,6 +248,17 @@ class ServiceModal {
           this.openModal();
         }
       } catch (err) {}
+      // security lrbrl
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute("data-setting-select-dropdown-btn") ==
+          "security-level"
+        ) {
+          this.updateSecuLevel();
+        }
+      } catch (err) {}
     });
   }
 
@@ -262,11 +273,26 @@ class ServiceModal {
     });
     const firstStep = this.simpleForm.querySelector("[data-step='1']");
     firstStep.classList.remove("hidden");
+    this.updateSimpleActions();
     // we want to update settings by current security level
-    const securityLevelValue = this.simpleForm.querySelector(
-      '[data-setting-select-text="security-level"]',
-    );
-    this.setSettingsByAtt(this.simpleForm, "");
+    this.updateSecuLevel();
+  }
+
+  updateSecuLevel() {
+    // Add timeout to let dropdown update attribute values
+    // This avoid using previous value
+    setTimeout(() => {
+      const secuLevelValue = this.simpleForm
+        .querySelector('[data-setting-select-text="security-level"]')
+        .textContent.toLowerCase()
+        .trim();
+
+      this.setSettingsByAtt(
+        this.simpleForm,
+        "data-default-method",
+        `data-security-level-${secuLevelValue}`,
+      );
+    }, 30);
   }
 
   nextSimpleStep() {
@@ -357,18 +383,37 @@ class ServiceModal {
     });
   }
 
-  isAvoidInpList(inp, inpName) {
-    if (
-      inpName === "csrf_token" ||
-      inpName === "OLD_SERVER_NAME" ||
-      inpName === "mode" ||
-      inpName === "security-level" ||
-      inpName === "is_draft" ||
-      inpName === "operation" ||
-      inpName === "settings-filter" ||
-      inp.hasAttribute("data-combobox")
-    )
-      return true;
+  isAvoidInpList(type, inp, inpName, containerEl) {
+    if (type === "input") {
+      if (
+        inpName === "csrf_token" ||
+        inpName === "OLD_SERVER_NAME" ||
+        inpName === "mode" ||
+        inpName === "security-level" ||
+        inpName === "is_draft" ||
+        inpName === "operation" ||
+        inpName === "settings-filter" ||
+        inp.hasAttribute("data-combobox") ||
+        (containerEl === this.simpleForm && inpName === "SERVER_NAME")
+      )
+        return true;
+    }
+
+    if (type === "select") {
+      if (
+        inpName === "csrf_token" ||
+        inpName === "OLD_SERVER_NAME" ||
+        inpName === "mode" ||
+        inpName === "security-level" ||
+        inpName === "is_draft" ||
+        inpName === "operation" ||
+        inpName === "settings-filter" ||
+        inp.hasAttribute("data-combobox") ||
+        (containerEl === this.simpleForm && inpName === "SECURITY_LEVEL")
+      )
+        return true;
+    }
+
     return false;
   }
 
@@ -413,7 +458,7 @@ class ServiceModal {
     inps.forEach((inp) => {
       // form related values are excludes
       const inpName = inp.getAttribute("name");
-      if (this.isAvoidInpList(inp, inpName)) return;
+      if (this.isAvoidInpList("input", inp, inpName, parentEl)) return;
 
       //for all other settings values
       const defaultMethod = inp.getAttribute(attMethodName);
@@ -428,6 +473,16 @@ class ServiceModal {
     // Select only
     const selects = parentEl.querySelectorAll("select");
     selects.forEach((select) => {
+      if (
+        this.isAvoidInpList(
+          "select",
+          select,
+          select.getAttribute("name"),
+          parentEl,
+        )
+      )
+        return;
+
       const defaultMethod = select.getAttribute(attMethodName);
       const defaultVal = select.getAttribute(attValueName);
       //click the custom select dropdown to update select value
@@ -728,7 +783,7 @@ class ServiceModal {
             //form related values are excludes
             const inpName = inp.getAttribute("name");
 
-            if (this.isAvoidInpList(inp, inpName)) return;
+            if (this.isAvoidInpList("input", inp, inpName, this.modal)) return;
 
             //SET DISABLED / ENABLED
             //for regular input
@@ -753,7 +808,7 @@ class ServiceModal {
     }
 
     // Reset simple mode, we want to override default value by default security level
-    // this.resetSimpleMode();
+    this.resetSimpleMode();
 
     // Global reset
     this.resetFilterInp();
