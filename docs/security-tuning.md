@@ -181,6 +181,7 @@ This plugin offers seamless integration with various DNS providers for streamlin
 | `USE_LETS_ENCRYPT_DNS_WILDCARD`    | `yes`     | multisite | no       | Set to `yes` to automatically generate wildcard domains in certificates.                |
 | `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | no       | Time in seconds to wait for DNS propagation.                                            |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | yes      | Credential item for Let's Encrypt DNS provider that contains required credentials.      |
+| `LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS` | `no`      | global    | no       | Clear old certificates when renewing.                                                   |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
