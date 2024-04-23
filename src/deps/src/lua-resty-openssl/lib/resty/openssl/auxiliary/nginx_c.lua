@@ -56,14 +56,12 @@ if ngx.config.subsystem == "stream" then
         void **ssl_conn);
   ]]
 
-  -- sanity test
-  local _ = C.ngx_stream_lua_resty_openssl_aux_get_request_ssl
   local success
   if not os.getenv("CI_SKIP_KONG_SSL_FUNCS") then
     success, get_sock_ssl = pcall(function() return C.ngx_stream_lua_kong_get_socket_ssl end)
   end
   if not success or get_sock_ssl == nil then
-    get_sock_ssl = C.ngx_stream_lua_resty_openssl_aux_get_socket_ssl_ctx
+    get_sock_ssl = C.ngx_stream_lua_resty_openssl_aux_get_socket_ssl
   end
 
 else
@@ -87,8 +85,6 @@ else
         void **ssl_conn);
   ]]
 
-  -- sanity test
-  local _ = C.ngx_http_lua_resty_openssl_aux_get_request_ssl
   local success
   if not os.getenv("CI_SKIP_KONG_SSL_FUNCS") then
     success, get_sock_ssl = pcall(function() return C.ngx_http_lua_kong_ffi_get_socket_ssl end)
