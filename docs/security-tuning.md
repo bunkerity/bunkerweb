@@ -178,7 +178,7 @@ This plugin offers seamless integration with various DNS providers for streamlin
 | `LETS_ENCRYPT_DNS_EMAIL`           |           | multisite | no       | Email address for Let's Encrypt notifications.                                          |
 | `USE_LETS_ENCRYPT_DNS_STAGING`     | `no`      | multisite | no       | Set to `yes` to use Let's Encrypt staging server.                                       |
 | `LETS_ENCRYPT_DNS_PROVIDER`        |           | multisite | no       | DNS provider for Let's Encrypt DNS challenges.                                          |
-| `USE_LETS_ENCRYPT_DNS_WILDCARD`    | `no`      | multisite | no       | Set to `yes` to automatically generate wildcard domains in certificates.                |
+| `USE_LETS_ENCRYPT_DNS_WILDCARD`    | `yes`     | multisite | no       | Set to `yes` to automatically generate wildcard domains in certificates.                |
 | `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | no       | Time in seconds to wait for DNS propagation.                                            |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | yes      | Credential item for Let's Encrypt DNS provider that contains required credentials.      |
 
