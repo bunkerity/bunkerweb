@@ -1,12 +1,34 @@
 {% set security_levels = ['standard', 'advanced', 'high'] %}
+
+{# When multiple, setting_id need to be a setting that is part of a multiple to get all settings on the same group #}
+{# On levels, we should set a list of dict with setting_id as key and value as value #}
+
 {% set steps = [
 {
     "name" : "STEP 1 - STARTING UP",
     "description" : "we  need some information to get started.",
     "settings" : [
                     {"plugin_id" : "general", "setting_id": "SERVER_NAME", "title" : "DEFINE HOST", "subtitle" : "We need this to connect BunkerWeb to your application. You need to set your domain name.", "levels" : {} },
-                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "levels" : {}, "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(security_levels[0]|security_levels[1]|security_levels[2])$', 'type': 'select', 'select': [security_levels[0], security_levels[1], security_levels[2]]} }
-                    ],
+                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "levels" : {}, "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(security_levels[0]|security_levels[1]|security_levels[2])$', 'type': 'select', 'select': [security_levels[0], security_levels[1], security_levels[2]]} },
+                    {"plugin_id" : "limit", "setting_id": "LIMIT_REQ_URL", "title" : "Define header", "subtitle" : "test header multiple rendering",  "levels" : [{
+                                                                                                                                                                    security_levels[0] : [
+                                                                                                                                                                    {
+                                                                                                                                                                        "LIMIT_REQ_URL": "/",
+                                                                                                                                                                        "LIMIT_REQ_RATE": "2r/s"
+                                                                                                                                                                    }
+                                                                                                                                                                    ], security_levels[1] : [
+                                                                                                                                                                        {
+                                                                                                                                                                            "LIMIT_REQ_URL": "/",
+                                                                                                                                                                            "LIMIT_REQ_RATE": "2r/s"
+                                                                                                                                                                        }
+                                                                                                                                                                    ], security_levels[2] : [
+                                                                                                                                                                        {
+                                                                                                                                                                            "LIMIT_REQ_URL": "/",
+                                                                                                                                                                            "LIMIT_REQ_RATE": "2r/s"
+                                                                                                                                                                        }
+                                                                                                                                                                    ]}]
+                    },
+                  ],
                     "configs": []
 },
 {
@@ -24,12 +46,26 @@
 %}
 
 {# Get setting for each settings on steps #}
-
 {% for step in steps %}
         {% for setting in step.get('settings') %}
             {% for plugin in plugins %}
                 {% if setting["plugin_id"] == plugin["id"]%}
+
                     {% if setting.update({"setting" : plugin["settings"][setting["setting_id"]]})%}{%endif%}
+
+                    {# Case multiple, get all settings on same group #}
+                    {% set is_multiple = plugin["settings"][setting["setting_id"]].get("multiple", "") %}
+                    {% if is_multiple %}
+                        {% set multiples = {"multiples" : []}%}
+                        {% for mult_setting, value in plugin["settings"].items() %}
+                            {% if value.get("multiple", "") == is_multiple %}
+                                {% set mult_value = value %}
+                                {% if mult_value.update({"name" : mult_setting}) %}{%endif%}
+                                {% if multiples["multiples"].append(mult_value) %}{%endif%}
+                            {% endif %}
+                        {% endfor %}
+                        {% if setting.update(multiples)%}{% endif %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         {% endfor %}

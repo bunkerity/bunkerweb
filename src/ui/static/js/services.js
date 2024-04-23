@@ -915,10 +915,10 @@ class ServiceModal {
 }
 
 class Multiple {
-  constructor(prefix) {
+  constructor(prefix, formContainerSelector) {
     this.prefix = prefix;
     this.container = document.querySelector("main");
-    this.modalForm = document.querySelector(`[data-${this.prefix}-modal-form]`);
+    this.formContainer = document.querySelector(formContainerSelector);
     this.init();
   }
 
@@ -931,17 +931,19 @@ class Multiple {
       //edit service button
       try {
         if (
-          e.target.closest("button").getAttribute("data-services-action") ===
-            "edit" ||
-          e.target.closest("button").getAttribute("data-services-action") ===
-            "clone"
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "edit" ||
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "clone"
         ) {
           //remove all multiples
           this.removePrevMultiples();
           //get multiple service values and parse as obj
           const servicesSettings = e.target
-            .closest("[data-services-service]")
-            .querySelector("[data-services-settings]")
+            .closest(`[data-${this.prefix}-service]`)
+            .querySelector(`[data-${this.prefix}-settings]`)
             .getAttribute("data-value");
           const obj = JSON.parse(servicesSettings);
           //keep only multiple settings value
@@ -950,8 +952,9 @@ class Multiple {
             this.sortMultipleByContainerAndSuffixe(multipleSettings);
           // Need to set method as ui if clone
           const isClone =
-            e.target.closest("button").getAttribute("data-services-action") ===
-            "clone"
+            e.target
+              .closest("button")
+              .getAttribute(`data-${this.prefix}-action`) === "clone"
               ? true
               : false;
 
@@ -961,8 +964,9 @@ class Multiple {
       //new service button
       try {
         if (
-          e.target.closest("button").getAttribute("data-services-action") ===
-          "new"
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "new"
         ) {
           this.removePrevMultiples();
           this.addOneMultGroup();
@@ -970,7 +974,7 @@ class Multiple {
       } catch (err) {}
     });
 
-    this.modalForm.addEventListener("click", (e) => {
+    this.formContainer.addEventListener("click", (e) => {
       //ADD BTN
       try {
         if (
@@ -982,7 +986,7 @@ class Multiple {
           const btn = e.target.closest("button");
           const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
           //get all multiple groups
-          const multipleEls = document.querySelectorAll(
+          const multipleEls = this.formContainer.querySelectorAll(
             `[data-${this.prefix}-settings-multiple*="${attName}"]`,
           );
           //case no schema
@@ -995,7 +999,7 @@ class Multiple {
           //and keep the highest num
           multipleEls.forEach((container) => {
             const ctnrName = container.getAttribute(
-              "data-services-settings-multiple",
+              `data-${this.prefix}-settings-multiple`,
             );
             const num = this.getSuffixNumOrFalse(ctnrName);
             if (!isNaN(num) && num > topNum) topNum = num;
@@ -1005,11 +1009,12 @@ class Multiple {
           const currNum = `${multipleEls.length >= 2 ? topNum + 1 : topNum}`;
           const setNum = +currNum === 0 ? `` : `_${currNum}`;
           //the default (schema) group is the last group
-          const schema = document.querySelector(
+          const schema = this.formContainer.querySelector(
             `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
           );
           //clone schema to create a group with new num
           const schemaClone = schema.cloneNode(true);
+
           //add special attribute for disabled logic
           this.changeCloneSuffix(schemaClone, setNum);
           //set disabled / enabled state
@@ -1087,7 +1092,7 @@ class Multiple {
                   .setAttribute("data-value", defaultVal);
                 select.querySelector("data-setting-select-text").textContent =
                   defaultVal;
-                const dropdown = document.querySelector(
+                const dropdown = this.formContainer.querySelector(
                   `[data-setting-select-dropdown="${select.getAttribute(
                     "data-setting-select",
                   )}"]`,
@@ -1114,14 +1119,15 @@ class Multiple {
       const nameSuffixLess = isSuffixe
         ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
         : name.trim();
-      const relateSetting = document.querySelector(
+      const relateSetting = this.formContainer.querySelector(
         `[data-setting-container=${nameSuffixLess}_SCHEMA]`,
       );
+      if (!relateSetting) continue;
       const relateCtnr = relateSetting.closest(
-        "[data-services-settings-multiple]",
+        `[data-${this.prefix}-settings-multiple]`,
       );
       const relateCtnrName = relateCtnr.getAttribute(
-        "data-services-settings-multiple",
+        `data-${this.prefix}-settings-multiple`,
       );
       //then we sort the setting on the right container name by suffixe number
       if (!(relateCtnrName in sortMultiples)) {
@@ -1137,29 +1143,30 @@ class Multiple {
   }
 
   addOneMultGroup() {
-    const settings = document.querySelector("[data-services-modal-form]");
-    const multAddBtns = settings.querySelectorAll(
-      "[data-services-multiple-add]",
+    const multAddBtns = this.formContainer.querySelectorAll(
+      `[data-${this.prefix}-multiple-add]`,
     );
     multAddBtns.forEach((btn) => {
       //check if already one (SCHEMA exclude so length >= 2)
       const plugin = btn.closest("[data-plugin-item]");
       if (
-        plugin.querySelectorAll("[data-services-settings-multiple]").length >= 2
+        plugin.querySelectorAll(`[data-${this.prefix}-settings-multiple]`)
+          .length >= 2
       )
         return;
+
       btn.click();
     });
   }
 
   showMultByAtt(att) {
-    const multContainers = document.querySelectorAll(
-      `[data-services-settings-multiple^=${att}]`,
+    const multContainers = this.formContainer.querySelectorAll(
+      `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
       if (
         !container
-          .getAttribute("data-services-settings-multiple")
+          .getAttribute(`data-${this.prefix}-settings-multiple`)
           .includes("SCHEMA")
       )
         container.classList.remove("hidden");
@@ -1167,13 +1174,13 @@ class Multiple {
   }
 
   toggleMultByAtt(att) {
-    const multContainers = document.querySelectorAll(
-      `[data-services-settings-multiple^=${att}]`,
+    const multContainers = this.formContainer.querySelectorAll(
+      `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
       if (
         !container
-          .getAttribute("data-services-settings-multiple")
+          .getAttribute(`data-${this.prefix}-settings-multiple`)
           .includes("SCHEMA")
       )
         container.classList.toggle("hidden");
@@ -1183,7 +1190,7 @@ class Multiple {
   getMultiplesOnly(settings) {
     //get schema settings
     const multiples = {};
-    const schemaSettings = document.querySelectorAll(
+    const schemaSettings = this.formContainer.querySelectorAll(
       `[data-setting-container$="SCHEMA"]`,
     );
     // loop on every schema settings
@@ -1213,8 +1220,8 @@ class Multiple {
       sortMultObj,
     )) {
       //we need to access the DOM schema container
-      const schemaCtnr = document.querySelector(
-        `[data-services-settings-multiple="${schemaCtnrName}"]`,
+      const schemaCtnr = this.formContainer.querySelector(
+        `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`,
       );
       //now we have to loop on each multiple settings group
       for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
@@ -1249,9 +1256,9 @@ class Multiple {
   changeCloneSuffix(schemaCtnrClone, suffix) {
     //rename multiple container
     schemaCtnrClone.setAttribute(
-      "data-services-settings-multiple",
+      `data-${this.prefix}-settings-multiple`,
       schemaCtnrClone
-        .getAttribute("data-services-settings-multiple")
+        .getAttribute(`data-${this.prefix}-settings-multiple`)
         .replace("_SCHEMA", suffix),
     );
 
@@ -1401,7 +1408,7 @@ class Multiple {
         .click();
 
       //set state to custom visible el
-      const btnCustom = document.querySelector(
+      const btnCustom = this.formContainer.querySelector(
         `[data-setting-select=${select.getAttribute(
           "data-setting-select-default",
         )}]`,
@@ -1440,10 +1447,10 @@ class Multiple {
         selects.forEach((select) => {
           const method = select.getAttribute("data-default-method");
           const name = select.getAttribute(
-            "data-services-setting-select-default",
+            `data-${this.prefix}-setting-select-default`,
           );
-          const selDOM = document.querySelector(
-            `button[data-services-setting-select='${name}']`,
+          const selDOM = this.formContainer.querySelector(
+            `button[data-${this.prefix}-setting-select='${name}']`,
           );
           if (method === "ui" || method === "default") {
             selDOM.removeAttribute("disabled", "");
@@ -1477,7 +1484,7 @@ class Multiple {
 
   hiddenIfNoMultiples() {
     //hide multiple btn if no multiple exist on a plugin
-    const multiples = document.querySelectorAll(
+    const multiples = this.formContainer.querySelectorAll(
       `[data-${this.prefix}-settings-multiple]`,
     );
     multiples.forEach((container) => {
@@ -1489,13 +1496,13 @@ class Multiple {
   }
 
   removePrevMultiples() {
-    const multiPlugins = document.querySelectorAll(
+    const multiPlugins = this.formContainer.querySelectorAll(
       `[data-${this.prefix}-settings-multiple]`,
     );
     multiPlugins.forEach((multiGrp) => {
       if (
         !multiGrp
-          .getAttribute("data-services-settings-multiple")
+          .getAttribute(`data-${this.prefix}-settings-multiple`)
           .includes("SCHEMA")
       )
         multiGrp.remove();
@@ -1838,7 +1845,14 @@ const setFilterGlobal = new FilterSettings(
   "services",
 );
 
-const setMultiple = new Multiple("services");
+const setAdvancedMultiple = new Multiple(
+  "services",
+  `[data-advanced][data-services-modal-form]`,
+);
+const setSimpleMultiple = new Multiple(
+  "services",
+  `[data-simple][data-services-modal-form]`,
+);
 
 const checkServiceModalKeyword = new CheckNoMatchFilter(
   document.querySelector("input#settings-filter"),
