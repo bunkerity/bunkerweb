@@ -160,8 +160,6 @@ def path_to_dict(
             mime = Magic(mime=True)
             file_type = mime.from_buffer(conf["data"])
 
-            print(file_type, flush=True)
-
             file_info = {
                 "name": conf["file_name"],
                 "job_name": conf["job_name"],
