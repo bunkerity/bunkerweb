@@ -244,6 +244,11 @@ function createDOMPurify(window = getGlobal()) {
    */
   let SAFE_FOR_TEMPLATES = false;
 
+  /* Output should be safe even for XML used within HTML and alike.
+   * This means, DOMPurify removes comments when containing risky content.
+   */
+  let SAFE_FOR_XML = true;
+
   /* Decide if document with <html>... should be returned */
   let WHOLE_DOCUMENT = false;
 
@@ -464,6 +469,7 @@ function createDOMPurify(window = getGlobal()) {
     ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
     ALLOW_SELF_CLOSE_IN_ATTR = cfg.ALLOW_SELF_CLOSE_IN_ATTR !== false; // Default true
     SAFE_FOR_TEMPLATES = cfg.SAFE_FOR_TEMPLATES || false; // Default false
+    SAFE_FOR_XML = cfg.SAFE_FOR_XML !== false; // Default true
     WHOLE_DOCUMENT = cfg.WHOLE_DOCUMENT || false; // Default false
     RETURN_DOM = cfg.RETURN_DOM || false; // Default false
     RETURN_DOM_FRAGMENT = cfg.RETURN_DOM_FRAGMENT || false; // Default false
@@ -913,7 +919,8 @@ function createDOMPurify(window = getGlobal()) {
       NodeFilter.SHOW_ELEMENT |
         NodeFilter.SHOW_COMMENT |
         NodeFilter.SHOW_TEXT |
-        NodeFilter.SHOW_PROCESSING_INSTRUCTION,
+        NodeFilter.SHOW_PROCESSING_INSTRUCTION |
+        NodeFilter.SHOW_CDATA_SECTION,
       null
     );
   };
@@ -1004,6 +1011,22 @@ function createDOMPurify(window = getGlobal()) {
       !_isNode(currentNode.firstElementChild) &&
       regExpTest(/<[/\w]/g, currentNode.innerHTML) &&
       regExpTest(/<[/\w]/g, currentNode.textContent)
+    ) {
+      _forceRemove(currentNode);
+      return true;
+    }
+
+    /* Remove any ocurrence of processing instructions */
+    if (currentNode.nodeType === 7) {
+      _forceRemove(currentNode);
+      return true;
+    }
+
+    /* Remove any kind of possibly harmful comments */
+    if (
+      SAFE_FOR_XML &&
+      currentNode.nodeType === 8 &&
+      regExpTest(/<[/\w]/g, currentNode.data)
     ) {
       _forceRemove(currentNode);
       return true;
