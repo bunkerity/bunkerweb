@@ -903,8 +903,8 @@ def services():
         del variables["csrf_token"]
 
         # Delete custom client variables
-        del variables["SECURITY_LEVEL"]
-        del variables["mode"]
+        variables.pop("SECURITY_LEVEL", None)
+        variables.pop("mode", None)
 
         is_draft = variables.pop("is_draft", "no") == "yes"
 
