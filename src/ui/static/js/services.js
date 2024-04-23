@@ -30,6 +30,8 @@ class ServiceModal {
     this.submitBtn = document.querySelector(
       "button[data-services-modal-submit]",
     );
+    this.darkMode = document.querySelector("[data-dark-toggle]");
+    this.isDarkMode = this.darkMode.checked;
     // simple el
     this.simpleForm = this.modal.querySelector(
       "[data-simple][data-services-modal-form]",
@@ -46,6 +48,9 @@ class ServiceModal {
     this.submitBtns = this.modal.querySelectorAll(
       "button[data-services-modal-submit]",
     );
+    // add editor for configs in simple mode
+    this.simpleEditorEls = [];
+    this.initSimpleEditors();
     //container
     this.container = document.querySelector("main");
     this.currAction = "";
@@ -90,6 +95,11 @@ class ServiceModal {
           this.checkVisibleInpsValidity();
         });
       });
+    });
+
+    this.darkMode.addEventListener("click", (e) => {
+      this.isDarkMode = e.target.checked;
+      this.updateEditorMode();
     });
 
     this.modal.addEventListener("click", (e) => {
@@ -278,6 +288,55 @@ class ServiceModal {
     this.updateSecuLevel();
   }
 
+  initSimpleEditors() {
+    const simpleEditors = this.modal.querySelectorAll("[data-simple-editor]");
+    simpleEditors.forEach((editorEl) => {
+      const editor = ace.edit(editorEl.getAttribute("id"));
+      // Handle
+      if (this.isDarkMode) {
+        editor.setTheme("ace/theme/dracula");
+      } else {
+        editor.setTheme("ace/theme/dawn");
+      }
+      //editor options
+      editor.setShowPrintMargin(false);
+      this.simpleEditorEls.push(editor);
+    });
+
+    this.updateSecuLevelEditorContent();
+  }
+
+  updateEditorMode() {
+    this.simpleEditorEls.forEach((editor) => {
+      if (this.isDarkMode) {
+        editor.setTheme("ace/theme/dracula");
+      } else {
+        editor.setTheme("ace/theme/dawn");
+      }
+    });
+  }
+
+  updateSecuLevelEditorContent() {
+    const secuLevelValue = this.simpleForm
+      .querySelector('[data-setting-select-text="security-level"]')
+      .textContent.toLowerCase()
+      .trim();
+
+    this.simpleEditorEls.forEach((editorEl) => {
+      const editorContent = this.modal
+        .querySelector(
+          `textarea#${editorEl.container
+            .getAttribute("id")
+            .replace(
+              "-editor",
+              "-content",
+            )}[data-simple-default-editor-content]`,
+        )
+        .getAttribute(`data-content-${secuLevelValue}`);
+      editorEl.setValue(editorContent);
+    });
+  }
+
   updateSecuLevel() {
     // Add timeout to let dropdown update attribute values
     // This avoid using previous value
@@ -287,11 +346,15 @@ class ServiceModal {
         .textContent.toLowerCase()
         .trim();
 
+      // Update settings by security level
       this.setSettingsByAtt(
         this.simpleForm,
         "data-default-method",
         `data-security-level-${secuLevelValue}`,
       );
+
+      // Update configs
+      this.updateSecuLevelEditorContent();
     }, 30);
   }
 

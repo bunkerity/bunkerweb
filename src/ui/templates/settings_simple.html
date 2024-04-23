@@ -73,5 +73,27 @@
         {% endif %}
         </div>
 {% endfor %}
-<!-- end plugin item -->
+
+<!-- custom configs -->
+{% for config in configs %}
+<div data-simple id="{{ config['type'] }}-simple"
+     class="w-full h-full px-1 mb-2 col-span-12 grid grid-cols-12 h-full items-end">
+    <!-- title and desc -->
+    <div class="col-span-12" data-setting-header>
+        <div class="flex flex-col justify-start items-start">
+            <h5 class="sm:pl-3 sm:pr-2 mt-2 transition duration-300 ease-in-out font-bold text-base uppercase dark:text-white/90 mb-0">
+                Custom config for {{ config['type'] }}
+            </h5>
+            <p class="max-w-[550px] sm:pl-3 sm:pr-2 text-sm dark:text-gray-300 mb-0">{{ config['subtitle'] }}</p>
+        </div>
+    </div>
+    <div class="w-full col-span-12 px-4">
+        <textarea {% for level_name, value in config['levels'].items() %} data-content-{{level_name}}="{{ value}}" {% endfor %} data-simple-default-editor-content class="hidden" id="{{config['name']}}-content" name="{{config['name']}}-content"></textarea>
+        <!-- editor-->
+        <div data-simple-editor id="{{config['name']}}-editor" class="text-base w-full h-50 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800">
+        </div>
+        <!-- editor-->
+    </div>
+</div>
+{% endfor %}
 </div>

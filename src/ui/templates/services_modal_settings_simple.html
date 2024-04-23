@@ -1,25 +1,23 @@
+{% set security_levels = ['standard', 'advanced', 'high'] %}
 {% set steps = [
 {
     "name" : "STEP 1 - STARTING UP",
     "description" : "we  need some information to get started.",
     "settings" : [
                     {"plugin_id" : "general", "setting_id": "SERVER_NAME", "title" : "DEFINE HOST", "subtitle" : "We need this to connect BunkerWeb to your application. You need to set your domain name.", "levels" : {} },
-                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "levels" : {}, "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(standard|advanced|bunker)$', 'type': 'select', 'select': ['standard', 'elevated', 'lockdown']} }
+                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "levels" : {}, "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(security_levels[0]|security_levels[1]|security_levels[2])$', 'type': 'select', 'select': [security_levels[0], security_levels[1], security_levels[2]]} }
                     ],
-    "configs": [
-        {"name": "my_config_1", "type": "modsec", "data": "..."},
-        {"name": "my_config_2", "type": "server-http", "data": "..."}
-    ]
+                    "configs": []
 },
 {
     "name" : "STEP 2 - ANTIBOT",
     "description" : "Avoid spammer and bot to access your website.",
     "settings" : [
-                  {"plugin_id" : "antibot", "setting_id": "USE_ANTIBOT", "title" : "Define the type of your antibot", "subtitle" : "Javascript, Captcha or Cookie don't need additionnal settings to be fill. Recaptcha, Hcaptcha and Turnstile need secret key and site key delivered from providers.",  "levels" : {"standard" : "no", "elevated" : "javascript", "lockdown" : "javascript"} },
+                  {"plugin_id" : "antibot", "setting_id": "USE_ANTIBOT", "title" : "Define the type of your antibot", "subtitle" : "Javascript, Captcha or Cookie don't need additionnal settings to be fill. Recaptcha, Hcaptcha and Turnstile need secret key and site key delivered from providers.",  "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} },
                  ],
     "configs": [
-        {"name": "my_config_1", "type": "modsec", "data": "..."},
-        {"name": "my_config_2", "type": "server-http", "data": "..."}
+        {"name": "my_config_1", "type": "modsec", "subtitle" : "This will determine the modsecurity rules to apply to this service.", "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} },
+        {"name": "my_config_2", "type": "server-http", "subtitle" : "This will determine the server http...", "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} }
     ]
 },
 ]
@@ -58,8 +56,8 @@
             <hr class="separator" />
         </div>
             {% set plugin_simple = step.get('settings') %}
+            {% set configs = step.get('configs') %}
             {% include "settings_simple.html" %}
-
         </div>
     {% endfor %}
 
