@@ -43,7 +43,7 @@
                 </button>
             </div>
             <!-- end plugin multiple handler-->
-                <!-- multiple settings -->
+            <!-- multiple settings -->
                 <div data-{{ attribute_name }}-settings-multiple="{{ setting_input['multiple_name'] }}_SCHEMA" class=" col-span-12 bg-gray-50 dark:bg-slate-900/30 hidden w-full my-4 grid-cols-12 border dark:border-gray-700 rounded">
                     {% for setting in setting_input.get("multiples") %}
                         {% set setting_input = { "name" : setting.get("name"), "context" : setting.get("context"), "method" : setting.get("method", "default"), "help" : setting.get("help"), "label" : setting.get("label"), "id" : setting.get("id"), "type" : setting.get("type"), "default" : setting.get("default", "default"), "select" : setting.get("select"), "regex" : setting.get("regex"), "value" : setting.get("value", setting.get('default')), "is_multiple" : True, "levels" : {} } %}

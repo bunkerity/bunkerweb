@@ -173,12 +173,8 @@ class ServiceModal {
           );
           //get service data and parse it
           //multiple type logic is launch at same time on relate class
-          const servicesSettings = e.target
-            .closest("[data-services-service]")
-            .querySelector("[data-services-settings]")
-            .getAttribute("data-value");
-          const obj = JSON.parse(servicesSettings);
-          this.updateModalData(obj, false, false, false);
+          const settings = this.getSettingsNoMultiple(e.target);
+          this.updateModalData(settings, false, false, false);
           //show modal
           this.openModal();
         }
@@ -203,13 +199,9 @@ class ServiceModal {
           );
           //set default value with method default
           //get service data and parse it
-          //multiple type logic is launch at same time on relate class
-          const servicesSettings = e.target
-            .closest("[data-services-service]")
-            .querySelector("[data-services-settings]")
-            .getAttribute("data-value");
-          const obj = JSON.parse(servicesSettings);
-          this.updateModalData(obj, true, true, true, true);
+          // multiple type logic is launch at same time on relate class
+          const settings = this.getSettingsNoMultiple(e.target);
+          this.updateModalData(settings, true, true, true, true);
           this.openModal(); //server name is unset
         }
       } catch (err) {}
@@ -271,6 +263,19 @@ class ServiceModal {
       } catch (err) {}
     });
   }
+
+  // Avoid multiple settings because it is handle by Multiple class
+  getSettingsNoMultiple(target) {
+    const servicesSettings = target
+    .closest("[data-services-service]")
+    .querySelector("[data-services-settings]")
+    .getAttribute("data-value");
+    const settings = JSON.parse(servicesSettings);
+    // Loop
+    console.log(settings);
+    return settings;
+  }
+
 
   resetSimpleMode() {
     // reset button
@@ -919,16 +924,19 @@ class Multiple {
     this.prefix = prefix;
     this.container = document.querySelector("main");
     this.formContainer = document.querySelector(formContainerSelector);
+    this.pluginDataStr =  document.querySelector('input[data-plugins]').getAttribute('data-plugins');
+    this.pluginData = JSON.parse(JSON.stringify(this.pluginDataStr));
     this.init();
   }
 
   init() {
+
     window.addEventListener("load", () => {
       this.hiddenIfNoMultiples();
     });
 
     this.container.addEventListener("click", (e) => {
-      //edit service button
+      // Edit service button
       try {
         if (
           e.target
@@ -948,6 +956,7 @@ class Multiple {
           const obj = JSON.parse(servicesSettings);
           //keep only multiple settings value
           const multipleSettings = this.getMultiplesOnly(obj);
+
           const sortMultiples =
             this.sortMultipleByContainerAndSuffixe(multipleSettings);
           // Need to set method as ui if clone
@@ -961,10 +970,9 @@ class Multiple {
           this.setMultipleToDOM(sortMultiples, isClone);
         }
       } catch (err) {}
-      //new service button
+      // New service button
       try {
-        if (
-          e.target
+        if (e.target
             .closest("button")
             .getAttribute(`data-${this.prefix}-action`) === "new"
         ) {
@@ -975,7 +983,7 @@ class Multiple {
     });
 
     this.formContainer.addEventListener("click", (e) => {
-      //ADD BTN
+      // Add btn
       try {
         if (
           e.target
@@ -1193,6 +1201,7 @@ class Multiple {
     const schemaSettings = this.formContainer.querySelectorAll(
       `[data-setting-container$="SCHEMA"]`,
     );
+
     // loop on every schema settings
     schemaSettings.forEach((schema) => {
       const schemaName = schema
@@ -1223,6 +1232,7 @@ class Multiple {
       const schemaCtnr = this.formContainer.querySelector(
         `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`,
       );
+
       //now we have to loop on each multiple settings group
       for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
         //we have to clone schema container first
@@ -1240,6 +1250,7 @@ class Multiple {
             `[data-setting-container="${name}"]`,
           );
           //replace input info and disabled state
+          // check if attribute data-simple on formContainer
           this.setSetting(
             data["value"],
             setMethodUI ? "ui" : data["method"],
