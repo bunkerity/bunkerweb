@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {% set attribute_name = "bans" %}
     {% set reasons = ["all"] %}
     {% set terms = ["all"] %}
     {% for ban in bans %}
@@ -10,7 +11,6 @@
             {% if terms.append(ban["term"]) %}{% endif %}
         {% endif %}
     {% endfor %}
-    {% set attribute_name = "bans" %}
 
     <!-- actions -->
     <div class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">

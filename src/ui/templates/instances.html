@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+    {% set attribute_name = "instances" %}
+
     {% if instances|length == 0 %}
         <div class="col-span-12 sm:col-span-4 sm:col-start-5">
             <div class="text-center relative w-full p-4 text-white bg-blue-500 rounded-lg">No instance to show</div>
