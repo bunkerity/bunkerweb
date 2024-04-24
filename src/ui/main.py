@@ -829,7 +829,19 @@ def instances():
             "restart",
         ):
             return redirect_flash_error("Missing operation parameter on /instances.", "instances")
-        manage_bunkerweb("instances", request.form["INSTANCE_ID"], operation=request.form["operation"])
+
+        ui_data = get_ui_data()
+        ui_data["RELOADING"] = True
+        ui_data["LAST_RELOAD"] = time()
+        Thread(
+            target=manage_bunkerweb,
+            name="Reloading instances",
+            args=("instances", request.form["INSTANCE_ID"]),
+            kwargs={"operation": request.form["operation"]},
+        ).start()
+
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         return redirect(
             url_for(
