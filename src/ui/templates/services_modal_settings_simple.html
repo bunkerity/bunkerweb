@@ -11,22 +11,21 @@
                     {"plugin_id" : "general", "setting_id": "SERVER_NAME", "title" : "DEFINE HOST", "subtitle" : "We need this to connect BunkerWeb to your application. You need to set your domain name.", "levels" : {} },
                     {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "levels" : {}, "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(security_levels[0]|security_levels[1]|security_levels[2])$', 'type': 'select', 'select': [security_levels[0], security_levels[1], security_levels[2]]} },
                     {"plugin_id" : "limit", "setting_id": "LIMIT_REQ_URL", "title" : "Define header", "subtitle" : "test header multiple rendering",  "levels" : [{
-                                                                                                                                                                    security_levels[0] : [
-                                                                                                                                                                    {
-                                                                                                                                                                        "LIMIT_REQ_URL": "/",
-                                                                                                                                                                        "LIMIT_REQ_RATE": "2r/s"
+                                                                                                                                                                    security_levels[0] : {
+                                                                                                                                                                        "LIMIT_REQ_URL_1": "/",
+                                                                                                                                                                        "LIMIT_REQ_RATE_1": "2r/s"
                                                                                                                                                                     }
-                                                                                                                                                                    ], security_levels[1] : [
-                                                                                                                                                                        {
-                                                                                                                                                                            "LIMIT_REQ_URL": "/",
-                                                                                                                                                                            "LIMIT_REQ_RATE": "2r/s"
+                                                                                                                                                                    , security_levels[1] : {
+                                                                                                                                                                            "LIMIT_REQ_URL_1": "/",
+                                                                                                                                                                            "LIMIT_REQ_RATE_1": "2r/s"
                                                                                                                                                                         }
-                                                                                                                                                                    ], security_levels[2] : [
-                                                                                                                                                                        {
-                                                                                                                                                                            "LIMIT_REQ_URL": "/",
-                                                                                                                                                                            "LIMIT_REQ_RATE": "2r/s"
+                                                                                                                                                                    , security_levels[2] : {
+                                                                                                                                                                            "LIMIT_REQ_URL_1": "/",
+                                                                                                                                                                            "LIMIT_REQ_RATE_1": "2r/s",
+                                                                                                                                                                            "LIMIT_REQ_URL_2": "/admin",
+                                                                                                                                                                            "LIMIT_REQ_RATE_2": "4r/s"
                                                                                                                                                                         }
-                                                                                                                                                                    ]}]
+                                                                                                                                                                    }]
                     },
                   ],
                     "configs": []

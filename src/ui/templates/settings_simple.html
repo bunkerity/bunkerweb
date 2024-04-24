@@ -4,7 +4,7 @@
 {% for setting_simple in plugin_simple %}
     {% set setting_input = { "name" : setting_simple.get('setting_id'), "multiples" : setting_simple.get("multiples", {}), "method" : setting_simple.get('setting').get("method", "default"), "help" : setting_simple.get('setting').get("help"), "label" : setting_simple.get('setting').get("label"), "id" : setting_simple.get('setting').get("id"), "type" : setting_simple.get('setting').get("type"), "default" : setting_simple.get('setting').get("default", "default"), "select" : setting_simple.get('setting').get("select"), "regex" : setting_simple.get('setting').get("regex"), "value" : setting_simple.get('setting').get("value"), "is_multiple" : True if setting_simple.get('setting').get("multiple", "") else False, "levels" : setting_simple.get('levels', {}) if not setting_simple.get('setting').get("multiples", "") else {}, "multiple_name" : setting_simple.get('setting').get('multiple')  } %}
     <div data-simple id="{{ setting_simple['plugin_id'] }}-simple"
-         class="w-full h-full px-1 mb-2 col-span-12 {% if not setting_input['is_multiple'] %} md:col-span-6 {% endif %} grid grid-cols-12 h-full items-end">
+         class="w-full h-full px-1  mt-4 mb-2 col-span-12 {% if not setting_input['is_multiple'] %} md:col-span-6 {% endif %} grid grid-cols-12 h-full items-end">
         <!-- title and desc -->
         <div class="col-span-12" data-setting-header>
             <div class="flex flex-col justify-start items-start">
@@ -17,7 +17,7 @@
         {% if not setting_input.get('is_multiple') %}
         <!-- end title and desc -->
         <div class="w-full col-span-12">
-            <div data-setting-container data--simple-{{ current_endpoint }}-type="{{ setting_input['type'] }}" data--simple-{{ current_endpoint }}-context="{{ setting_input['context'] }}" class="relative mx-0 sm:mx-2 md:mx-3 lg:mx-4 my-2 col-span-12 md:my-3 md:col-span-6  2xl:my-3 2xl:col-span-4" id="form-edit--simple-{{ current_endpoint }}-{{ setting_input["id"] }}">
+            <div data-setting-container data-{{ current_endpoint }}-type="{{ setting_input['type'] }}" data-{{ current_endpoint }}-context="{{ setting_input['context'] }}" class="relative mx-0 sm:mx-2 md:mx-3 lg:mx-4 my-2 col-span-12 md:my-3 md:col-span-6  2xl:my-3 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ setting_input["id"] }}">
                 {% include "setting_header.html" %}
                 {% include "setting_input.html" %}
                 {% include "setting_select.html" %}
@@ -72,7 +72,7 @@
 <!-- custom configs -->
 {% for config in configs %}
 <div data-simple id="{{ config['type'] }}-simple"
-     class="w-full h-full px-1 mb-2 col-span-12 grid grid-cols-12 h-full items-end">
+     class="w-full h-full px-1 mt-4 mb-2 col-span-12 grid grid-cols-12 h-full items-end">
     <!-- title and desc -->
     <div class="col-span-12" data-setting-header>
         <div class="flex flex-col justify-start items-start">

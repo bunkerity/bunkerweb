@@ -257,7 +257,7 @@ class ServiceModal {
           this.openModal();
         }
       } catch (err) {}
-      // security lrbrl
+      // security
       try {
         if (
           e.target
@@ -648,7 +648,7 @@ class ServiceModal {
     this.SetSelectTabsVisible(action === "delete" ? false : true);
     this.setHeaderActionsVisible(action === "delete" ? false : true);
     this.changeSubmitBtn(action);
-
+    this.setMode(action);
     if (action === "edit" || action === "new" || action === "clone") {
       this.formNewEdit.classList.remove("hidden");
       this.simpleForm.classList.remove("hidden");
@@ -819,6 +819,16 @@ class ServiceModal {
     }
   }
 
+  setMode(action) {
+    if (action === "new") {
+      this.switchModeBtn.classList.remove("hidden");
+      this.setSettingMode("simple");
+    } else {
+      this.switchModeBtn.classList.add("hidden");
+      this.setSettingMode("advanced");
+    }
+  }
+
   setCardViewportHeight(setAsViewport) {
     if (setAsViewport) {
       this.modalCard.classList.add("h-[90vh]");
@@ -949,10 +959,18 @@ class ServiceModal {
 }
 
 class Multiple {
-  constructor(prefix, formContainerSelector) {
+  constructor(prefix, formContainerSelector, handleSecurityLevel = false) {
+    this.multSettingsName = JSON.parse(
+      document
+        .querySelector("input[data-plugins-multiple]")
+        .getAttribute("data-plugins-multiple")
+        .replaceAll(`'`, `"`),
+    );
+    this.currServName = "";
     this.prefix = prefix;
     this.container = document.querySelector("main");
     this.formContainer = document.querySelector(formContainerSelector);
+    this.handleSecurityLevel = handleSecurityLevel;
     this.init();
   }
 
@@ -962,6 +980,46 @@ class Multiple {
     });
 
     this.container.addEventListener("click", (e) => {
+      // Update security level
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute("data-setting-select-dropdown-btn") ==
+          "security-level"
+        ) {
+          // Need to wait atm for the attributes value to be updated
+          setTimeout(() => {
+            //remove all multiples
+            this.removePrevMultiples();
+            // set settings
+            const service = document.querySelector(
+              `[data-services-card][data-services-service='${this.currServName}']`,
+            );
+            const serviceSettings = service
+              ? service
+                  .querySelector("[data-services-settings]")
+                  .getAttribute("data-value")
+              : "{}";
+            //get multiple service values and parse as obj
+            const settings = this.getSettingsMultiple(serviceSettings);
+            //keep only multiple settings value
+            const multipleSettings = this.getMultiplesOnly(settings);
+            const sortMultiples =
+              this.sortMultipleByContainerAndSuffixe(multipleSettings);
+
+            // Need to set method as ui if clone
+            const isClone =
+              e.target
+                .closest("button")
+                .getAttribute(`data-${this.prefix}-action`) === "clone"
+                ? true
+                : false;
+            this.setMultipleToDOM(sortMultiples, isClone);
+          }, 30);
+        }
+      } catch (err) {}
+
       // Edit service button
       try {
         if (
@@ -974,8 +1032,13 @@ class Multiple {
         ) {
           //remove all multiples
           this.removePrevMultiples();
-          //get multiple service values and parse as obj
-          const settings = this.getSettingsMultiple(e.target);
+          // set settings
+          const service = e.target.closest("[data-services-service]");
+          this.serviceName = service.getAttribute("data-services-service");
+          const serviceSettings = service
+            .querySelector("[data-services-settings]")
+            .getAttribute("data-value");
+          const settings = this.getSettingsMultiple(serviceSettings);
           //keep only multiple settings value
           const multipleSettings = this.getMultiplesOnly(settings);
           const sortMultiples =
@@ -999,6 +1062,7 @@ class Multiple {
             .getAttribute(`data-${this.prefix}-action`) === "new"
         ) {
           this.removePrevMultiples();
+          this.serviceName = "new";
           this.addOneMultGroup();
         }
       } catch (err) {}
@@ -1182,7 +1246,6 @@ class Multiple {
       const multGroups = this.formContainer.querySelectorAll(
         `[data-${this.prefix}-settings-multiple^="${att}"]`,
       );
-      console.log(multGroups);
       if (multGroups.length >= 2) return;
 
       btn.click();
@@ -1218,13 +1281,92 @@ class Multiple {
   }
 
   // Avoid multiple settings because it is handle by Multiple class
-  getSettingsMultiple(target) {
-    const servicesSettings = target
-      .closest("[data-services-service]")
-      .querySelector("[data-services-settings]")
-      .getAttribute("data-value");
-    const settings = JSON.parse(servicesSettings);
+  getSettingsMultiple(serviceSettings) {
+    const settings = JSON.parse(serviceSettings);
+    // We need to add security level
+    if (this.handleSecurityLevel) {
+      return this.addSecurityLevelToSettings(settings);
+    }
     return settings;
+  }
+
+  addSecurityLevelToSettings(settings) {
+    // Retrieve security level and current level
+    const secLevel = document
+      .querySelector('[data-setting-select-text="security-level"]')
+      .getAttribute("data-value");
+
+    // Case custom, we don't have to use security level settings
+    if (secLevel === "custom") return settings;
+    // Case others security level, we need to remove multiple with method ui or default only and replace by security level settings
+    // We store remain names to avoid duplicate suffixe
+    const remainNames = [];
+    this.multSettingsName.forEach((name) => {
+      for (const [key, value] of Object.entries(settings)) {
+        if (
+          key.startsWith(name) &&
+          (value["method"] === "ui" || value["method"] === "default")
+        ) {
+          delete settings[key];
+        }
+        if (
+          key.startsWith(name) &&
+          (value["method"] !== "ui" || value["method"] !== "default")
+        ) {
+          remainNames.push(key);
+        }
+      }
+    });
+
+    // Retrieve multiple groups by security level
+    const secLevelMultSettingsEl = this.formContainer.querySelectorAll(
+      `[data-multiple-levels]`,
+    );
+    const settingsSecLevel = {};
+    secLevelMultSettingsEl.forEach((multEl) => {
+      const settingsGroup = JSON.parse(
+        multEl.getAttribute("data-multiple-levels").replaceAll(`'`, `"`),
+      );
+      // loop on each multiple groups
+      settingsGroup.forEach((levelGroups) => {
+        // define the suffixe number using remaining name
+        // loop on each dict on group
+        const levelGroup = levelGroups[secLevel];
+        for (const [key, value] of Object.entries(levelGroup)) {
+          let suffixe_num = 0;
+          // key has multiple "_", we want to delete only content after last "_"
+          // check if last element is a valid number to get right name
+          const splitKey = key.split("_");
+          const keyName = isNaN(splitKey[splitKey.length - 1])
+            ? key
+            : splitKey.slice(0, splitKey.length - 1).join("_");
+          // Loop on remaining names to get the right suffixe number
+          remainNames.forEach((name) => {
+            if (name.startsWith(keyName)) {
+              const splitName = name.split("_");
+              if (!isNaN(splitName[splitName.length - 1]))
+                suffixe_num = Math.max(
+                  suffixe_num,
+                  +splitName[splitName.length - 1],
+                );
+            }
+          });
+          const newKey = `${keyName}_${suffixe_num + 1}`;
+          // don't forget to add new key to avoid override same key
+          remainNames.push(newKey);
+          // we need same format as settings
+          settingsSecLevel[newKey] = {
+            value: value,
+            method: "ui",
+            global: false,
+          };
+        }
+      });
+    });
+
+    const mergeSettings = { ...settings, ...settingsSecLevel };
+    // Merge level settings with current settings
+    return mergeSettings;
   }
 
   getMultiplesOnly(settings) {
@@ -1893,10 +2035,12 @@ const setFilterGlobal = new FilterSettings(
 const setAdvancedMultiple = new Multiple(
   "services",
   `[data-advanced][data-services-modal-form]`,
+  false,
 );
 const setSimpleMultiple = new Multiple(
   "services",
   `[data-simple][data-services-modal-form]`,
+  true,
 );
 
 const checkServiceModalKeyword = new CheckNoMatchFilter(
