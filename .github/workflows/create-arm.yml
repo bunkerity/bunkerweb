@@ -66,7 +66,7 @@ jobs:
         with:
           args: instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH
-        uses: iFaxity/wait-on-action@628831cec646e6dacca502f34a6c6b46e131e51d
+        uses: iFaxity/wait-on-action@df89d0cf8089bb0c38e25279c74848ef313da53b
         with:
           resource: tcp:${{ fromJson(steps.scw.outputs.json).public_ip.address }}:22
           timeout: 300000
