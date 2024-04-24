@@ -761,10 +761,16 @@ class ServiceModal {
 
         const errMsg = form.querySelector("[data-services-modal-error-msg]");
         if (!isAllValid) {
+          invalidInp.classList.add("invalid");
+          const invalidEl = invalidInp
+            .closest("form")
+            .querySelector(`[data-invalid=${invalidInp.getAttribute("id")}]`);
+          invalidEl.classList.remove("hidden", "md:hidden");
           // Wait a little that modal is fully open to focus on invalid input, because not working when element is hidden
           setTimeout(() => {
             invalidInp.focus();
           }, 30);
+
           errMsg.textContent = `${invalidInpName} must be valid to submit`;
           errMsg.classList.remove("hidden");
           formMode == "simple"
@@ -934,9 +940,10 @@ class ServiceModal {
       document.querySelector("button[data-tab-select-handler]").click();
     } catch (e) {}
     this.checkVisibleInpsValidity();
-    //show modal el
-    this.modal.classList.add("flex");
-    this.modal.classList.remove("hidden");
+    setTimeout(() => {
+      this.modal.classList.add("flex");
+      this.modal.classList.remove("hidden");
+    }, 20);
   }
 }
 

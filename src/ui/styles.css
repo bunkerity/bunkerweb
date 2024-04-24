@@ -52,7 +52,7 @@
 /*----------------------------------------------*/
 
 .checkbox {
-  @apply cursor-pointer disabled:cursor-default
+  @apply transition-none cursor-pointer disabled:cursor-default
     relative dark:border-slate-600 dark:bg-slate-700 z-10 data-checked:z-0 w-5 h-5
     text-base rounded-1.4 data-checked:bg-primary data-checked:border-primary
     dark:data-checked:bg-primary dark:data-checked:border-primary duration-250 float-left
@@ -72,7 +72,7 @@
 }
 
 .custom-dropdown-btn {
-  @apply min-h-[38px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200;
+  @apply transition-none min-h-[38px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200;
 }
 
 .active.custom-dropdown-btn {
@@ -80,7 +80,7 @@
 }
 
 .regular-input {
-  @apply outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 disabled:opacity-75 focus:border-gray-300/0 focus:ring-1  focus:valid:ring-green-500 focus:invalid:ring-red-500  text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700;
+  @apply transition-none outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 disabled:opacity-75 focus:border-gray-300/0 focus:ring-1  focus:valid:ring-green-500 focus:invalid:ring-red-500  text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
 .invalid.regular-input {

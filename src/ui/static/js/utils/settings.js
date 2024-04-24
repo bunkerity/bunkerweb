@@ -515,9 +515,7 @@ class FilterSettings {
             multSetting.classList.add("hidden");
             multSettingHiddenCount++;
           }
-        } catch (err) {
-          console.log(err);
-        }
+        } catch (err) {}
       });
 
       // check for each multiple groups if all are hidden
@@ -923,43 +921,64 @@ class CheckNoMatchFilter {
 class showInvalid {
   constructor() {
     this.init();
+    this.isChecking = false;
   }
 
   init() {
     window.addEventListener("change", (e) => {
+      if (this.isChecking) return;
       this.setInvalidState(e);
     });
 
     window.addEventListener("input", (e) => {
+      if (this.isChecking) return;
       this.setInvalidState(e);
     });
 
     window.addEventListener("click", (e) => {
+      if (this.isChecking) return;
+      this.setInvalidState(e);
+    });
+
+    window.addEventListener("focusin", (e) => {
+      if (this.isChecking) return;
       this.setInvalidState(e);
     });
   }
 
   setInvalidState(e) {
+    this.isChecking = true;
     try {
-      if (e.target.hasAttribute("data-setting-input")) {
-        const settingName = e.target.getAttribute("id");
-        const invalidEl = document.querySelector(
-          `[data-invalid=${settingName}]`,
-        );
-        const isValid = e.target.validity.valid;
+      setTimeout(() => {
+        const elsToCheck = [
+          e.target,
+          ...document.querySelectorAll("input.invalid"),
+        ];
+        elsToCheck.forEach((el) => {
+          if (el.hasAttribute("data-setting-input")) {
+            const settingName = el.getAttribute("id");
+            const invalidEl = el
+              .closest("form")
+              .querySelector(`[data-invalid=${settingName}]`);
+            const isValid = el.validity.valid;
 
-        if (isValid) {
-          e.target.classList.remove("invalid");
-          invalidEl.classList.add("hidden", "md:hidden");
-          return;
-        }
-        if (!isValid) {
-          e.target.classList.add("invalid");
-          invalidEl.classList.remove("hidden", "md:hidden");
-          return;
-        }
-      }
-    } catch (e) {}
+            if (isValid) {
+              el.classList.remove("invalid");
+              invalidEl.classList.add("hidden", "md:hidden");
+              return;
+            }
+            if (!isValid) {
+              el.classList.add("invalid");
+              invalidEl.classList.remove("hidden", "md:hidden");
+              return;
+            }
+          }
+        });
+        this.isChecking = false;
+      }, 20);
+    } catch (e) {
+      this.isChecking = false;
+    }
   }
 }
 
