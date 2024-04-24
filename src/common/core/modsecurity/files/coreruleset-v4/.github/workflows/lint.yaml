@@ -2,6 +2,11 @@ name: Lint
 
 on: [push, pull_request, merge_group]
 
+# Pin versions to not disrupt test pipelines
+env:
+  CRS_TOOLCHAIN_VERSION: '2.1.0'
+  SECRULES_PARSING_VERSION: '0.2.9'
+
 jobs:
   check-syntax:
     runs-on: ubuntu-latest
@@ -28,7 +33,7 @@ jobs:
       - name: "Check CRS syntax"
         run: |
           pip install --upgrade setuptools
-          pip install secrules-parsing
+          pip install secrules-parsing==${{ env.SECRULES_PARSING_VERSION }}
           secrules-parser -c --output-type github -f rules/*.conf
 
       - name: "Check CRS formatting"
@@ -43,14 +48,12 @@ jobs:
           pip install -r ./util/find-rules-without-test/requirements.txt
           ./util/find-rules-without-test/find-rules-without-test.py --output=github .
 
-      - name: "Install crs-toolchain"
+      - name: "Install crs-toolchain ${{ env.CRS_TOOLCHAIN_VERSION }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download -R coreruleset/crs-toolchain -p '*_linux_amd64.tar.gz'
-          ls crs-toolchain*
-          tar xzf crs-toolchain*_linux_amd64.tar.gz
-          rm crs-toolchain*_linux_amd64.tar.gz
+          gh release download -R coreruleset/crs-toolchain "v${{ env.CRS_TOOLCHAIN_VERSION }}" \
+            -p "crs-toolchain_${{ env.CRS_TOOLCHAIN_VERSION }}_linux_amd64.tar.gz" -O - | tar -xzvf - crs-toolchain
 
       - name: "Check that all assembly files are properly formatted"
         run: |

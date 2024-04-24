@@ -176,6 +176,10 @@ WEB-INF/
 sslvpn_websession
 # BlockCypher log file used in code examples
 BlockCypher.log
+# Roundcube Webmail
+config.inc.php
+config.sample.php
+defaults.inc.php
 
 # /proc entries (keep in sync with lfi-os-files.data)
 # grep -E "^proc/" lfi-os-files.data

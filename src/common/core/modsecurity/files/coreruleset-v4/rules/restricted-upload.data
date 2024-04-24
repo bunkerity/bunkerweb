@@ -94,13 +94,16 @@ cmdline
 composer.json
 composer.lock
 config.gz
+config.inc.php
 config.php
+config.sample.php
 config.yml
 config_dev.yml
 config_prod.yml
 config_test.yml
 cpuinfo
 database.yml
+defaults.inc.php
 default.settings.php
 diskstats
 dynamic_debug

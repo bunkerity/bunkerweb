@@ -249,7 +249,7 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 You can choose between the following versions of the OWASP Core Rule Set :
 
 - **3** : The version [v3.3.5](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.5) of the OWASP Core Rule Set (***default***)
-- **4** : The version [v4.0.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.0.0) of the OWASP Core Rule Set
+- **4** : The version [v4.2.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.2.0) of the OWASP Core Rule Set
 
 ### Custom configurations
 

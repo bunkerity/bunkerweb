@@ -140,6 +140,7 @@ bin/cpulimit
 bin/crash
 bin/cron
 bin/crontab
+bin/cscli
 bin/csh
 bin/csplit
 bin/csvtool
@@ -583,6 +584,7 @@ bin/vim
 bin/vimdiff
 bin/vipw
 bin/virsh
+bin/visudo
 bin/volatility
 bin/w
 bin/w3m
