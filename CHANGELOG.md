@@ -13,17 +13,23 @@
 - [UI] General : fix tooltip crop because of overflow
 - [UI] General : fix select setting crop because of overflow and check if select is out of viewport to determine visible position
 - [UI] General : show logs on UI when pre rendering issue
+- [UI] General : Improve UI performance by using multiple workers for the web server and reducing the number of times we prompt a loading page
 - [UI] Global config : fix script error while fragment relate to a missing plugin
 - [UI] Global config / services page : filtering settings now open plugin select to highlight remaining plugin
 - [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
 - [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
+- [UI] Global config / services page : add order for settings to always respect the order defined in the plugin
 - [UI] Reporting page : fix missing data and add new ones
 - [UI] Account page : keep license key form even if pro register to easy update
-
-
+- [UI] Wizard : Add the possibility to still configure reverse proxy even if an admin user already exists
 - [DOCUMENTATION] Add upgrade procedure for 1.5.7+
+- [DOCUMENTATION] Rename Migrating section to Upgrading
 - [MISC] Support custom bwcli commands using plugins
+- [MISC] Add Docker labels in autoconf, bw, scheduler, and ui Dockerfiles
+- [DEPS] Update Python base Docker image to version 3.12.3-alpine3.19
 - [DEPS] Updated LuaJIT version to v2.1-20240314
+- [DEPS] Updated lua-resty-openssl version to 1.3.1
+- [DEPS] Updated coreruleset-v4 version to v4.2.0
 
 ## v1.5.6 - 2024/03/25
 
