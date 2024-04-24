@@ -570,8 +570,6 @@ def setup():
                     "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
                     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
                     "MAX_CLIENT_SIZE": "50m",
-                    "LIMIT_REQ_URL_1": request.form["ui_url"] or "/",
-                    "LIMIT_REQ_RATE_1": "10r/s",
                 },
                 request.form["server_name"],
                 request.form["server_name"],
