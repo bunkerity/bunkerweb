@@ -768,7 +768,8 @@ class ServiceModal {
           invalidEl.classList.remove("hidden", "md:hidden");
           // Wait a little that modal is fully open to focus on invalid input, because not working when element is hidden
           setTimeout(() => {
-            invalidInp.focus();
+            // only focus  if not another input is focus
+            if (document.activeElement.tagName !== "INPUT") invalidInp.focus();
           }, 30);
 
           errMsg.textContent = `${invalidInpName} must be valid to submit`;
@@ -974,16 +975,12 @@ class Multiple {
           //remove all multiples
           this.removePrevMultiples();
           //get multiple service values and parse as obj
-          const servicesSettings = e.target
-            .closest(`[data-${this.prefix}-service]`)
-            .querySelector(`[data-${this.prefix}-settings]`)
-            .getAttribute("data-value");
-          const obj = JSON.parse(servicesSettings);
+          const settings = this.getSettingsMultiple(e.target);
           //keep only multiple settings value
-          const multipleSettings = this.getMultiplesOnly(obj);
-
+          const multipleSettings = this.getMultiplesOnly(settings);
           const sortMultiples =
             this.sortMultipleByContainerAndSuffixe(multipleSettings);
+
           // Need to set method as ui if clone
           const isClone =
             e.target
@@ -991,7 +988,6 @@ class Multiple {
               .getAttribute(`data-${this.prefix}-action`) === "clone"
               ? true
               : false;
-
           this.setMultipleToDOM(sortMultiples, isClone);
         }
       } catch (err) {}
@@ -1181,13 +1177,13 @@ class Multiple {
       `[data-${this.prefix}-multiple-add]`,
     );
     multAddBtns.forEach((btn) => {
+      const att = btn.getAttribute(`data-${this.prefix}-multiple-add`);
       //check if already one (SCHEMA exclude so length >= 2)
-      const plugin = btn.closest("[data-plugin-item]");
-      if (
-        plugin.querySelectorAll(`[data-${this.prefix}-settings-multiple]`)
-          .length >= 2
-      )
-        return;
+      const multGroups = this.formContainer.querySelectorAll(
+        `[data-${this.prefix}-settings-multiple^="${att}"]`,
+      );
+      console.log(multGroups);
+      if (multGroups.length >= 2) return;
 
       btn.click();
     });
@@ -1221,6 +1217,16 @@ class Multiple {
     });
   }
 
+  // Avoid multiple settings because it is handle by Multiple class
+  getSettingsMultiple(target) {
+    const servicesSettings = target
+      .closest("[data-services-service]")
+      .querySelector("[data-services-settings]")
+      .getAttribute("data-value");
+    const settings = JSON.parse(servicesSettings);
+    return settings;
+  }
+
   getMultiplesOnly(settings) {
     //get schema settings
     const multiples = {};
@@ -1235,6 +1241,7 @@ class Multiple {
         .getAttribute("data-setting-container")
         .replace("_SCHEMA", "")
         .trim();
+
       //check if match with service setting
       for (const [key, data] of Object.entries(settings)) {
         if (key.includes(schemaName)) {
