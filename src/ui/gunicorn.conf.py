@@ -18,6 +18,7 @@ from logger import setup_logger  # type: ignore
 from src.User import User
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
+RUN_DIR = Path(sep, "var", "run", "bunkerweb")
 
 MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 LOG_LEVEL = getenv("LOG_LEVEL", "info")
@@ -110,10 +111,11 @@ def on_starting(server):
 
 
 def when_ready(server):
-    TMP_DIR.joinpath("ui.pid").write_text(str(getpid()), encoding="utf-8")
+    RUN_DIR.mkdir(parents=True, exist_ok=True)
+    RUN_DIR.joinpath("ui.pid").write_text(str(getpid()), encoding="utf-8")
     TMP_DIR.joinpath("ui.healthy").write_text("ok", encoding="utf-8")
 
 
 def on_exit(server):
-    TMP_DIR.joinpath("ui.pid").unlink(missing_ok=True)
+    RUN_DIR.joinpath("ui.pid").unlink(missing_ok=True)
     TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
