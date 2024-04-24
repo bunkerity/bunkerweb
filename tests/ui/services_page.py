@@ -70,7 +70,9 @@ try:
 
     select_combobox = safe_get_element(DRIVER, By.XPATH, "//input[@data-combobox='']")
     assert isinstance(select_combobox, WebElement), "Combobox is not a WebElement"
-    select_combobox.send_keys("no plugin matching normally")
+    # Test simulate keyboard from js
+    DRIVER.execute_script("arguments[0].value = 'no plugin matching normally' ", select_combobox)
+    DRIVER.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", select_combobox)
 
     # All tabs should be hidden
     total_tabs = DRIVER.execute_script("""return document?.querySelector('[data-tab-select-dropdown]')?.querySelectorAll('[data-tab-select-handler]').length""")
