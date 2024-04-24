@@ -49,7 +49,7 @@ try:
 
     log_info("Service edit modal checked ...")
 
-    input_server_name = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
+    input_server_name = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='SERVER_NAME']")
     assert isinstance(input_server_name, WebElement), "Input is not a WebElement"
     if input_server_name.get_attribute("value") != "www.example.com":
         log_error("The value is not the expected one, exiting ...")
@@ -587,13 +587,87 @@ try:
         log_error("Step 2 should be visible.")
         exit(1)
     
-    log_info("Fill first step and move to step 2 done ...")
+    log_info("Fill first step and move to step 2 done, edit step 2 value ...")
 
     # Select antibot plugin and click on javascript value
     select = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select='use-antibot']")
     assert isinstance(select, WebElement), "Select is not a WebElement"
-    
+    DRIVER.execute_script("arguments[0].click()", select)
 
+    # Click on javascript value
+    button_js_antibot = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='use-antibot' and @value='javascript']")
+    assert isinstance(button_js_antibot, WebElement), "Button javascript is not a WebElement"
+    DRIVER.execute_script("arguments[0].click()", button_js_antibot)
+    
+    # Check that value is updated
+    value_js_antibot = DRIVER.execute_script("""return document.querySelector('span[data-setting-select-text="use-antibot"]').getAttribute('data-value')""")
+    if value_js_antibot != "javascript":
+        log_error("Value should be javascript.")
+        exit(1)
+
+    log_info("Edit step 2 value, done, trying to go back, change security level and check antibot value ...")
+
+    # Click on back button
+    back_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-simple-back='']")
+    DRIVER.execute_script("arguments[0].click()", back_button)
+
+    # Check if data-step is 1 looking for hidden
+    is_step_1 = DRIVER.execute_script(f"""return document.querySelector("[data-simple-step='1']").classList.contains("hidden")""")
+    if is_step_1:
+        log_error("Step 1 should be visible.")
+        exit(1)
+
+    # Change security level
+    select = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select='security-level']")
+    assert isinstance(select, WebElement), "Select is not a WebElement"
+    DRIVER.execute_script("arguments[0].click()", select)
+
+    # Click on standard value
+    button_standard_security = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='security-level' and @value='standard']")
+    assert isinstance(button_standard_security, WebElement), "Button standard is not a WebElement"
+    DRIVER.execute_script("arguments[0].click()", button_standard_security)
+
+    # Check that value is updated
+    value_standard_security = DRIVER.execute_script("""return document.querySelector('span[data-setting-select-text="security-level"]').getAttribute('data-value')""")
+    if value_standard_security != "standard":
+        log_error("Value should be standard.")
+        exit(1)
+
+    # Click on next button
+    next_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-simple-next='']")
+    DRIVER.execute_script("arguments[0].click()", next_button)
+
+    # Check if data-step is 2 looking for hidden
+    is_step_2 = DRIVER.execute_script(f"""return document.querySelector("[data-simple-step='2']").classList.contains("hidden")""")
+    if is_step_2:
+        log_error("Step 2 should be visible.")
+        exit(1)
+
+    # Check antibot value
+    value_js_antibot = DRIVER.execute_script("""return document.querySelector('span[data-setting-select-text="use-antibot"]').getAttribute('data-value')""")
+    if value_js_antibot != "no":
+        log_error("Value should be changed by no selecting security level.")
+        exit(1)
+
+    log_info("Changing security level and check update done, create app ...")
+    submit_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-services-modal-submit='']")
+    access_page(DRIVER, "/form[@data-services-modal-form and @data-advanced]//button[@data-services-modal-submit='']", "services", False)
+
+    if TEST_TYPE == "linux":
+        wait_for_service("app3.example.com")
+
+    try:
+        services = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service]", multiple=True, error=True)
+        assert isinstance(services, list), "Services is not a list"
+    except TimeoutException:
+        log_exception("Services not found, exiting ...")
+        exit(1)
+
+    if len(services) < 4:
+        log_error(f"The service hasn't been created ({len(services)} services found), exiting ...")
+        exit(1)
+    
+    log_info("Service app3.example.com has been created successfully...")
 
     
     log_info("✅ Services page tests finished successfully")

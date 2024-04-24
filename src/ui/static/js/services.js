@@ -2018,7 +2018,7 @@ const setDropdown = new Dropdown();
 const setFilter = new Filter();
 const setTabsSelect = new TabsSelect(
   document.querySelector("[data-services-tabs-select]"),
-  document.querySelector("[data-services-modal-form]"),
+  document.querySelector("[data-advanced][data-services-modal-form]"),
 );
 
 const setPopover = new Popover();
@@ -2028,7 +2028,7 @@ const invalid = new showInvalid();
 const setFilterGlobal = new FilterSettings(
   "settings-filter",
   document.querySelector("[data-services-tabs-select]"),
-  document.querySelector("[data-services-modal-form]"),
+  document.querySelector("[data-advanced][data-services-modal-form]"),
   "services",
 );
 
