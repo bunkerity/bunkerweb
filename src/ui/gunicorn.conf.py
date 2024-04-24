@@ -110,9 +110,6 @@ def on_starting(server):
 
 
 def when_ready(server):
-    if not TMP_DIR.joinpath(".ui.json").is_file():
-        TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
-
     TMP_DIR.joinpath("ui.pid").write_text(str(getpid()), encoding="utf-8")
     TMP_DIR.joinpath("ui.healthy").write_text("ok", encoding="utf-8")
 

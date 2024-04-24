@@ -141,6 +141,9 @@ USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_L
 
 bw_version = get_version()
 
+if not TMP_DIR.joinpath(".ui.json").is_file():
+    TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
+
 try:
     app.config.update(
         INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION, db),
