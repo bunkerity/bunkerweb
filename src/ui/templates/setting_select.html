@@ -1,6 +1,7 @@
 {% if setting_input and setting_input["type"] == "select" %}
     {% set inp_name = setting_input['name'] %}
-    {% set inp_name_mult = inp_name + "_SCHEMA" if setting_input["is_multiple"] else inp_name %}
+    {% set is_multiple = setting_input["is_multiple"] %}
+    {% set inp_name_mult = inp_name + "_SCHEMA" if is_multiple else inp_name %}
     {% set inp_default = setting_input['default'] %}
     {% set inp_value = setting_input['value'] %}
     {% set inp_method = setting_input['method'] %}
@@ -22,6 +23,7 @@
             {% for level_name, value in inp_levels.items() %}
                 data-security-level-{{level_name}}="{{value}}"
             {% endfor %}
+            {% if is_multiple %} data-is-multiple {% endif %}
             >
         {% for item in inp_items %}
             <option {% if not item %}label="empty"{% endif %}

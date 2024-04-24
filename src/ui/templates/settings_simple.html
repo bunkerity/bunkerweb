@@ -44,7 +44,7 @@
             </div>
             <!-- end plugin multiple handler-->
             <!-- multiple settings -->
-                <div data-{{ attribute_name }}-settings-multiple="{{ setting_input['multiple_name'] }}_SCHEMA" class=" col-span-12 bg-gray-50 dark:bg-slate-900/30 hidden w-full my-4 grid-cols-12 border dark:border-gray-700 rounded">
+                <div data-{{ attribute_name }}-settings-multiple="{{ setting_input['multiple_name'] }}_SCHEMA" class=" col-span-12 bg-gray-50 dark:bg-slate-900/30 hidden w-full mt-4 grid-cols-12 border dark:border-gray-700 rounded">
                     {% for setting in setting_input.get("multiples") %}
                         {% set setting_input = { "name" : setting.get("name"), "context" : setting.get("context"), "method" : setting.get("method", "default"), "help" : setting.get("help"), "label" : setting.get("label"), "id" : setting.get("id"), "type" : setting.get("type"), "default" : setting.get("default", "default"), "select" : setting.get("select"), "regex" : setting.get("regex"), "value" : setting.get("value", setting.get('default')), "is_multiple" : True, "levels" : {} } %}
                         <div data-setting-container="{{ setting }}_SCHEMA" data-{{ attribute_name }}-type="{{ setting_input['type'] }}" data-{{ attribute_name }}-context="{{ setting_input['context'] }}" class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4" id="form-edit-{{ attribute_name }}-{{ setting }}_SCHEMA">

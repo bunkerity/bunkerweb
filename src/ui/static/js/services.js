@@ -9,6 +9,12 @@ import {
 
 class ServiceModal {
   constructor() {
+    this.multSettingsName = JSON.parse(
+      document
+        .querySelector("input[data-plugins-multiple]")
+        .getAttribute("data-plugins-multiple")
+        .replaceAll(`'`, `"`),
+    );
     //modal elements
     this.modal = document.querySelector("[data-services-modal]");
     this.modalTitle = this.modal.querySelector("[data-services-modal-title]");
@@ -55,6 +61,7 @@ class ServiceModal {
     this.container = document.querySelector("main");
     this.currAction = "";
     this.currMethod = "";
+
     this.init();
   }
 
@@ -267,15 +274,21 @@ class ServiceModal {
   // Avoid multiple settings because it is handle by Multiple class
   getSettingsNoMultiple(target) {
     const servicesSettings = target
-    .closest("[data-services-service]")
-    .querySelector("[data-services-settings]")
-    .getAttribute("data-value");
+      .closest("[data-services-service]")
+      .querySelector("[data-services-settings]")
+      .getAttribute("data-value");
     const settings = JSON.parse(servicesSettings);
-    // Loop
-    console.log(settings);
+    this.multSettingsName.forEach((name) => {
+      // check if a settings is starting with a multiple name
+      // if yes, remove it
+      for (const [key, value] of Object.entries(settings)) {
+        if (key.startsWith(name)) {
+          delete settings[key];
+        }
+      }
+    });
     return settings;
   }
-
 
   resetSimpleMode() {
     // reset button
@@ -520,9 +533,12 @@ class ServiceModal {
     parentEl = this.modal,
     attMethodName = "data-default-method",
     attValueName = "data-default-value",
+    avoidMultiple = true,
   ) {
     // Start with input-like (input, checkbox)
-    const inps = parentEl.querySelectorAll("input");
+    const inps = avoidMultiple
+      ? parentEl.querySelectorAll("input:not([data-is-multiple])")
+      : parentEl.querySelectorAll("input");
     inps.forEach((inp) => {
       // form related values are excludes
       const inpName = inp.getAttribute("name");
@@ -539,7 +555,9 @@ class ServiceModal {
     });
 
     // Select only
-    const selects = parentEl.querySelectorAll("select");
+    const selects = avoidMultiple
+      ? parentEl.querySelectorAll("select:not([data-is-multiple])")
+      : parentEl.querySelectorAll("select");
     selects.forEach((select) => {
       if (
         this.isAvoidInpList(
@@ -848,7 +866,10 @@ class ServiceModal {
         const method = setMethodUI ? "ui" : data["method"];
         const global = data["global"];
         try {
-          const inps = this.modal.querySelectorAll(`[name='${key}']`);
+          // get only inputs without attribute data-is-multiple
+          const inps = this.modal.querySelectorAll(
+            `[name='${key}']:not([data-is-multiple])`,
+          );
 
           inps.forEach((inp) => {
             //form related values are excludes
@@ -924,13 +945,10 @@ class Multiple {
     this.prefix = prefix;
     this.container = document.querySelector("main");
     this.formContainer = document.querySelector(formContainerSelector);
-    this.pluginDataStr =  document.querySelector('input[data-plugins]').getAttribute('data-plugins');
-    this.pluginData = JSON.parse(JSON.stringify(this.pluginDataStr));
     this.init();
   }
 
   init() {
-
     window.addEventListener("load", () => {
       this.hiddenIfNoMultiples();
     });
@@ -972,7 +990,8 @@ class Multiple {
       } catch (err) {}
       // New service button
       try {
-        if (e.target
+        if (
+          e.target
             .closest("button")
             .getAttribute(`data-${this.prefix}-action`) === "new"
         ) {
@@ -1198,6 +1217,7 @@ class Multiple {
   getMultiplesOnly(settings) {
     //get schema settings
     const multiples = {};
+
     const schemaSettings = this.formContainer.querySelectorAll(
       `[data-setting-container$="SCHEMA"]`,
     );

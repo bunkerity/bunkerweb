@@ -16,7 +16,16 @@
         {% endif %}
     {% endfor %}
 
-    <input class="hidden" data-plugins="{{plugins}}" />
+    {# Get name of multiples #}
+    {% set multiple_settings = [] %}
+    {% for plugin in plugins%}
+        {% for setting, value in plugin.get('settings', {}).items() %}
+            {% if value.get("multiple", "") %}
+                {% if multiple_settings.append(setting) %}{% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    <input class="hidden" data-plugins-multiple='{{multiple_settings}}'' />
     <!-- actions -->
     <div data-{{attribute_name}}-service
          class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">

@@ -1,6 +1,7 @@
 {% if setting_input and setting_input["type"] == "check" %}
     {% set inp_name = setting_input['name'] %}
-    {% set inp_name_mult = inp_name + "_SCHEMA" if setting_input["is_multiple"] else inp_name %}
+    {% set is_multiple = setting_input["is_multiple"] %}
+    {% set inp_name_mult = inp_name + "_SCHEMA" if is_multiple else inp_name %}
     {% set inp_id = setting_input['id'] %}
     {% set inp_regex = setting_input['regex'] %}
     {% set inp_default = setting_input['default'] %}
@@ -27,6 +28,7 @@
                 {% for level_name, value in inp_levels.items() %}
                  data-security-level-{{level_name}}="{{value}}"
                 {% endfor %}
+                {% if is_multiple %} data-is-multiple {% endif %}
                 />
         <svg data-checkbox-handler="{{ inp_id }}"
                 class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
