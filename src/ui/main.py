@@ -180,7 +180,7 @@ def get_ui_data():
     return ui_data
 
 
-def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False):
+def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False):
     # Do the operation
     error = False
     ui_data = get_ui_data()
@@ -249,7 +249,15 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         else:
             ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
 
-    ui_data = get_ui_data()
+    if not threaded:
+        for f in ui_data.get("TO_FLASH", []):
+            if f["type"] == "error":
+                flash(f["content"], "error")
+            else:
+                flash(f["content"])
+
+        ui_data["TO_FLASH"] = []
+
     ui_data["RELOADING"] = False
     with LOCK:
         TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
@@ -368,26 +376,6 @@ def error_message(msg: str):
     return {"status": "ko", "message": msg}
 
 
-@app.before_request
-def before_each_request():
-    db_user = db.get_ui_user()
-    if db_user:
-        app.config["USER"] = User(**db_user)
-
-    ui_data = get_ui_data()
-    for f in ui_data.get("TO_FLASH", []):
-        if f["type"] == "error":
-            flash(f["content"], "error")
-        else:
-            flash(f["content"])
-
-    ui_data["TO_FLASH"] = []
-    with LOCK:
-        TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
-
-    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
-
-
 @app.context_processor
 def inject_variables():
     metadata = db.get_metadata()
@@ -449,6 +437,12 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
+    db_user = db.get_ui_user()
+    if db_user:
+        app.config["USER"] = User(**db_user)
+
+    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
+
     if current_user.is_authenticated:
         passed = True
 
@@ -577,7 +571,7 @@ def setup():
                 request.form["server_name"],
                 request.form["server_name"],
             ),
-            kwargs={"operation": "new"},
+            kwargs={"operation": "new", "threaded": True},
         ).start()
 
         with LOCK:
@@ -837,7 +831,7 @@ def instances():
             target=manage_bunkerweb,
             name="Reloading instances",
             args=("instances", request.form["INSTANCE_ID"]),
-            kwargs={"operation": request.form["operation"]},
+            kwargs={"operation": request.form["operation"], "threaded": True},
         ).start()
 
         with LOCK:
@@ -2190,6 +2184,14 @@ def check_reloading():
             app.logger.warning("Reloading took too long, forcing the state to be reloaded")
             flash("Forced the status to be reloaded", "error")
             ui_data["RELOADING"] = False
+
+        for f in ui_data.get("TO_FLASH", []):
+            if f["type"] == "error":
+                flash(f["content"], "error")
+            else:
+                flash(f["content"])
+
+        ui_data["TO_FLASH"] = []
 
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
