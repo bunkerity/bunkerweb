@@ -1,4 +1,5 @@
 from contextlib import suppress
+from datetime import datetime
 from logging import error as log_error, exception as log_exception, info as log_info, warning as log_warning
 from time import sleep
 from typing import List, Optional, Union
@@ -51,6 +52,7 @@ def safe_get_element(
 
 def assert_button_click(driver, button: Union[str, WebElement], by: str = "xpath"):  # type: ignore
     clicked = False
+    current_date = datetime.now()
     while not clicked:
         with suppress(ElementClickInterceptedException):
             if isinstance(button, str):
@@ -67,6 +69,11 @@ def assert_button_click(driver, button: Union[str, WebElement], by: str = "xpath
             button.click()
 
             clicked = True
+
+        if (datetime.now() - current_date).seconds > 10:
+            log_error("Button click failed, exiting ...")
+            exit(1)
+
     return clicked
 
 
