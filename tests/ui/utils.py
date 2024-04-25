@@ -145,8 +145,6 @@ def access_page(driver, button: Union[bool, str, WebElement], name: str, message
     if message:
         log_info(f"{name.title()} page loaded successfully")
 
-    driver.set_window_size(2560, 1440)
-
 
 def wait_for_service(service: str = "www.example.com"):
     ready = False
