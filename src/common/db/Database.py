@@ -181,7 +181,7 @@ class Database:
             self.sql_engine.dispose()
 
     @contextmanager
-    def __db_session(self, raise_error: bool = False) -> Any:
+    def __db_session(self) -> Any:
         try:
             assert self.sql_engine is not None
         except AssertionError:
