@@ -1,12 +1,11 @@
 from contextlib import suppress
-from logging import info as log_info, exception as log_exception, error as log_error
+from logging import info as log_info, exception as log_exception, error as log_error, warning as log_warning
 from time import sleep
 from requests import RequestException, get
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.keys import Keys
 
 
 from wizard import DRIVER
@@ -49,7 +48,7 @@ try:
 
     log_info("Service edit modal checked ...")
 
-    input_server_name = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='SERVER_NAME']")
+    input_server_name = safe_get_element(DRIVER, By.XPATH, "//input[@id='SERVER_NAME']")
     assert isinstance(input_server_name, WebElement), "Input is not a WebElement"
     if input_server_name.get_attribute("value") != "www.example.com":
         log_error("The value is not the expected one, exiting ...")
@@ -62,10 +61,12 @@ try:
 
     log_info("Toggle modal checked, trying settings ...")
 
+    assert_button_click(DRIVER, "//button[@data-toggle-settings-mode-btn='simple']")
+
     log_info("Start trying combobox filter ...")
 
     # Open plugins select
-    DRIVER.execute_script(f"""document.querySelector('button[data-tab-select-dropdown-btn]').click()""")
+    DRIVER.execute_script("""document.querySelector('button[data-tab-select-dropdown-btn]').click()""")
 
     select_combobox = safe_get_element(DRIVER, By.XPATH, "//input[@data-combobox='']")
     assert isinstance(select_combobox, WebElement), "Combobox is not a WebElement"
@@ -102,10 +103,12 @@ try:
         exit(1)
 
     # Click on the visible tab
-    DRIVER.execute_script(f"""document.querySelector('button[data-tab-select-handler="blacklist"]').click()""")
+    DRIVER.execute_script("""document.querySelector('button[data-tab-select-handler="blacklist"]').click()""")
+
+    sleep(1)
 
     # Reopen select and check if combobox input is empty
-    DRIVER.execute_script(f"""document.querySelector('button[data-tab-select-dropdown-btn]').click()""")
+    DRIVER.execute_script("""document.querySelector('button[data-tab-select-dropdown-btn]').click()""")
     combo_value = select_combobox.get_property("value")
 
     if combo_value:
@@ -121,7 +124,7 @@ try:
         exit(1)
 
     # Reset to general
-    DRIVER.execute_script(f"""document.querySelector('button[data-tab-select-handler="general"]').click()""")
+    DRIVER.execute_script("""document.querySelector('button[data-tab-select-handler="general"]').click()""")
 
     log_info("Combobox filtering done, trying filter keywords ...")
 
@@ -143,9 +146,12 @@ try:
 
     # Set keyword with no matching settings
     input_keyword = safe_get_element(DRIVER, By.ID, "settings-filter")
-    DRIVER.execute_script(
-        "arguments[0].value = 'dqz48 é84 dzq 584dz5qd4'; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", input_keyword
-    )
+    assert isinstance(input_keyword, WebElement), "Settings filter element is not a WebElement"
+
+    input_keyword.clear()
+    input_keyword.send_keys("dqz48 é84 dzq 584dz5qd4")
+
+    sleep(0.5)
 
     # Check that the no matching element is shown and other card hide
     is_no_match = DRIVER.execute_script('return document.querySelector("[data-services-nomatch]").classList.contains("hidden")')
@@ -180,21 +186,17 @@ try:
 
     log_info("Matching a setting done, trying select dropdown ...")
 
-    DRIVER.execute_script(f"""document.querySelector('button[data-tab-select-dropdown-btn]').click()""")
+    DRIVER.execute_script("""document.querySelector('button[data-tab-select-dropdown-btn]').click()""")
 
-    select = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select='server-type']")
+    select = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select='server-type']")
     assert_button_click(DRIVER, select)
 
-    select_active_item = safe_get_element(
-        DRIVER,
-        By.XPATH,
-        "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='server-type' and contains(@class, 'active')]",
-    )
+    select_active_item = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select-dropdown-btn='server-type' and contains(@class, 'active')]")
     assert_button_click(DRIVER, select_active_item)
 
     log_info("Select dropdown done, trying toggle checkbox...")
 
-    checkbox_api = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='LISTEN_STREAM']")
+    checkbox_api = safe_get_element(DRIVER, By.XPATH, "//input[@id='LISTEN_STREAM']")
     assert_button_click(DRIVER, checkbox_api)
     assert_button_click(DRIVER, checkbox_api)
 
@@ -214,17 +216,15 @@ try:
 
     assert_button_click(DRIVER, "//div[@data-services-service='www.example.com']//button[@data-services-action='edit']")
 
-    assert_button_click(DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-tab-select-dropdown-btn='']")
-    assert_button_click(DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-tab-select-handler='gzip']")
-    gzip_select = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select='gzip-comp-level']")
+    assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
+    assert_button_click(DRIVER, "//button[@data-tab-select-handler='gzip']")
+    gzip_select = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select='gzip-comp-level']")
     assert isinstance(gzip_select, WebElement), "Gzip select is not a WebElement"
     assert_button_click(DRIVER, gzip_select)
 
-    assert_button_click(
-        DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='gzip-comp-level' and @value='6']"
-    )
+    assert_button_click(DRIVER, "//button[@data-setting-select-dropdown-btn='gzip-comp-level' and @value='6']")
 
-    access_page(DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-services-modal-submit='']", "services", False)
+    access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
 
     if TEST_TYPE == "linux":
         wait_for_service()
@@ -242,9 +242,7 @@ try:
     assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
     assert_button_click(DRIVER, "//button[@data-tab-select-handler='gzip']")
 
-    gzip_comp_level_selected_elem = safe_get_element(
-        DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//select[@id='GZIP_COMP_LEVEL']/option[@selected='']"
-    )
+    gzip_comp_level_selected_elem = safe_get_element(DRIVER, By.XPATH, "//select[@id='GZIP_COMP_LEVEL']/option[@selected='']")
     assert isinstance(gzip_comp_level_selected_elem, WebElement), "Gzip comp level selected element is not a WebElement"
     if gzip_comp_level_selected_elem.get_attribute("value") != "6":
         log_error("The value is not the expected one, exiting ...")
@@ -270,7 +268,7 @@ try:
         log_error(f"""Switching mode needed to return advanced mode, but he have {current_mode}...""")
         exit(1)
 
-    server_name_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='SERVER_NAME']")
+    server_name_input = safe_get_element(DRIVER, By.XPATH, "//input[@id='SERVER_NAME']")
     assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
 
     # Reset
@@ -282,24 +280,24 @@ try:
     )
 
     if TEST_TYPE == "docker":
-        assert_button_click(DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-tab-select-dropdown-btn='']")
-        assert_button_click(DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-tab-select-handler='reverseproxy']")
+        assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
+        assert_button_click(DRIVER, "//button[@data-tab-select-handler='reverseproxy']")
 
-        use_reverse_proxy_checkbox = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='USE_REVERSE_PROXY']")
+        use_reverse_proxy_checkbox = safe_get_element(DRIVER, By.XPATH, "//input[@id='USE_REVERSE_PROXY']")
         assert isinstance(use_reverse_proxy_checkbox, WebElement), "Use reverse proxy checkbox is not a WebElement"
         assert_button_click(DRIVER, use_reverse_proxy_checkbox)
 
-        reverse_proxy_host_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='REVERSE_PROXY_HOST']")
+        reverse_proxy_host_input = safe_get_element(DRIVER, By.XPATH, "//input[@id='REVERSE_PROXY_HOST']")
         assert isinstance(reverse_proxy_host_input, WebElement), "Reverse proxy host input is not a WebElement"
-        DRIVER.execute_script(f"""return document.querySelector('input#REVERSE_PROXY_HOST[data-setting-input]').value = 'http://app1:8080' """)
+        DRIVER.execute_script("""return document.querySelector('input#REVERSE_PROXY_HOST[data-setting-input]').value = 'http://app1:8080' """)
 
-        reverse_proxy_url_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='REVERSE_PROXY_URL']")
+        reverse_proxy_url_input = safe_get_element(DRIVER, By.XPATH, "//input[@id='REVERSE_PROXY_URL']")
         assert isinstance(reverse_proxy_url_input, WebElement), "Reverse proxy url input is not a WebElement"
-        DRIVER.execute_script(f"""return document.querySelector('input#REVERSE_PROXY_URL[data-setting-input]').value = '/' """)
+        DRIVER.execute_script("""return document.querySelector('input#REVERSE_PROXY_URL[data-setting-input]').value = '/' """)
 
     log_info("Set new service values, trying to save ...")
 
-    access_page(DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-services-modal-submit='']", "services", False)
+    access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
 
     if TEST_TYPE == "linux":
         wait_for_service("app1.example.com")
@@ -348,7 +346,7 @@ try:
 
     assert_button_click(DRIVER, clone_button)
 
-    server_name_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='SERVER_NAME']")
+    server_name_input = safe_get_element(DRIVER, By.XPATH, "//input[@id='SERVER_NAME']")
     assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
 
     if server_name_input.get_attribute("value"):
@@ -359,13 +357,10 @@ try:
     DRIVER.execute_script("arguments[0].value = ''; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input)
 
     DRIVER.execute_script(
-        "arguments[0].value = 'app1.example.com'; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input
+        "arguments[0].value = 'app2.example.com'; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input
     )
 
     access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
-
-    if TEST_TYPE == "linux":
-        wait_for_service("app2.example.com")
 
     try:
         services = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service]", multiple=True, error=True)
@@ -392,13 +387,13 @@ try:
 
     log_info("Service app2.example.com is present, trying it ...")
 
+    wait_for_service("app2.example.com")
+
     try:
         safe_get_element(DRIVER, By.XPATH, "//button[@data-services-action='edit' and @data-services-name='app2.example.com']//ancestor::div//a", error=True)
     except TimeoutException:
         log_error("Delete button hasn't been found, even though it should be, exiting ...")
         exit(1)
-
-    wait_for_service("app2.example.com")
 
     log_info("The service is working, trying to set it as draft ...")
 
@@ -406,7 +401,7 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-toggle-draft-btn='']")
 
-    access_page(DRIVER, "/form[@data-services-modal-form and @data-advanced]//button[@data-services-modal-submit='']", "services", False)
+    access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
 
     if TEST_TYPE == "linux":
         wait_for_service()
@@ -422,8 +417,6 @@ try:
         log_error(f"The service has been deleted ({len(services)} services found), exiting ...")
         exit(1)
 
-    sleep(30)
-
     log_info("Service app2.example.com has been set as draft, making sure it's not working anymore ...")
 
     retry = 0
@@ -437,7 +430,7 @@ try:
                 log_error(f"Content = {req.text}")
                 exit(1)
             if req.status_code < 400 and retry < 5 and "Nothing to see here..." not in req.text:
-                log_error("The service is still working, retry in 5 seconds ...")
+                log_warning("The service is still working, retry in 5 seconds ...")
                 sleep(5)
 
     log_info("Create another service app3.example.com to get filters (need at least 4 services on page)")
@@ -451,7 +444,7 @@ try:
 
     assert_button_click(DRIVER, clone_button_2)
 
-    server_name_input_2 = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='SERVER_NAME']")
+    server_name_input_2 = safe_get_element(DRIVER, By.XPATH, "//input[@id='SERVER_NAME']")
     assert isinstance(server_name_input_2, WebElement), "Input is not a WebElement"
 
     if server_name_input_2.get_attribute("value"):
@@ -460,16 +453,15 @@ try:
 
     # Reset
 
-    DRIVER.execute_script("arguments[0].value = ''; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input)
+    DRIVER.execute_script("arguments[0].value = ''; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input_2)
 
     DRIVER.execute_script(
-        "arguments[0].value = 'app3.example.com'; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input
+        "arguments[0].value = 'app3.example.com'; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input_2
     )
 
     access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
 
-    if TEST_TYPE == "linux":
-        wait_for_service("app3.example.com")
+    wait_for_service("app3.example.com")
 
     try:
         services = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service]", multiple=True, error=True)
@@ -500,12 +492,12 @@ try:
 
     # Set keyword with no matching settings
     input_card_keyword = safe_get_element(DRIVER, By.ID, "service-name-keyword")
-    DRIVER.execute_script(
-        "arguments[0].value = 'dqz48 é84 dzq 584dz5qd4'; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));",
-        input_card_keyword,
-    )
+    assert isinstance(input_card_keyword, WebElement), "Service name element is not a WebElement"
 
-    sleep(0.1)
+    input_card_keyword.clear()
+    input_card_keyword.send_keys("dqz48 é84 dzq 584dz5qd4")
+
+    sleep(0.5)
 
     # Check that the no matching element is shown and other card hide
     is_no_match = DRIVER.execute_script('return document.querySelector("[data-services-nomatch-card]").classList.contains("hidden")')
@@ -564,7 +556,23 @@ try:
         log_error(f"The service hasn't been deleted ({len(services)} services found), exiting ...")
         exit(1)
 
-    log_info("Service app3.example.com has been deleted successfully, trying recreate app3.example.com using simple mode ...")
+    log_info("Service app3.example.com has been deleted successfully, making sure it's not working anymore ...")
+
+    retry = 0
+    for x in range(5):
+        retry += 1
+        with suppress(RequestException):
+            req = get("http://app3.example.com")
+            if req.status_code < 400 and retry >= 5 and "Nothing to see here..." not in req.text:
+                log_error("The service is still working, exiting ...")
+                log_error(f"Status code = {str(req.status_code)}")
+                log_error(f"Content = {req.text}")
+                exit(1)
+            if req.status_code < 400 and retry < 5 and "Nothing to see here..." not in req.text:
+                log_warning("The service is still working, retry in 5 seconds ...")
+                sleep(5)
+
+    log_info("Service app3.example.com is not working as expected, trying to recreate app3.example.com using simple mode ...")
 
     assert_button_click(DRIVER, "//button[@data-services-action='new']")
 
@@ -603,11 +611,10 @@ try:
     )
 
     # Click on next button
-    next_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-simple-next='']")
-    DRIVER.execute_script("arguments[0].click()", next_button)
+    assert_button_click(DRIVER, "//button[@data-simple-next='']")
 
     # Check if data-step is 2 looking for hidden
-    is_step_2 = DRIVER.execute_script(f"""return document.querySelector("[data-simple-step='2']").classList.contains("hidden")""")
+    is_step_2 = DRIVER.execute_script("""return document.querySelector("[data-step='2']").classList.contains("hidden")""")
     if is_step_2:
         log_error("Step 2 should be visible.")
         exit(1)
@@ -615,78 +622,66 @@ try:
     log_info("Fill first step and move to step 2 done, edit step 2 value ...")
 
     # Select antibot plugin and click on javascript value
-    select = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select='use-antibot']")
-    assert isinstance(select, WebElement), "Select is not a WebElement"
-    DRIVER.execute_script("arguments[0].click()", select)
+    assert_button_click(DRIVER, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']")
 
     # Click on javascript value
-    button_js_antibot = safe_get_element(
-        DRIVER,
-        By.XPATH,
-        "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='use-antibot' and @value='javascript']",
-    )
-    assert isinstance(button_js_antibot, WebElement), "Button javascript is not a WebElement"
-    DRIVER.execute_script("arguments[0].click()", button_js_antibot)
+    assert_button_click(DRIVER, "//div[@id='antibot-simple']//button[@data-setting-select-dropdown-btn='use-antibot' and @value='javascript']")
 
     # Check that value is updated
-    value_js_antibot = DRIVER.execute_script("""return document.querySelector('span[data-setting-select-text="use-antibot"]').getAttribute('data-value')""")
-    if value_js_antibot != "javascript":
+    antibot_button_text = safe_get_element(
+        DRIVER, By.XPATH, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']//span[@data-setting-select-text='use-antibot']"
+    )
+    assert isinstance(antibot_button_text, WebElement), "Antibot button text is not a WebElement"
+    if antibot_button_text.get_attribute("data-value") != "javascript":
         log_error("Value should be javascript.")
         exit(1)
 
     log_info("Edit step 2 value, done, trying to go back, change security level and check antibot value ...")
 
     # Click on back button
-    back_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-simple-back='']")
-    DRIVER.execute_script("arguments[0].click()", back_button)
+    assert_button_click(DRIVER, "//button[@data-simple-back='']")
 
     # Check if data-step is 1 looking for hidden
-    is_step_1 = DRIVER.execute_script(f"""return document.querySelector("[data-simple-step='1']").classList.contains("hidden")""")
+    is_step_1 = DRIVER.execute_script("""return document.querySelector("[data-step='1']").classList.contains("hidden")""")
     if is_step_1:
         log_error("Step 1 should be visible.")
         exit(1)
 
     # Change security level
-    select = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select='security-level']")
-    assert isinstance(select, WebElement), "Select is not a WebElement"
-    DRIVER.execute_script("arguments[0].click()", select)
+    assert_button_click(DRIVER, "//div[@id='security-level-simple']//button[@data-setting-select='security-level']")
 
     # Click on standard value
-    button_standard_security = safe_get_element(
-        DRIVER,
-        By.XPATH,
-        "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='security-level' and @value='standard']",
-    )
-    assert isinstance(button_standard_security, WebElement), "Button standard is not a WebElement"
-    DRIVER.execute_script("arguments[0].click()", button_standard_security)
+    assert_button_click(DRIVER, "//div[@id='security-level-simple']//button[@data-setting-select-dropdown-btn='security-level' and @value='standard']")
 
     # Check that value is updated
-    value_standard_security = DRIVER.execute_script(
-        """return document.querySelector('span[data-setting-select-text="security-level"]').getAttribute('data-value')"""
+    value_standard_security = safe_get_element(
+        DRIVER, By.XPATH, "//div[@id='security-level-simple']//button[@data-setting-select='security-level']//span[@data-setting-select-text='security-level']"
     )
-    if value_standard_security != "standard":
+    assert isinstance(value_standard_security, WebElement), "Security level button text is not a WebElement"
+    if value_standard_security.get_attribute("data-value") != "standard":
         log_error("Value should be standard.")
         exit(1)
 
     # Click on next button
-    next_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-simple-next='']")
-    DRIVER.execute_script("arguments[0].click()", next_button)
+    assert_button_click(DRIVER, "//button[@data-simple-next='']")
 
     # Check if data-step is 2 looking for hidden
-    is_step_2 = DRIVER.execute_script(f"""return document.querySelector("[data-simple-step='2']").classList.contains("hidden")""")
+    is_step_2 = DRIVER.execute_script("""return document.querySelector("[data-step='2']").classList.contains("hidden")""")
     if is_step_2:
         log_error("Step 2 should be visible.")
         exit(1)
 
     # Check antibot value
-    value_js_antibot = DRIVER.execute_script("""return document.querySelector('span[data-setting-select-text="use-antibot"]').getAttribute('data-value')""")
-    if value_js_antibot != "no":
-        log_error("Value should be changed by no selecting security level.")
+    antibot_button_text = safe_get_element(
+        DRIVER, By.XPATH, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']//span[@data-setting-select-text='use-antibot']"
+    )
+    assert isinstance(antibot_button_text, WebElement), "Antibot button text is not a WebElement"
+    if antibot_button_text.get_attribute("data-value") != "no":
+        log_error("Value should be no.")
         exit(1)
 
     log_info("Changing security level and check update done, create app ...")
-    submit_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-services-modal-submit='']")
-    access_page(DRIVER, "/form[@data-services-modal-form and @data-advanced]//button[@data-services-modal-submit='']", "services", False)
+    access_page(DRIVER, "//form[@data-services-modal-form and @data-simple]//button[@data-services-modal-submit='']", "services", False)
 
     if TEST_TYPE == "linux":
         wait_for_service("app3.example.com")
