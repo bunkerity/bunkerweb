@@ -966,6 +966,7 @@ class Multiple {
         .getAttribute("data-plugins-multiple")
         .replaceAll(`'`, `"`),
     );
+    this.currAction = "";
     this.currServName = "";
     this.prefix = prefix;
     this.container = document.querySelector("main");
@@ -980,16 +981,28 @@ class Multiple {
     });
 
     this.container.addEventListener("click", (e) => {
+      try {
+        if (e.target.closest("button").hasAttribute("data-services-action")) {
+          this.currAction = e.target
+            .closest("button")
+            .getAttribute("data-services-action");
+        }
+      } catch (e) {}
       // Update security level
       try {
         if (
-          e.target
-            .closest("button")
-            .getAttribute("data-setting-select-dropdown-btn") ==
+          e.target.getAttribute("data-setting-select-dropdown-btn") ==
           "security-level"
         ) {
           // Need to wait atm for the attributes value to be updated
           setTimeout(() => {
+            if (!this.handleSecurityLevel) return;
+            if (
+              this.currAction === "edit" ||
+              this.currAction === "clone" ||
+              this.currAction === "delete"
+            )
+              return;
             //remove all multiples
             this.removePrevMultiples();
             // set settings
@@ -1039,8 +1052,10 @@ class Multiple {
             .querySelector("[data-services-settings]")
             .getAttribute("data-value");
           const settings = this.getSettingsMultiple(serviceSettings);
+
           //keep only multiple settings value
           const multipleSettings = this.getMultiplesOnly(settings);
+
           const sortMultiples =
             this.sortMultipleByContainerAndSuffixe(multipleSettings);
 
@@ -2037,6 +2052,7 @@ const setAdvancedMultiple = new Multiple(
   `[data-advanced][data-services-modal-form]`,
   false,
 );
+
 const setSimpleMultiple = new Multiple(
   "services",
   `[data-simple][data-services-modal-form]`,
