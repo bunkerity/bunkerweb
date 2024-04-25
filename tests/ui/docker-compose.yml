@@ -1,4 +1,7 @@
-version: "3.5"
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
+  DOCKER_HOST: "tcp://bw-docker:2375"
+  LOG_LEVEL: "debug"
 
 services:
   bw:
@@ -33,36 +36,46 @@ services:
     pull_policy: never
     depends_on:
       - bw
-      - bw-docker-proxy
-    environment:
-      DOCKER_HOST: "tcp://bw-docker-proxy:2375"
+      - bw-docker
     volumes:
       - bw-data:/data
+    environment:
+      <<: *env
     networks:
-      - bw-universe
       - bw-docker
+      - bw-universe
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.5.7
     pull_policy: never
     depends_on:
       - bw
-      - bw-docker-proxy
-      - bw-scheduler
+      - bw-docker
     environment:
-      DOCKER_HOST: "tcp://bw-docker-proxy:2375"
-    volumes:
-      - bw-data:/data
+      <<: *env
     networks:
       - bw-docker
       - bw-universe
 
-  bw-docker-proxy:
+  bw-docker:
     image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
+      - LOG_LEVEL=warning
+    networks:
+      - bw-docker
+
+  bw-db:
+    image: mariadb:11
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=secret
+    volumes:
+      - bw-db:/var/lib/mysql
     networks:
       - bw-docker
 
@@ -74,6 +87,7 @@ services:
 
 volumes:
   bw-data:
+  bw-db:
 
 networks:
   bw-universe:
@@ -89,3 +103,4 @@ networks:
       config:
         - subnet: 192.168.0.0/24
   bw-docker:
+    name: bw-docker
