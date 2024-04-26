@@ -503,37 +503,6 @@ class Settings {
     }
   }
 
-  setIsDraft(isDraft, method) {
-    const draftVal = isDraft ? "yes" : "no";
-
-    const draftInps = this.container.querySelectorAll('input[name="is_draft"]');
-
-    draftInps.forEach((inp) => {
-      inp.setAttribute("value", draftVal);
-      inp.value = draftVal;
-    });
-
-    //Update draft button
-    const btn = this.container.querySelector("button[data-toggle-draft-btn]");
-
-    if (
-      (!["ui", "default"].includes(method) && this.currAction !== "clone") ||
-      this.currAction === "delete"
-    ) {
-      return btn.classList.add("hidden");
-    }
-
-    btn.classList.remove("hidden");
-
-    const showEl = isDraft ? "true" : "false";
-    btn.querySelectorAll("[data-toggle-draft]").forEach((item) => {
-      if (item.getAttribute("data-toggle-draft") === showEl)
-        item.classList.remove("hidden");
-      if (item.getAttribute("data-toggle-draft") !== showEl)
-        item.classList.add("hidden");
-    });
-  }
-
   updateOldNameValue() {
     const oldNameValue = this.action === "edit" ? this.oldServName : "";
 
@@ -591,7 +560,6 @@ class Settings {
 
   updateData(
     target,
-    settings = {},
     forceEnabled = false,
     setMethodUI = false,
     emptyServerName = false,
@@ -643,8 +611,8 @@ class Settings {
     return settings;
   }
 
-  setRegularInps(settings, forceEnabled, setMethodUI) {
-    const settings = this.getRegularInps(settings);
+  setRegularInps(allSettings, forceEnabled, setMethodUI) {
+    const settings = this.getRegularInps(allSettings);
     // Case we have settings, like when we edit a service
     // We need to update the settings with the right values
     if (Object.keys(settings).length > 0) {
@@ -1061,12 +1029,12 @@ class Settings {
 class MultipleActions {
   constructor(prefix, formContainerSelector) {
     this.prefix = prefix;
-    this.formContainer = document.querySelector(formContainerSelector);
+    this.form = document.querySelector(formContainerSelector);
     this.init();
   }
 
   init() {
-    this.formContainer.addEventListener("click", (e) => {
+    this.form.addEventListener("click", (e) => {
       // Add btn
       try {
         if (
@@ -1078,7 +1046,7 @@ class MultipleActions {
           const btn = e.target.closest("button");
           const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
           //get all multiple groups
-          const multipleEls = this.formContainer.querySelectorAll(
+          const multipleEls = this.form.querySelectorAll(
             `[data-${this.prefix}-settings-multiple*="${attName}"]`,
           );
           //case no schema
@@ -1101,7 +1069,7 @@ class MultipleActions {
           const currNum = `${multipleEls.length >= 2 ? topNum + 1 : topNum}`;
           const setNum = +currNum === 0 ? `` : `_${currNum}`;
           //the default (schema) group is the last group
-          const schema = this.formContainer.querySelector(
+          const schema = this.form.querySelector(
             `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
           );
           //clone schema to create a group with new num
@@ -1184,7 +1152,7 @@ class MultipleActions {
                   .setAttribute("data-value", defaultVal);
                 select.querySelector("data-setting-select-text").textContent =
                   defaultVal;
-                const dropdown = this.formContainer.querySelector(
+                const dropdown = this.form.querySelector(
                   `[data-setting-select-dropdown="${select.getAttribute(
                     "data-setting-select",
                   )}"]`,
@@ -1216,7 +1184,7 @@ class MultipleActions {
   }
 
   showMultByAtt(att) {
-    const multContainers = this.formContainer.querySelectorAll(
+    const multContainers = this.form.querySelectorAll(
       `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
@@ -1230,7 +1198,7 @@ class MultipleActions {
   }
 
   toggleMultByAtt(att) {
-    const multContainers = this.formContainer.querySelectorAll(
+    const multContainers = this.form.querySelectorAll(
       `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
@@ -1268,7 +1236,7 @@ class MultipleActions {
           const name = select.getAttribute(
             `data-${this.prefix}-setting-select-default`,
           );
-          const selDOM = this.formContainer.querySelector(
+          const selDOM = this.form.querySelector(
             `button[data-${this.prefix}-setting-select='${name}']`,
           );
           if (method === "ui" || method === "default") {
@@ -1356,7 +1324,7 @@ class ServiceModal {
           //set form info and right form
           this.setFormModal(e.target);
         }
-      } catch (err) {}
+      } catch (err) { console.log(err);}
     });
   }
 
@@ -1382,36 +1350,28 @@ class ServiceModal {
         .querySelector("[data-service-method]")
         .getAttribute("data-value") || "no";
 
-    const oldServName = e.target
+        let oldServName = '';
+
+        if(action !== "new") target
       .closest("[data-services-service]")
       .querySelector("[data-old-service-name]")
-      .getAttribute("data-value");
+      .getAttribute("data-value") || '';
     this.currMethod = method;
 
     return [action, serviceName, oldServName, isDraft, method];
   }
 
-  setFormModal() {
+  setFormModal(target) {
     const [action, serviceName, oldServName, isDraft, method] =
-      this.getActionData(e.target);
-
+      this.getActionData(target);
     this.currAction = action;
     this.modalTitle.textContent = `${action} ${serviceName}`;
-    const operation = action === "clone" ? "new" : action;
-
-    // update operation and other hidden inputs for all mode in modal
-    const operationInps = this.modal.querySelectorAll(
-      'input[name="operation"]',
-    );
-    operationInps.forEach((inp) => {
-      inp.setAttribute("value", operation);
-      inp.value = operation;
-    });
 
     // show / hide components
     this.hideForms();
     this.setCardViewportHeight(action === "delete" ? false : true);
     this.setHeaderActionsVisible(action === "delete" ? false : true);
+    this.SetSelectTabsVisible(action === "delete" ? false : true);
     this.setModeVisible(action);
     if (action === "edit" || action === "new" || action === "clone") {
       this.formNewEdit.classList.remove("hidden");
@@ -1430,15 +1390,46 @@ class ServiceModal {
 
     if (action === "delete") {
       this.formDelete.classList.remove("hidden");
-      formEl.querySelector(`[data-services-modal-text]`).textContent =
+      this.formDelete.querySelector(`[data-services-modal-text]`).textContent =
         `Are you sure you want to delete ${serviceName} ?`;
-      const nameInp = formEl.querySelector(`input[name="SERVER_NAME"]`);
+      const nameInp = this.formDelete.querySelector(`input[name="SERVER_NAME"]`);
       nameInp.setAttribute("value", serviceName);
       nameInp.value = serviceName;
     }
 
     this.setIsDraft(isDraft === "yes" ? true : false, method);
     this.openModal();
+  }
+
+  setIsDraft(isDraft, method) {
+    const draftVal = isDraft ? "yes" : "no";
+
+    const draftInps = this.container.querySelectorAll('input[name="is_draft"]');
+
+    draftInps.forEach((inp) => {
+      inp.setAttribute("value", draftVal);
+      inp.value = draftVal;
+    });
+
+    //Update draft button
+    const btn = this.container.querySelector("button[data-toggle-draft-btn]");
+
+    if (
+      (!["ui", "default"].includes(method) && this.currAction !== "clone") ||
+      this.currAction === "delete"
+    ) {
+      return btn.classList.add("hidden");
+    }
+
+    btn.classList.remove("hidden");
+
+    const showEl = isDraft ? "true" : "false";
+    btn.querySelectorAll("[data-toggle-draft]").forEach((item) => {
+      if (item.getAttribute("data-toggle-draft") === showEl)
+        item.classList.remove("hidden");
+      if (item.getAttribute("data-toggle-draft") !== showEl)
+        item.classList.add("hidden");
+    });
   }
 
   setHeaderActionsVisible(setVisible) {
@@ -1849,17 +1840,9 @@ const setFilterGlobal = new FilterSettings(
   "services",
 );
 
-const setAdvancedMultiple = new Multiple(
-  "services",
-  `[data-advanced][data-services-modal-form]`,
-  false,
-);
 
-const setSimpleMultiple = new Multiple(
-  "services",
-  `[data-simple][data-services-modal-form]`,
-  true,
-);
+// const settings = new Settings(document.querySelector("[data-advanced][data-services-modal-form]"), "advanced");
+// const setAdvancedMultiple = new MultipleActions("services", document.querySelector("[data-advanced][data-services-modal-form]"));
 
 const checkServiceModalKeyword = new CheckNoMatchFilter(
   document.querySelector("input#settings-filter"),
