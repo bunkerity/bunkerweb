@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
-from hashlib import sha256
 from io import BytesIO
-from os import getenv, listdir, chmod, _exit, sep
-from os.path import basename, dirname, join, normpath
+from itertools import chain
+from os import getenv, sep
+from os.path import join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from uuid import uuid4
-from glob import glob
-from json import loads
+from json import JSONDecodeError, loads
 from shutil import copytree, rmtree
 from tarfile import open as tar_open
 from traceback import format_exc
@@ -31,30 +30,57 @@ for deps_path in [
 from magic import Magic
 from requests import get
 
+from common_utils import bytes_hash  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
-logger = setup_logger("Jobs.download-plugins", getenv("LOG_LEVEL", "INFO"))
+EXTERNAL_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "plugins")
+TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "plugins")
+LOGGER = setup_logger("Jobs.download-plugins", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 
-def install_plugin(plugin_dir) -> bool:
-    # Load plugin.json
-    metadata = loads(Path(plugin_dir, "plugin.json").read_text(encoding="utf-8"))
-    # Don't go further if plugin is already installed
-    if Path("etc", "bunkerweb", "plugins", metadata["id"], "plugin.json").is_file():
-        logger.warning(
-            f"Skipping installation of plugin {metadata['id']} (already installed)",
-        )
+def install_plugin(plugin_path: Path, db) -> bool:
+    plugin_file = plugin_path.joinpath("plugin.json")
+
+    if not plugin_file.is_file():
+        LOGGER.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json not found)")
         return False
+
+    # Load plugin.json
+    try:
+        metadata = loads(plugin_file.read_text(encoding="utf-8"))
+    except JSONDecodeError:
+        LOGGER.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json is not valid)")
+        return False
+
+    new_plugin_path = EXTERNAL_PLUGINS_DIR.joinpath(metadata["id"])
+
+    # Don't go further if plugin is already installed
+    if new_plugin_path.is_dir():
+        old_version = None
+
+        for plugin in db.get_plugins(_type="external"):
+            if plugin["id"] == metadata["id"]:
+                old_version = plugin["version"]
+                break
+
+        if old_version == metadata["version"]:
+            LOGGER.warning(f"Skipping installation of plugin {metadata['id']} (version {metadata['version']} already installed)")
+            return False
+
+        LOGGER.warning(
+            f"Plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it..."
+        )
+        rmtree(new_plugin_path, ignore_errors=True)
+
     # Copy the plugin
-    copytree(plugin_dir, join(sep, "etc", "bunkerweb", "plugins", metadata["id"]))
+    copytree(plugin_path, new_plugin_path)
     # Add u+x permissions to jobs files
-    for job_file in glob(join(plugin_dir, "jobs", "*")):
-        st = Path(job_file).stat()
-        chmod(job_file, st.st_mode | S_IEXEC)
-    logger.info(f"Plugin {metadata['id']} installed")
+    for job_file in chain(new_plugin_path.joinpath("jobs").glob("*"), new_plugin_path.joinpath("bwcli").glob("*")):
+        job_file.chmod(job_file.stat().st_mode | S_IEXEC)
+    LOGGER.info(f"Plugin {metadata['id']} installed")
     return True
 
 
@@ -62,18 +88,19 @@ try:
     # Check if we have plugins to download
     plugin_urls = getenv("EXTERNAL_PLUGIN_URLS")
     if not plugin_urls:
-        logger.info("No external plugins to download")
-        _exit(0)
+        LOGGER.info("No external plugins to download")
+        sys_exit(0)
 
+    db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     plugin_nbr = 0
 
     # Loop on URLs
-    logger.info(f"Downloading external plugins from {plugin_urls}...")
+    LOGGER.info(f"Downloading external plugins from {plugin_urls}...")
     for plugin_url in plugin_urls.split(" "):
         # Download Plugin file
         try:
             if plugin_urls.startswith("file://"):
-                content = Path(normpath(plugin_urls[7:])).read_bytes()
+                content = Path(plugin_urls[7:]).read_bytes()
             else:
                 content = b""
                 resp = get(
@@ -84,7 +111,7 @@ try:
                 )
 
                 if resp.status_code != 200:
-                    logger.warning(f"Got status code {resp.status_code}, skipping...")
+                    LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
                     continue
 
                 # Iterate over the response content in chunks
@@ -92,16 +119,14 @@ try:
                     if chunk:
                         content += chunk
         except:
-            logger.error(
-                f"Exception while downloading plugin(s) from {plugin_url} :\n{format_exc()}",
-            )
+            LOGGER.error(f"Exception while downloading plugin(s) from {plugin_url} :\n{format_exc()}")
             status = 2
             continue
 
         # Extract it to tmp folder
-        temp_dir = join(sep, "var", "tmp", "bunkerweb", "plugins", str(uuid4()))
+        temp_dir = TMP_DIR.joinpath(str(uuid4()))
         try:
-            Path(temp_dir).mkdir(parents=True, exist_ok=True)
+            temp_dir.mkdir(parents=True, exist_ok=True)
             file_type = Magic(mime=True).from_buffer(content)
 
             if file_type == "application/zip":
@@ -109,78 +134,72 @@ try:
                     zf.extractall(path=temp_dir)
             elif file_type == "application/gzip":
                 with tar_open(fileobj=BytesIO(content), mode="r:gz") as tar:
-                    tar.extractall(path=temp_dir)
+                    try:
+                        tar.extractall(path=temp_dir, filter="data")
+                    except TypeError:
+                        tar.extractall(path=temp_dir)
             elif file_type == "application/x-tar":
                 with tar_open(fileobj=BytesIO(content), mode="r") as tar:
-                    tar.extractall(path=temp_dir)
+                    try:
+                        tar.extractall(path=temp_dir, filter="data")
+                    except TypeError:
+                        tar.extractall(path=temp_dir)
             else:
-                logger.error(f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping...")
+                LOGGER.error(f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping...")
                 continue
         except:
-            logger.error(
-                f"Exception while decompressing plugin(s) from {plugin_url} :\n{format_exc()}",
-            )
+            LOGGER.error(f"Exception while decompressing plugin(s) from {plugin_url} :\n{format_exc()}")
             status = 2
             continue
 
         # Install plugins
         try:
-            for plugin_dir in glob(join(temp_dir, "**", "plugin.json"), recursive=True):
+            for plugin_path in temp_dir.rglob("**/plugin.json"):
                 try:
-                    if install_plugin(dirname(plugin_dir)):
+                    if install_plugin(plugin_path.parent, db):
                         plugin_nbr += 1
                 except FileExistsError:
-                    logger.warning(
-                        f"Skipping installation of plugin {basename(dirname(plugin_dir))} (already installed)",
-                    )
+                    LOGGER.warning(f"Skipping installation of plugin {plugin_path.parent.name} (already installed)")
         except:
-            logger.error(
-                f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}",
-            )
+            LOGGER.error(f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}")
             status = 2
 
     if not plugin_nbr:
-        logger.info("No external plugins to update to database")
-        _exit(0)
+        LOGGER.info("No external plugins to update to database")
+        sys_exit(0)
 
     external_plugins = []
     external_plugins_ids = []
-    plugins_dir = join(sep, "etc", "bunkerweb", "plugins")
-    for plugin in listdir(plugins_dir):
-        path = join(plugins_dir, plugin)
-        if not Path(path, "plugin.json").is_file():
-            logger.warning(f"Plugin {plugin} is not valid, deleting it...")
-            rmtree(path, ignore_errors=True)
+    for plugin_path in EXTERNAL_PLUGINS_DIR.glob("*"):
+        if not plugin_path.joinpath("plugin.json").is_file():
+            LOGGER.warning(f"Plugin {plugin_path.name} is not valid, deleting it...")
+            rmtree(plugin_path, ignore_errors=True)
             continue
 
-        plugin_file = loads(Path(path, "plugin.json").read_text(encoding="utf-8"))
+        plugin_file = loads(plugin_path.joinpath("plugin.json").read_text(encoding="utf-8"))
 
-        plugin_content = BytesIO()
-        with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-            tar.add(path, arcname=basename(path))
-        plugin_content.seek(0)
-        value = plugin_content.getvalue()
+        with BytesIO() as plugin_content:
+            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                tar.add(plugin_path, arcname=plugin_path.name)
+            plugin_content.seek(0)
+            value = plugin_content.getvalue()
 
         plugin_file.update(
             {
-                "external": True,
-                "page": False,
+                "type": "external",
+                "page": plugin_path.joinpath("ui").is_dir(),
                 "method": "scheduler",
                 "data": value,
-                "checksum": sha256(value).hexdigest(),
+                "checksum": bytes_hash(value, algorithm="sha256"),
             }
         )
-
-        if "ui" in listdir(path):
-            plugin_file["page"] = True
 
         external_plugins.append(plugin_file)
         external_plugins_ids.append(plugin_file["id"])
 
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     lock = Lock()
 
-    for plugin in db.get_plugins(external=True, with_data=True):
+    for plugin in db.get_plugins(_type="external", with_data=True):
         if plugin["method"] != "scheduler" and plugin["id"] not in external_plugins_ids:
             external_plugins.append(plugin)
 
@@ -188,18 +207,18 @@ try:
         err = db.update_external_plugins(external_plugins)
 
     if err:
-        logger.error(
-            f"Couldn't update external plugins to database: {err}",
-        )
+        LOGGER.error(f"Couldn't update external plugins to database: {err}")
 
     status = 1
-    logger.info("External plugins downloaded and installed")
+    LOGGER.info("External plugins downloaded and installed")
 
+except SystemExit as e:
+    status = e.code
 except:
     status = 2
-    logger.error(f"Exception while running download-plugins.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running download-plugins.py :\n{format_exc()}")
 
-for plugin_tmp in glob(join(sep, "var", "tmp", "bunkerweb", "plugins-*")):
+for plugin_tmp in TMP_DIR.glob("*"):
     rmtree(plugin_tmp, ignore_errors=True)
 
 sys_exit(status)

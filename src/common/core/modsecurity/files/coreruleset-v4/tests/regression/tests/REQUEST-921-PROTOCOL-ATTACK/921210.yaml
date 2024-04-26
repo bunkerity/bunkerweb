@@ -1,0 +1,49 @@
+---
+meta:
+  author: "Christian Folini (dune73)"
+  description: "HTTP Parameter Pollution"
+  enabled: true
+  name: 921210.yaml
+tests:
+  - test_title: 921210-1
+    desc: "HTTP Parameter Pollution via bogus chars after parameter array name"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: "/?foo[1]a=bar&foo[1]b=<evil>"
+          output:
+            log_contains: id "921210"
+  - test_title: 921210-2
+    desc: "HTTP Parameter Pollution via bogus chars between square brackets of multi-dimensional array name"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: "/?foo[1]a[2]=bar"
+          output:
+            log_contains: id "921210"
+  - test_title: 921210-3
+    desc: "HTTP Parameter Pollution false positive test"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: "/?foo[1][2]=bar"
+          output:
+            no_log_contains: id "921210"

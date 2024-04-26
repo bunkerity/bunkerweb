@@ -1,0 +1,17 @@
+---
+meta:
+  author: "Andrea (theMiddle) Menin"
+  enabled: false
+  name: "920620.yaml"
+  description: "Tests for 920620"
+tests:
+  - test_title: 920620-1
+    desc: Multiple Content-Type request headers
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            encoded_request: "R0VUIC9nZXQgSFRUUC8xLjENCkhvc3Q6IGxvY2FsaG9zdA0KVXNlci1BZ2VudDogT1dBU1AgQ1JTIHRlc3QgYWdlbnQNCkFjY2VwdDogdGV4dC94bWwsYXBwbGljYXRpb24veG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCx0ZXh0L2h0bWw7cT0wLjksdGV4dC9wbGFpbjtxPTAuOCxpbWFnZS9wbmcsKi8qO3E9MC41DQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24veG1sDQoNCg=="
+          output:
+            log_contains: "id \"920620\""

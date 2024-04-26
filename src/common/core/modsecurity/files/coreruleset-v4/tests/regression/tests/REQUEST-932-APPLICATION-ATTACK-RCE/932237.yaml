@@ -1,0 +1,543 @@
+---
+meta:
+  author: "Franziska Bühler, Esad Cetiner"
+  enabled: true
+  name: "932237.yaml"
+tests:
+  - test_title: 932237-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: env
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: id
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: set -o history
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: settings
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get'
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: environment
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get'
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-6
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: env
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-7
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: id
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-8
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: set -o history
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-9
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: settings
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get'
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-10
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: environment
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get'
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-11
+    desc: "9323HNQU - should not be detected at PL 2"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              code=;vi dddd +silent\\ \!whoami +wq
+            version: HTTP/1.0
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-12
+    desc: "9323HNQU - should not be detected at PL 2"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              code=;vi -c:\!pwd
+            version: HTTP/1.0
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-13
+    desc: "FP with word comment"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "https://example.com/?args=comment"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932237"
+  - test_title: 932237-14
+    desc: "FP with word settings"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "https://example.com/?args=settings"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932237"
+  - test_title: 932237-15
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: set
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-16
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: set
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-17
+    desc: "Block env command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: env --version
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-18
+    desc: "Block env command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: env --version
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-19
+    desc: "Block ad-hoc ansible commands"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible all -m ping"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-20
+    desc: "Block ansible config dump command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-config dump"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-21
+    desc: "Block installing collections from ansible galaxy"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-galaxy collection install community.general"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-22
+    desc: "Block ad-hoc ansible commands using ansible-console"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "code=ansible-console"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-23
+    desc: "Block ansible-doc command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-doc plugin ping"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-24
+    desc: "Block dumping ansible inventory file and variables"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-inventory --list"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-25
+    desc: "Block ansible pull from remote repository"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-pull --url example.com"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-26
+    desc: "Block decrypting ansible secrets"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-vault decrypt secret"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-27
+    desc: "Block execution of ansible playbooks"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "ansible-playbook site.yml"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-28
+    desc: "Block decryption of secrets with chef-vault"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef-vault -i secret"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-29
+    desc: "Block execution of chef-shell command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef-shell"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-30
+    desc: "Block execution chef recipie book"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef-run all recipie.rb"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-31
+    desc: "Block execution chef recipie book against a specific node"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef-client -t 1.1.1.1"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-32
+    desc: "Block execution chef command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "chef report nodes"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-33
+    desc: "Block execution of visudo"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "visudo"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"
+  - test_title: 932237-34
+    desc: "Block execution of CrowdSec cscli"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "cscli alerts list"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+          output:
+            log_contains: id "932237"

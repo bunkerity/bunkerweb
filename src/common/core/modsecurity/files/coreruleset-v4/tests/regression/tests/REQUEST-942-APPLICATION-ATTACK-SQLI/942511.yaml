@@ -1,0 +1,39 @@
+---
+meta:
+  author: "Walter Hop"
+  description: None
+  enabled: true
+  name: 942511.yaml
+tests:
+  - test_title: 942511-1
+    desc: "SQLi bypass detected: quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?`bla`"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942511"
+  - test_title: 942511-2
+    desc: "SQLi bypass detected: quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?'bla'"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942511"

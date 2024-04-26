@@ -9,15 +9,15 @@
   "git_repository": [
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20231117",
+      "name": "LuaJIT v2.1-20240314",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "4182d6bf37e9f8d1cb5d6e83b1db66de84b95101"
+      "commit": "15f58c9648ee40a3fb6617e22e2f3fdff80d66b8"
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.11",
+      "name": "ModSecurity v3.0.12",
       "url": "https://github.com/SpiderLabs/ModSecurity.git",
-      "commit": "bbde9381cbccb49ea73f6194b08b478adc53f3bc",
+      "commit": "5f44383236b94ef8066529861d0b4d603f9b3bcb",
       "post_install": "patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch && rm -rf src/deps/src/modsecurity/others/libinjection"
     },
     {
@@ -120,9 +120,9 @@
     },
     {
       "id": "lua-resty-http",
-      "name": "lua-resty-http v0.17.1",
+      "name": "lua-resty-http v0.17.2",
       "url": "https://github.com/ledgetech/lua-resty-http.git",
-      "commit": "4ab4269cf442ba52507aa2c718f606054452fcad"
+      "commit": "183310324026120ab7eaf5dd82b9be90ae63aadf"
     },
     {
       "id": "lua-resty-ipmatcher",
@@ -145,15 +145,15 @@
     },
     {
       "id": "lua-resty-mlcache",
-      "name": "lua-resty-mlcache v2.6.0",
+      "name": "lua-resty-mlcache v2.7.0",
       "url": "https://github.com/thibaultcha/lua-resty-mlcache.git",
-      "commit": "f140f56663cbdb9cdd247d29f75c299c702ff6b4"
+      "commit": "b4d0aed5adf74b118238efdcd971224278ec7d26"
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.2.0",
+      "name": "lua-resty-openssl v1.3.1",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "7f25f00ba2b2140b794c94b5ae17f5a0736e3b03",
+      "commit": "643956d990b3ef4d9b52d0b77ba4d69d7e912dcc",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {

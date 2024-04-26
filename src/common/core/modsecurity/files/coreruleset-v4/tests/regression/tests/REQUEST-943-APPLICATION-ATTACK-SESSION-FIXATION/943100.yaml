@@ -1,0 +1,49 @@
+---
+meta:
+  author: csanders-git
+  description: None
+  enabled: true
+  name: 943100.yaml
+tests:
+  - test_title: 943100-1
+    desc: Session Fixation Attack (943100) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              Referer: http
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /foo.php?bar=blah<script>document.cookie="sessionid=1234;%20domain=.example.dom";</script>
+            version: HTTP/1.1
+          output:
+            log_contains: id "943100"
+  - test_title: 943100-2
+    desc: "Status Page Test - Possible Session Fixation Attack: Part of Setting Cookie Values in ARG"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              Referer: http
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /foo.php?test=.cookie;expires=
+            version: HTTP/1.1
+          output:
+            log_contains: id "943100"

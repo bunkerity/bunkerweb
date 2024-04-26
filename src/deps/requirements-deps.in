@@ -1,7 +1,7 @@
-pip==23.3.2
+pip==24.0
 pip-compile-multi==2.6.3
-pip-tools==7.3.0
+pip-tools==7.4.1
 pip-upgrader==1.4.15
-setuptools==69.0.3
+setuptools==69.5.1
 tomli==2.0.1
-wheel==0.42.0
+wheel==0.43.0

@@ -8,13 +8,13 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name      | Version | Description                                                                                                                      |                                                 Link                                                  |
 | :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
-|   **ClamAV**   |   1.3   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-| **Coraza** |   1.3   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).           | [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza) |
-|  **CrowdSec**  |   1.3   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
-| **Discord** | 1.3 | Send security notifications to a Discord channel using a Webhook. | [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord) |
-| **Slack** | 1.3 | Send security notifications to a Slack channel using a Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack) |
-| **VirusTotal** |   1.3   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-| **WebHook** | 1.3 | Send security notifications to a custom HTTP endpoint using a	Webhook. | [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook) |
+|   **ClamAV**   |   1.4   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+| **Coraza** |   1.4   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).           | [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza) |
+|  **CrowdSec**  |   1.4   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
+| **Discord** | 1.4 | Send security notifications to a Discord channel using a Webhook. | [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord) |
+| **Slack** | 1.4 | Send security notifications to a Slack channel using a Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack) |
+| **VirusTotal** |   1.4   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+| **WebHook** | 1.4 | Send security notifications to a custom HTTP endpoint using a	Webhook. | [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook) |
 
 ## How to use a plugin
 
@@ -22,7 +22,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).
 
-You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.3.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.4.zip`
 
 ### Manual
 
@@ -45,11 +45,44 @@ The first step is to install the plugin by putting the plugin files inside the c
     cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
     ```
 
-    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+    !!! warning "Using local folder for persistent data"
+        The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+        But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
 
-    ```shell
-    chown -R 101:101 ./bw-data
-    ```
+        ```shell
+        mkdir bw-data && \
+        chown root:101 bw-data && \
+        chmod 770 bw-data
+        ```
+
+        Alternatively, if the folder already exists :
+
+        ```shell
+        chown -R root:101 bw-data && \
+        chmod -R 770 bw-data
+        ```
+
+        If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+
+        ```shell
+        grep ^$(whoami): /etc/subuid && \
+        grep ^$(whoami): /etc/subgid
+        ```
+
+        For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
+
+        ```shell
+        mkdir bw-data && \
+        sudo chgrp 100100 bw-data && \
+        chmod 770 bw-data
+        ```
+
+        Or if the folder already exists :
+
+        ```shell
+        sudo chgrp -R 100100 bw-data && \
+        chmod -R 770 bw-data
+        ```
 
     Then you can mount the volume when starting your Docker stack :
 
@@ -58,7 +91,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         volumes:
           - ./bw-data:/data
     ...
@@ -95,7 +128,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         volumes:
           - ./bw-data:/data
     ...
@@ -134,7 +167,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -181,7 +214,7 @@ The first step is to install the plugin by putting the plugin files inside the c
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.5.5
+              image: bunkerity/bunkerweb-scheduler:1.5.7
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -260,9 +293,36 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 ## Writing a plugin
 
+### Structure
+
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+
+What a plugin structure looks like :
+```
+plugin /
+        confs / conf_type / conf_name.conf
+        ui / actions.py
+             template.html
+        jobs / my-job.py
+        plugin.lua
+        plugin.json
+```
+
+- **conf_name.conf** : add [custom NGINX configurations](quickstart-guide.md#custom-configurations) (as jinja2 templates)
+
+- **actions.py** : script to execute on flask server, this script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
+
+- **template.html** : custom plugin page you can access from ui
+
+- **jobs py file** : custom python files executed as jobs by the scheduler
+
+- **plugin.lua** : code to execute on NGINX using [NGINX LUA module](https://github.com/openresty/lua-nginx-module)
+
+- **plugin.json** : metadata, settings and jobs for your settings
+
+### Getting started
 
 The first step is to create a folder that will contain the plugin :
 
@@ -339,7 +399,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream` and `server-stream`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec` and `modsec-crs`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
@@ -369,8 +429,8 @@ local utils     = require "bunkerweb.utils"
 local myplugin = class("myplugin", plugin)
 
 
-function myplugin:initialize()
-    plugin.initialize(self, "myplugin")
+function myplugin:initialize(ctx)
+    plugin.initialize(self, "myplugin", ctx)
     self.dummy = "dummy"
 end
 
@@ -507,7 +567,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 
@@ -515,43 +575,111 @@ BunkerWeb uses an internal job scheduler for periodic tasks like renewing certif
 
 ### Plugin page
 
-Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the [web UI](web-ui.md).
+Everything related to the web UI is located inside the subfolder **ui** as we seen in the [previous structure section.](#structure).
 
-Everything related to the web UI is located inside a subfolder named **ui** at the root directory of your plugin. A template file named **template.html** and located inside the **ui** subfolder contains the client code and logic to display your page. Another file named **actions.py** and also located inside the **ui** subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).
+#### Prerequisites
+
+When you want to create a plugin page, you need two files :
+
+- **template.html** that will be accessible with a **GET /plugins/<*plugin_id*>**.
+
+- **actions.py** where you can add some scripting and logic with a **POST /plugins/<*plugin_id*>**. Notice that this file **need a function with the same name as the plugin** to work. This file is needed even if the function is empty.
+
+#### Basic example
 
 !!! info "Jinja 2 template"
     The **template.html** file is a Jinja2 template, please refer to the [Jinja2 documentation](https://jinja.palletsprojects.com) if needed.
 
-A plugin page can have a form that is used to submit data to the plugin. To get the values of the form, you need to put a **actions.py** file in the **ui** folder. Inside the file, **you must define a function that has the same name as the plugin**. This function will be called when the form is submitted. You can then use the **request** object (from the [Flask library](https://flask.palletsprojects.com)) to get the values of the form. The form's action must finish with **/plugins/<*plugin_id*>**. The helper function `url_for` will generate for you the prefix of the URL : `{{ url_for('plugins') }}/plugin_id`.
+We can put aside the **actions.py** file and start **only using the template on a GET situation**. The template can access app context and libs, so you can use Jinja, request or flask utils.
 
-If you want to display variables generated from your **actions.py** in your template file, you can return a dictionary with variables name as keys and variables value as values. Here is dummy example where we return a single variable :
+For example, you can get the request arguments in your template like this :
+
+```html
+<p>request args : {{ request.args.get() }}.</p>
+```
+
+#### Actions.py
+
+!!! warning "CSRF Token"
+
+    Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
+    ```html
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    ```
+
+You can power-up your plugin page with additional scripting with the **actions.py** file when sending a **POST /plugins/<*plugin_id*>**.
+
+You have two functions by default in **actions.py** :
+
+**pre_render function**
+
+This allows you to retrieve data when you **GET** the template, and to use the data with the pre_render variable available in Jinja to display content more dynamically.
 
 ```python
-def myplugin() :
-	return {"foo": "bar"}
+def pre_render(**kwargs)
+  return <pre_render_data>
 ```
 
-And we display it in the **template.html** file :
-```html
-{% if foo %}
-Content of foo is : {{ foo }}.
-{% endif %}
+BunkerWeb will send you this type of response :
+
+
+```python
+return jsonify({"status": "ok|ko", "code" : XXX, "data": <pre_render_data>}), 200
 ```
 
-Please note that every form submission is protected via a CSRF token, you will need to include the following snippet into your forms :
-```html
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+**<*plugin_id*> function**
+
+This allows you to retrieve data when you make a **POST** from the template endpoint, which must be used in AJAX.
+
+```python
+def myplugin(**kwargs)
+  return <plugin_id_data>
 ```
 
-Retrieving user submitted data is pretty simple, thanks to the request module provided by Flask :
+BunkerWeb will send you this type of response :
+
+```python
+return jsonify({"message": "ok", "data": <plugin_id_data>}), 200
+```
+
+**What you can access from action.py**
+
+Here are the arguments that are passed and access on action.py functions:
+
+```python
+function(app=app, args=request.args.to_dict() or request.json or None)
+```
+
+!!! info "Python libraries"
+    In addition, you can use Python libraries that are already available like :
+    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
+
+
+**Some examples**
+
+- Retrieve form submitted data
 
 ```python
 from flask import request
 
-def myplugin() :
+def myplugin(**kwargs) :
 	my_form_value = request.form["my_form_input"]
+  return my_form_value
 ```
 
-!!! info "Python libraries"
-    You can use Python libraries that are already available like :
-    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
+- Access app config
+
+**action.py**
+```python
+from flask import request
+
+def pre_render(**kwargs) :
+	config = kwargs['app'].config["CONFIG"].get_config(methods=False)
+  return config
+```
+
+**template**
+```html
+<!-- metadata + config -->
+<div>{{ pre_render }}</div>
+```

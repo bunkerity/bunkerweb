@@ -37,6 +37,7 @@ function reversescan:access()
 		elseif cached == "open" then
 			ret_threads = true
 			ret_err = "port " .. port .. " is opened for IP " .. self.ctx.bw.remote_addr
+			self:set_metric("counters", "failed_" .. port, 1)
 			break
 			-- Perform scan in a thread
 		elseif not cached then
@@ -99,6 +100,7 @@ function reversescan:access()
 		if open then
 			ret_threads = true
 			ret_err = "port " .. port .. " is opened for IP " .. self.ctx.bw.remote_addr
+			self:set_metric("counters", "failed_" .. port, 1)
 			break
 		end
 	end

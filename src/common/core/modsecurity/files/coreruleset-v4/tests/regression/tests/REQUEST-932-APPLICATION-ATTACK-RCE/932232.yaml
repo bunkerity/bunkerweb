@@ -1,0 +1,129 @@
+---
+meta:
+  author: "Franziska Bühler"
+  description: "Remote Command Execution: Unix Command Injection"
+  enabled: true
+  name: 932232.yaml
+tests:
+  - test_title: 932232-1
+    desc: "/?arg=;ps"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?arg=%3Bps
+            version: HTTP/1.0
+          output:
+            log_contains: id "932232"
+  - test_title: 932232-2
+    desc: "/?arg=|vi (x"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?arg=%7Cvi%20%28x
+            version: HTTP/1.0
+          output:
+            log_contains: id "932232"
+  - test_title: 932232-3
+    desc: "/?arg=&w (x"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?arg=%26w%20%28x
+            version: HTTP/1.0
+          output:
+            log_contains: id "932232"
+  - test_title: 932232-4
+    desc: "/?arg=&aptitude"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?arg=%26aptitude
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932232"
+  - test_title: 932232-5
+    desc: Remote Command Execution bypass with time
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/?foo=time+who"
+            version: HTTP/1.1
+          output:
+            log_contains: "id \"932232\""
+  - test_title: 932232-6
+    desc: Remote Command Execution bypass with time negative test
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/?foo=time+warner"
+            version: HTTP/1.1
+          output:
+            no_log_contains: "id \"932232\""
+  - test_title: 932232-7
+    desc: Remote Command Injection test for BB finding 935E1D91 - time evasion attempt
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?foo=ti''me+who"
+            version: HTTP/1.1
+          output:
+            log_contains: "id \"932232\""

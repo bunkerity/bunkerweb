@@ -66,7 +66,7 @@ SecAuditLog /var/log/bunkerweb/modsec_audit.log
 
 # include OWASP CRS configurations
 {% if USE_MODSECURITY_CRS == "yes" %}
-include /usr/share/bunkerweb/core/modsecurity/files/crs-setup.conf
+include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v{{ MODSECURITY_CRS_VERSION }}.conf
 
 # custom CRS configurations before loading rules (e.g. exclusions)
 {% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs") %}
@@ -100,7 +100,7 @@ SecRule ENV:is_whitelisted "yes" "id:1000,phase:1,allow,nolog,ctl:ruleEngine=Off
 {% endif +%}
 
 # include OWASP CRS rules
-include /usr/share/bunkerweb/core/modsecurity/files/coreruleset/rules/*.conf
+include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v{{ MODSECURITY_CRS_VERSION }}/rules/*.conf
 {% endif +%}
 
 # custom rules after loading the CRS

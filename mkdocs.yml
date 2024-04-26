@@ -8,13 +8,13 @@ copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</sc
 
 nav:
   - Introduction: 'index.md'
-  - Migrating: 'migrating.md'
   - Concepts: 'concepts.md'
   - Integrations: 'integrations.md'
   - Quickstart guide: 'quickstart-guide.md'
   - Security tuning: 'security-tuning.md'
   - Settings: 'settings.md'
   - Web UI: 'web-ui.md'
+  - Upgrading: 'upgrading.md'
   - Troubleshooting: 'troubleshooting.md'
   - Plugins: 'plugins.md'
   - Professional services: 'professional-services.md'

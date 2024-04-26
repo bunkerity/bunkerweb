@@ -1,0 +1,21 @@
+FROM redhat/ubi9-init:9.3-12@sha256:e78f63bdad5dc986c8ceb9c6b5ce350a0bb7dce5b59c3a804a5874b3a1eab76a
+
+ENV NGINX_VERSION 1.24.0
+
+# Copy centos repo
+COPY src/linux/centos-9.repo /etc/yum.repos.d/centos.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/centos.repo
+
+# Copy RPM-GPG-KEY-CentOS-Official
+COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+# Import RPM-GPG-KEY-CentOS-Official
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
+
+RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+    dnf install php-fpm yum-utils -y && \
+    dnf install nginx-${NGINX_VERSION} -y
+
+COPY ./package-rhel9/*.rpm /opt

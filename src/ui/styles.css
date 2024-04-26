@@ -8,40 +8,43 @@
 }
 
 * {
-  font-family: "Open Sans", sans-serif !important;
+  font-family: "Open Sans", sans-serif;
 }
 
 .ace_editor,
-.ace_editor div,
-.ace_content {
-  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro",
+.ace_editor * {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Droid Sans Mono", "Consolas",
     monospace !important;
-  font-size: 16px !important;
-  font-weight: normal !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
 }
 
 .sr-only {
   @apply hidden;
 }
 
+.separator {
+  @apply h-px mx-0 mt-3 mb-2 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent;
+}
+
 .close-btn {
-  @apply dark:brightness-90  inline-block px-6 py-3 font-bold text-center text-red-500 border border-red-500 uppercase align-middle transition-all rounded-lg cursor-pointer dark:bg-gray-200 dark:hover:brightness-75 bg-white hover:bg-white/80 focus:bg-white/80 leading-normal ease-in tracking-tight-rem shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply dark:brightness-90  inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-red-500 border border-red-500 uppercase align-middle transition-all rounded-lg cursor-pointer dark:bg-gray-200 dark:hover:brightness-75 bg-white hover:bg-white/80 focus:bg-white/80 leading-normal ease-in tracking-tight-rem shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .valid-btn {
-  @apply tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .delete-btn {
-  @apply tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .edit-btn {
-  @apply tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .info-btn {
-  @apply tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 /*----------------------------------------------*/
@@ -49,7 +52,7 @@
 /*----------------------------------------------*/
 
 .checkbox {
-  @apply cursor-pointer disabled:cursor-default
+  @apply transition-none cursor-pointer disabled:cursor-default
     relative dark:border-slate-600 dark:bg-slate-700 z-10 data-checked:z-0 w-5 h-5
     text-base rounded-1.4 data-checked:bg-primary data-checked:border-primary
     dark:data-checked:bg-primary dark:data-checked:border-primary duration-250 float-left
@@ -65,35 +68,51 @@
 }
 
 .custom-select-btn {
-  @apply disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-primary flex justify-between align-middle items-center text-left text-sm leading-5.6  w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500;
+  @apply disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-primary flex justify-between align-middle items-center text-left text-sm leading-5.6  w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
 .custom-dropdown-btn {
-  @apply min-h-[38px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
+  @apply transition-none min-h-[38px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200;
 }
 
 .active.custom-dropdown-btn {
-  @apply min-h-[38px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-primary  my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-primary text-gray-300 dark:text-gray-300;
+  @apply min-h-[38px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-primary  my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-primary text-gray-300 dark:text-gray-200;
 }
 
 .regular-input {
-  @apply outline-none dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:border-gray-300/0 focus:ring-1  focus:valid:ring-green-500 focus:invalid:ring-red-500  text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700;
+  @apply transition-none outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 disabled:opacity-75 focus:border-gray-300/0 focus:ring-1  focus:valid:ring-green-500 focus:invalid:ring-red-500  text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700;
+}
+
+.invalid.regular-input {
+  @apply !ring-1 !ring-red-500;
 }
 
 .input-title {
-  @apply transition duration-300 ease-in-out dark:opacity-90 text-sm font-bold m-0 dark:text-gray-300;
+  @apply transition duration-300 ease-in-out text-sm font-bold m-0 dark:text-gray-200;
 }
 
 .popover-settings-container {
+  @apply z-[1000] h-fit max-w-[250px] transition-all duration-500 dark:brightness-90 transition rounded-md p-3 -translate-y-7 fixed bg-blue-500;
+}
+
+.popover-tab {
   @apply transition-all duration-500 dark:brightness-90 transition z-50 rounded-md p-3 left-0 -translate-y-7 bottom-0 absolute bg-blue-500;
 }
 
 .popover-settings-text {
-  @apply transition duration-300 ease-in-out dark:opacity-90 font-bold text-sm text-white dark:text-gray-100 m-0;
+  @apply transition duration-300 ease-in-out font-bold text-sm text-white dark:text-white m-0;
 }
 
 .popover-settings-svg {
   @apply cursor-pointer fill-blue-500 h-5 w-5 ml-2 hover:brightness-75;
+}
+
+.popover-settings-svg-multiple {
+  @apply cursor-pointer fill-orange-500 dark:stroke-gray-500 stroke-gray-700 h-5.5 w-5.5 ml-2 hover:brightness-75;
+}
+
+.hidden-multiple {
+  @apply !hidden;
 }
 /*--------------------------------------------*/
 /*---------------END SETTINGS_PLUGINS---------*/
@@ -103,46 +122,458 @@
 /*---------------SETTINGS_TABS-----------------*/
 /*---------------------------------------------*/
 
-.active.settings-tabs-tab-btn {
-  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative  px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md brightness-90 z-10;
+.active.tabs-tab-btn {
+  @apply dark:bg-gray-700 dark:hover:bg-gray-700 bg-gray-200 hover:bg-gray-200;
 }
 
-.settings-tabs-tab-btn {
+.tabs-tab-btn {
   @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative  px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
 }
 
-.settings-tabs-name {
-  @apply text-primary transition duration-300 ease-in-out dark:opacity-90 pl-3 pr-2 dark:text-gray-300;
+.tabs-name {
+  @apply text-primary transition duration-300 ease-in-out pl-3 pr-2 dark:text-gray-100;
 }
 
-.settings-tabs-popover-container {
+.tabs-popover-container {
   @apply top-[60px] min-w-[150px] dark:brightness-90 bg-blue-500 transition z-50 rounded-md p-3 left-0 absolute;
 }
 
-.settings-tabs-popover-text {
+.tabs-popover-text {
   @apply font-bold text-sm text-white m-0;
 }
 
-.settings-tabs-mobile-btn {
-  @apply dark:hover:brightness-95 dark:border-slate-600 dark:bg-slate-700  border-primary border w-full flex items-center justify-between rounded-lg hover:-translate-y-px my-1 px-6 py-3 font-bold text-center  uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-50 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
+.settings-tabs-select-btn {
+  @apply dark:hover:brightness-95 dark:border-slate-600 dark:bg-slate-700  border-primary border w-full flex items-center justify-between rounded-lg hover:-translate-y-px my-1 px-4 py-2 md:px-6 md:py-3 font-bold text-center  uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-50 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
 }
 
-.settings-tabs-mobile-btn-text {
-  @apply transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-300 text-primary;
+.settings-tabs-select-btn-text {
+  @apply transition duration-300 ease-in-out dark:text-gray-400 text-primary;
 }
 
-.active.settings-tabs-mobile-dropdown-btn {
-  @apply border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 z-[1000] dark:bg-primary bg-primary text-gray-300;
+.active.settings-tabs-select-dropdown-btn {
+  @apply border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-200 z-[1000] dark:bg-primary bg-primary text-gray-300;
 }
 
-.first.settings-tabs-mobile-dropdown-btn {
+.first.settings-tabs-select-dropdown-btn {
   @apply border-t rounded-t border-b border-l border-r;
 }
 
-.settings-tabs-mobile-dropdown-btn {
-  @apply flex justify-between border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
+.last.settings-tabs-select-dropdown-btn {
+  @apply rounded-b;
+}
+
+.settings-tabs-select-dropdown-btn {
+  @apply flex justify-between border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200;
 }
 
 /*---------------------------------------------*/
 /*---------------END SETTINGS_TABS-------------*/
 /*---------------------------------------------*/
+
+/*---------------------------------------------*/
+/*--------------- HOME PAGE--------------------*/
+/*---------------------------------------------*/
+
+.home-card {
+  @apply dark:brightness-110 sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.home-card-name {
+  @apply mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-400;
+}
+
+.home-card-title {
+  @apply mb-1 font-bold dark:text-white/90;
+}
+
+.home-card-subtitle {
+  @apply mx-0.5 font-bold leading-normal text-sm mb-0;
+}
+
+.info.home-card-subtitle {
+  @apply text-sky-500;
+}
+
+.error.home-card-subtitle {
+  @apply text-red-500;
+}
+
+.success.home-card-subtitle {
+  @apply text-green-500;
+}
+
+.warning.home-card-subtitle {
+  @apply text-yellow-500;
+}
+
+.home-card-svg-container {
+  @apply dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
+}
+
+.version.home-card-svg-container {
+  @apply bg-yellow-500;
+}
+
+.version-number.home-card-svg-container {
+  @apply bg-emerald-500;
+}
+
+.instances.home-card-svg-container {
+  @apply bg-gray-600;
+}
+
+.services.home-card-svg-container {
+  @apply bg-orange-500;
+}
+
+.plugins.home-card-svg-container {
+  @apply bg-yellow-400;
+}
+
+/*---------------------------------------------*/
+/*--------------- END HOME PAGE ----------------*/
+/*---------------------------------------------*/
+
+/*---------------------------------------------*/
+/*--------------- CARD------------------------*/
+/*---------------------------------------------*/
+
+.card-detail-container {
+  @apply grid grid-cols-1 gap-2 mt-4 mb-6 ml-1;
+}
+
+.card-detail-item {
+  @apply flex items-center col-span-1 py-1 sm:py-0;
+}
+
+.card-detail-item-title {
+  @apply transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
+}
+
+.card-detail-item-subtitle {
+  @apply break-all transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
+}
+
+/*---------------------------------------------*/
+/*--------------- END CARD --------------------*/
+/*---------------------------------------------*/
+
+/*---------------------------------------------*/
+/*--------------- CORE PLUGINS ----------------*/
+/*---------------------------------------------*/
+
+.core-layout {
+  @apply col-span-12 grid grid-cols-12;
+}
+
+.core-card {
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-lg {
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit transition hover:scale-102 col-span-12 md:col-span-6 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-wrap {
+  @apply flex justify-between;
+}
+
+.core-card-wrap-logo {
+  @apply flex justify-start items-center;
+}
+
+.core-card-text {
+  @apply transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-300;
+}
+
+.core-card-text-doc {
+  @apply transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-300 px-1 mt-4 mb-2;
+}
+
+.core-card-text-doc-link {
+  @apply hover:brightness-90 cursor-pointer mt-2 underline text-sky-500;
+}
+
+.center.core-card-text {
+  @apply text-center;
+}
+
+.core-card-title {
+  @apply mb-2 font-bold dark:text-white/90;
+}
+
+.core-card-svg-container {
+  @apply dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
+}
+
+.core-card-deactivated-title {
+  @apply font-bold dark:text-white/90;
+}
+
+.core-card-deactivated-svg {
+  @apply leading-none text-lg relative fill-yellow-500 stroke-white;
+}
+
+.core-card-text-container {
+  @apply mx-1 flex justify-start items-center my-3;
+}
+
+.core-card-status {
+  @apply ml-2 mr-2 mb-2 mt-2 col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-fit h-fit transition hover:scale-102 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-status-container {
+  @apply mx-1 flex justify-start items-center;
+}
+
+.core-card-status-title {
+  @apply mb-0 font-bold dark:text-white/90 mr-4;
+}
+
+.core-card-status-svg {
+  @apply w-6 h-6;
+}
+
+.info.core-card-status-svg {
+  @apply fill-sky-500;
+}
+
+.error.core-card-status-svg {
+  @apply fill-red-500;
+}
+
+.success.core-card-status-svg {
+  @apply fill-green-500;
+}
+
+.core-layout-separator {
+  @apply col-span-12;
+}
+
+.core-card-list {
+  @apply ml-2 mr-2 mb-2 mt-2 content-start md:col-span-6 overflow-x-hidden overflow-y-auto grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-list.no-data {
+  @apply place-content-stretch;
+}
+
+.core-card-list-no-data {
+  @apply pb-[2rem] text-2xl text-center mb-0;
+}
+
+.w-small.core-card-list {
+  @apply md:max-w-[300px];
+}
+
+.w-medium.core-card-list {
+  @apply md:max-w-[400px];
+}
+
+.w-large.core-card-list {
+  @apply md:max-w-[550px];
+}
+
+.core-card-list-title-container {
+  @apply col-span-12 flex;
+}
+
+.core-card-list-title {
+  @apply mb-4 mt-2 font-bold dark:text-white/90 mx-2;
+}
+
+.core-card-list-container {
+  @apply col-span-12 overflow-y-auto overflow-x-auto;
+}
+
+.core-card-list-header {
+  @apply dark:text-gray-200 h-8 text-sm font-bold m-0 pb-2 border-b border-gray-400;
+}
+
+.core-card-list-item {
+  @apply items-center grid grid-cols-12 border-b border-gray-300 py-2.5;
+}
+
+.core-card-list-item-content {
+  @apply dark:text-gray-400 text-sm m-0 my-1;
+}
+
+.core-card-list-wrap {
+  @apply w-full grid grid-cols-12 rounded p-2;
+}
+
+.w-small.core-card-list-wrap {
+  @apply min-w-[200px];
+}
+
+.w-medium.core-card-list-wrap {
+  @apply min-w-[300px];
+}
+
+.w-large.core-card-list-wrap {
+  @apply min-w-[450px];
+}
+
+.core-card-metrics {
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-metrics-name {
+  @apply mb-2 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-400;
+}
+
+.core-card-metrics-subtitle {
+  @apply mb-0 dark:text-gray-300;
+}
+
+.core-card-metrics-subtitle-content {
+  @apply font-bold leading-normal text-sm mx-0.5;
+}
+
+.error.core-card-metrics-subtitle-content {
+  @apply text-red-500;
+}
+
+.success.core-card-metrics-subtitle-content {
+  @apply text-green-500;
+}
+
+.warning.core-card-metrics-subtitle-content {
+  @apply text-yellow-500;
+}
+
+.info.core-card-metrics-subtitle-content {
+  @apply text-sky-500;
+}
+
+.core-card-metrics-svg {
+  @apply leading-none text-lg relative fill-white;
+}
+
+.size-small.core-card-metrics-svg {
+  @apply scale-[0.5];
+}
+
+.size-medium.core-card-metrics-svg {
+  @apply scale-[0.6];
+}
+
+.size-base.core-card-metrics-svg {
+  @apply scale-[0.75];
+}
+
+.purple.core-card-svg-container {
+  @apply bg-purple-600;
+}
+
+.green.core-card-svg-container {
+  @apply bg-green-700;
+}
+
+.red.core-card-svg-container {
+  @apply bg-red-700;
+}
+
+.orange.core-card-svg-container {
+  @apply bg-orange-600;
+}
+
+.blue.core-card-svg-container {
+  @apply bg-blue-600;
+}
+
+.yellow.core-card-svg-container {
+  @apply bg-yellow-600;
+}
+
+.gray.core-card-svg-container {
+  @apply bg-gray-600;
+}
+
+.dark.core-card-svg-container {
+  @apply bg-slate-600;
+}
+
+.amber.core-card-svg-container {
+  @apply bg-amber-600;
+}
+
+.emerald.core-card-svg-container {
+  @apply bg-emerald-600;
+}
+
+.teal.core-card-svg-container {
+  @apply bg-teal-600;
+}
+
+.indigo.core-card-svg-container {
+  @apply bg-indigo-600;
+}
+
+.cyan.core-card-svg-container {
+  @apply bg-cyan-600;
+}
+
+.sky.core-card-svg-container {
+  @apply bg-sky-700;
+}
+
+.pink.core-card-svg-container {
+  @apply bg-pink-600;
+}
+
+.lime.core-card-svg-container {
+  @apply bg-lime-600;
+}
+
+.core-separator {
+  @apply h-px mx-0 mt-3 mb-2 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent;
+}
+
+.core-card-test-container {
+  @apply flex justify-center mt-4;
+}
+
+.core-card-test-btn {
+  @apply text-sm tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+}
+
+.core-card-upload-btn {
+  @apply w-fit disabled:hover:translate-y-0 disabled:cursor-not-allowed disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 tracking-wide dark:brightness-125 hover:brightness-75 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md;
+}
+
+.core-card-test-status-container {
+  @apply mx-1 flex justify-center items-center;
+}
+
+.core-card-test-status-svg {
+  @apply w-6 h-6 mr-2;
+}
+
+.success.core-card-test-status-svg {
+  @apply fill-green-500;
+}
+
+.error.core-card-test-status-svg {
+  @apply fill-red-500;
+}
+
+.info.core-card-test-status-svg {
+  @apply fill-sky-500;
+}
+
+.core-img-default {
+  @apply h-12 w-12 mr-4;
+}
+
+.core-img-hor {
+  @apply h-16 w-24 mr-4;
+}
+
+/*---------------------------------------------*/
+/*--------------- END CORE PLUGINS ------------*/
+/*---------------------------------------------*/
+
+.file-manager-actions-item-btn {
+  @apply rounded dark:text-gray-200 text-primary whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative pl-4 pr-5 pb-2.5 pt-3 font-bold text-center uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+}

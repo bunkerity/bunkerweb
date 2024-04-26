@@ -185,7 +185,7 @@ helpers.fill_ctx = function(no_ref)
 			end
 			data.remote_addr = var.remote_addr
 			data.server_name = var.server_name
-			data.local_time = var.local_time
+			data.time_local = var.time_local
 			if data.kind == "http" then
 				data.uri = var.uri
 				data.request_uri = var.request_uri
@@ -196,6 +196,7 @@ helpers.fill_ctx = function(no_ref)
 				data.http_content_length = var.http_content_length
 				data.http_origin = var.http_origin
 				data.http_version = req.http_version()
+				data.start_time = req.start_time()
 				data.scheme = var.scheme
 			end
 			-- IP data : global

@@ -15,12 +15,13 @@
   roles:
     - common
     - docker
-    - private_net
 
 - hosts: all
   name: Setup swarm
   roles:
     - swarm
+  environment:
+    PIP_BREAK_SYSTEM_PACKAGES: "1"
 
 - hosts: managers[0]
   name: Setup local registry

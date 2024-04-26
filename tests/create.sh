@@ -2,7 +2,6 @@
 
 # drop and export secrets
 echo "${CICD_SECRETS}" > /opt/.env
-echo "export TF_VAR_k8s_ip=${K8S_IP}" >> /opt/.env
 chmod +x /opt/.env
 # shellcheck disable=SC1091
 . /opt/.env
@@ -24,7 +23,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 # terraform apply
-terraform apply -auto-approve
+terraform apply -auto-approve -input=false
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
 	echo "terraform apply failed"

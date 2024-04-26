@@ -1,0 +1,47 @@
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
+<div data-{{ current_endpoint }}-tabs-select class="col-span-12 grid grid-cols-12">
+    <div class="relative col-span-12 h-full">
+        <button data-tab-select-dropdown-btn
+                aria-controls="tab-dropdown"
+                data-tab-id="{{ plugins[0]['id'] }}"
+                class="settings-tabs-select-btn">
+            <span aria-description="current tab" class="settings-tabs-select-btn-text">
+                {% if current_endpoint == "global-config" %}general{% endif %}
+            </span>
+            <!-- chevron -->
+            <svg data-tab-select-dropdown-arrow
+                 class="transition-transform h-4 w-4 fill-primary dark:fill-gray-300"
+                 xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 512 512">
+                <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+            </svg>
+            <!-- end chevron -->
+        </button>
+        <!-- dropdown-->
+        <div id="tab-dropdown"
+             role="listbox"
+             data-tab-select-dropdown
+             class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto max-h-[350px]">
+            <input data-focus="true"
+                   data-combobox
+                   type="text"
+                   placeholder="Search plugin"
+                   class="cursor-text first border rounded-t border-gray-100 text-left focus:outline outline-none text-sm leading-5.6 ease block w-full appearance-none border-gray-300 dark:border-gray-200 bg-white dark:bg-gray-400 bg-clip-padding px-6 py-1.5 font-normal text-gray-800 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-600">
+            {% set first_el = "True" %}
+            {% for plugin in plugins %}
+                {% if current_endpoint == "services" and plugin["settings"]
+                    and check_settings(plugin["settings"], "multisite") or current_endpoint == "global-config" %}
+                    <button role="option"
+                            data-tab-select-handler="{{ plugin['id'] }}"
+                            data-tab-plugin-type="{{ plugin['type'] }}"
+                            data-select="false"
+                            id="edit-{{ current_endpoint }}-{{ plugin['id'] }}-tab"
+                            class="{% if loop.first %}active{% endif %} {% if loop.last %}last{% endif %}  settings-tabs-select-dropdown-btn">
+                        {{ plugin['name'] }}
+                    </button>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <!-- end dropdown-->
+    </div>
+</div>

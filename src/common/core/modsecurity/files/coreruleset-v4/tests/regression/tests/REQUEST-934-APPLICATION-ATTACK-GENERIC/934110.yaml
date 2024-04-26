@@ -1,0 +1,143 @@
+---
+meta:
+  author: "fzipitria"
+  enabled: true
+  name: "934110.yaml"
+  description: "Test for vanilla SSRF in PL1"
+tests:
+  - test_title: 934110-1
+    desc: SSRF - check google cloud url
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/test?ssrf=http%3A%2F%2F169.254.169.254%2FcomputeMetadata%2Fv1%2F"
+          output:
+            log_contains: id "934110"
+  - test_title: 934110-2
+    desc: SSRF - check digitalcloud url
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/test?ssrf=http%3A%2F%2F169.254.169.254%2Fmetadata%2Fv1.json"
+          output:
+            log_contains: id "934110"
+  - test_title: 934110-3
+    desc: SSRF - check packetcloud url
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/test?ssrf=https%3A%2F%2Fmetadata.packet.net%2Fuserdata"
+          output:
+            log_contains: id "934110"
+  - test_title: 934110-4
+    desc: SSRF - check openstack url
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/test?ssrf=http%3A%2F%2F169.254.169.254%2Fopenstack"
+          output:
+            log_contains: id "934110"
+  - test_title: 934110-5
+    desc: SSRF - check oracle cloud url
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/test?ssrf=http%3A%2F%2F192.0.0.192%2Flatest%2Fuser-data%2F"
+          output:
+            log_contains: id "934110"
+  - test_title: 934110-6
+    desc: SSRF - negative test aws
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/test?ssrf=169.254.169.254%2Flatest%2Fuser-data"
+          output:
+            no_log_contains: id "934110"
+  - test_title: 934110-7
+    desc: SSRF - negative test aws
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/test?ssrf=http%3A%2F%2F169.254.169.254%2Flatest"
+          output:
+            no_log_contains: id "934110"
+  - test_title: 934110-8
+    desc: SSRF - negative test gcp
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/test?ssrf=http%3A%2F%2Fmetadata.google.internal"
+          output:
+            no_log_contains: id "934110"

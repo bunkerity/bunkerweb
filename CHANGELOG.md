@@ -1,13 +1,99 @@
 # Changelog
 
-## v1.5.6 - YYYY/MM/DD
+## v1.5.7 - ????/??/??
 
+- [BUGFIX] Fix rare error when the cache is not properly initialized and jobs are executed
+- [BUGFIX] Fix bug when downloading new mmdb files
+- [BUGFIX] Remove potential false positives with ModSecurity on the jobs page of the web UI
+- [BUGFIX] Fix bwcli not working with Redis sentinel
+- [BUGFIX] Fix potential issues when removing the bunkerweb Linux package
+- [FEATURE] Add backup plugin to backup and restore easily the database
+- [FEATURE] Add LETS_ENCRYPT_CLEAR_OLD_CERTS setting to control if old certificates should be removed when generating Let's Encrypt certificates (default is no)
+- [FEATURE] Add DISABLE_DEFAULT_SERVER_STRICT_SNI setting to allow/block requests when SNI is unknown or unset (default is no)
+- [UI] General : fix tooltip crop because of overflow
+- [UI] General : fix select setting crop because of overflow and check if select is out of viewport to determine visible position
+- [UI] General : show logs on UI when pre rendering issue
+- [UI] General : Improve UI performance by using multiple workers for the web server and reducing the number of times we prompt a loading page
+- [UI] Global config : fix script error while fragment relate to a missing plugin
+- [UI] Global config / services page : filtering settings now open plugin select to highlight remaining plugin
+- [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
+- [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
+- [UI] Global config / services page : add order for settings to always respect the order defined in the plugin
+- [UI] Reporting page : fix missing data and add new ones
+- [UI] Account page : keep license key form even if pro register to easy update
+- [UI] Wizard : Add the possibility to still configure reverse proxy even if an admin user already exists
+- [DOCUMENTATION] Add upgrade procedure for 1.5.7+
+- [DOCUMENTATION] Rename Migrating section to Upgrading
+- [MISC] Support custom bwcli commands using plugins
+- [MISC] Add Docker labels in autoconf, bw, scheduler, and ui Dockerfiles
+- [DEPS] Update Python base Docker image to version 3.12.3-alpine3.19
+- [DEPS] Updated LuaJIT version to v2.1-20240314
+- [DEPS] Updated lua-resty-openssl version to 1.3.1
+- [DEPS] Updated coreruleset-v4 version to v4.2.0
+
+## v1.5.6 - 2024/03/25
+
+- [LINUX] Support RHEL 9.3
+- [BUGFIX] Fix issues with the antibot feature ([#866](https://github.com/bunkerity/bunkerweb/issues/866), [#870](https://github.com/bunkerity/bunkerweb/issues/870))
+- [BUGFIX] Fix Bad behavior whitelist check in access phase
+- [BUGFIX] Fix ModSecurity FP on antibot page
+- [BUGFIX] Fix Whitelist core plugin missing a check for empty server_name in multisite mode
+- [BUGFIX] Fix Templator missing some common configs
+- [BUGFIX] Database update with external plugins reupload
+- [BUGFIX] UI delete or edit multiple setting
+- [LINUX] Add logrotate support for the logs
+- [UI] New : add bans management page in the web UI
+- [UI] New : add blocked requests page in the web UI
+- [UI] New : some core plugins pages in the web UI
+- [UI] General : enhance the Content-Security-Policy header in the web UI
+- [UI] General : dark mode enhancement
+- [UI] General : add visual feedback when filtering is matching nothing
+- [UI] General : blog news working and add dynamic banner news
+- [UI] Global config page : Add multisite edit, add context filter
+- [UI] Global config / Service page : remove tabs for select and enhance filtering (plugin name, multiple settings and context now includes)
+- [UI] Service page : add the possibility to clone a service in the web UI
+- [UI] Service page : add the possibility to set a service as draft in the web UI
+- [UI] Service page : add services filter when at least 4 services
+- [UI] Configs page : add path filtering related to config presence, remove service when config is root only
+- [UI] Pro license : add home card, show pro plugins on menu and plugins page, resume in account page, alert in case issue with license usage
+- [UI] Log page : enhance UX
+- [FEATURE] Add setting REDIS_SSL_VERIFY to activate/disable the SSL certificate verification when using Redis
+- [FEATURE] Add Redis Sentinel fallback to master automatically if no slaves are available
+- [FEATURE] Add Redis Sentinel support for bwcli
+- [FEATURE] Add new Metrics core plugin that will allow metrics collection and retrieval of internal metrics
+- [FEATURE] Add setting DATABASE_LOG_LEVEL to control SQLAlchemy loggers separately from the main one
+- [FEATURE] Add whitelist check for the default-server as well
+- [FEATURE] Add the possibility to choose between the coreruleset v3 and v4 that will be used by ModSecurity (default is v3)
+- [FEATURE] Add the TIMERS_LOG_LEVEL setting to control the log level of the lua timers
+- [FEATURE] Add pro version management to core plugins, the scheduler and the web UI
+- [FEATURE] Add REVERSE_PROXY_CUSTOM_HOST setting to set a custom Host header when using reverse proxy
+- [MISC] Add a better custom certificate cache handling
 - [MISC] Updated Linux base images in Dockerfiles
+- [MISC] Add recommended dialects to databases string
+- [MISC] Refine the data sent in the anonymous reporting feature and move the setting and the job to the "jobs" plugin
+- [MISC] BunkerWeb will now load the default loading page even on 404 errors when generating the configuration
+- [MISC] Update database schema to support the new pro version and optimize it
+- [MISC] Refactor SSL/TLS logics to make it more consistent
+- [MISC] Use ECDSA key instead of RSA for selfsigned/default/fallback certificates
+- [MISC] Refactor certbot-new job to optimize the certbot requests
+- [MISC] Refactor jobs utils to make it more consistent
+- [MISC] Review jobs and utils to make it more consistent and better in general
+- [MISC] Change BunkerWeb base Docker image to nginx:1.24.0-alpine-slim
+- [DOCUMENTATION] Update web UI's setup wizard instructions in the documentation
+- [DOCUMENTATION] Update plugins documentation to reflect the new plugin system
+- [DOCUMENTATION] Update ModSecurity documentation to reflect the new changes in the Security Tuning section
+- [DOCUMENTATION] Add pro version documentation
 - [DEPS] Updated stream-lua-nginx-module to v0.0.14
 - [DEPS] Updated lua-nginx-module version to v0.10.26
 - [DEPS] Updated libmaxminddb version to v1.9.1
 - [DEPS] Updated lua-resty-core to v0.1.28
 - [DEPS] Updated zlib version to v1.3.1
+- [DEPS] Updated ModSecurity version to v3.0.12
+- [DEPS] Updated coreruleset version to v3.3.5
+- [DEPS] Added coreruleset version v4.1.0
+- [DEPS] Updated lua-resty-mlcache version to v2.7.0
+- [DEPS] Updated lua-resty-openssl version to v1.2.1
+- [DEPS] Updated lua-resty-http version to v0.17.2
 
 ## v1.5.5 - 2024/01/12
 

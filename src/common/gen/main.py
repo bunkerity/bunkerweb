@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from glob import glob
 from os import R_OK, W_OK, X_OK, access, getenv, sep
-from os.path import join, normpath
+from os.path import join
 from pathlib import Path
 from shutil import rmtree
 from subprocess import DEVNULL, STDOUT, run
@@ -16,6 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
@@ -28,89 +29,54 @@ if __name__ == "__main__":
     try:
         # Parse arguments
         parser = ArgumentParser(description="BunkerWeb config generator")
+        parser.add_argument("--settings", default=join(sep, "usr", "share", "bunkerweb", "settings.json"), type=str, help="file containing the main settings")
         parser.add_argument(
-            "--settings",
-            default=join(sep, "usr", "share", "bunkerweb", "settings.json"),
-            type=str,
-            help="file containing the main settings",
+            "--templates", default=join(sep, "usr", "share", "bunkerweb", "confs"), type=str, help="directory containing the main template files"
         )
-        parser.add_argument(
-            "--templates",
-            default=join(sep, "usr", "share", "bunkerweb", "confs"),
-            type=str,
-            help="directory containing the main template files",
-        )
-        parser.add_argument(
-            "--core",
-            default=join(sep, "usr", "share", "bunkerweb", "core"),
-            type=str,
-            help="directory containing the core plugins",
-        )
-        parser.add_argument(
-            "--plugins",
-            default=join(sep, "etc", "bunkerweb", "plugins"),
-            type=str,
-            help="directory containing the external plugins",
-        )
-        parser.add_argument(
-            "--output",
-            default=join(sep, "etc", "nginx"),
-            type=str,
-            help="where to write the rendered files",
-        )
-        parser.add_argument(
-            "--target",
-            default=join(sep, "etc", "nginx"),
-            type=str,
-            help="where nginx will search for configurations files",
-        )
-        parser.add_argument(
-            "--variables",
-            type=str,
-            help="path to the file containing environment variables",
-        )
+        parser.add_argument("--core", default=join(sep, "usr", "share", "bunkerweb", "core"), type=str, help="directory containing the core plugins")
+        parser.add_argument("--plugins", default=join(sep, "etc", "bunkerweb", "plugins"), type=str, help="directory containing the external plugins")
+        parser.add_argument("--pro-plugins", default=join(sep, "etc", "bunkerweb", "pro", "plugins"), type=str, help="directory containing the pro plugins")
+        parser.add_argument("--output", default=join(sep, "etc", "nginx"), type=str, help="where to write the rendered files")
+        parser.add_argument("--target", default=join(sep, "etc", "nginx"), type=str, help="where nginx will search for configurations files")
+        parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
         parser.add_argument("--no-linux-reload", action="store_true", help="disable linux reload")
         args = parser.parse_args()
 
-        settings_path = Path(normpath(args.settings))
-        templates_path = Path(normpath(args.templates))
-        core_path = Path(normpath(args.core))
-        plugins_path = Path(normpath(args.plugins))
-        output_path = Path(normpath(args.output))
-        target_path = Path(normpath(args.target))
+        settings_path = Path(args.settings)
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
+        templates_path = Path(args.templates)
+        templates_path.mkdir(parents=True, exist_ok=True)
+        core_path = Path(args.core)
+        core_path.mkdir(parents=True, exist_ok=True)
+        plugins_path = Path(args.plugins)
+        plugins_path.mkdir(parents=True, exist_ok=True)
+        pro_plugins_path = Path(args.pro_plugins)
+        pro_plugins_path.mkdir(parents=True, exist_ok=True)
+        output_path = Path(args.output)
+        output_path.mkdir(parents=True, exist_ok=True)
+        target_path = Path(args.target)
+        target_path.mkdir(parents=True, exist_ok=True)
 
         logger.info("Generator started ...")
         logger.info(f"Settings : {settings_path}")
         logger.info(f"Templates : {templates_path}")
         logger.info(f"Core : {core_path}")
         logger.info(f"Plugins : {plugins_path}")
+        logger.info(f"Pro plugins : {pro_plugins_path}")
         logger.info(f"Output : {output_path}")
         logger.info(f"Target : {target_path}")
 
-        integration = "Linux"
-        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-        os_release_path = Path(sep, "etc", "os-release")
-        if getenv("KUBERNETES_MODE", "no").lower() == "yes":
-            integration = "Kubernetes"
-        elif getenv("SWARM_MODE", "no").lower() == "yes":
-            integration = "Swarm"
-        elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
-            integration = "Autoconf"
-        elif integration_path.is_file():
-            integration = integration_path.read_text().strip()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text():
-            integration = "Docker"
-
-        del integration_path, os_release_path
+        integration = get_integration()
 
         if args.variables:
-            variables_path = Path(normpath(args.variables))
+            variables_path = Path(args.variables)
+            variables_path.parent.mkdir(parents=True, exist_ok=True)
             logger.info(f"Variables : {variables_path}")
 
             # Check existences and permissions
             logger.info("Checking arguments ...")
             files = [settings_path, variables_path]
-            paths_rx = [core_path, plugins_path, templates_path]
+            paths_rx = [core_path, plugins_path, pro_plugins_path, templates_path]
             paths_rwx = [output_path]
             for file in files:
                 if not file.is_file():
@@ -138,11 +104,7 @@ if __name__ == "__main__":
             # Compute the config
             logger.info("Computing config ...")
             config: Dict[str, Any] = Configurator(
-                str(settings_path),
-                str(core_path),
-                str(plugins_path),
-                str(variables_path),
-                logger,
+                str(settings_path), str(core_path), str(plugins_path), str(pro_plugins_path), str(variables_path), logger
             ).get_config()
         else:
             if join(sep, "usr", "share", "bunkerweb", "db") not in sys_path:
@@ -168,14 +130,7 @@ if __name__ == "__main__":
 
         # Render the templates
         logger.info("Rendering templates ...")
-        templator = Templator(
-            str(templates_path),
-            str(core_path),
-            str(plugins_path),
-            str(output_path),
-            str(target_path),
-            config,
-        )
+        templator = Templator(str(templates_path), str(core_path), str(plugins_path), str(pro_plugins_path), str(output_path), str(target_path), config)
         templator.render()
 
         if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker") and not args.no_linux_reload:

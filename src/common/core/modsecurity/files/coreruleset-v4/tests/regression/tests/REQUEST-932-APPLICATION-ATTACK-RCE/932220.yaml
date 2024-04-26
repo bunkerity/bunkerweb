@@ -1,0 +1,253 @@
+---
+meta:
+  author: "Max Leske, Xhoenix"
+  description: Unix shell RCE using pipe for less than 4 chars
+  enabled: true
+  name: 932220.yaml
+tests:
+  - test_title: 932220-1
+    desc: "TEST=echo | php7.4"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: "/post"
+            data: "TEST=echo | php7.4"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-2
+    desc: "TEST=echo | ${php7.4}php7.4"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: "/post"
+            data: "TEST=echo | ${php7.4}php7.4"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-3
+    desc: "whxami|sh+``"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            data: "whxami|sh+``"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-4
+    desc: "whxami|fish+``"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            data: "whxami|fish+``"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-5
+    desc: "Negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            data: "echo | curx"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932220"
+  - test_title: 932220-6
+    desc: |
+      Test for BB finding 9P5LL13Y
+      echo "foo;whxam"i | tr x o | sh #"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            uri: "/post"
+            port: 80
+            data: |
+              echo "foo;whxam"i | tr x o | sh #"
+            version: HTTP/1.1
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-7
+    desc: "Block evasion using here string"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+            data: |
+              code=cat<<<ifconfig | sh
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-8
+    desc: "Block evasion using here string with space"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+            data: |
+              code=cat<<< ifconfig | sh
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-9
+    desc: "Block evasion using here string with single quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+            data: |
+              code=cat<<<'ifconfig' | sh
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-10
+    desc: "Block evasion using here string with double quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+            data: |
+              code=cat<<<"ifconfig" | sh
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-11
+    desc: "Block evasion using here string with command substitution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+            data: |
+              code=cat<<<$(whoami | sh)
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-12
+    desc: "Block `time` prefix"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+            data: |
+              code=time whoami | sh
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-13
+    desc: "Block `strace` prefix"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+            data: |
+              code=strace whoami | sh
+          output:
+            log_contains: id "932220"
+  - test_title: 932220-14
+    desc: "Block `nohup` prefix"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.0
+            data: |
+              code=nohup whoami | sh
+          output:
+            log_contains: id "932220"

@@ -23,7 +23,7 @@ if [ -f /etc/os-release ]; then
     if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then
         # Get the version of the package
         VERSION=$(dpkg-query -W -f='${Version}' bunkerweb)
-        if dpkg --compare-versions "$VERSION" lt "1.5.5" && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
+        if dpkg --compare-versions "$VERSION" lt "1.5.7" && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
             echo "ℹ️ Copy /var/tmp/variables.env to /etc/bunkerweb/variables.env"
             do_and_check_cmd cp -f /var/tmp/variables.env /etc/bunkerweb/variables.env
             echo "ℹ️ Copy /var/tmp/ui.env to /etc/bunkerweb/ui.env"
@@ -32,12 +32,16 @@ if [ -f /etc/os-release ]; then
     elif [[ "$OS" == "Red Hat Enterprise Linux" || "$OS" == "Fedora" ]]; then
         # Get the version of the package
         VERSION=$(rpm -q --queryformat '%{VERSION}' bunkerweb)
-        if [ "$(printf '%s\n' "$VERSION" "$(echo '1.5.5' | tr -d ' ')" | sort -V | head -n 1)" = "$VERSION" ] && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
+        if [ "$(printf '%s\n' "$VERSION" "$(echo '1.5.7' | tr -d ' ')" | sort -V | head -n 1)" = "$VERSION" ] && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then
             echo "ℹ️ Copy /var/tmp/variables.env to /etc/bunkerweb/variables.env"
             do_and_check_cmd cp -f /var/tmp/variables.env /etc/bunkerweb/variables.env
             echo "ℹ️ Copy /var/tmp/ui.env to /etc/bunkerweb/ui.env"
             do_and_check_cmd cp -f /var/tmp/ui.env /etc/bunkerweb/ui.env
         fi
+    fi
+    if [ -f /var/tmp/db.sqlite3 ]; then
+        echo "ℹ️ Copy /var/tmp/db.sqlite3 to /var/lib/bunkerweb/db.sqlite3"
+        do_and_check_cmd cp -f /var/tmp/db.sqlite3 /var/lib/bunkerweb/db.sqlite3
     fi
 else
     echo "❌ Error: /etc/os-release not found"

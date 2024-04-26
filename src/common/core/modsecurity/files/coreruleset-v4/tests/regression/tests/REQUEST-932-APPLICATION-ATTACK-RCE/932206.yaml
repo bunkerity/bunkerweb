@@ -1,0 +1,58 @@
+---
+meta:
+  author: "Max Leske"
+  description: RCE Bypass
+  enabled: true
+  name: 932206.yaml
+tests:
+  - test_title: 932206-1
+    desc: Referer header without URL
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "/bin/ca't'+/et*/passwd"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            log_contains: id "932206"
+  - test_title: 932206-2
+    desc: False positive test against URL
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "http://www.example.com/page?param=test+test"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932206"
+  - test_title: 932206-3
+    desc: False positive test against query string and space in path
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "http://www.example.com/page%20test?param=test"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932206"

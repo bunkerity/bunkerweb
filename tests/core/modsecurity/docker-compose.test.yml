@@ -5,8 +5,10 @@ services:
     build: .
     environment:
       PYTHONUNBUFFERED: "1"
+      DOCKER_HOST: "tcp://bw-docker:2375"
       USE_MODSECURITY: "yes"
       USE_MODSECURITY_CRS: "yes"
+      MODSECURITY_CRS_VERSION: "3"
       MODSECURITY_SEC_AUDIT_ENGINE: "RelevantOnly"
       MODSECURITY_SEC_RULE_ENGINE: "On"
       MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABCFHZ"
@@ -15,7 +17,10 @@ services:
     networks:
       bw-services:
         ipv4_address: 192.168.0.3
+      bw-docker:
 
 networks:
   bw-services:
+    external: true
+  bw-docker:
     external: true

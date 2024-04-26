@@ -1,0 +1,23 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Word list for rule 932380 (RCE Windows command injection part 2/2)
+##!
+##!+ i
+
+##! extension/switches suffix
+##! cmd.com, cmd.exe, etc.
+##!$ (?:\.[\"\^]*\w+)?
+##! cmd/h
+##!$ \b
+
+##! starting tokens prefix
+##!> assemble
+  ##!> include windows-commands-prefix
+
+  ##!> cmdline windows
+
+    ##!> include-except windows-commands windows-commands-fps
+
+  ##!<
+##!<

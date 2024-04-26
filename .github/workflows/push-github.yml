@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
       # Get PDF doc
       - name: Get documentation
         if: inputs.VERSION != 'testing'
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395 # v4.1.6
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
       # Create tag
@@ -51,7 +51,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION != 'testing'
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
         with:
           body: |
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
@@ -75,7 +75,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION == 'testing'
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
         with:
           body: |
             **The testing version of BunkerWeb should not be used in production, please use the latest stable version instead.**

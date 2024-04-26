@@ -1,5 +1,0 @@
----
-- include_tasks: network.yml
-- include_tasks: apt.yml
-- include_tasks: hostname.yml
-- include_tasks: fail2ban.yml

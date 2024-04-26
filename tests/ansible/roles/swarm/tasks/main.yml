@@ -6,8 +6,6 @@
       - python3-pip
       - virtualenv
       - python3-setuptools
-      - python
-      - python-setuptools
 
 - name: Upgrade pip3
   pip:
@@ -17,17 +15,19 @@
 
 - name: Install dockerpy for py3
   pip:
-    name: docker[tls]
+    name: docker
     state: forcereinstall
     executable: pip3
     version: "6.1.3"
 
-# - name: Pin version for urllib
-#   pip:
-#     name: urllib3<2
-#     state: forcereinstall
-#     executable: pip3
-#     extra_args:
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: ".*{{ item }}$"
+    line: "{{ hostvars[item].local_ip }} {{item}}"
+    state: present
+  when: hostvars[item].local_ip is defined
+  with_items: "{{ groups.all }}"
 
 - name: Init Docker Swarm
   community.docker.docker_swarm:

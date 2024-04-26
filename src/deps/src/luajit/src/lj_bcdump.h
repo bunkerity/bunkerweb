@@ -46,6 +46,8 @@
 
 #define BCDUMP_F_KNOWN		(BCDUMP_F_FR2*2-1)
 
+#define BCDUMP_F_DETERMINISTIC	0x80000000
+
 /* Type codes for the GC constants of a prototype. Plus length for strings. */
 enum {
   BCDUMP_KGC_CHILD, BCDUMP_KGC_TAB, BCDUMP_KGC_I64, BCDUMP_KGC_U64,
@@ -61,7 +63,7 @@ enum {
 /* -- Bytecode reader/writer ---------------------------------------------- */
 
 LJ_FUNC int lj_bcwrite(lua_State *L, GCproto *pt, lua_Writer writer,
-		       void *data, int strip);
+		       void *data, uint32_t flags);
 LJ_FUNC GCproto *lj_bcread_proto(LexState *ls);
 LJ_FUNC GCproto *lj_bcread(LexState *ls);
 

@@ -19,6 +19,7 @@ import {
   typeErrorCreate,
   lookupGetter,
   create,
+  objectHasOwnProperty,
 } from './utils.js';
 
 const getGlobal = function () {
@@ -28,9 +29,9 @@ const getGlobal = function () {
 /**
  * Creates a no-op policy for internal use only.
  * Don't export this function outside this module!
- * @param {?TrustedTypePolicyFactory} trustedTypes The policy factory.
+ * @param {TrustedTypePolicyFactory} trustedTypes The policy factory.
  * @param {HTMLScriptElement} purifyHostElement The Script element used to load DOMPurify (to determine policy name suffix).
- * @return {?TrustedTypePolicy} The policy created (or null, if Trusted Types
+ * @return {TrustedTypePolicy} The policy created (or null, if Trusted Types
  * are not supported or creating the policy failed).
  */
 const _createTrustedTypesPolicy = function (trustedTypes, purifyHostElement) {
@@ -161,6 +162,7 @@ function createDOMPurify(window = getGlobal()) {
     ARIA_ATTR,
     IS_SCRIPT_OR_DATA,
     ATTR_WHITESPACE,
+    CUSTOM_ELEMENT,
   } = EXPRESSIONS;
 
   let { IS_ALLOWED_URI } = EXPRESSIONS;
@@ -241,6 +243,11 @@ function createDOMPurify(window = getGlobal()) {
    * This means, DOMPurify removes data attributes, mustaches and ERB
    */
   let SAFE_FOR_TEMPLATES = false;
+
+  /* Output should be safe even for XML used within HTML and alike.
+   * This means, DOMPurify removes comments when containing risky content.
+   */
+  let SAFE_FOR_XML = true;
 
   /* Decide if document with <html>... should be returned */
   let WHOLE_DOCUMENT = false;
@@ -412,8 +419,8 @@ function createDOMPurify(window = getGlobal()) {
     PARSER_MEDIA_TYPE =
       // eslint-disable-next-line unicorn/prefer-includes
       SUPPORTED_PARSER_MEDIA_TYPES.indexOf(cfg.PARSER_MEDIA_TYPE) === -1
-        ? (PARSER_MEDIA_TYPE = DEFAULT_PARSER_MEDIA_TYPE)
-        : (PARSER_MEDIA_TYPE = cfg.PARSER_MEDIA_TYPE);
+        ? DEFAULT_PARSER_MEDIA_TYPE
+        : cfg.PARSER_MEDIA_TYPE;
 
     // HTML tags and attributes are not case-sensitive, converting to lowercase. Keeping XHTML as is.
     transformCaseFunc =
@@ -422,52 +429,47 @@ function createDOMPurify(window = getGlobal()) {
         : stringToLowerCase;
 
     /* Set configuration parameters */
-    ALLOWED_TAGS =
-      'ALLOWED_TAGS' in cfg
-        ? addToSet({}, cfg.ALLOWED_TAGS, transformCaseFunc)
-        : DEFAULT_ALLOWED_TAGS;
-    ALLOWED_ATTR =
-      'ALLOWED_ATTR' in cfg
-        ? addToSet({}, cfg.ALLOWED_ATTR, transformCaseFunc)
-        : DEFAULT_ALLOWED_ATTR;
-    ALLOWED_NAMESPACES =
-      'ALLOWED_NAMESPACES' in cfg
-        ? addToSet({}, cfg.ALLOWED_NAMESPACES, stringToString)
-        : DEFAULT_ALLOWED_NAMESPACES;
-    URI_SAFE_ATTRIBUTES =
-      'ADD_URI_SAFE_ATTR' in cfg
-        ? addToSet(
-            clone(DEFAULT_URI_SAFE_ATTRIBUTES), // eslint-disable-line indent
-            cfg.ADD_URI_SAFE_ATTR, // eslint-disable-line indent
-            transformCaseFunc // eslint-disable-line indent
-          ) // eslint-disable-line indent
-        : DEFAULT_URI_SAFE_ATTRIBUTES;
-    DATA_URI_TAGS =
-      'ADD_DATA_URI_TAGS' in cfg
-        ? addToSet(
-            clone(DEFAULT_DATA_URI_TAGS), // eslint-disable-line indent
-            cfg.ADD_DATA_URI_TAGS, // eslint-disable-line indent
-            transformCaseFunc // eslint-disable-line indent
-          ) // eslint-disable-line indent
-        : DEFAULT_DATA_URI_TAGS;
-    FORBID_CONTENTS =
-      'FORBID_CONTENTS' in cfg
-        ? addToSet({}, cfg.FORBID_CONTENTS, transformCaseFunc)
-        : DEFAULT_FORBID_CONTENTS;
-    FORBID_TAGS =
-      'FORBID_TAGS' in cfg
-        ? addToSet({}, cfg.FORBID_TAGS, transformCaseFunc)
-        : {};
-    FORBID_ATTR =
-      'FORBID_ATTR' in cfg
-        ? addToSet({}, cfg.FORBID_ATTR, transformCaseFunc)
-        : {};
-    USE_PROFILES = 'USE_PROFILES' in cfg ? cfg.USE_PROFILES : false;
+    ALLOWED_TAGS = objectHasOwnProperty(cfg, 'ALLOWED_TAGS')
+      ? addToSet({}, cfg.ALLOWED_TAGS, transformCaseFunc)
+      : DEFAULT_ALLOWED_TAGS;
+    ALLOWED_ATTR = objectHasOwnProperty(cfg, 'ALLOWED_ATTR')
+      ? addToSet({}, cfg.ALLOWED_ATTR, transformCaseFunc)
+      : DEFAULT_ALLOWED_ATTR;
+    ALLOWED_NAMESPACES = objectHasOwnProperty(cfg, 'ALLOWED_NAMESPACES')
+      ? addToSet({}, cfg.ALLOWED_NAMESPACES, stringToString)
+      : DEFAULT_ALLOWED_NAMESPACES;
+    URI_SAFE_ATTRIBUTES = objectHasOwnProperty(cfg, 'ADD_URI_SAFE_ATTR')
+      ? addToSet(
+          clone(DEFAULT_URI_SAFE_ATTRIBUTES), // eslint-disable-line indent
+          cfg.ADD_URI_SAFE_ATTR, // eslint-disable-line indent
+          transformCaseFunc // eslint-disable-line indent
+        ) // eslint-disable-line indent
+      : DEFAULT_URI_SAFE_ATTRIBUTES;
+    DATA_URI_TAGS = objectHasOwnProperty(cfg, 'ADD_DATA_URI_TAGS')
+      ? addToSet(
+          clone(DEFAULT_DATA_URI_TAGS), // eslint-disable-line indent
+          cfg.ADD_DATA_URI_TAGS, // eslint-disable-line indent
+          transformCaseFunc // eslint-disable-line indent
+        ) // eslint-disable-line indent
+      : DEFAULT_DATA_URI_TAGS;
+    FORBID_CONTENTS = objectHasOwnProperty(cfg, 'FORBID_CONTENTS')
+      ? addToSet({}, cfg.FORBID_CONTENTS, transformCaseFunc)
+      : DEFAULT_FORBID_CONTENTS;
+    FORBID_TAGS = objectHasOwnProperty(cfg, 'FORBID_TAGS')
+      ? addToSet({}, cfg.FORBID_TAGS, transformCaseFunc)
+      : {};
+    FORBID_ATTR = objectHasOwnProperty(cfg, 'FORBID_ATTR')
+      ? addToSet({}, cfg.FORBID_ATTR, transformCaseFunc)
+      : {};
+    USE_PROFILES = objectHasOwnProperty(cfg, 'USE_PROFILES')
+      ? cfg.USE_PROFILES
+      : false;
     ALLOW_ARIA_ATTR = cfg.ALLOW_ARIA_ATTR !== false; // Default true
     ALLOW_DATA_ATTR = cfg.ALLOW_DATA_ATTR !== false; // Default true
     ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
     ALLOW_SELF_CLOSE_IN_ATTR = cfg.ALLOW_SELF_CLOSE_IN_ATTR !== false; // Default true
     SAFE_FOR_TEMPLATES = cfg.SAFE_FOR_TEMPLATES || false; // Default false
+    SAFE_FOR_XML = cfg.SAFE_FOR_XML !== false; // Default true
     WHOLE_DOCUMENT = cfg.WHOLE_DOCUMENT || false; // Default false
     RETURN_DOM = cfg.RETURN_DOM || false; // Default false
     RETURN_DOM_FRAGMENT = cfg.RETURN_DOM_FRAGMENT || false; // Default false
@@ -515,7 +517,7 @@ function createDOMPurify(window = getGlobal()) {
 
     /* Parse profile info */
     if (USE_PROFILES) {
-      ALLOWED_TAGS = addToSet({}, [...TAGS.text]);
+      ALLOWED_TAGS = addToSet({}, TAGS.text);
       ALLOWED_ATTR = [];
       if (USE_PROFILES.html === true) {
         addToSet(ALLOWED_TAGS, TAGS.html);
@@ -658,12 +660,15 @@ function createDOMPurify(window = getGlobal()) {
   /* Keep track of all possible SVG and MathML tags
    * so that we can perform the namespace checks
    * correctly. */
-  const ALL_SVG_TAGS = addToSet({}, TAGS.svg);
-  addToSet(ALL_SVG_TAGS, TAGS.svgFilters);
-  addToSet(ALL_SVG_TAGS, TAGS.svgDisallowed);
-
-  const ALL_MATHML_TAGS = addToSet({}, TAGS.mathMl);
-  addToSet(ALL_MATHML_TAGS, TAGS.mathMlDisallowed);
+  const ALL_SVG_TAGS = addToSet({}, [
+    ...TAGS.svg,
+    ...TAGS.svgFilters,
+    ...TAGS.svgDisallowed,
+  ]);
+  const ALL_MATHML_TAGS = addToSet({}, [
+    ...TAGS.mathMl,
+    ...TAGS.mathMlDisallowed,
+  ]);
 
   /**
    * @param  {Element} element a DOM element whose namespace is being checked
@@ -781,6 +786,7 @@ function createDOMPurify(window = getGlobal()) {
    */
   const _forceRemove = function (node) {
     arrayPush(DOMPurify.removed, { element: node });
+
     try {
       // eslint-disable-next-line unicorn/prefer-dom-node-remove
       node.parentNode.removeChild(node);
@@ -910,7 +916,11 @@ function createDOMPurify(window = getGlobal()) {
       root.ownerDocument || root,
       root,
       // eslint-disable-next-line no-bitwise
-      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT,
+      NodeFilter.SHOW_ELEMENT |
+        NodeFilter.SHOW_COMMENT |
+        NodeFilter.SHOW_TEXT |
+        NodeFilter.SHOW_PROCESSING_INSTRUCTION |
+        NodeFilter.SHOW_CDATA_SECTION,
       null
     );
   };
@@ -1001,6 +1011,22 @@ function createDOMPurify(window = getGlobal()) {
       !_isNode(currentNode.firstElementChild) &&
       regExpTest(/<[/\w]/g, currentNode.innerHTML) &&
       regExpTest(/<[/\w]/g, currentNode.textContent)
+    ) {
+      _forceRemove(currentNode);
+      return true;
+    }
+
+    /* Remove any ocurrence of processing instructions */
+    if (currentNode.nodeType === 7) {
+      _forceRemove(currentNode);
+      return true;
+    }
+
+    /* Remove any kind of possibly harmful comments */
+    if (
+      SAFE_FOR_XML &&
+      currentNode.nodeType === 8 &&
+      regExpTest(/<[/\w]/g, currentNode.data)
     ) {
       _forceRemove(currentNode);
       return true;
@@ -1190,7 +1216,7 @@ function createDOMPurify(window = getGlobal()) {
    * @returns {boolean} Returns true if the tag name meets the basic criteria for a custom element, otherwise false.
    */
   const _isBasicCustomElement = function (tagName) {
-    return tagName.indexOf('-') > 0;
+    return tagName !== 'annotation-xml' && stringMatch(tagName, CUSTOM_ELEMENT);
   };
 
   /**

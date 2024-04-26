@@ -29,42 +29,44 @@ jobs:
         # TODO: arm64
         # latest and one version older for valgrind and perf test
         - nginx: "1.19.9"
-          openssl: "1.1.1w"
-          extras: "valgrind"
-          lua_nginx_module: "v0.10.20"
-          lua_resty_core: "v0.1.22"
-        - nginx: "1.19.9"
-          openssl: "3.1.4"
+          openssl: "3.1.5"
           openssl_fips: "3.0.8"
           extras: "valgrind"
           lua_nginx_module: "v0.10.20"
           lua_resty_core: "v0.1.22"
           nginx_cc_opts: "-Wno-error"
         - nginx: "1.21.4"
+          openssl: "3.1.5"
+          openssl_fips: "3.0.8"
+          extras: "valgrind"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
+          nginx_cc_opts: "-Wno-error"
+        - nginx: "1.25.3"
           openssl: "1.1.1w"
           extras: "valgrind perf"
-          lua_nginx_module: "v0.10.25"
-          lua_resty_core: "v0.1.27"
-        - nginx: "1.21.4"
-          openssl: "3.0.12"
+          lua_nginx_module: "v0.10.26"
+          lua_resty_core: "v0.1.28"
+        - nginx: "1.25.3"
+          openssl: "3.0.13"
           openssl_fips: "3.0.8"
-          extras: "valgrind perf"
-          lua_nginx_module: "v0.10.25"
-          lua_resty_core: "v0.1.27"
+          extras: "valgrind perf lua-kong-nginx-module"
+          lua_nginx_module: "v0.10.26"
+          lua_resty_core: "v0.1.28"
           nginx_cc_opts: "-Wno-error"
-        - nginx: "1.21.4"
-          openssl: "3.1.4"
+        - nginx: "1.25.3"
+          openssl: "3.1.5"
           openssl_fips: "3.0.8"
-          extras: "valgrind perf"
-          lua_nginx_module: "v0.10.25"
-          lua_resty_core: "v0.1.27"
+          extras: "valgrind perf lua-kong-nginx-module"
+          lua_nginx_module: "v0.10.26"
+          lua_resty_core: "v0.1.28"
           nginx_cc_opts: "-Wno-error"
-        - nginx: "1.21.4"
-          openssl: "3.2.0"
+        - nginx: "1.25.3"
+          openssl: "3.2.1"
           openssl_fips: "3.0.8"
-          extras: "valgrind perf"
-          lua_nginx_module: "v0.10.25"
-          lua_resty_core: "v0.1.27"
+          extras: "valgrind perf lua-kong-nginx-module"
+          lua_nginx_module: "v0.10.26"
+          lua_resty_core: "v0.1.28"
           nginx_cc_opts: "-Wno-error"
 
     env:
@@ -113,6 +115,7 @@ jobs:
         git clone https://github.com/openresty/lua-nginx-module.git ./lua-nginx-module -b ${{ matrix.lua_nginx_module }}
         git clone https://github.com/openresty/no-pool-nginx.git ./no-pool-nginx
         git clone https://github.com/fffonion/lua-resty-openssl-aux-module ./lua-resty-openssl-aux-module
+        git clone https://github.com/Kong/lua-kong-nginx-module.git ./lua-kong-nginx-module
         # lua libraries at parent directory of current repository
         popd
         git clone https://github.com/openresty/lua-resty-core.git ../lua-resty-core -b ${{ matrix.lua_resty_core }}
@@ -168,15 +171,17 @@ jobs:
     - name: Build Nginx
       env:
         NGINX_CC_OPTS: ${{ matrix.nginx_cc_opts }}
+        NGINX_MODULES: ""
       run: |
         if [[ "${{ matrix.extras }}" == *valgrind* ]]; then NGINX_CC_OPTS="$NGINX_CC_OPTS -O0"; fi
+        if [[ "${{ matrix.extras }}" == *lua-kong-nginx-module* ]]; then NGINX_MODULES="$NGINX_MODULES --add-module=../lua-kong-nginx-module"; fi
         export PATH=$BASE_PATH/work/nginx/sbin:$BASE_PATH/../nginx-devel-utils:$PATH
         export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
         export NGX_LUA_LOC=$BASE_PATH/../lua-nginx-module
         export NGX_STREAM_LUA_LOC=$BASE_PATH/../stream-lua-nginx-module
         export
         cd $BASE_PATH
-        if [ ! -e work ]; then ngx-build ${{ matrix.nginx }} --add-module=../ndk-nginx-module --add-module=../lua-nginx-module --add-module=../lua-resty-openssl-aux-module --with-http_ssl_module --with-cc-opt="-I$OPENSSL_INC $NGINX_CC_OPTS" --with-ld-opt="-L$OPENSSL_LIB -Wl,-rpath,$OPENSSL_LIB" --with-debug > build.log 2>&1 || (cat build.log && exit 1); fi
+        if [ ! -e work ]; then ngx-build ${{ matrix.nginx }} --add-module=../ndk-nginx-module --add-module=../lua-nginx-module --add-module=../lua-resty-openssl-aux-module $NGINX_MODULES --with-http_ssl_module --with-cc-opt="-I$OPENSSL_INC $NGINX_CC_OPTS" --with-ld-opt="-L$OPENSSL_LIB -Wl,-rpath,$OPENSSL_LIB" --with-debug > build.log 2>&1 || (cat build.log && exit 1); fi
         nginx -V
         ldd `which nginx`|grep -E 'luajit|ssl|pcre'
 
@@ -188,6 +193,8 @@ jobs:
 
         echo "Nginx SSL plain FFI"
         export CI_SKIP_NGINX_C=1
+        TEST_NGINX_TIMEOUT=10 prove -j$JOBS t/openssl/ssl/ 2>&1
+        export CI_SKIP_KONG_SSL_FUNCS=1
         TEST_NGINX_TIMEOUT=10 prove -j$JOBS t/openssl/ssl/ 2>&1
 
     - name: Run Valgrind
@@ -201,6 +208,9 @@ jobs:
 
         echo "Nginx SSL plain FFI"
         export CI_SKIP_NGINX_C=1
+        stdbuf -o 0 -e 0 prove -j$JOBS t/openssl/ssl/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
+        if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
+        export CI_SKIP_KONG_SSL_FUNCS=1
         stdbuf -o 0 -e 0 prove -j$JOBS t/openssl/ssl/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
         if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
 

@@ -1,8 +1,26 @@
+local ffi = require "ffi"
 local ngx_re_gmatch = ngx.re.gmatch
 local ngx_re_sub = ngx.re.sub
 local ngx_re_find = ngx.re.find
 local ngx_log = ngx.log
 local ngx_WARN = ngx.WARN
+local ngx_DEBUG = ngx.DEBUG
+local to_hex = require("resty.string").to_hex
+local ffi_gc = ffi.gc
+local ffi_cast = ffi.cast
+local type = type
+
+local lib_chain, lib_x509, lib_pkey
+local openssl_available, res = xpcall(function()
+    lib_chain = require("resty.openssl.x509.chain")
+    lib_x509 = require("resty.openssl.x509")
+    lib_pkey = require("resty.openssl.pkey")
+end, debug.traceback)
+
+if not openssl_available then
+  ngx_log(ngx_WARN, "failed to load module `resty.openssl.*`, \z
+                     mTLS isn't supported without lua-resty-openssl:\n", res)
+end
 
 --[[
 A connection function that incorporates:
@@ -148,7 +166,7 @@ local function connect(self, options)
         local proxy_uri_t
         proxy_uri_t, err = self:parse_uri(proxy_uri)
         if not proxy_uri_t then
-            return nil, "uri parse error: ", err
+            return nil, "uri parse error: " .. err
         end
 
         local proxy_scheme = proxy_uri_t[1]
@@ -158,6 +176,61 @@ local function connect(self, options)
         end
         proxy_host = proxy_uri_t[2]
         proxy_port = proxy_uri_t[3]
+    end
+
+    local cert_hash
+    if ssl and ssl_client_cert and ssl_client_priv_key then
+        local cert_type = type(ssl_client_cert)
+        local key_type = type(ssl_client_priv_key)
+
+        if cert_type ~= "cdata" then
+            return nil, "bad ssl_client_cert: cdata expected, got " .. cert_type
+        end
+
+        if key_type ~= "cdata" then
+            return nil, "bad ssl_client_priv_key: cdata expected, got " .. key_type
+        end
+
+        if not openssl_available then
+            return nil, "module `resty.openssl.*` not available, mTLS isn't supported without lua-resty-openssl"
+        end
+
+        -- convert from `void*` to `OPENSSL_STACK*`
+        local cert_chain, err = lib_chain.dup(ffi_cast("OPENSSL_STACK*", ssl_client_cert))
+        if not cert_chain then
+            return nil, "failed to dup the ssl_client_cert: " .. err
+        end
+
+        if #cert_chain < 1 then
+            return nil, "no cert in ssl_client_cert"
+        end
+
+        local cert, err = lib_x509.dup(cert_chain[1].ctx)
+        if not cert then
+            return nil, "failed to dup the x509: " .. err
+        end
+
+        -- convert from `void*` to `EVP_PKEY*`
+        local key, err = lib_pkey.new(ffi_cast("EVP_PKEY*", ssl_client_priv_key))
+        if not key then
+            return nil, "failed to new the pkey: " .. err
+        end
+
+        -- should not free the cdata passed in
+        ffi_gc(key.ctx, nil)
+
+        -- check the private key in order to make sure the caller is indeed the holder of the cert
+        ok, err = cert:check_private_key(key)
+        if not ok then
+            return nil, "the private key doesn't match the cert: " .. err
+        end
+
+        cert_hash, err = cert:digest("sha256")
+        if not cert_hash then
+            return nil, "failed to calculate the digest of the cert: " .. err
+        end
+
+        cert_hash = to_hex(cert_hash) -- convert to hex so that it's printable
     end
 
     -- construct a poolname unique within proxy and ssl info
@@ -170,11 +243,14 @@ local function connect(self, options)
                    .. ":" .. tostring(ssl_verify)
                    .. ":" .. (proxy_uri or "")
                    .. ":" .. (request_scheme == "https" and proxy_authorization or "")
+                   .. ":" .. (cert_hash or "")
         -- in the above we only add the 'proxy_authorization' as part of the poolname
         -- when the request is https. Because in that case the CONNECT request (which
         -- carries the authorization header) is part of the connect procedure, whereas
         -- with a plain http request the authorization is part of the actual request.
     end
+
+    ngx_log(ngx_DEBUG, "poolname: ", poolname)
 
     -- do TCP level connection
     local tcp_opts = { pool = poolname, pool_size = pool_size, backlog = backlog }
@@ -184,7 +260,7 @@ local function connect(self, options)
         if not ok then
             return nil, "failed to connect to: " .. (proxy_host or "") ..
                         ":" .. (proxy_port or "") ..
-                        ": ", err
+                        ": " .. err
         end
 
         if ssl and sock:getreusedtimes() == 0 then
@@ -204,7 +280,7 @@ local function connect(self, options)
             })
 
             if not res then
-                return nil, "failed to issue CONNECT to proxy:", err
+                return nil, "failed to issue CONNECT to proxy: " .. err
             end
 
             if res.status < 200 or res.status > 299 then
@@ -234,13 +310,13 @@ local function connect(self, options)
         -- Experimental mTLS support
         if ssl_client_cert and ssl_client_priv_key then
           if type(sock.setclientcert) ~= "function" then
-            ngx_log(ngx_WARN, "cannot use SSL client cert and key without mTLS support")
+              return nil, "cannot use SSL client cert and key without mTLS support"
 
           else
-            ok, err = sock:setclientcert(ssl_client_cert, ssl_client_priv_key)
-            if not ok then
-              ngx_log(ngx_WARN, "could not set client certificate: ", err)
-            end
+              ok, err = sock:setclientcert(ssl_client_cert, ssl_client_priv_key)
+              if not ok then
+                  return nil, "could not set client certificate: " .. err
+              end
           end
         end
 

@@ -80,7 +80,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - 80:8080
           - 443:8443
@@ -96,7 +96,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -118,7 +118,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.5
+        image: bunkerity/bunkerweb-ui:1.5.7
         depends_on:
           - bw-docker
         environment:
@@ -171,7 +171,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - 80:8080
           - 443:8443
@@ -188,7 +188,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.5
+        image: bunkerity/bunkerweb-autoconf:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -201,7 +201,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -236,7 +236,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.5
+        image: bunkerity/bunkerweb-ui:1.5.7
         networks:
           bw-docker:
           bw-universe:
@@ -278,7 +278,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - published: 80
             target: 8080
@@ -308,7 +308,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
             - "bunkerweb.INSTANCE=yes"
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.5
+        image: bunkerity/bunkerweb-autoconf:1.5.7
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -336,7 +336,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               - "node.role == manager"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -363,7 +363,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.5
+        image: bunkerity/bunkerweb-ui:1.5.7
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -410,7 +410,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
       name: cr-bunkerweb
     rules:
       - apiGroups: [""]
-        resources: ["services", "pods", "configmaps"]
+        resources: ["services", "pods", "configmaps", "secrets"]
         verbs: ["get", "watch", "list"]
       - apiGroups: ["networking.k8s.io"]
         resources: ["ingresses"]
@@ -454,7 +454,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.5.5
+              image: bunkerity/bunkerweb:1.5.7
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -527,7 +527,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.5.5
+              image: bunkerity/bunkerweb-autoconf:1.5.7
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -554,7 +554,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.5.5
+              image: bunkerity/bunkerweb-scheduler:1.5.7
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -639,7 +639,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.5.5
+              image: bunkerity/bunkerweb-ui:1.5.7
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -713,53 +713,41 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 === "Linux"
 
-    If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI SERVICE. Since the web UI is listening on the same machine as BunkerWeb, you will need to set the `UI_HOST` setting `http://127.0.0.1:7000`.
+    If you want to use the setup wizard, you will need to run the following command `export UI_WIZARD=1` before installing BunkerWeb as described in [integrations section](integrations.md#linux) of the documentation (this is an optional step).
 
     !!! tip "Accessing the setup wizard"
 
         You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
 
-    Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
-
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    SERVER_NAME=
-    MULTISITE=yes
-    UI_HOST=http://127.0.0.1:7000
-    ```
-
-    The web UI comes as systemd service named `bunkerweb-ui` which is not enabled by default. If you want to start the web UI when on startup you can run the following command :
-
-    ```shell
-    systemctl enable bunkerweb-ui
-    ```
-
-    Create an empty configuration file for the web UI :
-
-    ```shell
-    echo "" > /etc/bunkerweb/ui.env
-    chown nginx:nginx /etc/bunkerweb/ui.env
-    ```
-
-    Don't forget to restart the `bunkerweb` and `bunkerweb-ui` services :
-
-    ```shell
-    systemctl restart bunkerweb
-    systemctl restart bunkerweb-ui
-    ```
-
 ## Account management
 
-You can change the username, password needed and manage two-factor authentication by **accessing the account page** of the web UI from the menu.
-
-You need to click on `manage account` inside the sidebar menu.
+You can access the account management page by clicking on `manage account` inside the sidebar menu :
 
 <figure markdown>
   ![Overview](assets/img/manage-account.webp){ align=center, width="350" }
   <figcaption>Account page access from menu</figcaption>
+</figure>
+
+### Upgrade to PRO
+
+!!! info "What is BunkerWeb PRO ?"
+    BunkerWeb PRO is an enhanced version of BunkerWeb open-source. Whether it's enhanced security, an enriched user experience, or technical monitoring, the BunkerWeb PRO version will allow you to fully benefit from BunkerWeb and respond to your professional needs. Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question regarding the PRO version.
+
+Once you have your PRO license key from the [BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), you can paste it into the PRO section of the account management page.
+
+<figure markdown>
+  ![PRO upgrade](assets/img/pro-ui-upgrade.webp){ align=center, width="550" }
+  <figcaption>Upgrade to PRO from the web UI</figcaption>
+</figure>
+
+!!! warning "Upgrade time"
+    The PRO version is downloaded in the background by the scheduler, it may take some time to upgrade.
+
+When your BunkerWeb instance has upgraded to the PRO version, you will see your license expiration date and the maximum number of services you can protect.
+
+<figure markdown>
+  ![PRO upgrade](assets/img/ui-pro.webp){ align=center, width="550" }
+  <figcaption>PRO license information</figcaption>
 </figure>
 
 ### Username / Password
@@ -839,7 +827,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -848,7 +836,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - 80:8080
           - 443:8443
@@ -867,12 +855,13 @@ After a successful login/password combination, you will be prompted to enter you
           - www.example.com_REVERSE_PROXY_URL=/changeme
           - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
           - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+          - www.example.com_MAX_CLIENT_SIZE=50m
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -894,7 +883,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.5
+        image: bunkerity/bunkerweb-ui:1.5.7
         depends_on:
           - bw-docker
         environment:
@@ -959,7 +948,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -968,7 +957,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - 80:8080
           - 443:8443
@@ -985,7 +974,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-services
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.5
+        image: bunkerity/bunkerweb-autoconf:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -998,7 +987,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-docker
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1033,7 +1022,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.5
+        image: bunkerity/bunkerweb-ui:1.5.7
         networks:
           bw-docker:
           bw-universe:
@@ -1052,7 +1041,7 @@ After a successful login/password combination, you will be prompted to enter you
           - "bunkerweb.REVERSE_PROXY_URL=/changeme"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
           - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-
+          - "bunkerweb.MAX_CLIENT_SIZE=50m"
     volumes:
       bw-data:
 
@@ -1094,7 +1083,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1103,7 +1092,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - published: 80
             target: 8080
@@ -1133,7 +1122,7 @@ After a successful login/password combination, you will be prompted to enter you
             - "bunkerweb.INSTANCE=yes"
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.5
+        image: bunkerity/bunkerweb-autoconf:1.5.7
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -1161,7 +1150,7 @@ After a successful login/password combination, you will be prompted to enter you
               - "node.role == manager"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -1188,7 +1177,7 @@ After a successful login/password combination, you will be prompted to enter you
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.5
+        image: bunkerity/bunkerweb-ui:1.5.7
         environment:
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -1207,7 +1196,7 @@ After a successful login/password combination, you will be prompted to enter you
             - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
             - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
             - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-
+            - "bunkerweb.MAX_CLIENT_SIZE=50m"
     volumes:
       bw-data:
 
@@ -1242,7 +1231,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) of the repository.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1253,7 +1242,7 @@ After a successful login/password combination, you will be prompted to enter you
       name: cr-bunkerweb
     rules:
       - apiGroups: [""]
-        resources: ["services", "pods", "configmaps"]
+        resources: ["services", "pods", "configmaps", "secrets"]
         verbs: ["get", "watch", "list"]
       - apiGroups: ["networking.k8s.io"]
         resources: ["ingresses"]
@@ -1297,7 +1286,7 @@ After a successful login/password combination, you will be prompted to enter you
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.5.5
+              image: bunkerity/bunkerweb:1.5.7
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -1367,7 +1356,7 @@ After a successful login/password combination, you will be prompted to enter you
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.5.5
+              image: bunkerity/bunkerweb-autoconf:1.5.7
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -1394,7 +1383,7 @@ After a successful login/password combination, you will be prompted to enter you
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.5.5
+              image: bunkerity/bunkerweb-scheduler:1.5.7
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -1479,7 +1468,7 @@ After a successful login/password combination, you will be prompted to enter you
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.5.5
+              image: bunkerity/bunkerweb-ui:1.5.7
               imagePullPolicy: Always
               env:
                 - name: ADMIN_USERNAME
@@ -1561,6 +1550,7 @@ After a successful login/password combination, you will be prompted to enter you
       annotations:
         bunkerweb.io/www.example.com_USE_UI: "yes"
         bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: '400 404 405 413 429 500 501 502 503 504'
+        bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: '50m'
     spec:
       rules:
         - host: www.example.com
@@ -1614,6 +1604,7 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+    www.example.com_MAX_CLIENT_SIZE=50m
     ```
 
     Don't forget to restart the `bunkerweb` service :
@@ -1647,6 +1638,7 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+    www.example.com_MAX_CLIENT_SIZE=50m
     ```
 
     The variable `enable_ui` can be set to `true` in order to activate the web UI service and the variable `custom_ui` can be used to specify the configuration file for the web UI :
@@ -1721,6 +1713,7 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+    www.example.com_MAX_CLIENT_SIZE=50m
     ```
 
     Don't forget to restart the `bunkerweb` service :

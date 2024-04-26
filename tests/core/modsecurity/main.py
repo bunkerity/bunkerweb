@@ -1,4 +1,6 @@
 from contextlib import suppress
+from datetime import datetime
+from re import search
 from os import getenv
 from requests import get
 from requests.exceptions import RequestException
@@ -30,6 +32,9 @@ try:
 
     use_modsecurity = getenv("USE_MODSECURITY", "yes") == "yes"
     use_modsecurity_crs = getenv("USE_MODSECURITY_CRS", "yes") == "yes"
+    modsecurity_crs_version = getenv("MODSECURITY_CRS_VERSION", "3")
+
+    current_time = datetime.now().timestamp()
 
     print(
         "ℹ️ Sending a requests to http://www.example.com/?id=/etc/passwd ...",
@@ -56,6 +61,37 @@ try:
     elif use_modsecurity and use_modsecurity_crs:
         print("❌ ModSecurity is not working as expected, exiting ...", flush=True)
         exit(1)
+
+    if use_modsecurity and use_modsecurity_crs:
+        found = False
+        if getenv("TEST_TYPE", "docker") == "docker":
+            from docker import DockerClient
+
+            docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+            docker_client = DockerClient(base_url=docker_host)
+
+            bw_instances = docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
+
+            if not bw_instances:
+                print("❌ BunkerWeb instance not found ...", flush=True)
+                exit(1)
+
+            bw_instance = bw_instances[0]
+
+            for log in bw_instance.logs(since=current_time).split(b"\n"):
+                if f'[ver "OWASP_CRS/{modsecurity_crs_version}'.encode() in log:
+                    found = True
+                    break
+        else:
+            with open("/var/log/bunkerweb/error.log", "r") as f:
+                for line in f.readlines():
+                    if search(r'\[ver "OWASP_CRS/' + modsecurity_crs_version, line):
+                        found = True
+                        break
+
+        if not found:
+            print("❌ ModSecurity CRS doesn't use the expected version, exiting ...", flush=True)
+            exit(1)
 
     print("✅ ModSecurity is working as expected ...", flush=True)
 except SystemExit:

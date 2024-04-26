@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.5.5
+    image: bunkerity/bunkerweb:1.5.7
     ports:
       - 80:8080
       - 443:8443
@@ -19,7 +19,7 @@ services:
       - bw-services
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.5.5
+    image: bunkerity/bunkerweb-autoconf:1.5.7
     depends_on:
       - bunkerweb
       - bw-docker
@@ -32,7 +32,7 @@ services:
       - bw-docker
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.5
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     depends_on:
       - bunkerweb
       - bw-docker
@@ -66,7 +66,7 @@ services:
       - bw-docker
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.5
+    image: bunkerity/bunkerweb-ui:1.5.7
     networks:
       bw-docker:
       bw-universe:
@@ -85,6 +85,7 @@ services:
       - "bunkerweb.REVERSE_PROXY_URL=/changeme"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
       - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+      - "bunkerweb.MAX_CLIENT_SIZE=50m"
 
 volumes:
   bw-data:

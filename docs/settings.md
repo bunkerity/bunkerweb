@@ -15,44 +15,45 @@ When settings are considered as "multiple", it means that you can have multiple 
 
 STREAM support :warning:
 
-|           Setting            |                                                        Default                                                         | Context |Multiple|                   Description                    |
-|------------------------------|------------------------------------------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------|
-|`IS_LOADING`                  |`no`                                                                                                                    |global   |no      |Internal use : set to yes when BW is loading.     |
-|`NGINX_PREFIX`                |`/etc/nginx/`                                                                                                           |global   |no      |Where nginx will search for configurations.       |
-|`HTTP_PORT`                   |`8080`                                                                                                                  |global   |no      |HTTP port number which bunkerweb binds to.        |
-|`HTTPS_PORT`                  |`8443`                                                                                                                  |global   |no      |HTTPS port number which bunkerweb binds to.       |
-|`MULTISITE`                   |`no`                                                                                                                    |global   |no      |Multi site activation.                            |
-|`SERVER_NAME`                 |`www.example.com`                                                                                                       |multisite|no      |List of the virtual hosts served by bunkerweb.    |
-|`WORKER_PROCESSES`            |`auto`                                                                                                                  |global   |no      |Number of worker processes.                       |
-|`WORKER_RLIMIT_NOFILE`        |`2048`                                                                                                                  |global   |no      |Maximum number of open files for worker processes.|
-|`WORKER_CONNECTIONS`          |`1024`                                                                                                                  |global   |no      |Maximum number of connections per worker.         |
-|`LOG_FORMAT`                  |`$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`|global   |no      |The format to use for access logs.                |
-|`LOG_LEVEL`                   |`notice`                                                                                                                |global   |no      |The level to use for error logs.                  |
-|`DNS_RESOLVERS`               |`127.0.0.11`                                                                                                            |global   |no      |DNS addresses of resolvers to use.                |
-|`DATASTORE_MEMORY_SIZE`       |`64m`                                                                                                                   |global   |no      |Size of the internal datastore.                   |
-|`CACHESTORE_MEMORY_SIZE`      |`64m`                                                                                                                   |global   |no      |Size of the internal cachestore.                  |
-|`CACHESTORE_IPC_MEMORY_SIZE`  |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (ipc).            |
-|`CACHESTORE_MISS_MEMORY_SIZE` |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (miss).           |
-|`CACHESTORE_LOCKS_MEMORY_SIZE`|`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (locks).          |
-|`USE_API`                     |`yes`                                                                                                                   |global   |no      |Activate the API to control BunkerWeb.            |
-|`API_HTTP_PORT`               |`5000`                                                                                                                  |global   |no      |Listen port number for the API.                   |
-|`API_LISTEN_IP`               |`0.0.0.0`                                                                                                               |global   |no      |Listen IP address for the API.                    |
-|`API_SERVER_NAME`             |`bwapi`                                                                                                                 |global   |no      |Server name (virtual host) for the API.           |
-|`API_WHITELIST_IP`            |`127.0.0.0/8`                                                                                                           |global   |no      |List of IP/network allowed to contact the API.    |
-|`AUTOCONF_MODE`               |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.               |
-|`SWARM_MODE`                  |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                  |
-|`KUBERNETES_MODE`             |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                    |
-|`SERVER_TYPE`                 |`http`                                                                                                                  |multisite|no      |Server type : http or stream.                     |
-|`LISTEN_STREAM`               |`yes`                                                                                                                   |multisite|no      |Enable listening for non-ssl (passthrough).       |
-|`LISTEN_STREAM_PORT`          |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).         |
-|`LISTEN_STREAM_PORT_SSL`      |`4242`                                                                                                                  |multisite|no      |Listening port for ssl (passthrough).             |
-|`USE_UDP`                     |`no`                                                                                                                    |multisite|no      |UDP listen instead of TCP (stream).               |
-|`USE_IPV6`                    |`no`                                                                                                                    |global   |no      |Enable IPv6 connectivity.                         |
+|           Setting            |                                                        Default                                                         | Context |Multiple|                                        Description                                         |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------|---------|--------|--------------------------------------------------------------------------------------------|
+|`IS_LOADING`                  |`no`                                                                                                                    |global   |no      |Internal use : set to yes when BW is loading.                                               |
+|`NGINX_PREFIX`                |`/etc/nginx/`                                                                                                           |global   |no      |Where nginx will search for configurations.                                                 |
+|`HTTP_PORT`                   |`8080`                                                                                                                  |global   |no      |HTTP port number which bunkerweb binds to.                                                  |
+|`HTTPS_PORT`                  |`8443`                                                                                                                  |global   |no      |HTTPS port number which bunkerweb binds to.                                                 |
+|`MULTISITE`                   |`no`                                                                                                                    |global   |no      |Multi site activation.                                                                      |
+|`SERVER_NAME`                 |`www.example.com`                                                                                                       |multisite|no      |List of the virtual hosts served by bunkerweb.                                              |
+|`WORKER_PROCESSES`            |`auto`                                                                                                                  |global   |no      |Number of worker processes.                                                                 |
+|`WORKER_RLIMIT_NOFILE`        |`2048`                                                                                                                  |global   |no      |Maximum number of open files for worker processes.                                          |
+|`WORKER_CONNECTIONS`          |`1024`                                                                                                                  |global   |no      |Maximum number of connections per worker.                                                   |
+|`LOG_FORMAT`                  |`$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`|global   |no      |The format to use for access logs.                                                          |
+|`LOG_LEVEL`                   |`notice`                                                                                                                |global   |no      |The level to use for error logs.                                                            |
+|`DNS_RESOLVERS`               |`127.0.0.11`                                                                                                            |global   |no      |DNS addresses of resolvers to use.                                                          |
+|`DATASTORE_MEMORY_SIZE`       |`64m`                                                                                                                   |global   |no      |Size of the internal datastore.                                                             |
+|`CACHESTORE_MEMORY_SIZE`      |`64m`                                                                                                                   |global   |no      |Size of the internal cachestore.                                                            |
+|`CACHESTORE_IPC_MEMORY_SIZE`  |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (ipc).                                                      |
+|`CACHESTORE_MISS_MEMORY_SIZE` |`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (miss).                                                     |
+|`CACHESTORE_LOCKS_MEMORY_SIZE`|`16m`                                                                                                                   |global   |no      |Size of the internal cachestore (locks).                                                    |
+|`USE_API`                     |`yes`                                                                                                                   |global   |no      |Activate the API to control BunkerWeb.                                                      |
+|`API_HTTP_PORT`               |`5000`                                                                                                                  |global   |no      |Listen port number for the API.                                                             |
+|`API_LISTEN_IP`               |`0.0.0.0`                                                                                                               |global   |no      |Listen IP address for the API.                                                              |
+|`API_SERVER_NAME`             |`bwapi`                                                                                                                 |global   |no      |Server name (virtual host) for the API.                                                     |
+|`API_WHITELIST_IP`            |`127.0.0.0/8`                                                                                                           |global   |no      |List of IP/network allowed to contact the API.                                              |
+|`AUTOCONF_MODE`               |`no`                                                                                                                    |global   |no      |Enable Autoconf Docker integration.                                                         |
+|`SWARM_MODE`                  |`no`                                                                                                                    |global   |no      |Enable Docker Swarm integration.                                                            |
+|`KUBERNETES_MODE`             |`no`                                                                                                                    |global   |no      |Enable Kubernetes integration.                                                              |
+|`SERVER_TYPE`                 |`http`                                                                                                                  |multisite|no      |Server type : http or stream.                                                               |
+|`LISTEN_STREAM`               |`yes`                                                                                                                   |multisite|no      |Enable listening for non-ssl (passthrough).                                                 |
+|`LISTEN_STREAM_PORT`          |`1337`                                                                                                                  |multisite|no      |Listening port for non-ssl (passthrough).                                                   |
+|`LISTEN_STREAM_PORT_SSL`      |`4242`                                                                                                                  |multisite|no      |Listening port for ssl (passthrough).                                                       |
+|`USE_UDP`                     |`no`                                                                                                                    |multisite|no      |UDP listen instead of TCP (stream).                                                         |
+|`USE_IPV6`                    |`no`                                                                                                                    |global   |no      |Enable IPv6 connectivity.                                                                   |
+|`IS_DRAFT`                    |`no`                                                                                                                    |multisite|no      |Internal use : set to yes when the service is in draft mode.                                |
+|`TIMERS_LOG_LEVEL`            |`debug`                                                                                                                 |global   |no      |Log level for timers.                                                                       |
+|`OVERRIDE_INSTANCES`          |                                                                                                                        |global   |no      |List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 fqdn-or-ip:5000)|
 
 
-## Core settings
-
-### Antibot
+## Antibot
 
 STREAM support :x:
 
@@ -72,7 +73,7 @@ Bot detection by using a challenge.
 |`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
 |`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
 
-### Auth basic
+## Auth basic
 
 STREAM support :x:
 
@@ -86,7 +87,39 @@ Enforce login before accessing a resource or the whole site using HTTP basic aut
 |`AUTH_BASIC_PASSWORD`|`changeme`       |multisite|no      |Password                                        |
 |`AUTH_BASIC_TEXT`    |`Restricted area`|multisite|no      |Text to display                                 |
 
-### Bad behavior
+## Backup
+
+STREAM support :white_check_mark:
+
+Backup your data to a custom location. Ensure the safety and availability of your important files by creating regular backups.
+
+|     Setting      |          Default           |Context|Multiple|                 Description                 |
+|------------------|----------------------------|-------|--------|---------------------------------------------|
+|`USE_BACKUP`      |`yes`                       |global |no      |Enable or disable the backup feature         |
+|`BACKUP_DIRECTORY`|`/var/lib/bunkerweb/backups`|global |no      |The directory where the backup will be stored|
+|`BACKUP_SCHEDULE` |`daily`                     |global |no      |The frequency of the backup                  |
+|`BACKUP_ROTATION` |`7`                         |global |no      |The number of backups to keep                |
+
+## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :white_check_mark:
+
+Automatically backup your data to an S3 bucket
+
+|           Setting           |Default|Context|Multiple|                Description                 |
+|-----------------------------|-------|-------|--------|--------------------------------------------|
+|`USE_BACKUP_S3`              |`no`   |global |no      |Enable or disable the S3 backup feature     |
+|`BACKUP_S3_SCHEDULE`         |`daily`|global |no      |The frequency of the backup                 |
+|`BACKUP_S3_ROTATION`         |`7`    |global |no      |The number of backups to keep               |
+|`BACKUP_S3_ENDPOINT`         |       |global |no      |The S3 endpoint                             |
+|`BACKUP_S3_BUCKET`           |       |global |no      |The S3 bucket                               |
+|`BACKUP_S3_REGION`           |       |global |no      |The S3 region                               |
+|`BACKUP_S3_ACCESS_KEY_ID`    |       |global |no      |The S3 access key ID                        |
+|`BACKUP_S3_ACCESS_KEY_SECRET`|       |global |no      |The S3 access key secret                    |
+|`BACKUP_S3_COMP_LEVEL`       |`6`    |global |no      |The compression level of the backup zip file|
+
+## Bad behavior
 
 STREAM support :white_check_mark:
 
@@ -100,7 +133,7 @@ Ban IP generating too much 'bad' HTTP status code in a period of time.
 |`BAD_BEHAVIOR_THRESHOLD`   |`10`                         |multisite|no      |Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.    |
 |`BAD_BEHAVIOR_COUNT_TIME`  |`60`                         |multisite|no      |Period of time (in seconds) during which we count 'bad' HTTP status codes.                  |
 
-### Blacklist
+## Blacklist
 
 STREAM support :warning:
 
@@ -131,7 +164,7 @@ Deny access based on internal and external IP/network/rDNS/ASN blacklists.
 |`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.                    |
 |`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
 
-### Brotli
+## Brotli
 
 STREAM support :x:
 
@@ -144,7 +177,7 @@ Compress HTTP requests with the brotli algorithm.
 |`BROTLI_MIN_LENGTH`|`1000`                                                                                                                                                                                                                                                                                                                                                                                                                          |multisite|no      |Minimum length for brotli compression.                 |
 |`BROTLI_COMP_LEVEL`|`6`                                                                                                                                                                                                                                                                                                                                                                                                                             |multisite|no      |The compression level of the brotli algorithm.         |
 
-### BunkerNet
+## BunkerNet
 
 STREAM support :white_check_mark:
 
@@ -155,7 +188,7 @@ Share threat data with other BunkerWeb instances via BunkerNet.
 |`USE_BUNKERNET`   |`yes`                     |multisite|no      |Activate BunkerNet feature.  |
 |`BUNKERNET_SERVER`|`https://api.bunkerweb.io`|global   |no      |Address of the BunkerNet API.|
 
-### CORS
+## CORS
 
 STREAM support :x:
 
@@ -175,7 +208,7 @@ Cross-Origin Resource Sharing.
 |`CORS_ALLOW_HEADERS`          |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header.                  |
 |`CORS_DENY_REQUEST`           |`yes`                                                                               |multisite|no      |Deny request and don't send it to backend if Origin is not allowed.|
 
-### Client cache
+## Client cache
 
 STREAM support :x:
 
@@ -188,7 +221,7 @@ Manage caching for clients.
 |`CLIENT_CACHE_ETAG`      |`yes`                                                       |multisite|no      |Send the HTTP ETag header for static resources.                     |
 |`CLIENT_CACHE_CONTROL`   |`public, max-age=15552000`                                  |multisite|no      |Value of the Cache-Control HTTP header.                             |
 
-### Country
+## Country
 
 STREAM support :white_check_mark:
 
@@ -199,7 +232,7 @@ Deny access based on the country of the client IP.
 |`BLACKLIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).    |
 |`WHITELIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).|
 
-### Custom HTTPS certificate
+## Custom HTTPS certificate
 
 STREAM support :white_check_mark:
 
@@ -213,17 +246,18 @@ Choose custom certificate for HTTPS.
 |`CUSTOM_SSL_CERT_DATA`|       |multisite|no      |Certificate data encoded in base64.                                             |
 |`CUSTOM_SSL_KEY_DATA` |       |multisite|no      |Key data encoded in base64.                                                     |
 
-### DB
+## DB
 
 STREAM support :white_check_mark:
 
 Integrate easily the Database.
 
-|   Setting    |                 Default                 |Context|Multiple|                   Description                    |
-|--------------|-----------------------------------------|-------|--------|--------------------------------------------------|
-|`DATABASE_URI`|`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
+|      Setting       |                 Default                 |Context|Multiple|                   Description                    |
+|--------------------|-----------------------------------------|-------|--------|--------------------------------------------------|
+|`DATABASE_URI`      |`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
+|`DATABASE_LOG_LEVEL`|`warning`                                |global |no      |The level to use for database logs.               |
 
-### DNSBL
+## DNSBL
 
 STREAM support :white_check_mark:
 
@@ -234,7 +268,7 @@ Deny access based on external DNSBL servers.
 |`USE_DNSBL` |`yes`                                                                       |multisite|no      |Activate DNSBL feature.|
 |`DNSBL_LIST`|`bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org`|global   |no      |List of DNSBL servers. |
 
-### Errors
+## Errors
 
 STREAM support :x:
 
@@ -245,7 +279,7 @@ Manage default error pages
 |`ERRORS`                 |                                                 |multisite|no      |List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).|
 |`INTERCEPTED_ERROR_CODES`|`400 401 403 404 405 413 429 500 501 502 503 504`|multisite|no      |List of HTTP error code intercepted by BunkerWeb                                                                        |
 
-### Greylist
+## Greylist
 
 STREAM support :warning:
 
@@ -266,7 +300,7 @@ Allow access while keeping security features based on internal and external IP/n
 |`GREYLIST_URI`            |       |multisite|no      |List of URI (PCRE regex), separated with spaces, to put into the greylist.                    |
 |`GREYLIST_URI_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing bad URI to put into the greylist.             |
 
-### Gzip
+## Gzip
 
 STREAM support :x:
 
@@ -279,7 +313,7 @@ Compress HTTP requests with the gzip algorithm.
 |`GZIP_MIN_LENGTH`|`1000`                                                                                                                                                                                                                                                                                                                                                                                                                          |multisite|no      |Minimum length for gzip compression.                 |
 |`GZIP_COMP_LEVEL`|`5`                                                                                                                                                                                                                                                                                                                                                                                                                             |multisite|no      |The compression level of the gzip algorithm.         |
 
-### HTML injection
+## HTML injection
 
 STREAM support :x:
 
@@ -289,7 +323,7 @@ Inject custom HTML code before the </body> tag.
 |-------------|-------|---------|--------|------------------------|
 |`INJECT_BODY`|       |multisite|no      |The HTML code to inject.|
 
-### Headers
+## Headers
 
 STREAM support :x:
 
@@ -312,19 +346,38 @@ Manage HTTP headers sent to clients.
 |`X_CONTENT_TYPE_OPTIONS`             |`nosniff`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |multisite|no      |Value for the X-Content-Type-Options header.                                                  |
 |`X_XSS_PROTECTION`                   |`1; mode=block`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |multisite|no      |Value for the X-XSS-Protection header.                                                        |
 
-### Let's Encrypt
+## Let's Encrypt
 
 STREAM support :white_check_mark:
 
 Automatic creation, renewal and configuration of Let's Encrypt certificates.
 
-|         Setting          |Default| Context |Multiple|                                                                                 Description                                                                                 |
-|--------------------------|-------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|`AUTO_LETS_ENCRYPT`       |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                       |
-|`EMAIL_LETS_ENCRYPT`      |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
-|`USE_LETS_ENCRYPT_STAGING`|`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
+|           Setting            |Default| Context |Multiple|                                                                                 Description                                                                                 |
+|------------------------------|-------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT`           |`no`   |multisite|no      |Activate automatic Let's Encrypt mode.                                                                                                                                       |
+|`EMAIL_LETS_ENCRYPT`          |       |multisite|no      |Email used for Let's Encrypt notification and in certificate.                                                                                                                |
+|`USE_LETS_ENCRYPT_STAGING`    |`no`   |multisite|no      |Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.|
+|`LETS_ENCRYPT_CLEAR_OLD_CERTS`|`no`   |global   |no      |Clear old certificates when renewing.                                                                                                                                        |
 
-### Limit
+## Let's Encrypt DNS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :white_check_mark:
+
+Automatic creation, renewal and configuration of Let's Encrypt certificates using DNS challenges.
+
+|             Setting              | Default | Context |Multiple|                                      Description                                      |
+|----------------------------------|---------|---------|--------|---------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT_DNS`           |`no`     |multisite|no      |Activate automatic Let's Encrypt DNS.                                                  |
+|`LETS_ENCRYPT_DNS_EMAIL`          |         |multisite|no      |The email address to use for Let's Encrypt notifications.                              |
+|`USE_LETS_ENCRYPT_DNS_STAGING`    |`no`     |multisite|no      |Use the Let's Encrypt staging environment.                                             |
+|`LETS_ENCRYPT_DNS_PROVIDER`       |         |multisite|no      |The DNS provider to use for DNS challenges.                                            |
+|`USE_LETS_ENCRYPT_DNS_WILDCARD`   |`yes`    |multisite|no      |Create wildcard certificates for all domains using DNS challenges.                     |
+|`LETS_ENCRYPT_DNS_PROPAGATION`    |`default`|multisite|no      |The time to wait for DNS propagation in seconds.                                       |
+|`LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`|         |multisite|yes     |Configuration item that will be added to the credentials.ini file for the DNS provider.|
+|`LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS`|`no`     |global   |no      |Clear old certificates when renewing.                                                  |
+
+## Limit
 
 STREAM support :warning:
 
@@ -340,34 +393,54 @@ Limit maximum number of requests and connections.
 |`LIMIT_CONN_MAX_HTTP2` |`100`  |multisite|no      |Maximum number of streams per IP when using HTTP/2 protocol.                                 |
 |`LIMIT_CONN_MAX_STREAM`|`10`   |multisite|no      |Maximum number of connections per IP when using stream.                                      |
 
-### Miscellaneous
+## Metrics
+
+STREAM support :warning:
+
+Metrics collection and retrieve.
+
+|           Setting            |Default| Context |Multiple|                       Description                       |
+|------------------------------|-------|---------|--------|---------------------------------------------------------|
+|`USE_METRICS`                 |`yes`  |multisite|no      |Enable collection and retrieval of internal metrics.     |
+|`METRICS_MEMORY_SIZE`         |`16m`  |global   |no      |Size of the internal storage for metrics.                |
+|`METRICS_MAX_BLOCKED_REQUESTS`|`100`  |global   |no      |Maximum number of blocked requests to store (per worker).|
+
+## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :white_check_mark:
+
+Migration of BunkerWeb configuration between instances made easy via the web UI
+
+## Miscellaneous
 
 STREAM support :warning:
 
 Miscellaneous settings.
 
-|           Setting           |        Default        | Context |Multiple|                                                         Description                                                         |
-|-----------------------------|-----------------------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------|
-|`DISABLE_DEFAULT_SERVER`     |`no`                   |global   |no      |Close connection if the request vhost is unknown.                                                                            |
-|`REDIRECT_HTTP_TO_HTTPS`     |`no`                   |multisite|no      |Redirect all HTTP request to HTTPS.                                                                                          |
-|`AUTO_REDIRECT_HTTP_TO_HTTPS`|`yes`                  |multisite|no      |Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.                                    |
-|`ALLOWED_METHODS`            |`GET|POST|HEAD`        |multisite|no      |Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.                                                 |
-|`MAX_CLIENT_SIZE`            |`10m`                  |multisite|no      |Maximum body size (0 for infinite).                                                                                          |
-|`SERVE_FILES`                |`yes`                  |multisite|no      |Serve files from the local folder.                                                                                           |
-|`ROOT_FOLDER`                |                       |multisite|no      |Root folder containing files to serve (/var/www/html/{server_name} if unset).                                                |
-|`SSL_PROTOCOLS`              |`TLSv1.2 TLSv1.3`      |multisite|no      |The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.                      |
-|`HTTP2`                      |`yes`                  |multisite|no      |Support HTTP2 protocol when HTTPS is enabled.                                                                                |
-|`LISTEN_HTTP`                |`yes`                  |multisite|no      |Respond to (insecure) HTTP requests.                                                                                         |
-|`USE_OPEN_FILE_CACHE`        |`no`                   |multisite|no      |Enable open file cache feature                                                                                               |
-|`OPEN_FILE_CACHE`            |`max=1000 inactive=20s`|multisite|no      |Open file cache directive                                                                                                    |
-|`OPEN_FILE_CACHE_ERRORS`     |`yes`                  |multisite|no      |Enable open file cache for errors                                                                                            |
-|`OPEN_FILE_CACHE_MIN_USES`   |`2`                    |multisite|no      |Enable open file cache minimum uses                                                                                          |
-|`OPEN_FILE_CACHE_VALID`      |`30s`                  |multisite|no      |Open file cache valid time                                                                                                   |
-|`EXTERNAL_PLUGIN_URLS`       |                       |global   |no      |List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).|
-|`DENY_HTTP_STATUS`           |`403`                  |global   |no      |HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.       |
-|`SEND_ANONYMOUS_REPORT`      |`yes`                  |global   |no      |Send anonymous report to BunkerWeb maintainers.                                                                              |
+|              Setting              |        Default        | Context |Multiple|                                                         Description                                                         |
+|-----------------------------------|-----------------------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------|
+|`DISABLE_DEFAULT_SERVER`           |`no`                   |global   |no      |Deny HTTP request if the request vhost is unknown.                                                                           |
+|`DISABLE_DEFAULT_SERVER_STRICT_SNI`|`no`                   |global   |no      |Close SSL/TLS connection if the SNI is unknown.                                                                              |
+|`REDIRECT_HTTP_TO_HTTPS`           |`no`                   |multisite|no      |Redirect all HTTP request to HTTPS.                                                                                          |
+|`AUTO_REDIRECT_HTTP_TO_HTTPS`      |`yes`                  |multisite|no      |Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.                                    |
+|`ALLOWED_METHODS`                  |`GET|POST|HEAD`        |multisite|no      |Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.                                                 |
+|`MAX_CLIENT_SIZE`                  |`10m`                  |multisite|no      |Maximum body size (0 for infinite).                                                                                          |
+|`SERVE_FILES`                      |`yes`                  |multisite|no      |Serve files from the local folder.                                                                                           |
+|`ROOT_FOLDER`                      |                       |multisite|no      |Root folder containing files to serve (/var/www/html/{server_name} if unset).                                                |
+|`SSL_PROTOCOLS`                    |`TLSv1.2 TLSv1.3`      |multisite|no      |The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.                      |
+|`HTTP2`                            |`yes`                  |multisite|no      |Support HTTP2 protocol when HTTPS is enabled.                                                                                |
+|`LISTEN_HTTP`                      |`yes`                  |multisite|no      |Respond to (insecure) HTTP requests.                                                                                         |
+|`USE_OPEN_FILE_CACHE`              |`no`                   |multisite|no      |Enable open file cache feature                                                                                               |
+|`OPEN_FILE_CACHE`                  |`max=1000 inactive=20s`|multisite|no      |Open file cache directive                                                                                                    |
+|`OPEN_FILE_CACHE_ERRORS`           |`yes`                  |multisite|no      |Enable open file cache for errors                                                                                            |
+|`OPEN_FILE_CACHE_MIN_USES`         |`2`                    |multisite|no      |Enable open file cache minimum uses                                                                                          |
+|`OPEN_FILE_CACHE_VALID`            |`30s`                  |multisite|no      |Open file cache valid time                                                                                                   |
+|`EXTERNAL_PLUGIN_URLS`             |                       |global   |no      |List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).|
+|`DENY_HTTP_STATUS`                 |`403`                  |global   |no      |HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.       |
+|`SEND_ANONYMOUS_REPORT`            |`yes`                  |global   |no      |Send anonymous report to BunkerWeb maintainers.                                                                              |
 
-### ModSecurity
+## ModSecurity
 
 STREAM support :x:
 
@@ -377,11 +450,24 @@ Management of the ModSecurity WAF.
 |---------------------------------|--------------|---------|--------|------------------------------------------|
 |`USE_MODSECURITY`                |`yes`         |multisite|no      |Enable ModSecurity WAF.                   |
 |`USE_MODSECURITY_CRS`            |`yes`         |multisite|no      |Enable OWASP Core Rule Set.               |
+|`MODSECURITY_CRS_VERSION`        |`3`           |multisite|no      |Version of the OWASP Core Rule Set to use.|
 |`MODSECURITY_SEC_AUDIT_ENGINE`   |`RelevantOnly`|multisite|no      |SecAuditEngine directive of ModSecurity.  |
 |`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.   |
 |`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.|
 
-### PHP
+## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
+
+|           Setting            |Default|Context|Multiple|                 Description                 |
+|------------------------------|-------|-------|--------|---------------------------------------------|
+|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
+|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
+
+## PHP
 
 STREAM support :x:
 
@@ -394,7 +480,32 @@ Manage local or remote PHP-FPM.
 |`LOCAL_PHP`      |       |multisite|no      |Path to the PHP-FPM socket file.                            |
 |`LOCAL_PHP_PATH` |       |multisite|no      |Root folder containing files in the local PHP-FPM instance. |
 
-### Real IP
+## Pro
+
+STREAM support :x:
+
+Pro settings for the Pro version of BunkerWeb.
+
+|     Setting     |Default|Context|Multiple|                   Description                   |
+|-----------------|-------|-------|--------|-------------------------------------------------|
+|`PRO_LICENSE_KEY`|       |global |no      |The License Key for the Pro version of BunkerWeb.|
+
+## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Prometheus exporter for BunkerWeb internal metrics.
+
+|           Setting            |                       Default                       |Context|Multiple|                              Description                               |
+|------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
+|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global |no      |Enable the Prometheus export.                                           |
+|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global |no      |Listening IP of the Prometheus exporter.                                |
+|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global |no      |Listening port of the Prometheus exporter.                              |
+|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global |no      |HTTP URL of the Prometheus exporter.                                    |
+|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
+
+## Real IP
 
 STREAM support :warning:
 
@@ -409,7 +520,7 @@ Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.
 |`REAL_IP_HEADER`    |`X-Forwarded-For`                        |multisite|no      |HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.                  |
 |`REAL_IP_RECURSIVE` |`yes`                                    |multisite|no      |Perform a recursive search in the header container IP address.                                          |
 
-### Redirect
+## Redirect
 
 STREAM support :x:
 
@@ -421,7 +532,7 @@ Manage HTTP redirects.
 |`REDIRECT_TO_REQUEST_URI`|`no`   |multisite|no      |Append the requested URI to the redirect address.|
 |`REDIRECT_TO_STATUS_CODE`|`301`  |multisite|no      |Status code to send to client when redirecting.  |
 
-### Redis
+## Redis
 
 STREAM support :white_check_mark:
 
@@ -434,6 +545,7 @@ Redis server configuration when using BunkerWeb in cluster mode.
 |`REDIS_PORT`             |`6379` |global |no      |Redis server port.                                                 |
 |`REDIS_DATABASE`         |`0`    |global |no      |Redis database number.                                             |
 |`REDIS_SSL`              |`no`   |global |no      |Use SSL/TLS connection with Redis server.                          |
+|`REDIS_SSL_VERIFY`       |`no`   |global |no      |Verify the certificate of Redis server.                            |
 |`REDIS_TIMEOUT`          |`1000` |global |no      |Redis server timeout (in ms) for connect, read and write.          |
 |`REDIS_KEEPALIVE_IDLE`   |`30000`|global |no      |Max idle time (in ms) before closing redis connection in the pool. |
 |`REDIS_KEEPALIVE_POOL`   |`10`   |global |no      |Max number of redis connection(s) kept in the pool.                |
@@ -444,7 +556,28 @@ Redis server configuration when using BunkerWeb in cluster mode.
 |`REDIS_SENTINEL_PASSWORD`|       |global |no      |Redis sentinel password.                                           |
 |`REDIS_SENTINEL_MASTER`  |       |global |no      |Redis sentinel master name.                                        |
 
-### Reverse proxy
+## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
+
+|           Setting            |Default |Context|Multiple|                                                           Description                                                            |
+|------------------------------|--------|-------|--------|----------------------------------------------------------------------------------------------------------------------------------|
+|`USE_REPORTING_SMTP`          |`no`    |global |no      |Enable sending the report via email.                                                                                              |
+|`USE_REPORTING_WEBHOOK`       |`no`    |global |no      |Enable sending the report via webhook.                                                                                            |
+|`REPORTING_SCHEDULE`          |`weekly`|global |no      |The frequency at which reports are sent.                                                                                          |
+|`REPORTING_WEBHOOK_URLS`      |        |global |no      |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
+|`REPORTING_SMTP_EMAILS`       |        |global |no      |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
+|`REPORTING_SMTP_HOST`         |        |global |no      |The host server used for SMTP sending.                                                                                            |
+|`REPORTING_SMTP_PORT`         |`465`   |global |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
+|`REPORTING_SMTP_FROM_EMAIL`   |        |global |no      |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
+|`REPORTING_SMTP_FROM_USER`    |        |global |no      |The user authentication value for sending via the from email address.                                                             |
+|`REPORTING_SMTP_FROM_PASSWORD`|        |global |no      |The password authentication value for sending via the from email address.                                                         |
+|`REPORTING_SMTP_SSL`          |`SSL`   |global |no      |Determine whether or not to use a secure connection for SMTP.                                                                     |
+
+## Reverse proxy
 
 STREAM support :warning:
 
@@ -478,8 +611,9 @@ Manage reverse proxy configurations.
 |`REVERSE_PROXY_READ_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when reading from the proxied resource.                                                                              |
 |`REVERSE_PROXY_SEND_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when sending to the proxied resource.                                                                                |
 |`REVERSE_PROXY_INCLUDES`               |                                  |multisite|yes     |Additional configuration to include in the location block, separated with spaces.                                            |
+|`REVERSE_PROXY_CUSTOM_HOST`            |                                  |multisite|no      |Override Host header sent to upstream server.                                                                                |
 
-### Reverse scan
+## Reverse scan
 
 STREAM support :white_check_mark:
 
@@ -491,7 +625,7 @@ Scan clients ports to detect proxies or servers.
 |`REVERSE_SCAN_PORTS`  |`22 80 443 3128 8000 8080`|multisite|no      |List of port to scan when using reverse scan feature.             |
 |`REVERSE_SCAN_TIMEOUT`|`500`                     |multisite|no      |Specify the maximum timeout (in ms) when scanning a port.         |
 
-### Self-signed certificate
+## Self-signed certificate
 
 STREAM support :white_check_mark:
 
@@ -503,7 +637,7 @@ Generate self-signed certificate.
 |`SELF_SIGNED_SSL_EXPIRY`  |`365`                 |multisite|no      |Self-signed certificate expiry in days.  |
 |`SELF_SIGNED_SSL_SUBJ`    |`/CN=www.example.com/`|multisite|no      |Self-signed certificate subject.         |
 
-### Sessions
+## Sessions
 
 STREAM support :white_check_mark:
 
@@ -519,7 +653,7 @@ Management of session used by other plugins.
 |`SESSIONS_CHECK_IP`        |`yes`   |global |no      |Destroy session if IP address is different than original one.                    |
 |`SESSIONS_CHECK_USER_AGENT`|`yes`   |global |no      |Destroy session if User-Agent is different than original one.                    |
 
-### UI
+## UI
 
 STREAM support :x:
 
@@ -530,7 +664,7 @@ Integrate easily the BunkerWeb UI.
 |`USE_UI` |`no`   |multisite|no      |Use UI                                      |
 |`UI_HOST`|       |global   |no      |Address of the web UI used for initial setup|
 
-### Whitelist
+## Whitelist
 
 STREAM support :warning:
 

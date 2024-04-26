@@ -1,0 +1,41 @@
+---
+meta:
+  author: "Franziska Bühler"
+  description: None
+  enabled: true
+  name: 942460.yaml
+tests:
+  - test_title: 942460-1
+    desc: "Repetitive Non-Word Characters"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            port: 80
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: "/"
+            data: "var=foo...."
+            version: HTTP/1.1
+          output:
+            log_contains: id "942460"
+  - test_title: 942460-2
+    desc: "Repetitive Non-Word Characters negative test only 3 characters"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            port: 80
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: "/"
+            data: "var=foo..."
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "942460"

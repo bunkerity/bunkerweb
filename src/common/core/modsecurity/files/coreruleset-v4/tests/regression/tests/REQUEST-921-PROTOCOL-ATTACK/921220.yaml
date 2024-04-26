@@ -1,0 +1,21 @@
+---
+meta:
+  author: "Christian Folini (dune73)"
+  description: "HTTP Parameter Pollution"
+  enabled: true
+  name: 921220.yaml
+tests:
+  - test_title: 921220-1
+    desc: "Potential HTTP Parameter Pollution via parameter array"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: "/?foo[1]=bar"
+          output:
+            log_contains: id "921220"

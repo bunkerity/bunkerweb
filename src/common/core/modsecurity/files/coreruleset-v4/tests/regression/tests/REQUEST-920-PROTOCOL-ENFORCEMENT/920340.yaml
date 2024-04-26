@@ -1,0 +1,39 @@
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920340.yaml"
+  description: "Description"
+tests:
+  - test_title: 920340-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Length: "2"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "xy"
+            stop_magic: true
+          output:
+            log_contains: "id \"920340\""
+  - test_title: 920340-2
+    desc: "Status Page Test - POST request with body content, a non-zero Content-Length header, but no Content-Type header"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Length: "3"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            data: "abc"
+            stop_magic: true
+          output:
+            log_contains: "id \"920340\""

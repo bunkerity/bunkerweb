@@ -1,0 +1,130 @@
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
+  DOCKER_HOST: "tcp://bw-docker:2375"
+  LOG_LEVEL: "debug"
+
+services:
+  bunkerweb:
+    build:
+      context: ../..
+      dockerfile: ./src/bw/Dockerfile
+    ports:
+      - 80:8080
+      - 443:8443
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    environment:
+      - SERVER_NAME=app1.example.com
+      - MULTISITE=yes
+      - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
+      - USE_BUNKERNET=no
+      - USE_BLACKLIST=no
+      - USE_WHITELIST=no
+      - SEND_ANONYMOUS_REPORT=no
+      - LOG_LEVEL=info
+      - SERVE_FILES=no
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - UI_HOST=http://bw-ui:7000
+      - app1.example.com_USE_REVERSE_PROXY=yes
+      - app1.example.com_REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1:8080
+    networks:
+      bw-universe:
+        aliases:
+          - bunkerweb
+      bw-services:
+        aliases:
+          - bunkerweb
+
+  bw-scheduler:
+    build:
+      context: ../..
+      dockerfile: ./src/scheduler/Dockerfile
+    depends_on:
+      - bunkerweb
+      - bw-docker
+    volumes:
+      - bw-data:/data
+    environment:
+      <<: *env
+    networks:
+      bw-universe:
+        aliases:
+          - bw-scheduler
+      bw-docker:
+        aliases:
+          - bw-scheduler
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - LOG_LEVEL=warning
+    networks:
+      bw-docker:
+        aliases:
+          - bw-docker
+
+  bw-ui:
+    build:
+      context: ../..
+      dockerfile: ./src/ui/Dockerfile
+    command: python3 -m gunicorn --config gunicorn.conf.py --user ui --group ui --bind 0.0.0.0:7000 --reload --log-level debug main:app
+    depends_on:
+      - bw-docker
+    volumes:
+      - ../../src/ui/src:/usr/share/bunkerweb/ui/src:ro
+      - ../../src/ui/static:/usr/share/bunkerweb/ui/static:ro
+      - ../../src/ui/templates:/usr/share/bunkerweb/ui/templates:ro
+      - ../../src/ui/gunicorn.conf.py:/usr/share/bunkerweb/ui/gunicorn.conf.py:ro
+      - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
+      - ../../src/ui/utils.py:/usr/share/bunkerweb/ui/utils.py:ro
+    environment:
+      <<: *env
+    networks:
+      bw-universe:
+        aliases:
+          - bw-ui
+      bw-docker:
+        aliases:
+          - bw-ui
+
+  bw-db:
+    image: mariadb:11
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=secret
+    volumes:
+      - bw-db:/var/lib/mysql
+    networks:
+      bw-docker:
+        aliases:
+          - bw-db
+
+  app1:
+    image: nginxdemos/nginx-hello
+    networks:
+      bw-services:
+        aliases:
+          - app1
+
+volumes:
+  bw-data:
+  bw-db:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  bw-docker:
+    name: bw-docker

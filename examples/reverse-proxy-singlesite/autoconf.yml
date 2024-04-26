@@ -2,7 +2,7 @@ version: "3"
 
 services:
   app1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       bw-services:
         aliases:
@@ -11,7 +11,7 @@ services:
       - bunkerweb.SERVER_NAME=www.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL_1=~ ^/app1/(.*)$$
-      - bunkerweb.REVERSE_PROXY_HOST_1=http://app1/$$1
+      - bunkerweb.REVERSE_PROXY_HOST_1=http://app1:8080/$$1
       - |
         bunkerweb.CUSTOM_CONF_SERVER_HTTP_redirects=
         port_in_redirect off;
@@ -20,7 +20,7 @@ services:
         }
 
   app2:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       bw-services:
         aliases:
@@ -29,7 +29,7 @@ services:
       - bunkerweb.SERVER_NAME=www.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL_2=~ ^/app2/(.*)$$
-      - bunkerweb.REVERSE_PROXY_HOST_2=http://app2/$$1
+      - bunkerweb.REVERSE_PROXY_HOST_2=http://app2:8080/$$1
       - |
         bunkerweb.CUSTOM_CONF_SERVER_HTTP_redirects=
         port_in_redirect off;

@@ -1,0 +1,27 @@
+---
+meta:
+  author: "azurit"
+  enabled: true
+  name: "951190.yaml"
+  description: "Regression tests for rule 951190"
+tests:
+  - test_title: 951190-1
+    desc: "Matching ingres SQL Information Leakage"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: "[match sql-errors.data]the used select statements have different number of columns[/match]: [5000A] [Actian][Ingres ODBC Driver][Ingres]Delimited identifier starting with '' contains no valid characters. (6692) (SQLExecDirectW)"
+          output:
+            log_contains: "id \"951190\""

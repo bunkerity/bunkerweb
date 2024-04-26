@@ -10,6 +10,8 @@ local ngx = ngx
 local ERR = ngx.ERR
 local NOTICE = ngx.NOTICE
 local WARN = ngx.WARN
+local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
+local HTTP_OK = ngx.HTTP_OK
 local timer_at = ngx.timer.at
 local get_phase = ngx.get_phase
 local get_version = utils.get_version
@@ -28,6 +30,7 @@ local open = io.open
 local encode = cjson.encode
 local decode = cjson.decode
 local http_new = http.new
+local match = string.match
 
 function bunkernet:initialize(ctx)
 	-- Call parent initialize
@@ -201,9 +204,20 @@ function bunkernet:log(bypass_checks)
 	end
 	local ok, err
 	-- luacheck: ignore 212 431
-	local function report_callback(premature, obj, ip, reason, reason_data, method, url, headers, use_redis)
+	local function report_callback(
+		premature,
+		obj,
+		ip,
+		reason,
+		reason_data,
+		method,
+		url,
+		headers,
+		server_name,
+		use_redis
+	)
 		local status, _
-		ok, err, status, _ = obj:report(ip, reason, reason_data, method, url, headers)
+		ok, err, status, _ = obj:report(ip, reason, reason_data, method, url, headers, server_name)
 		if status == 429 then
 			obj.logger:log(WARN, "bunkernet API is rate limiting us")
 		elseif not ok then
@@ -226,7 +240,8 @@ function bunkernet:log(bypass_checks)
 		reason_data,
 		self.ctx.bw.request_method,
 		self.ctx.bw.request_uri,
-		ngx.req.get_headers()
+		ngx.req.get_headers(),
+		self.ctx.bw.server_name
 	)
 	if not hdr then
 		return self:ret(false, "can't create report timer : " .. err)
@@ -260,10 +275,48 @@ function bunkernet:request(method, url, data)
 	if not httpc then
 		return false, "can't instantiate http object : " .. err
 	end
+
+	local os_data = {
+		name = "Linux",
+		version = "Unknown",
+		version_id = "Unknown",
+		version_codename = "Unknown",
+		id = "Unknown",
+		arch = "Unknown",
+	}
+	local uname_cmd = io.popen("uname -m")
+	if uname_cmd then
+		os_data.arch = uname_cmd:read("*a"):gsub("\n", "")
+		uname_cmd:close()
+	end
+
+	local file = io.open("/etc/os-release", "r")
+	if file then
+		for line in file:lines() do
+			local key, value = line:match("^(%w+)=(.+)$")
+			if key and value then
+				value = value:gsub('"', "")
+				if key == "NAME" then
+					os_data.name = value
+				elseif key == "VERSION" then
+					os_data.version = value
+				elseif key == "VERSION_ID" then
+					os_data.version_id = value
+				elseif key == "VERSION_CODENAME" then
+					os_data.version_codename = value
+				elseif key == "ID" then
+					os_data.id = value
+				end
+			end
+		end
+		file:close()
+	end
+
 	local all_data = {
 		id = self.bunkernet_id,
 		version = self.version,
 		integration = self.integration,
+		os = os_data,
 	}
 	if data then
 		for k, v in pairs(data) do
@@ -296,7 +349,7 @@ function bunkernet:ping()
 	return self:request("GET", "/ping", {})
 end
 
-function bunkernet:report(ip, reason, reason_data, method, url, headers)
+function bunkernet:report(ip, reason, reason_data, method, url, headers, server_name)
 	local data = {
 		ip = ip,
 		reason = reason,
@@ -304,8 +357,39 @@ function bunkernet:report(ip, reason, reason_data, method, url, headers)
 		method = method,
 		url = url,
 		headers = headers,
+		server_name = server_name,
 	}
 	return self:request("POST", "/report", data)
+end
+
+function bunkernet:api()
+	-- Match request
+	if not match(self.ctx.bw.uri, "^/bunkernet/ping$") or self.ctx.bw.request_method ~= "POST" then
+		return self:ret(false, "success")
+	end
+	-- Check id
+	local id, err_id = self.datastore:get("plugin_bunkernet_id", true)
+	if not id and err_id ~= "not found" then
+		return self:ret(true, "error while getting bunkernet id : " .. err_id, HTTP_INTERNAL_SERVER_ERROR)
+	elseif not id then
+		return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
+	end
+	self.bunkernet_id = id
+	self.version = get_version(self.ctx)
+	self.integration = get_integration(self.ctx)
+	-- Send ping request
+	local ok, err, status, _ = self:ping()
+	if not ok then
+		return self:ret(true, "error while sending request to API : " .. err, HTTP_INTERNAL_SERVER_ERROR)
+	end
+	if status ~= 200 then
+		return self:ret(
+			true,
+			"received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id,
+			HTTP_INTERNAL_SERVER_ERROR
+		)
+	end
+	return self:ret(true, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful", HTTP_OK)
 end
 
 return bunkernet

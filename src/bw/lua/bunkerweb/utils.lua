@@ -317,7 +317,11 @@ utils.get_reason = function(ctx)
 	end
 	local banned, _ = datastore:get("bans_ip_" .. ip)
 	if banned then
-		return decode(banned)["reason"], {}
+		local ok, ban_data = pcall(decode, banned)
+		if ok then
+			banned = ban_data["reason"]
+		end
+		return banned, {}
 	end
 	-- unknown
 	if ngx.status == utils.get_deny_status() then
@@ -642,12 +646,16 @@ utils.is_banned = function(ip)
 	if not result and err ~= "not found" then
 		return nil, "datastore:get() error : " .. result
 	elseif result and err ~= "not found" then
-		local ok, ttl = datastore:ttl("bans_ip_" .. ip)
-		local ban_data = decode(result)
-		if not ok then
-			return true, ban_data["reason"], -1
+		local ok, ban_data = pcall(decode, result)
+		if ok then
+			result = ban_data["reason"]
 		end
-		return true, ban_data["reason"], ttl
+		local ttl
+		ok, ttl = datastore:ttl("bans_ip_" .. ip)
+		if not ok then
+			return true, result, -1
+		end
+		return true, result, ttl
 	end
 	-- Redis case
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
@@ -694,7 +702,12 @@ utils.is_banned = function(ip)
 		if not ok then
 			return nil, "datastore:set() error : " .. err
 		end
-		return true, decode(data[1])["reason"], data[2]
+		local ban_data
+		ok, ban_data = pcall(decode, data[1])
+		if ok then
+			data[1] = ban_data["reason"]
+		end
+		return true, data[1], data[2]
 	end
 	clusterstore:close()
 	return false, "not banned"
@@ -773,6 +786,8 @@ utils.get_phases = function()
 		"preread",
 		"log_stream",
 		"log_default",
+		"timer",
+		"init_workers",
 	}
 end
 

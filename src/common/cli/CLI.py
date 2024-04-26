@@ -2,12 +2,14 @@
 
 from datetime import datetime
 from json import dumps, loads
+from operator import itemgetter
 from time import time
 from dotenv import dotenv_values
-from os import getenv, sep
+from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from redis import StrictRedis, Sentinel
+from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from typing import Any, Optional, Tuple
 
@@ -55,6 +57,7 @@ class CLI(ApiCaller):
         self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
         variables_path = Path(sep, "etc", "nginx", "variables.env")
         self.__variables = {}
+        self.__db = None
         if variables_path.is_file():
             self.__variables = dotenv_values(variables_path)
 
@@ -63,8 +66,8 @@ class CLI(ApiCaller):
 
             self.__logger.info("Getting variables from database")
 
-            db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
-            self.__variables = db.get_config()
+            self.__db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
+            self.__variables = self.__db.get_config()
 
         assert isinstance(self.__variables, dict), "Failed to get variables from database"
 
@@ -74,7 +77,8 @@ class CLI(ApiCaller):
         if self.__use_redis:
             self.__logger.info("Fetching redis configuration")
             redis_host = self.__get_variable("REDIS_HOST")
-            if redis_host:
+            sentinel_hosts = self.__get_variable("REDIS_SENTINEL_HOSTS")
+            if redis_host or sentinel_hosts:
                 redis_port = self.__get_variable("REDIS_PORT", "6379")
                 assert isinstance(redis_port, str), "REDIS_PORT is not a string"
                 if not redis_port.isdigit():
@@ -103,8 +107,6 @@ class CLI(ApiCaller):
                     self.__logger.error(f"REDIS_KEEPALIVE_POOL is not a valid number of connections: {redis_keepalive_pool}, defaulting to 10")
                     redis_keepalive_pool = "10"
                 redis_keepalive_pool = int(redis_keepalive_pool)
-
-                self.__logger.info("Redis configuration is valid")
 
                 redis_ssl = self.__get_variable("REDIS_SSL", "no") == "yes"
                 username = self.__get_variable("REDIS_USERNAME", None) or None
@@ -139,7 +141,9 @@ class CLI(ApiCaller):
                         self.__use_redis = False
 
                     if self.__use_redis:
-                        self.__logger.info(f"Connected to redis sentinel cluster, getting master with the following parameters:\n{sentinel_master=}\n{redis_db=}\n{username=}\n{password=}")
+                        self.__logger.info(
+                            f"Connected to redis sentinel cluster, getting master with the following parameters:\n{sentinel_master=}\n{redis_db=}\n{username=}\n{password=}"
+                        )
                         self.__redis = sentinel.master_for(
                             sentinel_master,
                             db=redis_db,
@@ -147,7 +151,9 @@ class CLI(ApiCaller):
                             password=password,
                         )
                 else:
-                    self.__logger.info(f"Connecting to redis with the following parameters:\n{redis_host=}\n{redis_port=}\n{redis_db=}\n{username=}\n{password=}\n{redis_timeout=}\nmax_connections={redis_keepalive_pool}\n{redis_ssl=}")
+                    self.__logger.info(
+                        f"Connecting to redis with the following parameters:\n{redis_host=}\n{redis_port=}\n{redis_db=}\n{username=}\n{password=}\n{redis_timeout=}\nmax_connections={redis_keepalive_pool}\n{redis_ssl=}"
+                    )
                     self.__redis = StrictRedis(
                         host=redis_host,
                         port=redis_port,
@@ -170,7 +176,7 @@ class CLI(ApiCaller):
                     self.__use_redis = False
                 self.__logger.info("Connected to redis")
             else:
-                self.__logger.error("USE_REDIS is set to yes but REDIS_HOST is not set, disabling redis")
+                self.__logger.error("USE_REDIS is set to yes but REDIS_HOST or REDIS_SENTINEL_HOSTS is not set, disabling redis")
                 self.__use_redis = False
 
         if self.__integration == "linux":
@@ -210,24 +216,30 @@ class CLI(ApiCaller):
 
     def unban(self, ip: str) -> Tuple[bool, str]:
         if self.__redis:
-            ok = self.__redis.delete(f"bans_ip_{ip}")
-            if not ok:
-                self.__logger.error(f"Failed to delete ban for {ip} from redis")
+            try:
+                ok = self.__redis.delete(f"bans_ip_{ip}")
+                if not ok:
+                    self.__logger.error(f"Failed to delete ban for {ip} from redis")
+            except Exception as e:
+                self.__logger.error(f"Failed to delete ban for {ip} from redis: {e}")
 
         if self.send_to_apis("POST", "/unban", data={"ip": ip}):
             return True, f"IP {ip} has been unbanned"
-        return False, "error"
+        return False, f"Failed to unban {ip}"
 
     def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
         if self.__redis:
-            ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time()}))
-            if not ok:
-                self.__logger.error(f"Failed to ban {ip} in redis")
-            self.__redis.expire(f"bans_ip_{ip}", int(exp))
+            try:
+                ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time()}))
+                if not ok:
+                    self.__logger.error(f"Failed to ban {ip} in redis")
+                self.__redis.expire(f"bans_ip_{ip}", int(exp))
+            except Exception as e:
+                self.__logger.error(f"Failed to ban {ip} in redis: {e}")
 
         if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
             return (True, f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}")
-        return False, "error"
+        return False, f"Failed to ban {ip}"
 
     def bans(self) -> Tuple[bool, str]:
         servers = {}
@@ -249,7 +261,7 @@ class CLI(ApiCaller):
                 exp = self.__redis.ttl(key)
                 servers["redis"].append({"ip": ip, "exp": exp} | loads(data))
 
-        servers = {k: sorted(v, key=lambda x: x["date"]) for k, v in servers.items()}
+        servers = {k: sorted(v, key=itemgetter("date")) for k, v in servers.items()}
 
         cli_str = ""
         for server, bans in servers.items():
@@ -258,7 +270,56 @@ class CLI(ApiCaller):
                 cli_str += "No ban found\n"
 
             for ban in bans:
-                cli_str += f"- {ban['ip']} ; banned the {datetime.fromtimestamp(ban['date']).strftime('%d-%m-%Y at %H:%M:%S')} for {format_remaining_time(ban['exp'])} remaining with reason \"{ban.get('reason', 'no reason given')}\"\n"
+                banned_date = ""
+                remaining = "for eternity"
+                if ban["date"] != -1:
+                    banned_date = f"the {datetime.fromtimestamp(ban['date']).strftime('%d-%m-%Y at %H:%M:%S')} "
+                if ban["exp"] != -1:
+                    remaining = f"for {format_remaining_time(ban['exp'])} remaining"
+                cli_str += f"- {ban['ip']} ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\"\n"
             cli_str += "\n"
 
         return True, cli_str
+
+    def custom(self, plugin_id: str, command: str, *args: str, debug: bool = False) -> Tuple[bool, str]:
+        if not self.__db:
+            raise Exception("This command can only be executed on the scheduler")
+
+        found = False
+        plugin_type = "core"
+        file_name = None
+
+        for db_plugin in self.__db.get_plugins():
+            if db_plugin["id"] == plugin_id:
+                found = True
+                plugin_type = db_plugin["type"]
+                file_name = db_plugin["bwcli"].get(command, None)
+                break
+
+        if not found:
+            return False, f"Plugin {plugin_id} not found"
+        elif not file_name:
+            return False, f"Command {command} not found for plugin {plugin_id}"
+
+        command_path = (
+            Path(sep, "usr", "share", "bunkerweb", "core", plugin_id)
+            if plugin_type == "core"
+            else (
+                Path(sep, "etc", "bunkerweb", "plugins", plugin_id) if plugin_type == "external" else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin_id)
+            )
+        ).joinpath("bwcli", file_name)
+
+        if not command_path.is_file():
+            return False, f"Command {command} not found for plugin {plugin_id} (file {command_path} not found)"
+
+        cmd = [command_path.as_posix()]
+        if args:
+            cmd.extend(args)
+
+        self.__logger.debug(f"Executing command {' '.join(cmd)}")
+        proc = run(cmd, stdin=DEVNULL, stderr=STDOUT, check=False, env=self.__variables | environ | ({"LOG_LEVEL": "DEBUG"} if debug else {}))  # type: ignore
+
+        if proc.returncode != 0:
+            return False, f"Command {command} failed"
+
+        return True, ""

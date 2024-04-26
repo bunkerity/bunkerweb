@@ -1,29 +1,20 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use Test::Nginx::Socket::Lua;
-use Cwd qw(cwd);
+use strict;
+use lib '.';
+use t::TestMLCache;
 
-plan tests => repeat_each() * (blocks() * 3 + 3);
-
-my $pwd = cwd();
-
-our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
-    lua_shared_dict  cache_shm      1m;
-    lua_shared_dict  cache_shm_miss 1m;
-};
-
-no_long_string();
 log_level('warn');
+
+plan tests => repeat_each() * blocks() * 4;
 
 run_tests();
 
 __DATA__
 
 === TEST 1: new() validates 'opts.resurrect_ttl' (number && >= 0)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -42,20 +33,18 @@ __DATA__
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.resurrect_ttl must be a number
 opts.resurrect_ttl must be >= 0
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 2: get() validates 'opts.resurrect_ttl' (number && >= 0)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -79,20 +68,18 @@ opts.resurrect_ttl must be >= 0
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.resurrect_ttl must be a number
 opts.resurrect_ttl must be >= 0
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 3: get() resurrects a stale value upon callback soft error for 'resurrect_ttl' instance option
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -162,8 +149,6 @@ opts.resurrect_ttl must be >= 0
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> 1st get()
 data: 123
@@ -193,13 +178,13 @@ err: nil
 hit_lvl: 3
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 4: get() logs soft callback error with warn level when resurrecting
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -243,8 +228,6 @@ hit_lvl: 3
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> 1st get()
 data: 123
@@ -257,13 +240,14 @@ err: nil
 hit_lvl: 4
 --- error_log eval
 qr/\[warn\] .*? callback returned an error \(some error\) but stale value found/
+--- no_error_log
+[error]
 
 
 
 === TEST 5: get() accepts 'opts.resurrect_ttl' option to override instance option
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -317,8 +301,6 @@ qr/\[warn\] .*? callback returned an error \(some error\) but stale value found/
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> 1st get()
 data: 123
@@ -338,13 +320,13 @@ err: nil
 hit_lvl: 4
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 6: get() resurrects a nil stale value (negative cache)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -406,8 +388,6 @@ hit_lvl: 4
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> 1st get()
 data: nil
@@ -432,13 +412,13 @@ err: nil
 hit_lvl: 3
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 7: get() resurrects a nil stale value (negative cache) in 'opts.shm_miss'
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -501,8 +481,6 @@ hit_lvl: 3
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> 1st get()
 data: nil
@@ -527,13 +505,13 @@ err: nil
 hit_lvl: 3
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 8: get() ignores cb return values upon stale value resurrection
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -593,8 +571,6 @@ hit_lvl: 3
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> 1st get()
 data: 123
@@ -619,13 +595,13 @@ err: nil
 hit_lvl: 3
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 9: get() does not resurrect a stale value when callback throws error
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -677,8 +653,6 @@ hit_lvl: 3
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> 1st get()
 data: 123
@@ -696,13 +670,13 @@ err: nil
 hit_lvl: 3
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 10: get() returns error and data on lock timeout but does not resurrect
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             -- insert 2 dummy values to ensure that lock acquisition (which
             -- uses shm:set) will _not_ evict out stale cached value
@@ -767,8 +741,6 @@ hit_lvl: 3
             ngx.say("hit_lvl: ", hit_lvl) -- should be 1 since LRU instances are shared by mlcache namespace, and t1 finished
         }
     }
---- request
-GET /t
 --- response_body
 data: 123
 err: nil
@@ -778,17 +750,16 @@ hit_lvl: 4
 data: 456
 err: nil
 hit_lvl: 1
---- no_error_log
-[error]
 --- error_log eval
 qr/\[warn\] .*? could not acquire callback lock: timeout/
+--- no_error_log
+[error]
 
 
 
 === TEST 11: get() returns nil cached item on callback lock timeout
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             -- insert 2 dummy values to ensure that lock acquisition (which
             -- uses shm:set) will _not_ evict out stale cached value
@@ -853,8 +824,6 @@ qr/\[warn\] .*? could not acquire callback lock: timeout/
             ngx.say("hit_lvl: ", hit_lvl) -- should be 1 since LRU instances are shared by mlcache namespace, and t1 finished
         }
     }
---- request
-GET /t
 --- response_body
 data: nil
 err: nil
@@ -864,17 +833,16 @@ hit_lvl: 4
 data: nil
 err: nil
 hit_lvl: 1
---- no_error_log
-[error]
 --- error_log eval
 qr/\[warn\] .*? could not acquire callback lock: timeout/
+--- no_error_log
+[error]
 
 
 
 === TEST 12: get() does not resurrect a stale value if no 'resurrect_ttl' is set on the instance
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -920,8 +888,6 @@ qr/\[warn\] .*? could not acquire callback lock: timeout/
             ngx.say("hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 -> 1st get()
 data: 123
@@ -939,13 +905,13 @@ err: some error
 hit_lvl: nil
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 13: get() callback can return nil + err (non-string) safely with opts.resurrect_ttl
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -970,21 +936,18 @@ hit_lvl: nil
             ngx.say("cb return values: ", data, " ", err)
         }
     }
---- request
-GET /t
 --- response_body
 cb return values: 123 nil
---- no_error_log
-[error]
 --- error_log eval
 qr/\[warn\] .*? callback returned an error \(table: 0x[[:xdigit:]]+\)/
+--- no_error_log
+[error]
 
 
 
 === TEST 14: get() returns stale hit_lvl when retrieved from shm on last ms (see GH PR #58)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local forced_now = ngx.now()
             ngx.now = function()
@@ -1039,9 +1002,8 @@ qr/\[warn\] .*? callback returned an error \(table: 0x[[:xdigit:]]+\)/
             ngx.say("+0.200s after resurrect hit_lvl: ", hit_lvl)
         }
     }
---- request
-GET /t
 --- response_body
 +0.200s after resurrect hit_lvl: 4
 --- no_error_log
 [error]
+[crit]

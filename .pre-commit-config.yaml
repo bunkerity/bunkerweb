@@ -3,7 +3,7 @@
 exclude: (^LICENSE.md$|^src/VERSION$|^env/|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/(js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js)|css/dashboard\.css))|\.(svg|drawio|patch\d?|ascii|tf|tftpl|key)$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
+    rev: 2c9f875913ee60ca25ce70243dc24d5b6415598c # frozen: v4.6.0
     hooks:
       - id: requirements-txt-fixer
         name: Fix requirements.txt and requirements.in files
@@ -17,7 +17,7 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/psf/black
-    rev: ec91a2be3c44d88e1a3960a4937ad6ed3b63464e # frozen: 23.12.1
+    rev: 8fe627072f15ff2e3d380887b92f7868efaf6d05 # frozen: 24.4.0
     hooks:
       - id: black
         name: Black Python Formatter
@@ -47,10 +47,10 @@ repos:
     hooks:
       - id: flake8
         name: Flake8 Python Linter
-        args: ["--max-line-length=250", "--ignore=E266,E402,E722,W503"]
+        args: ["--max-line-length=160", "--ignore=E266,E402,E501,E722,W503"]
 
   - repo: https://github.com/dosisod/refurb
-    rev: a295cee6d188f5797aefe5d7cf77a353ed48ea93 # frozen: v1.27.0
+    rev: 2e31f0033b6c00bf99912fc6a8b5fd00460c9ba0 # frozen: v2.0.0
     hooks:
       - id: refurb
         name: Refurb Python Refactoring Tool
@@ -67,11 +67,11 @@ repos:
         types: [text]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: e815c559e3ac76227e8e7463cf3a6598b715687b # frozen: v8.18.1
+    rev: 145400593c178304246371bc45290588bc72f43e # frozen: v8.18.2
     hooks:
       - id: gitleaks
 
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: 3f77b826548d8dc2d26675f077361c92773b50a7 # frozen: v0.9.0
+    rev: 2491238703a5d3415bb2b7ff11388bf775372f29 # frozen: v0.10.0
     hooks:
       - id: shellcheck

@@ -40,27 +40,33 @@ jobs:
     steps:
       # Prepare
       - name: Check out repository code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
       - name: Install ruby
-        uses: ruby/setup-ruby@5daca165445f0ae10478593083f72ca2625e241d # v1.169.0
+        uses: ruby/setup-ruby@70da3bbf44ac06db1b0547ce2acc9380a5270d1e # v1.175.0
         with:
           ruby-version: "3.0"
       - name: Install packagecloud
         run: gem install package_cloud
       # Download packages
-      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
-        if: inputs.LINUX != 'el'
+      - uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395 # v4.1.6
+        if: inputs.LINUX != 'el' && inputs.LINUX != 'el9'
         with:
           name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
-      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
-        if: inputs.LINUX == 'el'
+      - uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395 # v4.1.6
+        if: inputs.LINUX == 'el' || inputs.LINUX == 'el9'
         with:
-          name: package-rhel-${{ inputs.PACKAGE_ARCH }}
+          name: package-rh${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
       # Remove existing packages
       - name: Remove existing package
         run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Remove existing package
+        if: inputs.LINUX == 'el9'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/el/9 bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
@@ -70,10 +76,20 @@ jobs:
       #   run: sudo apt install -y rename && rename 's/[0-9]\.[0-9]\.[0-9]/testing/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package
       - name: Push package to packagecloud
+        if: inputs.LINUX != 'el9'
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
         with:
           PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push package to packagecloud
+        if: inputs.LINUX == 'el9'
+        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
+        with:
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: el/9
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

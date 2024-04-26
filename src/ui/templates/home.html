@@ -1,192 +1,94 @@
-{% extends "base.html" %} {% block content %}
-<!-- stats card -->
-<div class="col-span-12 grid grid-cols-12 justify-start items-start gap-4">
-  <a
-  href="https://github.com/bunkerity/bunkerweb"
-  class="dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  target="_blank"
->
-  <!-- text -->
-  <div>
-    <p
-      class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
-    >
-      Version
-    </p>
-    <!-- version of user -->
-    <h5 class="mb-1 font-bold dark:text-white/90">{{ version }}</h5>
+{% extends "base.html" %}
+{% block content %}
+    {% set attribute_name = "home" %}
 
-    <p class="mb-0 dark:text-white dark:opacity-60">
-      <!-- case no remote fetch -->
-      {% if not remote_version %}
-      <span class="font-bold leading-normal text-sm text-yellow-500 mx-0.5"
-        >couldn't fint remote</span
-      >
-      <!-- case remote and match-->
-      {% elif remote_version and check_version %}
-      <span class="font-bold leading-normal text-sm text-green-500 mx-0.5"
-        >latest version</span
-      >
-      <!-- case remote and no match-->
-      {% elif remote_version and not check_version %}
-      <span class="font-bold leading-normal text-sm text-yellow-500 mx-0.5"
-        >Update to</span
-      >{{ remote_version }} {% endif %}
-    </p>
-  </div>
-  <!-- end text -->
-  <!-- icon -->
-  <div
-    role="img"
-    aria-label="version"
-    class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-secondary"
-  >
-    <svg
-      class="translate-x-0.5 -translate-y-0.5 scale-50 leading-none text-lg relative fill-white"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 448 512"
-    >
-      <path
-        d="M80 104c13.3 0 24-10.7 24-24s-10.7-24-24-24S56 66.7 56 80s10.7 24 24 24zm80-24c0 32.8-19.7 61-48 73.3v87.8c18.8-10.9 40.7-17.1 64-17.1h96c35.3 0 64-28.7 64-64v-6.7C307.7 141 288 112.8 288 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3V160c0 70.7-57.3 128-128 128H176c-35.3 0-64 28.7-64 64v6.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3V352 153.3C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80zm232 0c0-13.3-10.7-24-24-24s-24 10.7-24 24s10.7 24 24 24s24-10.7 24-24zM80 456c13.3 0 24-10.7 24-24s-10.7-24-24-24s-24 10.7-24 24s10.7 24 24 24z"
-      />
-    </svg>
-  </div>
-  <!-- end icon -->
-</a>
-<!-- end stats card -->
-
-<!-- stats card -->
-<a
-  href="{% if current_endpoint == 'instances' %}javascript:void(0){% else %}loading?next={{ url_for('instances') }}{% endif %}"
-  class="dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
->
-  <!-- text -->
-  <div>
-    <p
-      class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
-    >
-      Instances
-    </p>
-    <h5 class="mb-1 font-bold dark:text-white/90">{{ instances_number }}</h5>
-    <p class="mb-0 dark:text-white dark:opacity-60">
-      <span class="font-bold leading-normal text-sm text-emerald-500 mx-0.5"
-        >{{instance_health_count}} / {{ instances_number }}</span
-      >
-      is working
-    </p>
-  </div>
-  <!-- end text -->
-  <!-- icon -->
-  <div
-    role="img"
-    aria-label="instances"
-    class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-red-500"
-  >
-    <svg
-      class="scale-50 leading-none text-lg relative fill-white"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-    >
-      <path
-        d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V256c0 17.7 14.3 32 32 32s32-14.3 32-32V32zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.5 81 63.5 135.4c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.4 24.7-103.1 63.5-135.4z"
-      ></path>
-    </svg>
-  </div>
-  <!-- end icon -->
-</a>
-<!-- end stats card -->
-
-<!-- stats card -->
-<a
-  href="{% if current_endpoint == 'services' %}javascript:void(0){% else %}loading?next={{ url_for('services') }}{% endif %}"
-  class="dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
->
-  <!-- text -->
-  <div>
-    <p
-      class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
-    >
-      Services
-    </p>
-    <h5 class="mb-1 font-bold dark:text-white/90">{{ services_number }}</h5>
-    <p class="mb-0 dark:text-white dark:opacity-60">
-      <span class="font-bold leading-normal text-sm text-sky-600 mx-0.5"
-        >{{services_ui_count}}</span
-      >
-      ui,
-      <span class="font-bold leading-normal text-sm text-sky-600 mx-0.5"
-        >{{services_scheduler_count}}</span
-      >
-      scheduler,
-      <span class="font-bold leading-normal text-sm text-sky-600 mx-0.5"
-        >{{services_autoconf_count}}</span
-      >
-      autoconf
-    </p>
-  </div>
-  <!-- end text -->
-  <!-- icon -->
-  <div
-    role="img"
-    aria-label="services"
-    class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-orange-500"
-  >
-    <svg
-      class="scale-50 leading-none text-lg relative fill-white"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-    >
-      <path
-        d="M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64H348.7c2.2 20.4 3.3 41.8 3.3 64zm28.8-64H503.9c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64H380.8c2.1-20.6 3.2-42 3.2-64s-1.1-43.4-3.2-64zm112.6-32H376.7c-10-63.9-29.8-117.4-55.3-151.6c78.3 20.7 142 77.5 171.9 151.6zm-149.1 0H167.7c6.1-36.4 15.5-68.6 27-94.7c10.5-23.6 22.2-40.7 33.5-51.5C239.4 3.2 248.7 0 256 0s16.6 3.2 27.8 13.8c11.3 10.8 23 27.9 33.5 51.5c11.6 26 21 58.2 27 94.7zm-209 0H18.6C48.6 85.9 112.2 29.1 190.6 8.4C165.1 42.6 145.3 96.1 135.3 160zM8.1 192H131.2c-2.1 20.6-3.2 42-3.2 64s1.1 43.4 3.2 64H8.1C2.8 299.5 0 278.1 0 256s2.8-43.5 8.1-64zM194.7 446.6c-11.6-26-20.9-58.2-27-94.6H344.3c-6.1 36.4-15.5 68.6-27 94.6c-10.5 23.6-22.2 40.7-33.5 51.5C272.6 508.8 263.3 512 256 512s-16.6-3.2-27.8-13.8c-11.3-10.8-23-27.9-33.5-51.5zM135.3 352c10 63.9 29.8 117.4 55.3 151.6C112.2 482.9 48.6 426.1 18.6 352H135.3zm358.1 0c-30 74.1-93.6 130.9-171.9 151.6c25.5-34.2 45.2-87.7 55.3-151.6H493.4z"
-      />
-    </svg>
-  </div>
-  <!-- end icon -->
-</a>
-<!-- end stats card -->
-
-<!-- stats card-->
-<a
-  href="{% if current_endpoint == 'services' %}javascript:void(0){% else %}loading?next={{ url_for('plugins') }}{% endif %}"
-  class="dark:brightness-110 max-h-none sm:max-h-28 h-full hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
->
-  <!-- text -->
-  <div>
-    <p
-      class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
-    >
-      Plugins
-    </p>
-    <h5 class="mb-1 font-bold dark:text-white/90">
-      {{ config["CONFIG"].get_plugins()|length }}
-    </h5>
-    <p class="mb-0 dark:text-white dark:opacity-60">
-      <span class="font-bold leading-normal text-sm text-red-500 mx-0.5"
-        >{{plugins_errors}}</span
-      >
-      error
-    </p>
-  </div>
-  <!-- end text -->
-  <!-- icon -->
-  <div
-    role="img"
-    aria-label="plugins"
-    class="inline-block w-12 h-12 text-center rounded-circle bg-yellow-500"
-  >
-    <svg
-      class="scale-50 -translate-y-1.5 leading-none text-lg relative fill-white"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 384 512"
-    >
-      <path
-        d="M96 0C78.3 0 64 14.3 64 32v96h64V32c0-17.7-14.3-32-32-32zM288 0c-17.7 0-32 14.3-32 32v96h64V32c0-17.7-14.3-32-32-32zM32 160c-17.7 0-32 14.3-32 32s14.3 32 32 32v32c0 77.4 55 142 128 156.8V480c0 17.7 14.3 32 32 32s32-14.3 32-32V412.8C297 398 352 333.4 352 256V224c17.7 0 32-14.3 32-32s-14.3-32-32-32H32z"
-      />
-    </svg>
-  </div>
-  <!-- end icon -->
-</a>
-<!-- end stats card-->
-</div>
-
+    {% set cards = [
+            {'name' : 'Version', 'title' : 'PRO' if is_pro_version else 'PRO LOCKED' if pro_status == 'active' and pro_overlapped else 'EXPIRED' if pro_status == 'expired' else 'SUSPENDED' if pro_status == 'suspended' else 'FREE', 'link' : 'https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro', 'subtitle' : 'all features available' if is_pro_version else 'awaiting compliance' if pro_status == 'active' and pro_overlapped else 'renew license' if pro_status == 'expired' else 'talk to team' if pro_status == 'suspended' else 'upgrade to pro', 'subtitle_color' : 'success' if is_pro_version else 'warning' },
+            {'name' : 'Version number', 'title' : version, 'link' : 'https://github.com/bunkerity/bunkerweb', 'subtitle' : "couldn't find remote" if not remote_version else "latest version" if remote_version and check_version else 'Update to ' + remote_version  , 'subtitle_color' : "error" if not remote_version else "success" if remote_version and check_version else 'warning'},
+            {'name' : 'Instances', 'title' : instances_number, 'link' : 'loading?next=' + url_for('instances')  , 'subtitle' : instance_health_count|string + ' / ' + instances_number|string + ' is working'  , 'subtitle_color' : "info"},
+            {'name' : 'Services', 'title' : services_number, 'link' : 'loading?next=' + url_for('services')  , 'subtitle' : services_ui_count|string + ' ui, ' + services_scheduler_count|string + ' scheduler, ' + services_autoconf_count|string + ' autoconf ' , 'subtitle_color' : "info"},
+            {'name' : 'Plugins', 'title' : config["CONFIG"].get_plugins()|length, 'link' : 'loading?next=' + url_for('plugins')  , 'subtitle' : plugins_errors|string + ' errors' if plugins_errors > 0 else 'no error' , 'subtitle_color' : "error" if plugins_errors > 0 else 'success'}
+        ] %}
+    <div class="col-span-12 grid grid-cols-12 justify-start items-start gap-4">
+        {% for card in cards %}
+            <!-- stats card -->
+            <a href="{{ card['link'] }}"
+               class="home-card"
+               {% if card['link'].startswith('http') %}target="_blank"{% endif %}
+               rel="noopener">
+                <!-- text -->
+                <div>
+                    <p class="home-card-name">{{ card['name'] }}</p>
+                    <!-- version of user -->
+                    <h5 class="home-card-title">{{ card['title'] }}</h5>
+                    <p class="home-card-subtitle {{ card['subtitle_color'] }}">{{ card['subtitle'] }}</p>
+                </div>
+                <!-- end text -->
+                <!-- icon -->
+                <div role="img"
+                     aria-label="version"
+                     class="home-card-svg-container {{ card['name'].replace(' ', '-') |lower }}">
+                    {% if card['name'] == "Version" and is_pro_version %}
+                        <svg class="leading-none text-lg relative scale-[0.6]"
+                             viewBox="0 0 48 46"
+                             fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path class="fill-white"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+                            <path class="fill-white"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+                        </svg>
+                    {% endif %}
+                    {% if card['name'] == "Version" and not is_pro_version %}
+                        <svg class="leading-none fill-white text-yellow-500 text-lg relative scale-[0.6]"
+                             xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                        </svg>
+                    {% endif %}
+                    {% if card['name'] == "Version number" %}
+                        <svg class="translate-x-0.5 -translate-y-0.5 scale-50 leading-none text-lg relative fill-white"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 448 512">
+                            <path d="M80 104c13.3 0 24-10.7 24-24s-10.7-24-24-24S56 66.7 56 80s10.7 24 24 24zm80-24c0 32.8-19.7 61-48 73.3v87.8c18.8-10.9 40.7-17.1 64-17.1h96c35.3 0 64-28.7 64-64v-6.7C307.7 141 288 112.8 288 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3V160c0 70.7-57.3 128-128 128H176c-35.3 0-64 28.7-64 64v6.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3V352 153.3C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80zm232 0c0-13.3-10.7-24-24-24s-24 10.7-24 24s10.7 24 24 24s24-10.7 24-24zM80 456c13.3 0 24-10.7 24-24s-10.7-24-24-24s-24 10.7-24 24s10.7 24 24 24z" />
+                        </svg>
+                    {% endif %}
+                    {% if card['name'] == "Instances" %}
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="scale-[0.6] leading-none text-lg relative stroke-white">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9">
+                            </path>
+                        </svg>
+                    {% endif %}
+                    {% if card['name'] == "Services" %}
+                        <svg class="scale-[0.6] stroke-orange-500 leading-none text-lg relative fill-white"
+                             xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />
+                        </svg>
+                    {% endif %}
+                    {% if card['name'] == "Plugins" %}
+                        <svg class="scale-75 leading-none text-lg relative fill-white text-yellow-400"
+                             xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
+                        </svg>
+                    {% endif %}
+                </div>
+                <!-- end icon -->
+            </a>
+            <!-- end stats card -->
+        {% endfor %}
+    </div>
 {% endblock %}

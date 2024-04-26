@@ -1,0 +1,147 @@
+---
+meta:
+  author: "fzipi"
+  enabled: true
+  name: "953120.yaml"
+  description: "Positive tests for rule 953120"
+tests:
+  - test_title: 953120-1
+    desc: "Just something that returns <?php "
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?php echo "Hello World!\n" ?>
+          output:
+            log_contains: "id \"953120\""
+  - test_title: 953120-2
+    desc: "Negative test, returns <?php12345, should not match"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?php12345
+          output:
+            no_log_contains: "id \"953120\""
+  - test_title: 953120-3
+    desc: "Positive test, returns <? "
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: "<? "
+          output:
+            log_contains: "id \"953120\""
+  - test_title: 953120-4
+    desc: "Negative test, returns <?1234"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?1234
+          output:
+            no_log_contains: "id \"953120\""
+  - test_title: 953120-5
+    desc: "Positive test, returns <?= "
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?= "Hello World!\n" =?>
+          output:
+            log_contains: "id \"953120\""
+  - test_title: 953120-6
+    desc: "Negative test, returns <?=!@#$%^&"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?=!@#$%^&
+          output:
+            no_log_contains: "id \"953120\""
+  - test_title: 953120-7
+    desc: "Case insensitive test <?PhP "
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: <?PhP echo "Hello World!\n" ?>
+          output:
+            log_contains: "id \"953120\""

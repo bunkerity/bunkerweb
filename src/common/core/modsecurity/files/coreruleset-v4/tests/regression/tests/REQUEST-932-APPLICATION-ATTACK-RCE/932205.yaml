@@ -1,0 +1,126 @@
+---
+meta:
+  author: "Max Leske"
+  description: RCE Bypass
+  enabled: true
+  name: 932205.yaml
+tests:
+  - test_title: 932205-1
+    desc: Referer without query string, trying to evade query string match
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "www.google.com;c$?at+/etc/passwd"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            log_contains: id "932205"
+  - test_title: 932205-2
+    desc: Referer header with query string and obvious payload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "www.google.com?param=;/bin/ca?+/et*/passwd"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            log_contains: id "932205"
+  - test_title: 932205-3
+    desc: Referer header with canonical path, query string and obvious payload
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "www.google.com/?param=;/bin/ca?+/et*/passwd"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            log_contains: id "932205"
+  - test_title: 932205-4
+    desc: False positive test against query string and space in a parameter
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "http://www.example.com/page?param=test+test"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932205"
+  - test_title: 932205-5
+    desc: False positive test against query string and space in path
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "http://www.example.com/page%20test?param=test"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932205"
+  - test_title: 932205-6
+    desc: False positive test against syntax highlighter (generic)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "https://coreruleset.org/#:~:text=generic%20attack%20detection"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932205"
+  - test_title: 932205-7
+    desc: False positive test against fragment (scroll to text fragment)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Referer: "https://www.google.com/url?q=https://example.com/path/#:~:text=Inoltre%2C%20non%20vi%20sono%20evidenze,'immaginario%20comune%20(1).&sa=U&ved=2ahUKEwjSluGs8eX9AhWiSvEDHaaEChEQFnoECAgQBQ&usg=AOvVaw1_nmpM50Zh9-mGx1DsMw7j"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932205"

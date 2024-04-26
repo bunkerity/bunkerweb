@@ -1,0 +1,39 @@
+---
+meta:
+  author: "Christian S.J. Peron"
+  description: None
+  enabled: true
+  name: 941240.yaml
+tests:
+  - test_title: 941240-1
+    desc: "IE XSS Filters"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=%3c%3fimport%20implementation%20%3d"
+            version: HTTP/1.0
+          output:
+            log_contains: id "941240"
+  - test_title: 941240-2
+    desc: "Status Page Test - IE XSS Filter <importimplementation= intentionally without space"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?test=<importimplementation="
+            version: HTTP/1.0
+          output:
+            log_contains: id "941240"

@@ -16,11 +16,11 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Set up Python 3.12
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
         with:
-          python-version: "3.12"
+          python-version: "3.9"
       - name: Install Firefox manually and dependencies
         run: |
           sudo add-apt-repository ppa:mozillateam/ppa -y
@@ -36,7 +36,7 @@ jobs:
           ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
           sudo apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip firefox
       - name: Download geckodriver
-        uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
+        uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
         with:
           max_attempts: 3
           timeout_minutes: 20
@@ -47,7 +47,7 @@ jobs:
             sudo chmod +x /usr/local/bin/geckodriver
             rm -f geckodriver.tar.gz
       - name: Login to ghcr
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -88,7 +88,7 @@ jobs:
           echo "USE_BUNKERNET=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_BLACKLIST=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "SEND_ANONYMOUS_REPORT=no" | sudo tee -a /etc/bunkerweb/variables.env
-          echo "LOG_LEVEL=info" | sudo tee -a /etc/bunkerweb/variables.env
+          echo "LOG_LEVEL=debug" | sudo tee -a /etc/bunkerweb/variables.env
           sudo chown nginx:nginx /etc/bunkerweb/variables.env
           sudo chmod 777 /etc/bunkerweb/variables.env
       - name: Install BunkerWeb

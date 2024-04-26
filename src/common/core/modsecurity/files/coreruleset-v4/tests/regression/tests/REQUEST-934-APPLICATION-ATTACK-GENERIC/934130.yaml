@@ -1,0 +1,220 @@
+---
+meta:
+  author: "lifeforms"
+  enabled: true
+  name: "934130.yaml"
+  description: "Tests for rule 934130"
+tests:
+  - test_title: 934130-1
+    desc: negative test case
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?foo=proto"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "934130"
+  - test_title: 934130-2
+    desc: positive test case with JSON POST
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.0
+            data: |
+              {"text":"a","title":{"__proto__":{"where":{"name":"sqlinjection","where":null}}}}
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-3
+    desc: positive test case, CVE-2021-20083
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?__proto__[test]=test"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-4
+    desc: positive test case, CVE-2021-20084, 1/2
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?__proto__.test=test"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-5
+    desc: positive test case, CVE-2021-20084, 2/2
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?constructor.prototype.test=test"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-6
+    desc: positive test case with space evasion, CVE-2021-20084, 2/2
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?constructor.prototype.%20test=test"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-7
+    desc: positive test case with GET parameter, jQuery $.get
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?__proto__[context]=<img/src/onerror%3dalert(1)>"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-8
+    desc: positive test case with GET parameter, V4Fire Core Library
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?__proto__%5Btest%5D%3D%7B%22json%22%3A%22value%22%7D"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-9
+    desc: positive test case with GET parameter, analytics-utils < 1.0.3
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?constructor%5Bprototype%5D%5Btest%5D%3Dtest"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-10
+    desc: positive test case with GET parameter, jQuery $.get
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?__proto__[jquery]=x"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-11
+    desc: positive test case with GET parameter, Vue.js
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/get?__proto__%5Bv-bind%3Aclass%5D%3D%27%27.constructor.constructor%28%27alert%281%29%27%29%28%29"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-12
+    desc: "Detect example payload __proto__... submitted as plaintext"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: test_cookie=__proto__.foo=bar
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934130"
+  - test_title: 934130-13
+    desc: "Detect example payload __proto__... submitted as plaintext with JavaScript escape sequence obfuscation"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: test_cookie=__\u0070\u0072oto__.foo=bar
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934130"

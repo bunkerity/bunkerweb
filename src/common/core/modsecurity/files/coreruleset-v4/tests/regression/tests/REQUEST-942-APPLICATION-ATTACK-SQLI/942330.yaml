@@ -1,0 +1,89 @@
+---
+meta:
+  author: "Christian S.J. Peron"
+  description: None
+  enabled: true
+  name: 942330.yaml
+tests:
+  - test_title: 942330-1
+    desc: "classic SQL injection probings 1/3"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=%22%27&var2=whatever"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942330"
+  - test_title: 942330-2
+    desc: "Test first backslash match ([\"'`\x5c]*?)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=\\\"1 or 1-"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942330"
+  - test_title: 942330-3
+    desc: "Test second backslash match (\x5cx(?:23|27|3d))"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=\\x23"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942330"
+  - test_title: 942330-4
+    desc: "Test false positive issue nr. 3205"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: |
+              "var=05111222333
+              andy.surname@somedomain.com"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942330"
+  - test_title: 942330-5
+    desc: "Test false positive issue nr. 3205"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=05111222333 andy.surname@somedomain.com"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942330"

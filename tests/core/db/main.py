@@ -282,7 +282,7 @@ try:
             "description": "The general settings for the server",
             "version": "0.1",
             "stream": "partial",
-            "external": False,
+            "type": "core",
             "checked": False,
             "page_checked": True,
             "settings": global_settings,
@@ -316,27 +316,35 @@ try:
                 Plugins.description,
                 Plugins.version,
                 Plugins.stream,
-                Plugins.external,
+                Plugins.type,
                 Plugins.method,
             )
             .all()
         )
 
         for plugin in plugins:
-            if not plugin.external and plugin.id in core_plugins:
+            if plugin.type == "pro":  # ? We do not test the pro plugins in here
+                continue
+
+            if plugin.type == "core" and plugin.id in core_plugins:
                 current_plugin = core_plugins
-            elif plugin.external and plugin.id in external_plugins:
+            elif plugin.type == "external" and plugin.id in external_plugins:
                 current_plugin = external_plugins
             else:
                 print(
-                    f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but should not be, exiting ...",
+                    f"❌ The {'external' if plugin.type == 'external' else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but should not be, exiting ...: {plugin}",
                     flush=True,
                 )
                 exit(1)
 
-            if plugin.name != current_plugin[plugin.id]["name"] or plugin.description != current_plugin[plugin.id]["description"] or plugin.version != current_plugin[plugin.id]["version"] or plugin.stream != current_plugin[plugin.id]["stream"]:
+            if (
+                plugin.name != current_plugin[plugin.id]["name"]
+                or plugin.description != current_plugin[plugin.id]["description"]
+                or plugin.version != current_plugin[plugin.id]["version"]
+                or plugin.stream != current_plugin[plugin.id]["stream"]
+            ):
                 print(
-                    f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
+                    f"❌ The {'external' if plugin.type == 'external' else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
                     + f"{dumps({'name': plugin.name, 'description': plugin.description, 'version': plugin.version, 'stream': plugin.stream})}"
                     + f" (database) != {dumps({'name': current_plugin[plugin.id]['name'], 'description': current_plugin[plugin.id]['description'], 'version': current_plugin[plugin.id]['version'], 'stream': current_plugin[plugin.id]['stream']})} (file)",  # noqa: E501
                     flush=True,
@@ -357,7 +365,7 @@ try:
                         or setting.multiple != current_plugin[plugin.id]["settings"][setting.id].get("multiple", None)
                     ):
                         print(
-                            f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
+                            f"❌ The {'external' if plugin.type == 'external' else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
                             + f"{dumps({'default': setting.default, 'help': setting.help, 'label': setting.label, 'regex': setting.regex, 'type': setting.type})}"
                             + f" (database) != {dumps({'default': current_plugin[plugin.id]['settings'][setting.id]['default'], 'help': current_plugin[plugin.id]['settings'][setting.id]['help'], 'label': current_plugin[plugin.id]['settings'][setting.id]['label'], 'regex': current_plugin[plugin.id]['settings'][setting.id]['regex'], 'type': current_plugin[plugin.id]['settings'][setting.id]['type']})} (file)",  # noqa: E501
                             flush=True,
@@ -368,13 +376,13 @@ try:
 
     if not all([core_plugins[plugin]["checked"] for plugin in core_plugins]):
         print(
-            f"❌ Not all core plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in core_plugins if not core_plugins[plugin]])}",
+            f"❌ Not all core plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in core_plugins if not core_plugins[plugin]['checked']])}",
             flush=True,
         )
         exit(1)
     elif not all([external_plugins[plugin]["checked"] for plugin in external_plugins]):
         print(
-            f"❌ Not all external plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in external_plugins if not external_plugins[plugin]])}",
+            f"❌ Not all external plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in external_plugins if not external_plugins[plugin]['checked']])}",
             flush=True,
         )
         exit(1)
@@ -385,9 +393,13 @@ try:
 
     with db_session() as session:
         jobs = session.query(Jobs).all()
+        pro_plugin_ids = [plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).filter_by(type="pro").all()]
 
         for job in jobs:
-            if not job.success:
+            if job.plugin_id in pro_plugin_ids:
+                continue
+
+            if job.name != "download-pro-plugins" and not job.success:
                 print(
                     f"❌ The job {job.name} (plugin_id: {job.plugin_id}) is in the database but failed, exiting ...",
                     flush=True,
@@ -469,27 +481,15 @@ try:
                 )
                 exit(1)
 
-            path_ui = Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")) if Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")).exists() else Path(join("external", plugin_page.plugin_id, "ui"))
+            path_ui = (
+                Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui"))
+                if Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")).exists()
+                else Path(join("external", plugin_page.plugin_id, "ui"))
+            )
 
             if not path_ui.exists():
                 print(
                     f'❌ The plugin page from {plugin_page.plugin_id} is in the database but should not be because the "ui" folder is missing from the plugin, exiting ...',
-                    flush=True,
-                )
-                exit(1)
-
-            template_checksum = file_hash(f"{path_ui}/template.html")
-            actions_checksum = file_hash(f"{path_ui}/actions.py")
-
-            if plugin_page.template_checksum != template_checksum:
-                print(
-                    f"❌ The plugin page from {plugin_page.plugin_id} is in the database but the template file checksum differ, exiting ...\n{plugin_page.template_checksum} (database) != {template_checksum} (file)",
-                    flush=True,
-                )
-                exit(1)
-            elif plugin_page.actions_checksum != actions_checksum:
-                print(
-                    f"❌ The plugin page from {plugin_page.plugin_id} is in the database but the actions file checksum differ, exiting ...\n{plugin_page.actions_checksum} (database) != {actions_checksum} (file)",
                     flush=True,
                 )
                 exit(1)
@@ -584,7 +584,10 @@ try:
                     flush=True,
                 )
                 exit(1)
-            elif custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"] and custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"] + b"\n":
+            elif (
+                custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"]
+                and custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"] + b"\n"
+            ):
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but the value differ, exiting ...\n{custom_config.data} (database) != {current_custom_configs[custom_config.name]['value']} (env)",
                     flush=True,

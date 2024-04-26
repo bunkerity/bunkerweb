@@ -1,0 +1,207 @@
+---
+meta:
+  author: "Christian S.J. Peron, Franziska Bühler"
+  enabled: true
+  name: "930110.yaml"
+  description: "Application attacks: Local file include"
+tests:
+  - test_title: 930110-1
+    desc: "Path Traversal Attack (/../)"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              FoobarHeader: "/../../../././..\\ ../../etc/master.passwd"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/"
+          output:
+            log_contains: id "930110"
+  - test_title: 930110-2
+    desc: "Path Traversal Attack (/../) query string"
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              X-FTW: "This should trip"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?arg=../../../etc/passwd"
+          output:
+            log_contains: id "930110"
+  - test_title: 930110-3
+    desc: "Path Traversal Attack (/../) query string"
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "POST"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/"
+            data: "arg=../../../etc/passwd&foo=var"
+          output:
+            log_contains: id "930110"
+  - test_title: 930110-4
+    desc: "Path Traversal Attack (/../) query string"
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/foo../1234"
+          output:
+            no_log_contains: id "930110"
+  - test_title: 930110-5
+    desc: "Path Traversal Attack (/../) query string"
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/foo.../1234"
+          output:
+            no_log_contains: id "930110"
+  - test_title: 930110-6
+    desc: "Path Traversal Attack (/../) query string"
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/..foo"
+          output:
+            no_log_contains: id "930110"
+  - test_title: 930110-7
+    desc: "Path Traversal Attack (/../) query string"
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: ".."
+          output:
+            no_log_contains: id "930110"
+  - test_title: 930110-8
+    desc: 'Path Traversal Attack (..\) query string'
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/?arg=..\pineapple'
+          output:
+            log_contains: id "930110"
+  - test_title: 930110-9
+    desc: 'Path Traversal Attack triple dot (.../) query string'
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/?foo=.../.../WINDOWS/win.ini'
+          output:
+            log_contains: id "930110"
+  - test_title: 930110-10
+    desc: 'Path Traversal Attack (../) file upload'
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "POST"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryABCDEFGIJKLMNOPQ
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            uri: /
+            data: |
+              ------WebKitFormBoundaryABCDEFGIJKLMNOPQ
+              Content-Disposition: form-data; name="file"; filename="../1.7z"
+              Content-Type: application/octet-stream
+
+              BINARYDATA
+              ------WebKitFormBoundaryABCDEFGIJKLMNOPQ--
+          output:
+            log_contains: id "930110"
+  - test_title: 930110-11
+    desc: 'Path Traversal Attack (..\) file upload'
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "POST"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryABCDEFGIJKLMNOPQ
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            uri: /
+            data: |
+              ------WebKitFormBoundaryABCDEFGIJKLMNOPQ
+              Content-Disposition: form-data; name="file"; filename="..\1.7z"
+              Content-Type: application/octet-stream
+
+              BINARYDATA
+              ------WebKitFormBoundaryABCDEFGIJKLMNOPQ--
+          output:
+            log_contains: id "930110"
+  - test_title: 930110-12
+    desc: "Path Traversal Attack (;..;) query string"
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              X-FTW: "This should trip"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?a=..;.\\.;\\."
+          output:
+            log_contains: id "930110"

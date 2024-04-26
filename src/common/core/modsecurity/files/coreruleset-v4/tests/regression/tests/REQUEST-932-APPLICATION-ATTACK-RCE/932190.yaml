@@ -1,0 +1,113 @@
+---
+meta:
+  author: "Franziska Bühler, Max Leske"
+  description: "Remote Command Execution: Wildcard bypass technique attempt"
+  enabled: true
+  name: 932190.yaml
+tests:
+  - test_title: 932190-1
+    desc: "Match wild card evasion in 'cat+/et*/*wd'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?id=cat%2B%2Fet*%2F*wd
+            version: HTTP/1.0
+          output:
+            log_contains: id "932190"
+  - test_title: 932190-2
+    desc: "Match wild card evasion in 'cat+/ET*/*WD'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?id=cat%2B%2FET*%2F*WD
+            version: HTTP/1.0
+          output:
+            log_contains: id "932190"
+  - test_title: 932190-3
+    desc: "Match wild card evasion in '/???/?s'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?id=%2F%3F%3F%3F%2F%3Fs
+            version: HTTP/1.0
+          output:
+            log_contains: id "932190"
+  - test_title: 932190-4
+    desc: "No FP in 'Does the * shine bright?'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?id=Does%20the%20%2A%20shine%20bright%3F
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932190"
+  - test_title: 932190-5
+    desc: "Handle single quote evasion mixed with wild card evasion"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: application/json
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.0
+            data: "{\"foo\" : \";+cat+/e't'*/pa'?s'wd\"}"
+          output:
+            log_contains: id "932190"
+  - test_title: 932190-6
+    desc: "Handle backslash evasion mixed with wild card evasion"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: application/json
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.0
+            data: "{\"foo\" : \";+cat+/e\\\\t\\\\*/pa\\\\?s\\\\wd\"}"
+          output:
+            log_contains: id "932190"

@@ -1,0 +1,24 @@
+---
+meta:
+  author: "Christian S.J. Peron, Christian Folini"
+  description: None
+  enabled: true
+  name: 942260.yaml
+tests:
+  - test_title: 942260-1
+    desc: "Basic SQL authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # something LIKE '
+            uri: "/?var=something%20LIKE%20%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"

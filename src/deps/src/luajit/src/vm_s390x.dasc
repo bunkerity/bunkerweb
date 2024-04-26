@@ -264,6 +264,19 @@
 |  lay PC, (-BCBIAS_J*4)(TMPR1, PC)
 |.endmacro
 |
+|// Decrement hashed hotcount and trigger trace recorder if zero.
+|.macro hotloop, reg
+|  lgr reg, PC   
+|  srlg reg, reg, 1
+|  nill reg, HOTCOUNT_PCMASK 
+|  afi reg, GG_DISP2HOT
+|  agr reg, DISPATCH
+|  lg TMPR1, (reg) 
+|  aghi TMPR1, -HOTCOUNT_LOOP 
+|  stg TMPR1, (reg) 
+|  jl ->vm_hotloop
+|.endmacro
+|
 |// Set current VM state.
 |.macro set_vmstate, st
 |  lghi TMPR1, ~LJ_VMST_..st
@@ -2030,9 +2043,24 @@ static void build_subroutines(BuildCtx *ctx)
   |  stg r0, 0
   |
   |->vm_hotloop:			// Hot loop counter underflow.
-  |  stg r0, 0
-  |  stg r0, 0
-  |
+  |.if JIT
+  |  lg LFUNC:RB, -16(BASE) 
+  |  cleartp LFUNC:RB 
+  |  lg RB, LFUNC:RB->pc 
+  |  llgc RD, (PC2PROTO(framesize))(RB) 
+  |  sllg RD, RD, 3
+  |  la RD, 0(RD, BASE)
+  |  lg L:RB, SAVE_L
+  |  stg BASE, L:RB->base
+  |  stg RD, L:RB->top 
+  |  lgr CARG2, PC
+  |  la CARG1, GG_DISP2J(DISPATCH)
+  |  stg L:RB, (DISPATCH_J(L))(DISPATCH)
+  |  stg PC, SAVE_PC
+  |  brasl r14, extern lj_trace_hot		// (jit_State *J, const BCIns *pc)
+  |  j <3
+  |.endif  
+  |    
   |->vm_callhook:			// Dispatch target for call hooks.
   |  stg PC, SAVE_PC
   |.if JIT
@@ -2131,7 +2159,8 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_next:
   |.if JIT
-  |  NYI  // On big-endian.
+  |  stg r0, 0 // NYI On big-endian.
+  |  stg r0, 0
   |.endif
   |
   |//-----------------------------------------------------------------------
@@ -2140,8 +2169,16 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |// Handler for callback functions. Callback slot number in ah/al.
   |->vm_ffi_callback:
-  |  stg r0, 0
-  |  stg r0, 0
+  |.if FFI
+  |.type CTSTATE, CTState, PC
+  |  saveregs
+  |  la DISPATCH, GG_G2DISP(RB)
+  |  lg CTSTATE, GL:RB->ctype_state
+  |  llgcr RC, RC
+  |  stg RC, CTSTATE->cb.slot
+  |  
+  |  la RC, CFRAME_SIZE(sp)
+  |.endif
   |
   |->cont_ffi_callback:			// Return from FFI callback.
   |  stg r0, 0
@@ -3758,11 +3795,13 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
   |.define FOR_EXT,  24(RA)
 
   case BC_FORL:
+  {
     |.if JIT
     |  hotloop RB
     |.endif
     | // Fall through. Assumes BC_IFORL follows and ins_AJ is a no-op.
     break;
+  }
 
   case BC_JFORI:
   case BC_JFORL:

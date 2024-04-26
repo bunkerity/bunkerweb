@@ -3,6 +3,7 @@ local plugin = require "bunkerweb.plugin"
 
 local ngx = ngx
 local subsystem = ngx.config.subsystem
+local tostring = tostring
 
 local template
 local render = nil
@@ -18,6 +19,14 @@ function errors:initialize(ctx)
 	plugin.initialize(self, "errors", ctx)
 	-- Default error texts
 	self.default_errors = {
+		["301"] = {
+			title = "Moved Permanently",
+			text = "The requested page has moved to a new url.",
+		},
+		["302"] = {
+			title = "Found",
+			text = "The requested page has moved temporarily to a new url.",
+		},
 		["400"] = {
 			title = "Bad Request",
 			text = "The server did not understand the request.",
@@ -67,6 +76,11 @@ function errors:initialize(ctx)
 			text = "The gateway has timed out.",
 		},
 	}
+end
+
+function errors:log()
+	self:set_metric("counters", tostring(ngx.status), 1)
+	return self:ret(true, "success")
 end
 
 function errors:render_template(code)

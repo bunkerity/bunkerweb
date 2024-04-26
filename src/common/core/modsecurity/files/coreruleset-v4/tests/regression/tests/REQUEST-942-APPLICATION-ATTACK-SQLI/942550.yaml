@@ -1,0 +1,673 @@
+---
+meta:
+  author: "Andrea Menin (theMiddle)"
+  description: JSON in SQL bypass technique
+  enabled: true
+  name: 942550.yaml
+tests:
+  - test_title: 942550-1
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"b":2}'::jsonb <@ '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-2
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"b":2}'::jsonb <@ '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-3
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"b":2}'::jsonb <@ '{"a":1, "b":2}'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-4
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"b":2}'::jsonb <@ '{"a":1, "b":2}'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-5
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"b":2}' <@ '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22b%22%3A2%7D%27%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-6
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"b":2}' <@ '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22b%22%3A2%7D%27%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-7
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"b":2}'::json <@ '{"a":1, "b":2}'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajson%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-8
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"b":2}'::json <@ '{"a":1, "b":2}'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajson%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-9
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"b":2}' <@ '{"a":1, "b":2}'::json
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22b%22%3A2%7D%27%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajson"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-10
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"b":2}' <@ '{"a":1, "b":2}'::json
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22b%22%3A2%7D%27%20%3C%40%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajson"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-11
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"b":2}'::jsonb @> '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%40%3E%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-12
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"b":2}'::jsonb @> '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%40%3E%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-13
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"b":2}'::jsonb < '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%3C%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-14
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"b":2}'::jsonb < '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%3C%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-15
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"b":2}'::jsonb > '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%3E%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-16
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"b":2}'::jsonb > '{"a":1, "b":2}'::jsonb
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22b%22%3A2%7D%27%3A%3Ajsonb%20%3E%20%27%7B%22a%22%3A1%2C%20%22b%22%3A2%7D%27%3A%3Ajsonb"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-17
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"a":2,"c":[4,5,{"f":7}]}' -> '$.c[2].f' = 7
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22a%22%3A2%2C%22c%22%3A%5B4%2C5%2C%7B%22f%22%3A7%7D%5D%7D%27%20-%3E%20%27%24.c%5B2%5D.f%27%20%3D%207"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-18
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"a":2,"c":[4,5,{"f":7}]}' -> '$.c[2].f' = 7
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22a%22%3A2%2C%22c%22%3A%5B4%2C5%2C%7B%22f%22%3A7%7D%5D%7D%27%20-%3E%20%27%24.c%5B2%5D.f%27%20%3D%207"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-19
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"a":2,"c":[4,5,{"f":7}]}' <- '$.c[2].f' = 7
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22a%22%3A2%2C%22c%22%3A%5B4%2C5%2C%7B%22f%22%3A7%7D%5D%7D%27%20%3C-%20%27%24.c%5B2%5D.f%27%20%3D%207"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-20
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"a":2,"c":[4,5,{"f":7}]}' <- '$.c[2].f' = 7
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22a%22%3A2%2C%22c%22%3A%5B4%2C5%2C%7B%22f%22%3A7%7D%5D%7D%27%20%3C-%20%27%24.c%5B2%5D.f%27%20%3D%207"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-21
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR json_extract('{"id": 14, "name": "Aztalan"}', '$.name') = 'Aztalan'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20json_extract%28%27%7B%22id%22%3A%2014%2C%20%22name%22%3A%20%22Aztalan%22%7D%27%2C%20%27%24.name%27%29%20%3D%20%27Aztalan%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-22
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR json_extract('{"id": 14, "name": "Aztalan"}', '$.name') = 'Aztalan'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20json_extract%28%27%7B%22id%22%3A%2014%2C%20%22name%22%3A%20%22Aztalan%22%7D%27%2C%20%27%24.name%27%29%20%3D%20%27Aztalan%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-23
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: blah/"}' and data @> '{"a":"a"}' union select ASCII(s.token) from unnset(string_to_array((select cookie from cookie limit 1 ),NULL)) s(token)--/state
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=blah/%22%7D%27%20and%20data%20%40%3E%20%27%7B%22a%22%3A%22a%22%7D%27%20union%20select%20ASCII%28s.token%29%20from%20unnset%28string_to_array%28%28select%20cookie%20from%20cookie%20limit%201%20%29%2CNULL%29%29%20s%28token%29--/state"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-24
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: blah/"}' and data @> '{"a":"a"}' union select ASCII(s.token) from unnset(string_to_array((select cookie from cookie limit 1 ),NULL)) s(token)--/state
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/blah/%22%7D%27%20and%20data%20%40%3E%20%27%7B%22a%22%3A%22a%22%7D%27%20union%20select%20ASCII%28s.token%29%20from%20unnset%28string_to_array%28%28select%20cookie%20from%20cookie%20limit%201%20%29%2CNULL%29%29%20s%28token%29--/state"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-25
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"a":"b"}' ? 'a'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22a%22%3A%22b%22%7D%27%20%3F%20%27a%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-26
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"a":"b"}' ? 'a'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22a%22%3A%22b%22%7D%27%20%3F%20%27a%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-27
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '[1,2]' ? '1'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%5B1%2C2%5D%27%20%3F%20%271%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-28
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '[1,2]' ? '1'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%5B1%2C2%5D%27%20%3F%20%271%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-29
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"name":"asd"}' ?| array['a','name']
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22name%22%3A%22asd%22%7D%27%20%3F%7C%20array%5B%27a%27%2C%27name%27%5D"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-30
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"name":"asd"}' ?| array['a','name']
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22name%22%3A%22asd%22%7D%27%20%3F%7C%20array%5B%27a%27%2C%27name%27%5D"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-31
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"name":"asd"}' ?& array['a','name']
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22name%22%3A%22asd%22%7D%27%20%3F%26%20array%5B%27a%27%2C%27name%27%5D"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-32
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"name":"asd"}' ?& array['a','name']
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22name%22%3A%22asd%22%7D%27%20%3F%26%20array%5B%27a%27%2C%27name%27%5D"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-33
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '[1,2,3]'::json ->> 2='3'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%5B1%2C2%2C3%5D%27%3A%3Ajson%20-%3E%3E%202%3D%273%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-34
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '[1,2,3]'::json ->> 2='3'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%5B1%2C2%2C3%5D%27%3A%3Ajson%20-%3E%3E%202%3D%273%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-35
+    desc: |
+      JSON in SQL (ARGS)
+      decoded payload: OR '{"a":1}'::jsonb #> '{a,b}' ? 'c'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "id=OR%20%27%7B%22a%22%3A1%7D%27%3A%3Ajsonb%20%23%3E%20%27%7Ba%2Cb%7D%27%20%3F%20%27c%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"
+  - test_title: 942550-36
+    desc: |
+      JSON in SQL (REQUEST_FILENAME)
+      decoded payload: OR '{"a":1}'::jsonb #> '{a,b}' ? 'c'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/OR%20%27%7B%22a%22%3A1%7D%27%3A%3Ajsonb%20%23%3E%20%27%7Ba%2Cb%7D%27%20%3F%20%27c%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942550"

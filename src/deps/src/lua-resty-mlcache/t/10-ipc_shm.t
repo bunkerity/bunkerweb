@@ -1,51 +1,21 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use Test::Nginx::Socket::Lua;
-use Cwd qw(cwd);
+use strict;
 use lib '.';
-use t::Util;
+use t::TestMLCache;
 
 workers(2);
-
 #repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3) + 2;
-
-my $pwd = cwd();
-
-our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
-    lua_shared_dict  cache_shm 1m;
-    lua_shared_dict  ipc_shm   1m;
-
-    init_by_lua_block {
-        -- local verbose = true
-        local verbose = false
-        local outfile = "$Test::Nginx::Util::ErrLogFile"
-        -- local outfile = "/tmp/v.log"
-        if verbose then
-            local dump = require "jit.dump"
-            dump.on(nil, outfile)
-        else
-            local v = require "jit.v"
-            v.on(outfile)
-        end
-
-        require "resty.core"
-        -- jit.opt.start("hotloop=1")
-        -- jit.opt.start("loopunroll=1000000")
-        -- jit.off()
-    }
-};
+plan tests => repeat_each() * blocks() * 4;
 
 run_tests();
 
 __DATA__
 
 === TEST 1: update() with ipc_shm catches up with invalidation events
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -62,20 +32,18 @@ __DATA__
             assert(cache:update())
         }
     }
---- request
-GET /t
 --- ignore_response_body
---- no_error_log
-[error]
 --- error_log
 received event from invalidations: my_key
+--- no_error_log
+[error]
+[crit]
 
 
 
 === TEST 2: update() with ipc_shm timeouts when waiting for too long
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -98,22 +66,19 @@ received event from invalidations: my_key
             end
         }
     }
---- request
-GET /t
 --- response_body
 could not poll ipc events: timeout
+--- error_log
+received event from invalidations: my_key
 --- no_error_log
 [error]
 received event from invalidations: my_other
---- error_log
-received event from invalidations: my_key
 
 
 
 === TEST 3: update() with ipc_shm JITs when no events to catch up
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -125,20 +90,18 @@ received event from invalidations: my_key
             end
         }
     }
---- request
-GET /t
 --- ignore_response_body
---- no_error_log
-[error]
 --- error_log eval
 qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):7 loop\]/
+--- no_error_log
+[error]
+[crit]
 
 
 
 === TEST 4: set() with ipc_shm invalidates other workers' LRU cache
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -167,8 +130,6 @@ qr/\[TRACE\s+\d+ content_by_lua\(nginx\.conf:\d+\):7 loop\]/
             assert(cache_clone:update())
         }
     }
---- request
-GET /t
 --- response_body
 calling update on cache
 called lru:delete() with key: my_key
@@ -176,13 +137,13 @@ calling update on cache_clone
 called lru:delete() with key: my_key
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 5: delete() with ipc_shm invalidates other workers' LRU cache
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -211,8 +172,6 @@ called lru:delete() with key: my_key
             assert(cache_clone:update())
         }
     }
---- request
-GET /t
 --- response_body
 called lru:delete() with key: my_key
 calling update on cache
@@ -221,14 +180,14 @@ calling update on cache_clone
 called lru:delete() with key: my_key
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 6: purge() with mlcache_shm invalidates other workers' LRU cache (OpenResty < 1.13.6.2)
---- skip_eval: 3: t::Util::skip_openresty('>=', '1.13.6.2')
---- http_config eval: $::HttpConfig
+--- skip_eval: 3: t::TestMLCache::skip_openresty('>=', '1.13.6.2')
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -257,8 +216,6 @@ called lru:delete() with key: my_key
             ngx.say("cache_clone has new lru: ", cache_clone.lru ~= lru_clone)
         }
     }
---- request
-GET /t
 --- response_body
 cache has new lru: true
 cache_clone still has same lru: true
@@ -266,14 +223,14 @@ calling update on cache_clone
 cache_clone has new lru: true
 --- no_error_log
 [error]
+[crit]
 
 
 
 === TEST 7: purge() with mlcache_shm invalidates other workers' LRU cache (OpenResty >= 1.13.6.2)
---- skip_eval: 3: t::Util::skip_openresty('<', '1.13.6.2')
---- http_config eval: $::HttpConfig
+--- skip_eval: 3: t::TestMLCache::skip_openresty('<', '1.13.6.2')
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -306,8 +263,6 @@ cache_clone has new lru: true
             ngx.say("lru didn't change after purge: ", cache.lru == lru)
         }
     }
---- request
-GET /t
 --- response_body
 both instances use the same lru: true
 called lru:flush_all()
@@ -317,3 +272,4 @@ both instances use the same lru: true
 lru didn't change after purge: true
 --- no_error_log
 [error]
+[crit]

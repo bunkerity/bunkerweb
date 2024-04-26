@@ -1,0 +1,339 @@
+---
+meta:
+  author: "Christian S.J. Peron, Max Leske"
+  description: None
+  enabled: true
+  name: 942440.yaml
+tests:
+  - test_title: 942440-1
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/post?var=DROP%20sampletable%3b--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-2
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=' or 1=1;%00"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-3
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=OR 1# "
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-4
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=admin'--"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-5
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=DROP/*comment*/sampletable"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-6
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=DR/**/OP/*bypass deny listing*/sampletable"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-7
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=SELECT/*avoid-spaces*/password/**/FROM/**/Members"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-8
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=SELECT /*!32302 1/0, */ 1 FROM tablename"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-9
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=' or 1=1# "
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-10
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=‘ or 1=1-- -"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-11
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=‘ or 1=1/*"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-12
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=1='1' or-- -"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-13
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=' /*!50000or*/1='1"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-14
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=' /*!or*/1='1"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-15
+    desc: "SQL Comment Sequence"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: "POST"
+            port: 80
+            version: "HTTP/1.0"
+            uri: "/post"
+            data: "test=0/**/union/*!50000select*/table_name`foo`/**/"
+          output:
+            log_contains: id "942440"
+  - test_title: 942440-16
+    desc: "Avoid False Positive on JWT (body)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: "POST"
+            port: 80
+            version: "HTTP/1.1"
+            uri: "/post"
+            data: "token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMe--KKF2QT4fwpMeJf36POk6yJV_adQssw-5c"
+          output:
+            no_log_contains: id "942440"
+  - test_title: 942440-17
+    desc: "Avoid False Positive on JWT (cookie)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Cookie: "token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMe--KKF2QT4fwpMeJf36POk6yJV_adQssw-5c"
+            method: "POST"
+            port: 80
+            version: "HTTP/1.1"
+            uri: "/post"
+            data: "foo=bar"
+          output:
+            no_log_contains: id "942440"
+  - test_title: 942440-18
+    desc: "Avoid False Positive on JWT (querystring)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: "GET"
+            port: 80
+            version: "HTTP/1.1"
+            uri: "/callback?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMe--KKF2QT4fwpMeJf36POk6yJV_adQssw-5c"
+          output:
+            no_log_contains: id "942440"
+  - test_title: 942440-19
+    desc: "False positive against Facebook click identifier"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: "GET"
+            port: 80
+            version: "HTTP/1.1"
+            uri: "/get/?fbclid=IwAR1dug0BYxe0ukhZ2vKrdQwLAxVFRJ--Q2Y7OBJE_0uId9-Eh-sJWLdVk2E"
+          output:
+            no_log_contains: id "942440"
+  - test_title: 942440-20
+    desc: "False positive against Google click identifier"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: "GET"
+            port: 80
+            version: "HTTP/1.1"
+            uri: "/get/?gclid=j0KCQiA1NebBhDDARIsAANiDD3_RJeMv8zScF--mC1jf8fO8PDYJCxD9xdwT7iQ59QIIwL-86ncQtMaAh0lEALw_wcB"
+          output:
+            no_log_contains: id "942440"

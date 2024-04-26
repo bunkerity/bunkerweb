@@ -1,0 +1,107 @@
+---
+meta:
+  author: "M4tteoP, Esad Cetiner"
+  enabled: true
+  name: "953100.yaml"
+  description: "Tests for rule 953100"
+tests:
+  - test_title: 953100-1
+    desc: "'File size is' leads to FPs, it should not match at PL1"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: "Maximum allowed file size is 10 MB"
+          output:
+            no_log_contains: id "953100"
+  - test_title: 953100-2
+    desc: "'Invalid date' Wordpress FP, it should not match at PL1"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: "Invalid date selected"
+          output:
+            no_log_contains: id "953100"
+  - test_title: 953100-3
+    desc: "'The function' might lead to FPs, it should not match at PL1"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: "please review the function"
+          output:
+            no_log_contains: id "953100"
+  - test_title: 953100-4
+    desc: "'Static function' might lead to FPs, it should not match at PL1"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: "This is a static function"
+          output:
+            no_log_contains: id "953100"
+  - test_title: 953100-5
+    desc: "'cannot be empty is too common for PL-1 GH isue #3399"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "text/plain"
+            method: "GET"
+            version: "HTTP/1.0"
+            uri: "/anything"
+            data: "Field cannot be empty."
+          output:
+            no_log_contains: id "953100"

@@ -1,0 +1,176 @@
+---
+meta:
+  author: Franziska Buehler, Max Leske
+  description: Windows shell command injections
+  enabled: true
+  name: 932380.yaml
+tests:
+  - test_title: 932380-1
+    desc: |
+      Windows shell command injection with 'bcdboot': view=image.jpg%26bcdboot < file.txt
+      Match input redirection to bcdboot
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /get?view%3Dimage.jpg%26bcdboot%20%3C%20file.txt
+            version: HTTP/1.0
+          output:
+            log_contains: id "932380"
+  - test_title: 932380-2
+    desc: |
+      Windows shell command injection with 'bcdboot': view=image.jpg%26bcdboot /r file.txt
+      Match bcdboot with normal argument
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /get?view%3Dimage.jpg%26bcdboot%20%2Fr%20file.txt
+            version: HTTP/1.0
+          output:
+            log_contains: id "932380"
+  - test_title: 932380-3
+    desc: |
+      Windows shell command injection with 'bcdboot': view=image.jpg%26bcdboot/r file.txt
+      Match bcdboot with argument without preceding space
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /get?view%3Dimage.jpg%26bcdboot%2Fr%20file.txt
+            version: HTTP/1.0
+          output:
+            log_contains: id "932380"
+  - test_title: 932380-4
+    desc: |
+      Windows shell command injection with 'bcdboot': view=image.jpg%26bcdboot  /r file.txt
+      Match bcdboot with argument with multiple preceding space
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /get?view%3Dimage.jpg%26bcdboot%20%20%2Fr%20file.txt
+            version: HTTP/1.0
+          output:
+            log_contains: id "932380"
+  - test_title: 932380-5
+    desc: |
+      Windows shell command injection with 'sort' (false positive): sort%3Dex%26sort%3Dascending
+      Do not match query parameter
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /get/www/delivery/lg.php?bannerid=18&campaignid=1&zoneid=4&loc=https%3A%2F%2Fwww.example.com%2Ffoo%2Fbar%2Fx-x%2Fx%3Fs%3D2014-11-01%26e%3D2020-10-31%26ex%3D7%26page%3D1%26sort%3Dex%26sort%3Ddescending&referer=https%3A%2F%2Fwww.example.com%2Ffoo%2Fbar%2Fx-x%2Fx%3Fs%3D2014-11-01%26e%3D2020-10-31%26ex%3D7%26page%3D1%26sort%3Dex%26sort%3Dascending&cb=7de91ea349
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932380"
+  - test_title: 932380-6
+    desc: |
+      Windows shell command injection with 'sort' (false positive): sort%3D0
+      Do not match encoded path
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /get/url%2Fbla%3Ftest%3D1%26sort%3D0
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932380"
+  - test_title: 932380-7
+    desc: "Windows shell command injection using 'bcdboot'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/post"
+            data: "var=test@coreruleset.org\"|bcdboot %SYSTEMROOT%\\win.ini"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932380"
+  - test_title: 932380-8
+    desc: False positive against 'time warner'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?foo=time+warner+"
+            version: HTTP/1.1
+          output:
+            no_log_contains: "id \"932380\""
+  - test_title: 932380-9
+    desc: False positive against 'time for'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: POST
+            port: 80
+            uri: "/post?"
+            version: HTTP/1.1
+            data: |
+              payload=While this is a challenging time for us all, we are busy helping customers manage playout infrastructure in ways that were just dreams only a couple of years ago.
+          output:
+            no_log_contains: "id \"932380\""

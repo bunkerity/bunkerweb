@@ -1,0 +1,116 @@
+{% set security_levels = ['standard', 'advanced', 'high'] %}
+
+{# When multiple, setting_id need to be a setting that is part of a multiple to get all settings on the same group #}
+{# On levels, we should set a list of dict with setting_id as key and value as value #}
+
+{% set steps = [
+{
+    "name" : "STEP 1 - STARTING UP",
+    "description" : "we  need some information to get started.",
+    "settings" : [
+                    {"plugin_id" : "general", "setting_id": "SERVER_NAME", "title" : "DEFINE HOST", "subtitle" : "We need this to connect BunkerWeb to your application. You need to set your domain name.", "levels" : {} },
+                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "levels" : {}, "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(security_levels[0]|security_levels[1]|security_levels[2])$', 'type': 'select', 'select': [security_levels[0], security_levels[1], security_levels[2]]} },
+                    {"plugin_id" : "limit", "setting_id": "LIMIT_REQ_URL", "title" : "Define header", "subtitle" : "test header multiple rendering",  "levels" : [{
+                                                                                                                                                                    security_levels[0] : {
+                                                                                                                                                                        "LIMIT_REQ_URL_1": "/",
+                                                                                                                                                                        "LIMIT_REQ_RATE_1": "2r/s"
+                                                                                                                                                                    }
+                                                                                                                                                                    , security_levels[1] : {
+                                                                                                                                                                            "LIMIT_REQ_URL_1": "/",
+                                                                                                                                                                            "LIMIT_REQ_RATE_1": "2r/s"
+                                                                                                                                                                        }
+                                                                                                                                                                    , security_levels[2] : {
+                                                                                                                                                                            "LIMIT_REQ_URL_1": "/",
+                                                                                                                                                                            "LIMIT_REQ_RATE_1": "2r/s",
+                                                                                                                                                                            "LIMIT_REQ_URL_2": "/admin",
+                                                                                                                                                                            "LIMIT_REQ_RATE_2": "4r/s"
+                                                                                                                                                                        }
+                                                                                                                                                                    }]
+                    },
+                  ],
+                    "configs": []
+},
+{
+    "name" : "STEP 2 - ANTIBOT",
+    "description" : "Avoid spammer and bot to access your website.",
+    "settings" : [
+                  {"plugin_id" : "antibot", "setting_id": "USE_ANTIBOT", "title" : "Define the type of your antibot", "subtitle" : "Javascript, Captcha or Cookie don't need additionnal settings to be fill. Recaptcha, Hcaptcha and Turnstile need secret key and site key delivered from providers.",  "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} },
+                 ],
+    "configs": [
+        {"name": "my_config_1", "type": "modsec", "subtitle" : "This will determine the modsecurity rules to apply to this service.", "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} },
+        {"name": "my_config_2", "type": "server-http", "subtitle" : "This will determine the server http...", "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} }
+    ]
+},
+]
+%}
+
+{# Get setting for each settings on steps #}
+{% for step in steps %}
+        {% for setting in step.get('settings') %}
+            {% for plugin in plugins %}
+                {% if setting["plugin_id"] == plugin["id"]%}
+
+                    {% if setting.update({"setting" : plugin["settings"][setting["setting_id"]]})%}{%endif%}
+
+                    {# Case multiple, get all settings on same group #}
+                    {% set is_multiple = plugin["settings"][setting["setting_id"]].get("multiple", "") %}
+                    {% if is_multiple %}
+                        {% set multiples = {"multiples" : []}%}
+                        {% for mult_setting, value in plugin["settings"].items() %}
+                            {% if value.get("multiple", "") == is_multiple %}
+                                {% set mult_value = value %}
+                                {% if mult_value.update({"name" : mult_setting}) %}{%endif%}
+                                {% if multiples["multiples"].append(mult_value) %}{%endif%}
+                            {% endif %}
+                        {% endfor %}
+                        {% if setting.update(multiples)%}{% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+{% endfor %}
+
+<!-- new and edit form -->
+<form data-simple data-services-modal-form
+        class="!hidden w-full h-[90vh] overflow-auto flex flex-col justify-between"
+        id="form-simple-new"
+        method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" value="new" name="operation" />
+    <input type="hidden" value="" name="OLD_SERVER_NAME" />
+    <input type="hidden" value="no" name="is_draft" />
+    <input type="hidden" value="easy" name="mode" />
+
+    {% for step in steps %}
+    <div data-step="{{loop.index}}" class="flex flex-col {% if loop.index != 1 %} hidden {% endif %}">
+        <div class="flex flex-col w-full items-start mt-2">
+            <h2 class="ml-2 mr-1 text-xl transition duration-300 ease-in-out font-bold text-md uppercase dark:text-white/90 mb-0" data-simple-step>{{ step.get("name")}}</h2>
+            <p class="ml-2 mr-1 text-base dark:text-gray-300 mb-1" data-simple-description>{{ step.get("description")}}</p>
+        </div>
+        <div class="w-full min-w-[300px] my-1 sm:my-0">
+            <hr class="separator" />
+        </div>
+            {% set plugin_simple = step.get('settings') %}
+            {% set configs = step.get('configs') %}
+            {% include "settings_simple.html" %}
+        </div>
+    {% endfor %}
+
+    <!-- action button -->
+    <div class="w-full flex-col items-center justify-center flex mt-10">
+        <div class="flex justify-center">
+            <button data-services-modal-close
+                    type="button"
+                    class="close-btn mb-4 mr-3 text-base">Close</button>
+            <button data-simple-back
+                    type="button"
+                    disabled
+                    class="info-btn mb-4 mr-3 text-base">Back</button>
+            <button data-simple-next type="button" class="mb-4 valid-btn">Continue</button>
+            <button data-services-modal-submit type="submit" class="hidden mb-4 valid-btn">Save</button>
+        </div>
+        <!-- end action button-->
+        <p data-services-modal-error-msg
+            class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
+    </div>
+</form>

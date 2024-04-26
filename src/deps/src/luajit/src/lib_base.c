@@ -361,7 +361,11 @@ LJLIB_ASM_(xpcall)		LJLIB_REC(.)
 static int load_aux(lua_State *L, int status, int envarg)
 {
   if (status == LUA_OK) {
-    if (tvistab(L->base+envarg-1)) {
+    /*
+    ** Set environment table for top-level function.
+    ** Don't do this for non-native bytecode, which returns a prototype.
+    */
+    if (tvistab(L->base+envarg-1) && tvisfunc(L->top-1)) {
       GCfunc *fn = funcV(L->top-1);
       GCtab *t = tabV(L->base+envarg-1);
       setgcref(fn->c.env, obj2gco(t));

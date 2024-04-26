@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.5
+    image: bunkerity/bunkerweb:1.5.7
     ports:
       - 80:8080
       - 443:8443
@@ -17,9 +17,9 @@ services:
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - app1.example.com_REVERSE_PROXY_URL=/
-      - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
+      - app1.example.com_REVERSE_PROXY_HOST=http://myapp1:8080
       - app2.example.com_REVERSE_PROXY_URL=/
-      - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
+      - app2.example.com_REVERSE_PROXY_HOST=http://myapp2:8080
       # global config applied at server context
       - |
         CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -53,7 +53,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.5
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     depends_on:
       - mybunker
     environment:
@@ -75,12 +75,12 @@ services:
       - bw-docker
 
   myapp1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 
   myapp2:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 

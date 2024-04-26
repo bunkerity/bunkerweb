@@ -1,0 +1,151 @@
+---
+meta:
+  author: "Franziska Buehler, Xhoenix"
+  description: None
+  enabled: true
+  name: 941390.yaml
+tests:
+  - test_title: 941390-1
+    desc: "JavaScript method setInterval(code, 1)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/?arg=setInterval%28code%2C%201%29'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"
+  - test_title: 941390-2
+    desc: "JavaScript method: arg=x\";setTimeout(name, 1)//"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/?arg=x%22%3BsetTimeout%28name%2C%201%29%2F%2F'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"
+  - test_title: 941390-3
+    desc: "JavaScript method eval('2 + 2')"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/?arg=eval%28%272%20%2B%202%27%29'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"
+  - test_title: 941390-4
+    desc: "JavaScript constructor new Function()"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/?arg=new%20Function%28%29'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"
+  - test_title: 941390-5
+    desc: "JavaScript call alert"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/?arg=alert%28%29'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"
+  - test_title: 941390-6
+    desc: "JavaScript call atob"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/?arg=atob%28%29'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"
+  - test_title: 941390-7
+    desc: "JavaScript call btoa"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/?arg=btoa%28%29'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"
+  - test_title: 941390-8
+    desc: "JavaScript call prompt"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.>"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/get?arg=prompt%28%29'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"
+  - test_title: 941390-9
+    desc: "JavaScript call confirm"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.>"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: '/get?arg=confirm%28%29'
+            version: HTTP/1.1
+          output:
+            log_contains: id "941390"

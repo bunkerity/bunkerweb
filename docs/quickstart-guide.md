@@ -6,7 +6,7 @@
 
 !!! tip "Going further"
 
-	To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/examples) of the repository to get real-world examples.
+	To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/examples) of the repository to get real-world examples.
 
 ## Protect HTTP applications
 
@@ -32,12 +32,12 @@ You will find more settings about reverse proxy in the [settings section](settin
     services:
 
       myapp:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - 80:8080
           - 443:8443
@@ -48,13 +48,13 @@ You will find more settings about reverse proxy in the [settings section](settin
           - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
           - USE_REVERSE_PROXY=yes
           - REVERSE_PROXY_URL=/
-          - REVERSE_PROXY_HOST=http://myapp
+          - REVERSE_PROXY_HOST=http://myapp:8080
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -102,7 +102,7 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp:
-    	  image: tutum/hello-world
+    	  image: nginxdemos/nginx-hello
     	  networks:
     	    bw-services:
     		    aliases:
@@ -111,7 +111,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     	    - "bunkerweb.SERVER_NAME=www.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
     	    - "bunkerweb.REVERSE_PROXY_URL=/"
-    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp:8080"
 
     networks:
       bw-services:
@@ -128,7 +128,7 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           bw-services:
               aliases:
@@ -141,7 +141,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - "bunkerweb.SERVER_NAME=www.example.com"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp:8080"
 
     networks:
       bw-services:
@@ -174,9 +174,9 @@ You will find more settings about reverse proxy in the [settings section](settin
     	spec:
     	  containers:
     	  - name: app
-    		image: tutum/hello-world
+    		image: nginxdemos/nginx-hello
     		ports:
-    		- containerPort: 80
+    		- containerPort: 8080
     ---
     apiVersion: v1
     kind: Service
@@ -188,7 +188,7 @@ You will find more settings about reverse proxy in the [settings section](settin
       ports:
     	- protocol: TCP
     	  port: 80
-    	  targetPort: 80
+    	  targetPort: 8080
     ```
 
     Here is the corresponding Ingress definition to serve and protect the web application :
@@ -376,22 +376,22 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp1:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           - bw-services
 
       myapp2:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           - bw-services
 
       myapp3:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - 80:8080
           - 443:8443
@@ -403,15 +403,15 @@ You will find more settings about reverse proxy in the [settings section](settin
           - SERVER_NAME=app1.example.com app2.example.com app3.example.com
           - USE_REVERSE_PROXY=yes # Will be applied to all server config
           - REVERSE_PROXY_URL=/ # Will be applied to all server config
-          - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
-          - app2.example.com_REVERSE_PROXY_HOST=http://myapp2
-          - app3.example.com_REVERSE_PROXY_HOST=http://myapp3
+          - app1.example.com_REVERSE_PROXY_HOST=http://myapp1:8080
+          - app2.example.com_REVERSE_PROXY_HOST=http://myapp2:8080
+          - app3.example.com_REVERSE_PROXY_HOST=http://myapp3:8080
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -458,7 +458,7 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp1:
-    	  image: tutum/hello-world
+    	  image: nginxdemos/nginx-hello
     	  networks:
     	    bw-services:
     		    aliases:
@@ -467,10 +467,10 @@ You will find more settings about reverse proxy in the [settings section](settin
     	    - "bunkerweb.SERVER_NAME=app1.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
     	    - "bunkerweb.REVERSE_PROXY_URL=/"
-    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1:8080"
 
       myapp2:
-    	  image: tutum/hello-world
+    	  image: nginxdemos/nginx-hello
     	  networks:
     	    bw-services:
     		    aliases:
@@ -479,10 +479,10 @@ You will find more settings about reverse proxy in the [settings section](settin
     	    - "bunkerweb.SERVER_NAME=app2.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
     	    - "bunkerweb.REVERSE_PROXY_URL=/"
-    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2:8080"
 
       myapp3:
-    	  image: tutum/hello-world
+    	  image: nginxdemos/nginx-hello
     	  networks:
     	    bw-services:
     		    aliases:
@@ -491,7 +491,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     	    - "bunkerweb.SERVER_NAME=app3.example.com"
     	    - "bunkerweb.USE_REVERSE_PROXY=yes"
     	    - "bunkerweb.REVERSE_PROXY_URL=/"
-    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
+    	    - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3:8080"
 
     networks:
       bw-services:
@@ -508,7 +508,7 @@ You will find more settings about reverse proxy in the [settings section](settin
 
     services:
       myapp1:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           bw-services:
               aliases:
@@ -521,10 +521,10 @@ You will find more settings about reverse proxy in the [settings section](settin
           - "bunkerweb.SERVER_NAME=app1.example.com"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp1:8080"
 
       myapp2:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           bw-services:
               aliases:
@@ -537,10 +537,10 @@ You will find more settings about reverse proxy in the [settings section](settin
           - "bunkerweb.SERVER_NAME=app2.example.com"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp2:8080"
 
       myapp3:
-        image: tutum/hello-world
+        image: nginxdemos/nginx-hello
         networks:
           bw-services:
               aliases:
@@ -553,7 +553,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - "bunkerweb.SERVER_NAME=app3.example.com"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/"
-          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3"
+          - "bunkerweb.REVERSE_PROXY_HOST=http://myapp3:8080"
 
     networks:
       bw-services:
@@ -586,9 +586,9 @@ You will find more settings about reverse proxy in the [settings section](settin
     	spec:
     	  containers:
     	  - name: app1
-    		image: tutum/hello-world
+    		image: nginxdemos/nginx-hello
     		ports:
-    		- containerPort: 80
+    		- containerPort: 8080
     ---
     apiVersion: v1
     kind: Service
@@ -600,7 +600,7 @@ You will find more settings about reverse proxy in the [settings section](settin
       ports:
     	- protocol: TCP
     	  port: 80
-    	  targetPort: 80
+    	  targetPort: 8080
     ```
 
     Here is the corresponding Ingress definition to serve and protect the web applications :
@@ -830,7 +830,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.5
+      image: bunkerity/bunkerweb:1.5.7
       ...
       environment:
         - USE_REAL_IP=yes
@@ -845,7 +845,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.5
+      image: bunkerity/bunkerweb:1.5.7
       ...
       environment:
         - USE_REAL_IP=yes
@@ -860,7 +860,7 @@ REAL_IP_HEADER=X-Forwarded-For
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.5
+      image: bunkerity/bunkerweb:1.5.7
       ...
       environment:
         - USE_REAL_IP=yes
@@ -980,7 +980,7 @@ REAL_IP_HEADER=proxy_protocol
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.5
+      image: bunkerity/bunkerweb:1.5.7
       ...
       environment:
         - USE_REAL_IP=yes
@@ -996,7 +996,7 @@ REAL_IP_HEADER=proxy_protocol
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.5
+      image: bunkerity/bunkerweb:1.5.7
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1012,7 +1012,7 @@ REAL_IP_HEADER=proxy_protocol
 
     ```yaml
     mybunker:
-      image: bunkerity/bunkerweb:1.5.5
+      image: bunkerity/bunkerweb:1.5.7
       ...
       environment:
         - USE_REAL_IP=yes
@@ -1159,7 +1159,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - 80:8080 # Keep it if you want to use Let's Encrypt automation
           - 10000:10000 # app1
@@ -1181,7 +1181,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1230,7 +1230,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     services:
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           - 80:8080 # Keep it if you want to use Let's Encrypt automation
           - 10000:10000 # app1
@@ -1288,7 +1288,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         ports:
           # Keep it if you want to use Let's Encrypt automation
           - published: 80
@@ -1476,7 +1476,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     mybunker:
-      image: bunkerity/bunkerweb:1.5.5
+      image: bunkerity/bunkerweb:1.5.7
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1519,7 +1519,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.5.5
+      image: bunkerity/bunkerweb-scheduler:1.5.7
       volumes:
         - ./bw-data:/data
       ...
@@ -1546,7 +1546,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     myapp:
-      image: tutum/hello-world
+      image: nginxdemos/nginx-hello
       labels:
         - |
           bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1589,7 +1589,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.5.5
+      image: bunkerity/bunkerweb-scheduler:1.5.7
       volumes:
         - ./bw-data:/data
       ...
@@ -1822,7 +1822,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         volumes:
           - ./www:/var/www/html
         ports:
@@ -1845,7 +1845,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1923,7 +1923,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         volumes:
           - ./www:/var/www/html
         labels:
@@ -1937,7 +1937,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.5
+        image: bunkerity/bunkerweb-scheduler:1.5.7
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2081,7 +2081,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2364,7 +2364,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     services:
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         environment:
           - USE_IPv6=yes
 
@@ -2409,7 +2409,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     services:
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.5
+        image: bunkerity/bunkerweb:1.5.7
         environment:
           - USE_IPv6=yes
 

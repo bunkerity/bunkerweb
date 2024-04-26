@@ -1,0 +1,91 @@
+---
+meta:
+  author: "Felipe Zipitria, Max Leske"
+  description: Test Multipart/form-data
+  enabled: true
+  name: 922100.yaml
+tests:
+  - test_title: 922100-1
+    desc: "Positive test: utf-7 is not in allowed charsets"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: multipart/form-data; boundary=boundary
+              Accept: "*/*"
+            method: POST
+            port: 80
+            uri: "/post"
+            version: "HTTP/1.1"
+            data: |
+              --boundary
+              Content-disposition: form-data; name="_charset_"
+
+              utf-7
+              --boundary
+              Content-disposition: form-data; name="positive"
+              Content-Type: text/plain
+
+              Let me see if I can use utf-7.
+              --boundary--
+          output:
+            log_contains: id "922100"
+  - test_title: 922100-2
+    desc: "Negative test: only allowed charsets when using _charset_"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: multipart/form-data; boundary=boundary
+              Accept: "*/*"
+            method: POST
+            port: 80
+            uri: "/post"
+            version: "HTTP/1.1"
+            data: |
+              --boundary
+              Content-disposition: form-data; name="_charset_"
+
+              utf-8
+              --boundary
+              Content-disposition: form-data; name="negative"
+              Content-Type: text/plain
+
+              This should be good as we use utf-8 that is allowed.
+              --boundary--
+          output:
+            no_log_contains: id "922100"
+  - test_title: 922100-3
+    desc: "Positive test: don't allow substrings of valid charsets when using _charset_"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: multipart/form-data; boundary=boundary
+              Accept: "*/*"
+            method: POST
+            port: 80
+            uri: "/post"
+            version: "HTTP/1.1"
+            data: |
+              --boundary
+              Content-disposition: form-data; name="_charset_"
+
+              utf-
+              --boundary
+              Content-disposition: form-data; name="negative"
+              Content-Type: text/plain
+
+              utf-8 is valid but utf- should not be.
+              --boundary--
+          output:
+            log_contains: id "922100"

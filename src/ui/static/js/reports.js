@@ -1,7 +1,8 @@
+import { CheckNoMatchFilter } from "./utils/settings.js";
+
 class Filter {
   constructor(prefix = "reports") {
     this.prefix = prefix;
-    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
     this.methodValue = "all";
     this.statusValue = "all";
@@ -11,6 +12,11 @@ class Filter {
   }
 
   initHandler() {
+    this.container =
+      document.querySelector(`[data-${this.prefix}-filter]`) || null;
+
+    if (!this.container) return;
+
     //METHOD HANDLER
     this.container.addEventListener("click", (e) => {
       try {
@@ -81,7 +87,7 @@ class Filter {
       } catch (err) {}
     });
     // REASON HANDLER
-    +this.container.addEventListener("click", (e) => {
+    this.container.addEventListener("click", (e) => {
       try {
         if (
           e.target
@@ -136,7 +142,7 @@ class Filter {
     }
   }
 
-  setFilterMethod(requests) {
+  setFilterCountry(requests) {
     if (this.countryValue === "all") return;
     for (let i = 0; i < requests.length; i++) {
       const el = requests[i];
@@ -370,3 +376,23 @@ class Dropdown {
 
 const setDropdown = new Dropdown();
 const setFilter = new Filter();
+
+const checkPluginKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#keyword"),
+  "input",
+  document
+    .querySelector("[data-reports-list]")
+    .querySelectorAll("[data-reports-item]"),
+  document.querySelector("[data-reports-list-container]"),
+  document.querySelector("[data-reports-nomatch]"),
+);
+
+const checkPluginSelect = new CheckNoMatchFilter(
+  document.querySelectorAll("button[data-reports-setting-select-dropdown-btn]"),
+  "select",
+  document
+    .querySelector("[data-reports-list]")
+    .querySelectorAll("[data-reports-item]"),
+  document.querySelector("[data-reports-list-container]"),
+  document.querySelector("[data-reports-nomatch]"),
+);

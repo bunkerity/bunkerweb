@@ -1,0 +1,338 @@
+---
+meta:
+  author: "Felipe Zipitria"
+  description: Remote Command Execution Evasion Techniques
+  enabled: true
+  name: 932240.yaml
+tests:
+  - test_title: 932240-1
+    desc: "globbing technique 1: garb=cur[l];$garb+google.com (BB X)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              cmd=garb=adduse[r];$garb pizza
+            version: HTTP/1.1
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-2
+    desc: 'globbing technique 2: {n$u\c$u,-nlvp,777} (BB X)'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              cmd={n$u\c$u,-nlvp,777}
+            version: HTTP/1.1
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-3
+    desc: 'globbing technique 3: una$$me -a in cookies (BB S01X1GRV)'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Cookie: "una$$me -a"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-4
+    desc: 'globbing technique 4: uname$u -a (BB S01X1GRV)'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Cookie: "uname$u -a"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.1
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-5
+    desc: 'vars + spacing: v="u";cu$v\\r\l google.com (BB X)'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              cmd=v='u';cu$v\\r\l google.com
+            version: HTTP/1.1
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-6
+    desc: 'vars + spacing: non-existing vars: cu$@rl (BB X)'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              cmd=cu$@rl google.com
+            version: HTTP/1.1
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-7
+    desc: "Negative test on German numbering - Schauen Sie sich diese Zahl an:1'000'000"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: POST
+            port: 80
+            uri: "/post"
+            data: |
+              text=Schauen%20Sie%20sich%20diese%20Zahl%20an%3A%201%27000%27000
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932240"
+  - test_title: 932240-8
+    desc: "Negative test on WordPress like args"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate, br
+              Accept-Language: en-us,en;q=0.5
+            method: POST
+            port: 80
+            uri: "/post"
+            data: |
+              data%5Bwp-refresh-post-lock%5D%5Block%5D=1667487208%3A1&data%5Bwp-refresh-post-lock%5D%5Bpost_id%5D=1&interval=60&_nonce=25ed3b910d&action=heartbeat&screen_id=post&has_focus=false
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "932240"
+  - test_title: 932240-9
+    desc: "Unix Command Injection - python version bypass test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            # "cmd=python3.10 cmd"
+            uri: '/get?cmd=""p""y""t""h""o""n""3"".""1""0""%20""c""m""d""'
+            version: HTTP/1.0
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-10
+    desc: Backticks command subtition WAF evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=ping``%20127.0.0.1"
+            protocol: "http"
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-11
+    desc: Backticks command subtition WAF evasion (mid command)
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=pi``ng%20127.0.0.1"
+            protocol: "http"
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-12
+    desc: Dollar sign command subtition WAF evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=ping$()%20127.0.0.1"
+            protocol: "http"
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-13
+    desc: Dollar sign command subtition WAF evasion (mid command)
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=pi$()ng%20127.0.0.1"
+            protocol: "http"
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-14
+    desc: Process subtition '<()' WAF evasion (mid command)
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=pi<()ng%20127.0.0.1"
+            protocol: "http"
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-15
+    desc: Process subtition '>()' WAF evasion (mid command)
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?x=pi>()ng%20127.0.0.1"
+            protocol: "http"
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-16
+    desc: FP against single quote inside string
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            data: |
+              payload=All told, people were taken with the concept of Stadia, but the execution just didn't work.
+            protocol: "http"
+          output:
+            no_log_contains: id "932240"
+  - test_title: 932240-17
+    desc: "Detect quote evasion: kill '-'9"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            data: |
+              payload=kill '-'9
+            protocol: "http"
+          output:
+            log_contains: id "932240"
+  - test_title: 932240-18
+    desc: "False positive against quote evasion with two quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            data: |
+              payload=An affordable housing advocate says the city's rewrite of the land development code would boost affordable housing, but there's room to do more.
+            protocol: "http"
+          output:
+            no_log_contains: id "932240"
+  - test_title: 932240-19
+    desc: "Detect quote evasion: py''thon"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            data: |
+              payload=py''thon -c "print('attack')"
+            protocol: "http"
+          output:
+            log_contains: id "932240"

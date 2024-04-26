@@ -1,0 +1,24 @@
+---
+meta:
+  author: "Christian S.J. Peron"
+  description: None
+  enabled: true
+  name: 942420.yaml
+tests:
+  - test_title: 942420-1
+    desc: "Restricted SQL Character Anomaly Detection (cookies): # of special characters exceeded (8)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Cookie: "ar=%7e%7e%7e%7e%7e%7e%7e%7e%7e&foo=var"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942420"

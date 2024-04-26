@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
 from copy import deepcopy
+from operator import itemgetter
 from os import sep
-from os.path import join
 from flask import flash
 from json import loads as json_loads
 from pathlib import Path
 from re import search as re_search
-from subprocess import run, DEVNULL, STDOUT
-from typing import List, Tuple
-from uuid import uuid4
+from typing import List, Literal, Optional, Tuple
 
 
 class Config:
@@ -17,7 +15,7 @@ class Config:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
 
-    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True) -> None:
+    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None) -> None:
         """Generates the nginx configuration file from the given configuration
 
         Parameters
@@ -30,48 +28,31 @@ class Config:
         ConfigGenerationError
             If an error occurred during the generation of the configuration file, raises this exception
         """
-        conf = deepcopy(global_conf)
+        conf = global_conf.copy()
 
         servers = []
         plugins_settings = self.get_plugins_settings()
         for service in services_conf:
             server_name = service["SERVER_NAME"].split(" ")[0]
-            for k in service:
-                key_without_server_name = k.replace(f"{server_name}_", "")
-                if plugins_settings[key_without_server_name]["context"] != "global" if key_without_server_name in plugins_settings else True:
-                    if not k.startswith(server_name) or k in plugins_settings:
-                        conf[f"{server_name}_{k}"] = service[k]
-                    else:
-                        conf[k] = service[k]
+            if not server_name:
+                continue
+
+            for k, v in service.items():
+                if server_name != changed_service and f"{server_name}_{k}" in conf:
+                    continue
+
+                if plugins_settings[k.rsplit("_", 1)[0] if re_search(r"_\d+$", k) else k]["context"] == "multisite":
+                    conf[f"{server_name}_{k}"] = v
 
             servers.append(server_name)
 
         conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
-        env_file = Path(sep, "tmp", f"{uuid4()}.env")
-        env_file.write_text(
-            "\n".join(f"{k}={conf[k]}" for k in sorted(conf)),
-            encoding="utf-8",
-        )
 
-        proc = run(
-            [
-                "python3",
-                join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                "--variables",
-                str(env_file),
-                "--method",
-                "ui",
-            ]
-            + (["--no-check-changes"] if not check_changes else []),
-            stdin=DEVNULL,
-            stderr=STDOUT,
-            check=False,
-        )
+        err = self.__db.save_config(conf, "ui", changed=check_changes)
 
-        env_file.unlink()
-        if proc.returncode != 0:
-            raise Exception(f"Error from generator (return code = {proc.returncode})")
+        if err:
+            self.__db.logger.warning(f"Couldn't save config to database : {err}, config may not work as expected")
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -79,9 +60,9 @@ class Config:
             **self.__settings,
         }
 
-    def get_plugins(self, *, external: bool = False, with_data: bool = False) -> List[dict]:
-        plugins = self.__db.get_plugins(external=external, with_data=with_data)
-        plugins.sort(key=lambda x: x["name"])
+    def get_plugins(self, *, _type: Literal["all", "external", "pro"] = "all", with_data: bool = False) -> List[dict]:
+        plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
+        plugins.sort(key=itemgetter("name"))
 
         general_plugin = None
         for plugin in plugins.copy():
@@ -98,7 +79,7 @@ class Config:
     def get_settings(self) -> dict:
         return self.__settings
 
-    def get_config(self, methods: bool = True) -> dict:
+    def get_config(self, methods: bool = True, with_drafts: bool = False) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
         Returns
@@ -106,9 +87,9 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__db.get_config(methods=methods)
+        return self.__db.get_config(methods=methods, with_drafts=with_drafts)
 
-    def get_services(self, methods: bool = True) -> list[dict]:
+    def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services
 
         Returns
@@ -116,9 +97,9 @@ class Config:
         list
             The services
         """
-        return self.__db.get_services_settings(methods=methods)
+        return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
-    def check_variables(self, variables: dict, _global: bool = False) -> int:
+    def check_variables(self, variables: dict) -> int:
         """Testify that the variables passed are valid
 
         Parameters
@@ -137,11 +118,6 @@ class Config:
             check = False
 
             if k in plugins_settings:
-                if _global ^ (plugins_settings[k]["context"] == "global"):
-                    error = 1
-                    flash(f"Variable {k} is not valid.", "error")
-                    continue
-
                 setting = k
             else:
                 setting = k[0 : k.rfind("_")]  # noqa: E203
@@ -150,7 +126,7 @@ class Config:
                     flash(f"Variable {k} is not valid.", "error")
                     continue
 
-            if not (_global ^ (plugins_settings[setting]["context"] == "global")) and re_search(plugins_settings[setting]["regex"], v):
+            if re_search(plugins_settings[setting]["regex"], v):
                 check = True
 
             if not check:
@@ -163,7 +139,7 @@ class Config:
     def reload_config(self) -> None:
         self.__gen_conf(self.get_config(methods=False), self.get_services(methods=False))
 
-    def new_service(self, variables: dict) -> Tuple[str, int]:
+    def new_service(self, variables: dict, is_draft: bool = False) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
         Parameters
@@ -181,23 +157,17 @@ class Config:
         Exception
             raise this if the service already exists
         """
-        services = self.get_services(methods=False)
+        services = self.get_services(methods=False, with_drafts=True)
         server_name_splitted = variables["SERVER_NAME"].split(" ")
         for service in services:
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
-                return (
-                    f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
-                    1,
-                )
+                return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
 
-        services.append(variables)
-        self.__gen_conf(self.get_config(methods=False), services)
-        return (
-            f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.",
-            0,
-        )
+        services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
+        self.__gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
+        return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
 
-    def edit_service(self, old_server_name: str, variables: dict, *, check_changes: bool = True) -> Tuple[str, int]:
+    def edit_service(self, old_server_name: str, variables: dict, *, check_changes: bool = True, is_draft: bool = False) -> Tuple[str, int]:
         """Edits a service
 
         Parameters
@@ -212,34 +182,28 @@ class Config:
         str
             the confirmation message
         """
-        services = self.get_services(methods=False)
+        services = self.get_services(methods=False, with_drafts=True)
         changed_server_name = old_server_name != variables["SERVER_NAME"]
         server_name_splitted = variables["SERVER_NAME"].split(" ")
         old_server_name_splitted = old_server_name.split(" ")
         for i, service in enumerate(deepcopy(services)):
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
                 if changed_server_name and service["SERVER_NAME"].split(" ")[0] != old_server_name_splitted[0]:
-                    return (
-                        f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
-                        1,
-                    )
+                    return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
                 services.pop(i)
             elif changed_server_name and (service["SERVER_NAME"] == old_server_name or service["SERVER_NAME"] in old_server_name_splitted):
                 services.pop(i)
 
-        services.append(variables)
+        services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
         config = self.get_config(methods=False)
 
         if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
-            for k in deepcopy(config):
+            for k in config.copy():
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        self.__gen_conf(config, services, check_changes=check_changes)
-        return (
-            f"Configuration for {old_server_name_splitted[0]} has been edited.",
-            0,
-        )
+        self.__gen_conf(config, services, check_changes=check_changes, changed_service=variables["SERVER_NAME"])
+        return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
     def edit_global_conf(self, variables: dict) -> str:
         """Edits the global conf
@@ -277,7 +241,7 @@ class Config:
         """
         service_name = service_name.split(" ")[0]
         full_env = self.get_config(methods=False)
-        services = self.get_services(methods=False)
+        services = self.get_services(methods=False, with_drafts=True)
         new_services = []
         found = False
 
@@ -292,7 +256,7 @@ class Config:
 
         full_env["SERVER_NAME"] = " ".join([s for s in full_env["SERVER_NAME"].split(" ") if s != service_name])
 
-        new_env = deepcopy(full_env)
+        new_env = full_env.copy()
 
         for k in full_env:
             if k.startswith(service_name):

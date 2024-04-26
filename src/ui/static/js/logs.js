@@ -188,6 +188,8 @@ class FetchLogs {
     this.logListContainer = document.querySelector(
       `[data-${this.prefix}-list]`,
     );
+    this.noRunLogEl = document.querySelector("[data-logs-no-run]");
+    this.logsCard = document.querySelector("[data-logs-card]");
     this.submitDate = document.querySelector("button[data-submit-date]");
     this.submitLive = document.querySelector("button[data-submit-live]");
 
@@ -372,6 +374,8 @@ class FetchLogs {
       this.logListContainer.appendChild(logContainer);
     });
 
+    this.showLogRunEls();
+
     //force scroll when no live update
     const logListEl = document.querySelector(`[data-${this.prefix}-list]`);
     logListEl.scrollTop = logListEl.scrollHeight;
@@ -404,12 +408,19 @@ class FetchLogs {
       this.logListContainer.appendChild(logContainer);
     });
 
+    this.showLogRunEls();
+
     //if live update, refetch to last update every defined delay
     if (this.submitLive.getAttribute("data-submit-live") === "yes") {
       setTimeout(() => {
         this.getLogsSinceLastUpdate();
       }, this.updateDelay);
     }
+  }
+
+  showLogRunEls() {
+    this.noRunLogEl.classList.add("hidden");
+    this.logsCard.classList.remove("hidden");
   }
 }
 

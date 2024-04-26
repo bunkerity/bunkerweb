@@ -1,0 +1,199 @@
+---
+meta:
+  author: "Christian S.J. Peron, Franziska Bühler"
+  description: None
+  enabled: true
+  name: 942230.yaml
+tests:
+  - test_title: 942230-1
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=%29%20like%20%28"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942230"
+  - test_title: 942230-2
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=%29like%28"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942230"
+  - test_title: 942230-3
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=I%20like%20you%21"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942230"
+  - test_title: 942230-4
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=%20case%20when%20condition1%20then%20result1"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942230"
+  - test_title: 942230-5
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=having%20pain%21"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942230"
+  - test_title: 942230-6
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=SELECT%20x%20GROUP%20BY%20SOMETHING%20HAVING%20COUNT%28Id%29%20%3E%3D%209"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942230"
+  - test_title: 942230-7
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=SELECT%20%2A%20FROM%20%60movies%60%20GROUP%20BY%20%60category_id%60%2C%60year_released%60%20HAVING%20%60category_id%60%20%3D%208%3B"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942230"
+  - test_title: 942230-8
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=behaving%20badly%2F"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942230"
+  - test_title: 942230-9
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=o.havingu%40gmail.com"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942230"
+  - test_title: 942230-10
+    desc: "conditional SQL injection attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=if%282%3D"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942230"
+  - test_title: 942230-11
+    desc: "Issue #1914: FP for case"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=Just%20in%20case%20%28abc%29"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942230"
+  - test_title: 942230-12
+    desc: "Issue #2230: FN for case"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=if%281234%3D"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942230"

@@ -1,27 +1,24 @@
-FROM python:3.12.1-alpine3.18@sha256:fb759579d60cfe1f70b110a27be95aaa7cf758d2fa21cf54fffb71c2ba3f8034 AS builder
+FROM python:3.12.3-alpine3.19@sha256:ef097620baf1272e38264207003b0982285da3236a20ed829bf6bbf1e85fe3cb as builder
+
+# Export var for specific actions on linux/arm/v7
+ARG TARGETPLATFORM
+
+# Install python dependencies
+RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
+COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
+COPY src/common/db/requirements.armv7.txt /tmp/req/requirements-db.armv7.txt
 
 WORKDIR /usr/share/bunkerweb
 
-RUN mkdir -p deps/python && \
-  cat /tmp/req/requirements.txt* > deps/requirements.txt && \
-  rm -rf /tmp/req
-
-# Install python dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev
-
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
-
-# Remove build dependencies
-RUN apk del .build-deps && \
-  rm -rf /var/cache/apk/*
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.armv7.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.armv7.txt ; fi && \
+  pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
+  pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -34,7 +31,7 @@ COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 
-FROM python:3.12.1-alpine3.18@sha256:fb759579d60cfe1f70b110a27be95aaa7cf758d2fa21cf54fffb71c2ba3f8034
+FROM python:3.12.3-alpine3.19@sha256:ef097620baf1272e38264207003b0982285da3236a20ed829bf6bbf1e85fe3cb
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -49,9 +46,8 @@ RUN apk add --no-cache bash && \
   addgroup -g 101 autoconf && \
   adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf && \
   cp helpers/bwcli /usr/bin/ && \
-  mkdir -p /var/tmp/bunkerweb && \
-  mkdir -p /var/www && \
-  mkdir -p /etc/bunkerweb && \
+  echo "Docker" > INTEGRATION && \
+  mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /data/www && ln -s /data/www /var/www/html && \
@@ -59,14 +55,20 @@ RUN apk add --no-cache bash && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:autoconf /data && \
   chmod -R 770 /data && \
-  chown -R root:autoconf /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
+  chown -R root:autoconf INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
-  chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/*
+  chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/* && \
+  chmod 660 INTEGRATION
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.1.4-r3" "libssl3>=3.1.4-r3" "sqlite-libs>=3.41.2-r3"
+# There are no CVEs to fix for this image
 
-VOLUME /data /etc/nginx
+LABEL maintainer "Bunkerity <contact@bunkerity.com>"
+LABEL version "1.5.7"
+LABEL url "https://www.bunkerweb.io"
+LABEL bunkerweb.type "autoconf"
+
+VOLUME /data
 
 WORKDIR /usr/share/bunkerweb/autoconf
 

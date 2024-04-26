@@ -1,0 +1,38 @@
+---
+meta:
+  author: "Christian S.J. Peron"
+  enabled: true
+  name: "921150.yaml"
+  description: "Tests for protocol based attacks"
+tests:
+  - test_title: 921150-1
+    desc: "HTTP Header Injection Attack via payload"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/script.jsp?variableX=bar&variable2=Y&%0d%0restofdata"
+          output:
+            log_contains: "id \"921150\""
+  - test_title: 921150-2
+    desc: "Status Page Test - Header Injection Attack (CR/LF detected): Send a parameter name that includes %0d%0a (percent-encoded CR-LF)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            port: 80
+            headers:
+              Host: localhost
+              User-Agent: OWASP CRS test agent
+              Accept: "*/*"
+            method: GET
+            uri: "/?parameter%0d%0a=test"
+            version: HTTP/1.0
+          output:
+            log_contains: id "921150"

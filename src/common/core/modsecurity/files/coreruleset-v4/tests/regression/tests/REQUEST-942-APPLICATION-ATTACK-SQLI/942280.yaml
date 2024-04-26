@@ -1,0 +1,40 @@
+---
+meta:
+  author: "Christian S.J. Peron"
+  description: None
+  enabled: true
+  name: 942280.yaml
+tests:
+  - test_title: 942280-1
+    desc: "Postgres pg_sleep injection, waitfor delay attacks and database shutdown attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?var=select%20pg_sleep"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942280"
+  - test_title: 942280-2
+    desc: "SQL Server waitfor delay attack"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=\"tester@coreruleset.org\"' waitfor delay'0:0:20'--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942280

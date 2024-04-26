@@ -34,6 +34,7 @@ function country:access()
 					.. ")"
 			)
 		end
+		self:set_metric("counters", "failed_country", 1)
 		return self:ret(
 			true,
 			"client IP "
@@ -85,6 +86,7 @@ function country:access()
 		if not ok then
 			return self:ret(false, "error while adding item to cache : " .. err)
 		end
+		self:set_metric("counters", "failed_country", 1)
 		return self:ret(
 			true,
 			"client IP " .. self.ctx.bw.remote_addr .. " is not whitelisted (country = " .. country_data .. ")",
@@ -105,6 +107,7 @@ function country:access()
 				if not ok then
 					return self:ret(false, "error while adding item to cache : " .. err)
 				end
+				self:set_metric("counters", "failed_country", 1)
 				return self:ret(
 					true,
 					"client IP " .. self.ctx.bw.remote_addr .. " is blacklisted (country = " .. country_data .. ")",

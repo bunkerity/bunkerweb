@@ -1,12 +1,16 @@
 #!/bin/bash
 
 integration=$1
+release=$2
 
 if [ -z "$integration" ] ; then
     echo "💾 Please provide an integration name as argument ❌"
     exit 1
 elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
     echo "💾 Integration \"$integration\" is not supported ❌"
+    exit 1
+elif [ "$integration" == "docker" ] && [ -z "$release" ] ; then
+    echo "💾 Please provide a release as argument when using docker integration ❌"
     exit 1
 fi
 
@@ -57,7 +61,7 @@ else
     export GLOBAL_HTTP_PORT="80"
     export GLOBAL_HTTPS_PORT="443"
     export GLOBAL_DNS_RESOLVERS="9.9.9.9 8.8.8.8 8.8.4.4"
-    export GLOBAL_LOG_LEVEL="info"
+    export GLOBAL_LOG_LEVEL="debug"
     export GLOBAL_USE_BUNKERNET="no"
     export GLOBAL_USE_BLACKLIST="no"
     export GLOBAL_SEND_ANONYMOUS_REPORT="no"
@@ -78,6 +82,8 @@ cleanup_stack () {
             rm -rf init/bunkerweb
             find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@MULTISITE: "yes"$@MULTISITE: "no"@' {} \;
+            sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$release"'@' docker-compose.yml
+            sed -i 's@bunkerity/bunkerweb-scheduler:.*$@bunkerity/bunkerweb-scheduler:'"$release"'@' docker-compose.yml
             sed -i 's@bwadm.example.com_USE_REVERSE_PROXY@USE_REVERSE_PROXY@' docker-compose.yml
             sed -i 's@bwadm.example.com_REVERSE_PROXY_HOST@REVERSE_PROXY_HOST@' docker-compose.yml
             sed -i 's@bwadm.example.com_REVERSE_PROXY_URL@REVERSE_PROXY_URL@' docker-compose.yml
@@ -128,7 +134,24 @@ cleanup_stack () {
     echo "💾 Cleaning up current stack ..."
 
     if [ "$integration" == "docker" ] ; then
-        docker compose down -v --remove-orphans
+        soft_cleanup=$1
+        if [ "$soft_cleanup" = "1" ] ; then
+            docker compose down
+        else
+            docker compose down -v --remove-orphans
+        fi
+
+        if [[ $end -eq 0 && $exit_code = 1 ]] && [ $manual = 0 ] ; then
+            echo "💾 Removing bw-docker network ..."
+
+            docker network rm bw-docker
+
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                echo "💾 Network removal failed ❌"
+                exit 1
+            fi
+        fi
     else
         sudo systemctl stop bunkerweb
         sudo truncate -s 0 /var/log/bunkerweb/error.log
@@ -145,6 +168,123 @@ cleanup_stack () {
 
 # Cleanup stack on exit
 trap cleanup_stack EXIT
+
+starting_stack () {
+    echo "💾 Starting stack ..."
+    if [ "$integration" == "docker" ] ; then
+        docker compose up -d
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            echo "💾 Up failed, retrying ... ⚠️"
+            manual=1
+            cleanup_stack
+            if [ "$test" = "mariadb" ] ; then
+                docker compose -f docker-compose.mariadb.yml up -d
+                if [ $? -ne 0 ] ; then
+                    echo "💾 Up failed ❌"
+                    exit 1
+                fi
+            elif [ "$test" = "mysql" ] ; then
+                docker compose -f docker-compose.mysql.yml up -d
+                if [ $? -ne 0 ] ; then
+                    echo "💾 Up failed ❌"
+                    exit 1
+                fi
+            elif [ "$test" = "postgres" ] ; then
+                docker compose -f docker-compose.postgres.yml up -d
+                if [ $? -ne 0 ] ; then
+                    echo "💾 Up failed ❌"
+                    exit 1
+                fi
+            fi
+            manual=0
+            docker compose up -d
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                echo "💾 Up failed ❌"
+                exit 1
+            fi
+        fi
+    else
+        sudo systemctl start bunkerweb
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            echo "💾 Start failed ❌"
+            exit 1
+        fi
+    fi
+}
+
+waiting_stack () {
+    # Check if stack is healthy
+    echo "💾 Waiting for stack to be healthy ..."
+    i=0
+    if [ "$integration" == "docker" ] ; then
+        while [ $i -lt 120 ] ; do
+            containers=("db-bw-1" "db-bw-scheduler-1")
+            healthy="true"
+            for container in "${containers[@]}" ; do
+                check="$(docker inspect --format "{{json .State.Health }}" "$container" | grep "healthy")"
+                if [ "$check" = "" ] ; then
+                    healthy="false"
+                    break
+                fi
+            done
+            if [ "$healthy" = "true" ] ; then
+                echo "💾 Docker stack is healthy ✅"
+                break
+            fi
+            sleep 1
+            i=$((i+1))
+        done
+        if [ $i -ge 120 ] ; then
+            docker compose logs
+            echo "💾 Docker stack is not healthy ❌"
+            echo "🛡️ Showing BunkerWeb and BunkerWeb Scheduler logs ..."
+            docker compose logs bw bw-scheduler
+            exit 1
+        fi
+    else
+        healthy="false"
+        retries=0
+        while [[ $healthy = "false" && $retries -lt 5 ]] ; do
+            while [ $i -lt 120 ] ; do
+                if sudo grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" ; then
+                    echo "💾 Linux stack is healthy ✅"
+                    break
+                fi
+                sleep 1
+                i=$((i+1))
+            done
+            if [ $i -ge 120 ] ; then
+                sudo journalctl -u bunkerweb --no-pager
+                echo "🛡️ Showing BunkerWeb error logs ..."
+                sudo cat /var/log/bunkerweb/error.log
+                echo "🛡️ Showing BunkerWeb access logs ..."
+                sudo cat /var/log/bunkerweb/access.log
+                echo "💾 Linux stack is not healthy ❌"
+                exit 1
+            fi
+
+            if sudo journalctl -u bunkerweb --no-pager | grep -q "SYSTEMCTL - ❌ " ; then
+                echo "💾 ⚠ Linux stack got an issue, restarting ..."
+                sudo journalctl --rotate
+                sudo journalctl --vacuum-time=1s
+                manual=1
+                cleanup_stack
+                manual=0
+                sudo systemctl start bunkerweb
+                retries=$((retries+1))
+            else
+                healthy="true"
+            fi
+        done
+        if [ "$retries" -ge 5 ] ; then
+            echo "💾 Linux stack could not be healthy ❌"
+            exit 1
+        fi
+    fi
+}
 
 echo "💾 Initializing workspace ..."
 if [ "$integration" == "docker" ] ; then
@@ -222,7 +362,7 @@ fi
 tests="local multisite"
 
 if [ "$integration" == "docker" ] ; then
-    tests="$tests mariadb mysql postgres"
+    tests="$tests mariadb mysql postgres upgrade"
 fi
 
 for test in $tests
@@ -329,120 +469,52 @@ do
                 exit 1
             fi
         fi
-    fi
+    elif [ "$test" = "upgrade" ] ; then
+        older_version="$(curl -i https://github.com/bunkerity/bunkerweb/tags | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+' | uniq | sed -n 1p | cut -c 2-)"
+        echo "💾 Running tests when upgrading from $older_version (older) to latest version ..."
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"@' {} \;
+        sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$older_version"'@' docker-compose.yml
+        sed -i 's@bunkerity/bunkerweb-scheduler:.*$@bunkerity/bunkerweb-scheduler:'"$older_version"'@' docker-compose.yml
 
-    echo "💾 Starting stack ..."
-    if [ "$integration" == "docker" ] ; then
-        docker compose up -d
+        docker pull bunkerity/bunkerweb:"$older_version"
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
-            echo "💾 Up failed, retrying ... ⚠️"
-            manual=1
-            cleanup_stack
-            if [ "$test" = "mariadb" ] ; then
-                docker compose -f docker-compose.mariadb.yml up -d
-                if [ $? -ne 0 ] ; then
-                    echo "💾 Up failed ❌"
-                    exit 1
-                fi
-            elif [ "$test" = "mysql" ] ; then
-                docker compose -f docker-compose.mysql.yml up -d
-                if [ $? -ne 0 ] ; then
-                    echo "💾 Up failed ❌"
-                    exit 1
-                fi
-            elif [ "$test" = "postgres" ] ; then
-                docker compose -f docker-compose.postgres.yml up -d
-                if [ $? -ne 0 ] ; then
-                    echo "💾 Up failed ❌"
-                    exit 1
-                fi
-            fi
-            manual=0
-            docker compose up -d
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                echo "💾 Up failed ❌"
-                exit 1
-            fi
+            echo "💾 Pull for bunkerweb:$older_version failed ❌"
+            exit 1
         fi
-    else
-        sudo systemctl start bunkerweb
+
+        docker pull bunkerity/bunkerweb-scheduler:"$older_version"
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
-            echo "💾 Start failed ❌"
+            echo "💾 Pull for bunkerweb-scheduler:$older_version failed ❌"
+            exit 1
+        fi
+
+        starting_stack
+
+        waiting_stack
+
+        manual=1
+        cleanup_stack "1"
+        manual=0
+
+        sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$release"'@' docker-compose.yml
+        sed -i 's@bunkerity/bunkerweb-scheduler:.*$@bunkerity/bunkerweb-scheduler:'"$release"'@' docker-compose.yml
+
+        echo "💾 Removing bw-volume volume ..."
+
+        docker volume rm bw-volume
+
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            echo "💾 Volume removal failed ❌"
             exit 1
         fi
     fi
 
-    # Check if stack is healthy
-    echo "💾 Waiting for stack to be healthy ..."
-    i=0
-    if [ "$integration" == "docker" ] ; then
-        while [ $i -lt 120 ] ; do
-            containers=("db-bw-1" "db-bw-scheduler-1")
-            healthy="true"
-            for container in "${containers[@]}" ; do
-                check="$(docker inspect --format "{{json .State.Health }}" "$container" | grep "healthy")"
-                if [ "$check" = "" ] ; then
-                    healthy="false"
-                    break
-                fi
-            done
-            if [ "$healthy" = "true" ] ; then
-                echo "💾 Docker stack is healthy ✅"
-                break
-            fi
-            sleep 1
-            i=$((i+1))
-        done
-        if [ $i -ge 120 ] ; then
-            docker compose logs
-            echo "💾 Docker stack is not healthy ❌"
-            echo "🛡️ Showing BunkerWeb and BunkerWeb Scheduler logs ..."
-            docker compose logs bw bw-scheduler
-            exit 1
-        fi
-    else
-        healthy="false"
-        retries=0
-        while [[ $healthy = "false" && $retries -lt 5 ]] ; do
-            while [ $i -lt 120 ] ; do
-                if sudo grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" ; then
-                    echo "💾 Linux stack is healthy ✅"
-                    break
-                fi
-                sleep 1
-                i=$((i+1))
-            done
-            if [ $i -ge 120 ] ; then
-                sudo journalctl -u bunkerweb --no-pager
-                echo "🛡️ Showing BunkerWeb error logs ..."
-                sudo cat /var/log/bunkerweb/error.log
-                echo "🛡️ Showing BunkerWeb access logs ..."
-                sudo cat /var/log/bunkerweb/access.log
-                echo "💾 Linux stack is not healthy ❌"
-                exit 1
-            fi
+    starting_stack
 
-            if sudo journalctl -u bunkerweb --no-pager | grep -q "SYSTEMCTL - ❌ " ; then
-                echo "💾 ⚠ Linux stack got an issue, restarting ..."
-                sudo journalctl --rotate
-                sudo journalctl --vacuum-time=1s
-                manual=1
-                cleanup_stack
-                manual=0
-                sudo systemctl start bunkerweb
-                retries=$((retries+1))
-            else
-                healthy="true"
-            fi
-        done
-        if [ "$retries" -ge 5 ] ; then
-            echo "💾 Linux stack could not be healthy ❌"
-            exit 1
-        fi
-    fi
+    waiting_stack
 
     # Start tests
 
@@ -468,6 +540,18 @@ do
         exit 1
     else
         echo "💾 Test \"$test\" succeeded ✅"
+    fi
+
+    if [ "$test" = "upgrade" ] ; then
+        scheduler_logs="$(docker compose logs bw-scheduler)"
+        if echo "$scheduler_logs" | grep -q "❌" ; then
+            echo "💾 Upgrade test failed ❌"
+            echo "🛡️ Showing BunkerWeb Scheduler logs ..."
+            echo "$scheduler_logs"
+            exit 1
+        else
+            echo "💾 Upgrade test succeeded ✅"
+        fi
     fi
 
     manual=1

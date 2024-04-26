@@ -463,6 +463,14 @@ int Transaction::processURI(const char *uri, const char *method,
 
     size_t pos_raw_query = uri_s.find("?");
 
+    std::string path_info_raw;
+    if (pos_raw_query == std::string::npos) {
+        path_info_raw = std::string(uri_s, 0);
+    } else {
+        path_info_raw = std::string(uri_s, 0, pos_raw_query);
+    }
+    std::string path_info = utils::uri_decode(path_info_raw);
+
     m_uri_decoded = utils::uri_decode(uri_s);
 
     size_t var_size = pos_raw_query;
@@ -477,15 +485,8 @@ int Transaction::processURI(const char *uri, const char *method,
     m_variableRequestProtocol.set("HTTP/" + std::string(http_version),
         m_variableOffset + requestLine.size() + 1);
 
-
-    size_t pos_query = m_uri_decoded.find("?");
-    if (pos_query != std::string::npos) {
-        m_uri_no_query_string_decoded = std::unique_ptr<std::string>(
-            new std::string(m_uri_decoded, 0, pos_query));
-    } else {
-        m_uri_no_query_string_decoded = std::unique_ptr<std::string>(
-            new std::string(m_uri_decoded));
-    }
+    m_uri_no_query_string_decoded = std::unique_ptr<std::string>(
+        new std::string(path_info));
 
 
     if (pos_raw_query != std::string::npos) {
@@ -495,12 +496,7 @@ int Transaction::processURI(const char *uri, const char *method,
             + std::string(method).size() + 1);
     }
 
-    std::string path_info;
-    if (pos_query == std::string::npos) {
-        path_info = std::string(m_uri_decoded, 0);
-    } else {
-        path_info = std::string(m_uri_decoded, 0, pos_query);
-    }
+
     if (var_size == std::string::npos) {
         var_size = uri_s.size();
     }

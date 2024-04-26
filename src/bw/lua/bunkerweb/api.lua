@@ -94,10 +94,12 @@ end
 
 api.global.POST["^/reload$"] = function(self)
 	-- Check config
+	logger:log(NOTICE, "Checking Nginx configuration")
 	local status = execute("nginx -t")
 	if status ~= 0 then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed")
 	end
+	logger:log(NOTICE, "Nginx configuration is valid, reloading Nginx")
 	-- Send HUP signal to master process
 	local ok, err = kill(get_master_pid(), "HUP")
 	if not ok then
@@ -128,6 +130,8 @@ api.global.POST["^/confs$"] = function(self)
 		destination = "/etc/bunkerweb/configs"
 	elseif self.ctx.bw.uri == "/plugins" then
 		destination = "/etc/bunkerweb/plugins"
+	elseif self.ctx.bw.uri == "/pro_plugins" then
+		destination = "/etc/bunkerweb/pro/plugins"
 	end
 	local form, err = upload:new(4096)
 	if not form then
@@ -174,6 +178,8 @@ api.global.POST["^/cache$"] = api.global.POST["^/confs$"]
 api.global.POST["^/custom_configs$"] = api.global.POST["^/confs$"]
 
 api.global.POST["^/plugins$"] = api.global.POST["^/confs$"]
+
+api.global.POST["^/pro_plugins$"] = api.global.POST["^/confs$"]
 
 api.global.POST["^/unban$"] = function(self)
 	read_body()
@@ -258,10 +264,15 @@ api.global.GET["^/bans$"] = function(self)
 					"can't access ttl " .. k .. " from datastore : " .. ttl
 				)
 			end
-			local ban_data = decode(result)
-			local ban =
+			local ban_data
+			ok, ban_data = pcall(decode, result)
+			if not ok then
+				ban_data = { reason = result, date = -1 }
+			end
+			table.insert(
+				data,
 				{ ip = k:sub(9, #k), reason = ban_data["reason"], date = ban_data["date"], exp = math.floor(ttl) }
-			table.insert(data, ban)
+			)
 		end
 	end
 	return self:response(HTTP_OK, "success", data)

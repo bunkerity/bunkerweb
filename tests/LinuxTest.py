@@ -11,7 +11,7 @@ class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro, domains={}):
         super().__init__(name, "linux", timeout, tests, delay=20)
         self._domains = domains
-        if distro not in ("ubuntu", "debian", "fedora", "centos", "rhel"):
+        if distro not in ("ubuntu", "debian", "fedora", "centos") and not distro.startswith("rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
 
@@ -26,7 +26,7 @@ class LinuxTest(Test):
                 raise Exception("docker run failed (linux stack)")
             if distro in ("ubuntu", "debian"):
                 cmd = "echo force-bad-version >> /etc/dpkg/dpkg.cfg ; apt install -y /opt/\\$(ls /opt | grep deb)"
-            elif distro in ("centos", "fedora", "rhel"):
+            elif distro in ("centos", "fedora") or distro.startswith("rhel"):
                 cmd = "dnf install -y /opt/\\$(ls /opt | grep rpm)"
             proc = LinuxTest.docker_exec(distro, cmd)
             if proc.returncode != 0:
@@ -53,7 +53,7 @@ class LinuxTest(Test):
                         "/etc/php/8.2/fpm/pool.d/www.conf",
                     )
                     LinuxTest.docker_exec(distro, "systemctl stop php8.2-fpm ; systemctl start php8.2-fpm")
-            elif distro in ("centos", "fedora", "rhel"):
+            elif distro in ("centos", "fedora") or distro.startswith("rhel"):
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm unzip")
                 LinuxTest.docker_cp(distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf")
                 LinuxTest.docker_exec(

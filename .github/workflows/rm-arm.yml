@@ -21,9 +21,9 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
       - name: Delete ARM VM
-        uses: scaleway/action-scw@c718eca1fcb9fec1fb1433752d61599c6a0ad2e9
+        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
         with:
           args: instance server delete ${{ secrets.ARM_ID }} zone=fr-par-2 with-ip=true with-volumes=all force-shutdown=true
           access-key: ${{ secrets.SCW_ACCESS_KEY }}

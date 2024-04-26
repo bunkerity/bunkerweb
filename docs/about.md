@@ -4,16 +4,32 @@
 
 BunkerWeb is maintained by [Bunkerity](https://www.bunkerity.com/?utm_campaign=self&utm_source=doc), a French 🇫🇷 company specialized in Cybersecurity 🛡️.
 
+## Do you have a professional version ?
+
+Yes, we do offer a professional version of BunkerWeb called "BunkerWeb PRO".
+
+Here are the main benefits of BunkerWeb PRO :
+
+- Unlock all features of BunkerWeb
+- Pay per protected services
+- Respond to professional needs
+- Free trial with no credit card
+- Best effort support included
+
+You can go the [BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to get more information and claim your free trial.
+
 ## Do you offer professional services ?
 
-Yes, we offer professional services related to BunkerWeb such as :
+Yes, we offer professional services related to BunkerWeb.
+
+You can get in touch with us about any of the following :
 
 - Consulting
 - Support
 - Custom development
 - Partnership
 
-**We have a [dedicated panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to centralize all professional requests.**
+We have a [dedicated panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to centralize all professional requests.
 
 You can also contact use at [contact@bunkerity.com](mailto:contact@bunkerity.com) if you are interested.
 

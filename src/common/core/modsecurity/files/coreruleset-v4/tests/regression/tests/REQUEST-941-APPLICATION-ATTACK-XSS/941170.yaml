@@ -1,0 +1,83 @@
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "941170.yaml"
+  description: "Tests to trigger, or not trigger 941170"
+tests:
+  - test_title: 941170-1
+    desc: XSS in XML Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/char_test?mime=text/xml&body=%3Cx:script%20xmlns:x=%22http://www.w3.org/1999/xhtml%22%20src=%22data:,alert(1)%22%20/%3E'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "941170"
+  - test_title: 941170-2
+    desc: "XSS test based on portswigger XSS cheatsheet"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: POST
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/'
+            data: "payload=javascript:/*--></title></style></textarea></script></xmp><svg/onload='+/\"/+/onmouseover=1/+/[*/[]/+alert(1)//'></a>"
+          output:
+            log_contains: id "941170"
+  - test_title: 941170-3
+    desc: 'Test first backslash match (javascript:(?:[\s\S]+[=\x5c\(\[\.<]) with: javascript: \\\\t (extra backslashes to work around rule transformations)'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/?var=javascript:%20%5C%5C%5C%5Ct'
+            headers:
+              Accept: "*/*"
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+          output:
+            log_contains: id "941170"
+  - test_title: 941170-4
+    desc: 'Test second backslash match (javascript:(?:...|\x5c[ux]\d)) with: javascript:\\\\u0020 (extra backslashes to work around rule transformations)'
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/?var=javascript:%5C%5C%5C%5Cu0020'
+            headers:
+              Accept: "*/*"
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+          output:
+            log_contains: id "941170"
+  - test_title: 941170-5
+    desc: "Status Page Test -  data: , <x> as GET variable"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/?test=%20data%3A%20%2C%20%3Cx%3E'
+            headers:
+              Accept: "*/*"
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+          output:
+            log_contains: id "941170"

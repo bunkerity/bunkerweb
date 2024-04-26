@@ -31,6 +31,12 @@ function buildPackage() {
     if [ "$DISTRO" = "fedora" ]; then
       sudo docker build -t linux-fedora -f src/linux/Dockerfile-fedora .
     fi
+    if [ "$DISTRO" = "rhel" ]; then
+      sudo docker build -t linux-rhel -f src/linux/Dockerfile-rhel .
+    fi
+    if [ "$DISTRO" = "rhel9" ]; then
+      sudo docker build -t linux-rhel9 -f src/linux/Dockerfile-rhel9 .
+    fi
   fi
 }
 
@@ -50,13 +56,19 @@ function createContainer() {
     if [ "$DISTRO" = "fedora" ]; then
       sudo docker run -v /tmp/fedora:/data linux-fedora
     fi
+    if [ "$DISTRO" = "rhel" ]; then
+      sudo docker run -v /tmp/rhel:/data linux-rhel
+    fi
+    if [ "$DISTRO" = "rhel9" ]; then
+      sudo docker run -v /tmp/rhel9:/data linux-rhel9
+    fi
   fi
 }
 
 # Retrieve $DISTRO from the user
 
 function retrieveDistro() {
-  echo "Which distro do you want to use? (ubuntu, debian, centos, fedora)"
+  echo "Which distro do you want to use? (ubuntu, debian, centos, fedora, rhel, rhel9)"
   read -r DISTRO
 }
 

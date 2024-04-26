@@ -1,0 +1,42 @@
+name: Create changelog PRs
+
+# default token permissions: none
+permissions: {}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * Sun' # run on Sundays at 4 AM UTC
+
+jobs:
+  create-changelog-prs:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repo"
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Python 3
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: 3.12
+
+      - name: Check GH API rate limits
+        run: |
+          gh api -i repos/coreruleset/coreruleset/releases/latest | grep -i "x-ratelimit"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Run script"
+        run: ".github/create-changelog-prs.py"
+        env:
+          # Required for the use of the gh CLI in the script
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check GH API rate limits
+        run: |
+          gh api -i repos/coreruleset/coreruleset/releases/latest | grep -i "x-ratelimit"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

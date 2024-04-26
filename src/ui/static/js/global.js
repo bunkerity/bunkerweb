@@ -53,19 +53,43 @@ class News {
 
   init() {
     window.addEventListener("load", () => {
-      try {
-        fetch("https://www.bunkerweb.io/api/posts/0/2")
-          .then((res) => {
-            return res.json();
-          })
-          .then((res) => {
-            return this.render(res.data);
-          });
-      } catch (err) {}
+      if (sessionStorage.getItem("lastRefetch") !== null) {
+        const storeStamp = sessionStorage.getItem("lastRefetch");
+        const nowStamp = Math.round(new Date().getTime() / 1000);
+        if (+nowStamp > storeStamp) {
+          sessionStorage.removeItem("lastRefetch");
+          sessionStorage.removeItem("lastNews");
+        }
+      }
+
+      if (sessionStorage.getItem("lastNews") !== null)
+        return this.render(JSON.parse(sessionStorage.getItem("lastNews")));
+
+      fetch("https://www.bunkerweb.io/api/posts/0/2")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          const reverseData = res.data.reverse();
+          return this.render(reverseData);
+        })
+        .catch((e) => {});
     });
   }
 
   render(lastNews) {
+    // store for next time if not the case
+    if (
+      !sessionStorage.getItem("lastNews") &&
+      !sessionStorage.getItem("lastRefetch")
+    ) {
+      sessionStorage.setItem(
+        "lastRefetch",
+        Math.round(new Date().getTime() / 1000) + 3600,
+      );
+      sessionStorage.setItem("lastNews", JSON.stringify(lastNews));
+    }
+
     const newsContainer = document.querySelector("[data-news-container]");
     //remove default message
     newsContainer.textContent = "";
@@ -80,11 +104,20 @@ class News {
         news.tags,
         news.date,
       );
+      const BASE_URL = this.BASE_URL;
       let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
       document
         .querySelector("[data-news-container]")
         .insertAdjacentHTML("afterbegin", cleanHTML);
+      document.querySelectorAll(`.blog-click-${news.slug}`).forEach((slug) => {
+        slug.addEventListener("click", function () {
+          window.open(`${BASE_URL}/blog/post/${news.slug}`, "_blank");
+        });
+      });
+      document.querySelectorAll(".blog-click-tag").forEach((tag) => {
+        tag.target = "_blank";
+      });
     });
   }
 
@@ -94,7 +127,7 @@ class News {
     tags.forEach((tag) => {
       tagList += ` <a
       href="${this.BASE_URL}/blog/tag/${tag.slug}"
-      class="my-0 mr-1 rounded bg-secondary hover:brightness-90 hover:-translate-y-0.4 text-white py-1 px-2 text-sm"
+      class="blog-click-tag my-0 mr-1 rounded bg-secondary hover:brightness-90 hover:-translate-y-0.4 text-white py-1 px-2 text-sm"
       >
       ${tag.name}
       </a>`;
@@ -106,19 +139,16 @@ class News {
       >
         <div>
             <img  role="link"
-                onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-                class="cursor-pointer rounded w-full  h-40 m-0 object-cover"
+                class="blog-click-${slug} cursor-pointer rounded w-full  h-40 m-0 object-cover"
                 src="${img}"
                 alt="image"
             />
             <span role="link"
-            onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="block cursor-pointer mt-3 mb-1 text-xl font-semibold text-primary dark:text-white tracking-wide">${title}</span>
+            class="blog-click-${slug} block cursor-pointer mt-3 mb-1 text-xl font-semibold text-primary dark:text-white tracking-wide">${title}</span>
         </div>
         <div>
             <div  role="link"
-            onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="cursor-pointer min-h-[100px] mb-3 dark:text-gray-300 text-gray-600 pt-3">
+            class="blog-click-${slug} cursor-pointer min-h-[100px] mb-3 dark:text-gray-300 text-gray-600 pt-3">
                 ${excerpt}
             </div>
             <div class="min-h-[75px] mt-2 flex flex-wrap justify-start items-end align-bottom">
@@ -204,7 +234,7 @@ class darkMode {
       body: JSON.stringify({ darkmode: isDark }),
     };
     const send = await fetch(
-      `${location.href.split("/").slice(0, -1).join("/")}/darkmode`,
+      document.querySelector("[data-mode-link]").getAttribute("data-mode-link"),
       data,
     );
   }
@@ -222,6 +252,15 @@ class FlashMsg {
     //animate message button if message + never opened
     window.addEventListener("load", (e) => {
       if (Number(this.flashCount.textContent) > 0) this.animeBtn();
+      // display only one fixed flash message
+      const flashFixedEls = document.querySelectorAll(
+        "[data-flash-message-fixed]",
+      );
+      if (flashFixedEls.length > 1) {
+        flashFixedEls.forEach((el, i) => {
+          if (i > 0) el.remove();
+        });
+      }
     });
     //stop animate if clicked once
     this.openBtn.addEventListener("click", (e) => {
@@ -323,7 +362,62 @@ class Banner {
   }
 
   init() {
-    this.changeMenu();
+    window.addEventListener("load", () => {
+      this.changeMenu();
+      this.loadData();
+      this.animateBanner();
+    });
+  }
+
+  loadData() {
+    if (sessionStorage.getItem("bannerRefetch") !== null) {
+      const storeStamp = sessionStorage.getItem("bannerRefetch");
+      const nowStamp = Math.round(new Date().getTime() / 1000);
+      if (+nowStamp > storeStamp) {
+        sessionStorage.removeItem("bannerRefetch");
+        sessionStorage.removeItem("bannerNews");
+      }
+    }
+
+    //[
+    //   {
+    //  "content": "<p  class='dark:brightness-125 mb-0 text-center text-xs xs:text-sm text-white' style='color:white'> Need premium support ? <a class='dark:brightness-125 font-medium underline text-gray-100 hover:no-underline ml-1' style='text-decoration:underline; color :  white;' href='https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc'>Check BunkerWeb Panel</a></p>"
+    // }
+    //]
+    // Try to get data from api
+    if (sessionStorage.getItem("bannerNews") !== null) {
+      return this.updateBanner(
+        JSON.parse(sessionStorage.getItem("bannerNews")),
+      );
+    }
+    fetch("https://www.bunkerweb.io/api/bw-ui-news")
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        sessionStorage.setItem("bannerNews", JSON.stringify(res.data[0].data));
+        // Refetch after one hour
+        sessionStorage.setItem(
+          "bannerRefetch",
+          Math.round(new Date().getTime() / 1000) + 3600,
+        );
+        return this.updateBanner(res.data[0].data);
+      })
+      .catch((e) => {});
+  }
+
+  updateBanner(bannerNews) {
+    // store for next time
+    const bannerItems = this.bannerEl.querySelectorAll('[role="listitem"]');
+    const maxItems = Math.min(bannerNews.length, bannerItems.length);
+
+    for (let i = 0; i < maxItems; i++) {
+      const bannerEl = bannerItems[i];
+      bannerEl.innerHTML = bannerNews[i]["content"];
+    }
+  }
+
+  animateBanner() {
     setInterval(() => {
       // Get current visible
       let visibleEl;
@@ -365,6 +459,7 @@ class Banner {
     }, this.nextDelay);
   }
 
+  // update float button position looking at current banner visibility
   changeMenu() {
     let options = {
       root: null,
@@ -445,9 +540,9 @@ const setSelect = new Select();
 const setPassword = new Password();
 const setDisabledPop = new DisabledPop();
 const setNews = new News();
+const setBanner = new Banner();
 const setDarkM = new darkMode();
 const setFlash = new FlashMsg();
-const setBanner = new Banner();
 const setLoader = new Loader();
 const setMenu = new Menu();
 

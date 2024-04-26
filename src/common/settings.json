@@ -3,8 +3,8 @@
     "context": "global",
     "default": "no",
     "help": "Internal use : set to yes when BW is loading.",
-    "id": "internal-use",
-    "label": "internal use",
+    "id": "internal-use-loading",
+    "label": "internal use loading",
     "regex": "^(yes|no)$",
     "type": "check"
   },
@@ -50,7 +50,7 @@
     "help": "List of the virtual hosts served by bunkerweb.",
     "id": "server-name",
     "label": "Server name",
-    "regex": "^(?! )( ?((?=[^ ]{1,255}( |$))[^ ]+)(?!.* \\2))*$",
+    "regex": "^((\\S{1,255})(?!.*\\s\\2(\\s|$)))?(\\s(\\S{1,255})(?!.*\\s\\5(\\s|$)))*$",
     "type": "text"
   },
   "WORKER_PROCESSES": {
@@ -288,5 +288,42 @@
     "label": "Use IPv6",
     "regex": "^(yes|no)$",
     "type": "check"
+  },
+  "IS_DRAFT": {
+    "context": "multisite",
+    "default": "no",
+    "help": "Internal use : set to yes when the service is in draft mode.",
+    "id": "internal-use-draft",
+    "label": "internal use draft",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "TIMERS_LOG_LEVEL": {
+    "context": "global",
+    "default": "debug",
+    "help": "Log level for timers.",
+    "id": "timers-log-level",
+    "label": "Timers log level",
+    "regex": "^(debug|info|notice|warn|err|crit|alert|emerg)$",
+    "type": "select",
+    "select": [
+      "debug",
+      "info",
+      "notice",
+      "warn",
+      "err",
+      "crit",
+      "alert",
+      "emerg"
+    ]
+  },
+  "OVERRIDE_INSTANCES": {
+    "context": "global",
+    "default": "",
+    "help": "List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 fqdn-or-ip:5000)",
+    "id": "override-instances",
+    "label": "Override instances",
+    "regex": "^.*$",
+    "type": "text"
   }
 }

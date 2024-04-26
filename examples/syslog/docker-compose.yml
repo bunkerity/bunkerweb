@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.5
+    image: bunkerity/bunkerweb:1.5.7
     logging:
       driver: syslog
       options:
@@ -21,14 +21,14 @@ services:
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://myapp
+      - REVERSE_PROXY_HOST=http://myapp:8080
     labels:
       - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.5
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     logging:
       driver: syslog
       options:
@@ -65,7 +65,7 @@ services:
         ipv4_address: 10.10.10.254
 
   myapp:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 

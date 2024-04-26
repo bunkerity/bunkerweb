@@ -1,4 +1,4 @@
-FROM python:3.12.1-alpine3.18@sha256:fb759579d60cfe1f70b110a27be95aaa7cf758d2fa21cf54fffb71c2ba3f8034
+FROM python:3.12.3-alpine3.19@sha256:ef097620baf1272e38264207003b0982285da3236a20ed829bf6bbf1e85fe3cb
 
 # Install firefox and geckodriver
 RUN apk add --no-cache --virtual .build-deps curl grep zip wget && \

@@ -1,57 +1,74 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
+    {% set attribute_name = "global-config" %}
 
-<div data-service-content="settings" class="col-span-12 gap-y-4 grid grid-cols-12">
-  <div class="p-4 col-span-12 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  >
-    <div data-{{current_endpoint}}-tabs-header class="flex flex-col xs:flex-row xs:justify-start xs:items-center gap-x-4 gap-y-2 my-3">
-      <h5 class="transition duration-300 ease-in-out 0 ml-2 font-bold text-md uppercase dark:text-white/90 mb-0">CONFIGS</h5>
-      <!-- search inpt-->
-      <div class="flex relative col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3">
-        <label class="sr-only" for="settings-filter">filter settings</label>
-        <input
-          type="text"
-          id="settings-filter"
-          name="settings-filter"
-          class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-          placeholder="key words"
-          pattern="(.*?)"
-          required
-        />
-      </div>
-      <!-- end search inpt-->
+    <div data-global-config-tabs-select-container
+         class="z-100 w-full  grid grid-cols-12 h-fit max-h-100 sm:max-h-125 col-span-12 md:col-span-6 lg:col-span-4 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        <div data-{{ current_endpoint }}-tabs-select-header class="col-span-12">
+            <div class="flex flex-col xs:flex-row xs:justify-start xs:items-center gap-x-4 gap-y-2 mb-4">
+                <h5 class="transition duration-300 ease-in-out 0 ml-2 font-bold text-md uppercase dark:text-white/90 mb-0">PLUGINS</h5>
+            </div>
+            {% include "settings_tabs_select.html" %}
+        </div>
     </div>
-      <!-- tabs -->
-      {% include "settings_tabs.html" %}
-      <!-- end tabs-->
-  </div>
+    <!-- filter -->
+    {% set filters = [
+        {
+            "type": "input",
+            "name": "Search",
+            "label": "search",
+            "id": "keyword",
+            "placeholder": "keyword",
+            "pattern": "(.*?)"
+        },
+        {
+            "type": "select",
+            "name": "Context",
+            "id": "context",
+            "value": "all",
+            "values": [
+                "all",
+                "global",
+                "multisite"
+            ]
+        },
+        {
+            "type": "select",
+            "name": "Type",
+            "id": "type",
+            "value": "all",
+            "values": [
+                "all",
+                "core",
+                "external",
+                "pro"
+            ]
+        }
+    ] %}
+    {% include "card_filter.html" %}
 
-    <!-- form global conf -->
-    <form
-    data-global-config-form
-      id="form-edit-global-configs"
-      method="POST"
-      class="flex flex-col justify-between overflow-hidden overflow-y-auto max-h-135 md:max-h-160 dark:brightness-110 col-span-12 break-words bg-white shadow-xl p-4 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-    >
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-
-        <!-- plugin item -->
-        {% include "settings_plugins.html" %}
-        <!-- end plugin item -->
-
-      <!-- submit -->
-      <div class="flex w-full justify-center mt-8 mb-2">
-        <button
-          type="submit"
-          class="valid-btn"
-        >
-          SAVE
-        </button>
-      </div>
-      <!-- end submit -->
-    </form>
-    <!--end form global conf -->
-
-  </div>
-</div>
-
-{% endblock %}
+    <!-- end filter -->
+    <div data-global-config-plugins-container
+         class="col-span-12 gap-y-4 grid grid-cols-12">
+        <div data-global-config-settings
+             class="hidden"
+             data-value="{{ dumped_global_config }}"></div>
+        <!-- form global conf -->
+        <form data-global-config-form
+              id="form-edit-global-config"
+              method="post"
+              class="flex flex-col justify-between overflow-hidden overflow-y-auto dark:brightness-110 col-span-12 break-words bg-white shadow-xl p-4 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <!-- plugin item -->
+            {% include "settings_plugins.html" %}
+            <!-- end plugin item -->
+            <!-- submit -->
+            <div class="flex w-full justify-center mt-8 mb-2">
+                <button type="submit" class="valid-btn">SAVE</button>
+            </div>
+            <!-- end submit -->
+        </form>
+        <!--end form global conf -->
+    {% include "filter_nomatch.html" %}
+    </div>
+{% endblock content %}

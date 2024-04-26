@@ -1,0 +1,55 @@
+---
+meta:
+  author: "Franziska Bühler"
+  description: "Unicode character bypass"
+  enabled: true
+  name: "920540.yaml"
+tests:
+  - test_title: 920540-1
+    desc: "Unicode character bypass issue #2512: alert() \u0061lert"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            method: "POST"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: "application/x-www-form-urlencoded; charset=utf-8"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "testarg=%5Cu0061lert"
+          output:
+            log_contains: "id \"920540\""
+  - test_title: 920540-2
+    desc: "Unicode character bypass issue #2512: eval() \u0065val()"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            method: "POST"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: "application/x-www-form-urlencoded; charset=utf-8"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "testarg=%5Cu0065val%28%29"
+          output:
+            log_contains: "id \"920540\""
+  - test_title: 920540-3
+    desc: "Unicode character bypass: negative test for JSON (double encoded as JSON parser decodes it)"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            method: "POST"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: "application/json"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "{\"testarg\": \"\x5c\x5cu0065val\"}"
+          output:
+            no_log_contains: "id \"920540\""

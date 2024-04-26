@@ -20,6 +20,8 @@ jobs:
         openresty_version:
           - 1.17.8.2
           - 1.19.9.1
+          - 1.21.4.3
+          - 1.25.3.1
 
     runs-on: ubuntu-latest
     container:
@@ -49,7 +51,9 @@ jobs:
       run: cpanm -q -n Test::Nginx
 
     - name: Install Luacov
-      run: /usr/local/openresty/luajit/bin/luarocks install luacov
+      run: |
+        /usr/local/openresty/luajit/bin/luarocks install luacov
+        /usr/local/openresty/luajit/bin/luarocks install lua-resty-openssl
 
     - uses: actions/checkout@v2
 

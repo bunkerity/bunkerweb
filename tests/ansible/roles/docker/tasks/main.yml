@@ -25,11 +25,14 @@
     name:
       - docker-ce
       - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
     update_cache: yes
     state: present
 
-- name: Install /usr/local/bin/docker-compose
-  shell: curl -L https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+- name: Symlink docker-compose
+  shell: ln -f -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 - name: Add user to docker group
   user:

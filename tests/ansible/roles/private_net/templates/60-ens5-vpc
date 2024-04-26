@@ -1,4 +1,0 @@
-auto ens5
-allow-hotplug ens5
-iface ens5 inet static
-    address {{ local_ip }}/24

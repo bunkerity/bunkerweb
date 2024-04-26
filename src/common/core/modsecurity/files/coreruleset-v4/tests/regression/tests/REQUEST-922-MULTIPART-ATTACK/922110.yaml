@@ -1,0 +1,63 @@
+---
+meta:
+  author: "Felipe Zipitria"
+  description: Test Multipart/form-data
+  enabled: true
+  name: 922110.yaml
+tests:
+  - test_title: 922110-1
+    desc: "Positive test: utf-7 is not in allowed charsets"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: multipart/form-data; boundary=boundary
+              Accept: "*/*"
+            method: POST
+            port: 80
+            uri: "/post"
+            version: "HTTP/1.1"
+            data: |
+              --boundary
+              Content-disposition: form-data; name="_charset_"
+
+              utf-8
+              --boundary
+              Content-disposition: form-data; name="922110"
+              Content-Type: text/plain; charset=utf-7
+
+              Knock knock.
+              --boundary--
+          output:
+            log_contains: id "922110"
+  - test_title: 922110-2
+    desc: "Negative test: utf-8 is allowed"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: multipart/form-data; boundary=boundary
+              Accept: "*/*"
+            method: POST
+            port: 80
+            uri: "/post"
+            version: "HTTP/1.1"
+            data: |
+              --boundary
+              Content-disposition: form-data; name="_charset_"
+
+              utf-8
+              --boundary
+              Content-disposition: form-data; name="negative"
+              Content-Type: text/plain; charset=utf-8
+
+              I shold be allowed to get in.
+              --boundary--
+          output:
+            no_log_contains: id "922110"

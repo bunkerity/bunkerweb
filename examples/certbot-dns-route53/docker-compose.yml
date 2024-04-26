@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.5
+    image: bunkerity/bunkerweb:1.5.7
     ports:
       - 80:8080
       - 443:8443
@@ -21,11 +21,11 @@ services:
       - CUSTOM_SSL_CERT=/certs/live/example.com/fullchain.pem
       - CUSTOM_SSL_KEY=/certs/live/example.com/privkey.pem
       - app1.example.com_REVERSE_PROXY_URL=/
-      - app1.example.com_REVERSE_PROXY_HOST=http://app1
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1:8080
       - app2.example.com_REVERSE_PROXY_URL=/
-      - app2.example.com_REVERSE_PROXY_HOST=http://app2
+      - app2.example.com_REVERSE_PROXY_HOST=http://app2:8080
       - app3.example.com_REVERSE_PROXY_URL=/
-      - app3.example.com_REVERSE_PROXY_HOST=http://app3
+      - app3.example.com_REVERSE_PROXY_HOST=http://app3:8080
     labels:
       - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
@@ -33,7 +33,7 @@ services:
       - bw-services
 
   bbw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.5
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     depends_on:
       - mybunker
     environment:
@@ -67,17 +67,17 @@ services:
     entrypoint: /bin/sh /opt/entrypoint.sh
 
   app1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 
   app2:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 
   app3:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 

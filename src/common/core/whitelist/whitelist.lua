@@ -137,6 +137,7 @@ function whitelist:access()
 		ngx_var.is_whitelisted = "yes"
 		self.ctx.bw.is_whitelisted = "yes"
 		env_set("is_whitelisted", "yes")
+		self:set_metric("counters", "passed_whitelist", 1)
 		return self:ret(true, err, OK)
 	end
 	-- Perform checks
@@ -155,7 +156,8 @@ function whitelist:access()
 					ngx_var.is_whitelisted = "yes"
 					self.ctx.bw.is_whitelisted = "yes"
 					env_set("is_whitelisted", "yes")
-					return self:ret(true, k .. " is whitelisted (info : " .. whitelisted .. ")", ngx.OK)
+					self:set_metric("counters", "passed_whitelist", 1)
+					return self:ret(true, k .. " is whitelisted (info : " .. whitelisted .. ")", OK)
 				end
 			end
 		end

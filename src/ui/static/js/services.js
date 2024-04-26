@@ -1,50 +1,129 @@
 import {
   Popover,
-  Tabs,
+  TabsSelect,
   FormatValue,
   FilterSettings,
+  CheckNoMatchFilter,
+  showInvalid,
 } from "./utils/settings.js";
 
 class ServiceModal {
   constructor() {
+    this.multSettingsName = JSON.parse(
+      document
+        .querySelector("input[data-plugins-multiple]")
+        .getAttribute("data-plugins-multiple")
+        .replaceAll(`'`, `"`),
+    );
     //modal elements
     this.modal = document.querySelector("[data-services-modal]");
     this.modalTitle = this.modal.querySelector("[data-services-modal-title]");
-    this.modalTabs = this.modal.querySelector(["[data-services-tabs]"]);
+    this.modalTabs = this.modal.querySelector(["[data-services-tabs-select]"]);
     this.modalTabsHeader = this.modal.querySelector([
-      "[data-services-tabs-header]",
+      "[data-services-tabs-select-header]",
     ]);
-
     this.modalCard = this.modal.querySelector("[data-services-modal-card]");
+    this.switchModeBtn = this.modal.querySelector(
+      "[data-toggle-settings-mode-btn]",
+    );
     //modal forms
-    this.formNewEdit = this.modal.querySelector("[data-services-modal-form]");
+    this.formNewEdit = this.modal.querySelector(
+      "[data-advanced][data-services-modal-form]",
+    );
     this.formDelete = this.modal.querySelector(
       "[data-services-modal-form-delete]",
     );
     this.submitBtn = document.querySelector(
       "button[data-services-modal-submit]",
     );
+    this.darkMode = document.querySelector("[data-dark-toggle]");
+    this.isDarkMode = this.darkMode.checked;
+    // simple el
+    this.simpleForm = this.modal.querySelector(
+      "[data-simple][data-services-modal-form]",
+    );
+    this.nextBtn = this.modal.querySelector("button[data-simple-next]");
+    this.backBtn = this.modal.querySelector("button[data-simple-back]");
+    this.saveSimpleBtn = this.simpleForm.querySelector(
+      "button[data-services-modal-submit]",
+    );
+    // list els
+    this.serverNameInps = this.modal.querySelectorAll(
+      'input[name="SERVER_NAME"][data-setting-input]',
+    );
+    this.submitBtns = this.modal.querySelectorAll(
+      "button[data-services-modal-submit]",
+    );
+    // add editor for configs in simple mode
+    this.simpleEditorEls = [];
+    this.initSimpleEditors();
     //container
     this.container = document.querySelector("main");
+    this.currAction = "";
+    this.currMethod = "";
+
     this.init();
   }
 
   //store default config data on DOM
   //to update modal data on new button click
 
-  getActionAndServName(target) {
+  getActionData(target) {
     const action = target
       .closest("button")
       .getAttribute("data-services-action");
     const serviceName = target
       .closest("button")
       .getAttribute("data-services-name");
+    const isDraft =
+      target
+        .closest("[data-services-service]")
+        .querySelector("[data-is-draft]")
+        .getAttribute("data-value") || "no";
 
-    return [action, serviceName];
+    const method =
+      target
+        .closest("[data-services-service]")
+        .querySelector("[data-service-method]")
+        .getAttribute("data-value") || "no";
+
+    this.currMethod = method;
+
+    return [action, serviceName, isDraft, method];
   }
 
   init() {
+    // Get list of server name from services card
+    // When the server name input is matching existing server name that is not the current modal one
+    // Disable the submit button
+    window.addEventListener("DOMContentLoaded", () => {
+      [this.formNewEdit, this.simpleForm].forEach((form) => {
+        form.addEventListener("input", (e) => {
+          this.checkVisibleInpsValidity();
+        });
+      });
+    });
+
+    this.darkMode.addEventListener("click", (e) => {
+      this.isDarkMode = e.target.checked;
+      this.updateEditorMode();
+    });
+
     this.modal.addEventListener("click", (e) => {
+      // update draft mode
+      try {
+        if (e.target.closest("button").hasAttribute("data-toggle-draft-btn")) {
+          // Get current state
+          const currModeIsDraft = e.target
+            .querySelector('[data-toggle-draft="true"]')
+            .classList.contains("hidden")
+            ? true
+            : false;
+
+          this.setIsDraft(currModeIsDraft, this.currMethod);
+        }
+      } catch (err) {}
+
       //close
       try {
         if (
@@ -55,6 +134,26 @@ class ServiceModal {
       } catch (err) {}
     });
 
+    this.switchModeBtn.addEventListener("click", () => {
+      const currMode = this.switchModeBtn.getAttribute(
+        "data-toggle-settings-mode-btn",
+      );
+      const switchMode = currMode === "advanced" ? "simple" : "advanced";
+
+      this.setSettingMode(switchMode);
+      this.checkVisibleInpsValidity();
+    });
+
+    this.nextBtn.addEventListener("click", () => {
+      this.nextSimpleStep();
+      this.checkVisibleInpsValidity();
+    });
+
+    this.backBtn.addEventListener("click", () => {
+      this.prevSimpleStep();
+      this.checkVisibleInpsValidity();
+    });
+
     this.container.addEventListener("click", (e) => {
       //edit action
       try {
@@ -63,23 +162,27 @@ class ServiceModal {
           "edit"
         ) {
           //set form info and right form
-          const [action, serviceName] = this.getActionAndServName(e.target);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target,
+          );
           const oldServName = e.target
             .closest("[data-services-service]")
             .querySelector("[data-old-service-name]")
             .getAttribute("data-value");
-          this.setForm(action, serviceName, oldServName, this.formNewEdit);
+
+          this.setForm(
+            action,
+            serviceName,
+            oldServName,
+            this.formNewEdit,
+            isDraft,
+            method,
+          );
           //get service data and parse it
           //multiple type logic is launch at same time on relate class
-          const servicesSettings = e.target
-            .closest("[data-services-service]")
-            .querySelector("[data-services-settings]")
-            .getAttribute("data-value");
-          const obj = JSON.parse(servicesSettings);
-          this.updateModalData(obj);
+          const settings = this.getSettingsNoMultiple(e.target);
+          this.updateModalData(settings, false, false, false);
           //show modal
-          this.resetFilterInp();
-          this.changeSubmitBtn("EDIT", "edit-btn");
           this.openModal();
         }
       } catch (err) {}
@@ -90,27 +193,22 @@ class ServiceModal {
           "clone"
         ) {
           //set form info and right form
-          const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, serviceName, this.formNewEdit);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target,
+          );
+          this.setForm(
+            action,
+            serviceName,
+            serviceName,
+            this.formNewEdit,
+            isDraft,
+            method,
+          );
           //set default value with method default
           //get service data and parse it
-          //multiple type logic is launch at same time on relate class
-          const servicesSettings = e.target
-            .closest("[data-services-service]")
-            .querySelector("[data-services-settings]")
-            .getAttribute("data-value");
-          const obj = JSON.parse(servicesSettings);
-          this.updateModalData(obj, true);
-          // server name is unset
-          const inpServName = document.querySelector("input#SERVER_NAME");
-          inpServName.getAttribute("value", "");
-          inpServName.removeAttribute("disabled", "");
-          inpServName.value = "";
-          // clone is UI creation, so no setting should be disabled
-
-          //show modal
-          this.resetFilterInp();
-          this.changeSubmitBtn("CREATE", "valid-btn");
+          // multiple type logic is launch at same time on relate class
+          const settings = this.getSettingsNoMultiple(e.target);
+          this.updateModalData(settings, true, true, true, true);
           this.openModal(); //server name is unset
         }
       } catch (err) {}
@@ -121,19 +219,19 @@ class ServiceModal {
           "new"
         ) {
           //set form info and right form
-          const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, serviceName, this.formNewEdit);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target,
+          );
+          this.setForm(
+            action,
+            serviceName,
+            serviceName,
+            this.formNewEdit,
+            isDraft,
+            method,
+          );
           //set default value with method default
-          this.setSettingsDefault();
-          //server name is unset
-          const inpServName = document.querySelector("input#SERVER_NAME");
-          inpServName.getAttribute("value", "");
-          inpServName.removeAttribute("disabled", "");
-          inpServName.value = "";
-
-          //show modal
-          this.resetFilterInp();
-          this.changeSubmitBtn("CREATE", "valid-btn");
+          this.updateModalData({}, true, true, true, true);
           this.openModal();
         }
       } catch (err) {}
@@ -144,13 +242,201 @@ class ServiceModal {
           "delete"
         ) {
           //set form info and right form
-          const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, serviceName, this.formDelete);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target,
+          );
+          this.setForm(
+            action,
+            serviceName,
+            serviceName,
+            this.formDelete,
+            isDraft,
+            method,
+          );
           //show modal
           this.openModal();
         }
       } catch (err) {}
+      // security
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute("data-setting-select-dropdown-btn") ==
+          "security-level"
+        ) {
+          this.updateSecuLevel();
+        }
+      } catch (err) {}
     });
+  }
+
+  // Avoid multiple settings because it is handle by Multiple class
+  getSettingsNoMultiple(target) {
+    const servicesSettings = target
+      .closest("[data-services-service]")
+      .querySelector("[data-services-settings]")
+      .getAttribute("data-value");
+    const settings = JSON.parse(servicesSettings);
+    this.multSettingsName.forEach((name) => {
+      // check if a settings is starting with a multiple name
+      // if yes, remove it
+      for (const [key, value] of Object.entries(settings)) {
+        if (key.startsWith(name)) {
+          delete settings[key];
+        }
+      }
+    });
+    return settings;
+  }
+
+  resetSimpleMode() {
+    // reset button
+    this.backBtn.setAttribute("disabled", "");
+    this.nextBtn.removeAttribute("disabled");
+    // hidden all steps and show first one
+    const steps = this.simpleForm.querySelectorAll("[data-step]");
+    steps.forEach((step) => {
+      step.classList.add("hidden");
+    });
+    const firstStep = this.simpleForm.querySelector("[data-step='1']");
+    firstStep.classList.remove("hidden");
+    this.updateSimpleActions();
+    // we want to update settings by current security level
+    this.updateSecuLevel();
+  }
+
+  initSimpleEditors() {
+    const simpleEditors = this.modal.querySelectorAll("[data-simple-editor]");
+    simpleEditors.forEach((editorEl) => {
+      const editor = ace.edit(editorEl.getAttribute("id"));
+      // Handle
+      if (this.isDarkMode) {
+        editor.setTheme("ace/theme/dracula");
+      } else {
+        editor.setTheme("ace/theme/dawn");
+      }
+      //editor options
+      editor.setShowPrintMargin(false);
+      this.simpleEditorEls.push(editor);
+    });
+
+    this.updateSecuLevelEditorContent();
+  }
+
+  updateEditorMode() {
+    this.simpleEditorEls.forEach((editor) => {
+      if (this.isDarkMode) {
+        editor.setTheme("ace/theme/dracula");
+      } else {
+        editor.setTheme("ace/theme/dawn");
+      }
+    });
+  }
+
+  updateSecuLevelEditorContent() {
+    const secuLevelValue = this.simpleForm
+      .querySelector('[data-setting-select-text="security-level"]')
+      .textContent.toLowerCase()
+      .trim();
+
+    this.simpleEditorEls.forEach((editorEl) => {
+      const editorContent = this.modal
+        .querySelector(
+          `textarea#${editorEl.container
+            .getAttribute("id")
+            .replace(
+              "-editor",
+              "-content",
+            )}[data-simple-default-editor-content]`,
+        )
+        .getAttribute(`data-content-${secuLevelValue}`);
+      editorEl.setValue(editorContent);
+    });
+  }
+
+  updateSecuLevel() {
+    // Add timeout to let dropdown update attribute values
+    // This avoid using previous value
+    setTimeout(() => {
+      const secuLevelValue = this.simpleForm
+        .querySelector('[data-setting-select-text="security-level"]')
+        .textContent.toLowerCase()
+        .trim();
+
+      // Update settings by security level
+      this.setSettingsByAtt(
+        this.simpleForm,
+        "data-default-method",
+        `data-security-level-${secuLevelValue}`,
+      );
+
+      // Update configs
+      this.updateSecuLevelEditorContent();
+    }, 30);
+  }
+
+  nextSimpleStep() {
+    // get current step
+    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStepNum = currStep.getAttribute("data-step");
+    // get next step and  next step + 1 to determine if continue or save
+    const nextStep = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum + 1}"]`,
+    );
+    // hide current step and show next one
+    currStep.classList.add("hidden");
+    nextStep.classList.remove("hidden");
+
+    this.updateSimpleActions();
+  }
+
+  prevSimpleStep() {
+    // get current step
+    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStepNum = currStep.getAttribute("data-step");
+    // get next step and  next step + 1 to determine if continue or save
+    const prevStep = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum - 1}"]`,
+    );
+
+    // hide current step and show next one
+    currStep.classList.add("hidden");
+    prevStep.classList.remove("hidden");
+
+    this.updateSimpleActions();
+  }
+
+  updateSimpleActions() {
+    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStepNum = currStep.getAttribute("data-step");
+    // get next step and  next step + 1 to determine if continue or save
+    const prevStep = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum - 1}"]`,
+    );
+
+    const nextStep = this.simpleForm.querySelector(
+      `[data-step="${+currStepNum + 1}"]`,
+    );
+
+    // Handle case last step or not
+    if (nextStep) {
+      this.nextBtn.classList.remove("hidden");
+      this.saveSimpleBtn.classList.add("hidden");
+    }
+
+    if (!nextStep) {
+      this.nextBtn.classList.add("hidden");
+      this.saveSimpleBtn.classList.remove("hidden");
+    }
+
+    if (prevStep) {
+      this.backBtn.removeAttribute("disabled");
+    }
+
+    if (!prevStep) {
+      this.backBtn.setAttribute("disabled", "");
+    }
   }
 
   resetFilterInp() {
@@ -159,69 +445,132 @@ class ServiceModal {
     inpFilter.dispatchEvent(new Event("input"));
   }
 
-  changeSubmitBtn(text, btnType) {
-    this.submitBtn.textContent = text;
-    this.submitBtn.classList.remove(
-      "delete-btn",
-      "valid-btn",
-      "edit-btn",
-      "info-btn",
-    );
-    this.submitBtn.classList.add(btnType);
+  changeSubmitBtn(action) {
+    if (action === "delete") return;
+    const text = action === "edit" ? "SAVE" : "CREATE";
+
+    this.submitBtns.forEach((btn) => {
+      btn.textContent = text;
+      btn.classList.remove("delete-btn", "valid-btn", "edit-btn", "info-btn");
+      btn.classList.add("valid-btn");
+    });
   }
 
-  setSettingsDefault() {
-    const inps = this.modal.querySelectorAll("input");
-    inps.forEach((inp) => {
-      //form related values are excludes
-      const inpName = inp.getAttribute("name");
+  resetServerName() {
+    this.serverNameInps.forEach((inpServName) => {
+      inpServName.getAttribute("value", "");
+      inpServName.removeAttribute("disabled", "");
+      inpServName.value = "";
+    });
+  }
+
+  isAvoidInpList(type, inp, inpName, containerEl) {
+    if (type === "input") {
       if (
         inpName === "csrf_token" ||
         inpName === "OLD_SERVER_NAME" ||
+        inpName === "mode" ||
+        inpName === "security-level" ||
+        inpName === "is_draft" ||
         inpName === "operation" ||
-        inpName === "settings-filter"
+        inpName === "settings-filter" ||
+        inp.hasAttribute("data-combobox") ||
+        (containerEl === this.simpleForm && inpName === "SERVER_NAME")
+      )
+        return true;
+    }
+
+    if (type === "select") {
+      if (
+        inpName === "csrf_token" ||
+        inpName === "OLD_SERVER_NAME" ||
+        inpName === "mode" ||
+        inpName === "security-level" ||
+        inpName === "is_draft" ||
+        inpName === "operation" ||
+        inpName === "settings-filter" ||
+        inp.hasAttribute("data-combobox") ||
+        (containerEl === this.simpleForm && inpName === "SECURITY_LEVEL")
+      )
+        return true;
+    }
+
+    return false;
+  }
+
+  setCheckbox(inp, method, value) {
+    if (inp.getAttribute("type") === "checkbox" && inp.tagName === "INPUT") {
+      try {
+        if (inp.hasAttribute("aria-checked")) {
+          value === "yes"
+            ? inp.setAttribute("aria-checked", "true")
+            : inp.setAttribute("aria-checked", "false");
+        }
+      } catch (err) {}
+
+      try {
+        value === "yes"
+          ? inp.setAttribute("data-checked", "true")
+          : inp.setAttribute("data-checked", "false");
+      } catch (err) {}
+
+      inp.setAttribute("value", value);
+      inp.setAttribute("data-method", method);
+      inp.checked = true;
+    }
+  }
+
+  setInput(inp, method, value) {
+    if (inp.getAttribute("type") !== "checkbox" && inp.tagName === "INPUT") {
+      inp.setAttribute("value", value);
+      inp.value = value;
+      inp.setAttribute("data-method", method);
+    }
+  }
+
+  // By default, loop on all settings to disabled them
+  setSettingsByAtt(
+    parentEl = this.modal,
+    attMethodName = "data-default-method",
+    attValueName = "data-default-value",
+    avoidMultiple = true,
+  ) {
+    // Start with input-like (input, checkbox)
+    const inps = avoidMultiple
+      ? parentEl.querySelectorAll("input:not([data-is-multiple])")
+      : parentEl.querySelectorAll("input");
+    inps.forEach((inp) => {
+      // form related values are excludes
+      const inpName = inp.getAttribute("name");
+      if (this.isAvoidInpList("input", inp, inpName, parentEl)) return;
+
+      //for all other settings values
+      const defaultMethod = inp.getAttribute(attMethodName);
+      const defaultVal = inp.getAttribute(attValueName);
+
+      this.setCheckbox(inp, defaultMethod, defaultVal);
+      this.setInput(inp, defaultMethod, defaultVal);
+
+      this.setDisabledByMethod(inp, defaultMethod);
+    });
+
+    // Select only
+    const selects = avoidMultiple
+      ? parentEl.querySelectorAll("select:not([data-is-multiple])")
+      : parentEl.querySelectorAll("select");
+    selects.forEach((select) => {
+      if (
+        this.isAvoidInpList(
+          "select",
+          select,
+          select.getAttribute("name"),
+          parentEl,
+        )
       )
         return;
 
-      //for all other settings values
-      const defaultMethod = inp.getAttribute("data-default-method");
-      const defaultVal = inp.getAttribute("data-default-value");
-
-      //SET VALUE
-      if (inp.getAttribute("type") === "checkbox") {
-        try {
-          if (inp.hasAttribute("aria-checked")) {
-            defaultVal === "yes"
-              ? inp.setAttribute("aria-checked", "true")
-              : inp.setAttribute("aria-checked", "false");
-          }
-        } catch (err) {}
-
-        try {
-          defaultVal === "yes"
-            ? inp.setAttribute("data-checked", "true")
-            : inp.setAttribute("data-checked", "false");
-        } catch (err) {}
-
-        inp.setAttribute("value", defaultVal);
-        inp.setAttribute("data-method", defaultMethod);
-        inp.checked = true;
-      }
-
-      if (inp.getAttribute("type") !== "checkbox") {
-        inp.setAttribute("value", defaultVal);
-        inp.value = defaultVal;
-        inp.setAttribute("data-method", defaultMethod);
-      }
-
-      //SET METHOD
-      this.setDisabledDefault(inp, defaultMethod);
-    });
-
-    const selects = this.modal.querySelectorAll("select");
-    selects.forEach((select) => {
-      const defaultMethod = select.getAttribute("data-default-method");
-      const defaultVal = select.getAttribute("data-default-value");
+      const defaultMethod = select.getAttribute(attMethodName);
+      const defaultVal = select.getAttribute(attValueName);
       //click the custom select dropdown to update select value
       select.parentElement
         .querySelector(
@@ -236,11 +585,11 @@ class ServiceModal {
         )}]`,
       );
 
-      this.setDisabledDefault(btnCustom, defaultMethod);
+      this.setDisabledByMethod(btnCustom, defaultMethod);
     });
   }
 
-  setDisabledDefault(inp, method) {
+  setDisabledByMethod(inp, method) {
     if (method === "ui" || method === "default") {
       inp.removeAttribute("disabled");
     } else {
@@ -248,152 +597,331 @@ class ServiceModal {
     }
   }
 
-  setForm(action, serviceName, oldServName, formEl) {
-    this.modalTitle.textContent = `${action} ${serviceName}`;
-    const operation = action === "clone" ? "new" : action;
-    formEl.setAttribute("id", `form-${operation}-${serviceName}`);
-    const opeInp = formEl.querySelector(`input[name="operation"]`);
-    opeInp.setAttribute("value", operation);
-    opeInp.value = operation;
+  setIsDraft(isDraft, method) {
+    const draftVal = isDraft ? "yes" : "no";
 
-    if (action === "edit" || action === "new") {
-      this.showNewEditForm();
-      const oldNameInp = formEl.querySelector(`input[name="OLD_SERVER_NAME"]`);
-      oldNameInp.setAttribute("value", oldServName);
-      oldNameInp.value = oldServName;
+    const draftInps = this.modal.querySelectorAll('input[name="is_draft"]');
+
+    draftInps.forEach((inp) => {
+      inp.setAttribute("value", draftVal);
+      inp.value = draftVal;
+    });
+
+    //Update draft button
+    const btn = this.modal.querySelector("button[data-toggle-draft-btn]");
+
+    if (
+      (!["ui", "default"].includes(method) && this.currAction !== "clone") ||
+      this.currAction === "delete"
+    ) {
+      return btn.classList.add("hidden");
     }
 
-    if (action === "clone") {
-      this.showNewEditForm();
-      const oldNameInp = formEl.querySelector(`input[name="OLD_SERVER_NAME"]`);
-      oldNameInp.setAttribute("value", "");
-      oldNameInp.value = "";
+    btn.classList.remove("hidden");
+
+    const showEl = isDraft ? "true" : "false";
+    btn.querySelectorAll("[data-toggle-draft]").forEach((item) => {
+      if (item.getAttribute("data-toggle-draft") === showEl)
+        item.classList.remove("hidden");
+      if (item.getAttribute("data-toggle-draft") !== showEl)
+        item.classList.add("hidden");
+    });
+  }
+
+  setForm(action, serviceName, oldServName, formEl, isDraft, method) {
+    this.currAction = action;
+    this.modalTitle.textContent = `${action} ${serviceName}`;
+    const operation = action === "clone" ? "new" : action;
+
+    // update operation and other hidden inputs for all mode in modal
+    const operationInps = this.modal.querySelectorAll(
+      'input[name="operation"]',
+    );
+    operationInps.forEach((inp) => {
+      inp.setAttribute("value", operation);
+      inp.value = operation;
+    });
+
+    // show / hide components
+    this.hideForms();
+    this.setCardViewportHeight(action === "delete" ? false : true);
+    this.SetSelectTabsVisible(action === "delete" ? false : true);
+    this.setHeaderActionsVisible(action === "delete" ? false : true);
+    this.changeSubmitBtn(action);
+    this.setMode(action);
+    if (action === "edit" || action === "new" || action === "clone") {
+      this.formNewEdit.classList.remove("hidden");
+      this.simpleForm.classList.remove("hidden");
+
+      const oldNameValue = action === "edit" ? oldServName : "";
+
+      const oldNameInps = this.modal.querySelectorAll(
+        'input[name="OLD_SERVER_NAME"]',
+      );
+      oldNameInps.forEach((inp) => {
+        inp.setAttribute("value", oldNameValue);
+        inp.value = oldNameValue;
+      });
     }
 
     if (action === "delete") {
-      this.showDeleteForm();
+      this.formDelete.classList.remove("hidden");
       formEl.querySelector(`[data-services-modal-text]`).textContent =
         `Are you sure you want to delete ${serviceName} ?`;
       const nameInp = formEl.querySelector(`input[name="SERVER_NAME"]`);
       nameInp.setAttribute("value", serviceName);
       nameInp.value = serviceName;
     }
+
+    this.setIsDraft(isDraft === "yes" ? true : false, method);
   }
 
-  showNewEditForm() {
-    this.cardViewport();
-    this.showTabs();
-    this.hideForms();
-    this.formNewEdit.classList.remove("hidden");
+  // Switch settings mode and update button
+  setSettingMode(mode) {
+    const elsToShow =
+      mode === "advanced"
+        ? document.querySelectorAll("[data-advanced]")
+        : document.querySelectorAll("[data-simple]");
+    const elsToHide =
+      mode === "advanced"
+        ? document.querySelectorAll("[data-simple]")
+        : document.querySelectorAll("[data-advanced]");
+    elsToHide.forEach((setting) => {
+      setting.classList.add("!hidden");
+    });
+    elsToShow.forEach((setting) => {
+      setting.classList.remove("!hidden");
+    });
+    // button
+    this.switchModeBtn.setAttribute("data-toggle-settings-mode-btn", mode);
+    const switchEls = this.switchModeBtn.querySelectorAll(
+      "[data-toggle-settings-mode]",
+    );
+    switchEls.forEach((el) => {
+      el.getAttribute("data-toggle-settings-mode") === mode
+        ? el.classList.remove("hidden")
+        : el.classList.add("hidden");
+    });
   }
 
-  showDeleteForm() {
-    this.cardNoViewport();
-    this.hideTabs();
-    this.hideForms();
+  checkVisibleInpsValidity() {
+    try {
+      const forms = [this.formNewEdit, this.simpleForm];
+      forms.forEach((form) => {
+        // Check that there is a visible container to check
+        const formMode = form.hasAttribute("data-simple")
+          ? "simple"
+          : "advanced";
+        // For advanced, we want to check all inputs
+        // For simple, we want to check only current step inputs to continue
+        const inps =
+          formMode === "simple"
+            ? form.querySelectorAll(
+                "[data-step]:not(.hidden) input[data-setting-input]",
+              )
+            : form.querySelectorAll(
+                "[data-plugin-item]:not(.hidden) input[data-setting-input], [data-plugin-item][class*='hidden'] input[data-setting-input]",
+              );
+        // merge input with visible and not visible
+        if (inps.length <= 0) return;
 
-    this.formDelete.classList.remove("hidden");
+        let isAllValid = true;
+        let invalidInpName = "";
+        let invalidInp = null;
+
+        for (let i = 0; i < inps.length; i++) {
+          // for all inputs
+          if (!inps[i].validity.valid) {
+            invalidInp = inps[i];
+            isAllValid = false;
+            invalidInpName = inps[i].getAttribute("name");
+            break;
+          }
+
+          // special case for SERVER_NAME
+          if (
+            inps[i].getAttribute("name") === "SERVER_NAME" &&
+            inps[i].value !== ""
+          ) {
+            // Case conflict with another server name
+            const serverNames = document.querySelectorAll(
+              "[data-services-service]",
+            );
+            const serverNameValue = inps[i].getAttribute("value");
+            serverNames.forEach((serverName) => {
+              const name = serverName.getAttribute("data-services-service");
+              if (name === serverNameValue) return;
+              if (name === inps[i].value) {
+                invalidInpName = inps[i]?.getAttribute("name");
+                isAllValid = false;
+              }
+            });
+          }
+        }
+
+        const errMsg = form.querySelector("[data-services-modal-error-msg]");
+        if (!isAllValid) {
+          invalidInp.classList.add("invalid");
+          const invalidEl = invalidInp
+            .closest("form")
+            .querySelector(`[data-invalid=${invalidInp.getAttribute("id")}]`);
+          invalidEl.classList.remove("hidden", "md:hidden");
+          // Wait a little that modal is fully open to focus on invalid input, because not working when element is hidden
+          setTimeout(() => {
+            // only focus  if not another input is focus
+            if (document.activeElement.tagName !== "INPUT") invalidInp.focus();
+          }, 30);
+
+          errMsg.textContent = `${invalidInpName} must be valid to submit`;
+          errMsg.classList.remove("hidden");
+          formMode == "simple"
+            ? this.nextBtn.setAttribute("disabled", "")
+            : null;
+          formMode == "advanced"
+            ? form
+                .querySelector("button[data-services-modal-submit]")
+                .setAttribute("disabled", "")
+            : null;
+        }
+
+        if (isAllValid) {
+          errMsg.classList.add("hidden");
+          formMode == "simple"
+            ? this.nextBtn.removeAttribute("disabled")
+            : null;
+          formMode == "advanced"
+            ? form
+                .querySelector("button[data-services-modal-submit]")
+                .removeAttribute("disabled")
+            : null;
+        }
+      });
+    } catch (e) {}
   }
 
-  cardViewport() {
-    this.modalCard.classList.add("h-[90vh]");
-    this.modalCard.classList.add("w-full");
+  setHeaderActionsVisible(setVisible) {
+    if (setVisible) {
+      this.modal
+        .querySelector("[data-toggle-draft-btn]")
+        .classList.remove("hidden");
+      this.modal
+        .querySelector("[data-toggle-settings-mode-btn]")
+        .classList.remove("hidden");
+    }
+
+    if (!setVisible) {
+      this.modal
+        .querySelector("[data-toggle-draft-btn]")
+        .classList.add("hidden");
+      this.modal
+        .querySelector("[data-toggle-settings-mode-btn]")
+        .classList.add("hidden");
+    }
   }
 
-  cardNoViewport() {
-    this.modalCard.classList.remove("h-[90vh]");
-    this.modalCard.classList.remove("w-full");
+  setMode(action) {
+    if (action === "new") {
+      this.switchModeBtn.classList.remove("hidden");
+      this.setSettingMode("simple");
+    } else {
+      this.switchModeBtn.classList.add("hidden");
+      this.setSettingMode("advanced");
+    }
+  }
+
+  setCardViewportHeight(setAsViewport) {
+    if (setAsViewport) {
+      this.modalCard.classList.add("h-[90vh]");
+      this.modalCard.classList.add("w-full");
+    }
+
+    if (!setAsViewport) {
+      this.modalCard.classList.remove("h-[90vh]");
+      this.modalCard.classList.remove("w-full");
+    }
   }
 
   hideForms() {
     this.formNewEdit.classList.add("hidden");
+    this.simpleForm.classList.add("hidden");
     this.formDelete.classList.add("hidden");
   }
 
-  hideTabs() {
-    this.modalTabs.classList.remove("grid");
-    this.modalTabs.classList.add("hidden");
-
-    this.modalTabsHeader.classList.remove("flex");
-    this.modalTabsHeader.classList.add("hidden");
-  }
-
-  showTabs() {
-    this.modalTabs.classList.add("grid");
-    this.modalTabs.classList.remove("hidden");
-    this.modalTabsHeader.classList.add("flex");
-    this.modalTabsHeader.classList.remove("hidden");
-  }
-
-  updateModalData(settings, forceEnabled = false) {
-    //use this to select inputEl and change value
-    for (const [key, data] of Object.entries(settings)) {
-      //change format to match id
-      const value = data["value"];
-      const method = data["method"];
-      const global = data["global"];
-      try {
-        const inps = this.modal.querySelectorAll(`[name='${key}']`);
-
-        inps.forEach((inp) => {
-          //form related values are excludes
-          const inpName = inp.getAttribute("name");
-          if (
-            inpName === "csrf_token" ||
-            inpName === "OLD_SERVER_NAME" ||
-            inpName === "operation" ||
-            inpName === "settings-filter"
-          )
-            return;
-
-          //SET DISABLED / ENABLED
-          //for regular input
-          if (
-            inp.tagName === "INPUT" &&
-            inp.getAttribute("type") !== "checkbox"
-          ) {
-            inp.setAttribute("value", value);
-            inp.value = value;
-            inp.setAttribute("data-method", method);
-          }
-          //for checkbox
-          if (
-            inp.tagName === "INPUT" &&
-            inp.getAttribute("type") === "checkbox"
-          ) {
-            try {
-              if (inp.hasAttribute("aria-checked")) {
-                value === "yes"
-                  ? inp.setAttribute("aria-checked", "true")
-                  : inp.setAttribute("aria-checked", "false");
-              }
-            } catch (err) {}
-
-            try {
-              value === "yes"
-                ? inp.setAttribute("data-checked", "true")
-                : inp.setAttribute("data-checked", "false");
-            } catch (err) {}
-
-            inp.setAttribute("value", value);
-            inp.setAttribute("data-method", method);
-            inp.checked = true;
-          }
-          //for select
-          if (inp.tagName === "SELECT") {
-            inp.parentElement
-              .querySelector(
-                `button[data-setting-select-dropdown-btn][value='${value}']`,
-              )
-              .click();
-            inp.setAttribute("data-method", method);
-          }
-
-          if (!forceEnabled) this.setDisabledState(inp, method, global);
-          if (forceEnabled) inp.removeAttribute("disabled");
-        });
-      } catch (err) {}
+  SetSelectTabsVisible(setVisible) {
+    if (setVisible) {
+      this.modalTabs.classList.add("grid");
+      this.modalTabs.classList.remove("hidden");
+      this.modalTabsHeader.classList.add("flex");
+      this.modalTabsHeader.classList.remove("hidden");
     }
+
+    if (!setVisible) {
+      this.modalTabs.classList.remove("grid");
+      this.modalTabs.classList.add("hidden");
+
+      this.modalTabsHeader.classList.remove("flex");
+      this.modalTabsHeader.classList.add("hidden");
+    }
+  }
+
+  updateModalData(
+    settings = {},
+    forceEnabled = false,
+    setMethodUI = false,
+    emptyServerName = false,
+  ) {
+    // Reset all settings when opening modal
+    this.setSettingsByAtt();
+
+    // Case we have settings, like when we edit a service
+    // We need to update the settings with the right values
+    if (Object.keys(settings).length > 0) {
+      // use this to select inputEl and change value
+      for (const [key, data] of Object.entries(settings)) {
+        //change format to match id
+        const value = data["value"];
+        const method = setMethodUI ? "ui" : data["method"];
+        const global = data["global"];
+        try {
+          // get only inputs without attribute data-is-multiple
+          const inps = this.modal.querySelectorAll(
+            `[name='${key}']:not([data-is-multiple])`,
+          );
+
+          inps.forEach((inp) => {
+            //form related values are excludes
+            const inpName = inp.getAttribute("name");
+
+            if (this.isAvoidInpList("input", inp, inpName, this.modal)) return;
+
+            //SET DISABLED / ENABLED
+            //for regular input
+            this.setCheckbox(inp, method, value);
+            this.setInput(inp, method, value);
+
+            //for select
+            if (inp.tagName === "SELECT") {
+              inp.parentElement
+                .querySelector(
+                  `button[data-setting-select-dropdown-btn][value='${value}']`,
+                )
+                .click();
+              inp.setAttribute("data-method", method);
+            }
+
+            if (!forceEnabled) this.setDisabledState(inp, method, global);
+            if (forceEnabled) inp.removeAttribute("disabled");
+          });
+        } catch (err) {}
+      }
+    }
+
+    // Reset simple mode, we want to override default value by default security level
+    this.resetSimpleMode();
+
+    // Global reset
+    this.resetFilterInp();
+    if (emptyServerName) this.resetServerName();
   }
 
   setDisabledState(inp, method, global) {
@@ -418,19 +946,32 @@ class ServiceModal {
   }
 
   openModal() {
-    //switch to first setting
-    document.querySelector("button[data-tab-handler]").click();
-    //show modal el
-    this.modal.classList.add("flex");
-    this.modal.classList.remove("hidden");
+    try {
+      //switch to first setting
+      document.querySelector("button[data-tab-select-handler]").click();
+    } catch (e) {}
+    this.checkVisibleInpsValidity();
+    setTimeout(() => {
+      this.modal.classList.add("flex");
+      this.modal.classList.remove("hidden");
+    }, 20);
   }
 }
 
 class Multiple {
-  constructor(prefix) {
+  constructor(prefix, formContainerSelector, handleSecurityLevel = false) {
+    this.multSettingsName = JSON.parse(
+      document
+        .querySelector("input[data-plugins-multiple]")
+        .getAttribute("data-plugins-multiple")
+        .replaceAll(`'`, `"`),
+    );
+    this.currAction = "";
+    this.currServName = "";
     this.prefix = prefix;
     this.container = document.querySelector("main");
-    this.modalForm = document.querySelector(`[data-${this.prefix}-modal-form]`);
+    this.formContainer = document.querySelector(formContainerSelector);
+    this.handleSecurityLevel = handleSecurityLevel;
     this.init();
   }
 
@@ -440,41 +981,110 @@ class Multiple {
     });
 
     this.container.addEventListener("click", (e) => {
-      //edit service button
+      try {
+        if (e.target.closest("button").hasAttribute("data-services-action")) {
+          this.currAction = e.target
+            .closest("button")
+            .getAttribute("data-services-action");
+        }
+      } catch (e) {}
+      // Update security level
       try {
         if (
-          e.target.closest("button").getAttribute("data-services-action") ===
-          "edit"
+          e.target.getAttribute("data-setting-select-dropdown-btn") ==
+          "security-level"
+        ) {
+          // Need to wait atm for the attributes value to be updated
+          setTimeout(() => {
+            if (!this.handleSecurityLevel) return;
+            if (
+              this.currAction === "edit" ||
+              this.currAction === "clone" ||
+              this.currAction === "delete"
+            )
+              return;
+            //remove all multiples
+            this.removePrevMultiples();
+            // set settings
+            const service = document.querySelector(
+              `[data-services-card][data-services-service='${this.currServName}']`,
+            );
+            const serviceSettings = service
+              ? service
+                  .querySelector("[data-services-settings]")
+                  .getAttribute("data-value")
+              : "{}";
+            //get multiple service values and parse as obj
+            const settings = this.getSettingsMultiple(serviceSettings);
+            //keep only multiple settings value
+            const multipleSettings = this.getMultiplesOnly(settings);
+            const sortMultiples =
+              this.sortMultipleByContainerAndSuffixe(multipleSettings);
+
+            // Need to set method as ui if clone
+            const isClone =
+              e.target
+                .closest("button")
+                .getAttribute(`data-${this.prefix}-action`) === "clone"
+                ? true
+                : false;
+            this.setMultipleToDOM(sortMultiples, isClone);
+          }, 30);
+        }
+      } catch (err) {}
+
+      // Edit service button
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "edit" ||
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "clone"
         ) {
           //remove all multiples
           this.removePrevMultiples();
-          //get multiple service values and parse as obj
-          const servicesSettings = e.target
-            .closest("[data-services-service]")
+          // set settings
+          const service = e.target.closest("[data-services-service]");
+          this.serviceName = service.getAttribute("data-services-service");
+          const serviceSettings = service
             .querySelector("[data-services-settings]")
             .getAttribute("data-value");
-          const obj = JSON.parse(servicesSettings);
+          const settings = this.getSettingsMultiple(serviceSettings);
+
           //keep only multiple settings value
-          const multipleSettings = this.getMultiplesOnly(obj);
+          const multipleSettings = this.getMultiplesOnly(settings);
+
           const sortMultiples =
             this.sortMultipleByContainerAndSuffixe(multipleSettings);
-          this.setMultipleToDOM(sortMultiples);
+
+          // Need to set method as ui if clone
+          const isClone =
+            e.target
+              .closest("button")
+              .getAttribute(`data-${this.prefix}-action`) === "clone"
+              ? true
+              : false;
+          this.setMultipleToDOM(sortMultiples, isClone);
         }
       } catch (err) {}
-      //new service button
+      // New service button
       try {
         if (
-          e.target.closest("button").getAttribute("data-services-action") ===
-          "new"
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "new"
         ) {
           this.removePrevMultiples();
+          this.serviceName = "new";
           this.addOneMultGroup();
         }
       } catch (err) {}
     });
 
-    this.modalForm.addEventListener("click", (e) => {
-      //ADD BTN
+    this.formContainer.addEventListener("click", (e) => {
+      // Add btn
       try {
         if (
           e.target
@@ -485,7 +1095,7 @@ class Multiple {
           const btn = e.target.closest("button");
           const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
           //get all multiple groups
-          const multipleEls = document.querySelectorAll(
+          const multipleEls = this.formContainer.querySelectorAll(
             `[data-${this.prefix}-settings-multiple*="${attName}"]`,
           );
           //case no schema
@@ -498,7 +1108,7 @@ class Multiple {
           //and keep the highest num
           multipleEls.forEach((container) => {
             const ctnrName = container.getAttribute(
-              "data-services-settings-multiple",
+              `data-${this.prefix}-settings-multiple`,
             );
             const num = this.getSuffixNumOrFalse(ctnrName);
             if (!isNaN(num) && num > topNum) topNum = num;
@@ -508,11 +1118,12 @@ class Multiple {
           const currNum = `${multipleEls.length >= 2 ? topNum + 1 : topNum}`;
           const setNum = +currNum === 0 ? `` : `_${currNum}`;
           //the default (schema) group is the last group
-          const schema = document.querySelector(
+          const schema = this.formContainer.querySelector(
             `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
           );
           //clone schema to create a group with new num
           const schemaClone = schema.cloneNode(true);
+
           //add special attribute for disabled logic
           this.changeCloneSuffix(schemaClone, setNum);
           //set disabled / enabled state
@@ -546,10 +1157,59 @@ class Multiple {
             .closest("button")
             .hasAttribute(`data-${this.prefix}-multiple-delete`)
         ) {
+          // We are not removing it really, just hiding it and update values to default
+          // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
           const multContainer = e.target.closest(
-            "[data-services-settings-multiple]",
+            `[data-${this.prefix}-settings-multiple]`,
           );
-          multContainer.remove();
+          multContainer.classList.add("hidden-multiple");
+          // get setting container
+          const settings = multContainer.querySelectorAll(
+            `[data-setting-container]`,
+          );
+          settings.forEach((setting) => {
+            // for regular input
+            try {
+              const inps = setting.querySelectorAll("input");
+              inps.forEach((inp) => {
+                // case checkbox
+                if (inp.getAttribute("type") === "checkbox") {
+                  const defaultVal = inp.getAttribute("data-default") || "";
+
+                  if (defaultVal === "yes" && !inp.checked) {
+                    inp.click();
+                  }
+                }
+
+                // case regular
+                if (inp.getAttribute("type") !== "checkbox") {
+                  const defaultVal = inp.getAttribute("data-default") || "";
+                  inp.setAttribute("value", defaultVal);
+                  inp.value = defaultVal;
+                }
+              });
+            } catch (e) {}
+            // for select
+            try {
+              const selects = setting.querySelectorAll(
+                "button[data-setting-select]",
+              );
+              selects.forEach((select) => {
+                const defaultVal = select.getAttribute("data-default") || "";
+                select
+                  .querySelector("data-setting-select-text")
+                  .setAttribute("data-value", defaultVal);
+                select.querySelector("data-setting-select-text").textContent =
+                  defaultVal;
+                const dropdown = this.formContainer.querySelector(
+                  `[data-setting-select-dropdown="${select.getAttribute(
+                    "data-setting-select",
+                  )}"]`,
+                );
+                dropdown.querySelector(`button[value=${defaultVal}]`).click();
+              });
+            } catch (e) {}
+          });
         }
         //remove last child
       } catch (err) {}
@@ -568,14 +1228,15 @@ class Multiple {
       const nameSuffixLess = isSuffixe
         ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
         : name.trim();
-      const relateSetting = document.querySelector(
+      const relateSetting = this.formContainer.querySelector(
         `[data-setting-container=${nameSuffixLess}_SCHEMA]`,
       );
+      if (!relateSetting) continue;
       const relateCtnr = relateSetting.closest(
-        "[data-services-settings-multiple]",
+        `[data-${this.prefix}-settings-multiple]`,
       );
       const relateCtnrName = relateCtnr.getAttribute(
-        "data-services-settings-multiple",
+        `data-${this.prefix}-settings-multiple`,
       );
       //then we sort the setting on the right container name by suffixe number
       if (!(relateCtnrName in sortMultiples)) {
@@ -591,29 +1252,29 @@ class Multiple {
   }
 
   addOneMultGroup() {
-    const settings = document.querySelector("[data-services-modal-form]");
-    const multAddBtns = settings.querySelectorAll(
-      "[data-services-multiple-add]",
+    const multAddBtns = this.formContainer.querySelectorAll(
+      `[data-${this.prefix}-multiple-add]`,
     );
     multAddBtns.forEach((btn) => {
+      const att = btn.getAttribute(`data-${this.prefix}-multiple-add`);
       //check if already one (SCHEMA exclude so length >= 2)
-      const plugin = btn.closest("[data-plugin-item]");
-      if (
-        plugin.querySelectorAll("[data-services-settings-multiple]").length >= 2
-      )
-        return;
+      const multGroups = this.formContainer.querySelectorAll(
+        `[data-${this.prefix}-settings-multiple^="${att}"]`,
+      );
+      if (multGroups.length >= 2) return;
+
       btn.click();
     });
   }
 
   showMultByAtt(att) {
-    const multContainers = document.querySelectorAll(
-      `[data-services-settings-multiple^=${att}]`,
+    const multContainers = this.formContainer.querySelectorAll(
+      `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
       if (
         !container
-          .getAttribute("data-services-settings-multiple")
+          .getAttribute(`data-${this.prefix}-settings-multiple`)
           .includes("SCHEMA")
       )
         container.classList.remove("hidden");
@@ -621,31 +1282,123 @@ class Multiple {
   }
 
   toggleMultByAtt(att) {
-    const multContainers = document.querySelectorAll(
-      `[data-services-settings-multiple^=${att}]`,
+    const multContainers = this.formContainer.querySelectorAll(
+      `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
       if (
         !container
-          .getAttribute("data-services-settings-multiple")
+          .getAttribute(`data-${this.prefix}-settings-multiple`)
           .includes("SCHEMA")
       )
         container.classList.toggle("hidden");
     });
   }
 
+  // Avoid multiple settings because it is handle by Multiple class
+  getSettingsMultiple(serviceSettings) {
+    const settings = JSON.parse(serviceSettings);
+    // We need to add security level
+    if (this.handleSecurityLevel) {
+      return this.addSecurityLevelToSettings(settings);
+    }
+    return settings;
+  }
+
+  addSecurityLevelToSettings(settings) {
+    // Retrieve security level and current level
+    const secLevel = document
+      .querySelector('[data-setting-select-text="security-level"]')
+      .getAttribute("data-value");
+
+    // Case custom, we don't have to use security level settings
+    if (secLevel === "custom") return settings;
+    // Case others security level, we need to remove multiple with method ui or default only and replace by security level settings
+    // We store remain names to avoid duplicate suffixe
+    const remainNames = [];
+    this.multSettingsName.forEach((name) => {
+      for (const [key, value] of Object.entries(settings)) {
+        if (
+          key.startsWith(name) &&
+          (value["method"] === "ui" || value["method"] === "default")
+        ) {
+          delete settings[key];
+        }
+        if (
+          key.startsWith(name) &&
+          (value["method"] !== "ui" || value["method"] !== "default")
+        ) {
+          remainNames.push(key);
+        }
+      }
+    });
+
+    // Retrieve multiple groups by security level
+    const secLevelMultSettingsEl = this.formContainer.querySelectorAll(
+      `[data-multiple-levels]`,
+    );
+    const settingsSecLevel = {};
+    secLevelMultSettingsEl.forEach((multEl) => {
+      const settingsGroup = JSON.parse(
+        multEl.getAttribute("data-multiple-levels").replaceAll(`'`, `"`),
+      );
+      // loop on each multiple groups
+      settingsGroup.forEach((levelGroups) => {
+        // define the suffixe number using remaining name
+        // loop on each dict on group
+        const levelGroup = levelGroups[secLevel];
+        for (const [key, value] of Object.entries(levelGroup)) {
+          let suffixe_num = 0;
+          // key has multiple "_", we want to delete only content after last "_"
+          // check if last element is a valid number to get right name
+          const splitKey = key.split("_");
+          const keyName = isNaN(splitKey[splitKey.length - 1])
+            ? key
+            : splitKey.slice(0, splitKey.length - 1).join("_");
+          // Loop on remaining names to get the right suffixe number
+          remainNames.forEach((name) => {
+            if (name.startsWith(keyName)) {
+              const splitName = name.split("_");
+              if (!isNaN(splitName[splitName.length - 1]))
+                suffixe_num = Math.max(
+                  suffixe_num,
+                  +splitName[splitName.length - 1],
+                );
+            }
+          });
+          const newKey = `${keyName}_${suffixe_num + 1}`;
+          // don't forget to add new key to avoid override same key
+          remainNames.push(newKey);
+          // we need same format as settings
+          settingsSecLevel[newKey] = {
+            value: value,
+            method: "ui",
+            global: false,
+          };
+        }
+      });
+    });
+
+    const mergeSettings = { ...settings, ...settingsSecLevel };
+    // Merge level settings with current settings
+    return mergeSettings;
+  }
+
   getMultiplesOnly(settings) {
     //get schema settings
     const multiples = {};
-    const schemaSettings = document.querySelectorAll(
+
+    const schemaSettings = this.formContainer.querySelectorAll(
       `[data-setting-container$="SCHEMA"]`,
     );
+
     // loop on every schema settings
     schemaSettings.forEach((schema) => {
       const schemaName = schema
         .getAttribute("data-setting-container")
         .replace("_SCHEMA", "")
         .trim();
+
       //check if match with service setting
       for (const [key, data] of Object.entries(settings)) {
         if (key.includes(schemaName)) {
@@ -661,15 +1414,16 @@ class Multiple {
   }
 
   //put multiple on the right plugin, on schema container
-  setMultipleToDOM(sortMultObj) {
+  setMultipleToDOM(sortMultObj, setMethodUI = false) {
     //we loop on each multiple that contains values to render to DOM
     for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
       sortMultObj,
     )) {
       //we need to access the DOM schema container
-      const schemaCtnr = document.querySelector(
-        `[data-services-settings-multiple="${schemaCtnrName}"]`,
+      const schemaCtnr = this.formContainer.querySelector(
+        `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`,
       );
+
       //now we have to loop on each multiple settings group
       for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
         //we have to clone schema container first
@@ -687,9 +1441,10 @@ class Multiple {
             `[data-setting-container="${name}"]`,
           );
           //replace input info and disabled state
+          // check if attribute data-simple on formContainer
           this.setSetting(
             data["value"],
-            data["method"],
+            setMethodUI ? "ui" : data["method"],
             data["global"],
             settingContainer,
           );
@@ -703,9 +1458,9 @@ class Multiple {
   changeCloneSuffix(schemaCtnrClone, suffix) {
     //rename multiple container
     schemaCtnrClone.setAttribute(
-      "data-services-settings-multiple",
+      `data-${this.prefix}-settings-multiple`,
       schemaCtnrClone
-        .getAttribute("data-services-settings-multiple")
+        .getAttribute(`data-${this.prefix}-settings-multiple`)
         .replace("_SCHEMA", suffix),
     );
 
@@ -732,6 +1487,45 @@ class Multiple {
       settingCtnr.setAttribute(
         "id",
         settingCtnr.getAttribute("id").replace("_SCHEMA", suffix),
+      );
+    });
+
+    // rename label
+    const labelEls = schemaCtnrClone.querySelectorAll("label");
+    labelEls.forEach((label) => {
+      label.setAttribute(
+        "for",
+        label.getAttribute("for").replace("_SCHEMA", suffix),
+      );
+    });
+
+    //rename popover
+    const popoverBtns = schemaCtnrClone.querySelectorAll("[data-popover-btn]");
+    popoverBtns.forEach((popoverBtn) => {
+      popoverBtn.setAttribute(
+        "data-popover-btn",
+        popoverBtn.getAttribute("data-popover-btn").replace("_SCHEMA", suffix),
+      );
+    });
+
+    const popoverContents = schemaCtnrClone.querySelectorAll(
+      "[data-popover-content]",
+    );
+    popoverContents.forEach((popoverContent) => {
+      popoverContent.setAttribute(
+        "data-popover-content",
+        popoverContent
+          .getAttribute("data-popover-content")
+          .replace("_SCHEMA", suffix),
+      );
+    });
+
+    //rename invalid
+    const invalidEls = schemaCtnrClone.querySelectorAll("[data-invalid]");
+    invalidEls.forEach((invalidEl) => {
+      invalidEl.setAttribute(
+        "data-invalid",
+        invalidEl.getAttribute("data-invalid").replace("_SCHEMA", suffix),
       );
     });
 
@@ -766,6 +1560,9 @@ class Multiple {
         if (
           inpName === "csrf_token" ||
           inpName === "OLD_SERVER_NAME" ||
+          inpName === "is_draft" ||
+          inpName === "mode" ||
+          inpName === "security-level" ||
           inpName === "operation" ||
           inpName === "settings-filter"
         )
@@ -813,7 +1610,7 @@ class Multiple {
         .click();
 
       //set state to custom visible el
-      const btnCustom = document.querySelector(
+      const btnCustom = this.formContainer.querySelector(
         `[data-setting-select=${select.getAttribute(
           "data-setting-select-default",
         )}]`,
@@ -852,10 +1649,10 @@ class Multiple {
         selects.forEach((select) => {
           const method = select.getAttribute("data-default-method");
           const name = select.getAttribute(
-            "data-services-setting-select-default",
+            `data-${this.prefix}-setting-select-default`,
           );
-          const selDOM = document.querySelector(
-            `button[data-services-setting-select='${name}']`,
+          const selDOM = this.formContainer.querySelector(
+            `button[data-${this.prefix}-setting-select='${name}']`,
           );
           if (method === "ui" || method === "default") {
             selDOM.removeAttribute("disabled", "");
@@ -889,7 +1686,7 @@ class Multiple {
 
   hiddenIfNoMultiples() {
     //hide multiple btn if no multiple exist on a plugin
-    const multiples = document.querySelectorAll(
+    const multiples = this.formContainer.querySelectorAll(
       `[data-${this.prefix}-settings-multiple]`,
     );
     multiples.forEach((container) => {
@@ -901,13 +1698,13 @@ class Multiple {
   }
 
   removePrevMultiples() {
-    const multiPlugins = document.querySelectorAll(
+    const multiPlugins = this.formContainer.querySelectorAll(
       `[data-${this.prefix}-settings-multiple]`,
     );
     multiPlugins.forEach((multiGrp) => {
       if (
         !multiGrp
-          .getAttribute("data-services-settings-multiple")
+          .getAttribute(`data-${this.prefix}-settings-multiple`)
           .includes("SCHEMA")
       )
         multiGrp.remove();
@@ -934,13 +1731,372 @@ class Multiple {
   }
 }
 
-const setPopover = new Popover();
-const setTabs = new Tabs();
-const setModal = new ServiceModal();
-const format = new FormatValue();
-const setFilterGlobal = new FilterSettings(
-  "settings-filter",
-  "[data-service-content='settings']",
+class Dropdown {
+  constructor(prefix = "services") {
+    this.prefix = prefix;
+    this.container = document.querySelector("main");
+    this.lastDrop = "";
+    this.initDropdown();
+  }
+
+  initDropdown() {
+    this.container.addEventListener("click", (e) => {
+      //SELECT BTN LOGIC
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-setting-select`) &&
+          !e.target.closest("button").hasAttribute(`disabled`)
+        ) {
+          const btnName = e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select`);
+          if (this.lastDrop !== btnName) {
+            this.lastDrop = btnName;
+            this.closeAllDrop();
+          }
+
+          this.toggleSelectBtn(e);
+        }
+      } catch (err) {}
+      //SELECT DROPDOWN BTN LOGIC
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-setting-select-dropdown-btn`)
+        ) {
+          const btn = e.target.closest("button");
+          const btnValue = btn.getAttribute("value");
+          const btnSetting = btn.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown-btn`,
+          );
+          //stop if same value to avoid new fetching
+          const isSameVal = this.isSameValue(btnSetting, btnValue);
+          if (isSameVal) return this.hideDropdown(btnSetting);
+          //else, add new value to custom
+          this.setSelectNewValue(btnSetting, btnValue);
+          //close dropdown and change style
+          this.hideDropdown(btnSetting);
+
+          if (
+            !e.target.closest("button").hasAttribute(`data-${this.prefix}-file`)
+          ) {
+            this.changeDropBtnStyle(btnSetting, btn);
+          }
+          //show / hide filter
+          if (btnSetting === "instances") {
+            this.hideFilterOnLocal(btn.getAttribute("data-_type"));
+          }
+        }
+      } catch (err) {}
+    });
+  }
+
+  closeAllDrop() {
+    const drops = document.querySelectorAll(
+      `[data-${this.prefix}-setting-select-dropdown]`,
+    );
+    drops.forEach((drop) => {
+      drop.classList.add("hidden");
+      drop.classList.remove("flex");
+      document
+        .querySelector(
+          `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown`,
+          )}"]`,
+        )
+        .classList.remove("rotate-180");
+    });
+  }
+
+  isSameValue(btnSetting, value) {
+    const selectCustom = document.querySelector(
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`,
+    );
+    const currVal = selectCustom.textContent;
+    return currVal === value ? true : false;
+  }
+
+  setSelectNewValue(btnSetting, value) {
+    const selectCustom = document.querySelector(
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`,
+    );
+    selectCustom.querySelector(
+      `[data-${this.prefix}-setting-select-text]`,
+    ).textContent = value;
+  }
+
+  hideDropdown(btnSetting) {
+    //hide dropdown
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
+    );
+    dropdownEl.classList.add("hidden");
+    dropdownEl.classList.remove("flex");
+    //svg effect
+    const dropdownChevron = document.querySelector(
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`,
+    );
+    dropdownChevron.classList.remove("rotate-180");
+  }
+
+  changeDropBtnStyle(btnSetting, selectedBtn) {
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
+    );
+    //reset dropdown btns
+    const btnEls = dropdownEl.querySelectorAll("button");
+
+    btnEls.forEach((btn) => {
+      btn.classList.remove(
+        "bg-primary",
+        "dark:bg-primary",
+        "text-gray-300",
+        "text-gray-300",
+      );
+      btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
+    });
+    //highlight clicked btn
+    selectedBtn.classList.remove(
+      "bg-white",
+      "dark:bg-slate-700",
+      "text-gray-700",
+    );
+    selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
+  }
+
+  toggleSelectBtn(e) {
+    const attribute = e.target
+      .closest("button")
+      .getAttribute(`data-${this.prefix}-setting-select`);
+    //toggle dropdown
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`,
+    );
+    const dropdownChevron = document.querySelector(
+      `svg[data-${this.prefix}-setting-select="${attribute}"]`,
+    );
+    dropdownEl.classList.toggle("hidden");
+    dropdownEl.classList.toggle("flex");
+    dropdownChevron.classList.toggle("rotate-180");
+  }
+
+  //hide date filter on local
+  hideFilterOnLocal(type) {
+    if (type === "local") {
+      this.hideInp(`input#from-date`);
+      this.hideInp(`input#to-date`);
+    }
+
+    if (type !== "local") {
+      this.showInp(`input#from-date`);
+      this.showInp(`input#to-date`);
+    }
+  }
+
+  showInp(selector) {
+    document.querySelector(selector).closest("div").classList.add("flex");
+    document.querySelector(selector).closest("div").classList.remove("hidden");
+  }
+
+  hideInp(selector) {
+    document.querySelector(selector).closest("div").classList.add("hidden");
+    document.querySelector(selector).closest("div").classList.remove("flex");
+  }
+}
+
+class Filter {
+  constructor(prefix = "services") {
+    this.prefix = prefix;
+    this.container =
+      document.querySelector(`[data-${this.prefix}-filter]`) || null;
+    this.keyInp = document.querySelector("input#service-name-keyword");
+    this.stateValue = "all";
+    this.methodValue = "all";
+    this.initHandler();
+  }
+
+  initHandler() {
+    if (!this.container) return;
+    //STATE HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "state"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="state"]`,
+              )
+              .textContent.trim()
+              .toLowerCase();
+
+            this.stateValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    //METHOD HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "method"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="method"]`,
+              )
+              .textContent.trim()
+              .toLowerCase();
+
+            this.methodValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    //KEYWORD HANDLER
+    this.keyInp.addEventListener("input", (e) => {
+      this.filter();
+    });
+  }
+
+  filter() {
+    const services = document.querySelectorAll(`[data-${this.prefix}-card]`);
+    if (services.length === 0) return;
+    //reset
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      el.classList.remove("hidden");
+    }
+    //filter type
+    this.setFilterState(services);
+    this.setFilterMethod(services);
+    this.setFilterKeyword(services);
+  }
+
+  setFilterState(services) {
+    if (this.stateValue === "all") return;
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      const type = el
+        .querySelector(`[data-${this.prefix}-state]`)
+        .getAttribute(`data-${this.prefix}-state`)
+        .trim()
+        .toLowerCase();
+      if (type !== this.stateValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterMethod(services) {
+    if (this.methodValue === "all") return;
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      const type = el
+        .querySelector(`[data-${this.prefix}-method]`)
+        .getAttribute(`data-${this.prefix}-method`)
+        .trim()
+        .toLowerCase();
+      if (type !== this.methodValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterKeyword(jobs) {
+    const keyword = this.keyInp.value.trim().toLowerCase();
+    if (!keyword) return;
+    for (let i = 0; i < jobs.length; i++) {
+      const el = jobs[i];
+      const name = el
+        .querySelector(`[data-${this.prefix}-name]`)
+        .textContent.trim()
+        .toLowerCase();
+
+      if (!name.includes(keyword)) el.classList.add("hidden");
+    }
+  }
+}
+
+const setDropdown = new Dropdown();
+const setFilter = new Filter();
+const setTabsSelect = new TabsSelect(
+  document.querySelector("[data-services-tabs-select]"),
+  document.querySelector("[data-advanced][data-services-modal-form]"),
 );
 
-const setMultiple = new Multiple("services");
+const setPopover = new Popover();
+const setModal = new ServiceModal();
+const format = new FormatValue();
+const invalid = new showInvalid();
+const setFilterGlobal = new FilterSettings(
+  "settings-filter",
+  document.querySelector("[data-services-tabs-select]"),
+  document.querySelector("[data-advanced][data-services-modal-form]"),
+  "services",
+);
+
+const setAdvancedMultiple = new Multiple(
+  "services",
+  `[data-advanced][data-services-modal-form]`,
+  false,
+);
+
+const setSimpleMultiple = new Multiple(
+  "services",
+  `[data-simple][data-services-modal-form]`,
+  true,
+);
+
+const checkServiceModalKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#settings-filter"),
+  "input",
+  document
+    .querySelector("[data-services-modal-form]")
+    .querySelectorAll("[data-plugin-item]"),
+  document.querySelector("[data-services-modal-form]"),
+  document.querySelector("[data-services-nomatch]"),
+);
+
+const checkServiceModalSelect = new CheckNoMatchFilter(
+  document.querySelectorAll(
+    "button[data-services-setting-select-dropdown-btn]",
+  ),
+  "select",
+  document
+    .querySelector("[data-services-modal-form]")
+    .querySelectorAll("[data-plugin-item]"),
+  document.querySelector("[data-services-modal-form]"),
+  document.querySelector("[data-services-nomatch]"),
+);
+
+try {
+  const checkServiceCardKeyword = new CheckNoMatchFilter(
+    document.querySelectorAll("input#service-name-keyword"),
+    "input",
+    document.querySelectorAll("[data-services-card]"),
+    false,
+    document.querySelector("[data-services-nomatch-card]"),
+  );
+
+  const checkServiceCardSelect = new CheckNoMatchFilter(
+    document.querySelectorAll(
+      "button[data-services-setting-select-dropdown-btn]",
+    ),
+    "select",
+    document.querySelectorAll("[data-services-card]"),
+    false,
+    document.querySelector("[data-services-nomatch-card]"),
+  );
+} catch (e) {}

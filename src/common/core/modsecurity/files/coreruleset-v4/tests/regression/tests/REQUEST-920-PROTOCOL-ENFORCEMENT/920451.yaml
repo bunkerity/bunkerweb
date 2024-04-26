@@ -1,0 +1,37 @@
+---
+meta:
+  author: "Andrew Howe"
+  enabled: true
+  name: "920451.yaml"
+  description: "Tests to trigger and not trigger rule 920451"
+tests:
+  - test_title: 920451-1
+    desc: "Send an Accept-Charset header, which should be blocked"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/html
+              Accept-Charset: UTF-8
+          output:
+            log_contains: id "920451"
+  - test_title: 920451-2
+    desc: "Send a Content-Range header, which should be blocked but by this rule's sibling rule, not by this rule"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/html
+              Content-Range: bytes 4096-8192/8192
+          output:
+            no_log_contains: id "920451"

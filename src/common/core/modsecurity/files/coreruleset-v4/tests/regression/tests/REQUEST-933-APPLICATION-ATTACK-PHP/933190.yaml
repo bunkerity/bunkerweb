@@ -1,0 +1,24 @@
+---
+meta:
+  author: "NiceYouKnow"
+  description: None
+  enabled: true
+  name: 933190.yaml
+tests:
+  - test_title: 933190-1
+    desc: "PHP Injection Attack: PHP Closing Tag Found"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: 'file_test=<?php%20@eval($_POST["hacker"]);%20?>&submit=1'
+            version: HTTP/1.1
+          output:
+            log_contains: id "933190"

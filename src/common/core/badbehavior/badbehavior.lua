@@ -21,7 +21,7 @@ end
 
 function badbehavior:log()
 	-- Check if we are whitelisted
-	if is_whitelisted(self.ctx) == "yes" then
+	if is_whitelisted(self.ctx) then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if bad behavior is activated
@@ -49,6 +49,7 @@ function badbehavior:log()
 	if not ok then
 		return self:ret(false, "can't create increase timer : " .. err)
 	end
+	self:set_metric("counters", tostring(ngx.status), 1)
 	return self:ret(true, "success")
 end
 

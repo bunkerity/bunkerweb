@@ -1,32 +1,19 @@
-{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip()
-%}
-
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', ' ').replace('-', ' ') %}
 <!-- header -->
-<header
-  class="relative flex flex-wrap items-center justify-between px-0 pb-2 sm:mx-6 transition-all ease-in shadow-none duration-250 rounded-2xl lg:flex-nowrap lg:justify-start"
->
-  <div
-    class="flex items-center justify-between w-full px-4 py-1 mx-auto flex-wrap-inherit"
-  >
-    <nav>
-      <!-- breadcrumb -->
-      <h6 class="mb-0 text-lg font-bold text-white capitalize">
-        {{current_endpoint}}
-      </h6>
-      <ul class="flex flex-wrap pt-1 mr-12 bg-transparent rounded-lg sm:mr-16">
-        <li class="text-sm leading-normal">
-          <a class="text-white opacity-50 dark:opacity-75" href="javascript:;"
-            >BunkerWeb</a
-          >
-        </li>
-        <li
-          class="hidden sm:inline text-sm pl-0 xs:pl-2 capitalize leading-normal text-white before:float-left before:pr-2 before:text-white before:content-['/']"
-          aria-current="page"
-        >
-          {{current_endpoint}}
-        </li>
-      </ul>
-    </nav>
-  </div>
+<header class="relative flex flex-wrap items-center justify-between px-0 pb-2 sm:mx-6 transition-all ease-in shadow-none duration-250 rounded-2xl lg:flex-nowrap lg:justify-start">
+    <div class="flex items-center justify-between w-full px-4 py-1 mx-auto flex-wrap-inherit">
+        <nav>
+            <!-- breadcrumb -->
+            <h6 class="mb-0 text-lg font-bold text-white capitalize">{{ current_endpoint }}</h6>
+            <ul class="flex flex-wrap pt-1 mr-12 bg-transparent rounded-lg sm:mr-16">
+                <li class="text-sm leading-normal">
+                    <a class="text-white opacity-50 dark:opacity-100 dark:text-gray-500"
+                       href="javascript:;">BunkerWeb</a>
+                </li>
+                <li class="hidden sm:inline text-sm pl-0 xs:pl-2 capitalize leading-normal text-white before:float-left before:pr-2 before:text-white before:content-['/']"
+                    aria-current="page">{{ current_endpoint }}</li>
+            </ul>
+        </nav>
+    </div>
 </header>
 <!-- end header -->

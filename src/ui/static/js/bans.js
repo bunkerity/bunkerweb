@@ -1,3 +1,5 @@
+import { CheckNoMatchFilter } from "./utils/settings.js";
+
 class Filter {
   constructor(prefix = "bans") {
     this.prefix = prefix;
@@ -21,7 +23,7 @@ class Filter {
           setTimeout(() => {
             const value = document
               .querySelector(
-                `[data-${this.prefix}-setting-select-text="reason"]`
+                `[data-${this.prefix}-setting-select-text="reason"]`,
               )
               .textContent.trim();
 
@@ -80,7 +82,7 @@ class Filter {
       const el = bans[i];
 
       const ip = this.getElAttribut(el, "ip");
-      const banStart = this.getElAttribut(el, "ban_sart");
+      const banStart = this.getElAttribut(el, "ban_start");
       const banEnd = this.getElAttribut(el, "ban_end");
       const remain = this.getElAttribut(el, "remain");
 
@@ -159,7 +161,7 @@ class Dropdown {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`,
           );
           //stop if same value to avoid new fetching
           const isSameVal = this.isSameValue(btnSetting, btnValue);
@@ -185,7 +187,7 @@ class Dropdown {
 
   closeAllDrop() {
     const drops = document.querySelectorAll(
-      `[data-${this.prefix}-setting-select-dropdown]`
+      `[data-${this.prefix}-setting-select-dropdown]`,
     );
     drops.forEach((drop) => {
       drop.classList.add("hidden");
@@ -193,8 +195,8 @@ class Dropdown {
       document
         .querySelector(
           `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown`
-          )}"]`
+            `data-${this.prefix}-setting-select-dropdown`,
+          )}"]`,
         )
         .classList.remove("rotate-180");
     });
@@ -202,7 +204,7 @@ class Dropdown {
 
   isSameValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`,
     );
     const currVal = selectCustom.textContent;
     return currVal === value ? true : false;
@@ -210,30 +212,30 @@ class Dropdown {
 
   setSelectNewValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`,
     );
     selectCustom.querySelector(
-      `[data-${this.prefix}-setting-select-text]`
+      `[data-${this.prefix}-setting-select-text]`,
     ).textContent = value;
   }
 
   hideDropdown(btnSetting) {
     //hide dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
     );
     dropdownEl.classList.add("hidden");
     dropdownEl.classList.remove("flex");
     //svg effect
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`,
     );
     dropdownChevron.classList.remove("rotate-180");
   }
 
   changeDropBtnStyle(btnSetting, selectedBtn) {
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
     );
     //reset dropdown btns
     const btnEls = dropdownEl.querySelectorAll("button");
@@ -243,7 +245,7 @@ class Dropdown {
         "bg-primary",
         "dark:bg-primary",
         "text-gray-300",
-        "text-gray-300"
+        "text-gray-300",
       );
       btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
     });
@@ -251,7 +253,7 @@ class Dropdown {
     selectedBtn.classList.remove(
       "bg-white",
       "dark:bg-slate-700",
-      "text-gray-700"
+      "text-gray-700",
     );
     selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
   }
@@ -262,10 +264,10 @@ class Dropdown {
       .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`,
     );
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${attribute}"]`
+      `svg[data-${this.prefix}-setting-select="${attribute}"]`,
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");
@@ -318,7 +320,7 @@ class Unban {
           setTimeout(() => {
             // Check if at least one item is selected
             const selected = this.listEl.querySelectorAll(
-              `input[data-checked="true"]`
+              `input[data-checked="true"]`,
             );
 
             // Case true, enable unban button
@@ -340,7 +342,7 @@ class Unban {
       if (this.unbanBtn.hasAttribute("disabled")) return;
       // Get all selected items
       const selected = this.listEl.querySelectorAll(
-        `input[data-checked="true"]`
+        `input[data-checked="true"]`,
       );
       const getDatas = [];
       selected.forEach((el) => {
@@ -366,7 +368,7 @@ class AddBanModal {
     this.listEl = document.querySelector(`[data-bans-add-ban-list]`);
     this.submitBtn = document.querySelector(`button[data-bans-modal-submit]`);
     this.removeAllFieldBtn = document.querySelector(
-      "button[data-add-ban-delete-all-item]"
+      "button[data-add-ban-delete-all-item]",
     );
     this.formEl = document.querySelector("form[data-ban-add-form]");
     this.itemCount = 0;
@@ -520,7 +522,7 @@ class AddBanModal {
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="pointer-events-none absolute top-1 right-2 w-6 h-6"
+          class="pointer-events-none dark:stroke-gray-300 absolute top-1 right-2 w-6 h-6"
         >
           <path
             stroke-linecap="round"
@@ -534,7 +536,7 @@ class AddBanModal {
       <button
         data-add-ban-delete-item
         type="button"
-        class="dark:bg-red-500/90 duration-300 dark:opacity-90 flex justify-center items-center p-2 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+        class="dark:bg-red-500/90 duration-300 flex justify-center items-center p-2 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -559,11 +561,12 @@ class AddBanModal {
   }
 
   setDatepicker(id) {
-    const defaultDate = +(Date.now() + 3600000 * 24)
-      .toString()
-      .substring(0, 10);
+    const defaultDate = +(Date.now() + 3600000 * 24);
     const inpEl = document.querySelector(`input#ban-end-${id}`);
-    inpEl.setAttribute("data-timestamp", defaultDate);
+    inpEl.setAttribute(
+      "data-timestamp",
+      defaultDate.toString().substring(0, 10),
+    );
 
     // instantiate datepicker
     const dateOptions = {
@@ -581,7 +584,10 @@ class AddBanModal {
 
         // Case pick is before current date
         if (pickStamp < nowStamp) {
-          inpEl.setAttribute("data-timestamp", defaultDate);
+          inpEl.setAttribute(
+            "data-timestamp",
+            defaultDate.toString().substring(0, 10),
+          );
           return instance.setDate(defaultDate);
         }
 
@@ -601,3 +607,23 @@ const setDropdown = new Dropdown();
 const setFilter = new Filter();
 const setUnban = new Unban();
 const setModal = new AddBanModal();
+
+const checkPluginKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#keyword"),
+  "input",
+  document
+    .querySelector("[data-bans-list]")
+    .querySelectorAll("[data-bans-item]"),
+  document.querySelector("[data-bans-list-container]"),
+  document.querySelector("[data-bans-nomatch]"),
+);
+
+const checkPluginSelect = new CheckNoMatchFilter(
+  document.querySelectorAll("button[data-bans-setting-select-dropdown-btn]"),
+  "select",
+  document
+    .querySelector("[data-bans-list]")
+    .querySelectorAll("[data-bans-item]"),
+  document.querySelector("[data-bans-list-container]"),
+  document.querySelector("[data-bans-nomatch]"),
+);

@@ -31,6 +31,15 @@
       "label": "Use Let's Encrypt Staging",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+      "context": "global",
+      "default": "no",
+      "help": "Clear old certificates when renewing.",
+      "id": "lets-encrypt-clear-old-certs",
+      "label": "Clear old certificates when they are no longer needed",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   },
   "jobs": [

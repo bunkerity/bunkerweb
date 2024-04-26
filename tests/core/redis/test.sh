@@ -154,6 +154,7 @@ cleanup_stack () {
             unset REDIS_PORT
             unset REDIS_DATABASE
             unset REDIS_SSL
+            sudo systemctl stop redis
             sudo killall redis-server
         fi
         sudo rm -rf acl tls
@@ -237,7 +238,7 @@ do
             export REDIS_USERNAME="bunkerweb"
 
             echo "🧰 Stopping redis ..."
-            sudo killall redis-server
+            sudo systemctl stop redis
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 echo "🧰 Redis stop failed ❌"

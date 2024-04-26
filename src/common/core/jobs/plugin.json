@@ -9,13 +9,13 @@
     {
       "name": "mmdb-country",
       "file": "mmdb-country.py",
-      "every": "week",
+      "every": "day",
       "reload": true
     },
     {
       "name": "mmdb-asn",
       "file": "mmdb-asn.py",
-      "every": "week",
+      "every": "day",
       "reload": true
     },
     {

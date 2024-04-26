@@ -5,6 +5,12 @@ from json import loads
 from glob import glob
 from pathlib import Path
 from pytablewriter import MarkdownTableWriter
+import requests
+import zipfile
+import shutil
+from contextlib import suppress
+
+from os import getenv
 
 
 def print_md_table(settings) -> MarkdownTableWriter:
@@ -33,6 +39,10 @@ def stream_support(support) -> str:
     else:
         md += ":warning:"
     return md
+
+
+def pro_title(title: str) -> str:
+    return f"## {title} <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'>\n"
 
 
 doc = StringIO()
@@ -66,20 +76,50 @@ with open("src/common/settings.json", "r") as f:
     print(print_md_table(loads(f.read())), file=doc)
     print(file=doc)
 
-# Print core settings
-print("## Core settings\n", file=doc)
+# Get core plugins
 core_settings = {}
 for core in glob("src/common/core/*/plugin.json"):
     with open(core, "r") as f:
-        core_plugin = loads(f.read())
-        if len(core_plugin["settings"]) > 0:
-            core_settings[core_plugin["name"]] = core_plugin
+        with suppress(Exception):
+            core_plugin = loads(f.read())
+            if len(core_plugin["settings"]) > 0:
+                core_settings[core_plugin["name"]] = core_plugin
 
-for name, data in dict(sorted(core_settings.items())).items():
-    print(f"### {data['name']}\n", file=doc)
+# Get PRO plugins
+if getenv("VERSION"):
+    version = getenv("VERSION")
+else:
+    with open("src/VERSION", "r") as f:
+        version = f.read().strip()
+url = f"https://assets.bunkerity.com/bw-pro/preview/v{version}.zip"
+response = requests.get(url)
+response.raise_for_status()
+Path(f"v{version}.zip").write_bytes(response.content)
+with zipfile.ZipFile(f"v{version}.zip", "r") as zip_ref:
+    zip_ref.extractall(f"v{version}")
+pro_settings = {}
+for pro in glob(f"v{version}/*/plugin.json"):
+    with open(pro, "r") as f:
+        with suppress(Exception):
+            pro_plugin = loads(f.read())
+            core_settings[pro_plugin["name"]] = pro_plugin
+            core_settings[pro_plugin["name"]]["is_pro"] = True
+
+# Print plugins and their settings
+for data in dict(sorted(core_settings.items())).values():
+    pro_crown = ""
+    if "is_pro" in data:
+        pro_crown = " <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)\n"
+    print(f"## {data['name']}{pro_crown}\n", file=doc)
     print(f"{stream_support(data['stream'])}\n", file=doc)
     print(f"{data['description']}\n", file=doc)
-    print(print_md_table(data["settings"]), file=doc)
+    if data["settings"]:
+        print(print_md_table(data["settings"]), file=doc)
+
+# Remove zip file
+Path(f"v{version}.zip").unlink()
+# Remove folder using shutil
+shutil.rmtree(f"v{version}")
 
 doc.seek(0)
 content = doc.read()

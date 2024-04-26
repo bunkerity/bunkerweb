@@ -1,0 +1,85 @@
+---
+meta:
+  author: "Franziska Buehler, Max Leske"
+  description: "Detection of MySQL injection evasion attempts using special comments"
+  enabled: true
+  name: 942500.yaml
+tests:
+  - test_title: 942500-1
+    desc: "Use of portability comment (/*!...*/) as evasion technique"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?id=9999+or+{if+length((/*!5000select+username/*!50000from*/user+where+id=1))>0}"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942500"
+  - test_title: 942500-2
+    desc: "Use of portability comment (/*!...*/) as evasion technique, with space before !"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?id=9999+or+{if+length((/*+!5000select+username/*!50000from*/user+where+id=1))>0}"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942500"
+  - test_title: 942500-3
+    desc: "Use of optimizer hints (/*+...*/) as evasion technique"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?test=9999+or+%2F*%2Boptimizer+hint+*%2F+true"
+          output:
+            log_contains: id "942500"
+  - test_title: 942500-4
+    desc: "Use of optimizer hints (/*+...*/) as evasion technique with space before +"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?test=9999+or+%2F*+%2Boptimizer+hint+*%2F+true"
+          output:
+            log_contains: id "942500"
+  - test_title: 942500-5
+    desc: "Status Page Test - MySQL inline comment detected"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?test=9999+or+{if+length((/*!5000select+username/*!comment*/"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942500"

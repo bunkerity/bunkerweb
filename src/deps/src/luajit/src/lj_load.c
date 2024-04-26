@@ -34,14 +34,28 @@ static TValue *cpparser(lua_State *L, lua_CFunction dummy, void *ud)
   UNUSED(dummy);
   cframe_errfunc(L->cframe) = -1;  /* Inherit error function. */
   bc = lj_lex_setup(L, ls);
-  if (ls->mode && !strchr(ls->mode, bc ? 'b' : 't')) {
-    setstrV(L, L->top++, lj_err_str(L, LJ_ERR_XMODE));
-    lj_err_throw(L, LUA_ERRSYNTAX);
+  if (ls->mode) {
+    int xmode = 1;
+    const char *mode = ls->mode;
+    char c;
+    while ((c = *mode++)) {
+      if (c == (bc ? 'b' : 't')) xmode = 0;
+      if (c == (LJ_FR2 ? 'W' : 'X')) ls->fr2 = !LJ_FR2;
+    }
+    if (xmode) {
+      setstrV(L, L->top++, lj_err_str(L, LJ_ERR_XMODE));
+      lj_err_throw(L, LUA_ERRSYNTAX);
+    }
   }
   pt = bc ? lj_bcread(ls) : lj_parse(ls);
-  fn = lj_func_newL_empty(L, pt, tabref(L->env));
-  /* Don't combine above/below into one statement. */
-  setfuncV(L, L->top++, fn);
+  if (ls->fr2 == LJ_FR2) {
+    fn = lj_func_newL_empty(L, pt, tabref(L->env));
+    /* Don't combine above/below into one statement. */
+    setfuncV(L, L->top++, fn);
+  } else {
+    /* Non-native generation returns a dumpable, but non-runnable prototype. */
+    setprotoV(L, L->top++, pt);
+  }
   return NULL;
 }
 
@@ -159,9 +173,10 @@ LUALIB_API int luaL_loadstring(lua_State *L, const char *s)
 LUA_API int lua_dump(lua_State *L, lua_Writer writer, void *data)
 {
   cTValue *o = L->top-1;
+  uint32_t flags = LJ_FR2*BCDUMP_F_FR2;  /* Default mode for legacy C API. */
   lj_checkapi(L->top > L->base, "top slot empty");
   if (tvisfunc(o) && isluafunc(funcV(o)))
-    return lj_bcwrite(L, funcproto(funcV(o)), writer, data, 0);
+    return lj_bcwrite(L, funcproto(funcV(o)), writer, data, flags);
   else
     return 1;
 }

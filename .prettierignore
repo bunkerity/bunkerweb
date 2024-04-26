@@ -2,7 +2,7 @@ docs/
 env/
 */env/
 *.min*
-src/common/core/modsecurity/
+src/common/core/modsecurity/files/
 src/deps/src/
 mkdocs.yml
 CHANGELOG.md
@@ -16,5 +16,6 @@ flatpickr.*
 src/ui/static/js/editor/*
 src/ui/static/js/utils/purify/*
 src/ui/templates/*
+src/common/core/*/ui/*
 datepicker-foundation.css
-examples/*
+examples/

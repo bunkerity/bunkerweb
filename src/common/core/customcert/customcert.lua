@@ -20,6 +20,14 @@ function customcert:initialize(ctx)
 	plugin.initialize(self, "customcert", ctx)
 end
 
+function customcert:set()
+	local https_configured = self.variables["USE_CUSTOM_SSL"]
+	if https_configured == "yes" then
+		self.ctx.bw.https_configured = "yes"
+	end
+	return self:ret(true, "set https_configured to " .. https_configured)
+end
+
 function customcert:init()
 	local ret_ok, ret_err = true, "success"
 	if has_variable("USE_CUSTOM_SSL", "yes") then
@@ -36,8 +44,8 @@ function customcert:init()
 			for server_name, multisite_vars in pairs(vars) do
 				if multisite_vars["USE_CUSTOM_SSL"] == "yes" and server_name ~= "global" then
 					local check, data = read_files({
-						"/var/cache/bunkerweb/customcert/" .. server_name .. ".cert.pem",
-						"/var/cache/bunkerweb/customcert/" .. server_name .. ".key.pem",
+						"/var/cache/bunkerweb/customcert/" .. server_name .. "/cert.pem",
+						"/var/cache/bunkerweb/customcert/" .. server_name .. "/key.pem",
 					})
 					if not check then
 						self.logger:log(ERR, "error while reading files : " .. data)
@@ -60,8 +68,8 @@ function customcert:init()
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
 			local check, data = read_files({
-				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. ".cert.pem",
-				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. ".key.pem",
+				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. "/cert.pem",
+				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. "/key.pem",
 			})
 			if not check then
 				self.logger:log(ERR, "error while reading files : " .. data)

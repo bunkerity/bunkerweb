@@ -112,6 +112,27 @@ function headers:header()
 			ngx_header[header] = nil
 		end
 	end
+	-- Set secure flag
+	local set_cookie = ngx_header["Set-Cookie"]
+	if self.ctx.bw.scheme == "https" and self.variables["COOKIE_AUTO_SECURE_FLAG"] == "yes" and set_cookie ~= nil then
+		local new_set_cookie = nil
+		if type(set_cookie) == "string" then
+			new_set_cookie = set_cookie
+			if not set_cookie:find("[Ss]ecure") then
+				new_set_cookie = new_set_cookie .. "; Secure"
+			end
+		elseif type(set_cookie) == "table" then
+			new_set_cookie = {}
+			for _, single_set_cookie in ipairs(set_cookie) do
+				local check_set_cookie = single_set_cookie
+				if not check_set_cookie:find("[Ss]ecure") then
+					check_set_cookie = check_set_cookie .. "; Secure"
+				end
+				table.insert(new_set_cookie, check_set_cookie)
+			end
+		end
+		ngx_header["Set-Cookie"] = new_set_cookie
+	end
 	return self:ret(true, "edited headers for request")
 end
 

@@ -1,2 +1,2 @@
-maxminddb==2.5.2
+maxminddb==2.6.1
 requests==2.31.0

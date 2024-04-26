@@ -52,6 +52,7 @@ class JobScheduler(ApiCaller):
         self.__lock = lock
         self.__thread_lock = Lock()
         self.__job_success = True
+        self.__job_reload = False
         self.__semaphore = Semaphore(cpu_count() or 1)
 
     @property
@@ -77,15 +78,10 @@ class JobScheduler(ApiCaller):
             with self.__thread_lock:
                 instances = self.__db.get_instances()
             for instance in instances:
-                api = API(
-                    f"http://{instance['hostname']}:{instance['port']}",
-                    host=instance["server_name"],
-                )
+                api = API(f"http://{instance['hostname']}:{instance['port']}", host=instance["server_name"])
                 apis.append(api)
         except:
-            self.__logger.warning(
-                f"Exception while getting jobs instances : {format_exc()}",
-            )
+            self.__logger.warning(f"Exception while getting jobs instances : {format_exc()}")
         return apis
 
     def update_jobs(self):
@@ -93,7 +89,11 @@ class JobScheduler(ApiCaller):
 
     def __get_jobs(self):
         jobs = {}
-        for plugin_file in glob(join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")) + glob(join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")):  # core plugins  # external plugins
+        for plugin_file in (
+            glob(join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json"))
+            + glob(join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json"))
+            + glob(join(sep, "etc", "bunkerweb", "pro", "plugins", "*", "plugin.json"))
+        ):  # core plugins  # external plugins # pro plugins
             plugin_name = basename(dirname(plugin_file))
             jobs[plugin_name] = []
             try:
@@ -104,29 +104,29 @@ class JobScheduler(ApiCaller):
                 plugin_jobs = plugin_data["jobs"]
 
                 for x, job in enumerate(deepcopy(plugin_jobs)):
-                    if not all(
-                        key in job.keys()
-                        for key in (
-                            "name",
-                            "file",
-                            "every",
-                            "reload",
+                    if not all(key in job.keys() for key in ("name", "file", "every", "reload")):
+                        self.__logger.warning(
+                            f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job"
                         )
-                    ):
-                        self.__logger.warning(f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job")
                         plugin_jobs.pop(x)
                         continue
 
                     if not match(r"^[\w.-]{1,128}$", job["name"]):
-                        self.__logger.warning(f"Invalid name for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128)), ignoring job")
+                        self.__logger.warning(
+                            f"Invalid name for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128)), ignoring job"
+                        )
                         plugin_jobs.pop(x)
                         continue
                     elif not match(r"^[\w./-]{1,256}$", job["file"]):
-                        self.__logger.warning(f"Invalid file for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256)), ignoring job")
+                        self.__logger.warning(
+                            f"Invalid file for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256)), ignoring job"
+                        )
                         plugin_jobs.pop(x)
                         continue
                     elif job["every"] not in ("once", "minute", "hour", "day", "week"):
-                        self.__logger.warning(f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job")
+                        self.__logger.warning(
+                            f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job"
+                        )
                         plugin_jobs.pop(x)
                         continue
                     elif job["reload"] is not True and job["reload"] is not False:
@@ -140,9 +140,7 @@ class JobScheduler(ApiCaller):
             except FileNotFoundError:
                 pass
             except:
-                self.__logger.warning(
-                    f"Exception while getting jobs for plugin {plugin_name} : {format_exc()}",
-                )
+                self.__logger.warning(f"Exception while getting jobs for plugin {plugin_name} : {format_exc()}")
         return jobs
 
     def __str_to_schedule(self, every: str) -> Job:
@@ -160,19 +158,13 @@ class JobScheduler(ApiCaller):
         reload = True
         if self.__integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
             self.__logger.info("Reloading nginx ...")
-            proc = run(
-                [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
-                stdin=DEVNULL,
-                stderr=PIPE,
-                env=self.__env,
-                check=False,
-            )
+            proc = run([join(sep, "usr", "sbin", "nginx"), "-s", "reload"], stdin=DEVNULL, stderr=PIPE, env=self.__env, check=False)
             reload = proc.returncode == 0
             if reload:
                 self.__logger.info("Successfully reloaded nginx")
             else:
                 self.__logger.error(
-                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}",
+                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}"
                 )
         else:
             self.__logger.info("Reloading nginx ...")
@@ -184,33 +176,25 @@ class JobScheduler(ApiCaller):
         return reload
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
-        self.__logger.info(
-            f"Executing job {name} from plugin {plugin} ...",
-        )
+        self.__logger.info(f"Executing job {name} from plugin {plugin} ...")
         success = True
         ret = -1
         try:
-            proc = run(
-                join(path, "jobs", file),
-                stdin=DEVNULL,
-                stderr=STDOUT,
-                env=self.__env,
-                check=False,
-            )
+            proc = run(join(path, "jobs", file), stdin=DEVNULL, stderr=STDOUT, env=self.__env, check=False)
             ret = proc.returncode
         except BaseException:
             success = False
-            self.__logger.error(
-                f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}",
-            )
+            self.__logger.error(f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}")
             with self.__thread_lock:
                 self.__job_success = False
 
-        if self.__job_success and ret >= 2:
+        if ret == 1:
+            with self.__thread_lock:
+                self.__job_reload = True
+
+        if self.__job_success and (ret < 0 or ret >= 2):
             success = False
-            self.__logger.error(
-                f"Error while executing job {name} from plugin {plugin}",
-            )
+            self.__logger.error(f"Error while executing job {name} from plugin {plugin}")
             with self.__thread_lock:
                 self.__job_success = False
 
@@ -223,13 +207,9 @@ class JobScheduler(ApiCaller):
             err = self.__db.update_job(plugin, name, success)
 
         if not err:
-            self.__logger.info(
-                f"Successfully updated database for the job {name} from plugin {plugin}",
-            )
+            self.__logger.info(f"Successfully updated database for the job {name} from plugin {plugin}")
         else:
-            self.__logger.warning(
-                f"Failed to update database for the job {name} from plugin {plugin}: {err}",
-            )
+            self.__logger.warning(f"Failed to update database for the job {name} from plugin {plugin}: {err}")
 
     def setup(self):
         for plugin, jobs in self.__jobs.items():
@@ -242,29 +222,28 @@ class JobScheduler(ApiCaller):
                     if every != "once":
                         self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
                 except:
-                    self.__logger.error(
-                        f"Exception while scheduling jobs for plugin {plugin} : {format_exc()}",
-                    )
+                    self.__logger.error(f"Exception while scheduling jobs for plugin {plugin} : {format_exc()}")
 
     def run_pending(self) -> bool:
-        if self.__lock:
-            self.__lock.acquire()
+        threads = []
+        self.__job_success = True
+        self.__job_reload = False
 
-        jobs = [job for job in schedule_jobs if job.should_run]
-        success = True
-        reload = False
-        for job in jobs:
-            ret = job.run()
+        for job in schedule_jobs:
+            if not job.should_run:
+                continue
+            threads.append(Thread(target=self.__run_in_thread, args=((job.run,),)))
 
-            if not isinstance(ret, int):
-                ret = -1
+        for thread in threads:
+            thread.start()
 
-            if ret == 1:
-                reload = True
-            elif ret < 0 or ret >= 2:
-                success = False
+        for thread in threads:
+            thread.join()
 
-        if reload:
+        success = self.__job_success
+        self.__job_success = True
+
+        if self.__job_reload:
             try:
                 if self.apis:
                     cache_path = join(sep, "var", "cache", "bunkerweb")
@@ -274,30 +253,27 @@ class JobScheduler(ApiCaller):
                         self.__logger.error(f"Error while sending {cache_path} folder")
                     else:
                         self.__logger.info(f"Successfully sent {cache_path} folder")
+
                 if not self.__reload():
                     success = False
-            except:
+            except BaseException:
                 success = False
-                self.__logger.error(
-                    f"Exception while reloading after job scheduling : {format_exc()}",
-                )
+                self.__logger.error(f"Exception while reloading after job scheduling : {format_exc()}")
+            self.__job_reload = False
 
-        if self.__lock:
-            self.__lock.release()
+        if threads:
+            self.__logger.info("All scheduled jobs have been executed")
+
         return success
 
     def run_once(self) -> bool:
         threads = []
+        self.__job_success = True
+        self.__job_reload = False
+
         for plugin, jobs in self.__jobs.items():
-            jobs_jobs = []
-
-            for job in jobs:
-                path = job["path"]
-                name = job["name"]
-                file = job["file"]
-
-                # Add job to the list of jobs to run in the order they are defined
-                jobs_jobs.append(partial(self.__job_wrapper, path, plugin, name, file))
+            # Add job to the list of jobs to run in the order they are defined
+            jobs_jobs = [partial(self.__job_wrapper, job["path"], plugin, job["name"], job["file"]) for job in jobs]
 
             # Create a thread for each plugin
             threads.append(Thread(target=self.__run_in_thread, args=(jobs_jobs,)))
@@ -308,10 +284,33 @@ class JobScheduler(ApiCaller):
         for thread in threads:
             thread.join()
 
-        ret = self.__job_success is True
+        ret = self.__job_success
         self.__job_success = True
 
         return ret
+
+    def run_single(self, job_name: str) -> bool:
+        if self.__lock:
+            self.__lock.acquire()
+
+        job_plugin = ""
+        job_to_run = None
+        for plugin, jobs in self.__jobs.items():
+            for job in jobs:
+                if job["name"] == job_name:
+                    job_plugin = plugin
+                    job_to_run = job
+                    break
+
+        if not job_plugin or not job_to_run:
+            self.__logger.warning(f"Job {job_name} not found")
+            return False
+
+        self.__job_wrapper(job_to_run["path"], job_plugin, job_to_run["name"], job_to_run["file"])
+
+        if self.__lock:
+            self.__lock.release()
+        return self.__job_success
 
     def __run_in_thread(self, jobs: list):
         self.__semaphore.acquire(timeout=60)
@@ -332,8 +331,6 @@ class JobScheduler(ApiCaller):
             ret = self.run_once()
             self.setup()
         except:
-            self.__logger.error(
-                f"Exception while reloading scheduler {format_exc()}",
-            )
+            self.__logger.error(f"Exception while reloading scheduler {format_exc()}")
             return False
         return ret

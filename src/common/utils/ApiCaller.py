@@ -138,7 +138,7 @@ class ApiCaller:
                         else:
                             responses[instance] = resp.json()
 
-        if response and responses:
+        if response:
             return ret, responses
         return ret
 

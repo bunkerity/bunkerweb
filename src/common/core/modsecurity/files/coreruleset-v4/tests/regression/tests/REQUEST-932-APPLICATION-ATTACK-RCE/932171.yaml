@@ -1,0 +1,42 @@
+---
+meta:
+  author: "Franziska Bühler"
+  description: "Remote Command Execution: Shellshock (CVE-2014-6271)"
+  enabled: true
+  name: 932171.yaml
+tests:
+  - test_title: 932171-1
+    desc: "Test for '() {' in ARGS_NAMES"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+              Test: () {
+            method: GET
+            port: 80
+            uri: /?%28%29%20%7B
+            version: HTTP/1.0
+          output:
+            log_contains: id "932171"
+  - test_title: 932171-2
+    desc: "Test for '() {' in ARGS"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?arg=%28%29%20%7B
+            version: HTTP/1.0
+          output:
+            log_contains: id "932171"

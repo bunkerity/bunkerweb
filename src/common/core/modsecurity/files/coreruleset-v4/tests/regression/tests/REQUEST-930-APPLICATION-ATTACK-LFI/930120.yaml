@@ -1,0 +1,179 @@
+---
+meta:
+  author: csanders-git
+  description: None
+  enabled: true
+  name: 930120.yaml
+tests:
+  - test_title: 930120-1
+    desc: Remote File Access Attempt (930120) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /index.php?file=News&op=../../../../../boot.ini%00
+            version: HTTP/1.1
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-2
+    desc: Remote File Access Attempt (930120) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /index.php?file=News&op=/etc/passwd%00
+            version: HTTP/1.1
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-3
+    desc: Remote File Access Attempt (930120) from old modsec regressions
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip, deflate
+              Accept-Language: zh-sg
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /index.php?file=News&op=../../../../../../../../../../usr/local/apps/apache2/conf/httpd.conf%00
+            version: HTTP/1.1
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-4
+    desc: "OS File Access"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?foo=arg&path_comp=.ssh/id_rsa"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-5
+    desc: "LFI via parameter name: /sys"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?/sys/class=test"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-6
+    desc: "LFI via parameter value: /sys"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?test=/sys/class"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-7
+    desc: "LFI via parameter value: /etc/subuid"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?code=cat+%2Fetc%2Fsubuid"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-8
+    desc: "LFI via parameter value: /etc/subuid-"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?code=cat+%2Fetc%2Fsubuid-"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-9
+    desc: |
+      YM9WT5NU
+      Disallow writing files to /tmp/
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?code=>/tmp/curl"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-10
+    desc: |
+      YM9WT5NU
+      False positive test
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?code=>/tmp"
+          output:
+            no_log_contains: id "930120"

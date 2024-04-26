@@ -19,16 +19,6 @@ function do_and_check_cmd() {
 echo "Setting ownership for all necessary directories to nginx user and group..."
 do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
 
-# Stop and disable nginx on boot
-echo "Stop and disable nginx on boot..."
-do_and_check_cmd systemctl stop nginx
-do_and_check_cmd systemctl disable nginx
-
-# Auto start BW service on boot and start it now
-echo "Enabling and starting bunkerweb service..."
-do_and_check_cmd systemctl enable bunkerweb
-do_and_check_cmd systemctl start bunkerweb
-
 # Copy old line from environment file to new one
 # Check if old environment file exists
 if [ -f /var/tmp/variables.env ]; then
@@ -74,6 +64,18 @@ else
     echo "Old database file not found. Skipping copy..."
 fi
 
+# Create wizard config
+if [ "$UI_WIZARD" != "" ] ; then
+    echo -ne 'DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nMULTISITE=yes\nUI_HOST=http://127.0.0.1:7000\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env
+    do_and_check_cmd chown nginx:nginx /etc/bunkerweb/variables.env
+    do_and_check_cmd chmod 660 /etc/bunkerweb/variables.env
+    touch /etc/bunkerweb/ui.env
+    do_and_check_cmd chown nginx:nginx /etc/bunkerweb/ui.env
+    do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env
+    do_and_check_cmd systemctl enable bunkerweb-ui
+    do_and_check_cmd systemctl start bunkerweb-ui
+fi
+
 # Create /var/www/html if needed
 if [ ! -d /var/www/html ] ; then
     echo "Creating /var/www/html directory ..."
@@ -83,5 +85,15 @@ if [ ! -d /var/www/html ] ; then
 else
     echo "/var/www/html directory already exists, skipping copy..."
 fi
+
+# Stop and disable nginx on boot
+echo "Stop and disable nginx on boot..."
+do_and_check_cmd systemctl stop nginx
+do_and_check_cmd systemctl disable nginx
+
+# Auto start BW service on boot and start it now
+echo "Enabling and starting bunkerweb service..."
+do_and_check_cmd systemctl enable bunkerweb
+do_and_check_cmd systemctl start bunkerweb
 
 echo "Postinstall successful !"

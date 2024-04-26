@@ -83,6 +83,13 @@ class DockerController(Controller):
             if not server_name:
                 continue
 
+            # check if server_name exists
+            if not self._is_service_present(server_name):
+                self._logger.warning(
+                    f"Ignoring config because {server_name} doesn't exist",
+                )
+                continue
+
             for variable, value in labels.items():
                 if not variable.startswith("bunkerweb."):
                     continue
@@ -101,7 +108,11 @@ class DockerController(Controller):
         )
 
     def __process_event(self, event):
-        return "Actor" in event and "Attributes" in event["Actor"] and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"] or "bunkerweb.SERVER_NAME" in event["Actor"]["Attributes"])
+        return (
+            "Actor" in event
+            and "Attributes" in event["Actor"]
+            and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"] or "bunkerweb.SERVER_NAME" in event["Actor"]["Attributes"])
+        )
 
     def process_events(self):
         self._set_autoconf_load_db()

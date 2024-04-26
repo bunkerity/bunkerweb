@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from operator import itemgetter
 from os import sep
 from os.path import join
 from pathlib import Path
@@ -8,7 +8,7 @@ from typing import Any, List, Optional, Tuple, Union
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-from dotenv import dotenv_values
+from dotenv import dotenv_values  # type: ignore
 
 
 class Instance:
@@ -34,7 +34,9 @@ class Instance:
         self.name = name
         self.hostname = hostname
         self._type = _type
-        self.health = status == "up" and ((data.attrs["State"]["Health"]["Status"] == "healthy" if "Health" in data.attrs["State"] else False) if _type == "container" and data else True)
+        self.health = status == "up" and (
+            (data.attrs["State"]["Health"]["Status"] == "healthy" if "Health" in data.attrs["State"] else False) if _type == "container" and data else True
+        )
         self.env = data
         self.apiCaller = apiCaller or ApiCaller()
 
@@ -118,12 +120,25 @@ class Instance:
     def reports(self) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", "/metrics/requests", response=True)
 
+    def metrics(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", f"/metrics/{plugin_id}", response=True)
+
+    def metrics_redis(self) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", "/redis/stats", response=True)
+
+    def ping(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("POST", f"/{plugin_id}/ping", response=True)
+
+    def data(self, plugin_endpoint) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", f"/{plugin_endpoint}", response=True)
+
 
 class Instances:
-    def __init__(self, docker_client, kubernetes_client, integration: str):
+    def __init__(self, docker_client, kubernetes_client, integration: str, db):
         self.__docker_client = docker_client
         self.__kubernetes_client = kubernetes_client
         self.__integration = integration
+        self.__db = db
 
     def __instance_from_id(self, _id) -> Instance:
         instances: list[Instance] = self.get_instances()
@@ -133,8 +148,33 @@ class Instances:
 
         raise ValueError(f"Can't find instance with _id {_id}")
 
-    def get_instances(self) -> list[Instance]:
+    def get_instances(self, override_instances=None) -> list[Instance]:
         instances = []
+        # Override case : only return instances from DB
+        if override_instances is None:
+            config = self.__db.get_config()
+            override_instances = config["OVERRIDE_INSTANCES"] != ""
+        if override_instances:
+            for instance in self.__db.get_instances():
+                instances.append(
+                    Instance(
+                        instance["hostname"],
+                        instance["hostname"],
+                        instance["hostname"],
+                        "override",
+                        "up",
+                        None,
+                        ApiCaller(
+                            [
+                                API(
+                                    f"http://{instance['hostname']}:{instance['port']}",
+                                    instance["server_name"],
+                                )
+                            ]
+                        ),
+                    )
+                )
+            return instances
         # Docker instances (containers or services)
         if self.__docker_client is not None:
             for instance in self.__docker_client.containers.list(all=True, filters={"label": "bunkerweb.INSTANCE"}):
@@ -257,7 +297,7 @@ class Instances:
     def reload_instances(self) -> Union[list[str], str]:
         not_reloaded: list[str] = []
         for instance in self.get_instances():
-            if instance.health is False:
+            if not instance.health:
                 not_reloaded.append(instance.name)
                 continue
 
@@ -313,16 +353,16 @@ class Instances:
             resp, instance_bans = instance.bans()
             if not resp:
                 return []
-            return instance_bans[instance.name].get("data", [])
+            return instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", [])
 
         bans: List[dict[str, Any]] = []
         for instance in self.get_instances():
             resp, instance_bans = instance.bans()
             if not resp:
                 continue
-            bans.extend(instance_bans[instance.name].get("data", []))
+            bans.extend(instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", []))
 
-        bans.sort(key=lambda x: x["exp"])
+        bans.sort(key=itemgetter("exp"))
 
         unique_bans = {}
 
@@ -352,15 +392,124 @@ class Instances:
             resp, instance_reports = instance.reports()
             if not resp:
                 return []
-            return instance_reports[instance.name].get("msg", [])
+            return (instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"]
 
         reports: List[dict[str, Any]] = []
         for instance in self.get_instances():
-            resp, instance_reports = instance.reports()
+            try:
+                resp, instance_reports = instance.reports()
+            except:
+                continue
+
             if not resp:
                 continue
-            reports.extend(instance_reports[instance.name].get("msg", []))
+            reports.extend((instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"])
 
-        reports.sort(key=lambda x: x["date"], reverse=True)
+        reports.sort(key=itemgetter("date"), reverse=True)
 
         return reports
+
+    def get_metrics(self, plugin_id: str):
+        # Get metrics from all instances
+        metrics = {}
+        for instance in self.get_instances():
+            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+
+            try:
+                if plugin_id == "redis":
+                    resp, instance_metrics = instance.metrics_redis()
+                else:
+                    resp, instance_metrics = instance.metrics(plugin_id)
+            except:
+                continue
+
+            # filters
+            if not resp:
+                continue
+
+            if (
+                not isinstance(instance_metrics.get(instance_name, {"msg": None}).get("msg"), dict)
+                or instance_metrics[instance_name].get("status", "error") != "success"
+            ):
+                continue
+
+            metric_data = instance_metrics[instance_name]["msg"]
+
+            # Update metrics looking for value type
+            for key, value in metric_data.items():
+                if key not in metrics:
+                    metrics[key] = value
+                    continue
+
+                # Some value are the same for all instances, we don't need to update them
+                # Example redis_nb_keys count
+                if key == "redis_nb_keys":
+                    continue
+
+                # Case value is number, add it to the existing value
+                if isinstance(value, (int, float)):
+                    metrics[key] += value
+                # Case value is string, replace the existing value
+                elif isinstance(value, str):
+                    metrics[key] = value
+                # Case value is list, extend it to the existing value
+                elif isinstance(value, list):
+                    metrics[key].extend(value)
+                # Case value is a dict, loop on it and update the existing value
+                elif isinstance(value, dict):
+                    for k, v in value.items():
+                        if k not in metrics[key]:
+                            metrics[key][k] = v
+                        elif isinstance(v, (int, float)):
+                            metrics[key][k] += v
+                        elif isinstance(v, list):
+                            metrics[key][k].extend(v)
+                        elif isinstance(v, str):
+                            metrics[key][k] = v
+        return metrics
+
+    def get_ping(self, plugin_id: str):
+        # Need at least one instance to get a success ping to return success
+        ping = {"status": "error"}
+        for instance in self.get_instances():
+            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+
+            try:
+                resp, ping_data = instance.ping(plugin_id)
+            except:
+                continue
+
+            if not resp:
+                continue
+
+            ping["status"] = ping_data[instance_name].get("status", "error")
+
+            if ping["status"] == "success":
+                break
+
+        return ping
+
+    def get_data(self, plugin_endpoint: str):
+        # Need at least one instance to get a success ping to return success
+        data = []
+        for instance in self.get_instances():
+
+            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+
+            try:
+                resp, instance_data = instance.data(plugin_endpoint)
+            except:
+                data.append({instance_name: {"status": "error"}})
+                continue
+
+            if not resp:
+                data.append({instance_name: {"status": "error"}})
+                continue
+
+            if instance_data[instance_name].get("status", "error") == "error":
+                data.append({instance_name: {"status": "error"}})
+                continue
+
+            data.append({instance_name: instance_data[instance_name].get("msg", {})})
+
+        return data

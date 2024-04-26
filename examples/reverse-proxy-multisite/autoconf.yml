@@ -2,7 +2,7 @@ version: "3"
 
 services:
   app1:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       bw-services:
         aliases:
@@ -11,10 +11,10 @@ services:
       - bunkerweb.SERVER_NAME=app1.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
-      - bunkerweb.REVERSE_PROXY_HOST=http://app1
+      - bunkerweb.REVERSE_PROXY_HOST=http://app1:8080
 
   app2:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       bw-services:
         aliases:
@@ -23,7 +23,7 @@ services:
       - bunkerweb.SERVER_NAME=app2.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
-      - bunkerweb.REVERSE_PROXY_HOST=http://app2
+      - bunkerweb.REVERSE_PROXY_HOST=http://app2:8080
 
 networks:
   bw-services:

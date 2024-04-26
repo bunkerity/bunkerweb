@@ -17,7 +17,7 @@ function gen_package() {
     mode="$1"
     linux="$2"
     version="$(tr -d '\n' < VERSION)"
-    if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [ "$linux" = "rhel" ] ; then
+    if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [[ "$linux" = rhel* ]] ; then
         type="rpm"
     else
         type="deb"
@@ -59,6 +59,8 @@ echo "Building fedora package ..."
 gen_package "$1" "fedora"
 echo "Building rhel package ..."
 gen_package "$1" "rhel"
+echo "Building rhel9 package ..."
+gen_package "$1" "rhel9"
 
 # Copy packages in the Docker context
 do_and_check_cmd cp -r "/opt/packages/$1" ./packages
@@ -74,5 +76,7 @@ echo "Building fedora test image ..."
 build_image "fedora"
 echo "Building rhel test image ..."
 build_image "rhel"
+echo "Building rhel9 test image ..."
+build_image "rhel9"
 
 exit 0

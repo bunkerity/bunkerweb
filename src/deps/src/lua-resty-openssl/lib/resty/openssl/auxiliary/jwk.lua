@@ -245,9 +245,11 @@ function _M.dump_jwk(pkey, is_priv)
     jwk = {
       kty = "OKP",
       crv = ecx_curves_reverse[pkey.key_type],
-      d = encode_base64url(params.private),
       x = encode_base64url(params.public),
     }
+    if is_priv then
+      jwk.d = encode_base64url(params.private)
+    end
   else
     return nil, "jwk.dump_jwk: not implemented for this key type"
   end

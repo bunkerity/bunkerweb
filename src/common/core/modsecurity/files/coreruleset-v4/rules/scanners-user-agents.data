@@ -1,0 +1,115 @@
+# This file lists what we think the most widely used
+# security scanners identifyable via their user agents.
+#
+# The list is curated by hand. Attempts to machine-generate
+# a larger list leads to a lot of false positives and edge
+# cases where certain scanners / bots are welcome in certain
+# situations. We consider this a baseline of unwanted scanners.
+
+
+# http://www.arachni-scanner.com/
+arachni
+
+betabot
+
+bewica-security-scan
+
+# Backup File Artifacts Checker
+# https://github.com/mazen160/bfac
+BFAC
+
+# Commix
+# https://github.com/commixproject/commix
+commix
+
+# Detectify website vulnerability scanner
+# https://detectify.com/
+Detectify
+
+# hidden page scanner
+# (deprecated) https://www.owasp.org/index.php/Category:OWASP_DirBuster_Project
+dirbuster
+
+fimap
+
+# vuln scanner
+# https://github.com/ffuf/ffuf
+fuzz faster
+
+# Scanner that looks for existing or hidden web objects
+# https://github.com/OJ/gobuster
+gobuster
+
+# sql injection
+havij
+
+hexometer
+
+jbrofuzz
+
+jorgee
+
+libwhisker
+
+# port scanner
+# https://github.com/robertdavidgraham/masscan
+masscan
+
+morfeus
+
+# Nessus
+# http://www.tenable.com/products/nessus-vulnerability-scanner
+nessus
+
+netlab360
+
+netsparker
+
+# vuln scanner
+# https://cirt.net/Nikto2
+nikto
+
+nmap
+
+# https://github.com/projectdiscovery/nuclei
+nuclei
+
+# http://www.openvas.org/
+openvas
+
+sitelockspider
+
+# SQL Injections
+# http://sqlmap.org/
+sqlmap
+
+# https://www.cyber.nj.gov/threat-profiles/trojan-variants/sysscan
+sysscan
+
+# https://github.com/google/tsunami-security-scanner
+TsunamiSecurityScanner
+
+w3af.org
+
+# http://www.robotstxt.org/db/webbandit.html
+webbandit
+
+# (deprecated) http://www.scrt.ch/en/attack/downloads/webshag
+webshag
+
+# https://github.com/xmendez/wfuzz
+wfuzz
+
+whatweb
+
+wprecon
+
+# wordpress vuln scanner
+# https://wpscan.org/
+wpscan
+
+# ZGrab scanner (Mozilla/5.0 zgrab/0.x)
+# https://zmap.io
+zgrab
+
+zmeu

@@ -2,6 +2,26 @@
 ## [Unreleased]
 
 
+<a name="1.3.1"></a>
+## [1.3.1] - 2024-04-22
+### bug fixes
+- **aux/jwk:** remove ecx.d if exporting as public key [9d34ff8](https://github.com/fffonion/lua-resty-openssl/commit/9d34ff8fd79debbcf155f74af0b161083b6a8385)
+- **aux/nginx:** fix the typo of get_socket_ssl in the stream module [0aa315e](https://github.com/fffonion/lua-resty-openssl/commit/0aa315efe3d98d38d8d77dedf687958b62d8b184)
+- **aux/nginx:** remove extra sanity test that prevent usage of lua-kong-nginx-module [7bd2d0a](https://github.com/fffonion/lua-resty-openssl/commit/7bd2d0aabe82219071fe9fd1b30e49ff88bd5472)
+
+
+<a name="1.3.0"></a>
+## [1.3.0] - 2024-04-15
+### features
+- **aux/nginx:** use lua-kong-nginx-module's get_socket_ssl when available ([#3](https://github.com/fffonion/lua-resty-openssl/issues/3)) [48c5107](https://github.com/fffonion/lua-resty-openssl/commit/48c51077444e375b2cdd5155693b49d92a82d4a1)
+
+
+<a name="1.2.1"></a>
+## [1.2.1] - 2024-02-27
+### bug fixes
+- **aux/nginx:** support openresty 1.25.3 in FFI path [90b0a47](https://github.com/fffonion/lua-resty-openssl/commit/90b0a47df499b1def08a07a5183ebf6bad8c6095)
+
+
 <a name="1.2.0"></a>
 ## [1.2.0] - 2023-12-28
 ### bug fixes
@@ -571,7 +591,10 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.2.0...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.1...HEAD
+[1.3.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.0...1.3.1
+[1.3.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.2.1...1.3.0
+[1.2.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.0.2...1.1.0
 [1.0.2]: https://github.com/fffonion/lua-resty-openssl/compare/1.0.1...1.0.2

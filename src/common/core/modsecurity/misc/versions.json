@@ -1,0 +1,18 @@
+{
+  "git_repository": [
+    {
+      "id": "coreruleset-v3",
+      "name": "Coreruleset v3.3.5",
+      "url": "https://github.com/coreruleset/coreruleset.git",
+      "commit": "0bd51ff806c68e2a54c4d60ca13f731c5355696d",
+      "post_install": "cp files/coreruleset-v3/crs-setup.conf.example files/crs-setup-v3.conf"
+    },
+    {
+      "id": "coreruleset-v4",
+      "name": "Coreruleset v4.2.0",
+      "url": "https://github.com/coreruleset/coreruleset.git",
+      "commit": "666b722cc97f0545c2627351cc815107ffe18fba",
+      "post_install": "cp files/coreruleset-v4/crs-setup.conf.example files/crs-setup-v4.conf"
+    }
+  ]
+}

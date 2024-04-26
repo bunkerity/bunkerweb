@@ -39,17 +39,17 @@ class SwarmTest(Test):
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb:.*$",
-                "192.168.42.100:5000/bunkerweb-tests:latest",
+                "manager:5000/bunkerweb-tests:latest",
             )
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-autoconf:.*$",
-                "192.168.42.100:5000/autoconf-tests:latest",
+                "manager:5000/autoconf-tests:latest",
             )
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-scheduler:.*$",
-                "192.168.42.100:5000/scheduler-tests:latest",
+                "manager:5000/scheduler-tests:latest",
             )
             # Test.replace_in_file(compose, r"bw\-data:/", "/tmp/bw-data:/")
             proc = run(
@@ -74,6 +74,14 @@ class SwarmTest(Test):
                 sleep(1)
                 i += 1
             if not healthy:
+                proc = run(
+                    "docker stack ps --no-trunc bunkerweb",
+                    cwd="/tmp/swarm",
+                    shell=True,
+                    capture_output=True,
+                )
+                log("SWARM", "❌", f"stdout logs = {proc.stdout.decode()}")
+                log("SWARM", "❌", f"stderr logs = {proc.stderr.decode()}")
                 proc = run(
                     "docker service logs bunkerweb_bunkerweb ;"
                     + " docker service logs bunkerweb_bw-autoconf ;"
@@ -163,6 +171,21 @@ class SwarmTest(Test):
                 sleep(1)
                 i += 1
             if not healthy:
+                proc = run(
+                    'docker stack services --format "{{ .Name }}" ' + self._name,
+                    cwd="/tmp/swarm",
+                    shell=True,
+                    capture_output=True,
+                )
+                for service in proc.stdout.decode().splitlines():
+                    proc2 = run(
+                        "docker service ps " + service,
+                        cwd="/tmp/swarm",
+                        shell=True,
+                        capture_output=True,
+                    )
+                    log("SWARM", "❌", f"stdout logs = {proc2.stdout.decode()}")
+                    log("SWARM", "❌", f"stderr logs = {proc2.stderr.decode()}")
                 raise (Exception("swarm stack is not healthy"))
         except:
             log(

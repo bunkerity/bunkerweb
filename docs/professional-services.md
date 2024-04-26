@@ -4,9 +4,11 @@
 
 Since BunkerWeb is a free (as in freedom) software, you've the right to use it freely as long as you respect the [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.en.html).
 
+You can also upgrade BunkerWeb to the PRO version at any time. By doing so, you will get an enhanced experience to assist you in the security of your web services. Our goal is to help you focus on your business needs. The PRO version is updated regularly and we try our best to gather feedbacks from enterprises to include the needed features.
+
 But dedicating time to a specific technology may not be easy depending on your business priorities. Not mentioning that cybersecurity is complex domain where being both judge and jury is not recommended.
 
-Getting professional services in addition to the open-source solution is the ideal solution to cover your business needs. You can focus on your top priorities and rely on a trusted partner when it comes to web security.
+Getting professional services in addition to the open-source or PRO version is the ideal solution to cover your business needs. You can focus on your top priorities and rely on a trusted partner when it comes to web security.
 
 Please note that professionnal services are directly offered by [Bunkerity](https://www.bunkerity.com/?utm_campaign=self&utm_source=doc), the company maintaining the BunkerWeb project, through our [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) online platform.
 

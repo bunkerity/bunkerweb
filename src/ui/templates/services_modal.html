@@ -1,123 +1,65 @@
 <!-- modal -->
-<div
-  data-service-content="settings"
-  data-services-modal
-  class="dark:brightness-110 hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center"
->
-  <div
-    data-services-modal-card
-    class="overflow-y-auto mx-0 sm:mx-6 lg:mx-8 my-3 px-4 pt-4 pb-8 w-full sm:min-w-[500px] h-[90vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  >
-    <div class="w-full flex justify-between mb-2">
-      <p
-        data-services-modal-title
-        class="transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-200 mb-2 font-sans font-semibold leading-normal uppercase text-md"
-      >
-        SERVICE MODAL
-      </p>
-      <button
-        class="-translate-y-1"
-        aria-label="close modal"
-        data-services-modal-close
-      >
-        <svg
-          class="transition duration-300 ease-in-out dark:opacity-90 h-6 w-6 sm:h-7 sm:w-7 fill-slate-800 dark:fill-gray-300"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 320 512"
-        >
-          <path
-            d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-          />
-        </svg>
-      </button>
+<div data-services-plugins-container
+     data-services-modal
+     class="dark:brightness-110 hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center">
+    <div data-services-modal-card
+         class="overflow-y-auto mx-0 sm:mx-6 lg:mx-8 my-3 px-3 sm:px-4 pt-4 pb-8 w-full sm:min-w-[500px] max-w-[1000px] max-h-[95vh] md:max-h-[90vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        <div class="w-full flex justify-between items-start mb-1 sm:mb-2">
+            <div class="flex flex-col sm:flex-row justify-start items-start sm:items-center">
+                <p data-services-modal-title
+                   class="transition duration-300 ease-in-out dark:text-gray-100 mb-1 font-sans font-semibold leading-normal uppercase text-md">
+                    SERVICE MODAL
+                </p>
+                <button data-toggle-draft-btn
+                        class="transition hover:brightness-75 dark:hover:brightness-110 sm:ml-4 flex items-center border border-gray-700 dark:border-gray-300 dark:bg-slate-700 bg-gray-50/10 text-gray-800 rounded py-1 px-2">
+                    <p data-toggle-draft="true"
+                       class="hidden dark:text-gray-100 mb-0 mr-2  pointer-events-none">Draft</p>
+                    <p data-toggle-draft="false"
+                       class="hidden dark:text-gray-100 mb-0 mr-2  pointer-events-none">Online</p>
+                    <svg data-toggle-draft="true"
+                         xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="currentColor"
+                         class="hidden w-5 h-5 fill-gray-700 dark:fill-gray-300 pointer-events-none">
+                        <path fill-rule="evenodd" d="M10.5 3.798v5.02a3 3 0 0 1-.879 2.121l-2.377 2.377a9.845 9.845 0 0 1 5.091 1.013 8.315 8.315 0 0 0 5.713.636l.285-.071-3.954-3.955a3 3 0 0 1-.879-2.121v-5.02a23.614 23.614 0 0 0-3 0Zm4.5.138a.75.75 0 0 0 .093-1.495A24.837 24.837 0 0 0 12 2.25a25.048 25.048 0 0 0-3.093.191A.75.75 0 0 0 9 3.936v4.882a1.5 1.5 0 0 1-.44 1.06l-6.293 6.294c-1.62 1.621-.903 4.475 1.471 4.88 2.686.46 5.447.698 8.262.698 2.816 0 5.576-.239 8.262-.697 2.373-.406 3.092-3.26 1.47-4.881L15.44 9.879A1.5 1.5 0 0 1 15 8.818V3.936Z" clip-rule="evenodd" />
+                    </svg>
+                    <svg data-toggle-draft="false"
+                         xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="currentColor"
+                         class="hidden w-5 h-5 fill-gray-700 dark:fill-gray-300 pointer-events-none">
+                        <path d="M21.721 12.752a9.711 9.711 0 0 0-.945-5.003 12.754 12.754 0 0 1-4.339 2.708 18.991 18.991 0 0 1-.214 4.772 17.165 17.165 0 0 0 5.498-2.477ZM14.634 15.55a17.324 17.324 0 0 0 .332-4.647c-.952.227-1.945.347-2.966.347-1.021 0-2.014-.12-2.966-.347a17.515 17.515 0 0 0 .332 4.647 17.385 17.385 0 0 0 5.268 0ZM9.772 17.119a18.963 18.963 0 0 0 4.456 0A17.182 17.182 0 0 1 12 21.724a17.18 17.18 0 0 1-2.228-4.605ZM7.777 15.23a18.87 18.87 0 0 1-.214-4.774 12.753 12.753 0 0 1-4.34-2.708 9.711 9.711 0 0 0-.944 5.004 17.165 17.165 0 0 0 5.498 2.477ZM21.356 14.752a9.765 9.765 0 0 1-7.478 6.817 18.64 18.64 0 0 0 1.988-4.718 18.627 18.627 0 0 0 5.49-2.098ZM2.644 14.752c1.682.971 3.53 1.688 5.49 2.099a18.64 18.64 0 0 0 1.988 4.718 9.765 9.765 0 0 1-7.478-6.816ZM13.878 2.43a9.755 9.755 0 0 1 6.116 3.986 11.267 11.267 0 0 1-3.746 2.504 18.63 18.63 0 0 0-2.37-6.49ZM12 2.276a17.152 17.152 0 0 1 2.805 7.121c-.897.23-1.837.353-2.805.353-.968 0-1.908-.122-2.805-.353A17.151 17.151 0 0 1 12 2.276ZM10.122 2.43a18.629 18.629 0 0 0-2.37 6.49 11.266 11.266 0 0 1-3.746-2.504 9.754 9.754 0 0 1 6.116-3.985Z" />
+                    </svg>
+                </button>
+                <button data-toggle-settings-mode-btn="advanced"
+                        class="transition hover:brightness-75 dark:hover:brightness-110 sm:ml-4 flex items-center border border-gray-700 dark:border-gray-300 dark:bg-slate-700 bg-gray-50/10 text-gray-800 rounded py-1 px-2 mt-1.5 sm:mt-0">
+                    <p data-toggle-settings-mode="simple"
+                       class="hidden dark:text-gray-100 mb-0 mr-2  pointer-events-none">Simple</p>
+                    <p data-toggle-settings-mode="advanced"
+                       class="dark:text-gray-100 mb-0 mr-2  pointer-events-none">Advanced</p>
+                    <svg data-toggle-settings-mode="simple" class="hidden translate-y-0.5 w-5 h-5 fill-gray-700 stroke-white/0 dark:fill-gray-300 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path fill-rule="evenodd" d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />
+                    </svg>
+                    <svg data-toggle-settings-mode="advanced" class="translate-y-0.5 w-5 h-5 fill-gray-700 stroke-white/0 dark:fill-gray-300 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path fill-rule="evenodd" d="M8.34 1.804A1 1 0 0 1 9.32 1h1.36a1 1 0 0 1 .98.804l.295 1.473c.497.144.971.342 1.416.587l1.25-.834a1 1 0 0 1 1.262.125l.962.962a1 1 0 0 1 .125 1.262l-.834 1.25c.245.445.443.919.587 1.416l1.473.294a1 1 0 0 1 .804.98v1.361a1 1 0 0 1-.804.98l-1.473.295a6.95 6.95 0 0 1-.587 1.416l.834 1.25a1 1 0 0 1-.125 1.262l-.962.962a1 1 0 0 1-1.262.125l-1.25-.834a6.953 6.953 0 0 1-1.416.587l-.294 1.473a1 1 0 0 1-.98.804H9.32a1 1 0 0 1-.98-.804l-.295-1.473a6.957 6.957 0 0 1-1.416-.587l-1.25.834a1 1 0 0 1-1.262-.125l-.962-.962a1 1 0 0 1-.125-1.262l.834-1.25a6.957 6.957 0 0 1-.587-1.416l-1.473-.294A1 1 0 0 1 1 10.68V9.32a1 1 0 0 1 .804-.98l1.473-.295c.144-.497.342-.971.587-1.416l-.834-1.25a1 1 0 0 1 .125-1.262l.962-.962A1 1 0 0 1 5.38 3.03l1.25.834a6.957 6.957 0 0 1 1.416-.587l.294-1.473ZM13 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <button class="-translate-y-1"
+                    aria-label="close modal"
+                    data-services-modal-close>
+                <svg class="transition duration-300 ease-in-out h-6 w-6 sm:h-7 sm:w-7 fill-slate-800 dark:fill-gray-300"
+                     xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 320 512">
+                    <path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z" />
+                </svg>
+            </button>
+        </div>
+
+        {% include "services_modal_settings_advanced.html" %}
+        {% include "services_modal_settings_simple.html" %}
+        {% include "services_modal_delete.html" %}
+
     </div>
-    <div
-      data-services-tabs-header
-      class="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-x-4 gap-y-2 my-3"
-    >
-      <h5
-        class="transition duration-300 ease-in-out dark:opacity-90 ml-2 font-bold text-md uppercase dark:text-white mb-0"
-      >
-        CONFIGS
-      </h5>
-      <!-- search inpt-->
-      <div class="flex relative">
-        <label class="sr-only" for="settings-filter">search</label>
-        <input
-          type="text"
-          id="settings-filter"
-          name="settings-filter"
-          class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-          placeholder="key words"
-          pattern="(.*?)"
-          required
-        />
-      </div>
-      <!-- end search inpt-->
-    </div>
-    {% include "settings_tabs.html" %}
-    <!-- new and edit form -->
-    <form
-      data-services-modal-form
-      class="w-full h-full flex flex-col justify-between"
-      id="form-new"
-      method="POST"
-    >
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <input type="hidden" id="operation" value="new" name="operation" />
-      <input type="hidden" value="new" name="OLD_SERVER_NAME" />
-
-      {% include "settings_plugins.html" %}
-
-      <!-- action button -->
-      <div class="w-full justify-center flex mt-10">
-        <button
-          data-services-modal-close
-          type="button"
-          class="close-btn mb-4 mr-3 text-base"
-        >
-          Close
-        </button>
-        <button data-services-modal-submit type="submit" class="mb-4 valid-btn">
-          Save
-        </button>
-      </div>
-      <!-- end action button-->
-    </form>
-    <!-- end new and edit form -->
-    <!-- delete form-->
-    <form
-      data-services-modal-form-delete
-      class="w-full h-full flex flex-col justify-between"
-      id="form-delete-server_name"
-      method="POST"
-    >
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <input type="hidden" value="delete" name="operation" />
-      <input type="hidden" value="" name="SERVER_NAME" />
-
-      <div class="flex justify-center">
-        <p
-          data-services-modal-text
-          class="text-gray-700 dark:text-gray-500 mx-2 mb-2 mt-8 font-semibold font-sans leading-normal uppercase text-sm"
-        ></p>
-      </div>
-      <!-- action button -->
-      <div class="w-full justify-center flex mt-10">
-        <button
-          data-services-modal-close
-          type="button"
-          class="close-btn mb-4 mr-3 text-base"
-        >
-          Close
-        </button>
-        <button type="submit" class="delete-btn mb-4 mr-3 text-base">
-          Delete
-        </button>
-      </div>
-      <!-- end action button-->
-    </form>
-    <!-- end delete form-->
-  </div>
 </div>
 <!-- end modal -->

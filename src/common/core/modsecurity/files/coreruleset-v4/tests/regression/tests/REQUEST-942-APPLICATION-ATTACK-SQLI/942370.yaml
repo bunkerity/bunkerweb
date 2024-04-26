@@ -1,0 +1,204 @@
+---
+meta:
+  author: "Christian S.J. Peron, Max Leske, Franziska Bühler"
+  description: |
+    classic SQL injection probings 2/3
+
+    WARNING: these tests were derived from the existing expressions and are semantically meaningless.
+    The tests were used to ensure that a change to the assembly file would not change the semantics.
+    If you know what a particular expression is supposed to catch, please revise the associated test.
+  enabled: true
+  name: 942370.yaml
+tests:
+  - test_title: 942370-1
+    desc: |
+      [\"'`]\s*?\*.+or\W*?[\"'`]\d
+      [\"'`]\s*?\*.+xor\W*?[\"'`]\d
+      [\"'`]\s*?\*.+div\W*?[\"'`]\d
+      [\"'`]\s*?\*.+like\W*?[\"'`]\d
+      [\"'`]\s*?\*.+between\W*?[\"'`]\d
+      [\"'`]\s*?\*.+and\W*?[\"'`]\d
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=' * from = 1 or '9"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-2
+    desc: |
+      [\"'`]\s*?\*.+id\W*?[\"'`]\d
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=' * from = 1 id '9"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-3
+    desc: |
+      [^\w\s?]+\s*?[^\w\s]+\s*?[\"'`"]
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=' = # '"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-4
+    desc: |
+      [^\w\s]+\s*?[\W\d].*?#
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=' ? # = #"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-5
+    desc: |
+      [^\w\s]+\s*?[\W\d].*?--
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var='? # = --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-6
+    desc: |
+      [\"'`]\s*?or\s[^\d]+[\w-]+.*?\d
+      [\"'`]\s*?xor\s[^\d]+[\w-]+.*?\d
+      [\"'`]\s*?div\s[^\d]+[\w-]+.*?\d
+      [\"'`]\s*?like\s[^\d]+[\w-]+.*?\d
+      [\"'`]\s*?between\s[^\d]+[\w-]+.*?\d
+      [\"'`]\s*?and\s[^\d]+[\w-]+.*?\d
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=' or homer 9"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-7
+    desc: |
+      \^[\"'`]
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=^'"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-8
+    desc: |
+      [\"'`].*?\*\s*?\d
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=\"` * 12344"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-9
+    desc: |
+      [()\*<>%+-][\w-]+[^\w\s]+[\"'`][^,]
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=>foo##'."
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-10
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: 1"and json_search (json_array(password),0b11000010110110001101100,"t_______________")#
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"
+  - test_title: 942370-11
+    desc: encode(lo_get(16400),'base64')::int
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: encode(lo_get(16400),'base64')::int
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            version: HTTP/1.0
+          output:
+            log_contains: id "942370"

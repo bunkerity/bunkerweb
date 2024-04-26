@@ -221,24 +221,6 @@ LJLIB_PUSH(top-2) LJLIB_SET(version)
 
 /* -- Reflection API for Lua functions ------------------------------------ */
 
-/* Return prototype of first argument (Lua function or prototype object) */
-static GCproto *check_Lproto(lua_State *L, int nolua)
-{
-  TValue *o = L->base;
-  if (L->top > o) {
-    if (tvisproto(o)) {
-      return protoV(o);
-    } else if (tvisfunc(o)) {
-      if (isluafunc(funcV(o)))
-	return funcproto(funcV(o));
-      else if (nolua)
-	return NULL;
-    }
-  }
-  lj_err_argt(L, 1, LUA_TFUNCTION);
-  return NULL;  /* unreachable */
-}
-
 static void setintfield(lua_State *L, GCtab *t, const char *name, int32_t val)
 {
   setintV(lj_tab_setstr(L, t, lj_str_newz(L, name)), val);
@@ -247,7 +229,7 @@ static void setintfield(lua_State *L, GCtab *t, const char *name, int32_t val)
 /* local info = jit.util.funcinfo(func [,pc]) */
 LJLIB_CF(jit_util_funcinfo)
 {
-  GCproto *pt = check_Lproto(L, 1);
+  GCproto *pt = lj_lib_checkLproto(L, 1, 1);
   if (pt) {
     BCPos pc = (BCPos)lj_lib_optint(L, 2, 0);
     GCtab *t;
@@ -289,7 +271,7 @@ LJLIB_CF(jit_util_funcinfo)
 /* local ins, m = jit.util.funcbc(func, pc) */
 LJLIB_CF(jit_util_funcbc)
 {
-  GCproto *pt = check_Lproto(L, 0);
+  GCproto *pt = lj_lib_checkLproto(L, 1, 0);
   BCPos pc = (BCPos)lj_lib_checkint(L, 2);
   int lineinfo = lj_lib_optint(L, 3, 0);
   if (pc < pt->sizebc) {
@@ -312,7 +294,7 @@ LJLIB_CF(jit_util_funcbc)
 /* local k = jit.util.funck(func, idx) */
 LJLIB_CF(jit_util_funck)
 {
-  GCproto *pt = check_Lproto(L, 0);
+  GCproto *pt = lj_lib_checkLproto(L, 1, 0);
   ptrdiff_t idx = (ptrdiff_t)lj_lib_checkint(L, 2);
   if (idx >= 0) {
     if (idx < (ptrdiff_t)pt->sizekn) {
@@ -332,7 +314,7 @@ LJLIB_CF(jit_util_funck)
 /* local name = jit.util.funcuvname(func, idx) */
 LJLIB_CF(jit_util_funcuvname)
 {
-  GCproto *pt = check_Lproto(L, 0);
+  GCproto *pt = lj_lib_checkLproto(L, 1, 0);
   uint32_t idx = (uint32_t)lj_lib_checkint(L, 2);
   if (idx < pt->sizeuv) {
     setstrV(L, L->top-1, lj_str_newz(L, lj_debug_uvname(pt, idx)));

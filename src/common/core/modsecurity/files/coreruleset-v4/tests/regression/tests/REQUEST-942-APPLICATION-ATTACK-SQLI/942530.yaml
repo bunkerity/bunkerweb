@@ -1,0 +1,23 @@
+---
+meta:
+  author: "Franziska Bühler"
+  description: "Detects SQL query termination"
+  enabled: true
+  name: 942530.yaml
+tests:
+  - test_title: 942530-1
+    desc: "Detects SQL query termination with ';"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "email=admin@juice-sh.op';&password=foo"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942530"

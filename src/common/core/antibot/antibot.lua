@@ -152,6 +152,7 @@ function antibot:access()
 		if ok == nil then
 			return self:ret(false, "check challenge error : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 		elseif not ok then
+			self:set_metric("counters", "failed_challenges", 1)
 			self.logger:log(ngx.WARN, "client failed challenge : " .. err)
 		end
 		if redirect then

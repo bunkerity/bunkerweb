@@ -1,0 +1,141 @@
+---
+meta:
+  author: lifeforms
+  description: None
+  enabled: true
+  name: 944140.yaml
+tests:
+  - test_title: 944140-1
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /
+          output:
+            no_log_contains: id "944140"
+  - test_title: 944140-2
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-Filename: a.jsp
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload1
+          output:
+            log_contains: id "944140"
+  - test_title: 944140-3
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X_Filename: B.jsp
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload2
+          output:
+            log_contains: id "944140"
+  - test_title: 944140-4
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: a.jspx
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload3
+          output:
+            log_contains: id "944140"
+  - test_title: 944140-5
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-Filename: a.jsp..
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload4
+          output:
+            log_contains: id "944140"
+  - test_title: 944140-6
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-Filename: a.jspx..
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "944140"
+  - test_title: 944140-7
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: foo.jspx...
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload
+          output:
+            log_contains: id "944140"
+  - test_title: 944140-8
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X_Filename: foo.jspx.
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload7
+          output:
+            log_contains: id "944140"
+  - test_title: 944140-9
+    desc: Java script uploads
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              X-File-Name: foo.html
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            port: 80
+            uri: /upload8
+          output:
+            no_log_contains: id "944140"

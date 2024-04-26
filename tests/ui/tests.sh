@@ -1,16 +1,22 @@
 #!/bin/bash
 
 integration=$1
+test=$2
 
 if [ -z "$integration" ] ; then
     echo "Please provide an integration name as argument ❌"
+    exit 1
+elif [ -z "$test" ] ; then
+    echo "Please provide a test name as argument ❌"
     exit 1
 elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
     echo "Integration \"$integration\" is not supported ❌"
     exit 1
 fi
 
-echo "🌐 Building UI stack for integration \"$integration\" ..."
+test=$(basename "$test")
+
+echo "🌐 Building UI stack for integration \"$integration\", test: $test ..."
 
 cleanup_stack () {
     echo "🌐 Cleaning up current stack ..."
@@ -40,21 +46,15 @@ if [ "$integration" = "docker" ] ; then
     sed -i "s@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@" docker-compose.yml
     sed -i "s@bunkerity/bunkerweb-ui:.*@ui-tests@" docker-compose.yml
 
-    # Start stack
-    docker-compose pull bw-docker-proxy app1
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
-        echo "❌ Pull failed"
-        exit 1
-    fi
+    cleanup_stack
 
     echo "🌐 Starting stack ..."
-    docker compose up -d
+    docker compose up --build -d
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🌐 Up failed, retrying ... ⚠️"
         cleanup_stack
-        docker compose up -d
+        docker compose up --build -d
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             echo "🌐 Up failed ❌"
@@ -64,8 +64,8 @@ if [ "$integration" = "docker" ] ; then
 else
     sudo systemctl stop bunkerweb bunkerweb-ui
     sudo sed -i "/--bind \"127.0.0.1:7000\" &/c\        --bind \"127.0.0.1:7000\" --log-level debug &" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
-    sudo mkdir /var/www/html/app1.example.com
-    sudo touch /var/www/html/app1.example.com/index.html
+    sudo mkdir /var/www/html/app1.example.com /var/www/html/app2.example.com /var/www/html/app3.example.com
+    sudo touch /var/www/html/app1.example.com/index.html /var/www/html/app2.example.com/index.html /var/www/html/app3.example.com/index.html
     sudo find /etc/bunkerweb/configs/ -type f -exec rm -f {} \;
     sudo cp ready.conf /etc/bunkerweb/configs/server-http
     export TEST_TYPE="linux"
@@ -92,7 +92,7 @@ if [ "$integration" == "docker" ] ; then
         i=$((i+1))
     done
     if [ $i -ge 120 ] ; then
-        docker-compose logs
+        docker compose logs
         echo "❌ Docker stack is not healthy"
         exit 1
     fi
@@ -141,21 +141,23 @@ fi
 
 # Start tests
 if [ "$integration" == "docker" ] ; then
-    docker-compose -f docker-compose.test.yml build
+    echo "TEST_FILE=$test" > .env
+    docker compose -f docker-compose.test.yml build
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "❌ Build failed"
         exit 1
     fi
 
-    docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
+    docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
 else
-    python3 main.py
+    python3 "$test"
 fi
 
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     if [ "$integration" == "docker" ] ; then
+        rm -f .env
         docker compose logs
     else
         echo "🛡️ Showing BunkerWeb journal logs ..."

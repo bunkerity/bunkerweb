@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.5
+    image: bunkerity/bunkerweb:1.5.7
     # dropping all capabilities
     cap_drop:
       - ALL
@@ -30,7 +30,7 @@ services:
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://myapp
+      - REVERSE_PROXY_HOST=http://myapp:8080
       - REMOTE_PHP_PATH=/app
     labels:
       - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
@@ -39,7 +39,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.5
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     depends_on:
       - mybunker
     environment:
@@ -61,7 +61,7 @@ services:
       - bw-docker
 
   myapp:
-    image: tutum/hello-world
+    image: nginxdemos/nginx-hello
     networks:
       - bw-services
 

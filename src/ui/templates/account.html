@@ -1,691 +1,542 @@
-{% extends "base.html" %} {% block content %} {% set current_endpoint =
-url_for(request.endpoint)[1:].split("/")[-1].strip() %}
+{% extends "base.html" %}
+{% block content %}
+    {% set attribute_name = "account" %}
 
-<div
-  data-service-content
-  class="md:max-w-[600px] first-letter:w-full overflow-hidden overflow-y-auto overflow-x-auto col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
->
-  <h5 class="my-2 font-bold dark:text-white/90 mx-2">SETTINGS</h5>
-  <!-- desktop tabs -->
-  <div
-    role="tablist"
-    data-{{current_endpoint}}-tabs-desktop
-    class="hidden md:block col-span-12 mb-4 mx-2"
-  >
-    <!-- tabs -->
-    <button
-      role="tab"
-      data-tab-handler="username"
-      class="active settings-tabs-tab-btn"
-    >
-      <span class="w-full flex justify-between items-center">
-        <!-- text and icon -->
-        <span class="settings-tabs-name"> Username </span>
-        <svg
-          data-popover-btn="username"
-          class="fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <path
-            d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
-          />
-        </svg>
-        <!-- end text and icon -->
-        <!-- popover -->
-        <span
-          data-popover-content="username"
-          class="settings-tabs-popover-container hidden"
-        >
-          <span class="settings-tabs-popover-text">Edit your username</span>
-        </span>
-        <!-- end popover -->
-      </span>
-    </button>
-    <button
-      role="tab"
-      data-tab-handler="password"
-      class="settings-tabs-tab-btn"
-    >
-      <span class="w-full flex justify-between items-center">
-        <!-- text and icon -->
-        <span class="settings-tabs-name">Password</span>
-        <svg
-          data-popover-btn="password"
-          class="fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <path
-            d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
-          />
-        </svg>
-        <!-- end text and icon -->
-        <!-- popover -->
-        <span
-          data-popover-content="password"
-          class="settings-tabs-popover-container hidden"
-        >
-          <span class="settings-tabs-popover-text">Update your password</span>
-        </span>
-        <!-- end popover -->
-      </span>
-    </button>
-    <button role="tab" data-tab-handler="totp" class="settings-tabs-tab-btn">
-      <span class="w-full flex justify-between items-center">
-        <!-- text and icon -->
-        <span class="settings-tabs-name"> TOTP </span>
-        <svg
-          data-popover-btn="totp"
-          class="fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <path
-            d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
-          />
-        </svg>
-        <!-- end text and icon -->
-        <!-- popover -->
-        <span
-          data-popover-content="totp"
-          class="settings-tabs-popover-container hidden"
-        >
-          <span class="settings-tabs-popover-text"
-            >Enabled / Disabled TOTP
-          </span>
-        </span>
-        <!-- end popover -->
-      </span>
-    </button>
-
-    <!--end tabs-->
-  </div>
-  <!-- end desktop tabs -->
-  <!-- mobile tabs -->
-  <div class="md:hidden relative col-span-12 mb-4 mt-2 mx-2">
-    <button
-      data-tab-dropdown-btn
-      aria-controls="tab-dropdown-mobile"
-      class="settings-tabs-mobile-btn"
-    >
-      <span aria-description="current tab" class="settings-tabs-mobile-btn-text"
-        >Username
-      </span>
-      <!-- chevron -->
-      <svg
-        class="transition-transform h-4 w-4 fill-primary dark:fill-gray-300"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-      >
-        <path
-          d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-        />
-      </svg>
-      <!-- end chevron -->
-    </button>
-    <!-- dropdown-->
-    <div
-      id="tab-dropdown-mobile"
-      role="listbox"
-      data-tab-dropdown
-      class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto max-h-90"
-    >
-      <button
-        role="option"
-        data-tab-handler-mobile="username"
-        data-select="false"
-        id="edit-{{current_endpoint}}-username-tab"
-        class="active first settings-tabs-mobile-dropdown-btn"
-      >
-        Username
-      </button>
-      <button
-        role="option"
-        data-tab-handler-mobile="password"
-        data-select="false"
-        id="edit-{{current_endpoint}}-password-tab"
-        class="settings-tabs-mobile-dropdown-btn"
-      >
-        Password
-      </button>
-      <button
-        role="option"
-        data-tab-handler-mobile="totp"
-        data-select="false"
-        id="edit-{{current_endpoint}}-totp-tab"
-        class="settings-tabs-mobile-dropdown-btn rounded-b"
-      >
-        TOTP
-      </button>
-    </div>
-    <!-- end dropdown-->
-  </div>
-  <!-- end mobile tabs -->
-  <div
-    data-plugin-item="username"
-    class="grid grid-cols-12 w-full justify-items-center"
-  >
-    <div class="col-span-12">
-      <h5
-        class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200"
-      >
-        USERNAME
-      </h5>
-    </div>
-    <!-- update username -->
-    <form
-      class="col-span-12 grid grid-cols-12 w-full justify-items-center"
-      id="username-form"
-      action="account"
-      method="POST"
-      autocomplete="off"
-    >
-      <input type="hidden" name="operation" value="username" />
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <input
-        type="hidden"
-        name="next"
-        value="{{ request.values.get('next', '') }}"
-      />
-      <!-- username inpt-->
-      <div
-        class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-      >
-        <h5 class="input-title">Username</h5>
-        <label class="sr-only" for="admin_username">New username</label>
-        <input
-          type="text"
-          id="admin_username"
-          name="admin_username"
-          class="col-span-12 regular-input"
-          placeholder="blank will remain previous username"
-          pattern="(.*?)"
-          maxlength="256"
-          value="{{ username }}"
-          required
-        />
-      </div>
-      <!-- end username inpt-->
-      <!-- password inpt-->
-      <div
-        data-input-group
-        class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-      >
-        <h5 class="input-title">Password</h5>
-        <label class="sr-only" for="curr_password">Password</label>
-        <input
-          type="password"
-          id="curr_password"
-          name="curr_password"
-          class="col-span-12 regular-input"
-          placeholder="enter current password"
-          value=""
-          pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
-          minlength="8"
-          required
-        />
-        <div
-          data-setting-password-container
-          class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
-        >
-          <button
-            data-setting-password="visible"
-            class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
-            type="button"
-          >
-            <svg
-              class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 576 512"
-            >
-              <path
-                d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
-              />
-            </svg>
-          </button>
-          <button
-            data-setting-password="invisible"
-            class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
-            type="button"
-          >
-            <svg
-              class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 640 512"
-            >
-              <path
-                d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
-              />
-            </svg>
-          </button>
+    <div data-service-content
+         class="md:max-w-[700px] min-h-[200px] first-letter:w-full overflow-hidden overflow-y-auto overflow-x-auto col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        <h5 class="my-2 font-bold dark:text-white/90 mx-2">SETTINGS</h5>
+        {% set tabs = [
+            {
+                "name": "PRO",
+                "id": "pro",
+                "description": "BunkerWeb PRO"
+            },
+            {
+                "name": "Username",
+                "id": "username",
+                "description": "Edit your username"
+            },
+            {
+                "name": "Password",
+                "id": "password",
+                "description": "Update your password"
+            },
+            {
+                "name": "TOTP",
+                "id": "totp",
+                "description": "Enabled / Disabled TOTP"
+            }
+        ] %}
+        <div data-{{attribute_name}}-tabs class="col-span-12 grid grid-cols-12">
+            <div role="tablist" data-{{attribute_name}}-tabs class="block col-span-12 mb-4">
+                <!-- tabs -->
+                {% for tab in tabs %}
+                    <button role="tab"
+                            data-tab-handler="{{ tab['id'] }}"
+                            class="{% if loop.first %}active{% endif %} tabs-tab-btn">
+                        <span class="w-full flex justify-between items-center">
+                            <!-- text and icon -->
+                            <span class="tabs-name">{{ tab['name'] }}</span>
+                            <svg role="button"
+                                 data-popover-btn="{{ tab['name'] }}"
+                                 class=" fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 512 512">
+                                <path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z" />
+                            </svg>
+                            <!-- end text and icon -->
+                            <!-- popover -->
+                            <span data-popover-content="{{ tab['name'] }}"
+                                  class="tabs-popover-container hidden">
+                                <span class="tabs-popover-text">{{ tab['description'] }}</span>
+                            </span>
+                            <!-- end popover -->
+                        </span>
+                    </button>
+                {% endfor %}
+                <!--end tabs-->
+            </div>
         </div>
-      </div>
-      <!-- end password inpt-->
-
-      <div class="col-span-12 flex justify-center mt-6">
-        <button
-          type="submit"
-          id="username-button"
-          name="username-button"
-          value="username"
-          class="edit-btn"
-        >
-          Edit
-        </button>
-      </div>
-    </form>
-    <!-- end update username -->
-  </div>
-
-  <form
-    data-plugin-item="password"
-    class="hidden col-span-12 grid grid-cols-12 w-full justify-items-center mt-4"
-    id="password-form"
-    action="account"
-    method="POST"
-    autocomplete="off"
-  >
-    <div class="col-span-12">
-      <h5
-        class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200"
-      >
-        PASSWORD
-      </h5>
+        {% set pro_info = {
+                    "message" : "Pro version" if is_pro_version else "Pro version but exceeding services" if pro_status == "active" and pro_overlapped else "Pro version is expired" if pro_status == "expired" else "Pro version suspended" if pro_status == "suspended" else "You are using free version",
+                    "link_message" : "All features available" if is_pro_version else "Awaiting compliance" if pro_status == "active" and pro_overlapped else "Renew license" if pro_status == "expired" else "Suspended license" if pro_status == "suspended" else "Upgrade to pro",
+                    "link_message_color" : "text-green-500" if is_pro_version else "text-yellow-500" if pro_status == "active" and pro_overlapped else "text-yellow-500" if pro_status == "expired" else "text-red-500" if pro_status == "suspended" else "text-yellow-500",
+                    "icon" : "pro" if is_pro_version else "free"
+                } %}
+        <div data-tab-item="pro"
+             class="grid grid-cols-12 w-full justify-items-center">
+            <div class="col-span-12">
+                <h5 class="text-xl my-1 text-center transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200">PRO</h5>
+                <div class="flex justify-center items-center">
+                    <p class="mb-0 mr-2 dark:text-gray-300 font-semibold">{{ pro_info['message'] }}</p>
+                    <div role="img"
+                         aria-label="pro"
+                         class="dark:brightness-90 inline-block w-8 h-8 text-center rounded-circle bg-yellow-500">
+                        {% if pro_info['icon'] == 'pro' %}
+                            <svg class="leading-none text-lg relative scale-[0.6]"
+                                 viewBox="0 0 48 46"
+                                 fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path class="fill-white"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+                                <path class="fill-white"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+                            </svg>
+                        {% else %}
+                            <svg class="leading-none fill-white text-yellow-500 text-lg relative scale-[0.6]"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke-width="1.5"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                            </svg>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if pro_info['link_message'] %}
+                    <div class="flex justify-center mt-2">
+                        <a class="text-center font-semibold {{ pro_info['link_message_color'] }} underline"
+                           target="_blank"
+                           href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro">{{ pro_info['link_message'] }}</a>
+                    </div>
+                {% endif %}
+                {% if is_pro_version %}
+                    <div class="mt-2 flex flex-col justify-center items-center">
+                        {% if pro_services %}
+                            <p class="my-2 mr-2 dark:text-gray-300 text-center font-bold">{{ pro_services }} services allowed</p>
+                        {% endif %}
+                        {% if pro_expire %}
+                            <p class="my-2 mr-2 dark:text-gray-300 text-center">
+                                License expiration date : <span data-expire class="font-bold">{{ pro_expire }}</span>
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if not is_pro_version and pro_status == "active" and pro_overlapped %}
+                    <div class="mt-2 flex flex-col justify-center items-center">
+                        <p class="my-2 mr-2 text-red-500 text-center">
+                            You have more services than your license allows. Delete or draft some services to reach the number of {{ pro_services }} services.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+            <form class="mt-6 relative col-span-12 grid grid-cols-12 w-full justify-items-center"
+                  id="activate-key-form"
+                  action="account"
+                  method="POST"
+                  autocomplete="off">
+                <div class="col-span-12">
+                    <h5 class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0 dark:text-gray-200">
+                        {% if is_pro_version %}
+                            UPDATE KEY
+                        {% else %}
+                            ACTIVATE KEY
+                        {% endif %}
+                    </h5>
+                </div>
+                <input type="hidden" name="operation" value="activate-key" />
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden"
+                       name="next"
+                       value="{{ request.values.get('next', '') }}" />
+                <div data-input-group
+                     class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                    <h5 class="input-title">License key</h5>
+                    <label class="sr-only" for="license">License key</label>
+                    <input type="password"
+                           id="license"
+                           name="license"
+                           class="col-span-12 regular-input"
+                           placeholder="enter new license key"
+                           value=""
+                           pattern="^.*$"
+                           required />
+                    <div data-setting-password-container
+                         class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%] md:top-[53%]">
+                        <button data-setting-password="visible"
+                                class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+                                type="button">
+                            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 576 512">
+                                <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z" />
+                            </svg>
+                        </button>
+                        <button data-setting-password="invisible"
+                                class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+                                type="button">
+                            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 640 512">
+                                <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-span-12 flex justify-center mt-6">
+                    <button type="submit"
+                            id="activate-key-button"
+                            name="activate-key-button"
+                            class="valid-btn">SAVE</button>
+                </div>
+            </form>
+        </div>
+        <div data-tab-item="username"
+             class="hidden grid grid-cols-12 w-full justify-items-center">
+            <div class="col-span-12">
+                <h5 class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200">USERNAME</h5>
+            </div>
+            <!-- update username -->
+            <form class="col-span-12 grid grid-cols-12 w-full justify-items-center"
+                  id="username-form"
+                  action="account"
+                  method="POST"
+                  autocomplete="off">
+                <input type="hidden" name="operation" value="username" />
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden"
+                       name="next"
+                       value="{{ request.values.get('next', '') }}" />
+                <!-- username inpt-->
+                <div class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                    <h5 class="input-title">Username</h5>
+                    <label class="sr-only" for="admin_username">New username</label>
+                    <input type="text"
+                           id="admin_username"
+                           name="admin_username"
+                           class="col-span-12 regular-input"
+                           placeholder="blank will remain previous username"
+                           pattern="(.*?)"
+                           maxlength="256"
+                           value="{{ username }}"
+                           required />
+                </div>
+                <!-- end username inpt-->
+                <!-- password inpt-->
+                <div data-input-group
+                     class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                    <h5 class="input-title">Password</h5>
+                    <label class="sr-only" for="curr_password">Password</label>
+                    <input type="password"
+                           id="curr_password"
+                           name="curr_password"
+                           class="col-span-12 regular-input"
+                           placeholder="enter current password"
+                           value=""
+                           pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                           minlength="8"
+                           required />
+                    <div data-setting-password-container
+                         class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]">
+                        <button data-setting-password="visible"
+                                class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+                                type="button">
+                            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 576 512">
+                                <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z" />
+                            </svg>
+                        </button>
+                        <button data-setting-password="invisible"
+                                class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+                                type="button">
+                            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 640 512">
+                                <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- end password inpt-->
+                <div class="col-span-12 flex justify-center mt-6">
+                    <button type="submit"
+                            id="username-button"
+                            name="username-button"
+                            value="username"
+                            class="valid-btn">Save</button>
+                </div>
+            </form>
+            <!-- end update username -->
+        </div>
+        <form data-tab-item="password"
+              class="hidden col-span-12 grid grid-cols-12 w-full justify-items-center mt-4"
+              id="password-form"
+              action="account"
+              method="POST"
+              autocomplete="off">
+            <div class="col-span-12">
+                <h5 class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200">PASSWORD</h5>
+            </div>
+            <input type="hidden" name="operation" value="password" />
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden"
+                   name="next"
+                   value="{{ request.values.get('next', '') }}" />
+            <!-- password inpt-->
+            <div data-input-group
+                 class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                <h5 class="input-title">Password</h5>
+                <label class="sr-only" for="curr_password">Password</label>
+                <input type="password"
+                       id="curr_password"
+                       name="curr_password"
+                       class="col-span-12 regular-input"
+                       placeholder="enter current password"
+                       value=""
+                       pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                       minlength="8"
+                       required />
+                <div data-setting-password-container
+                     class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]">
+                    <button data-setting-password="visible"
+                            class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 576 512">
+                            <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z" />
+                        </svg>
+                    </button>
+                    <button data-setting-password="invisible"
+                            class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 640 512">
+                            <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- end password inpt-->
+            <!-- password inpt-->
+            <div data-input-group
+                 class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                <h5 class="input-title">New password</h5>
+                <label class="sr-only" for="admin_password">New password</label>
+                <input type="password"
+                       id="admin_password"
+                       name="admin_password"
+                       class="col-span-12 regular-input"
+                       placeholder="enter new password"
+                       value=""
+                       pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                       minlength="8"
+                       required />
+                <div data-setting-password-container
+                     class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]">
+                    <button data-setting-password="visible"
+                            class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 576 512">
+                            <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z" />
+                        </svg>
+                    </button>
+                    <button data-setting-password="invisible"
+                            class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 640 512">
+                            <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- end password inpt-->
+            <!-- password inpt-->
+            <div data-input-group
+                 class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                <h5 class="input-title">Confirm new password</h5>
+                <label class="sr-only" for="admin_password_check">Confirm new password</label>
+                <input type="password"
+                       id="admin_password_check"
+                       name="admin_password_check"
+                       class="col-span-12 regular-input"
+                       placeholder="confirm new password"
+                       value=""
+                       pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                       minlength="8"
+                       required />
+                <div data-setting-password-container
+                     class="absolute flex right-6 md:right-8 h-5 w-5 top-[38%] md:top-[40%]">
+                    <button data-setting-password="visible"
+                            class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 576 512">
+                            <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z" />
+                        </svg>
+                    </button>
+                    <button data-setting-password="invisible"
+                            class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 640 512">
+                            <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z" />
+                        </svg>
+                    </button>
+                </div>
+                <strong class="opacity-0 font-normal text-sm text-red-500" data-pw-alert>Value does not match password</strong>
+            </div>
+            <div class="col-span-12 flex justify-center">
+                <button type="submit" id="pw-button" name="pw-button" class="valid-btn">Save</button>
+            </div>
+        </form>
+        <form data-tab-item="totp"
+              class="hidden grid grid-cols-12 w-full justify-items-center"
+              id="totp-form"
+              action="account"
+              method="POST"
+              autocomplete="off">
+            <div class="col-span-12">
+                <h5 class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0 dark:text-gray-200">TOTP</h5>
+            </div>
+            <h5 class="{% if not is_totp %} text-red-500 {% else %} text-green-500 {% endif %} uppercase col-span-12 text-sm my-2 font-bold mx-2">
+                {% if not is_totp %}
+                    TOTP is currently off
+                {% else %}
+                    TOTP is currently on
+                {% endif %}
+            </h5>
+            <input type="hidden" name="operation" value="totp" />
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden"
+                   name="next"
+                   value="{{ request.values.get('next', '') }}" />
+            {% if not is_totp %}
+                <!-- qr secret -->
+                <div data-input-group
+                     class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                    <h5 class="input-title text-center">2FA QR CODE</h5>
+                    <div class="flex justify-center mt-2">
+                        <img src="data:image/png;base64, {{ totp_qr_image }}"
+                             alt="Secret Token"
+                             style="width: 200px;
+                                    height: 200px" />
+                    </div>
+                </div>
+                <!-- end qr secret -->
+                <!-- secret -->
+                <div data-input-group
+                     class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                    <h5 class="input-title">Secret token</h5>
+                    <label class="sr-only" for="secret_token">secret token</label>
+                    <input type="password"
+                           id="secret_token"
+                           name="secret_token"
+                           class="col-span-12 regular-input"
+                           placeholder="secret token"
+                           value="{{ secret_token }}"
+                           readonly />
+                    <div data-clipboard-copy
+                         class="hidden absolute flex right-[3.25rem] md:right-[3.75rem] h-5.5 w-5.5 top-[52%]">
+                        <button data-clipboard-target="#secret_token"
+                                class="bg-white dark:bg-slate-700 rounded-full h-full w-full flex items-center align-middle hover:brightness-95 transition-all"
+                                type="button">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke-width="1.5"
+                                 stroke="currentColor"
+                                 class="stroke-gray-700 dark:stroke-gray-400 pointer-events-none hover:brightness-95 transition-all">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div data-setting-password-container
+                         class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]">
+                        <button data-setting-password="visible"
+                                class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+                                type="button">
+                            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 576 512">
+                                <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z" />
+                            </svg>
+                        </button>
+                        <button data-setting-password="invisible"
+                                class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+                                type="button">
+                            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 640 512">
+                                <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- end secret -->
+            {% endif %}
+            {% if is_totp or not is_totp %}
+                <!-- username inpt-->
+                <div class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                    <h5 class="input-title">2FA code</h5>
+                    <label class="sr-only" for="totp_token">totp code</label>
+                    <input type="text"
+                           id="totp_token"
+                           name="totp_token"
+                           class="col-span-12 regular-input"
+                           placeholder="enter code"
+                           pattern="(.*?)"
+                           maxlength="256"
+                           required />
+                </div>
+                <!-- password inpt-->
+            {% endif %}
+            <div data-input-group
+                 class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
+                <h5 class="input-title">Password</h5>
+                <label class="sr-only" for="curr_password">Password</label>
+                <input type="password"
+                       id="curr_password"
+                       name="curr_password"
+                       class="col-span-12 regular-input"
+                       placeholder="enter password"
+                       value=""
+                       pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                       minlength="8"
+                       required />
+                <div data-setting-password-container
+                     class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]">
+                    <button data-setting-password="visible"
+                            class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 576 512">
+                            <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z" />
+                        </svg>
+                    </button>
+                    <button data-setting-password="invisible"
+                            class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+                            type="button">
+                        <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 640 512">
+                            <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- end password inpt-->
+            <div class="col-span-12 flex justify-center mt-6">
+                <button type="submit"
+                        id="totp-button"
+                        name="totp-button"
+                        value="totp"
+                        class="{% if not is_totp %}valid-btn{% else %}delete-btn{% endif %}">
+                    {% if not is_totp %}
+                        enable totp
+                    {% else %}
+                        disable totp
+                    {% endif %}
+                </button>
+            </div>
+        </form>
     </div>
-    <input type="hidden" name="operation" value="password" />
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    <input
-      type="hidden"
-      name="next"
-      value="{{ request.values.get('next', '') }}"
-    />
-    <!-- password inpt-->
-    <div
-      data-input-group
-      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-    >
-      <h5 class="input-title">Password</h5>
-      <label class="sr-only" for="curr_password">Password</label>
-      <input
-        type="password"
-        id="curr_password"
-        name="curr_password"
-        class="col-span-12 regular-input"
-        placeholder="enter current password"
-        value=""
-        pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
-        minlength="8"
-        required
-      />
-      <div
-        data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
-      >
-        <button
-          data-setting-password="visible"
-          class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 576 512"
-          >
-            <path
-              d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
-            />
-          </svg>
-        </button>
-        <button
-          data-setting-password="invisible"
-          class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 640 512"
-          >
-            <path
-              d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
-            />
-          </svg>
-        </button>
-      </div>
-    </div>
-    <!-- end password inpt-->
-    <!-- password inpt-->
-    <div
-      data-input-group
-      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-    >
-      <h5 class="input-title">New password</h5>
-      <label class="sr-only" for="admin_password">New password</label>
-      <input
-        type="password"
-        id="admin_password"
-        name="admin_password"
-        class="col-span-12 regular-input"
-        placeholder="enter new password"
-        value=""
-        pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
-        minlength="8"
-        required
-      />
-      <div
-        data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
-      >
-        <button
-          data-setting-password="visible"
-          class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 576 512"
-          >
-            <path
-              d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
-            />
-          </svg>
-        </button>
-        <button
-          data-setting-password="invisible"
-          class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 640 512"
-          >
-            <path
-              d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
-            />
-          </svg>
-        </button>
-      </div>
-    </div>
-    <!-- end password inpt-->
-    <!-- password inpt-->
-    <div
-      data-input-group
-      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-    >
-      <h5 class="input-title">Confirm new password</h5>
-      <label class="sr-only" for="admin_password_check"
-        >Confirm new password
-      </label>
-      <input
-        type="password"
-        id="admin_password_check"
-        name="admin_password_check"
-        class="col-span-12 regular-input"
-        placeholder="confirm new password"
-        value=""
-        pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
-        minlength="8"
-        required
-      />
-      <div
-        data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[38%] md:top-[40%]"
-      >
-        <button
-          data-setting-password="visible"
-          class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 576 512"
-          >
-            <path
-              d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
-            />
-          </svg>
-        </button>
-        <button
-          data-setting-password="invisible"
-          class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 640 512"
-          >
-            <path
-              d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
-            />
-          </svg>
-        </button>
-      </div>
-      <strong class="opacity-0 font-normal text-sm text-red-500" data-pw-alert
-        >Value does not match password
-      </strong>
-    </div>
-
-    <div class="col-span-12 flex justify-center">
-      <button type="submit" id="pw-button" name="pw-button" class="edit-btn">
-        Edit
-      </button>
-    </div>
-  </form>
-
-  <form
-    data-plugin-item="totp"
-    class="hidden grid grid-cols-12 w-full justify-items-center"
-    id="totp-form"
-    action="account"
-    method="POST"
-    autocomplete="off"
-  >
-    <div class="col-span-12">
-      <h5
-        class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0 dark:text-gray-200"
-      >
-        TOTP
-      </h5>
-    </div>
-    <h5
-      class="{% if not is_totp %} text-red-500 {% else %} text-green-500 {% endif %} uppercase col-span-12 text-sm my-2 font-bold mx-2"
-    >
-      {% if not is_totp %} TOTP is currently off {% else %} TOTP is currently on
-      {% endif %}
-    </h5>
-    <input type="hidden" name="operation" value="totp" />
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    <input
-      type="hidden"
-      name="next"
-      value="{{ request.values.get('next', '') }}"
-    />
-    {% if not is_totp %}
-    <!-- qr secret -->
-    <div
-      data-input-group
-      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-    >
-      <h5 class="input-title text-center">2FA QR CODE</h5>
-      <div class="flex justify-center mt-2">
-        <img
-          src="data:image/png;base64, {{ totp_qr_image }}"
-          alt="Secret Token"
-          style="width: 200px; height: 200px"
-        />
-      </div>
-    </div>
-    <!-- end qr secret -->
-    <!-- secret -->
-    <div
-      data-input-group
-      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-    >
-      <h5 class="input-title">Secret token</h5>
-      <label class="sr-only" for="secret_token">secret token</label>
-      <input
-        type="password"
-        id="secret_token"
-        name="secret_token"
-        class="col-span-12 regular-input"
-        placeholder="secret token"
-        value="{{ secret_token }}"
-        readonly
-      />
-      <div
-        data-clipboard-copy
-        class="hidden absolute flex right-[3.25rem] md:right-[3.75rem] h-5.5 w-5.5 top-[52%]"
-      >
-        <button
-          data-clipboard-target="#secret_token"
-          class="bg-white dark:bg-slate-700 rounded-full h-full w-full flex items-center align-middle hover:brightness-95 transition-all"
-          type="button"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="stroke-gray-700 dark:stroke-gray-400 pointer-events-none hover:brightness-95 transition-all"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
-            />
-          </svg>
-        </button>
-      </div>
-      <div
-        data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
-      >
-        <button
-          data-setting-password="visible"
-          class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 576 512"
-          >
-            <path
-              d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
-            />
-          </svg>
-        </button>
-        <button
-          data-setting-password="invisible"
-          class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 640 512"
-          >
-            <path
-              d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
-            />
-          </svg>
-        </button>
-      </div>
-    </div>
-    <!-- end secret -->
-    {% endif %} {% if is_totp or not is_totp %}
-    <!-- username inpt-->
-    <div
-      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-    >
-      <h5 class="input-title">2FA code</h5>
-      <label class="sr-only" for="totp_token">totp code</label>
-      <input
-        type="text"
-        id="totp_token"
-        name="totp_token"
-        class="col-span-12 regular-input"
-        placeholder="enter code"
-        pattern="(.*?)"
-        maxlength="256"
-        required
-      />
-    </div>
-    <!-- password inpt-->
-    {% endif %}
-    <div
-      data-input-group
-      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-    >
-      <h5 class="input-title">Password</h5>
-      <label class="sr-only" for="curr_password">Password</label>
-      <input
-        type="password"
-        id="curr_password"
-        name="curr_password"
-        class="col-span-12 regular-input"
-        placeholder="enter password"
-        value=""
-        pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
-        minlength="8"
-        required
-      />
-      <div
-        data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
-      >
-        <button
-          data-setting-password="visible"
-          class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 576 512"
-          >
-            <path
-              d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
-            />
-          </svg>
-        </button>
-        <button
-          data-setting-password="invisible"
-          class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
-          type="button"
-        >
-          <svg
-            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 640 512"
-          >
-            <path
-              d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
-            />
-          </svg>
-        </button>
-      </div>
-    </div>
-    <!-- end password inpt-->
-
-    <div class="col-span-12 flex justify-center mt-6">
-      <button
-        type="submit"
-        id="totp-button"
-        name="totp-button"
-        value="totp"
-        class="{% if not is_totp %}valid-btn{% else %}delete-btn{% endif %}"
-      >
-        {% if not is_totp %} enable totp {% else %} disable totp {% endif %}
-      </button>
-    </div>
-  </form>
-</div>
-
-{% endblock %}
+{% endblock content %}

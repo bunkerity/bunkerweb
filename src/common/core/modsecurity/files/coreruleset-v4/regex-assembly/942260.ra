@@ -1,0 +1,31 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##!> define quotes [\"'`]
+
+
+##!> assemble
+  {{quotes}}\s*?
+  ##!=>
+  and
+  nand
+  or
+  xor
+  xxor
+  div
+  like
+  between
+  not
+  \|\|
+  &&
+  ##!=>
+  \s+[\s\w]+=\s*?\w+\s*?having\s+
+  ##!=>
+##!<
+
+\w\s+like\s+{{quotes}}
+like\s*?{{quotes}}\%
+{{quotes}}\s*?like\W*?[\"'`\d]
+select\s+?[\[\]()\s\w\.,\"'`-]+from\s+

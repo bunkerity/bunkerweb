@@ -40,17 +40,14 @@ else
   ]]
 
   local ngx_version = ngx.config.nginx_version
+  local ngx_configure = ngx.config.nginx_configure()
+  local ngx_has_http_v3 = ngx_configure and ngx_configure:find("--with-http_v3_module", 1, true)
+  -- https://github.com/nginx/nginx/blob/master/src/core/ngx_connection.h
   if ngx_version == 1017008 or ngx_version == 1019003 or ngx_version == 1019009 
-    or ngx_version == 1021004 then
-    -- 1.17.8, 1.19.3, 1.19.9, 1.21.4
-    -- https://github.com/nginx/nginx/blob/master/src/core/ngx_connection.h
+    or ngx_version == 1021004 or (not ngx_has_http_v3 and ngx_version == 1025003) then
+    -- 1.17.8, 1.19.3, 1.19.9, 1.21.4, 1.25.3
     ffi.cdef [[
-    typedef struct {
-      ngx_str_t           src_addr;
-      ngx_str_t           dst_addr;
-      in_port_t           src_port;
-      in_port_t           dst_port;
-    } ngx_proxy_protocol_t;
+    typedef struct ngx_proxy_protocol_s ngx_proxy_protocol_t;
 
     typedef struct {
       void               *data;
@@ -85,6 +82,48 @@ else
       // trimmed
     } ngx_connection_s;
   ]]
+  elseif ngx_has_http_v3 and ngx_version == 1025003 then
+    -- 1.25.3
+    ffi.cdef [[
+    typedef struct ngx_proxy_protocol_s ngx_proxy_protocol_t;
+    typedef struct ngx_quic_stream_s ngx_quic_stream_t;
+
+    typedef struct {
+      void               *data;
+      void               *read;
+      void               *write;
+
+      int                 fd;
+
+      ngx_recv_pt         recv;
+      ngx_send_pt         send;
+      ngx_recv_chain_pt   recv_chain;
+      ngx_send_chain_pt   send_chain;
+
+      void               *listening;
+
+      off_t               sent;
+
+      void               *log;
+
+      void               *pool;
+
+      int                 type;
+
+      void                *sockaddr;
+      socklen_t           socklen;
+      ngx_str_t           addr_text;
+
+      // https://github.com/nginx/nginx/commit/be932e81a1531a3ba032febad968fc2006c4fa48
+      ngx_proxy_protocol_t  *proxy_protocol;
+
+      // https://github.com/nginx/nginx/commit/b813b9ec358862a2a94868bc057420d6eca5c05d
+      ngx_quic_stream_t     *quic;
+
+      ngx_ssl_connection_s  *ssl;
+      // trimmed
+    } ngx_connection_s;
+    ]]
   else
     error("resty.openssl.auxiliary.nginx doesn't support Nginx version " .. ngx_version, 2)
   end
@@ -214,7 +253,7 @@ else
         ngx.config.ngx_lua_version and
         ngx.config.ngx_lua_version
 
-  if ngx_lua_version >= 10019 and ngx_lua_version <= 10025 then
+  if ngx_lua_version >= 10019 and ngx_lua_version <= 10026 then
     -- https://github.com/openresty/lua-nginx-module/blob/master/src/ngx_http_lua_socket_tcp.h
     ffi.cdef[[
       typedef struct {

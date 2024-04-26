@@ -1,0 +1,74 @@
+---
+meta:
+  author: "Christian S.J. Peron, Franziska Bühler"
+  description: None
+  enabled: true
+  name: 942350.yaml
+tests:
+  - test_title: 942350-1
+    desc: "MySQL UDF injection and other data/structure manipulation"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # ; insert INTO table (word) VALUES('dfsd')
+            uri: "/?var=%3bINSERT%20INTO%20table%20%28col%29%20VALUES"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942350"
+  - test_title: 942350-2
+    desc: "Fix for FP reported in GitHub issue 1587"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # ;insertion_424242
+            uri: "/?var=%3Binsertion_424242"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942350"
+  - test_title: 942350-3
+    desc: "MySQL create function injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # CREATE FUNCTION hello (s CHAR(20)) RETURNS CHAR(50) DETERMINISTIC RETURN CONCAT('Hello, ',s,'!');
+            uri: "/?var=CREATE+FUNCTION+hello+%28s+CHAR%2820%29%29+RETURNS+CHAR%2850%29+DETERMINISTIC+RETURN+CONCAT%28%27Hello%2C+%27%2Cs%2C%27%21%27%29%3B"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942350"
+  - test_title: 942350-4
+    desc: "Status Page Test - MySQL injection with ;truncate[xx"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?test=;truncate[xx"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942350"

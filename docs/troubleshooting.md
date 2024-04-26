@@ -119,6 +119,10 @@ Here is how you can access the logs, depending on your integration :
 
 Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](quickstart-guide.md#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
 
+## Disable security checks
+
+For debugging purposes, you may need to temporarily disable the security checks made by BunkerWeb. One quick way of doing it is by adding everyone in the whitelist (e.g. `WHITELIST_IP=0.0.0.0/0`).
+
 ## ModSecurity
 
 The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :
@@ -466,3 +470,10 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
     ```
 
     You should now be able to log into the web UI only using your username and password.
+
+**Upload plugin**
+
+It may not be possible to upload a plugin from the UI in certain situations:
+
+- Missing package to manage compressed files on your integration, in which case you will need to add the necessary packages
+- Safari browser : the 'safe mode' may prevent you from being able to add a plugin. You will need to make the necessary changes on your machine

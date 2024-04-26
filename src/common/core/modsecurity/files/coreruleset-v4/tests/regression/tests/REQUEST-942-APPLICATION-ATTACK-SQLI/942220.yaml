@@ -1,0 +1,40 @@
+---
+meta:
+  author: "Christian S.J. Peron"
+  description: None
+  enabled: true
+  name: 942220.yaml
+tests:
+  - test_title: 942220-1
+    desc: "Integer overflow taken from skipfish"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # NB: not sure about rule 942220
+            uri: "/?string_to_convert=4294967296"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942220"
+  - test_title: 942220-2
+    desc: "PHP strtod infinite loop"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?i=2.2250738585072011e-308"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942220"

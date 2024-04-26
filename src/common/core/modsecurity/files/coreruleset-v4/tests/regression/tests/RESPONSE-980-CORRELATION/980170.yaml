@@ -1,0 +1,66 @@
+---
+meta:
+  author: "studersi"
+  enabled: true
+  name: "980170.yaml"
+  description: |
+    Test whether level 4 inbound reporting in phase 5 works by testing whether rule 980170 is triggered.
+    For these tests, existing test are repurposed with different assertions. Instead of asserting that the original
+    rules are triggered that the tests are written for, we assert that triggering these rules causes the corresponding
+    reporting rules to be triggered.
+tests:
+  - test_title: 980170-1
+    desc: Test is similar to 920350-1 but here we check if at reporting level 4 a request is logged that was blocked
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "127.0.0.1"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            # Will match rules
+            #  - 920273: restricted characters violation
+            #  - 920350: numeric IP in Host header
+            #  - 932160: Unix remote command execution
+            #  - 932236: Unix command injection
+            #  - 932260: Unix remote command execution
+            uri: "/?a=/bin/bash"
+          output:
+            log_contains: "id \"980170\""
+  - test_title: 980170-2
+    desc: Test is similar to 920350-1 but here we check if at reporting level 4 a request is logged that scored but was not blocked
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              # Will match rule 920350: numeric IP in Host header
+              Host: "127.0.0.1"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            log_contains: "id \"980170\""
+  - test_title: 980170-3
+    desc: Test is similar to 920350-1 but here we check if at reporting level 4 a request is not logged that did not score
+    stages:
+      - stage:
+          input:
+            dest_addr: "localhost"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+          output:
+            no_log_contains: "id \"980170\""

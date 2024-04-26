@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.5.5
+    image: bunkerity/bunkerweb:1.5.7
     ports:
       - published: 80
         target: 8080
@@ -32,7 +32,7 @@ services:
         - "bunkerweb.INSTANCE=yes"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.5.5
+    image: bunkerity/bunkerweb-autoconf:1.5.7
     environment:
       - SWARM_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
@@ -60,7 +60,7 @@ services:
           - "node.role == manager"
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.5
+    image: bunkerity/bunkerweb-scheduler:1.5.7
     environment:
       - SWARM_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
@@ -86,7 +86,7 @@ services:
       - bw-universe
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.5
+    image: bunkerity/bunkerweb-ui:1.5.7
     environment:
       - DATABASE_URI=postgresql://bunkerweb:changeme@bw-db:5432/db
       - DOCKER_HOST=tcp://bw-docker:2375
@@ -103,6 +103,7 @@ services:
         - "bunkerweb.REVERSE_PROXY_URL=/changeme"
         - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
         - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+        - "bunkerweb.MAX_CLIENT_SIZE=50m"
 
 volumes:
   bw-data:

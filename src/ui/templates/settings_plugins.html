@@ -1,419 +1,127 @@
-{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
-%}
-{% set global_config = config["CONFIG"].get_config() %}
-{% set plugins = config["CONFIG"].get_plugins() %}
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- plugin item -->
 {% for plugin in plugins %}
-
-<div
-data-plugin-item="{{plugin['id']}}"
-  id="{{plugin['id']}}"
-  class="{% if loop.index != 1 %}hidden{%endif%} w-full"
->
-  <!-- title and desc -->
-  <div class="col-span-12" data-setting-header>
-    <h5
-      class="transition duration-300 ease-in-out ml-2 font-bold text-md uppercase dark:text-white/90 mb-0"
-    >
-      {{plugin['name']}} <span>{{plugin['version']}}</span>
-    </h5>
-    <div
-      class="transition duration-300 ease-in-out dark:opacity-90 ml-2 text-sm mb-2 dark:text-gray-400"
-    >
-      {{plugin['description']}}
-    </div>
-  </div>
-  <!-- end title and desc -->
-  <div data-plugin-settings class="w-full grid grid-cols-12">
-    <!-- plugin settings not multiple -->
-    {% for setting, value in plugin["settings"].items() %}{% if setting != "IS_LOADING" and current_endpoint
-    == "global-config" and value['context'] == "global" and not value['multiple'] or current_endpoint ==
-    "services" and value['context'] == "multisite" and not value['multiple'] %}
-    <div    data-setting-container
-      class="mx-0 sm:mx-4  my-2 col-span-12 md:mx-6 md:my-3 md:col-span-6 2xl:mx-6 2xl:my-3 2xl:col-span-4"
-      id="form-edit-{{current_endpoint}}-{{ value["id"] }}">
-      <!-- title and info -->
-      <div class="flex items-center my-1 relative z-10">
-        <h5
-          class="input-title"
-        >
-          {{value["label"]}}
-        </h5>
-        <svg
-        data-popover-btn="{{ value["label"] }}"
-        class="popover-settings-svg"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-        >
-          <path
-            d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
-          />
-        </svg>
-        <!-- popover -->
-        <div role="alert" aria-description="show detail"  class="popover-settings-container  hidden"
-        data-popover-content="{{ value["label"] }}"
-        >
-          <p  class="popover-settings-text" >{{value['help']}}
-          </p>
+    <div data-advanced data-plugin-item="{{ plugin['id'] }}"
+         id="{{ plugin['id'] }}"
+         class="{% if loop.index != 1 %}hidden{% endif %} w-full px-1">
+        <!-- title and desc -->
+        <div class="col-span-12" data-setting-header>
+            {% if  plugin['type'] == "pro" and not is_pro_version %}
+                <p class="ml-2 mt-0 mb-2 mr-2 text-red-500 font-bold dark:brightness-95 text-sm">
+                    You need a valid pro license to use this plugin
+                </p>
+            {% endif %}
+            <div class="flex justify-start items-center">
+                <h5 class="transition duration-300 ease-in-out ml-2 mr-1 font-bold text-md uppercase dark:text-white/90 mb-0">
+                    {{ plugin['name'] }} <span>{{ plugin['version'] }}</span>
+                </h5>
+                {% if plugin['page'] %}
+                    <a aria-label="plugin page link"
+                       class="hover:-translate-y-px mx-2"
+                       href="{{ request.url_root }}plugins/{{ plugin['id'] }}">
+                        <svg class="h-5 w-5 fill-sky-500 dark dark:brightness-90"
+                             xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 448 512">
+                            <path d="M288 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h50.7L169.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L384 141.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H288zM80 64C35.8 64 0 99.8 0 144V400c0 44.2 35.8 80 80 80H336c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v80c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V144c0-8.8 7.2-16 16-16h80c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z">
+                            </path>
+                        </svg>
+                    </a>
+                {% endif %}
+                {% if plugin['type'] == "pro" %}
+                    <a {% if not is_pro_version %}target="_blank" rel="noopener"{% endif %}
+                       aria-label="pro plugin"
+                       class="hover:-translate-y-px mx-1 -translate-y-0.5 ml-1"
+                       href="{% if not is_pro_version %}https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro{% else %}javascript:void(0){% endif %}">
+                        <svg class="h-5.5 w-5.5 dark:brightness-90"
+                             viewBox="0 0 48 46"
+                             fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path class="fill-yellow-500"  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z" fill="#1C274C" />
+                            <path class="fill-yellow-500"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
+                        </svg>
+                    </a>
+                {% endif %}
+            </div>
+            <div class="max-w-[650px] transition duration-300 ease-in-out dark:opacity-90 ml-2 ">
+                <p class="text-sm dark:text-gray-300 mb-1">{{ plugin['description'] }}</p>
+            </div>
         </div>
-        <!-- end popover -->
-      </div>
-      <!-- end title and info -->
+        {# get number of multiple groups for the plugin #}
+        {% set multList = [] %}
+        <!-- end title and desc -->
+        <div data-plugin-settings class="w-full grid grid-cols-12">
+            <!-- plugin settings not multiple -->
+            {% for setting, value in plugin["settings"].items() %}
+                {% set setting_input = { "name" : setting, "context" : value.get("context"), "method" : value.get("method"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "value" : value.get("value"), "is_multiple" : False, "levels" : value.get('levels', {})} %}
 
-      <!-- input -->
-      {% if value["type"] != "select" and value["type"] != "check" %}
-      <div class="relative flex items-center">
-        <label class="sr-only" for="{{setting}}">{{setting}}</label>
-        <input
-        {% if setting == "SERVER_NAME" %}required{%endif%}
-        data-default-value="{{global_config[setting]['value']}}" data-default-method="{{global_config[setting]['method']}}"
-        {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}     id="{{setting}}" name="{{setting}}"
-        class="regular-input"
-        value="{% if global_config[setting]['value'] %} {{global_config[setting]['value']}} {% else %} {{value['default']}} {% endif %}" type="{{value['type']}}"  pattern="{{value['regex']|safe}}" />
+                {% if setting != "IS_DRAFT" and (current_endpoint == "global-config" and setting not in ["SERVER_NAME", "IS_LOADING"] or current_endpoint == "services" and value['context'] == "multisite") %}
+                    {% if value['multiple'] and value['multiple'] not in multList %}
+                        {% if multList.append(value['multiple']) %}{% endif %}
+                    {% endif %}
+                    {% if not value['multiple'] %}
+                        <div data-setting-container data-{{ current_endpoint }}-type="{{ plugin['type'] }}" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-0 sm:mx-2 md:mx-3 lg:mx-4 my-2 col-span-12 md:my-3 md:col-span-6  2xl:my-3 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}">
+                            <!-- title and info -->
+                            {% include "setting_header.html" %}
+                            {% include "setting_input.html" %}
+                            {% include "setting_select.html" %}
+                            {% include "setting_checkbox.html" %}
+                            {% include "setting_invalid.html"%}
 
-        {% if value['type'] == "password" %}
-        <div data-setting-password-container class="absolute flex right-2 h-5 w-5">
-          <button type="button" data-setting-password="visible" class="h-5 w-5 flex items-center align-middle" type="button">
-            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg>
-          </button>
-          <button type="button"  data-setting-password="invisible" class="hidden -translate-y-0.2 scale-110 h-5 w-5  items-center align-middle">
-            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg>
-          </button>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            <!-- end plugin settings -->
         </div>
-        {%endif%}
-      </div>
-      {% endif %}
-      <!-- end input -->
+        <!-- end plugin settings not multiple -->
+        {% if multList|length > 0 %}
+            <h5 data-multiple-title
+                class="transition duration-300 ease-in-out ml-2 font-bold text-[1.1rem] uppercase dark:text-white/90 mt-2 mb-0">
+                multiple settings
+            </h5>
+        {% endif %}
+        {% for multiple in multList %}
+            <!-- plugin multiple handler -->
+            <div data-multiple-handler="{{ multiple }}"
+                 class="flex items-center mx-2 mb-2 mt-5 col-span-12 ">
+                <h5 class="input-title max-w-[150px] sm:max-w-[350px]">{{ multiple.replace('-', ' ').replace('_', ' ')|upper }}</h5>
+                <button data-{{ current_endpoint }}-multiple-add="{{ multiple }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                    Add
+                </button>
+                <button data-{{ current_endpoint }}-multiple-toggle="{{ multiple }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                    SHOW / HIDE
+                </button>
+            </div>
+            <!-- end plugin multiple handler-->
+            <!-- multiple settings -->
+            <div data-{{ current_endpoint }}-settings-multiple="{{ multiple }}_SCHEMA" class="bg-gray-50 dark:bg-slate-900/30 hidden w-full my-4 grid-cols-12 border dark:border-gray-700 rounded">
+                {% for setting, value in plugin["settings"].items() %}
+                    {% set setting_input = { "name" : setting, "context" : value.get("context"), "method" : value.get("method"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "value" : value.get("value"), "is_multiple" : True, "levels" : value.get('levels', {})} %}
 
-
-      <!-- select -->
-      {% if value["type"] == "select" %}
-      <!-- default hidden-->
-      <select  data-default-method="{{global_config[setting]['method']}}"    data-default-value="{{value['default']}}"
-        id="{{setting}}" name="{{setting}}" data-setting-select-default="{{value['id']}}" data-type="form-select" id="{{setting}}" name="{{setting}}"
-          class="hidden">
-          {% for item in value['select'] %}
-          <option {% if not item %}label="empty" {% endif %} value="{{item}}" {% if global_config[setting]['value'] and global_config[setting]['value'] == item or not global_config[setting]['value'] and value['default'] == item %} selected{% endif %}>{{item}}</option>
-          {% endfor %}
-      </select>
-      <!-- end default hidden-->
-
-      <!--custom-->
-      <div data-select-container class="relative">
-        <button
-        {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}    data-setting-select="{{value['id']}}"
-        data-default-value="{{global_config[setting]['value']}}"
-        data-default-method="{{global_config[setting]['method']}}"
-          aria-controls="{{value['id']}}-dropdown"
-          type="button"
-          class="custom-select-btn"
-          >
-          {% for item in value['select'] %} {% if global_config[setting]['value'] and
-          global_config[setting]['value'] == item %}
-          <span
-          data-setting-select-text="{{value['id']}}"
-            data-value="{{global_config[setting]['value']}}"
-            >{{global_config[setting]['value']}}</span
-          >
-          {% elif not global_config[setting]['value'] and value['default'] == item %}
-          <span  aria-description="current value"
-          data-setting-select-text="{{value['id']}}"
-            data-value="{{value['default']}}"
-            >{{value['default']}}</span
-          >
-          {% endif %} {% endfor %}
-          <!-- chevron -->
-          <svg
-          data-setting-select="{{value['id']}}"
-            class="transition-transform h-4 w-4 fill-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-            />
-          </svg>
-          <!-- end chevron -->
-        </button>
-              <!-- dropdown-->
-          <div
-          id="{{value['id']}}-dropdown"
-          role="listbox"
-          data-setting-select-dropdown="{{value['id']}}"
-          class="hidden z-[20] absolute h-full flex-col w-full mt-2"
-        >
-          {% for item in value['select'] %} {% if global_config[setting]['value'] and
-          global_config[setting]['value'] == item or not global_config[setting]['value']
-          and value['default'] == item %}
-          <button role="option"
-            value="{{item}}"
-            data-setting-select-dropdown-btn="{{value['id']}}"
-            type="button"
-            class="active custom-dropdown-btn  {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %} "
-          >
-            {{item}}
-          </button>
-          {% else %}
-          <button role="option"
-            value="{{item}}"
-            data-setting-select-dropdown-btn="{{value['id']}}"
-            type="button"
-            class="custom-dropdown-btn {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %} "
-          >
-            {{item}}
-          </button>
-          {% endif %} {% endfor %}
+                    {# render only setting that match the multiple id and context #}
+                    {% if value['multiple'] == multiple and (
+                        current_endpoint == "global-config"
+                        or current_endpoint == "services" and value['context'] == "multisite"
+                        ) %}
+                        <div data-setting-container="{{ setting }}_SCHEMA" data-{{ current_endpoint }}-type="{{ plugin['type'] }}" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
+                            {% include "setting_header.html" %}
+                            {% include "setting_input.html"%}
+                            {% include "setting_select.html"%}
+                            {% include "setting_checkbox.html"%}
+                            {% include "setting_invalid.html"%}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div data-multiple-delete-container
+                         class="col-span-12 flex justify-center my-4">
+                        <button data-{{ current_endpoint }}-multiple-delete="{{ plugin['name'] }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                            Remove
+                        </button>
+                    </div>
+                    <!-- end plugin settings -->
+                </div>
+            {% endfor %}
+            <!-- end multiple settings -->
         </div>
-        <!-- end dropdown-->
-      </div>
-      <!-- end custom-->
-      {% endif %}
-
-      <!-- checkbox -->
-      {% if value["type"] == "check" %}
-      <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0 z-10 ">
-        <label class="sr-only" for="{{setting}}">{{setting}}</label>
-        <input  id="{{setting}}" name="{{setting}}"
-        data-default-method="{% if setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] %}mode{% else %}{{global_config[setting]['method']}}{% endif %}"
-        data-default-value="{{global_config[setting]['value']}}"
-
-        {% if
-        setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
-        != 'default' %} disabled {% endif %}
-
-        data-checked="{% if global_config[setting]['value'] == "yes" %}true{% else %}false{% endif %}"
-          checked
-        id="checkbox-{{value['id']}}"
-
-        class="checkbox" type="checkbox" data-pattern="{{value['regex']|safe}}"
-        value="{{global_config[setting]['value']}}" />
-
-        <svg
-        data-checkbox-handler="{{value['id']}}"
-          class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <path class="pointer-events-none"
-            d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"
-          ></path>
-        </svg>
-      </div>
-      {% endif %}
-      <!-- end checkbox -->
-
-      <!-- invalid feedback -->
-      <div role="alert" aria-label="show when invalid input" class="hidden text-sm dark:text-red-500">
-        {{value['label']}} is invalid and must match this pattern:
-        {{value['regex']|safe}}
-      </div>
-      <!--end invalid feedback-->
-    </div>
-    {% endif %} {% endfor %}
-    <!-- end plugin settings -->
-  </div>
-  <!-- end plugin settings not multiple -->
-
-  {# get number of multiple groups for the plugin #}
-  {%set multList = []%}
-  {% for setting, value in plugin["settings"].items() %}
-    {% if current_endpoint
-    == "global-config" and value['context'] == "global" and value['multiple'] and not value['multiple'] in multList or current_endpoint ==
-    "services" and value['context'] == "multisite" and value['multiple']  and not value['multiple'] in multList %}
-      {% set multList = multList.append(value['multiple']) %}
-    {%endif%}
-  {%endfor%}
-
-  {%for multiple in multList %}
-  <!-- plugin multiple handler -->
-  <div data-multiple-handler class="flex items-center mx-0 sm:mx-4 md:mx-6 md:my-3 my-2 2xl:mx-6 2xl:my-3  col-span-12 ">
-    <h5
-    class="input-title"
-    >
-      {{multiple}}
-    </h5>
-    <button data-{{current_endpoint}}-multiple-add="{{multiple}}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
-      Add
-    </button>
-    <button  data-{{current_endpoint}}-multiple-toggle="{{multiple}}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
-      SHOW / HIDE
-    </button>
-  </div>
-  <!-- end plugin multiple handler-->
-
-  <!-- multiple settings -->
-  <div data-{{current_endpoint}}-settings-multiple="{{multiple}}_SCHEMA" class="bg-gray-50 dark:bg-slate-900/30 hidden w-full mb-8 grid-cols-12 border dark:border-gray-700 rounded">
-    {% for setting, value in plugin["settings"].items() %}
-    {# render only setting that match the multiple id and context #}
-    {% if current_endpoint
-      == "global-config" and value['context'] == "global" and value['multiple'] == multiple or current_endpoint ==
-      "services" and value['context'] == "multisite" and value['multiple'] == multiple %}
-    <div  data-setting-container="{{setting}}_SCHEMA"
-      class="mx-0 sm:mx-4  my-2 col-span-12 md:mx-6 md:my-3 md:col-span-6 2xl:mx-6 2xl:my-3 2xl:col-span-4"
-      id="form-edit-{{current_endpoint}}-{{ value["id"] }}_SCHEMA">
-      <!-- title and info -->
-      <div class="flex items-center my-1 relative z-10">
-        <h5
-          class="input-title"
-        >
-          {{value["label"]}}
-        </h5>
-        <svg
-        data-popover-btn="{{ value["label"] }}"
-        class="popover-settings-svg"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 512 512"
-        >
-          <path
-            d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
-          />
-        </svg>
-        <!-- popover -->
-        <div role="alert" aria-description="show detail"  class="popover-settings-container hidden"
-        data-popover-content="{{ value["label"] }}"
-        >
-          <p  class="popover-settings-text" >{{value['help']}}
-          </p>
-        </div>
-        <!-- end popover -->
-      </div>
-      <!-- end title and info -->
-
-      <!-- input -->
-      {% if value["type"] != "select" and value["type"] != "check" %}
-      <div class="relative flex items-center">
-        <label class="sr-only" for="{{setting}}_SCHEMA">{{setting}}</label>
-        <input
-        data-default-value="{{value['default']}}" data-default-method="default" id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
-        class="regular-input"
-        value="{{value['default']}}" type="{{value['type']}}"  pattern="{{value['regex']|safe}}" />
-
-        {% if value['type'] == "password" %}
-        <div data-setting-password-container class="absolute flex right-2 h-5 w-5">
-          <button type="button" data-setting-password="visible" class="h-5 w-5 flex items-center align-middle" type="button">
-            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg>
-          </button>
-          <button type="button"  data-setting-password="invisible" class="hidden -translate-y-0.2 scale-110 h-5 w-5  items-center align-middle">
-            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg>
-          </button>
-        </div>
-        {%endif%}
-      </div>
-      {% endif %}
-      <!-- end input -->
-
-      <!-- select -->
-      {% if value["type"] == "select" %}
-      <!-- default hidden-->
-      <select  data-default-method="default"    data-default-value="{{value['default']}}"
-        id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA" data-select-default="{{value['id']}}" data-type="form-select" id="{{setting}}" name="{{setting}}"
-          class="hidden">
-          {% for item in value['select'] %}
-          <option {% if not item %}label="empty" {% endif %} value="{{item}}" {% if value['default'] == item %} selected {% endif %}>{{item}}</option>
-          {% endfor %}
-      </select>
-      <!-- end default hidden-->
-
-      <!--custom-->
-      <div  data-select-container  class="relative">
-        <button
-        data-setting-select="{{value['id']}}"
-        data-default-value="{{value['default']}}"
-          aria-controls="{{value['id']}}-dropdown"
-          type="button"
-          class="custom-select-btn"
-          >
-          {% for item in value['select'] %} {% if value['default'] == item %}
-          <span aria-description="current value"
-          data-setting-select-text="{{value['id']}}"
-            data-value="{{value['default']}}"
-            >{{value['default']}}</span
-          >
-          {% endif %} {% endfor %}
-          <!-- chevron -->
-          <svg
-          data-setting-select="{{value['id']}}"
-            class="transition-transform h-4 w-4 fill-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-            />
-          </svg>
-          <!-- end chevron -->
-        </button>
-              <!-- dropdown-->
-          <div id="{{value['id']}}-dropdown"
-          role="listbox"
-          data-setting-select-dropdown="{{value['id']}}"
-          class="hidden z-[20] absolute h-full flex-col w-full mt-2"
-        >
-          {% for item in value['select'] %} {% if value['default'] == item %}
-          <button role="option"
-            value="{{item}}"
-            data-setting-select-dropdown-btn="{{value['id']}}"
-            class="active custom-dropdown-btn {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %}"
-          >
-            {{item}}
-          </button>
-          {% else %}
-          <button
-            role="option"
-            value="{{item}}"
-            data-setting-select-dropdown-btn="{{value['id']}}"
-            class="custom-dropdown-btn  {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %}"
-          >
-            {{item}}
-          </button>
-          {% endif %} {% endfor %}
-        </div>
-        <!-- end dropdown-->
-      </div>
-      <!-- end custom-->
-      {% endif %}
-
-      <!-- checkbox -->
-      {% if value["type"] == "check" %}
-      <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0">
-        <label class="sr-only" for="{{setting}}_SCHEMA">{{setting}}</label>
-        <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
-        data-default-method="default"
-        data-default-value="{{value['default']}}" {% if value['default'] == 'yes' %} checked {%
-        endif %} id="checkbox-{{value['id']}}"
-        class="checkbox" type="checkbox" data-pattern="{{value['regex']|safe}}"
-        value="{{value['default']}}" />
-        <svg
-        data-checkbox-handler="{{value['id']}}"
-          class="pointer-events-none absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <path
-            d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"
-          ></path>
-        </svg>
-      </div>
-      {% endif %}
-      <!-- end checkbox -->
-
-      <!-- invalid feedback -->
-      <div role="alert" aria-label="show when invalid" class="hidden text-sm dark:text-red-500">
-        {{value['label']}} is invalid and must match this pattern:
-        {{value['regex']|safe}}
-      </div>
-      <!--end invalid feedback-->
-    </div>
-    {% endif %} {% endfor %}
-    <div data-multiple-delete-container class="col-span-12 flex justify-center my-4">
-      <button data-{{current_endpoint}}-multiple-delete="{{plugin['name']}}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
-        Remove
-      </button>
-    </div>
-    <!-- end plugin settings -->
-  </div>
-  {% endfor %}
-  <!-- end multiple settings -->
-</div>
 {% endfor %}
 <!-- end plugin item -->

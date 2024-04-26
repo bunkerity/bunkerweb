@@ -1,0 +1,39 @@
+---
+meta:
+  author: karelorigin
+  description: "Remote Command Execution: Unix shell history invocation"
+  enabled: true
+  name: 932331.yaml
+tests:
+  - test_title: 932331-1
+    desc: "Unix shell history invocation: absolute position"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?rce=!1
+            version: HTTP/1.0
+          output:
+            log_contains: id "932331"
+  - test_title: 932331-2
+    desc: "Unix shell history invocation: last command"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+            method: GET
+            port: 80
+            uri: /?rce=!!
+            version: HTTP/1.0
+          output:
+            log_contains: id "932331"

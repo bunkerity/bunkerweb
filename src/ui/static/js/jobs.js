@@ -1,3 +1,5 @@
+import { CheckNoMatchFilter } from "./utils/settings.js";
+
 class Dropdown {
   constructor(prefix = "jobs") {
     this.prefix = prefix;
@@ -177,16 +179,17 @@ class Dropdown {
 class Filter {
   constructor(prefix = "jobs") {
     this.prefix = prefix;
-    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
+    this.container =
+      document.querySelector(`[data-${this.prefix}-filter]`) || null;
     this.keyInp = document.querySelector("input#keyword");
     this.successValue = "all";
     this.reloadValue = "all";
-    this.sortValue = "name";
-
+    this.everyValue = "all";
     this.initHandler();
   }
 
   initHandler() {
+    if (!this.container) return;
     //SUCCESS HANDLER
     this.container.addEventListener("click", (e) => {
       try {
@@ -233,6 +236,29 @@ class Filter {
         }
       } catch (err) {}
     });
+    //EVERY HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "every"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="every"]`,
+              )
+              .textContent.trim();
+
+            this.everyValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
     //KEYWORD HANDLER
     this.keyInp.addEventListener("input", (e) => {
       this.filter();
@@ -249,8 +275,21 @@ class Filter {
     }
     //filter type
     this.setFilterSuccess(jobs);
+    this.setFilterEvery(jobs);
     this.setFilterReload(jobs);
     this.setFilterKeyword(jobs);
+  }
+
+  setFilterEvery(jobs) {
+    if (this.everyValue === "all") return;
+    for (let i = 0; i < jobs.length; i++) {
+      const el = jobs[i];
+      const type = el
+        .querySelector(`[data-${this.prefix}-every]`)
+        .getAttribute(`data-${this.prefix}-every`)
+        .trim();
+      if (type !== this.everyValue) el.classList.add("hidden");
+    }
   }
 
   setFilterSuccess(jobs) {
@@ -321,17 +360,18 @@ class Download {
             .hasAttribute(`data-${this.prefix}-download`)
         ) {
           const btnEl = e.target.closest("button");
+          const pluginId = btnEl.getAttribute("data-jobs-plugin");
           const jobName = btnEl.getAttribute("data-jobs-download");
           const fileName = btnEl.getAttribute("data-jobs-file");
-          this.sendFileToDL(jobName, fileName);
+          this.sendFileToDL(pluginId, jobName, fileName);
         }
       } catch (err) {}
     });
   }
 
-  async sendFileToDL(jobName, fileName) {
+  async sendFileToDL(pluginId, jobName, fileName) {
     window.open(
-      `${location.href}/download?job_name=${jobName}&file_name=${fileName}`,
+      `${location.href}/download?plugin_id=${pluginId}&job_name=${jobName}&file_name=${fileName}`,
     );
   }
 }
@@ -339,3 +379,23 @@ class Download {
 const setDropdown = new Dropdown("jobs");
 const setFilter = new Filter("jobs");
 const setDownload = new Download();
+
+const checkPluginKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#keyword"),
+  "input",
+  document
+    .querySelector("[data-jobs-list]")
+    .querySelectorAll("[data-jobs-item]"),
+  document.querySelector("[data-jobs-list-container]"),
+  document.querySelector("[data-jobs-nomatch]"),
+);
+
+const checkPluginSelect = new CheckNoMatchFilter(
+  document.querySelectorAll("button[data-jobs-setting-select-dropdown-btn]"),
+  "select",
+  document
+    .querySelector("[data-jobs-list]")
+    .querySelectorAll("[data-jobs-item]"),
+  document.querySelector("[data-jobs-list-container]"),
+  document.querySelector("[data-jobs-nomatch]"),
+);

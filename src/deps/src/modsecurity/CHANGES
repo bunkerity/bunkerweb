@@ -1,3 +1,11 @@
+v3.0.12 - 2024-Jan-30
+---------------------
+
+  - Change REQUEST_FILENAME and REQUEST_BASENAME behavior
+    [Issue #3048 - @martinhsv, @theMiddleBlue, @theseion, @M4tteoP, @airween]
+  - Set the minimum security protocol version for SecRemoteRules
+    [Issue security/code-scanning/2 - @airween]
+
 v3.0.11 - 2023-Dec-06
 ---------------------
 

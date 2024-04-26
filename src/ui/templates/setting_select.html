@@ -1,0 +1,99 @@
+{% if setting_input and setting_input["type"] == "select" %}
+    {% set inp_name = setting_input['name'] %}
+    {% set is_multiple = setting_input["is_multiple"] %}
+    {% set inp_name_mult = inp_name + "_SCHEMA" if is_multiple else inp_name %}
+    {% set inp_default = setting_input['default'] %}
+    {% set inp_value = setting_input['value'] %}
+    {% set inp_method = setting_input['method'] %}
+    {% set inp_items = setting_input['select'] %}
+    {% set inp_levels = setting_input['levels'] %}
+    {% set inp_id = setting_input['id'] %}
+    {% set inp_is_simple = setting_input['is_simple'] %}
+    {% set global_config_method = global_config.get(inp_name, {'method' : inp_method }).get('method') %}
+    {% set global_config_value = global_config.get(inp_name, {'value' : inp_value }).get('value') %}
+
+    <!-- default hidden-->
+    <select data-default-method="{{ global_config_method }}"
+            data-default-value="{{ inp_default }}"
+            id="{{ inp_name_mult }}"
+            name="{{ inp_name_mult }}"
+            data-setting-select-default="{{ inp_id }}"
+            data-type="form-select"
+            class="hidden"
+            {% for level_name, value in inp_levels.items() %}
+                data-security-level-{{level_name}}="{{value}}"
+            {% endfor %}
+            {% if is_multiple %} data-is-multiple {% endif %}
+            >
+        {% for item in inp_items %}
+            <option {% if not item %}label="empty"{% endif %}
+                    value="{{ item }}"
+                    {% if global_config_value and global_config_value == item or not global_config_value and inp_default == item %} selected{% endif %}>
+                {{ item }}
+            </option>
+        {% endfor %}
+    </select>
+    <!-- end default hidden-->
+    <!--custom-->
+    <div data-select-container class="relative">
+        <button {% if global_config_method != 'ui' and global_config_method != 'default' %}disabled{% endif %}
+                data-setting-select="{{ inp_id }}"
+                data-default-value="{{ global_config_value }}"
+                data-default-method="{{ global_config_method }}"
+                aria-controls="{{ inp_id }}-dropdown"
+                type="button"
+                {% for level_name, value in inp_levels.items() %}
+                 data-security-level-{{level_name}}="{{value}}"
+                {% endfor %}
+                class="custom-select-btn">
+            {% for item in inp_items %}
+                {% if global_config_value and
+                    global_config_value == item %}
+                    <span data-setting-select-text="{{ inp_id }}"
+                            data-value="{{ global_config_value }}">{{ global_config_value }}</span>
+                {% elif not global_config_value and inp_default == item %}
+                    <span aria-description="current value"
+                            data-setting-select-text="{{ inp_id }}"
+                            data-value="{{ inp_default }}">{{ inp_default }}</span>
+                {% endif %}
+            {% endfor %}
+            <!-- chevron -->
+            <svg data-setting-select="{{ inp_id }}"
+                    class="transition-transform h-4 w-4 fill-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512">
+                <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+            </svg>
+            <!-- end chevron -->
+        </button>
+        <!-- dropdown-->
+        <div id="{{ inp_id }}-dropdown"
+                role="listbox"
+                data-setting-select-dropdown="{{ inp_id }}"
+                class="hidden z-[20] fixed h-full flex-col mt-2 max-h-[200px] overflow-auto">
+            {% for item in inp_items %}
+                {% if global_config_value and
+                    global_config_value == item or not global_config_value
+                    and inp_default == item %}
+                    <button role="option"
+                            value="{{ item }}"
+                            data-setting-select-dropdown-btn="{{ inp_id }}"
+                            type="button"
+                            class="active custom-dropdown-btn  {% if loop.index == 1 %}border-t rounded-t{% endif %} {% if loop.index == loop.length %}rounded-b{% endif %} ">
+                        {{ item }}
+                    </button>
+                {% else %}
+                    <button role="option"
+                            value="{{ item }}"
+                            data-setting-select-dropdown-btn="{{ inp_id }}"
+                            type="button"
+                            class="custom-dropdown-btn {% if loop.index == 1 %}border-t rounded-t{% endif %} {% if loop.index == loop.length %}rounded-b{% endif %} ">
+                        {{ item }}
+                    </button>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <!-- end dropdown-->
+    </div>
+    <!-- end custom-->
+{% endif %}

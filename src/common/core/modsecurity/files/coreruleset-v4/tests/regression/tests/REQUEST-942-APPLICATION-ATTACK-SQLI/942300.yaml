@@ -1,0 +1,55 @@
+---
+meta:
+  author: "Christian S.J. Peron, Franziska Bühler"
+  description: None
+  enabled: true
+  name: 942300.yaml
+tests:
+  - test_title: 942300-1
+    desc: "MySQL comments, conditions and ch(a)r injectionss"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=) when 234 then&foo=bar"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942300"
+  - test_title: 942300-2
+    desc: "MySQL comments, conditions and ch(a)r injectionss"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=) when 234 then&foo=bar"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942300"
+  - test_title: 942300-3
+    desc: "No false positives with for. Issue #2007"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            data: "var=booked%20for%202021%28including%202020"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942300"

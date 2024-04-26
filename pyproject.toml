@@ -1,14 +1,13 @@
 [project]
 name = "BunkerWeb"
 description = "Make your web services secure by default !"
-version = "1.5.5"
+version = "1.5.7"
 authors = [
     { name = "Bunkerity", email = "contact@bunkerity.com" }
 ]
 
 [tool.black]
-py39 = true
-line-length = 250
+line-length = 160
 include = '\.pyi?$'
 exclude = '''
 /(

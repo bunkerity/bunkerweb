@@ -1,0 +1,32 @@
+---
+meta:
+  author: "NiceYouKnow"
+  description: None
+  enabled: true
+  name: 933111.yaml
+tests:
+  - test_title: 933111-1
+    desc: "PHP Injection Attack: PHP Script File Upload Found"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryoRWIb3busvBrbttO
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: /
+            port: 80
+            data: |
+              ------WebKitFormBoundaryoRWIb3busvBrbttO
+              Content-Disposition: form-data; name="file"; filename="test.php.jpg"
+              Content-Type: image/jpeg
+
+              <?php @eval($_POST["hacker"]); ?>
+
+              ------WebKitFormBoundaryoRWIb3busvBrbttO--
+            version: HTTP/1.1
+          output:
+            log_contains: id "933111"

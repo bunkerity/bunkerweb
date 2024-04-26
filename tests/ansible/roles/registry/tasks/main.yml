@@ -8,5 +8,5 @@
     volumes:
       - /etc/docker/registry:/var/lib/registry
     published_ports:
-      - "192.168.42.100:5000:5000"
+      - "{{ local_ip }}:5000:5000"
   when: inventory_hostname == groups['managers'][0]

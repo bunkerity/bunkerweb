@@ -1206,7 +1206,8 @@ pk:sign(message, nil, nil, {
 Verify a signture (which can be the string returned by [pkey:sign](#pkey-sign)). The second
 argument must be a [resty.openssl.digest](#restyopenssldigest) instance that uses
 the same digest algorithm as used in `sign` or a string. `ok` returns `true` if verficiation is
-successful and `false` otherwise. Note when verfication failed `err` will not be set.
+successful and `false` otherwise. Note when verfication failed `err` will not be set when used
+with OpenSSL 1.1.1 or lower.
 
 When passing [digest](#restyopenssldigest) instances as second parameter, it should not
 have been called [final()](#digestfinal), user should only use [update()](#digestupdate).

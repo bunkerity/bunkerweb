@@ -94,7 +94,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel]
+        linux: [ubuntu, debian, fedora, rhel, rhel9]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: beta
@@ -105,6 +105,8 @@ jobs:
           - linux: fedora
             package: rpm
           - linux: rhel
+            package: rpm
+          - linux: rhel9
             package: rpm
     uses: ./.github/workflows/linux-build.yml
     with:
@@ -131,7 +133,7 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
@@ -177,7 +179,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel]
+        linux: [ubuntu, debian, fedora, el, el9]
         arch: [amd64, arm64]
         include:
           - release: beta
@@ -202,6 +204,11 @@ jobs:
             suffix: "1."
             version: 8
             package: rpm
+          - linux: el9
+            separator: "-"
+            suffix: "1."
+            version: 9
+            package: rpm
           - linux: ubuntu
             arch: amd64
             package_arch: amd64
@@ -212,6 +219,9 @@ jobs:
             arch: amd64
             package_arch: x86_64
           - linux: el
+            arch: amd64
+            package_arch: x86_64
+          - linux: el9
             arch: amd64
             package_arch: x86_64
           - linux: ubuntu
@@ -224,6 +234,9 @@ jobs:
             arch: arm64
             package_arch: aarch64
           - linux: el
+            arch: arm64
+            package_arch: aarch64
+          - linux: el9
             arch: arm64
             package_arch: aarch64
     uses: ./.github/workflows/push-packagecloud.yml
