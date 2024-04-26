@@ -8,7 +8,8 @@ import {
 } from "./utils/settings.js";
 
 class Settings {
-  constructor(formEl, mode = "advanced") {
+  constructor(formEl, mode = "advanced", prefix = "services") {
+    this.prefix = prefix;
     this.mode = mode;
     this.multSettingsName = JSON.parse(
       document
@@ -21,15 +22,12 @@ class Settings {
     this.switchModeBtn =
       document.querySelector("[data-toggle-settings-mode-btn]") || null;
 
-    this.submitBtn = this.formEl.querySelector(
-      "button[data-services-modal-submit]",
+    this.submitBtn = this.container.querySelector(
+      `button[data-${this.prefix}-modal-submit]`,
     );
 
     this.darkMode = document.querySelector("[data-dark-toggle]");
     this.isDarkMode = this.darkMode.checked;
-    // simple el
-    this.nextBtn = null;
-    this.backBtn = null;
 
     if (this.mode === "simple") {
       this.nextBtn = this.container.querySelector("button[data-simple-next]");
@@ -39,13 +37,9 @@ class Settings {
     this.serverNameInps = this.container.querySelectorAll(
       'input[name="SERVER_NAME"][data-setting-input]',
     );
-    this.submitBtns = this.container.querySelectorAll(
-      "button[data-services-modal-submit]",
-    );
-    // add editor for configs in simple mode
-    this.simpleEditorEls = [];
-    this.initSimpleEditors();
 
+    // add editor for configs in simple mode
+    this.editorEls = [];
     this.currAction = "";
     this.currMethod = "";
     this.oldServName = "";
@@ -56,15 +50,14 @@ class Settings {
   init() {
     window.addEventListener("load", () => {
       this.hiddenIfNoMultiples();
+      this.initEditors();
     });
     // Get list of server name from services card
     // When the server name input is matching existing server name that is not the current modal one
     // Disable the submit button
     window.addEventListener("DOMContentLoaded", () => {
-      [this.formNewEdit, this.simpleForm].forEach((form) => {
-        form.addEventListener("input", (e) => {
-          this.checkVisibleInpsValidity();
-        });
+      this.container.addEventListener("input", (e) => {
+        this.checkVisibleInpsValidity();
       });
     });
 
@@ -73,99 +66,35 @@ class Settings {
       this.updateEditorMode();
     });
 
-    this.container.addEventListener("click", (e) => {
-      //edit action
+    // MODAL ACTIONS
+    window.addEventListener("click", (e) => {
+      //edit / clone action
       try {
         if (
-          e.target.closest("button").getAttribute("data-services-action") ===
-            "edit" ||
-          e.target.closest("button").getAttribute("data-services-action") ===
-            "clone" ||
-          e.target.closest("button").getAttribute("data-services-action") ===
-            "edit"
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "edit" ||
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "clone"
         ) {
-          //set form info and right form
-          const [action, serviceName, isDraft, method] = this.getActionData(
-            e.target,
-          );
-
-          //get service data and parse it
-          //multiple type logic is launch at same time on relate class
-          const settings = this.getSettingsNoMultiple(e.target);
-          this.updateModalData(settings, false, false, false);
-          //show modal
-          this.openModal();
+          this.updateData(e.target, false, false, false);
         }
-      } catch (err) {}
-      // clone action
-      try {
-        if (
-          e.target.closest("button").getAttribute("data-services-action") ===
-          "clone"
-        ) {
-          //set form info and right form
-          const [action, serviceName, isDraft, method] = this.getActionData(
-            e.target,
-          );
-          this.setForm(
-            action,
-            serviceName,
-            serviceName,
-            this.formNewEdit,
-            isDraft,
-            method,
-          );
-          //set default value with method default
-          //get service data and parse it
-          // multiple type logic is launch at same time on relate class
-          const settings = this.getSettingsNoMultiple(e.target);
-        }
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
       //new action
       try {
         if (
-          e.target.closest("button").getAttribute("data-services-action") ===
-          "new"
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "new"
         ) {
-          //set form info and right form
-          const [action, serviceName, isDraft, method] = this.getActionData(
-            e.target,
-          );
-          this.setForm(
-            action,
-            serviceName,
-            serviceName,
-            this.formNewEdit,
-            isDraft,
-            method,
-          );
-
-          //set default value with method default
-          this.updateModalData({}, true, true, true, true);
+          this.updateData(e.target, true, true, true, true);
         }
-      } catch (err) {}
-      //delete action
-      try {
-        if (
-          e.target.closest("button").getAttribute("data-services-action") ===
-          "delete"
-        ) {
-          //set form info and right form
-          const [action, serviceName, isDraft, method] = this.getActionData(
-            e.target,
-          );
-          this.setForm(
-            action,
-            serviceName,
-            serviceName,
-            this.formDelete,
-            isDraft,
-            method,
-          );
-          //show modal
-          this.openModal();
-        }
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
       // security
       try {
         if (
@@ -174,11 +103,12 @@ class Settings {
             .getAttribute("data-setting-select-dropdown-btn") ==
           "security-level"
         ) {
-          this.updateSecuLevel();
+          this.updateData(e.target, true, true, true, false);
         }
       } catch (err) {}
     });
 
+    // SIMPLE MODE ACTIONS
     if (this.mode === "simple") {
       this.nextBtn.addEventListener("click", () => {
         this.nextSimpleStep();
@@ -196,6 +126,139 @@ class Settings {
         }, 20);
       });
     }
+
+    // MULTIPLE ACTIONS
+    this.container.addEventListener("click", (e) => {
+      // Add btn
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-multiple-add`)
+        ) {
+          //get plugin from btn
+          const btn = e.target.closest("button");
+          const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
+          //get all multiple groups
+          const multipleEls = this.container.querySelectorAll(
+            `[data-${this.prefix}-settings-multiple*="${attName}"]`,
+          );
+          //case no schema
+          if (multipleEls.length <= 0) return;
+
+          //get the next container number logic
+          //default is 0
+          let topNum = 0;
+          //loop on curr multiples, get the name suffix for each
+          //and keep the highest num
+          multipleEls.forEach((container) => {
+            const ctnrName = container.getAttribute(
+              `data-${this.prefix}-settings-multiple`,
+            );
+            const num = this.getSuffixNumOrFalse(ctnrName);
+            if (!isNaN(num) && num > topNum) topNum = num;
+          });
+          //the final number is num
+          //num is total - 1 because of hidden SCHEMA container
+          const currNum = `${multipleEls.length >= 2 ? topNum + 1 : topNum}`;
+          const setNum = +currNum === 0 ? `` : `_${currNum}`;
+          //the default (schema) group is the last group
+          const schema = this.container.querySelector(
+            `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
+          );
+          //clone schema to create a group with new num
+          const schemaClone = schema.cloneNode(true);
+
+          //add special attribute for disabled logic
+          this.changeCloneSuffix(schemaClone, setNum);
+          //set disabled / enabled state
+          this.setDisabledMultNew(schemaClone);
+          this.showClone(schema, schemaClone);
+          //insert new group before first one
+          //show all groups
+          this.showMultByAtt(attName);
+        }
+      } catch (err) {}
+
+      //TOGGLE BTN
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-multiple-toggle`)
+        ) {
+          const att = e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-multiple-toggle`);
+          this.toggleMultByAtt(att);
+        }
+        //remove last child
+      } catch (err) {}
+
+      //REMOVE BTN
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-multiple-delete`)
+        ) {
+          // We are not removing it really, just hiding it and update values to default
+          // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
+          const multContainer = e.target.closest(
+            `[data-${this.prefix}-settings-multiple]`,
+          );
+          multContainer.classList.add("hidden-multiple");
+          // get setting container
+          const settings = multContainer.querySelectorAll(
+            `[data-setting-container]`,
+          );
+          settings.forEach((setting) => {
+            // for regular input
+            try {
+              const inps = setting.querySelectorAll("input");
+              inps.forEach((inp) => {
+                // case checkbox
+                if (inp.getAttribute("type") === "checkbox") {
+                  const defaultVal = inp.getAttribute("data-default") || "";
+
+                  if (defaultVal === "yes" && !inp.checked) {
+                    inp.click();
+                  }
+                }
+
+                // case regular
+                if (inp.getAttribute("type") !== "checkbox") {
+                  const defaultVal = inp.getAttribute("data-default") || "";
+                  inp.setAttribute("value", defaultVal);
+                  inp.value = defaultVal;
+                }
+              });
+            } catch (e) {}
+            // for select
+            try {
+              const selects = setting.querySelectorAll(
+                "button[data-setting-select]",
+              );
+              selects.forEach((select) => {
+                const defaultVal = select.getAttribute("data-default") || "";
+                select
+                  .querySelector("data-setting-select-text")
+                  .setAttribute("data-value", defaultVal);
+                select.querySelector("data-setting-select-text").textContent =
+                  defaultVal;
+                const dropdown = this.container.querySelector(
+                  `[data-setting-select-dropdown="${select.getAttribute(
+                    "data-setting-select",
+                  )}"]`,
+                );
+                dropdown.querySelector(`button[value=${defaultVal}]`).click();
+              });
+            } catch (e) {}
+          });
+        }
+        //remove last child
+      } catch (err) {}
+    });
   }
 
   resetSimpleMode() {
@@ -210,15 +273,11 @@ class Settings {
     const firstStep = this.simpleForm.querySelector("[data-step='1']");
     firstStep.classList.remove("hidden");
     this.updateSimpleActions();
-    // we want to update settings by current security level
-    this.updateSecuLevel();
   }
 
-  initSimpleEditors() {
-    const simpleEditors = this.container.querySelectorAll(
-      "[data-simple-editor]",
-    );
-    simpleEditors.forEach((editorEl) => {
+  initEditors() {
+    const editors = this.container.querySelectorAll("[data-editor]");
+    editors.forEach((editorEl) => {
       const editor = ace.edit(editorEl.getAttribute("id"));
       // Handle
       if (this.isDarkMode) {
@@ -228,14 +287,12 @@ class Settings {
       }
       //editor options
       editor.setShowPrintMargin(false);
-      this.simpleEditorEls.push(editor);
+      this.editorEls.push(editor);
     });
-
-    this.updateSecuLevelEditorContent();
   }
 
   updateEditorMode() {
-    this.simpleEditorEls.forEach((editor) => {
+    this.editorEls.forEach((editor) => {
       if (this.isDarkMode) {
         editor.setTheme("ace/theme/dracula");
       } else {
@@ -244,54 +301,12 @@ class Settings {
     });
   }
 
-  updateSecuLevelEditorContent() {
-    const secuLevelValue = this.simpleForm
-      .querySelector('[data-setting-select-text="security-level"]')
-      .textContent.toLowerCase()
-      .trim();
-
-    this.simpleEditorEls.forEach((editorEl) => {
-      const editorContent = this.container
-        .querySelector(
-          `textarea#${editorEl.container
-            .getAttribute("id")
-            .replace(
-              "-editor",
-              "-content",
-            )}[data-simple-default-editor-content]`,
-        )
-        .getAttribute(`data-content-${secuLevelValue}`);
-      editorEl.setValue(editorContent);
-    });
-  }
-
-  updateSecuLevel() {
-    // Add timeout to let dropdown update attribute values
-    // This avoid using previous value
-    setTimeout(() => {
-      const secuLevelValue = this.simpleForm
-        .querySelector('[data-setting-select-text="security-level"]')
-        .textContent.toLowerCase()
-        .trim();
-
-      // Update settings by security level
-      this.setSettingsByAtt(
-        this.simpleForm,
-        "data-default-method",
-        `data-security-level-${secuLevelValue}`,
-      );
-
-      // Update configs
-      this.updateSecuLevelEditorContent();
-    }, 30);
-  }
-
   nextSimpleStep() {
     // get current step
-    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStep = this.container.querySelector("[data-step]:not(.hidden)");
     const currStepNum = currStep.getAttribute("data-step");
     // get next step and  next step + 1 to determine if continue or save
-    const nextStep = this.simpleForm.querySelector(
+    const nextStep = this.container.querySelector(
       `[data-step="${+currStepNum + 1}"]`,
     );
     // hide current step and show next one
@@ -304,10 +319,10 @@ class Settings {
 
   prevSimpleStep() {
     // get current step
-    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStep = this.container.querySelector("[data-step]:not(.hidden)");
     const currStepNum = currStep.getAttribute("data-step");
     // get next step and  next step + 1 to determine if continue or save
-    const prevStep = this.simpleForm.querySelector(
+    const prevStep = this.container.querySelector(
       `[data-step="${+currStepNum - 1}"]`,
     );
 
@@ -320,14 +335,14 @@ class Settings {
   }
 
   updateSimpleActions() {
-    const currStep = this.simpleForm.querySelector("[data-step]:not(.hidden)");
+    const currStep = this.container.querySelector("[data-step]:not(.hidden)");
     const currStepNum = currStep.getAttribute("data-step");
     // get next step and  next step + 1 to determine if continue or save
-    const prevStep = this.simpleForm.querySelector(
+    const prevStep = this.container.querySelector(
       `[data-step="${+currStepNum - 1}"]`,
     );
 
-    const nextStep = this.simpleForm.querySelector(
+    const nextStep = this.container.querySelector(
       `[data-step="${+currStepNum + 1}"]`,
     );
 
@@ -381,7 +396,7 @@ class Settings {
         inpName === "operation" ||
         inpName === "settings-filter" ||
         inp.hasAttribute("data-combobox") ||
-        (containerEl === this.simpleForm && inpName === "SERVER_NAME")
+        (this.mode === "simple" && inpName === "SERVER_NAME")
       )
         return true;
     }
@@ -396,7 +411,7 @@ class Settings {
         inpName === "operation" ||
         inpName === "settings-filter" ||
         inp.hasAttribute("data-combobox") ||
-        (containerEl === this.simpleForm && inpName === "SECURITY_LEVEL")
+        (this.mode === "simple" && inpName === "SECURITY_LEVEL")
       )
         return true;
     }
@@ -516,7 +531,7 @@ class Settings {
     });
   }
 
-  updateOperation() {
+  updateOperation(operation) {
     // update operation and other hidden inputs for all mode in modal
     const operationInps = this.container.querySelectorAll(
       'input[name="operation"]',
@@ -567,13 +582,17 @@ class Settings {
     // Get global needed data
     this.currAction = target
       .closest("button")
-      .getAttribute("data-services-action");
-    this.oldServName = target
-      .closest("[data-services-service]")
-      .querySelector("[data-old-service-name]")
-      .getAttribute("data-value");
+      .getAttribute(`data-${this.prefix}-action`);
+
+    this.oldServName = "";
+    if (this.currAction !== "new")
+      this.oldServName = target
+        .closest(`[data-${this.prefix}-service]`)
+        .querySelector("[data-old-name]")
+        .getAttribute("data-value");
 
     // Update metadata, hidden inputs and visual content
+    const operation = this.currAction === "clone" ? "new" : this.currAction;
     this.updateOperation(this.currAction === "clone" ? "new" : this.currAction);
     this.updateOldNameValue();
     this.changeSubmitBtn();
@@ -586,11 +605,12 @@ class Settings {
       .closest("[data-settings]")
       .getAttribute("data-settings");
     const settings = JSON.parse(targetSettings);
+    console.log(settings);
     this.setRegularInps(settings, forceEnabled, setMethodUI, emptyServerName);
-    this.setMultipleInps(settings, forceEnabled, setMethodUI, emptyServerName);
+    this.setMultipleInps(settings);
 
     // Reset simple mode, we want to override default value by default security level
-    this.resetSimpleMode();
+    if (this.mode === "simple") this.resetSimpleMode();
 
     // Global reset
     this.resetFilterInp();
@@ -686,16 +706,11 @@ class Settings {
     this.removePrevMultiples();
     //keep only multiple settings value
     const multipleSettings = this.getMultiplesOnly(settings);
-
     const sortMultiples =
       this.sortMultipleByContainerAndSuffixe(multipleSettings);
 
     // Need to set method as ui if clone
-    const isClone =
-      e.target.closest("button").getAttribute(`data-${this.prefix}-action`) ===
-      "clone"
-        ? true
-        : false;
+    const isClone = this.currAction === "clone" ? true : false;
     this.setMultipleToDOM(sortMultiples, isClone);
     // Show at least one mult group
     this.addOneMultGroup();
@@ -705,7 +720,7 @@ class Settings {
     //get schema settings
     const multiples = {};
 
-    const schemaSettings = this.formContainer.querySelectorAll(
+    const schemaSettings = this.container.querySelectorAll(
       `[data-setting-container$="SCHEMA"]`,
     );
 
@@ -731,13 +746,14 @@ class Settings {
   }
 
   addOneMultGroup() {
-    const multAddBtns = this.formContainer.querySelectorAll(
+    const multAddBtns = this.container.querySelectorAll(
       `[data-${this.prefix}-multiple-add]`,
     );
+    console.log("mult groups, ", multAddBtns);
     multAddBtns.forEach((btn) => {
       const att = btn.getAttribute(`data-${this.prefix}-multiple-add`);
       //check if already one (SCHEMA exclude so length >= 2)
-      const multGroups = this.formContainer.querySelectorAll(
+      const multGroups = this.container.querySelectorAll(
         `[data-${this.prefix}-settings-multiple^="${att}"]`,
       );
       if (multGroups.length >= 2) return;
@@ -848,7 +864,7 @@ class Settings {
       const nameSuffixLess = isSuffixe
         ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
         : name.trim();
-      const relateSetting = this.formContainer.querySelector(
+      const relateSetting = this.container.querySelector(
         `[data-setting-container=${nameSuffixLess}_SCHEMA]`,
       );
       if (!relateSetting) continue;
@@ -872,7 +888,7 @@ class Settings {
   }
 
   //put multiple on the right plugin, on schema container
-  setMultipleToDOM(sortMultObj, setMethodUI = false) {
+  setMultipleToDOM(sortMultObj) {
     //we loop on each multiple that contains values to render to DOM
     for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
       sortMultObj,
@@ -1024,167 +1040,9 @@ class Settings {
           .classList.add("hidden");
     });
   }
-}
-
-class MultipleActions {
-  constructor(prefix, formContainerSelector) {
-    this.prefix = prefix;
-    this.form = document.querySelector(formContainerSelector);
-    this.init();
-  }
-
-  init() {
-    this.form.addEventListener("click", (e) => {
-      // Add btn
-      try {
-        if (
-          e.target
-            .closest("button")
-            .hasAttribute(`data-${this.prefix}-multiple-add`)
-        ) {
-          //get plugin from btn
-          const btn = e.target.closest("button");
-          const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
-          //get all multiple groups
-          const multipleEls = this.form.querySelectorAll(
-            `[data-${this.prefix}-settings-multiple*="${attName}"]`,
-          );
-          //case no schema
-          if (multipleEls.length <= 0) return;
-
-          //get the next container number logic
-          //default is 0
-          let topNum = 0;
-          //loop on curr multiples, get the name suffix for each
-          //and keep the highest num
-          multipleEls.forEach((container) => {
-            const ctnrName = container.getAttribute(
-              `data-${this.prefix}-settings-multiple`,
-            );
-            const num = this.getSuffixNumOrFalse(ctnrName);
-            if (!isNaN(num) && num > topNum) topNum = num;
-          });
-          //the final number is num
-          //num is total - 1 because of hidden SCHEMA container
-          const currNum = `${multipleEls.length >= 2 ? topNum + 1 : topNum}`;
-          const setNum = +currNum === 0 ? `` : `_${currNum}`;
-          //the default (schema) group is the last group
-          const schema = this.form.querySelector(
-            `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
-          );
-          //clone schema to create a group with new num
-          const schemaClone = schema.cloneNode(true);
-
-          //add special attribute for disabled logic
-          this.changeCloneSuffix(schemaClone, setNum);
-          //set disabled / enabled state
-          this.setDisabledMultNew(schemaClone);
-          this.showClone(schema, schemaClone);
-          //insert new group before first one
-          //show all groups
-          this.showMultByAtt(attName);
-        }
-      } catch (err) {}
-
-      //TOGGLE BTN
-      try {
-        if (
-          e.target
-            .closest("button")
-            .hasAttribute(`data-${this.prefix}-multiple-toggle`)
-        ) {
-          const att = e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-multiple-toggle`);
-          this.toggleMultByAtt(att);
-        }
-        //remove last child
-      } catch (err) {}
-
-      //REMOVE BTN
-      try {
-        if (
-          e.target
-            .closest("button")
-            .hasAttribute(`data-${this.prefix}-multiple-delete`)
-        ) {
-          // We are not removing it really, just hiding it and update values to default
-          // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
-          const multContainer = e.target.closest(
-            `[data-${this.prefix}-settings-multiple]`,
-          );
-          multContainer.classList.add("hidden-multiple");
-          // get setting container
-          const settings = multContainer.querySelectorAll(
-            `[data-setting-container]`,
-          );
-          settings.forEach((setting) => {
-            // for regular input
-            try {
-              const inps = setting.querySelectorAll("input");
-              inps.forEach((inp) => {
-                // case checkbox
-                if (inp.getAttribute("type") === "checkbox") {
-                  const defaultVal = inp.getAttribute("data-default") || "";
-
-                  if (defaultVal === "yes" && !inp.checked) {
-                    inp.click();
-                  }
-                }
-
-                // case regular
-                if (inp.getAttribute("type") !== "checkbox") {
-                  const defaultVal = inp.getAttribute("data-default") || "";
-                  inp.setAttribute("value", defaultVal);
-                  inp.value = defaultVal;
-                }
-              });
-            } catch (e) {}
-            // for select
-            try {
-              const selects = setting.querySelectorAll(
-                "button[data-setting-select]",
-              );
-              selects.forEach((select) => {
-                const defaultVal = select.getAttribute("data-default") || "";
-                select
-                  .querySelector("data-setting-select-text")
-                  .setAttribute("data-value", defaultVal);
-                select.querySelector("data-setting-select-text").textContent =
-                  defaultVal;
-                const dropdown = this.form.querySelector(
-                  `[data-setting-select-dropdown="${select.getAttribute(
-                    "data-setting-select",
-                  )}"]`,
-                );
-                dropdown.querySelector(`button[value=${defaultVal}]`).click();
-              });
-            } catch (e) {}
-          });
-        }
-        //remove last child
-      } catch (err) {}
-    });
-  }
-
-  changeCloneSuffix(schemaCtnrClone, suffix) {
-    //rename multiple container
-    schemaCtnrClone.setAttribute(
-      `data-${this.prefix}-settings-multiple`,
-      schemaCtnrClone
-        .getAttribute(`data-${this.prefix}-settings-multiple`)
-        .replace("_SCHEMA", suffix),
-    );
-  }
-
-  showClone(schemaCtnr, schemaCtnrClone) {
-    schemaCtnr.insertAdjacentElement("afterend", schemaCtnrClone);
-    schemaCtnrClone.classList.remove("hidden");
-    schemaCtnrClone.classList.add("grid");
-  }
 
   showMultByAtt(att) {
-    const multContainers = this.form.querySelectorAll(
+    const multContainers = this.container.querySelectorAll(
       `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
@@ -1198,7 +1056,7 @@ class MultipleActions {
   }
 
   toggleMultByAtt(att) {
-    const multContainers = this.form.querySelectorAll(
+    const multContainers = this.container.querySelectorAll(
       `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
@@ -1236,7 +1094,7 @@ class MultipleActions {
           const name = select.getAttribute(
             `data-${this.prefix}-setting-select-default`,
           );
-          const selDOM = this.form.querySelector(
+          const selDOM = this.container.querySelector(
             `button[data-${this.prefix}-setting-select='${name}']`,
           );
           if (method === "ui" || method === "default") {
@@ -1324,7 +1182,9 @@ class ServiceModal {
           //set form info and right form
           this.setFormModal(e.target);
         }
-      } catch (err) { console.log(err);}
+      } catch (err) {
+        console.log(err);
+      }
     });
   }
 
@@ -1350,12 +1210,13 @@ class ServiceModal {
         .querySelector("[data-service-method]")
         .getAttribute("data-value") || "no";
 
-        let oldServName = '';
+    let oldServName = "";
 
-        if(action !== "new") target
-      .closest("[data-services-service]")
-      .querySelector("[data-old-service-name]")
-      .getAttribute("data-value") || '';
+    if (action !== "new")
+      target
+        .closest("[data-services-service]")
+        .querySelector("[data-old-name]")
+        .getAttribute("data-value") || "";
     this.currMethod = method;
 
     return [action, serviceName, oldServName, isDraft, method];
@@ -1392,7 +1253,9 @@ class ServiceModal {
       this.formDelete.classList.remove("hidden");
       this.formDelete.querySelector(`[data-services-modal-text]`).textContent =
         `Are you sure you want to delete ${serviceName} ?`;
-      const nameInp = this.formDelete.querySelector(`input[name="SERVER_NAME"]`);
+      const nameInp = this.formDelete.querySelector(
+        `input[name="SERVER_NAME"]`,
+      );
       nameInp.setAttribute("value", serviceName);
       nameInp.value = serviceName;
     }
@@ -1840,8 +1703,10 @@ const setFilterGlobal = new FilterSettings(
   "services",
 );
 
-
-// const settings = new Settings(document.querySelector("[data-advanced][data-services-modal-form]"), "advanced");
+const settings = new Settings(
+  document.querySelector("[data-advanced][data-services-modal-form]"),
+  "advanced",
+);
 // const setAdvancedMultiple = new MultipleActions("services", document.querySelector("[data-advanced][data-services-modal-form]"));
 
 const checkServiceModalKeyword = new CheckNoMatchFilter(

@@ -25,7 +25,7 @@
             {% endif %}
         {% endfor %}
     {% endfor %}
-    <input class="hidden" data-plugins-multiple='{{multiple_settings}}'' />
+    <input class="hidden" data-plugins-multiple='{{multiple_settings}}' />
     <!-- actions -->
     <div data-{{attribute_name}}-service
          class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">
@@ -33,6 +33,7 @@
         <div data-service-method class="hidden" data-value="ui"></div>
         <button data-{{attribute_name}}-action="new"
                 data-{{attribute_name}}-name="service"
+                data-settings="{}"
                 type="button"
                 class="dark:bg-green-500/90 duration-300 dark:text-gray-100 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
             <span class="mr-2">new service</span>
@@ -103,9 +104,11 @@
             {% for service in services %}
                 {% set id_server_name = service["SERVER_NAME"]['value'].replace(".", "-") %}
                 <div data-{{attribute_name}}-card
+                        data-settings="{{ service['settings'] }}"
+
                      data-{{attribute_name}}-service="{{ service['SERVER_NAME']['value'] }}"
                      class="dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                    <div data-old-service-name
+                    <div data-old-name
                          class="hidden"
                          data-value="{{ service['SERVER_NAME']['full_value'] }}"></div>
                     <div data-is-draft
@@ -278,7 +281,7 @@
                             data-settings="{{ service['settings'] }}"
                             {% endif %}
                             {% if button['name'] == "new"%}
-                            data-settings="{}""
+                            data-settings="{}"
                             {% endif %}
                             data-{{attribute_name}}-action="{{ button['name'] }}"
                                     aria-label="{{ button['label'] }}"

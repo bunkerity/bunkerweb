@@ -937,6 +937,8 @@ def services():
 
         error = 0
 
+        print(variables, flush=True)
+
         # Reload instances
         manage_bunkerweb(
             "services",
