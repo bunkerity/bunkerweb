@@ -130,13 +130,17 @@ try:
 
     log_info("Check only one plugin is visible ...")
 
-    is_general_plugin_hidden = DRIVER.execute_script("""return document.querySelector('form[data-services-modal-form][data-advanced] [data-plugin-item="general"]').classList.contains('hidden')""")
+    is_general_plugin_hidden = DRIVER.execute_script(
+        """return document.querySelector('form[data-services-modal-form][data-advanced] [data-plugin-item="general"]').classList.contains('hidden')"""
+    )
 
     if is_general_plugin_hidden:
         log_error("Plugin general should be visible.")
         exit(1)
 
-    is_antibot_plugin_hidden = DRIVER.execute_script("""return document.querySelector('form[data-services-modal-form][data-advanced] [data-plugin-item="antibot"]').classList.contains('hidden')""")
+    is_antibot_plugin_hidden = DRIVER.execute_script(
+        """return document.querySelector('form[data-services-modal-form][data-advanced] [data-plugin-item="antibot"]').classList.contains('hidden')"""
+    )
 
     if not is_antibot_plugin_hidden:
         log_error("Plugin antibot should not be visible.")
@@ -169,13 +173,17 @@ try:
     )
 
     # Check that the matching element is shown and other card hide
-    is_server_type_hidden = DRIVER.execute_script("return document.querySelector('form[data-services-modal-form][data-advanced] #form-edit-services-server-type').classList.contains('hidden')")
+    is_server_type_hidden = DRIVER.execute_script(
+        "return document.querySelector('form[data-services-modal-form][data-advanced] #form-edit-services-server-type').classList.contains('hidden')"
+    )
 
     if is_server_type_hidden:
         log_error("Setting server type should be match.")
         exit(1)
 
-    is_server_name_hidden = DRIVER.execute_script("return document.querySelector('form[data-services-modal-form][data-advanced] #form-edit-services-server-name').classList.contains('hidden')")
+    is_server_name_hidden = DRIVER.execute_script(
+        "return document.querySelector('form[data-services-modal-form][data-advanced] #form-edit-services-server-name').classList.contains('hidden')"
+    )
 
     if not is_server_name_hidden:
         log_error("Setting server name should not be match.")
@@ -191,7 +199,11 @@ try:
     select = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select='server-type']")
     assert_button_click(DRIVER, select)
 
-    select_active_item = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='server-type' and contains(@class, 'active')]")
+    select_active_item = safe_get_element(
+        DRIVER,
+        By.XPATH,
+        "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='server-type' and contains(@class, 'active')]",
+    )
     assert_button_click(DRIVER, select_active_item)
 
     log_info("Select dropdown done, trying toggle checkbox...")
@@ -222,7 +234,9 @@ try:
     assert isinstance(gzip_select, WebElement), "Gzip select is not a WebElement"
     assert_button_click(DRIVER, gzip_select)
 
-    assert_button_click(DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='gzip-comp-level' and @value='6']")
+    assert_button_click(
+        DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-setting-select-dropdown-btn='gzip-comp-level' and @value='6']"
+    )
 
     access_page(DRIVER, "//form[@data-services-modal-form and @data-advanced]//button[@data-services-modal-submit='']", "services", False)
 
@@ -242,7 +256,9 @@ try:
     assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
     assert_button_click(DRIVER, "//button[@data-tab-select-handler='gzip']")
 
-    gzip_comp_level_selected_elem = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//select[@id='GZIP_COMP_LEVEL']/option[@selected='']")
+    gzip_comp_level_selected_elem = safe_get_element(
+        DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//select[@id='GZIP_COMP_LEVEL']/option[@selected='']"
+    )
     assert isinstance(gzip_comp_level_selected_elem, WebElement), "Gzip comp level selected element is not a WebElement"
     if gzip_comp_level_selected_elem.get_attribute("value") != "6":
         log_error("The value is not the expected one, exiting ...")
@@ -289,7 +305,9 @@ try:
 
         reverse_proxy_host_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='REVERSE_PROXY_HOST']")
         assert isinstance(reverse_proxy_host_input, WebElement), "Reverse proxy host input is not a WebElement"
-        DRIVER.execute_script("""return document.querySelector('form[data-services-modal-form][data-advanced] input#REVERSE_PROXY_HOST[data-setting-input]').value = 'http://app1:8080' """)
+        DRIVER.execute_script(
+            """return document.querySelector('form[data-services-modal-form][data-advanced] input#REVERSE_PROXY_HOST[data-setting-input]').value = 'http://app1:8080' """
+        )
 
         reverse_proxy_url_input = safe_get_element(DRIVER, By.XPATH, "//input[@id='REVERSE_PROXY_URL']")
         assert isinstance(reverse_proxy_url_input, WebElement), "Reverse proxy url input is not a WebElement"
@@ -370,7 +388,7 @@ try:
     if len(services) < 3:
         log_error(f"The service hasn't been created ({len(services)} services found), exiting ...")
         exit(1)
-    
+
     current_cards = DRIVER.execute_script("return document.querySelectorAll('[data-services-service]')")
     for card in current_cards:
         log_info(f"Card name: {card.text}")

@@ -105,9 +105,6 @@
                 <div data-{{attribute_name}}-card
                      data-{{attribute_name}}-service="{{ service['SERVER_NAME']['value'] }}"
                      class="dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-                    <div data-{{attribute_name}}-settings
-                         class="hidden"
-                         data-value="{{ service['settings'] }}"></div>
                     <div data-old-service-name
                          class="hidden"
                          data-value="{{ service['SERVER_NAME']['full_value'] }}"></div>
@@ -276,7 +273,14 @@
                             {% endif %}
                         {% endif %}
                         {% for button in action_buttons %}
-                            <button data-{{attribute_name}}-action="{{ button['name'] }}"
+                            <button
+                            {% if button['name'] == "clone" or button['name'] == "edit"%}
+                            data-settings="{{ service['settings'] }}"
+                            {% endif %}
+                            {% if button['name'] == "new"%}
+                            data-settings="{}""
+                            {% endif %}
+                            data-{{attribute_name}}-action="{{ button['name'] }}"
                                     aria-label="{{ button['label'] }}"
                                     data-{{attribute_name}}-name="{{ service['SERVER_NAME']['value'] }}"
                                     class="dark:brightness-90 z-20 mx-1 bg-{{ button['color'] }} hover:bg-{{ button['color'] }}/80 focus:bg-{{ button['color'] }}/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md">
