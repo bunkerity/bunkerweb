@@ -88,7 +88,6 @@ services:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
-    command: python3 -m gunicorn --config gunicorn.conf.py --user ui --group ui --bind 0.0.0.0:7000 --reload --log-level debug
     depends_on:
       - bw-docker
     volumes:
@@ -100,6 +99,7 @@ services:
       - ../../src/ui/utils.py:/usr/share/bunkerweb/ui/utils.py:ro
     environment:
       <<: *env
+      DEBUG: "1"
     networks:
       bw-universe:
         aliases:

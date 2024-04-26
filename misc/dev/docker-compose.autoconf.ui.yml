@@ -88,7 +88,6 @@ services:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
-    command: python3 -m gunicorn --config gunicorn.conf.py --user ui --group ui --bind 0.0.0.0:7000 --reload --log-level debug
     depends_on:
       - bw-docker
     volumes:
@@ -102,6 +101,7 @@ services:
       <<: *env
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
+      DEBUG: "1"
     networks:
       bw-universe:
         aliases:

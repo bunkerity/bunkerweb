@@ -28,7 +28,6 @@ proc_name = "bunkerweb-ui"
 accesslog = "/var/log/bunkerweb/ui-access.log"
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 errorlog = "/var/log/bunkerweb/ui.log"
-loglevel = LOG_LEVEL.lower()
 reuse_port = True
 worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = join(sep, "var", "tmp", "bunkerweb", "ui")
@@ -38,6 +37,14 @@ worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests_jitter = min(8, MAX_WORKERS)
 graceful_timeout = 5
+
+DEBUG = getenv("DEBUG", False)
+
+loglevel = "debug" if DEBUG else LOG_LEVEL.lower()
+
+if DEBUG:
+    reload = True
+    reload_extra_files = [file.as_posix() for file in Path(sep, "usr", "share", "bunkerweb", "ui", "templates").iterdir()]
 
 
 def on_starting(server):
