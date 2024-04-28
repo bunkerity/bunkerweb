@@ -593,7 +593,7 @@
 
             // send form and wait for response
 
-            const api = `http${
+            let api = `http${
               this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
             }://${this.servInp.value}${this.urlInp.value}`;
             if (!api.endsWith("/")) {
