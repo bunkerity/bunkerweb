@@ -23,6 +23,9 @@ class SettingsService {
           .replaceAll(`'`, `"`),
       ),
       "services",
+      document.querySelector("input#settings-filter"),
+      document.querySelector('[data-services-setting-select="type"]'),
+      document.querySelector("[data-tab-select-dropdown]"),
     );
 
     this.initSettingsService();
@@ -50,13 +53,15 @@ class SettingsService {
     let oldServName = "";
 
     if (action !== "new")
-      target
-        .closest("[data-services-service]")
-        .querySelector("[data-old-name]")
-        .getAttribute("data-value") || "";
+      oldServName =
+        target
+          .closest("[data-services-service]")
+          .querySelector("[data-old-name]")
+          .getAttribute("data-value") || "";
     this.currMethod = method;
 
     const operation = action === "clone" || action === "new" ? "new" : action;
+
     const settings = JSON.parse(
       target.closest("[data-settings]").getAttribute("data-settings"),
     );
@@ -87,7 +92,6 @@ class SettingsService {
             .closest("button")
             .getAttribute(`data-${this.prefix}-action`) === "new"
         ) {
-          console.log("run");
           const [
             action,
             serviceName,
@@ -98,13 +102,16 @@ class SettingsService {
             operation,
           ] = this.getActionData(e.target);
 
+          //simple
           const forceEnabled = action === "new" ? true : false;
           const setMethodUI =
             action === "new" || action === "clone" ? true : false;
           const emptyServerName =
             action === "new" || action === "clone" ? true : false;
-          this.advancedSettings.updateData(action, oldServName, operation);
-          this.advancedSettings.setRegularInps(
+          this.advancedSettings.setAdvanced(
+            action,
+            oldServName,
+            operation,
             settings,
             forceEnabled,
             setMethodUI,
@@ -226,10 +233,11 @@ class ServiceModal {
     let oldServName = "";
 
     if (action !== "new")
-      target
-        .closest("[data-services-service]")
-        .querySelector("[data-old-name]")
-        .getAttribute("data-value") || "";
+      oldServName =
+        target
+          .closest("[data-services-service]")
+          .querySelector("[data-old-name]")
+          .getAttribute("data-value") || "";
     this.currMethod = method;
 
     return [action, serviceName, oldServName, isDraft, method];

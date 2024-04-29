@@ -1010,6 +1010,7 @@ class Settings {
   }
 
   resetServerName() {
+    console.log("reset");
     this.serverNameInps.forEach((inpServName) => {
       inpServName.getAttribute("value", "");
       inpServName.removeAttribute("disabled", "");
@@ -1180,96 +1181,6 @@ class Settings {
       inp.value = this.operation;
     });
   }
-
-  getInpsToCheckByMode() {
-    // For advanced, we want to check all inputs
-    // For simple, we want to check only current step inputs to continue
-
-    const inps =
-      this.mode === "simple"
-        ? this.container.querySelectorAll(
-            "[data-step]:not(.hidden) input[data-setting-input]",
-          )
-        : this.container.querySelectorAll(
-            "[data-plugin-item]:not(.hidden) input[data-setting-input], [data-plugin-item][class*='hidden'] input[data-setting-input]",
-          );
-    return inps;
-  }
-
-  checkVisibleInpsValidity() {
-    try {
-      const inps = this.getInpsToCheckByMode();
-      // merge input with visible and not visible
-      if (inps.length <= 0) return;
-
-      let isAllValid = true;
-      let invalidInpName = "";
-      let invalidInp = null;
-
-      for (let i = 0; i < inps.length; i++) {
-        // for all inputs
-        if (!inps[i].validity.valid) {
-          invalidInp = inps[i];
-          isAllValid = false;
-          invalidInpName = inps[i].getAttribute("name");
-          break;
-        }
-
-        // special case for SERVER_NAME
-        if (
-          inps[i].getAttribute("name") === "SERVER_NAME" &&
-          inps[i].value !== ""
-        ) {
-          // Case conflict with another server name
-          const serverNames = document.querySelectorAll(
-            "[data-services-service]",
-          );
-          const serverNameValue = inps[i].getAttribute("value");
-          serverNames.forEach((serverName) => {
-            const name = serverName.getAttribute("data-services-service");
-            if (name === serverNameValue) return;
-            if (name === inps[i].value) {
-              invalidInpName = inps[i]?.getAttribute("name");
-              isAllValid = false;
-            }
-          });
-        }
-      }
-
-      const errMsg = form.querySelector("[data-services-modal-error-msg]");
-      if (!isAllValid) {
-        invalidInp.classList.add("invalid");
-        const invalidEl = invalidInp
-          .closest("form")
-          .querySelector(`[data-invalid=${invalidInp.getAttribute("id")}]`);
-        invalidEl.classList.remove("hidden", "md:hidden");
-        // Wait a little that modal is fully open to focus on invalid input, because not working when element is hidden
-        setTimeout(() => {
-          // only focus  if not another input is focus
-          if (document.activeElement.tagName !== "INPUT") invalidInp.focus();
-        }, 30);
-
-        errMsg.textContent = `${invalidInpName} must be valid to submit`;
-        errMsg.classList.remove("hidden");
-        formMode == "simple" ? this.nextBtn.setAttribute("disabled", "") : null;
-        formMode == "advanced"
-          ? form
-              .querySelector("button[data-services-modal-submit]")
-              .setAttribute("disabled", "")
-          : null;
-      }
-
-      if (isAllValid) {
-        errMsg.classList.add("hidden");
-        formMode == "simple" ? this.nextBtn.removeAttribute("disabled") : null;
-        formMode == "advanced"
-          ? form
-              .querySelector("button[data-services-modal-submit]")
-              .removeAttribute("disabled")
-          : null;
-      }
-    } catch (e) {}
-  }
 }
 
 class SettingsMultiple extends Settings {
@@ -1281,9 +1192,10 @@ class SettingsMultiple extends Settings {
   }
 
   initMultiple() {
-    window.addEventListener("load", () => {
+    this.container.addEventListener("load", () => {
       this.hiddenIfNoMultiples();
     });
+
     this.container.addEventListener("click", (e) => {
       // Add btn
       try {
@@ -1324,7 +1236,6 @@ class SettingsMultiple extends Settings {
           );
           //clone schema to create a group with new num
           const schemaClone = schema.cloneNode(true);
-
           //add special attribute for disabled logic
           this.changeCloneSuffix(schemaClone, setNum);
           //set disabled / enabled state
@@ -1446,6 +1357,48 @@ class SettingsMultiple extends Settings {
     this.addOneMultGroup();
   }
 
+  //put multiple on the right plugin, on schema container
+  setMultipleToDOM(sortMultObj, setMethodUI = false) {
+    //we loop on each multiple that contains values to render to DOM
+    for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
+      sortMultObj,
+    )) {
+      //we need to access the DOM schema container
+      const schemaCtnr = this.formContainer.querySelector(
+        `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`,
+      );
+
+      //now we have to loop on each multiple settings group
+      for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
+        //we have to clone schema container first
+        const schemaCtnrClone = schemaCtnr.cloneNode(true);
+        //remove id to avoid duplicate and for W3C
+        schemaCtnr.removeAttribute("id");
+        //now we replace _SCHEMA by current suffix everywhere we need
+        //unless it is 0 that means no suffix
+        const suffixFormat = +suffix === 0 ? `` : `_${suffix}`;
+        this.changeCloneSuffix(schemaCtnrClone, suffixFormat);
+        //then we have to loop on every settings of current group to change clone values by right ones
+        for (const [name, data] of Object.entries(settings)) {
+          //get setting container of clone container
+          const settingContainer = schemaCtnrClone.querySelector(
+            `[data-setting-container="${name}"]`,
+          );
+          //replace input info and disabled state
+          // check if attribute data-simple on formContainer
+          this.setSetting(
+            data["value"],
+            setMethodUI ? "ui" : data["method"],
+            data["global"],
+            settingContainer,
+          );
+        }
+        //send schema clone to DOM and show it
+        this.showClone(schemaCtnr, schemaCtnrClone);
+      }
+    }
+  }
+
   getMultiplesOnly(settings) {
     //get schema settings
     const multiples = {};
@@ -1479,7 +1432,6 @@ class SettingsMultiple extends Settings {
     const multAddBtns = this.container.querySelectorAll(
       `[data-${this.prefix}-multiple-add]`,
     );
-    console.log("mult groups, ", multAddBtns);
     multAddBtns.forEach((btn) => {
       const att = btn.getAttribute(`data-${this.prefix}-multiple-add`);
       //check if already one (SCHEMA exclude so length >= 2)
@@ -1577,6 +1529,81 @@ class SettingsMultiple extends Settings {
     });
   }
 
+  sortMultipleByContainerAndSuffixe(obj) {
+    const sortMultiples = {};
+    for (const [name, value] of Object.entries(obj)) {
+      //split name and check if there is a suffixe
+      const splitName = name.split("_");
+      //suffixe start with number 1, if none give arbitrary 0 value to store on same group
+      const isSuffixe = !isNaN(splitName[splitName.length - 1]) ? true : false;
+      const suffixe = isSuffixe ? splitName[splitName.length - 1] : "0";
+      //remove suffix if exists and query related name_SCHEMA to get container info
+      const nameSuffixLess = isSuffixe
+        ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
+        : name.trim();
+      const relateSetting = this.formContainer.querySelector(
+        `[data-setting-container=${nameSuffixLess}_SCHEMA]`,
+      );
+      if (!relateSetting) continue;
+      const relateCtnr = relateSetting.closest(
+        `[data-${this.prefix}-settings-multiple]`,
+      );
+      const relateCtnrName = relateCtnr.getAttribute(
+        `data-${this.prefix}-settings-multiple`,
+      );
+      //then we sort the setting on the right container name by suffixe number
+      if (!(relateCtnrName in sortMultiples)) {
+        sortMultiples[relateCtnrName] = {};
+      }
+
+      if (!(suffixe in sortMultiples[relateCtnrName])) {
+        sortMultiples[relateCtnrName][suffixe] = {};
+      }
+      sortMultiples[relateCtnrName][suffixe][name] = value;
+    }
+    return sortMultiples;
+  }
+
+  changeCloneSuffix(schemaCtnrClone, suffix) {
+    //rename multiple container
+    schemaCtnrClone.setAttribute(
+      `data-${this.prefix}-settings-multiple`,
+      schemaCtnrClone
+        .getAttribute(`data-${this.prefix}-settings-multiple`)
+        .replace("_SCHEMA", suffix),
+    );
+
+    // Get all elemennts by attribute to update _SCHEMA by suffix
+    const attributs = [
+      "data-setting-container",
+      "id",
+      "data-invalid",
+      "for",
+      "data-popover-btn",
+      "data-popover-content",
+      "name",
+    ];
+
+    attributs.forEach((att) => {
+      const attEls = schemaCtnrClone.querySelectorAll(`[${att}]`);
+      attEls.forEach((attEl) => {
+        attEl.setAttribute(
+          att,
+          attEl.getAttribute(att).replace("_SCHEMA", suffix),
+        );
+      });
+    });
+
+    //rename title
+    const titles = schemaCtnrClone.querySelectorAll("h5");
+    titles.forEach((title) => {
+      const text = title.textContent;
+      title.textContent = `${text} ${
+        suffix ? `#${suffix.replace("_", "")}` : ``
+      }`;
+    });
+  }
+
   getSuffixNumOrFalse(name) {
     const num = !isNaN(Number(name.substring(name.lastIndexOf("_") + 1)))
       ? Number(name.substring(name.lastIndexOf("_") + 1))
@@ -1586,27 +1613,43 @@ class SettingsMultiple extends Settings {
 }
 
 class SettingsAdvanced extends SettingsMultiple {
-  constructor(
-    mode,
-    formEl,
-    multSettingsName,
-    prefix = "services",
-    settingsFilterEl = null,
-  ) {
+  constructor(mode, formEl, multSettingsName, prefix = "services") {
     super(mode, formEl, multSettingsName, prefix);
-    this.settingsFilterEl = settingsFilterEl;
+    this.initAdvanced();
   }
 
-  setSettingsAdvanced(
-    settingsJSON,
+  initAdvanced() {
+    window.addEventListener("DOMContentLoaded", () => {
+      this.container.addEventListener("input", (e) => {
+        this.checkVisibleInpsValidity();
+      });
+    });
+  }
+
+  setAdvanced(
+    action,
+    oldServName,
+    operation,
+    settings,
     setMethodUI = false,
     forceEnabled = false,
     emptyServerName = false,
   ) {
-    const settings = JSON.parse(settingsJSON);
-    this.setRegularInps(settings, forceEnabled, setMethodUI, emptyServerName);
-    this.resetFilterInp();
+    this.updateData(action, oldServName, operation);
+    this.setSettingsByAtt();
+    this.setSettingsAdvanced(
+      settings,
+      setMethodUI,
+      forceEnabled,
+      emptyServerName,
+    );
     if (emptyServerName) this.resetServerName();
+    this.checkVisibleInpsValidity();
+  }
+
+  setSettingsAdvanced(settings, setMethodUI = false, forceEnabled = false) {
+    this.setRegularInps(settings, forceEnabled, setMethodUI);
+    this.setMultipleInps(settings);
   }
 
   // Avoid multiple settings because it is handle by Multiple class
@@ -1679,12 +1722,80 @@ class SettingsAdvanced extends SettingsMultiple {
     }
   }
 
-  resetFilterInp() {
-    if (this.settingsFilterEl) {
-      const inpFilter = document.querySelector('input[name="settings-filter"]');
-      inpFilter.value = "";
-      inpFilter.dispatchEvent(new Event("input"));
-    }
+  checkVisibleInpsValidity() {
+    try {
+      const inps = this.container.querySelectorAll(
+        "[data-plugin-item]:not(.hidden) input[data-setting-input], [data-plugin-item][class*='hidden'] input[data-setting-input]",
+      );
+      console.log("mode", this.mode);
+
+      console.log(inps);
+      // merge input with visible and not visible
+      if (inps.length <= 0) return;
+
+      let isAllValid = true;
+      let invalidInpName = "";
+      let invalidInp = null;
+
+      for (let i = 0; i < inps.length; i++) {
+        // for all inputs
+        if (!inps[i].validity.valid) {
+          invalidInp = inps[i];
+          isAllValid = false;
+          invalidInpName = inps[i].getAttribute("name");
+          break;
+        }
+
+        // special case for SERVER_NAME
+        if (
+          inps[i].getAttribute("name") === "SERVER_NAME" &&
+          inps[i].value !== ""
+        ) {
+          // Case conflict with another server name
+          const serverNames = document.querySelectorAll(
+            "[data-services-service]",
+          );
+          const serverNameValue = inps[i].getAttribute("value");
+          serverNames.forEach((serverName) => {
+            const name = serverName.getAttribute("data-services-service");
+            if (name === serverNameValue) return;
+            if (name === inps[i].value) {
+              invalidInpName = inps[i]?.getAttribute("name");
+              isAllValid = false;
+            }
+          });
+        }
+      }
+
+      const errMsg = this.container.querySelector(
+        "[data-services-modal-error-msg]",
+      );
+      if (!isAllValid) {
+        invalidInp.classList.add("invalid");
+        const invalidEl = invalidInp
+          .closest("form")
+          .querySelector(`[data-invalid=${invalidInp.getAttribute("id")}]`);
+        invalidEl.classList.remove("hidden", "md:hidden");
+        // Wait a little that modal is fully open to focus on invalid input, because not working when element is hidden
+        setTimeout(() => {
+          // only focus  if not another input is focus
+          if (document.activeElement.tagName !== "INPUT") invalidInp.focus();
+        }, 30);
+
+        errMsg.textContent = `${invalidInpName} must be valid to submit`;
+        errMsg.classList.remove("hidden");
+        this.container
+          .querySelector("button[data-services-modal-submit]")
+          .setAttribute("disabled", "");
+      }
+
+      if (isAllValid) {
+        errMsg.classList.add("hidden");
+        this.container
+          .querySelector("button[data-services-modal-submit]")
+          .removeAttribute("disabled");
+      }
+    } catch (e) {}
   }
 }
 
@@ -1698,7 +1809,11 @@ class SettingsSimple extends SettingsMultiple {
   }
 
   initSimple() {
-    // TODO :       handle this.changeSubmitBtn();
+    window.addEventListener("DOMContentLoaded", () => {
+      this.container.addEventListener("input", (e) => {
+        this.checkVisibleInpsValidity();
+      });
+    });
 
     // SIMPLE MODE ACTIONS
     this.nextBtn.addEventListener("click", () => {
@@ -1708,6 +1823,12 @@ class SettingsSimple extends SettingsMultiple {
     this.backBtn.addEventListener("click", () => {
       this.prevSimpleStep();
     });
+  }
+
+  setSimple(action, oldServName, operation, settingsJSON) {
+    this.updateData(action, oldServName, operation);
+    this.setSettingsByAtt();
+    this.checkVisibleInpsValidity();
   }
 
   resetSimpleMode() {
@@ -1787,6 +1908,76 @@ class SettingsSimple extends SettingsMultiple {
     if (!prevStep) {
       this.backBtn.setAttribute("disabled", "");
     }
+  }
+
+  checkVisibleInpsValidity() {
+    try {
+      console.log("mode", this.mode);
+      const inps = this.container.querySelectorAll(
+        "[data-step]:not(.hidden) input[data-setting-input]",
+      );
+      // merge input with visible and not visible
+      if (inps.length <= 0) return;
+
+      let isAllValid = true;
+      let invalidInpName = "";
+      let invalidInp = null;
+
+      for (let i = 0; i < inps.length; i++) {
+        // for all inputs
+        if (!inps[i].validity.valid) {
+          invalidInp = inps[i];
+          isAllValid = false;
+          invalidInpName = inps[i].getAttribute("name");
+          break;
+        }
+
+        // special case for SERVER_NAME
+        if (
+          inps[i].getAttribute("name") === "SERVER_NAME" &&
+          inps[i].value !== ""
+        ) {
+          // Case conflict with another server name
+          const serverNames = document.querySelectorAll(
+            "[data-services-service]",
+          );
+          const serverNameValue = inps[i].getAttribute("value");
+          serverNames.forEach((serverName) => {
+            const name = serverName.getAttribute("data-services-service");
+            if (name === serverNameValue) return;
+            if (name === inps[i].value) {
+              invalidInpName = inps[i]?.getAttribute("name");
+              isAllValid = false;
+            }
+          });
+        }
+      }
+
+      const errMsg = this.container.querySelector(
+        "[data-services-modal-error-msg]",
+      );
+      if (!isAllValid) {
+        invalidInp.classList.add("invalid");
+        const invalidEl = invalidInp
+          .closest("form")
+          .querySelector(`[data-invalid=${invalidInp.getAttribute("id")}]`);
+        invalidEl.classList.remove("hidden", "md:hidden");
+        // Wait a little that modal is fully open to focus on invalid input, because not working when element is hidden
+        setTimeout(() => {
+          // only focus  if not another input is focus
+          if (document.activeElement.tagName !== "INPUT") invalidInp.focus();
+        }, 30);
+
+        errMsg.textContent = `${invalidInpName} must be valid to submit`;
+        errMsg.classList.remove("hidden");
+        this.nextBtn.setAttribute("disabled", "");
+      }
+
+      if (isAllValid) {
+        errMsg.classList.add("hidden");
+        this.nextBtn.removeAttribute("disabled");
+      }
+    } catch (e) {}
   }
 }
 
@@ -1877,6 +2068,7 @@ class SettingsEditor {
           const multipleEls = this.container.querySelectorAll(
             `[data-${this.prefix}-settings-multiple*="${attName}"]`,
           );
+
           //case no schema
           if (multipleEls.length <= 0) return;
 
