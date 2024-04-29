@@ -167,14 +167,6 @@ class ServiceModal {
   }
 
   init() {
-    this.switchModeBtn.addEventListener("click", () => {
-      const currMode = this.switchModeBtn.getAttribute(
-        "data-toggle-settings-mode-btn",
-      );
-      const switchMode = currMode === "advanced" ? "simple" : "advanced";
-      this.switchMode(switchMode);
-    });
-
     this.modal.addEventListener("click", (e) => {
       //close
       try {
@@ -182,6 +174,17 @@ class ServiceModal {
           e.target.closest("button").hasAttribute("data-services-modal-close")
         ) {
           this.closeModal();
+        }
+      } catch (err) {}
+      // switch draft
+      try {
+        if (e.target.closest("button").hasAttribute("data-toggle-draft-btn")) {
+          const draftBtn = e.target.closest("button");
+          // check if hidden or not
+          const isDraft = draftBtn
+            .querySelector("[data-toggle-draft='true']")
+            .classList.contains("hidden");
+          this.setIsDraft(isDraft ? true : false, "default");
         }
       } catch (err) {}
     });

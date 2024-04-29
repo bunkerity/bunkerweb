@@ -1010,7 +1010,6 @@ class Settings {
   }
 
   resetServerName() {
-    console.log("reset");
     this.serverNameInps.forEach((inpServName) => {
       inpServName.getAttribute("value", "");
       inpServName.removeAttribute("disabled", "");
@@ -1636,7 +1635,6 @@ class SettingsAdvanced extends SettingsMultiple {
     emptyServerName = false,
   ) {
     this.updateData(action, oldServName, operation);
-    this.setSettingsByAtt();
     this.setSettingsAdvanced(
       settings,
       setMethodUI,
@@ -1648,6 +1646,7 @@ class SettingsAdvanced extends SettingsMultiple {
   }
 
   setSettingsAdvanced(settings, setMethodUI = false, forceEnabled = false) {
+    this.setSettingsByAtt();
     this.setRegularInps(settings, forceEnabled, setMethodUI);
     this.setMultipleInps(settings);
   }
@@ -1727,9 +1726,7 @@ class SettingsAdvanced extends SettingsMultiple {
       const inps = this.container.querySelectorAll(
         "[data-plugin-item]:not(.hidden) input[data-setting-input], [data-plugin-item][class*='hidden'] input[data-setting-input]",
       );
-      console.log("mode", this.mode);
 
-      console.log(inps);
       // merge input with visible and not visible
       if (inps.length <= 0) return;
 
@@ -1804,7 +1801,6 @@ class SettingsSimple extends SettingsMultiple {
     super(mode, formEl, multSettingsName, prefix);
     this.nextBtn = this.container.querySelector("button[data-simple-next]");
     this.backBtn = this.container.querySelector("button[data-simple-back]");
-
     this.initSimple();
   }
 
@@ -1825,10 +1821,32 @@ class SettingsSimple extends SettingsMultiple {
     });
   }
 
-  setSimple(action, oldServName, operation, settingsJSON) {
+  setSimple(
+    action,
+    oldServName,
+    operation,
+    settings,
+    setMethodUI = false,
+    forceEnabled = false,
+    emptyServerName = false,
+    resetSteps = false,
+  ) {
     this.updateData(action, oldServName, operation);
-    this.setSettingsByAtt();
+    this.setSettingsSimple(
+      settings,
+      setMethodUI,
+      forceEnabled,
+      emptyServerName,
+    );
+    if (emptyServerName) this.resetServerName();
+    if (resetSteps) this.resetSimpleMode();
     this.checkVisibleInpsValidity();
+  }
+
+  setSettingsSimple(settings, setMethodUI = false, forceEnabled = false) {
+    this.setSettingsByAtt();
+    this.setRegularInps(settings, forceEnabled, setMethodUI);
+    this.setMultipleInps(settings);
   }
 
   resetSimpleMode() {
@@ -1912,7 +1930,6 @@ class SettingsSimple extends SettingsMultiple {
 
   checkVisibleInpsValidity() {
     try {
-      console.log("mode", this.mode);
       const inps = this.container.querySelectorAll(
         "[data-step]:not(.hidden) input[data-setting-input]",
       );
@@ -1980,6 +1997,43 @@ class SettingsSimple extends SettingsMultiple {
     } catch (e) {}
   }
 }
+
+class SettingsRaw extends SettingsMultiple {
+  constructor(mode, formEl, multSettingsName, prefix = "services") {
+    super(mode, formEl, multSettingsName, prefix);
+    this.initRaw();
+  }
+
+  initRaw() {
+    window.addEventListener("DOMContentLoaded", () => {
+      this.container.addEventListener("input", (e) => {
+        this.checkVisibleInpsValidity();
+      });
+    });
+  }
+
+  setRaw(
+    action,
+    oldServName,
+    operation,
+    settings,
+    setMethodUI = false,
+    forceEnabled = false,
+    emptyServerName = false,
+  ) {
+    this.updateData(action, oldServName, operation);
+    this.setSettingsRaw(settings, setMethodUI, forceEnabled, emptyServerName);
+  }
+
+  setSettingsRaw(settings, setMethodUI = false, forceEnabled = false) {
+    this.setSettingsByAtt();
+    this.setRegularInps(settings, forceEnabled, setMethodUI);
+    this.setMultipleInps(settings);
+  }
+
+}
+
+
 
 class SettingsSwitch {
   constructor(switchBtn, settingsForms, prefix = "services") {
