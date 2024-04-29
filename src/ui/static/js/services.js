@@ -145,12 +145,12 @@ class SettingsService {
               .querySelector(
                 `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
               )
-              .click();
+              .removeAttribute("disabled");
             document
               .querySelector(
                 `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
               )
-              .removeAttribute("disabled");
+              .click();
           }
         }
       } catch (err) {
@@ -223,9 +223,11 @@ class SettingsService {
               }
             } catch (err) {}
           }
-
-          console.log("mainSettings", mainSettings);
-          console.log("compareSettings", compareSettings);
+          // No main settings if new
+          if (action === "new") {
+            mainSettings = JSON.parse(JSON.stringify(compareSettings));
+            compareSettings = null;
+          }
 
           this.simpleSettings.setSimple(
             action,

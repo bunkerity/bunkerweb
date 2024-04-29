@@ -71,7 +71,7 @@
 
 <!-- custom configs -->
 {% for config in configs %}
-<div data-simple id="{{ config['type'] }}-simple"
+<div data-simple data-config-container
      class="w-full h-full px-1 mt-4 mb-2 col-span-12 grid grid-cols-12 h-full items-end">
     <!-- title and desc -->
     <div class="col-span-12" data-setting-header>
@@ -82,10 +82,10 @@
             <p class="max-w-[550px] sm:pl-3 sm:pr-2 text-sm dark:text-gray-300 mb-0">{{ config['subtitle'] }}</p>
         </div>
     </div>
-    <div class="w-full col-span-12 px-4">
-        <textarea data-simple-default-editor-content class="hidden" id="{{config['name']}}-content" name="{{config['name']}}-content"></textarea>
+    <div data-editor-container class="w-full col-span-12 px-4">
+        <textarea data-editor-input class="hidden" name="{{config['type']}}_SERVER_NAME_{{config['name']}}"></textarea>
         <!-- editor-->
-        <div data-simple-editor id="{{config['name']}}-editor" class="text-base w-full h-50 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800">
+        <div data-editor id="{{config['id']}}" class="text-base w-full h-50 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800">
         </div>
         <!-- editor-->
     </div>

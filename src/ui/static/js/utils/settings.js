@@ -1266,6 +1266,13 @@ class Settings {
       }
     }
   }
+
+  getSuffixNumOrEmpty(name) {
+    const num = !isNaN(Number(name.substring(name.lastIndexOf("_") + 1)))
+      ? Number(name.substring(name.lastIndexOf("_") + 1))
+      : "";
+    return num;
+  }
 }
 
 class SettingsMultiple extends Settings {
@@ -1308,7 +1315,7 @@ class SettingsMultiple extends Settings {
             const ctnrName = container.getAttribute(
               `data-${this.prefix}-settings-multiple`,
             );
-            const num = this.getSuffixNumOrFalse(ctnrName);
+            const num = this.getSuffixNumOrEmpty(ctnrName);
             if (!isNaN(num) && num > topNum) topNum = num;
           });
           //the final number is num
@@ -1688,16 +1695,57 @@ class SettingsMultiple extends Settings {
       }`;
     });
   }
+}
 
-  getSuffixNumOrFalse(name) {
-    const num = !isNaN(Number(name.substring(name.lastIndexOf("_") + 1)))
-      ? Number(name.substring(name.lastIndexOf("_") + 1))
-      : "";
-    return num;
+class SettingsEditor extends SettingsMultiple {
+  constructor(mode, formEl, multSettingsName, prefix = "services") {
+    super(mode, formEl, multSettingsName, prefix);
+    this.darkMode = document.querySelector("[data-dark-toggle]");
+    this.isDarkMode = this.darkMode.checked;
+    // add editor for configs in simple mode
+    this.editorEls = [];
+    this.initEditors();
+  }
+
+  initEditors() {
+    window.addEventListener("load", () => {
+      this.instanciateEditors();
+    });
+
+    this.darkMode.addEventListener("click", (e) => {
+      this.isDarkMode = e.target.checked;
+      this.updateEditorMode();
+    });
+  }
+
+  instanciateEditors() {
+    const editors = this.container.querySelectorAll("[data-editor]");
+    editors.forEach((editorEl) => {
+      const editor = ace.edit(editorEl.getAttribute("id"));
+      // Handle
+      if (this.isDarkMode) {
+        editor.setTheme("ace/theme/dracula");
+      } else {
+        editor.setTheme("ace/theme/dawn");
+      }
+      //editor options
+      editor.setShowPrintMargin(false);
+      this.editorEls.push(editor);
+    });
+  }
+
+  updateEditorMode() {
+    this.editorEls.forEach((editor) => {
+      if (this.isDarkMode) {
+        editor.setTheme("ace/theme/dracula");
+      } else {
+        editor.setTheme("ace/theme/dawn");
+      }
+    });
   }
 }
 
-class SettingsAdvanced extends SettingsMultiple {
+class SettingsAdvanced extends SettingsEditor {
   constructor(formEl, multSettingsName, prefix = "services") {
     super("advanced", formEl, multSettingsName, prefix);
     this.initAdvanced();
@@ -1820,7 +1868,7 @@ class SettingsAdvanced extends SettingsMultiple {
   }
 }
 
-class SettingsSimple extends SettingsMultiple {
+class SettingsSimple extends SettingsEditor {
   constructor(formEl, multSettingsName, prefix = "services") {
     super("simple", formEl, multSettingsName, prefix);
     this.nextBtn = this.container.querySelector("button[data-simple-next]");
@@ -1856,10 +1904,11 @@ class SettingsSimple extends SettingsMultiple {
     emptyServerName = false,
     resetSteps = false,
   ) {
-    const settings = compareSettings
-      ? this.filterSettings(mainSettings, compareSettings)
-      : mainSettings;
-    console.log(settings);
+    const settings =
+      compareSettings && Object.keys(compareSettings).length > 0
+        ? this.filterSettings(mainSettings, compareSettings)
+        : mainSettings;
+    console.log("settings", settings);
     this.updateData(
       action,
       oldServName,
@@ -1876,8 +1925,97 @@ class SettingsSimple extends SettingsMultiple {
   }
 
   filterSettings(mainSettings, compareSettings) {
-    console.log("filter");
-    return {};
+    const mergeSettings = {};
+    // get the highest suffix number in mainSettings
+    let highestMainSuffix = 0;
+    let highestCompareSuffix = 0;
+    for (const [key, value] of Object.entries(mainSettings)) {
+      const mainSuffixeNum = this.getSuffixNumOrEmpty(key);
+      const mainIsSuffixe = !isNaN(mainSuffixeNum);
+      const mainName = mainIsSuffixe
+        ? key.replace(`_${highestMainSuffix}`, "").trim()
+        : key.trim();
+
+      // Case same key (same setting) and not a multiple
+      // Keep the one with a method != than ui or default if exists
+      // Else keep the one from compareSettings that is the securityLevel
+      if (key in compareSettings && !mainName.includes(this.multSettingsName)) {
+        const method = mainSettings[key]["method"];
+        if (method !== "ui" && method !== "default") {
+          mergeSettings[key] = value;
+          continue;
+        } else {
+          highestMainSuffix = mergeSettings[key] = compareSettings[key];
+          continue;
+        }
+      }
+      // Need to check if is a multiple from a list because we can have custom configs with suffixe too
+      if (mainIsSuffixe && mainName.includes(this.multSettingsName)) {
+        highestMainSuffix = mainIsSuffixe
+          ? Math.max(highestMainSuffix, suffixeNum)
+          : highestMainSuffix;
+      }
+
+      const compareSuffixeNum = this.getSuffixNumOrEmpty(key);
+      const compareIsSuffixe = !isNaN(compareSuffixeNum);
+      const compareName = compareIsSuffixe
+        ? key.replace(`_${highestCompareSuffix}`, "").trim()
+        : key.trim();
+
+      // Need to check if is a multiple from a list because we can have custom configs with suffixe too
+      if (compareIsSuffixe && compareName.includes(this.multSettingsName)) {
+        highestCompareSuffix = compareIsSuffixe
+          ? Math.max(highestCompareSuffix, suffixeNum)
+          : highestCompareSuffix;
+      }
+    }
+
+    // Case highest main suffixe is higher than compare suffixe
+    // Start updating starting from the highest suffix looping on all suffixed
+    // Until we reached the highest compare suffixe
+    if (highestCompareSuffix >= highestMainSuffix) {
+      highestMainSuffix++;
+      for (let i = 0; i <= highestCompareSuffix; i++) {
+        // Check if the setting is a multiple and match the current suffixe
+        for (const [key, value] of Object.entries(compareSettings)) {
+          const compareSuffixeNum = this.getSuffixNumOrEmpty(key);
+          const compareIsSuffixe = !isNaN(compareSuffixeNum);
+          const compareName = compareIsSuffixe
+            ? key.replace(`_${highestCompareSuffix}`, "").trim()
+            : key.trim();
+          // Need to check if is a multiple from a list because we can have custom configs with suffixe too
+          if (
+            !compareIsSuffixe ||
+            compareSuffixeNum != i ||
+            !compareName.includes(this.multSettingsName)
+          )
+            continue;
+          // Case multiple,  update suffixe to the highest available if needed
+          const newNameSuffixe = key.replace(
+            `_${compareSuffixeNum}`,
+            `_${highestMainSuffix}`,
+          );
+          mergeSettings[newNameSuffixe] = value;
+        }
+        // Update for the next loop to get the next suffixe
+        highestMainSuffix++;
+      }
+    }
+    // Else, add compare settings without changing anything
+    else {
+      for (const [key, value] of Object.entries(compareSettings)) {
+        const compareSuffixeNum = this.getSuffixNumOrEmpty(key);
+        const compareIsSuffixe = !isNaN(compareSuffixeNum);
+        const compareName = compareIsSuffixe
+          ? key.replace(`_${highestCompareSuffix}`, "").trim()
+          : key.trim();
+        // Need to check if is a multiple from a list because we can have custom configs with suffixe too
+        if (!compareIsSuffixe || !compareName.includes(this.multSettingsName))
+          continue;
+        mergeSettings[key] = value;
+      }
+    }
+    return mergeSettings;
   }
 
   setSettingsSimple(settings, setMethodUI = false, forceEnabled = false) {
@@ -2133,189 +2271,6 @@ class SettingsSwitch {
       el.getAttribute("data-toggle-settings-mode") === mode
         ? el.classList.remove("hidden")
         : el.classList.add("hidden");
-    });
-  }
-}
-
-class SettingsEditor {
-  constructor() {
-    this.darkMode = document.querySelector("[data-dark-toggle]");
-    this.isDarkMode = this.darkMode.checked;
-
-    // add editor for configs in simple mode
-    this.editorEls = [];
-
-    this.initEditors();
-  }
-
-  initEditors() {
-    window.addEventListener("load", () => {
-      this.instanciateEditors();
-    });
-
-    this.darkMode.addEventListener("click", (e) => {
-      this.isDarkMode = e.target.checked;
-      this.updateEditorMode();
-    });
-
-    // MULTIPLE ACTIONS
-    this.container.addEventListener("click", (e) => {
-      // Add btn
-      try {
-        if (
-          e.target
-            .closest("button")
-            .hasAttribute(`data-${this.prefix}-multiple-add`)
-        ) {
-          //get plugin from btn
-          const btn = e.target.closest("button");
-          const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
-          //get all multiple groups
-          const multipleEls = this.container.querySelectorAll(
-            `[data-${this.prefix}-settings-multiple*="${attName}"]`,
-          );
-
-          //case no schema
-          if (multipleEls.length <= 0) return;
-
-          //get the next container number logic
-          //default is 0
-          let topNum = 0;
-          //loop on curr multiples, get the name suffix for each
-          //and keep the highest num
-          multipleEls.forEach((container) => {
-            const ctnrName = container.getAttribute(
-              `data-${this.prefix}-settings-multiple`,
-            );
-            const num = this.getSuffixNumOrFalse(ctnrName);
-            if (!isNaN(num) && num > topNum) topNum = num;
-          });
-          //the final number is num
-          //num is total - 1 because of hidden SCHEMA container
-          const currNum = `${multipleEls.length >= 2 ? topNum + 1 : topNum}`;
-          const setNum = +currNum === 0 ? `` : `_${currNum}`;
-          //the default (schema) group is the last group
-          const schema = this.container.querySelector(
-            `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
-          );
-          //clone schema to create a group with new num
-          const schemaClone = schema.cloneNode(true);
-
-          //add special attribute for disabled logic
-          this.changeCloneSuffix(schemaClone, setNum);
-          //set disabled / enabled state
-          this.setDisabledMultNew(schemaClone);
-          this.showClone(schema, schemaClone);
-          //insert new group before first one
-          //show all groups
-          this.showMultByAtt(attName);
-        }
-      } catch (err) {}
-
-      //TOGGLE BTN
-      try {
-        if (
-          e.target
-            .closest("button")
-            .hasAttribute(`data-${this.prefix}-multiple-toggle`)
-        ) {
-          const att = e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-multiple-toggle`);
-          this.toggleMultByAtt(att);
-        }
-        //remove last child
-      } catch (err) {}
-
-      //REMOVE BTN
-      try {
-        if (
-          e.target
-            .closest("button")
-            .hasAttribute(`data-${this.prefix}-multiple-delete`)
-        ) {
-          // We are not removing it really, just hiding it and update values to default
-          // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
-          const multContainer = e.target.closest(
-            `[data-${this.prefix}-settings-multiple]`,
-          );
-          multContainer.classList.add("hidden-multiple");
-          // get setting container
-          const settings = multContainer.querySelectorAll(
-            `[data-setting-container]`,
-          );
-          settings.forEach((setting) => {
-            // for regular input
-            try {
-              const inps = setting.querySelectorAll("input");
-              inps.forEach((inp) => {
-                // case checkbox
-                if (inp.getAttribute("type") === "checkbox") {
-                  const defaultVal = inp.getAttribute("data-default") || "";
-
-                  if (defaultVal === "yes" && !inp.checked) {
-                    inp.click();
-                  }
-                }
-
-                // case regular
-                if (inp.getAttribute("type") !== "checkbox") {
-                  const defaultVal = inp.getAttribute("data-default") || "";
-                  inp.setAttribute("value", defaultVal);
-                  inp.value = defaultVal;
-                }
-              });
-            } catch (e) {}
-            // for select
-            try {
-              const selects = setting.querySelectorAll(
-                "button[data-setting-select]",
-              );
-              selects.forEach((select) => {
-                const defaultVal = select.getAttribute("data-default") || "";
-                select
-                  .querySelector("data-setting-select-text")
-                  .setAttribute("data-value", defaultVal);
-                select.querySelector("data-setting-select-text").textContent =
-                  defaultVal;
-                const dropdown = this.container.querySelector(
-                  `[data-setting-select-dropdown="${select.getAttribute(
-                    "data-setting-select",
-                  )}"]`,
-                );
-                dropdown.querySelector(`button[value=${defaultVal}]`).click();
-              });
-            } catch (e) {}
-          });
-        }
-        //remove last child
-      } catch (err) {}
-    });
-  }
-
-  instanciateEditors() {
-    const editors = this.container.querySelectorAll("[data-editor]");
-    editors.forEach((editorEl) => {
-      const editor = ace.edit(editorEl.getAttribute("id"));
-      // Handle
-      if (this.isDarkMode) {
-        editor.setTheme("ace/theme/dracula");
-      } else {
-        editor.setTheme("ace/theme/dawn");
-      }
-      //editor options
-      editor.setShowPrintMargin(false);
-      this.editorEls.push(editor);
-    });
-  }
-
-  updateEditorMode() {
-    this.editorEls.forEach((editor) => {
-      if (this.isDarkMode) {
-        editor.setTheme("ace/theme/dracula");
-      } else {
-        editor.setTheme("ace/theme/dawn");
-      }
     });
   }
 }
