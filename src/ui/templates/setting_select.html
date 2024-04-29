@@ -6,7 +6,6 @@
     {% set inp_value = setting_input['value'] %}
     {% set inp_method = setting_input['method'] %}
     {% set inp_items = setting_input['select'] %}
-    {% set inp_levels = setting_input['levels'] %}
     {% set inp_id = setting_input['id'] %}
     {% set inp_is_simple = setting_input['is_simple'] %}
     {% set global_config_method = global_config.get(inp_name, {'method' : inp_method }).get('method') %}
@@ -20,9 +19,6 @@
             data-setting-select-default="{{ inp_id }}"
             data-type="form-select"
             class="hidden"
-            {% for level_name, value in inp_levels.items() %}
-                data-security-level-{{level_name}}="{{value}}"
-            {% endfor %}
             {% if is_multiple %} data-is-multiple {% endif %}
             >
         {% for item in inp_items %}
@@ -42,9 +38,6 @@
                 data-default-method="{{ global_config_method }}"
                 aria-controls="{{ inp_id }}-dropdown"
                 type="button"
-                {% for level_name, value in inp_levels.items() %}
-                 data-security-level-{{level_name}}="{{value}}"
-                {% endfor %}
                 class="custom-select-btn">
             {% for item in inp_items %}
                 {% if global_config_value and

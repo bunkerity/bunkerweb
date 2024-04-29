@@ -13,19 +13,21 @@ import {
 class SettingsService {
   constructor() {
     this.prefix = "services";
+    this.settingsMultiple = JSON.parse(
+      document
+        .querySelector("input[data-plugins-multiple]")
+        .getAttribute("data-plugins-multiple")
+        .replaceAll(`'`, `"`),
+    );
     this.advancedSettings = new SettingsAdvanced(
-      "advanced",
       document.querySelector("[data-advanced][data-services-modal-form]"),
-      JSON.parse(
-        document
-          .querySelector("input[data-plugins-multiple]")
-          .getAttribute("data-plugins-multiple")
-          .replaceAll(`'`, `"`),
-      ),
+      this.settingsMultiple,
       "services",
-      document.querySelector("input#settings-filter"),
-      document.querySelector('[data-services-setting-select="type"]'),
-      document.querySelector("[data-tab-select-dropdown]"),
+    );
+    this.simpleSettings = new SettingsSimple(
+      document.querySelector("[data-simple][data-services-modal-form]"),
+      this.settingsMultiple,
+      "services",
     );
 
     this.initSettingsService();
@@ -50,14 +52,12 @@ class SettingsService {
         .querySelector("[data-service-method]")
         .getAttribute("data-value") || "no";
 
-    let oldServName = "";
+    const oldServName =
+      target
+        .closest("[data-services-service]")
+        .querySelector("[data-old-name]")
+        .getAttribute("data-value") || "";
 
-    if (action !== "new")
-      oldServName =
-        target
-          .closest("[data-services-service]")
-          .querySelector("[data-old-name]")
-          .getAttribute("data-value") || "";
     this.currMethod = method;
 
     const operation = action === "clone" || action === "new" ? "new" : action;
@@ -102,13 +102,25 @@ class SettingsService {
             operation,
           ] = this.getActionData(e.target);
 
-          //simple
           const forceEnabled = action === "new" ? true : false;
           const setMethodUI =
             action === "new" || action === "clone" ? true : false;
           const emptyServerName =
             action === "new" || action === "clone" ? true : false;
+
           this.advancedSettings.setAdvanced(
+            action,
+            oldServName,
+            operation,
+            settings,
+            setMethodUI,
+            forceEnabled,
+            emptyServerName,
+          );
+
+          // Click on right security level dropdown btn
+          // This will fire security level event listener
+          this.simpleSettings.updateData(
             action,
             oldServName,
             operation,
@@ -117,11 +129,34 @@ class SettingsService {
             setMethodUI,
             emptyServerName,
           );
+          if (action === "new") {
+            document
+              .querySelector(
+                `button[data-setting-select-dropdown-btn="security-level"][value="standard"]`,
+              )
+              .click();
+            document
+              .querySelector(
+                `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
+              )
+              .setAttribute("disabled", "true");
+          } else {
+            document
+              .querySelector(
+                `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
+              )
+              .click();
+            document
+              .querySelector(
+                `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
+              )
+              .removeAttribute("disabled");
+          }
         }
       } catch (err) {
         console.log(err);
       }
-      // security
+      // security level
       try {
         if (
           e.target
@@ -129,6 +164,80 @@ class SettingsService {
             .getAttribute("data-setting-select-dropdown-btn") ==
           "security-level"
         ) {
+          // get current common values
+          const action = this.simpleSettings.currAction;
+          const oldServName = this.simpleSettings.oldServName;
+          const operation = this.simpleSettings.operation;
+          const forceEnabled = this.simpleSettings.forceEnabled;
+          const setMethodUI = this.simpleSettings.setMethodUI;
+          const emptyServerName = this.simpleSettings.emptyServerName;
+          // get custom security level settings of service if custom choose
+          const value = e.target.closest("button").getAttribute("value");
+
+          // mainSettings is the settings of the service
+          let mainSettings;
+
+          // Try to get settings in a valid format
+          try {
+            mainSettings = JSON.parse(
+              document
+                .querySelector(`[data-old-name][data-value="${oldServName}"]`)
+                .closest("[data-services-service]")
+                .getAttribute("data-settings"),
+            );
+          } catch (err) {}
+
+          try {
+            if (!settings) {
+              mainSettings = JSON.parse(
+                document
+                  .querySelector(`[data-old-name][data-value="${oldServName}"]`)
+                  .closest("[data-services-service]")
+                  .getAttribute("data-settings")
+                  .replaceAll(`'`, `"`),
+              );
+            }
+          } catch (err) {}
+
+          // In case we want a security level, we need to get the settings of the security level
+          // In order to filter and merge both to avoid overriding disabled settings (method != ui|default)
+          let compareSettings = null;
+          if (value !== "custom") {
+            // Try to get settings in a valid format
+            try {
+              compareSettings = JSON.parse(
+                document
+                  .querySelector(`input#security-level-${value}`)
+                  .getAttribute("data-settings"),
+              );
+            } catch (err) {}
+
+            try {
+              if (!compareSettings) {
+                compareSettings = JSON.parse(
+                  document
+                    .querySelector(`input#security-level-${value}`)
+                    .getAttribute("data-settings")
+                    .replaceAll(`'`, `"`),
+                );
+              }
+            } catch (err) {}
+          }
+
+          console.log("mainSettings", mainSettings);
+          console.log("compareSettings", compareSettings);
+
+          this.simpleSettings.setSimple(
+            action,
+            oldServName,
+            operation,
+            mainSettings,
+            compareSettings,
+            setMethodUI,
+            forceEnabled,
+            emptyServerName,
+            true,
+          );
         }
       } catch (err) {}
     });
@@ -364,7 +473,7 @@ class ServiceModal {
   }
 
   setModeVisible(action) {
-    if (action === "new") {
+    if (action === "new" || action === "clone" || action === "edit") {
       this.switchModeBtn.classList.remove("hidden");
     } else {
       this.switchModeBtn.classList.add("hidden");
@@ -728,7 +837,13 @@ const setFilterGlobal = new FilterSettings(
 );
 
 const settings = new SettingsService();
-// const setAdvancedMultiple = new MultipleActions("services", document.querySelector("[data-advanced][data-services-modal-form]"));
+
+const switchSettings = new SettingsSwitch(
+  document.querySelector("[data-toggle-settings-mode-btn]"),
+  document.querySelector("main"),
+  ["advanced", "simple"],
+  "services",
+);
 
 const checkServiceModalKeyword = new CheckNoMatchFilter(
   document.querySelector("input#settings-filter"),

@@ -1,4 +1,29 @@
-{% set security_levels = ['standard', 'advanced', 'high'] %}
+{% set security_levels = ['standard', 'advanced', 'high', 'custom'] %}
+
+{% set standard = {
+    "USE_ANTIBOT": {
+        "value": "javascript",
+        "method": "default"
+    },
+    "SERVER_NAME": {
+        "value": "test",
+        "method": "default"
+    },
+}%}
+
+{% set advanced = {
+    "USE_ANTIBOT": {
+        "value": "no",
+        "method": "default"
+    },
+}%}
+
+{% set high = {
+    "USE_ANTIBOT": {
+        "value": "javascript",
+        "method": "default"
+    },
+}%}
 
 {# When multiple, setting_id need to be a setting that is part of a multiple to get all settings on the same group #}
 {# On levels, we should set a list of dict with setting_id as key and value as value #}
@@ -8,25 +33,9 @@
     "name" : "STEP 1 - STARTING UP",
     "description" : "we  need some information to get started.",
     "settings" : [
-                    {"plugin_id" : "general", "setting_id": "SERVER_NAME", "title" : "DEFINE HOST", "subtitle" : "We need this to connect BunkerWeb to your application. You need to set your domain name.", "levels" : {} },
-                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "levels" : {}, "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(security_levels[0]|security_levels[1]|security_levels[2])$', 'type': 'select', 'select': [security_levels[0], security_levels[1], security_levels[2]]} },
-                    {"plugin_id" : "limit", "setting_id": "LIMIT_REQ_URL", "title" : "Define header", "subtitle" : "test header multiple rendering",  "levels" : [{
-                                                                                                                                                                    security_levels[0] : {
-                                                                                                                                                                        "LIMIT_REQ_URL_1": "/",
-                                                                                                                                                                        "LIMIT_REQ_RATE_1": "2r/s"
-                                                                                                                                                                    }
-                                                                                                                                                                    , security_levels[1] : {
-                                                                                                                                                                            "LIMIT_REQ_URL_1": "/",
-                                                                                                                                                                            "LIMIT_REQ_RATE_1": "2r/s"
-                                                                                                                                                                        }
-                                                                                                                                                                    , security_levels[2] : {
-                                                                                                                                                                            "LIMIT_REQ_URL_1": "/",
-                                                                                                                                                                            "LIMIT_REQ_RATE_1": "2r/s",
-                                                                                                                                                                            "LIMIT_REQ_URL_2": "/admin",
-                                                                                                                                                                            "LIMIT_REQ_RATE_2": "4r/s"
-                                                                                                                                                                        }
-                                                                                                                                                                    }]
-                    },
+                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(security_levels[0]|security_levels[1]|security_levels[2]|security_levels[3])$', 'type': 'select', 'select': [security_levels[0], security_levels[1], security_levels[2], security_levels[3]]} },
+                    {"plugin_id" : "general", "setting_id": "SERVER_NAME", "title" : "DEFINE HOST", "subtitle" : "We need this to connect BunkerWeb to your application. You need to set your domain name."},
+                    {"plugin_id" : "limit", "setting_id": "LIMIT_REQ_URL", "title" : "Define header", "subtitle" : "test header multiple rendering" },
                   ],
                     "configs": []
 },
@@ -34,11 +43,11 @@
     "name" : "STEP 2 - ANTIBOT",
     "description" : "Avoid spammer and bot to access your website.",
     "settings" : [
-                  {"plugin_id" : "antibot", "setting_id": "USE_ANTIBOT", "title" : "Define the type of your antibot", "subtitle" : "Javascript, Captcha or Cookie don't need additionnal settings to be fill. Recaptcha, Hcaptcha and Turnstile need secret key and site key delivered from providers.",  "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} },
+                  {"plugin_id" : "antibot", "setting_id": "USE_ANTIBOT", "title" : "Define the type of your antibot", "subtitle" : "Javascript, Captcha or Cookie don't need additionnal settings to be fill. Recaptcha, Hcaptcha and Turnstile need secret key and site key delivered from providers." },
                  ],
     "configs": [
-        {"name": "my_config_1", "type": "modsec", "subtitle" : "This will determine the modsecurity rules to apply to this service.", "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} },
-        {"name": "my_config_2", "type": "server-http", "subtitle" : "This will determine the server http...", "levels" : {security_levels[0] : "no", security_levels[1] : "javascript", security_levels[2] : "javascript"} }
+        {"name": "my_config_1", "type": "modsec", "subtitle" : "This will determine the modsecurity rules to apply to this service."},
+        {"name": "my_config_2", "type": "server-http", "subtitle" : "This will determine the server http..."}
     ]
 },
 ]
@@ -69,6 +78,10 @@
             {% endfor %}
         {% endfor %}
 {% endfor %}
+
+<input type="hidden" id="security-level-{{security_levels[0]}}" data-settings="{{ standard }}" />
+<input type="hidden" id="security-level-{{security_levels[1]}}" data-settings="{{ advanced }}" />
+<input type="hidden" id="security-level-{{security_levels[2]}}" data-settings="{{ high }}" />
 
 <!-- new and edit form -->
 <form data-simple data-services-modal-form

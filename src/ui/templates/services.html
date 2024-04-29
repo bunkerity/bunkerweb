@@ -27,12 +27,14 @@
     {% endfor %}
     <input class="hidden" data-plugins-multiple='{{multiple_settings}}' />
     <!-- actions -->
-    <div data-{{attribute_name}}-service
+    <div data-{{attribute_name}}-service  data-settings="{}"
          class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">
         <div data-is-draft class="hidden" data-value="no"></div>
         <div data-service-method class="hidden" data-value="ui"></div>
         <button data-{{attribute_name}}-action="new"
                 data-{{attribute_name}}-name="service"
+                data-old-name
+                data-value="new"
                 data-settings="{}"
                 type="button"
                 class="dark:bg-green-500/90 duration-300 dark:text-gray-100 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">

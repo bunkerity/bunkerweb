@@ -998,6 +998,10 @@ class Settings {
     this.currAction = "";
     this.currMethod = "";
     this.oldServName = "";
+    this.setMethodUI = false;
+    this.forceEnabled = false;
+    this.emptyServerName = false;
+    this.currSettings = {};
     this.initSettings();
   }
 
@@ -1027,8 +1031,7 @@ class Settings {
         inpName === "is_draft" ||
         inpName === "operation" ||
         inpName === "settings-filter" ||
-        inp.hasAttribute("data-combobox") ||
-        (this.mode === "simple" && inpName === "SERVER_NAME")
+        inp.hasAttribute("data-combobox")
       )
         return true;
     }
@@ -1150,11 +1153,24 @@ class Settings {
     }
   }
 
-  updateData(action, oldServName, operation) {
+  updateData(
+    action,
+    oldServName,
+    operation,
+    settings,
+    setMethodUI,
+    forceEnabled,
+    emptyServerName,
+  ) {
     // Get global needed data
     this.currAction = action;
     this.oldServName = oldServName;
     this.operation = operation;
+    this.currSettings = settings;
+    this.setMethodUI = setMethodUI;
+    this.forceEnabled = forceEnabled;
+    this.emptyServerName = emptyServerName;
+
     this.updateOperation();
     this.updateOldNameValue();
   }
@@ -1179,6 +1195,76 @@ class Settings {
       inp.setAttribute("value", this.operation);
       inp.value = this.operation;
     });
+  }
+
+  // Avoid multiple settings because it is handle by Multiple class
+  getRegularInps(settings) {
+    this.multSettingsName.forEach((name) => {
+      // check if a settings is starting with a multiple name
+      // if yes, remove it
+      for (const [key, value] of Object.entries(settings)) {
+        if (key.startsWith(name)) {
+          delete settings[key];
+        }
+      }
+    });
+    return settings;
+  }
+
+  setRegularInps(allSettings, forceEnabled, setMethodUI) {
+    const settings = this.getRegularInps(allSettings);
+    // Case we have settings, like when we edit a service
+    // We need to update the settings with the right values
+    if (Object.keys(settings).length > 0) {
+      // use this to select inputEl and change value
+      for (const [key, data] of Object.entries(settings)) {
+        //change format to match id
+        const value = data["value"];
+        const method = setMethodUI ? "ui" : data["method"];
+        const global = data["global"];
+        try {
+          // get only inputs without attribute data-is-multiple
+          const inps = this.container.querySelectorAll(
+            `[name='${key}']:not([data-is-multiple])`,
+          );
+
+          inps.forEach((inp) => {
+            //form related values are excludes
+            const inpName = inp.getAttribute("name");
+
+            if (this.isAvoidInpList("input", inp, inpName, this.container))
+              return;
+
+            //SET DISABLED / ENABLED
+            //for regular input
+            this.setCheckbox(inp, method, value);
+            this.setInput(inp, method, value);
+
+            //for select
+            if (inp.tagName === "SELECT") {
+              inp.parentElement
+                .querySelector(
+                  `button[data-setting-select-dropdown-btn][value='${value}']`,
+                )
+                .click();
+              inp.setAttribute("data-method", method);
+            }
+
+            if (forceEnabled) {
+              inp.removeAttribute("disabled");
+            } else {
+              if (method === "ui" || method === "default") {
+                inp.removeAttribute("disabled");
+              } else {
+                inp.setAttribute("disabled", "");
+              }
+
+              if (global) inp.removeAttribute("disabled");
+            }
+          });
+        } catch (err) {}
+      }
+    }
   }
 }
 
@@ -1612,8 +1698,8 @@ class SettingsMultiple extends Settings {
 }
 
 class SettingsAdvanced extends SettingsMultiple {
-  constructor(mode, formEl, multSettingsName, prefix = "services") {
-    super(mode, formEl, multSettingsName, prefix);
+  constructor(formEl, multSettingsName, prefix = "services") {
+    super("advanced", formEl, multSettingsName, prefix);
     this.initAdvanced();
   }
 
@@ -1634,7 +1720,15 @@ class SettingsAdvanced extends SettingsMultiple {
     forceEnabled = false,
     emptyServerName = false,
   ) {
-    this.updateData(action, oldServName, operation);
+    this.updateData(
+      action,
+      oldServName,
+      operation,
+      settings,
+      setMethodUI,
+      forceEnabled,
+      emptyServerName,
+    );
     this.setSettingsAdvanced(
       settings,
       setMethodUI,
@@ -1649,76 +1743,6 @@ class SettingsAdvanced extends SettingsMultiple {
     this.setSettingsByAtt();
     this.setRegularInps(settings, forceEnabled, setMethodUI);
     this.setMultipleInps(settings);
-  }
-
-  // Avoid multiple settings because it is handle by Multiple class
-  getRegularInps(settings) {
-    this.multSettingsName.forEach((name) => {
-      // check if a settings is starting with a multiple name
-      // if yes, remove it
-      for (const [key, value] of Object.entries(settings)) {
-        if (key.startsWith(name)) {
-          delete settings[key];
-        }
-      }
-    });
-    return settings;
-  }
-
-  setRegularInps(allSettings, forceEnabled, setMethodUI) {
-    const settings = this.getRegularInps(allSettings);
-    // Case we have settings, like when we edit a service
-    // We need to update the settings with the right values
-    if (Object.keys(settings).length > 0) {
-      // use this to select inputEl and change value
-      for (const [key, data] of Object.entries(settings)) {
-        //change format to match id
-        const value = data["value"];
-        const method = setMethodUI ? "ui" : data["method"];
-        const global = data["global"];
-        try {
-          // get only inputs without attribute data-is-multiple
-          const inps = this.container.querySelectorAll(
-            `[name='${key}']:not([data-is-multiple])`,
-          );
-
-          inps.forEach((inp) => {
-            //form related values are excludes
-            const inpName = inp.getAttribute("name");
-
-            if (this.isAvoidInpList("input", inp, inpName, this.container))
-              return;
-
-            //SET DISABLED / ENABLED
-            //for regular input
-            this.setCheckbox(inp, method, value);
-            this.setInput(inp, method, value);
-
-            //for select
-            if (inp.tagName === "SELECT") {
-              inp.parentElement
-                .querySelector(
-                  `button[data-setting-select-dropdown-btn][value='${value}']`,
-                )
-                .click();
-              inp.setAttribute("data-method", method);
-            }
-
-            if (forceEnabled) {
-              inp.removeAttribute("disabled");
-            } else {
-              if (method === "ui" || method === "default") {
-                inp.removeAttribute("disabled");
-              } else {
-                inp.setAttribute("disabled", "");
-              }
-
-              if (global) inp.removeAttribute("disabled");
-            }
-          });
-        } catch (err) {}
-      }
-    }
   }
 
   checkVisibleInpsValidity() {
@@ -1797,8 +1821,8 @@ class SettingsAdvanced extends SettingsMultiple {
 }
 
 class SettingsSimple extends SettingsMultiple {
-  constructor(mode, formEl, multSettingsName, prefix = "services") {
-    super(mode, formEl, multSettingsName, prefix);
+  constructor(formEl, multSettingsName, prefix = "services") {
+    super("simple", formEl, multSettingsName, prefix);
     this.nextBtn = this.container.querySelector("button[data-simple-next]");
     this.backBtn = this.container.querySelector("button[data-simple-back]");
     this.initSimple();
@@ -1822,29 +1846,41 @@ class SettingsSimple extends SettingsMultiple {
   }
 
   setSimple(
-    action,
-    oldServName,
-    operation,
-    settings,
+    action = this.currAction,
+    oldServName = this.oldServName,
+    operation = this.operation,
+    mainSettings,
+    compareSettings = null,
     setMethodUI = false,
     forceEnabled = false,
     emptyServerName = false,
     resetSteps = false,
   ) {
-    this.updateData(action, oldServName, operation);
-    this.setSettingsSimple(
+    const settings = compareSettings
+      ? this.filterSettings(mainSettings, compareSettings)
+      : mainSettings;
+    console.log(settings);
+    this.updateData(
+      action,
+      oldServName,
+      operation,
       settings,
       setMethodUI,
       forceEnabled,
       emptyServerName,
     );
+    this.setSettingsSimple(settings, setMethodUI, forceEnabled);
     if (emptyServerName) this.resetServerName();
     if (resetSteps) this.resetSimpleMode();
     this.checkVisibleInpsValidity();
   }
 
+  filterSettings(mainSettings, compareSettings) {
+    console.log("filter");
+    return {};
+  }
+
   setSettingsSimple(settings, setMethodUI = false, forceEnabled = false) {
-    this.setSettingsByAtt();
     this.setRegularInps(settings, forceEnabled, setMethodUI);
     this.setMultipleInps(settings);
   }
@@ -2021,51 +2057,67 @@ class SettingsRaw extends SettingsMultiple {
     forceEnabled = false,
     emptyServerName = false,
   ) {
-    this.updateData(action, oldServName, operation);
+    this.updateData(
+      action,
+      oldServName,
+      operation,
+      settings,
+      setMethodUI,
+      forceEnabled,
+      emptyServerName,
+    );
     this.setSettingsRaw(settings, setMethodUI, forceEnabled, emptyServerName);
   }
 
-  setSettingsRaw(settings, setMethodUI = false, forceEnabled = false) {
-    this.setSettingsByAtt();
-    this.setRegularInps(settings, forceEnabled, setMethodUI);
-    this.setMultipleInps(settings);
-  }
-
+  setSettingsRaw(settings, setMethodUI = false, forceEnabled = false) {}
 }
 
-
-
 class SettingsSwitch {
-  constructor(switchBtn, settingsForms, prefix = "services") {
+  constructor(
+    switchBtn,
+    container = document.querySelector("main"),
+    modes = ["advanced", "simple"],
+    prefix = "services",
+  ) {
     this.prefix = prefix;
+    this.modes = modes;
     this.switchModeBtn = switchBtn;
-    // dict with mode as key and form element as value
-    this.settingsForms = settingsForms;
-
+    // dict wth mode as key and form element as value
+    this.container = container;
     this.init();
   }
 
   init() {
     this.switchModeBtn.addEventListener("click", () => {
-      setTimeout(() => {
-        this.checkVisibleInpsValidity();
-      }, 20);
+      // Get
+      const currMode = this.switchModeBtn.getAttribute(
+        "data-toggle-settings-mode-btn",
+      );
+      // Get current mode index in this.modes to get next one or first element if no next
+      const currModeIndex = this.modes.indexOf(currMode);
+      const nextMode = this.modes[currModeIndex + 1] || this.modes[0];
+      this.setSettingMode(nextMode);
     });
   }
 
   // Switch settings mode and update button
   setSettingMode(mode) {
-    if (this.mode === mode) return;
+    const currMode = this.switchModeBtn.getAttribute(
+      "data-toggle-settings-mode-btn",
+    );
+
+    if (currMode === mode) return;
     if (!this.switchModeBtn) return;
 
     const elsToShow =
       mode === "advanced"
-        ? document.querySelectorAll("[data-advanced]")
-        : document.querySelectorAll("[data-simple]");
+        ? this.container.querySelectorAll("[data-advanced]")
+        : this.container.querySelectorAll("[data-simple]");
+
     const elsToHide =
       mode === "advanced"
-        ? document.querySelectorAll("[data-simple]")
-        : document.querySelectorAll("[data-advanced]");
+        ? this.container.querySelectorAll("[data-simple]")
+        : this.container.querySelectorAll("[data-advanced]");
     elsToHide.forEach((setting) => {
       setting.classList.add("!hidden");
     });
