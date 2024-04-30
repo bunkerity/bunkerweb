@@ -27,11 +27,15 @@
     },
     "CUSTOM_CONFIG_MODSEC_1" : {
         "value": "test",
-        "method": "default"
+        "method": "default",
+        "type" : "modsec",
+        "name" : "modsec 1"
     },
     "CUSTOM_CONFIG_MODSEC_2" : {
-        "value": "test",
-        "method": "default"
+        "value": "test 2",
+        "method": "default",
+        "type" : "modsec",
+        "name" : "modsec 2"
     },
 }%}
 
@@ -70,8 +74,7 @@
                   {"plugin_id" : "antibot", "setting_id": "USE_ANTIBOT", "title" : "Define the type of your antibot", "subtitle" : "Javascript, Captcha or Cookie don't need additionnal settings to be fill. Recaptcha, Hcaptcha and Turnstile need secret key and site key delivered from providers." },
                  ],
     "configs": [
-        {"id" : "CUSTOM_CONFIG_MODSEC_1", "name": "my_config_1", "type": "modsec", "subtitle" : "This will determine the modsecurity rules to apply to this service."},
-        {"id" : "CUSTOM_CONFIG_MODSEC_2", "name": "my_config_2", "type": "server-http", "subtitle" : "This will determine the server http..."}
+        {"id" : "CUSTOM_CONFIG_MODSEC", "type" : "modsec", "name" : "modsecrules", "subtitle" : "This will determine the modsecurity rules to apply to this service."},
     ]
 },
 ]

@@ -77,15 +77,26 @@
     <div class="col-span-12" data-setting-header>
         <div class="flex flex-col justify-start items-start">
             <h5 class="sm:pl-3 sm:pr-2 mt-2 transition duration-300 ease-in-out font-bold text-base uppercase dark:text-white/90 mb-0">
-                Custom config for {{ config['type'] }}
+                Custom config {{ config['type'] }} for your service.
             </h5>
             <p class="max-w-[550px] sm:pl-3 sm:pr-2 text-sm dark:text-gray-300 mb-0">{{ config['subtitle'] }}</p>
         </div>
     </div>
-    <div data-editor-container class="w-full col-span-12 px-4">
-        <textarea data-editor-input class="hidden" name="{{config['type']}}_SERVER_NAME_{{config['name']}}"></textarea>
+    <div data-editor-container="{{config['id']}}_SCHEMA" data-default-type="{{config['type']}}" data-default-name="{{config['name']}}" class="hidden w-full col-span-12 px-4">
+        <div class="mb-2 flex flex-wrap justify-start items-center" >
+            <input disabled type="text"
+                   name="CONFIG_NAME"
+                   data-editor-filename
+                   class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 sm:ml-1 max-w-40  focus:valid:border-green-500 focus:file:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700"
+                   placeholder="{{config['name']}}"
+                   required />
+            <p class="ml-1 mb-0 dark:text-white/80 text-gray-700/80 text-sm">
+                .conf
+            </p>
+        </div>
+        <textarea data-editor-input class="hidden"></textarea>
         <!-- editor-->
-        <div data-editor id="{{config['id']}}" class="text-base w-full h-50 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800">
+        <div data-editor class="text-base w-full h-50 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800">
         </div>
         <!-- editor-->
     </div>

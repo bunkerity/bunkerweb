@@ -129,7 +129,12 @@ class SettingsService {
             setMethodUI,
             emptyServerName,
           );
+          const modeBtn = document.querySelector(
+            "button[data-toggle-settings-mode-btn]",
+          );
+          const mode = modeBtn.getAttribute("data-toggle-settings-mode-btn");
           if (action === "new") {
+            mode !== "simple" ? modeBtn.click() : null;
             document
               .querySelector(
                 `button[data-setting-select-dropdown-btn="security-level"][value="standard"]`,
@@ -141,6 +146,7 @@ class SettingsService {
               )
               .setAttribute("disabled", "true");
           } else {
+            mode !== "advanced" ? modeBtn.click() : null;
             document
               .querySelector(
                 `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
@@ -154,7 +160,6 @@ class SettingsService {
           }
         }
       } catch (err) {
-        console.log(err);
       }
       // security level
       try {
@@ -241,7 +246,8 @@ class SettingsService {
             true,
           );
         }
-      } catch (err) {}
+      } catch (err) {
+      }
     });
   }
 }
@@ -317,7 +323,6 @@ class ServiceModal {
           this.setFormModal(e.target);
         }
       } catch (err) {
-        console.log(err);
       }
     });
   }

@@ -1032,6 +1032,7 @@ class Settings {
         inpName === "is_draft" ||
         inpName === "operation" ||
         inpName === "settings-filter" ||
+        inpName === "CONFIG_NAME" ||
         inp.hasAttribute("data-combobox")
       )
         return true;
@@ -1732,30 +1733,166 @@ class SettingsEditor extends SettingsMultiple {
   }
 
   initEditors() {
-    window.addEventListener("load", () => {
-      this.instanciateEditors();
-    });
-
     this.darkMode.addEventListener("click", (e) => {
       this.isDarkMode = e.target.checked;
       this.updateEditorMode();
     });
   }
 
-  instanciateEditors() {
-    const editors = this.container.querySelectorAll("[data-editor]");
-    editors.forEach((editorEl) => {
-      const editor = ace.edit(editorEl.getAttribute("id"));
-      // Handle
-      if (this.isDarkMode) {
-        editor.setTheme("ace/theme/dracula");
-      } else {
-        editor.setTheme("ace/theme/dawn");
+  setupEditorsInstance() {
+    this.editorEls.forEach((editor) => {
+      const editorEl = editor.container;
+      // we want to link editor to inp when sending form
+      const linkInp = editorEl
+        .closest("[data-editor-container]")
+        .querySelector(`textarea[data-editor-input]`);
+      // format name to get format TYPE_CONFIG_NAME
+      linkInp.addEventListener("change", () => {
+        const filename = linkInp?.getAttribute("data-filename")
+          ? linkInp?.getAttribute("data-filename")
+          : linkInp?.getAttribute("data-default-filename");
+        const type = linkInp?.getAttribute("data-config-type");
+        const action = linkInp?.getAttribute("data-action");
+        linkInp.setAttribute("name", `${type}_${filename}_${action}`);
+      });
+
+      editor.on("change", () => {
+        linkInp.value = editor.getValue();
+      });
+
+      // we can link inp to input file name to update it if exists
+      const inpFileName = editorEl
+        .closest("[data-editor-container]")
+        .querySelector(`input[data-editor-filename]`);
+
+      if (inpFileName) {
+        inpFileName.addEventListener("input", () => {
+          linkInp.setAttribute("data-filename", inpFileName.value);
+          // dispatch event to inp to ensure it is updated
+          const event = new Event("change");
+          linkInp.dispatchEvent(event);
+        });
+        inpFileName.addEventListener("change", () => {
+          linkInp.setAttribute("data-filename", inpFileName.value);
+          // dispatch event to inp to ensure it is updated
+          const event = new Event("change");
+          linkInp.dispatchEvent(event);
+        });
       }
-      //editor options
-      editor.setShowPrintMargin(false);
-      this.editorEls.push(editor);
     });
+  }
+
+  setEditorSettings() {
+    this.resetEditorsInstAndDOM();
+    this.addDefaultEditorIfNone();
+    this.setupEditorsInstance();
+    this.updateEditorMode();
+  }
+
+  addDefaultEditorIfNone() {
+    // get containers with _SCHEMA
+    const editorContainers = this.container.querySelectorAll(
+      "[data-editor-container$='_SCHEMA']",
+    );
+    editorContainers.forEach((editorContainer) => {
+      // Check if others editor exists with same base name
+      const editorName = editorContainer
+        .getAttribute("data-editor-container")
+        .replace("_SCHEMA", "");
+      const otherEditors = this.container.querySelectorAll(
+        `[data-editor-container*='${editorName}']`,
+      );
+      if (otherEditors.length > 1) return;
+      // Add default editor
+      const defaultType = editorContainer.getAttribute("data-default-type");
+      const defaultName = editorContainer.getAttribute("data-default-name");
+      this.addOneEditor(editorContainer, defaultType, defaultName, 1, "");
+    });
+  }
+
+  resetEditorsInstAndDOM() {
+    // reset previous editors
+    this.editorEls.forEach((editor) => {
+      const editorContainer = editor.container.closest(
+        "[data-editor-container]",
+      );
+      editorContainer.remove();
+      editor.destroy();
+    });
+
+    this.editorEls = [];
+    // get only container ending with _SCHEMA
+    const editorContainers = this.container.querySelectorAll(
+      "[data-editor-container$='_SCHEMA']",
+    );
+    const configsSettings = this.getEditorSettings();
+    // Create instances on the right containers
+    editorContainers.forEach((editorContainer) => {
+      const contName = editorContainer
+        .getAttribute("data-editor-container")
+        .replace("_SCHEMA", "");
+      // Loop on each custom config settings that match same prefix as key
+      // And create instance
+      for (const [key, data] of Object.entries(configsSettings)) {
+        if (!key.startsWith(contName)) continue;
+        const editorName = data["name"];
+        const editorType = data["type"];
+        const editorValue = data["value"];
+        const [num, isNum, name] = this.getSuffixData(key);
+        this.addOneEditor(
+          editorContainer,
+          editorType,
+          editorName,
+          num,
+          editorValue,
+        );
+      }
+    });
+  }
+
+  addOneEditor(container, type, name, num, value) {
+    const contName = container
+      .getAttribute("data-editor-container")
+      .replace("_SCHEMA", "");
+    const containerClone = container.cloneNode(true);
+    // update attributs
+    containerClone.setAttribute("data-editor-container", `${contName}_${num}`);
+    const editor = containerClone.querySelector(`[data-editor]`);
+    if (editor) {
+      editor.setAttribute("id", `${contName}_${num}`);
+      editor.setAttribute("name", `${contName}_${num}`);
+    }
+    const filenameInp = containerClone.querySelector(
+      `input[data-editor-filename]`,
+    );
+    if (filenameInp) filenameInp.value = name;
+    const hiddenInp = containerClone.querySelector(
+      `textarea[data-editor-input]`,
+    );
+    if (hiddenInp) {
+      hiddenInp.setAttribute("data-config-type", type);
+      hiddenInp.setAttribute("data-filename", name);
+      hiddenInp.setAttribute("data-action", this.currAction);
+      hiddenInp.setAttribute("name", `${type}_${name}_${this.currAction}`);
+    }
+    // append to DOM and show as sibling of the original container
+    container.insertAdjacentElement("afterend", containerClone);
+    containerClone.classList.remove("hidden");
+    // instantiate editor
+    const editorInst = ace.edit(editor);
+    editorInst.setValue(value);
+    this.editorEls.push(editorInst);
+  }
+
+  getEditorSettings() {
+    const settings = JSON.parse(JSON.stringify(this.currSettings));
+    const configsSettings = {};
+    for (const [key, data] of Object.entries(settings)) {
+      if (key.startsWith("CUSTOM_CONFIG")) {
+        configsSettings[key] = data;
+      }
+    }
+    return configsSettings;
   }
 
   updateEditorMode() {
@@ -1927,6 +2064,7 @@ class SettingsSimple extends SettingsEditor {
       compareSettings && Object.keys(compareSettings).length > 0
         ? this.filterSettings(mainSettings, compareSettings)
         : mainSettings;
+
     this.updateData(
       action,
       oldServName,
@@ -1937,6 +2075,7 @@ class SettingsSimple extends SettingsEditor {
       emptyServerName,
     );
     this.setSettingsSimple();
+    this.setEditorSettings();
     this.resetServerName();
     if (resetSteps) this.resetSimpleMode();
     this.checkVisibleInpsValidity();
@@ -1944,12 +2083,35 @@ class SettingsSimple extends SettingsEditor {
 
   filterSettings(mainSettings, compareSettings) {
     const mergeSettings = {};
+    // handle custom configs, we only keep security level config on new, else we get only service configs
+    const configsToGetFrom =
+      this.currAction === "new" ? compareSettings : mainSettings;
+    const customConfSettings = []; // Allow to delete custom configs
+    for (const [key, value] of Object.entries(configsToGetFrom)) {
+      if (key.startsWith("CUSTOM_CONFIG")) {
+        mergeSettings[key] = value;
+        customConfSettings.push(key);
+      }
+    }
+
+    // Delete merged custom configs
+    for (let i = 0; i < customConfSettings.length; i++) {
+      try {
+        delete mainSettings[customConfSettings[i]];
+      } catch (e) {}
+
+      try {
+        delete compareSettings[customConfSettings[i]];
+      } catch (e) {}
+    }
+
     // get the highest suffix number in mainSettings
     let highestMainSuffix = 0;
     let highestCompareSuffix = 0;
+    // This will allow
+    const settingsConflicts = [];
     for (const [key, value] of Object.entries(mainSettings)) {
       const [mainSuffix, mainIsSuffixe, mainName] = this.getSuffixData(key);
-
       // Case same key (same setting) and not a multiple
       // Keep the one with a method != than ui or default if exists
       // Else keep the one from compareSettings that is the securityLevel
@@ -1957,17 +2119,18 @@ class SettingsSimple extends SettingsEditor {
         const method = mainSettings[key]["method"];
         if (method !== "ui" && method !== "default") {
           mergeSettings[key] = value;
-          continue;
         } else {
           highestMainSuffix = mergeSettings[key] = compareSettings[key];
-          continue;
         }
+        settingsConflicts.push(key);
+        continue;
       }
       // Need to check if is a multiple from a list because we can have custom configs with suffixe too
       if (this.multSettingsName.includes(mainName)) {
         highestMainSuffix = mainIsSuffixe
           ? Math.max(highestMainSuffix, suffixeNum)
           : highestMainSuffix;
+        settingsConflicts.push(key);
       }
       const [compareSuffix, compareIsSuffixe, compareName] =
         this.getSuffixData(key);
@@ -1977,6 +2140,7 @@ class SettingsSimple extends SettingsEditor {
         highestCompareSuffix = compareIsSuffixe
           ? Math.max(highestCompareSuffix, suffixeNum)
           : highestCompareSuffix;
+        settingsConflicts.push(key);
       }
     }
 
@@ -2013,7 +2177,24 @@ class SettingsSimple extends SettingsEditor {
         mergeSettings[key] = value;
       }
     }
-    return mergeSettings;
+
+    // Delete conflicts settings in order to merge the rest
+    for (let i = 0; i < settingsConflicts.length; i++) {
+      try {
+        delete mainSettings[settingsConflicts[i]];
+      } catch (e) {}
+      try {
+        delete compareSettings[settingsConflicts[i]];
+      } catch (e) {}
+    }
+
+    // Merge the rest of the settings
+    const mergeAllSettings = {
+      ...mergeSettings,
+      ...mainSettings,
+      ...compareSettings,
+    };
+    return mergeAllSettings;
   }
 
   setSettingsSimple() {
@@ -2218,7 +2399,7 @@ class SettingsSwitch {
     this.prefix = prefix;
     this.modes = modes;
     this.switchModeBtn = switchBtn;
-    // dict wth mode as key and form element as value
+    // dict with mode as key and form element as value
     this.container = container;
     this.init();
   }
