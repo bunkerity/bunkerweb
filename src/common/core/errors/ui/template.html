@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+
+{% set read_doc_text = 'You will find more information about the errors plugin <a target="_blank" href="https://docs.bunkerweb.io/' + bw_version + '/settings/#errors"  class="core-card-text-doc-link">in the documentation</a>.' %}
+
 {% block content %}
     <input type="csrf_token"
            name="csrf_token"
@@ -11,7 +14,7 @@
             <div class="core-card-text-container">
                 <p data-info class="core-card-text">{{plugin.get('description')}}</p>
             </div>
-            <p class="core-card-text-doc">More information available <a href="https://docs.bunkerweb.io/{{ bw_version }}/settings/#errors"  class="core-card-text-doc-link">in the documentation</a>.</p>
+            <p class="core-card-text-doc">{{ read_doc_text|safe }}</p>
         </div>
         <!-- end info -->
 
