@@ -379,11 +379,9 @@ def error_message(msg: str):
 @app.context_processor
 def inject_variables():
     metadata = db.get_metadata()
-    ui_data = get_ui_data()
 
     # check that is value is in tuple
     return dict(
-        dark_mode=ui_data.get("DARK_MODE", False),
         script_nonce=app.config["SCRIPT_NONCE"],
         is_pro_version=metadata["is_pro"],
         pro_status=metadata["pro_status"],
@@ -2157,23 +2155,6 @@ def login():
     } | ({"error": "Invalid username or password"} if fail else {})
 
     return render_template("login.html", **kwargs), 401 if fail else 200
-
-
-@app.route("/darkmode", methods=["POST"])
-@login_required
-def darkmode():
-    if not request.is_json:
-        return jsonify({"status": "ko", "message": "invalid request"}), 400
-
-    if "darkmode" in request.json:
-        ui_data = get_ui_data()
-        ui_data["DARK_MODE"] = request.json["darkmode"] == "true"
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
-    else:
-        return jsonify({"status": "ko", "message": "darkmode is required"}), 422
-
-    return jsonify({"status": "ok"}), 200
 
 
 @app.route("/check_reloading")

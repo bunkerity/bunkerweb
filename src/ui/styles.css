@@ -311,7 +311,7 @@
 }
 
 .core-card-deactivated-svg {
-  @apply leading-none text-lg relative fill-yellow-500 stroke-white;
+  @apply leading-none text-lg relative fill-yellow-500 stroke-white -translate-y-[8px];
 }
 
 .core-card-text-container {

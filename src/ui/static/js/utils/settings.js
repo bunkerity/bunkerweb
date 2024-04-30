@@ -1691,7 +1691,7 @@ class SettingsMultiple extends Settings {
     );
 
     // Get all elemennts by attribute to update _SCHEMA by suffix
-    const attributs = [
+    const attributes = [
       "data-setting-container",
       "id",
       "data-invalid",
@@ -1701,7 +1701,7 @@ class SettingsMultiple extends Settings {
       "name",
     ];
 
-    attributs.forEach((att) => {
+    attributes.forEach((att) => {
       const attEls = schemaCtnrClone.querySelectorAll(`[${att}]`);
       attEls.forEach((attEl) => {
         attEl.setAttribute(
@@ -1855,7 +1855,7 @@ class SettingsEditor extends SettingsMultiple {
       .getAttribute("data-editor-container")
       .replace("_SCHEMA", "");
     const containerClone = container.cloneNode(true);
-    // update attributs
+    // update attributes
     containerClone.setAttribute("data-editor-container", `${contName}_${num}`);
     const editor = containerClone.querySelector(`[data-editor]`);
     if (editor) {

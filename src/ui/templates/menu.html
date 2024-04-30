@@ -241,24 +241,15 @@
     <div class="flex flex-col justify-end mx-4 mt-2 mb-4">
         <!-- dark/light mode -->
         <div class="min-h-6 ml-12 my-4 flex justify-start">
-            <input type="hidden"
-                   id="csrf_token"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}" />
-            <input {% if dark_mode == True %}checked{% endif %}
+            <input
                    id="darkMode"
                    data-dark-toggle
-                   data-mode-link="{{ url_for('darkmode') }}"
                    class="dark:brightness-125 hover:brightness-75 rounded-10 duration-300 ease-in-out after:rounded-circle after:shadow-2xl after:duration-300 checked:after:translate-x-5.3 h-5 mt-0.5 relative float-left w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-primary checked:bg-primary checked:bg-none checked:bg-right"
                    type="checkbox" />
             <label for="darkMode"
                    data-dark-toggle-label
                    class="dark:text-gray-200 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700">
-                {% if dark_mode == True %}
-                    dark mode
-                {% else %}
                     light mode
-                {% endif %}
             </label>
         </div>
         <!-- end dark/light mode -->

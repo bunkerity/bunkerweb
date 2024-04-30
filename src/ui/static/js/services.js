@@ -159,8 +159,7 @@ class SettingsService {
               .click();
           }
         }
-      } catch (err) {
-      }
+      } catch (err) {}
       // security level
       try {
         if (
@@ -246,8 +245,7 @@ class SettingsService {
             true,
           );
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     });
   }
 }
@@ -322,8 +320,7 @@ class ServiceModal {
           //set form info and right form
           this.setFormModal(e.target);
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     });
   }
 
