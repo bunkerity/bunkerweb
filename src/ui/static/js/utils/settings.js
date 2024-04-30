@@ -1014,6 +1014,7 @@ class Settings {
   }
 
   resetServerName() {
+    if (!this.emptyServerName) return;
     this.serverNameInps.forEach((inpServName) => {
       inpServName.getAttribute("value", "");
       inpServName.removeAttribute("disabled", "");
@@ -1198,7 +1199,8 @@ class Settings {
   }
 
   // Avoid multiple settings because it is handle by Multiple class
-  getRegularInps(settings) {
+  getRegularInps() {
+    const settings = JSON.parse(JSON.stringify(this.currSettings));
     this.multSettingsName.forEach((name) => {
       // check if a settings is starting with a multiple name
       // if yes, remove it
@@ -1211,22 +1213,38 @@ class Settings {
     return settings;
   }
 
-  setRegularInps(allSettings, forceEnabled, setMethodUI) {
-    const settings = this.getRegularInps(allSettings);
+  setRegularInps() {
+    const settings = this.getRegularInps();
+    this.setSettingsByData(settings);
+  }
+
+  setSettingsByData(settings) {
     // Case we have settings, like when we edit a service
     // We need to update the settings with the right values
     if (Object.keys(settings).length > 0) {
-      // use this to select inputEl and change value
+      // Delete settings that doesn't match DOM elements
+      const namesToDelete = [];
+      for (const [key, data] of Object.entries(settings)) {
+        try {
+          const inps = this.container.querySelectorAll(`[name='${key}']`);
+        } catch (err) {
+          namesToDelete.push(key);
+        }
+      }
+
+      namesToDelete.forEach((name) => {
+        delete settings[name];
+      });
+
+      // update DOM value
       for (const [key, data] of Object.entries(settings)) {
         //change format to match id
         const value = data["value"];
-        const method = setMethodUI ? "ui" : data["method"];
+        const method = this.setMethodUI ? "ui" : data["method"];
         const global = data["global"];
         try {
           // get only inputs without attribute data-is-multiple
-          const inps = this.container.querySelectorAll(
-            `[name='${key}']:not([data-is-multiple])`,
-          );
+          const inps = this.container.querySelectorAll(`[name='${key}']`);
 
           inps.forEach((inp) => {
             //form related values are excludes
@@ -1250,7 +1268,7 @@ class Settings {
               inp.setAttribute("data-method", method);
             }
 
-            if (forceEnabled) {
+            if (this.forceEnabled) {
               inp.removeAttribute("disabled");
             } else {
               if (method === "ui" || method === "default") {
@@ -1267,11 +1285,14 @@ class Settings {
     }
   }
 
-  getSuffixNumOrEmpty(name) {
-    const num = !isNaN(Number(name.substring(name.lastIndexOf("_") + 1)))
-      ? Number(name.substring(name.lastIndexOf("_") + 1))
-      : "";
-    return num;
+  getSuffixData(name) {
+    // check if last part after _ is a number
+    const suffix = name.substring(name.lastIndexOf("_") + 1);
+    const isNum = !isNaN(suffix);
+    const suffixLessIfNum = isNum
+      ? name.substring(0, name.lastIndexOf("_"))
+      : name;
+    return [suffix, isNum, suffixLessIfNum];
   }
 }
 
@@ -1315,8 +1336,10 @@ class SettingsMultiple extends Settings {
             const ctnrName = container.getAttribute(
               `data-${this.prefix}-settings-multiple`,
             );
-            const num = this.getSuffixNumOrEmpty(ctnrName);
-            if (!isNaN(num) && num > topNum) topNum = num;
+            const [containerSuffix, containerIsNum, containerName] =
+              this.getSuffixData(ctnrName);
+            if (containerIsNum && containerSuffix > topNum)
+              topNum = containerIsNum;
           });
           //the final number is num
           //num is total - 1 because of hidden SCHEMA container
@@ -1434,32 +1457,31 @@ class SettingsMultiple extends Settings {
     });
   }
 
-  setMultipleInps(settings) {
+  setMultipleInps() {
     //remove all multiples
     this.removePrevMultiples();
     //keep only multiple settings value
-    const multipleSettings = this.getMultiplesOnly(settings);
+    const multipleSettings = this.getMultiplesOnly();
+
     const sortMultiples =
       this.sortMultipleByContainerAndSuffixe(multipleSettings);
-
     // Need to set method as ui if clone
-    const isClone = this.currAction === "clone" ? true : false;
-    this.setMultipleToDOM(sortMultiples, isClone);
+    this.setMultipleToDOM(sortMultiples);
+    this.setSettingsByData(multipleSettings);
     // Show at least one mult group
     this.addOneMultGroup();
   }
 
   //put multiple on the right plugin, on schema container
-  setMultipleToDOM(sortMultObj, setMethodUI = false) {
-    //we loop on each multiple that contains values to render to DOM
+  setMultipleToDOM(sortMultObj) {
+    // We want to loop on each schema container
     for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
       sortMultObj,
     )) {
       //we need to access the DOM schema container
-      const schemaCtnr = this.formContainer.querySelector(
+      const schemaCtnr = this.container.querySelector(
         `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`,
       );
-
       //now we have to loop on each multiple settings group
       for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
         //we have to clone schema container first
@@ -1470,19 +1492,11 @@ class SettingsMultiple extends Settings {
         //unless it is 0 that means no suffix
         const suffixFormat = +suffix === 0 ? `` : `_${suffix}`;
         this.changeCloneSuffix(schemaCtnrClone, suffixFormat);
-        //then we have to loop on every settings of current group to change clone values by right ones
+
         for (const [name, data] of Object.entries(settings)) {
           //get setting container of clone container
           const settingContainer = schemaCtnrClone.querySelector(
             `[data-setting-container="${name}"]`,
-          );
-          //replace input info and disabled state
-          // check if attribute data-simple on formContainer
-          this.setSetting(
-            data["value"],
-            setMethodUI ? "ui" : data["method"],
-            data["global"],
-            settingContainer,
           );
         }
         //send schema clone to DOM and show it
@@ -1491,7 +1505,16 @@ class SettingsMultiple extends Settings {
     }
   }
 
-  getMultiplesOnly(settings) {
+  getMultiplesOnly() {
+    const settings = JSON.parse(JSON.stringify(this.currSettings));
+    // Keep only multiples
+    for (const [key, data] of Object.entries(settings)) {
+      // remove suffixe if exists
+      //suffixe start with number 1, if none give arbitrary 0 value to store on same group
+      const [suffixe, isSuffixe, name] = this.getSuffixData(key);
+      if (!this.multSettingsName.includes(name)) delete settings[key];
+    }
+
     //get schema settings
     const multiples = {};
 
@@ -1517,6 +1540,7 @@ class SettingsMultiple extends Settings {
         }
       }
     });
+
     return multiples;
   }
 
@@ -1633,7 +1657,7 @@ class SettingsMultiple extends Settings {
       const nameSuffixLess = isSuffixe
         ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
         : name.trim();
-      const relateSetting = this.formContainer.querySelector(
+      const relateSetting = this.container.querySelector(
         `[data-setting-container=${nameSuffixLess}_SCHEMA]`,
       );
       if (!relateSetting) continue;
@@ -1777,20 +1801,15 @@ class SettingsAdvanced extends SettingsEditor {
       forceEnabled,
       emptyServerName,
     );
-    this.setSettingsAdvanced(
-      settings,
-      setMethodUI,
-      forceEnabled,
-      emptyServerName,
-    );
-    if (emptyServerName) this.resetServerName();
+    this.setSettingsAdvanced();
+    this.resetServerName();
     this.checkVisibleInpsValidity();
   }
 
-  setSettingsAdvanced(settings, setMethodUI = false, forceEnabled = false) {
+  setSettingsAdvanced() {
     this.setSettingsByAtt();
-    this.setRegularInps(settings, forceEnabled, setMethodUI);
-    this.setMultipleInps(settings);
+    this.setRegularInps();
+    this.setMultipleInps();
   }
 
   checkVisibleInpsValidity() {
@@ -1908,7 +1927,6 @@ class SettingsSimple extends SettingsEditor {
       compareSettings && Object.keys(compareSettings).length > 0
         ? this.filterSettings(mainSettings, compareSettings)
         : mainSettings;
-    console.log("settings", settings);
     this.updateData(
       action,
       oldServName,
@@ -1918,8 +1936,8 @@ class SettingsSimple extends SettingsEditor {
       forceEnabled,
       emptyServerName,
     );
-    this.setSettingsSimple(settings, setMethodUI, forceEnabled);
-    if (emptyServerName) this.resetServerName();
+    this.setSettingsSimple();
+    this.resetServerName();
     if (resetSteps) this.resetSimpleMode();
     this.checkVisibleInpsValidity();
   }
@@ -1930,11 +1948,7 @@ class SettingsSimple extends SettingsEditor {
     let highestMainSuffix = 0;
     let highestCompareSuffix = 0;
     for (const [key, value] of Object.entries(mainSettings)) {
-      const mainSuffixeNum = this.getSuffixNumOrEmpty(key);
-      const mainIsSuffixe = !isNaN(mainSuffixeNum);
-      const mainName = mainIsSuffixe
-        ? key.replace(`_${highestMainSuffix}`, "").trim()
-        : key.trim();
+      const [mainSuffix, mainIsSuffixe, mainName] = this.getSuffixData(key);
 
       // Case same key (same setting) and not a multiple
       // Keep the one with a method != than ui or default if exists
@@ -1950,20 +1964,16 @@ class SettingsSimple extends SettingsEditor {
         }
       }
       // Need to check if is a multiple from a list because we can have custom configs with suffixe too
-      if (mainIsSuffixe && mainName.includes(this.multSettingsName)) {
+      if (this.multSettingsName.includes(mainName)) {
         highestMainSuffix = mainIsSuffixe
           ? Math.max(highestMainSuffix, suffixeNum)
           : highestMainSuffix;
       }
-
-      const compareSuffixeNum = this.getSuffixNumOrEmpty(key);
-      const compareIsSuffixe = !isNaN(compareSuffixeNum);
-      const compareName = compareIsSuffixe
-        ? key.replace(`_${highestCompareSuffix}`, "").trim()
-        : key.trim();
+      const [compareSuffix, compareIsSuffixe, compareName] =
+        this.getSuffixData(key);
 
       // Need to check if is a multiple from a list because we can have custom configs with suffixe too
-      if (compareIsSuffixe && compareName.includes(this.multSettingsName)) {
+      if (this.multSettingsName.includes(compareName)) {
         highestCompareSuffix = compareIsSuffixe
           ? Math.max(highestCompareSuffix, suffixeNum)
           : highestCompareSuffix;
@@ -1978,21 +1988,13 @@ class SettingsSimple extends SettingsEditor {
       for (let i = 0; i <= highestCompareSuffix; i++) {
         // Check if the setting is a multiple and match the current suffixe
         for (const [key, value] of Object.entries(compareSettings)) {
-          const compareSuffixeNum = this.getSuffixNumOrEmpty(key);
-          const compareIsSuffixe = !isNaN(compareSuffixeNum);
-          const compareName = compareIsSuffixe
-            ? key.replace(`_${highestCompareSuffix}`, "").trim()
-            : key.trim();
+          const [compareSuffix, compareIsSuffixe, compareName] =
+            this.getSuffixData(key);
           // Need to check if is a multiple from a list because we can have custom configs with suffixe too
-          if (
-            !compareIsSuffixe ||
-            compareSuffixeNum != i ||
-            !compareName.includes(this.multSettingsName)
-          )
-            continue;
+          if (!this.multSettingsName.includes(compareName)) continue;
           // Case multiple,  update suffixe to the highest available if needed
           const newNameSuffixe = key.replace(
-            `_${compareSuffixeNum}`,
+            `_${compareName}`,
             `_${highestMainSuffix}`,
           );
           mergeSettings[newNameSuffixe] = value;
@@ -2004,23 +2006,19 @@ class SettingsSimple extends SettingsEditor {
     // Else, add compare settings without changing anything
     else {
       for (const [key, value] of Object.entries(compareSettings)) {
-        const compareSuffixeNum = this.getSuffixNumOrEmpty(key);
-        const compareIsSuffixe = !isNaN(compareSuffixeNum);
-        const compareName = compareIsSuffixe
-          ? key.replace(`_${highestCompareSuffix}`, "").trim()
-          : key.trim();
+        const [compareSuffix, compareIsSuffixe, compareName] =
+          this.getSuffixData(key);
         // Need to check if is a multiple from a list because we can have custom configs with suffixe too
-        if (!compareIsSuffixe || !compareName.includes(this.multSettingsName))
-          continue;
+        if (!this.multSettingsName.includes(compareName)) continue;
         mergeSettings[key] = value;
       }
     }
     return mergeSettings;
   }
 
-  setSettingsSimple(settings, setMethodUI = false, forceEnabled = false) {
-    this.setRegularInps(settings, forceEnabled, setMethodUI);
-    this.setMultipleInps(settings);
+  setSettingsSimple() {
+    this.setRegularInps();
+    this.setMultipleInps();
   }
 
   resetSimpleMode() {
