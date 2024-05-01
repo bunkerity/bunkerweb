@@ -43,9 +43,9 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu-jammy, ubuntu-noble, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, ubuntu-noble, debian, fedora, rhel, rhel9]
         include:
-          - linux: ubuntu-jammy
+          - linux: ubuntu
             package: deb
           - linux: ubuntu-noble
             package: deb
@@ -187,7 +187,7 @@ jobs:
     needs: [tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9]
+        linux: [ubuntu, ubuntu-noble, debian, fedora, el, el9]
         arch: [amd64]
         include:
           - release: dev
@@ -198,7 +198,7 @@ jobs:
             suffix: ""
             version: jammy
             package: deb
-          - linux: ubuntu
+          - linux: ubuntu-noble
             package_arch: amd64
             separator: _
             suffix: ""

@@ -49,12 +49,7 @@ jobs:
         run: gem install package_cloud
       # Download packages
       - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
-        if: inputs.LINUX == 'ubuntu'
-        with:
-          name: package-${{ inputs.LINUX }}-${{ inputs.VERSION }}-${{ inputs.PACKAGE_ARCH }}
-          path: /tmp/${{ inputs.LINUX }}
-      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
-        if: inputs.LINUX != 'el' && inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu'
+        if: inputs.LINUX != 'el' && inputs.LINUX != 'el9'
         with:
           name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
@@ -81,7 +76,7 @@ jobs:
       #   run: sudo apt install -y rename && rename 's/[0-9]\.[0-9]\.[0-9]/testing/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package
       - name: Push package to packagecloud
-        if: inputs.LINUX != 'el9'
+        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-noble'
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
         with:
           PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
@@ -89,7 +84,7 @@ jobs:
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push package to packagecloud
+      - name: Push package to packagecloud for el9
         if: inputs.LINUX == 'el9'
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
         with:
@@ -97,4 +92,13 @@ jobs:
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: el/9
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push package to packagecloud for ubuntu-noble
+        if: inputs.LINUX == 'ubuntu-noble'
+        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
+        with:
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: ubuntu/noble
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
