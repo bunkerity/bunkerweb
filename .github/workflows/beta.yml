@@ -94,11 +94,13 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, ubuntu-noble, debian, fedora, rhel, rhel9]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: beta
           - linux: ubuntu
+            package: deb
+          - linux: ubuntu-noble
             package: deb
           - linux: debian
             package: deb
@@ -179,7 +181,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9]
+        linux: [ubuntu, ubuntu-noble, debian, fedora, el, el9]
         arch: [amd64, arm64]
         include:
           - release: beta
@@ -188,6 +190,11 @@ jobs:
             separator: _
             suffix: ""
             version: jammy
+            package: deb
+          - linux: ubuntu-noble
+            separator: _
+            suffix: ""
+            version: noble
             package: deb
           - linux: debian
             separator: _
@@ -212,6 +219,9 @@ jobs:
           - linux: ubuntu
             arch: amd64
             package_arch: amd64
+          - linux: ubuntu-noble
+            arch: amd64
+            package_arch: amd64
           - linux: debian
             arch: amd64
             package_arch: amd64
@@ -225,6 +235,9 @@ jobs:
             arch: amd64
             package_arch: x86_64
           - linux: ubuntu
+            arch: arm64
+            package_arch: arm64
+          - linux: ubuntu-noble
             arch: arm64
             package_arch: arm64
           - linux: debian
