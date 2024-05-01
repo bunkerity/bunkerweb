@@ -43,9 +43,11 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9]
+        linux: [ubuntu-jammy, ubuntu-noble, debian, fedora, rhel, rhel9]
         include:
-          - linux: ubuntu
+          - linux: ubuntu-jammy
+            package: deb
+          - linux: ubuntu-noble
             package: deb
           - linux: debian
             package: deb
@@ -195,6 +197,12 @@ jobs:
             separator: _
             suffix: ""
             version: jammy
+            package: deb
+          - linux: ubuntu
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: noble
             package: deb
           - linux: debian
             package_arch: amd64

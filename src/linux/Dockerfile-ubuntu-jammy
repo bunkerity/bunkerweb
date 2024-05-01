@@ -99,7 +99,7 @@ COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 # Copy Linux files
 COPY --chmod=740 src/linux/scripts scripts
 COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
-COPY src/linux/fpm-ubuntu /usr/share/.fpm
+COPY src/linux/fpm-ubuntu-jammy /usr/share/.fpm
 COPY --chmod=644 src/linux/*.service /lib/systemd/system/
 COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 
