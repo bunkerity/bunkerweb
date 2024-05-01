@@ -31,7 +31,7 @@ RUN apt update && \
     apt-get update && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~jammy
 
-COPY ./package-ubuntu-jammy/*.deb /opt
+COPY ./package-ubuntu/*.deb /opt
 
 VOLUME ["/sys/fs/cgroup"]
 
