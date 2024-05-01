@@ -11,7 +11,7 @@
                 "REVERSE_PROXY_HOST": "http://my-upstream-server:8080",
                 "REVERSE_PROXY_URL": "/",
                 "REVERSE_PROXY_INTERCEPT_ERRORS": "yes",
-                "REVERSE_PROXY_WS": "yes",
+                "REVERSE_PROXY_WS": "no",
                 "REVERSE_PROXY_CUSTOM_HOST": "",
                 "REVERSE_PROXY_HEADERS": "Accept-Encoding ''"
             }

@@ -11,9 +11,10 @@
                 "REVERSE_PROXY_HOST": "http://my-upstream-server:8080",
                 "REVERSE_PROXY_URL": "/",
                 "REVERSE_PROXY_INTERCEPT_ERRORS": "yes",
-                "REVERSE_PROXY_WS": "yes",
+                "REVERSE_PROXY_WS": "no",
                 "REVERSE_PROXY_CUSTOM_HOST": "",
-                "REVERSE_PROXY_HEADERS": "Accept-Encoding ''"
+                "REVERSE_PROXY_HEADERS": "Accept-Encoding ''",
+                "SERVE_FILES": "no"
             }
         },
         {
@@ -28,6 +29,7 @@
             "name": "HTTP configuration",
             "description": "Miscellaneous settings related to HTTP protocol.",
             "settings": {
+                "DENY_HTTP_STATUS": "444",
                 "USE_GZIP": "yes",
                 "USE_BROTLI": "yes",
                 "ALLOWED_METHODS": "GET|POST|HEAD",
@@ -98,6 +100,14 @@
             "settings": {
                 "USE_CORS": "yes",
                 "CORS_ALLOW_ORIGIN": ""
+            }
+        },
+        {
+            "name": "Reverse scan",
+            "description": "Configure reverse scan of client to detect open proxy or datacenter connections.",
+            "settings": {
+                "USE_REVERSE_SCAN": "yes",
+                "REVERSE_SCAN_PORTS": "22 80 443 3128 8000 8080"
             }
         },
         {

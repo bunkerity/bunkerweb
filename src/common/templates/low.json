@@ -35,7 +35,8 @@
                 "CONTENT_SECURITY_POLICY": "",
                 "X_FRAME_OPTIONS": "",
                 "PERMISSIONS_POLICY": "",
-                "FEATURE_POLICY": ""
+                "FEATURE_POLICY": "",
+                "KEEP_UPSTREAM_HEADERS": "*"
             }
         },
         {
@@ -43,9 +44,9 @@
             "description": "Configure automatic bans when detecting bad behaviors on your web service.",
             "settings": {
                 "USE_BAD_BEHAVIOR": "yes",
-                "BAD_BEHAVIOR_STATUS_CODES": "400 401 403 404 405 429 444",
+                "BAD_BEHAVIOR_STATUS_CODES": "400 401 403 405 429 444",
                 "BAD_BEHAVIOR_BAN_TIME": "3600",
-                "BAD_BEHAVIOR_THRESHOLD": "30",
+                "BAD_BEHAVIOR_THRESHOLD": "20",
                 "BAD_BEHAVIOR_COUNT_TIME": "60"
             }
         },
@@ -58,7 +59,7 @@
                 "LIMIT_CONN_MAX_HTTP2": 200,
                 "USE_LIMIT_REQ": "yes",
                 "LIMIT_REQ_URL": "/",
-                "LIMIT_REQ_RATE": "4r/s"
+                "LIMIT_REQ_RATE": "5r/s"
             }
         },
         {
