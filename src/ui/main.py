@@ -883,6 +883,31 @@ def services():
         config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
         server_name = variables["SERVER_NAME"].split(" ")[0]
         was_draft = config.get(f"{server_name}_IS_DRAFT", "no") == "yes"
+        operation = request.form["operation"] 
+        # Get all variables starting with custom_config and delete them from variables
+        custom_configs = []
+        config_types = ("http", "stream", "server-http", "server-stream", "default-server-http", "modsec", "modsec-crs")
+
+        for variable in variables:
+            if variable.startswith("custom_config_"):
+                custom_configs.append(variable)
+                del variables[variable]
+
+        # config variable format is custom_config_<type>_<filename>
+        # we want a list of dict with each dict containing type, filename, action and server name
+        # after getting all configs, we want to save them after the end of current service action
+        # to avoid create config for none existing service or in case editing server name
+        format_configs = []
+        for config in custom_configs:
+            # first remove custom_config_ prefix
+            config = config.split("custom_config_")[1]
+            # then split the config into type, filename, action
+            config = config.split("_")
+            # check if the config is valid
+            if len(config) == 2 and config[0] in config_types:
+                format_configs.append({"type": config[0], "filename": config[1], "action": operation, "server_name": server_name})
+            else:
+                return redirect_flash_error("Invalid custom config {config}", "services", True)
 
         if request.form["operation"] in ("new", "edit"):
             del variables["operation"]
