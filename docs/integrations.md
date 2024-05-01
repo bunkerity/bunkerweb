@@ -948,6 +948,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
+- Ubuntu 24.04 "Noble"
 - Fedora 39
 - Red Hat Enterprise Linux (RHEL) 8.9
 - Red Hat Enterprise Linux (RHEL) 9.3
@@ -1005,6 +1006,11 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
 
 === "Ubuntu"
 
+    !!! example "Specifications for Ubuntu 24.04"
+        As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0.
+
+        Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
+
     The first step is to add NGINX official repository :
 
     ```shell
@@ -1012,7 +1018,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
     | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-    http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
+    http://nginx.org/packages/ubuntu jammy nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
@@ -1157,6 +1163,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
+- Ubuntu 24.04 "Noble"
 - Fedora 39
 - Red Hat Enterprise Linux (RHEL) 8.9
 - Red Hat Enterprise Linux (RHEL) 9.3
