@@ -495,9 +495,6 @@ def check():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
-    if current_user.is_authenticated:  # type: ignore
-        return redirect(url_for("home"))
-
     db_config = app.config["CONFIG"].get_config(methods=False)
 
     for server_name in db_config["SERVER_NAME"].split(" "):
@@ -959,8 +956,6 @@ def services():
                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
 
         error = 0
-
-        print(variables, flush=True)
 
         # Reload instances
         manage_bunkerweb(
