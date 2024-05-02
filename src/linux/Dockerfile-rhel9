@@ -1,4 +1,4 @@
-FROM redhat/ubi9:9.3@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072 as builder
+FROM redhat/ubi9:9.4@sha256:770cf07083e1c85ae69c25181a205b7cdef63c11b794c89b3b487d4670b4c328 as builder
 
 ENV OS=rhel
 ENV NGINX_VERSION 1.24.0
@@ -17,7 +17,8 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 RUN dnf install -y wget make yum-utils && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel python39 brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False --nobest openssl-libs openssl-devel && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel python39 brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
   wget https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm && \
   dnf install nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm -y && \
   rm -rf nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
@@ -67,7 +68,7 @@ COPY src/scheduler scheduler
 COPY src/ui ui
 COPY src/VERSION VERSION
 
-FROM redhat/ubi9:9.3@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
+FROM redhat/ubi9:9.4@sha256:770cf07083e1c85ae69c25181a205b7cdef63c11b794c89b3b487d4670b4c328
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

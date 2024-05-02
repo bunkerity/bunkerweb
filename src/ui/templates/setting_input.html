@@ -1,23 +1,30 @@
 
-{% if value["type"] != "select" and value["type"] != "check" %}
+{% if setting_input and setting_input["type"] != "select" and setting_input["type"] != "check" %}
     {% set inp_name = setting_input['name'] %}
-    {% set inp_name_mult = inp_name + "_SCHEMA" if setting_input["is_multiple"] else inp_name %}
+    {% set is_multiple = setting_input["is_multiple"] %}
+    {% set inp_name_mult = inp_name + "_SCHEMA" if is_multiple else inp_name %}
     {% set inp_type = setting_input['type'] %}
     {% set inp_default = setting_input['default'] %}
+    {% set inp_value = setting_input['value'] %}
+    {% set inp_regex = setting_input['regex'] %}
+    {% set global_config_method = global_config.get(inp_name, {'method' : inp_method }).get('method') %}
+    {% set global_config_value = global_config.get(inp_name, {'value' : inp_value }).get('value') %}
 
     <div class="relative flex items-center">
         <label class="sr-only" for="{{ inp_name_mult }}">{{ inp_name }}</label>
         <input {% if inp_name == "SERVER_NAME" %}required{% endif %}
-                data-default-value="{{ global_config[inp_name]['value'] }}"
-                data-default-method="{{ global_config[inp_name]['method'] }}"
+                data-default-value="{{ global_config_value }}"
+                data-default-method="{{ global_config_method }}"
                 data-setting-input
-                {% if global_config[inp_name]['method'] != 'ui' and global_config[inp_name]['method'] != 'default' %}disabled{% endif %}
+                {% if global_config_method != 'ui' and global_config_method != 'default' %}disabled{% endif %}
                 id="{{ inp_name_mult }}"
                 name="{{ inp_name_mult }}"
                 class="regular-input"
-                value="{% if global_config[inp_name]['value'] %} {{ global_config[inp_name]['value'] }} {% else %} {{ inp_default }} {% endif %}"
+                value="{% if global_config_value %} {{ global_config_value }} {% else %} {{ inp_default }} {% endif %}"
                 type="{{ inp_type }}"
-                pattern="{{ value['regex']|safe }}" />
+                pattern="{{ inp_regex|safe }}"
+                {% if is_multiple %} data-is-multiple {% endif %}
+                 />
         {% if inp_type == "password" %}
             <div data-setting-password-container class="absolute flex right-2 h-5 w-5">
                 <button type="button"

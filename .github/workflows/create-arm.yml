@@ -33,7 +33,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Get ARM availabilities
         id: availabilities
         uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
@@ -66,7 +66,7 @@ jobs:
         with:
           args: instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH
-        uses: iFaxity/wait-on-action@628831cec646e6dacca502f34a6c6b46e131e51d
+        uses: iFaxity/wait-on-action@df89d0cf8089bb0c38e25279c74848ef313da53b
         with:
           resource: tcp:${{ fromJson(steps.scw.outputs.json).public_ip.address }}:22
           timeout: 300000

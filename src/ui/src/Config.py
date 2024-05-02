@@ -3,14 +3,11 @@
 from copy import deepcopy
 from operator import itemgetter
 from os import sep
-from os.path import join
 from flask import flash
 from json import loads as json_loads
 from pathlib import Path
 from re import search as re_search
-from subprocess import run, DEVNULL, STDOUT
 from typing import List, Literal, Optional, Tuple
-from uuid import uuid4
 
 
 class Config:
@@ -51,30 +48,11 @@ class Config:
 
         conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
-        env_file = Path(sep, "tmp", f"{uuid4()}.env")
-        env_file.write_text(
-            "\n".join(f"{k}={conf[k]}" for k in sorted(conf)),
-            encoding="utf-8",
-        )
 
-        proc = run(
-            [
-                "python3",
-                join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                "--variables",
-                str(env_file),
-                "--method",
-                "ui",
-            ]
-            + (["--no-check-changes"] if not check_changes else []),
-            stdin=DEVNULL,
-            stderr=STDOUT,
-            check=False,
-        )
+        err = self.__db.save_config(conf, "ui", changed=check_changes)
 
-        env_file.unlink()
-        if proc.returncode != 0:
-            raise Exception(f"Error from generator (return code = {proc.returncode})")
+        if err:
+            self.__db.logger.warning(f"Couldn't save config to database : {err}, config may not work as expected")
 
     def get_plugins_settings(self) -> dict:
         return {

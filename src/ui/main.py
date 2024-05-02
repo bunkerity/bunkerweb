@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from math import floor
-from os import _exit, getenv, getpid, listdir, sep, urandom
+from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, isabs, join
 from secrets import choice
 from string import ascii_letters, digits
@@ -40,9 +40,9 @@ from shutil import move, rmtree
 from signal import SIGINT, signal, SIGTERM
 from subprocess import PIPE, Popen, call
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
-from threading import Thread
+from threading import Thread, Lock
 from tempfile import NamedTemporaryFile
-from time import sleep, time
+from time import time
 from werkzeug.utils import secure_filename
 from zipfile import BadZipFile, ZipFile
 
@@ -53,9 +53,16 @@ from src.ReverseProxied import ReverseProxied
 from src.User import AnonymousUser, User
 
 from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain
+from common_utils import get_integration, get_version  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from logging import getLogger
+
+TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
+TMP_DIR.mkdir(parents=True, exist_ok=True)
+
+TMP_DATA_FILE = TMP_DIR.joinpath(".ui.json")
+
+LOCK = Lock()
 
 
 def stop_gunicorn():
@@ -67,7 +74,7 @@ def stop_gunicorn():
 
 def stop(status, _stop=True):
     Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
-    Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(missing_ok=True)
+    TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
     if _stop is True:
         stop_gunicorn()
     _exit(status)
@@ -86,18 +93,20 @@ sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
 
 # Flask app
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
-app.config["SECRET_KEY"] = getenv("FLASK_SECRET", urandom(32))
 
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
 app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
 app.logger = setup_logger("UI")
 
-gunicorn_access_logger = getLogger("gunicorn.access")
-gunicorn_access_logger.setLevel(app.logger.level)
-gunicorn_logger = getLogger("gunicorn.error")
-gunicorn_logger.setLevel(app.logger.level)
-werkzeug_logger = getLogger("werkzeug")
-werkzeug_logger.setLevel(app.logger.level)
+FLASK_SECRET = getenv("FLASK_SECRET")
+
+if not FLASK_SECRET:
+    if not TMP_DIR.joinpath(".flask_secret").is_file():
+        app.logger.error("The .flask_secret file is missing")
+        stop(1)
+    FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
+
+app.config["SECRET_KEY"] = FLASK_SECRET
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -105,18 +114,7 @@ login_manager.login_view = "login"
 login_manager.anonymous_user = AnonymousUser
 PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 
-INTEGRATION = "Linux"
-integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-if getenv("KUBERNETES_MODE", "no").lower() == "yes":
-    INTEGRATION = "Kubernetes"
-elif getenv("SWARM_MODE", "no").lower() == "yes":
-    INTEGRATION = "Swarm"
-elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
-    INTEGRATION = "Autoconf"
-elif integration_path.is_file():
-    INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
-
-del integration_path
+INTEGRATION = get_integration()
 
 docker_client = None
 kubernetes_client = None
@@ -129,83 +127,31 @@ elif INTEGRATION == "Kubernetes":
     kube_config.load_incluster_config()
     kubernetes_client = kube_client.CoreV1Api()
 
-db = Database(app.logger, ui=True)
-
-if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
-    while not db.is_autoconf_loaded():
-        app.logger.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
-        sleep(5)
-
-while not db.is_initialized():
-    app.logger.warning("Database is not initialized, retrying in 5s ...")
-    sleep(5)
+db = Database(app.logger, ui=True, log=False)
 
 USER = "Error"
 while USER == "Error":
     with suppress(Exception):
         USER = db.get_ui_user()
 
-USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
-
 if USER:
     USER = User(**USER)
 
-    if getenv("ADMIN_USERNAME") or getenv("ADMIN_PASSWORD"):
-        if USER.method == "manual":
-            updated = False
-            if getenv("ADMIN_USERNAME", "") and USER.get_id() != getenv("ADMIN_USERNAME", ""):
-                USER.id = getenv("ADMIN_USERNAME", "")
-                updated = True
-            if getenv("ADMIN_PASSWORD", "") and not USER.check_password(getenv("ADMIN_PASSWORD", "")):
-                USER.update_password(getenv("ADMIN_PASSWORD", ""))
-                updated = True
+USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
 
-            if updated:
-                ret = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token)
-                if ret:
-                    app.logger.error(f"Couldn't update the admin user in the database: {ret}")
-                    stop(1)
-                app.logger.info("The admin user was updated successfully")
-        else:
-            app.logger.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
-elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
-    if not getenv("FLASK_DEBUG", False):
-        if len(getenv("ADMIN_USERNAME", "admin")) > 256:
-            app.logger.error("The admin username is too long. It must be less than 256 characters.")
-            stop(1)
-        elif not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "changeme")):
-            app.logger.error(
-                "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
-            )
-            stop(1)
+bw_version = get_version()
 
-    user_name = getenv("ADMIN_USERNAME", "admin")
-    USER = User(user_name, getenv("ADMIN_PASSWORD", "changeme"))
-    ret = db.create_ui_user(user_name, USER.password_hash)
-
-    if ret:
-        app.logger.error(f"Couldn't create the admin user in the database: {ret}")
-        stop(1)
-
-app.logger.info("Database is ready")
-Path(sep, "var", "run", "bunkerweb", "ui.pid").write_text(str(getpid()), encoding="utf-8")
-Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok", encoding="utf-8")
-bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
+if not TMP_DIR.joinpath(".ui.json").is_file():
+    TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
 
 try:
     app.config.update(
-        DEBUG=True,
         INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION, db),
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(),
         WTF_CSRF_SSL_STRICT=False,
         USER=USER,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
-        RELOADING=False,
-        LAST_RELOAD=0,
-        TO_FLASH=[],
-        DARK_MODE=False,
-        CURRENT_TOTP_TOKEN=None,
         SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
         DB=db,
     )
@@ -226,9 +172,22 @@ LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 
 
-def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False):
+def get_ui_data():
+    ui_data = "Error"
+    while ui_data == "Error":
+        with suppress(JSONDecodeError):
+            ui_data = json_loads(TMP_DATA_FILE.read_text(encoding="utf-8"))
+    return ui_data
+
+
+def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False):
     # Do the operation
     error = False
+    ui_data = get_ui_data()
+
+    if "TO_FLASH" not in ui_data:
+        ui_data["TO_FLASH"] = []
+
     if method == "services":
         service_custom_confs = glob(join(sep, "etc", "bunkerweb", "configs", "*", args[1].split(" ")[0]))
         moved = False
@@ -253,18 +212,16 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
             operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft) and not deleted)
 
         if error:
-            app.config["TO_FLASH"].append({"content": operation, "type": "error"})
+            ui_data["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
-            app.config["TO_FLASH"].append({"content": operation, "type": "success"})
+            ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
 
             if (was_draft != is_draft or not is_draft) and (moved or deleted):
                 # update changes in db
                 ret = db.checked_changes(["config", "custom_configs"], value=True)
                 if ret:
                     app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
-                    app.config["TO_FLASH"].append(
-                        {"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"}
-                    )
+                    ui_data["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
     if method == "global_config":
         operation = app.config["CONFIG"].edit_global_conf(args[0])
     elif method == "plugins":
@@ -286,13 +243,24 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     if operation:
         if isinstance(operation, list):
             for op in operation:
-                app.config["TO_FLASH"].append({"content": f"Reload failed for the instance {op}", "type": "error"})
+                ui_data["TO_FLASH"].append({"content": f"Reload failed for the instance {op}", "type": "error"})
         elif operation.startswith("Can't"):
-            app.config["TO_FLASH"].append({"content": operation, "type": "error"})
+            ui_data["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
-            app.config["TO_FLASH"].append({"content": operation, "type": "success"})
+            ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
 
-    app.config["RELOADING"] = False
+    if not threaded:
+        for f in ui_data.get("TO_FLASH", []):
+            if f["type"] == "error":
+                flash(f["content"], "error")
+            else:
+                flash(f["content"])
+
+        ui_data["TO_FLASH"] = []
+
+    ui_data["RELOADING"] = False
+    with LOCK:
+        TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
 
 # UTILS
@@ -309,7 +277,7 @@ def run_action(plugin: str, function_name: str = ""):
     try:
         # Try to import the custom plugin
         if obfuscation:
-            tmp_dir = Path(sep, "var", "tmp", "bunkerweb", "ui", "action", str(uuid4()))
+            tmp_dir = TMP_DIR.joinpath("ui", "action", str(uuid4()))
             tmp_dir.mkdir(parents=True, exist_ok=True)
 
             action_file = tmp_dir.joinpath("actions.py")
@@ -408,18 +376,12 @@ def error_message(msg: str):
     return {"status": "ko", "message": msg}
 
 
-@app.before_request
-def generate_nonce():
-    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
-
-
 @app.context_processor
 def inject_variables():
     metadata = db.get_metadata()
 
     # check that is value is in tuple
     return dict(
-        dark_mode=app.config["DARK_MODE"],
         script_nonce=app.config["SCRIPT_NONCE"],
         is_pro_version=metadata["is_pro"],
         pro_status=metadata["pro_status"],
@@ -449,12 +411,10 @@ def set_csp_header(response):
 
 @login_manager.user_loader
 def load_user(user_id):
-    db_user = db.get_ui_user()
-    if not db_user:
+    if not app.config["USER"]:
         app.logger.warning("Couldn't get the admin user from the database.")
         return None
-    user = User(**db_user)
-    return user if user_id == user.get_id() else None
+    return app.config["USER"] if user_id == app.config["USER"].get_id() else None
 
 
 @app.errorhandler(CSRFError)
@@ -475,6 +435,12 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
+    db_user = db.get_ui_user()
+    if db_user:
+        app.config["USER"] = User(**db_user)
+
+    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
+
     if current_user.is_authenticated:
         passed = True
 
@@ -529,11 +495,7 @@ def check():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
-    if current_user.is_authenticated:  # type: ignore
-        return redirect(url_for("home"))
-
     db_config = app.config["CONFIG"].get_config(methods=False)
-    db_user = db.get_ui_user()
 
     for server_name in db_config["SERVER_NAME"].split(" "):
         if db_config.get(f"{server_name}_USE_UI", "no") == "yes":
@@ -543,13 +505,13 @@ def setup():
         is_request_form("setup")
 
         required_keys = ["server_name", "ui_host", "ui_url"]
-        if not db_user:
+        if not app.config["USER"]:
             required_keys.extend(["admin_username", "admin_password", "admin_password_check"])
 
         if not any(key in request.form for key in required_keys):
             return redirect_flash_error(f"Missing either one of the following parameters: {', '.join(required_keys)}.", "setup")
 
-        if not db_user:
+        if not app.config["USER"]:
             if len(request.form["admin_username"]) > 256:
                 return redirect_flash_error("The admin username is too long. It must be less than 256 characters.", "setup")
 
@@ -573,7 +535,7 @@ def setup():
         if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
             return redirect_flash_error("The hostname is not valid.", "setup")
 
-        if not db_user:
+        if not app.config["USER"]:
             app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"], method="ui")
 
             ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
@@ -582,8 +544,9 @@ def setup():
 
             flash("The admin user was created successfully", "success")
 
-        app.config["RELOADING"] = True
-        app.config["LAST_RELOAD"] = time()
+        ui_data = get_ui_data()
+        ui_data["RELOADING"] = True
+        ui_data["LAST_RELOAD"] = time()
         # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
         Thread(
             target=manage_bunkerweb,
@@ -603,14 +566,17 @@ def setup():
                 request.form["server_name"],
                 request.form["server_name"],
             ),
-            kwargs={"operation": "new"},
+            kwargs={"operation": "new", "threaded": True},
         ).start()
+
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         return Response(status=200)
 
     return render_template(
         "setup.html",
-        ui_user=db_user,
+        ui_user=app.config["USER"],
         username=getenv("ADMIN_USERNAME", ""),
         password=getenv("ADMIN_PASSWORD", ""),
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
@@ -735,27 +701,11 @@ def account():
             db.set_pro_metadata(metadata)
 
             # Reload instances
-            app.config["RELOADING"] = True
-            app.config["LAST_RELOAD"] = time()
-            # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
-            Thread(
-                target=manage_bunkerweb,
-                name="Reloading instances",
-                args=(
-                    "global_config",
-                    variable,
-                ),
-            ).start()
+            manage_bunkerweb("global_config", variable)
 
             flash("Checking license key to upgrade.", "success")
 
-            return redirect(
-                url_for(
-                    "loading",
-                    next=url_for("account"),
-                    message="Saving license key",
-                )
-            )
+            return redirect(url_for("account"))
 
         is_request_params(["operation", "curr_password"], "account")
 
@@ -800,13 +750,18 @@ def account():
 
             is_request_params(["totp_token"], "account")
 
-            if not current_user.check_otp(request.form["totp_token"], secret=app.config["CURRENT_TOTP_TOKEN"]):
+            ui_data = get_ui_data()
+
+            if not current_user.check_otp(request.form["totp_token"], secret=ui_data.get("CURRENT_TOTP_TOKEN", None)):
                 return redirect_flash_error("The totp token is invalid. (totp)", "account")
 
             session["totp_validated"] = not current_user.is_two_factor_enabled
             is_two_factor_enabled = session["totp_validated"]
-            secret_token = None if current_user.is_two_factor_enabled else app.config["CURRENT_TOTP_TOKEN"]
-            app.config["CURRENT_TOTP_TOKEN"] = None
+            secret_token = None if current_user.is_two_factor_enabled else ui_data.get("CURRENT_TOTP_TOKEN", None)
+            ui_data["CURRENT_TOTP_TOKEN"] = None
+
+            with LOCK:
+                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         user = User(username, password, is_two_factor_enabled=is_two_factor_enabled, secret_token=secret_token, method=current_user.method)
         ret = db.update_ui_user(
@@ -832,7 +787,11 @@ def account():
         current_user.refresh_totp()
         secret_token = current_user.secret_token
         totp_qr_image = get_b64encoded_qr_image(current_user.get_authentication_setup_uri())
-        app.config["CURRENT_TOTP_TOKEN"] = secret_token
+
+        ui_data = get_ui_data()
+        ui_data["CURRENT_TOTP_TOKEN"] = secret_token
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
     return render_template(
         "account.html",
@@ -859,15 +818,19 @@ def instances():
             "restart",
         ):
             return redirect_flash_error("Missing operation parameter on /instances.", "instances")
-        app.config["RELOADING"] = True
-        app.config["LAST_RELOAD"] = time()
-        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
+
+        ui_data = get_ui_data()
+        ui_data["RELOADING"] = True
+        ui_data["LAST_RELOAD"] = time()
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
             args=("instances", request.form["INSTANCE_ID"]),
-            kwargs={"operation": request.form["operation"]},
+            kwargs={"operation": request.form["operation"], "threaded": True},
         ).start()
+
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         return redirect(
             url_for(
@@ -901,6 +864,11 @@ def services():
         # Check variables
         variables = deepcopy(request.form.to_dict())
         del variables["csrf_token"]
+
+        # Delete custom client variables
+        variables.pop("SECURITY_LEVEL", None)
+        variables.pop("mode", None)
+
         is_draft = variables.pop("is_draft", "no") == "yes"
 
         if "OLD_SERVER_NAME" not in request.form and request.form["operation"] == "edit":
@@ -912,6 +880,31 @@ def services():
         config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
         server_name = variables["SERVER_NAME"].split(" ")[0]
         was_draft = config.get(f"{server_name}_IS_DRAFT", "no") == "yes"
+        operation = request.form["operation"]
+        # Get all variables starting with custom_config and delete them from variables
+        custom_configs = []
+        config_types = ("http", "stream", "server-http", "server-stream", "default-server-http", "modsec", "modsec-crs")
+
+        for variable in variables:
+            if variable.startswith("custom_config_"):
+                custom_configs.append(variable)
+                del variables[variable]
+
+        # config variable format is custom_config_<type>_<filename>
+        # we want a list of dict with each dict containing type, filename, action and server name
+        # after getting all configs, we want to save them after the end of current service action
+        # to avoid create config for none existing service or in case editing server name
+        format_configs = []
+        for config in custom_configs:
+            # first remove custom_config_ prefix
+            config = config.split("custom_config_")[1]
+            # then split the config into type, filename, action
+            config = config.split("_")
+            # check if the config is valid
+            if len(config) == 2 and config[0] in config_types:
+                format_configs.append({"type": config[0], "filename": config[1], "action": operation, "server_name": server_name})
+            else:
+                return redirect_flash_error("Invalid custom config {config}", "services", True)
 
         if request.form["operation"] in ("new", "edit"):
             del variables["operation"]
@@ -965,15 +958,15 @@ def services():
         error = 0
 
         # Reload instances
-        app.config["RELOADING"] = True
-        app.config["LAST_RELOAD"] = time()
-        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
-        Thread(
-            target=manage_bunkerweb,
-            name="Reloading instances",
-            args=("services", variables, request.form.get("OLD_SERVER_NAME", ""), variables.get("SERVER_NAME", "")),
-            kwargs={"operation": request.form["operation"], "is_draft": is_draft, "was_draft": was_draft},
-        ).start()
+        manage_bunkerweb(
+            "services",
+            variables,
+            request.form.get("OLD_SERVER_NAME", ""),
+            variables.get("SERVER_NAME", ""),
+            operation=request.form["operation"],
+            is_draft=is_draft,
+            was_draft=was_draft,
+        )
 
         message = ""
 
@@ -1026,6 +1019,8 @@ def services():
             }
         )
 
+    services.sort(key=lambda x: x["SERVER_NAME"]["value"])
+
     return render_template(
         "services.html",
         services=services,
@@ -1074,17 +1069,7 @@ def global_config():
                     variables[f"{service}_{variable}"] = value
 
         # Reload instances
-        app.config["RELOADING"] = True
-        app.config["LAST_RELOAD"] = time()
-        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
-        Thread(
-            target=manage_bunkerweb,
-            name="Reloading instances",
-            args=(
-                "global_config",
-                variables,
-            ),
-        ).start()
+        manage_bunkerweb("global_config", variables)
 
         with suppress(BaseException):
             if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
@@ -1227,7 +1212,7 @@ def configs():
 @app.route("/plugins", methods=["GET", "POST"])
 @login_required
 def plugins():
-    tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui")
+    tmp_ui_path = TMP_DIR.joinpath("ui")
 
     if request.method == "POST":
         error = 0
@@ -1435,14 +1420,7 @@ def plugins():
                 flash("Plugins uploaded successfully")
 
         # Reload instances
-        app.config["RELOADING"] = True
-        app.config["LAST_RELOAD"] = time()
-        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
-        Thread(
-            target=manage_bunkerweb,
-            name="Reloading instances",
-            args=("plugins",),
-        ).start()
+        manage_bunkerweb("plugins")
 
         return redirect(url_for("loading", next=url_for("plugins"), message="Reloading plugins"))
 
@@ -1478,7 +1456,7 @@ def upload_plugin():
     if not request.files:
         return {"status": "ko"}, 400
 
-    tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui")
+    tmp_ui_path = TMP_DIR.joinpath("ui")
     tmp_ui_path.mkdir(parents=True, exist_ok=True)
 
     for uploaded_file in request.files.values():
@@ -2177,18 +2155,16 @@ def login():
     fail = False
     if request.method == "POST" and "username" in request.form and "password" in request.form:
         app.logger.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
-        db_user = db.get_ui_user()
-        if not db_user:
+        if not app.config["USER"]:
             app.logger.error("Couldn't get user from database")
             stop(1)
-        user = User(**db_user)
 
-        if user.get_id() == request.form["username"] and user.check_password(request.form["password"]):
+        if app.config["USER"].get_id() == request.form["username"] and app.config["USER"].check_password(request.form["password"]):
             # log the user in
             session["ip"] = request.remote_addr
             session["user_agent"] = request.headers.get("User-Agent")
             session["totp_validated"] = False
-            login_user(user, duration=timedelta(hours=1))
+            login_user(app.config["USER"], duration=timedelta(hours=1), force=True)
 
             # redirect him to the page he originally wanted or to the home page
             return redirect(url_for("loading", next=request.form.get("next") or url_for("home")))
@@ -2203,38 +2179,29 @@ def login():
     return render_template("login.html", **kwargs), 401 if fail else 200
 
 
-@app.route("/darkmode", methods=["POST"])
-@login_required
-def darkmode():
-    if not request.is_json:
-        return jsonify({"status": "ko", "message": "invalid request"}), 400
-
-    if "darkmode" in request.json:
-        app.config["DARK_MODE"] = request.json["darkmode"] == "true"
-    else:
-        return jsonify({"status": "ko", "message": "darkmode is required"}), 422
-
-    return jsonify({"status": "ok"}), 200
-
-
 @app.route("/check_reloading")
 @login_required
 def check_reloading():
-    if not app.config["RELOADING"] or app.config["LAST_RELOAD"] + 60 < time():
-        if app.config["RELOADING"]:
+    ui_data = get_ui_data()
+
+    if not ui_data.get("RELOADING", False) or ui_data.get("LAST_RELOAD", 0) + 60 < time():
+        if ui_data.get("RELOADING", False):
             app.logger.warning("Reloading took too long, forcing the state to be reloaded")
             flash("Forced the status to be reloaded", "error")
-            app.config["RELOADING"] = False
+            ui_data["RELOADING"] = False
 
-        for f in app.config["TO_FLASH"]:
+        for f in ui_data.get("TO_FLASH", []):
             if f["type"] == "error":
                 flash(f["content"], "error")
             else:
                 flash(f["content"])
 
-        app.config["TO_FLASH"].clear()
+        ui_data["TO_FLASH"] = []
 
-    return jsonify({"reloading": app.config["RELOADING"]})
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+    return jsonify({"reloading": ui_data.get("RELOADING", False)})
 
 
 @app.route("/logout")

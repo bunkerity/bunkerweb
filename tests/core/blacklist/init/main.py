@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from gzip import GzipFile
 from io import BytesIO
 from os import getenv, sep
@@ -6,17 +6,27 @@ from maxminddb import MODE_FD, open_database
 from pathlib import Path
 from requests import get
 
+current_date = date.today()
+
 # Compute the mmdb URL
-mmdb_url = f"https://download.db-ip.com/free/dbip-asn-lite-{date.today().strftime('%Y-%m')}.mmdb.gz"
+mmdb_url = f"https://download.db-ip.com/free/dbip-asn-lite-{current_date.strftime('%Y-%m')}.mmdb.gz"
 
 # Download the mmdb file in memory
 print(f"Downloading mmdb file from url {mmdb_url} ...", flush=True)
+
+resp = get(mmdb_url, stream=True)
+
+if resp.status_code == 404:
+    print(f"⚠ No mmdb file found for {current_date.strftime('%Y-%m')}, trying with previous month ...", flush=True)
+    current_date = current_date - timedelta(days=current_date.day)
+    resp = get(f"https://download.db-ip.com/free/dbip-asn-lite-{current_date.strftime('%Y-%m')}.mmdb.gz", stream=True)
+
+resp.raise_for_status()
+
 file_content = BytesIO()
-with get(mmdb_url, stream=True) as resp:
-    resp.raise_for_status()
-    for chunk in resp.iter_content(chunk_size=4 * 1024):
-        if chunk:
-            file_content.write(chunk)
+for chunk in resp.iter_content(chunk_size=4 * 1024):
+    if chunk:
+        file_content.write(chunk)
 file_content.seek(0)
 
 output_path = Path(sep, "output", "ip_asn.txt") if getenv("TEST_TYPE", "docker") == "docker" else Path(".", "ip_asn.txt")

@@ -68,7 +68,7 @@ def set_sqlite_pragma(dbapi_connection, _):
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
 
-    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None) -> None:
+    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None, log: bool = True) -> None:
         """Initialize the database"""
         self.logger = logger
 
@@ -90,7 +90,8 @@ class Database:
             db_path = Path(match.group("path"))
             if ui:
                 while not db_path.is_file():
-                    self.logger.warning(f"Waiting for the database file to be created: {db_path}")
+                    if log:
+                        self.logger.warning(f"Waiting for the database file to be created: {db_path}")
                     sleep(1)
             else:
                 db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,8 +112,8 @@ class Database:
             "poolclass": QueuePool,
             "pool_pre_ping": True,
             "pool_recycle": 1800,
-            "pool_size": 20,
-            "max_overflow": 10,
+            "pool_size": 40,
+            "max_overflow": 20,
         }
 
         try:
@@ -150,13 +151,14 @@ class Database:
                     _exit(1)
 
                 if "attempt to write a readonly database" in str(e):
-                    self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
+                    if log:
+                        self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
                     self.sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
-                else:
+                elif log:
                     self.logger.warning(
                         "Can't connect to database, retrying in 5 seconds ...",
                     )
@@ -167,7 +169,8 @@ class Database:
                 exit(1)
 
         self.suffix_rx = re_compile(r"_\d+$")
-        self.logger.info("✅ Database connection established")
+        if log:
+            self.logger.info("✅ Database connection established")
 
     def __del__(self) -> None:
         """Close the database"""
@@ -178,7 +181,7 @@ class Database:
             self.sql_engine.dispose()
 
     @contextmanager
-    def __db_session(self, raise_error: bool = False) -> Any:
+    def __db_session(self) -> Any:
         try:
             assert self.sql_engine is not None
         except AssertionError:
@@ -1101,7 +1104,7 @@ class Database:
             to_put = []
             endl = "\n"
             for custom_config in custom_configs:
-                if method != "ui":
+                if "exploded" in custom_config:
                     config = {"data": custom_config["value"], "method": method}
 
                     if custom_config["exploded"][0]:

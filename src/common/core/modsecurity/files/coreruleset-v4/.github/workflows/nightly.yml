@@ -9,6 +9,12 @@ jobs:
     name: Nightly Release
     runs-on: ubuntu-latest
     steps:
+      - name: Check GH API rate limits
+        run: |
+          gh api -i repos/coreruleset/coreruleset/releases/latest | grep -i "x-ratelimit"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: "Checkout repo"
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
 
@@ -57,5 +63,11 @@ jobs:
             --prerelease \
             --draft=false \
             nightly
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check GH API rate limits
+        run: |
+          gh api -i repos/coreruleset/coreruleset/releases/latest | grep -i "x-ratelimit"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

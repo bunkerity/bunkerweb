@@ -114,7 +114,7 @@ try:
         first_card = safe_get_element(DRIVER, By.XPATH, "/html/body/main/div/div/div/div[1]/h5")
         assert isinstance(first_card, WebElement), "First card is not a WebElement"
 
-        if first_card.text != "Deactivated":
+        if first_card.text != "Plugin deactivated":
             log_error(f"The {plugin} page should show that the plugin is deactivated, exiting ...")
             exit(1)
 

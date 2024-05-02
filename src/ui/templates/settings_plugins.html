@@ -52,7 +52,7 @@
         <div data-plugin-settings class="w-full grid grid-cols-12">
             <!-- plugin settings not multiple -->
             {% for setting, value in plugin["settings"].items() %}
-                {% set setting_input = { "name" : setting, "context" : value.get("context"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "is_multiple" : False} %}
+                {% set setting_input = { "name" : setting, "context" : value.get("context"), "method" : value.get("method"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "value" : value.get("value"), "is_multiple" : False, "levels" : value.get('levels', {})} %}
 
                 {% if setting != "IS_DRAFT" and (current_endpoint == "global-config" and setting not in ["SERVER_NAME", "IS_LOADING"] or current_endpoint == "services" and value['context'] == "multisite") %}
                     {% if value['multiple'] and value['multiple'] not in multList %}
@@ -96,7 +96,7 @@
             <!-- multiple settings -->
             <div data-{{ current_endpoint }}-settings-multiple="{{ multiple }}_SCHEMA" class="bg-gray-50 dark:bg-slate-900/30 hidden w-full my-4 grid-cols-12 border dark:border-gray-700 rounded">
                 {% for setting, value in plugin["settings"].items() %}
-                    {% set setting_input = { "name" : setting, "context" : value.get("context"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "is_multiple" : False} %}
+                    {% set setting_input = { "name" : setting, "context" : value.get("context"), "method" : value.get("method"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "value" : value.get("value"), "is_multiple" : True, "levels" : value.get('levels', {})} %}
 
                     {# render only setting that match the multiple id and context #}
                     {% if value['multiple'] == multiple and (

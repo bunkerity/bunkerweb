@@ -1,0 +1,129 @@
+{
+    "name": "medium",
+    "description": "Generic settings template with high security level required for your web service. False positives will certainly appear without any custom edit.",
+    "steps": [
+        {
+            "name": "Server configuration",
+            "description": "Configure your server name and reverse proxy settings. Don't forget to add the corresponding DNS A entry pointing to your BunkerWeb IP.",
+            "settings": {
+                "SERVER_NAME": "www.example.com",
+                "USE_REVERSE_PROXY": "yes",
+                "REVERSE_PROXY_HOST": "http://my-upstream-server:8080",
+                "REVERSE_PROXY_URL": "/",
+                "REVERSE_PROXY_INTERCEPT_ERRORS": "yes",
+                "REVERSE_PROXY_WS": "no",
+                "REVERSE_PROXY_CUSTOM_HOST": "",
+                "REVERSE_PROXY_HEADERS": "Accept-Encoding ''",
+                "SERVE_FILES": "no"
+            }
+        },
+        {
+            "name": "HTTPS",
+            "description": "Enable/disable and configure HTTPS for your service.",
+            "settings": {
+                "AUTO_LETS_ENCRYPT": "yes",
+                "SSL_PROTOCOLS": "TLSv1.3"
+            }
+        },
+        {
+            "name": "HTTP configuration",
+            "description": "Miscellaneous settings related to HTTP protocol.",
+            "settings": {
+                "DENY_HTTP_STATUS": "444",
+                "USE_GZIP": "yes",
+                "USE_BROTLI": "yes",
+                "ALLOWED_METHODS": "GET|POST|HEAD",
+                "MAX_SIZES": "10m",
+                "COOKIE_FLAGS": "* HttpOnly SameSite=Lax",
+                "CONTENT_SECURITY_POLICY": "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
+                "X_FRAME_OPTIONS": "SAMEORIGIN",
+                "PERMISSIONS_POLICY": "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
+                "FEATURE_POLICY": "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';"
+            }
+        },
+        {
+            "name": "Bad behavior",
+            "description": "Configure automatic bans when detecting bad behaviors on your web service.",
+            "settings": {
+                "USE_BAD_BEHAVIOR": "yes",
+                "BAD_BEHAVIOR_STATUS_CODES": "400 401 403 404 405 429 444",
+                "BAD_BEHAVIOR_BAN_TIME": "86400",
+                "BAD_BEHAVIOR_THRESHOLD": "5",
+                "BAD_BEHAVIOR_COUNT_TIME": "60"
+            }
+        },
+        {
+            "name": "Limit",
+            "description": "Configure requests and connections limits on your web service.",
+            "settings": {
+                "USE_LIMIT_CONN": "yes",
+                "LIMIT_CONN_MAX_HTTP1": "10",
+                "LIMIT_CONN_MAX_HTTP2": "100",
+                "USE_LIMIT_REQ": "yes",
+                "LIMIT_REQ_URL": "/",
+                "LIMIT_REQ_RATE": "2r/s"
+            }
+        },
+        {
+            "name": "DNSBL",
+            "description": "Enable/disable DNSBL protection. Might generate false positives especially if you have a worldwide audience.",
+            "settings": {
+                "USE_DNSBL": "yes"
+            }
+        },
+        {
+            "name": "Country",
+            "description": "Configure allowed countries to reach out your web service. Recommended if you protect a restricted area such as extranet or administration panel.",
+            "settings": {
+                "WHITELIST_COUNTRY": ""
+            }
+        },
+        {
+            "name": "Antibot",
+            "description": "Enable/disable and configure antibot protection globally on your web service.",
+            "settings": {
+                "USE_ANTIBOT": "captcha",
+                "ANTIBOT_TIME_RESOLVE": "120",
+                "ANTIBOT_TIME_VALID": "86400",
+                "ANTIBOT_RECAPTCHA_SCORE": "0.7",
+                "ANTIBOT_RECAPTCHA_SITEKEY": "",
+                "ANTIBOT_RECAPTCHA_SECRET": "",
+                "ANTIBOT_HCAPTCHA_SITEKEY": "",
+                "ANTIBOT_HCAPTCHA_SECRET": "",
+                "ANTIBOT_TURNSTILE_SITEKEY": "",
+                "ANTIBOT_TURNSTILE_SECRET": ""
+            }
+        },
+        {
+            "name": "CORS",
+            "description": "Configure Cross-Origin Resource Sharing (CORS) to allow/deny external requests to your web service.",
+            "settings": {
+                "USE_CORS": "yes",
+                "CORS_ALLOW_ORIGIN": ""
+            }
+        },
+        {
+            "name": "Reverse scan",
+            "description": "Configure reverse scan of client to detect open proxy or datacenter connections.",
+            "settings": {
+                "USE_REVERSE_SCAN": "yes",
+                "REVERSE_SCAN_PORTS": "22 80 443 3128 8000 8080"
+            }
+        },
+        {
+            "name": "ModSecurity",
+            "description": "Enable/disable and configure ModSecurity on your web service.",
+            "settings": {
+                "USE_MODSECURITY": "yes",
+                "MODSECURITY_CRS_VERSION": "4"
+            },
+            "configs": [
+                {
+                    "name": "template-high",
+                    "type": "modsec-crs",
+                    "data": "SecAction \"id:900000,phase:1,pass,t:none,nolog,tag:'OWASP_CRS',ver:'OWASP_CRS/4.2.0',setvar:tx.blocking_paranoia_level=4\""
+                }
+            ]
+        }
+    ]
+}

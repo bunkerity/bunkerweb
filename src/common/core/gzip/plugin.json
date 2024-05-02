@@ -41,6 +41,15 @@
       "regex": "^[1-9]$",
       "type": "select",
       "select": ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    },
+    "GZIP_PROXIED": {
+      "context": "multisite",
+      "default": "no-cache no-store private expired auth",
+      "help": "Which kind of proxied requests we should compress.",
+      "id": "gzip-proxied",
+      "label": "Proxied requests",
+      "regex": "^.*$",
+      "type": "text"
     }
   }
 }

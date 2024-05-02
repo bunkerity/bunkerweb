@@ -37,7 +37,7 @@
             <div class="col-span-12 flex flex-col justify-center items-center mt-2">
                 <form method="post"
                       class="col-span-12 flex flex-col justify-center align-middle items-cente">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}" />
                     <button data-plugin-reload-btn
                             disabled
                             type="submit"

@@ -1,64 +1,156 @@
+{% set security_levels = ['standard', 'advanced', 'high', 'custom'] %}
+
+{% set standard = {
+    "USE_ANTIBOT": {
+        "value": "javascript",
+        "method": "default"
+    },
+    "SERVER_NAME": {
+        "value": "test",
+        "method": "default"
+    },
+    "LIMIT_REQ_URL": {
+        "value": "/testfesf",
+        "method": "default"
+    },
+    "LIMIT_REQ_RATE": {
+        "value": "1r/s",
+        "method": "default"
+    },
+    "LIMIT_REQ_URL_1": {
+        "value": "/test",
+        "method": "default"
+    },
+    "LIMIT_REQ_RATE_1": {
+        "value": "3r/s",
+        "method": "default"
+    },
+    "CUSTOM_CONFIG_MODSEC_1" : {
+        "value": "test",
+        "method": "default",
+        "type" : "modsec",
+        "name" : "modsec 1"
+    },
+    "CUSTOM_CONFIG_MODSEC_2" : {
+        "value": "test 2",
+        "method": "default",
+        "type" : "modsec",
+        "name" : "modsec 2"
+    },
+}%}
+
+{% set advanced = {
+    "USE_ANTIBOT": {
+        "value": "no",
+        "method": "default"
+    },
+}%}
+
+{% set high = {
+    "USE_ANTIBOT": {
+        "value": "javascript",
+        "method": "default"
+    },
+}%}
+
+{# When multiple, setting_id need to be a setting that is part of a multiple to get all settings on the same group #}
+{# On levels, we should set a list of dict with setting_id as key and value as value #}
+
 {% set steps = [
 {
-    "name" : "STEP 1 - SERVER NAME",
-    "description" : "We need this to...",
+    "name" : "STEP 1 - STARTING UP",
+    "description" : "we  need some information to get started.",
     "settings" : [
-                  {"plugin_id" : "general", "setting_id": "SERVER_NAME", "label" : "What is your host ?", "levels" : {"standard" : "", "advanced" : "", "high" : ""} },
+                    {"plugin_id" : "security-level", "setting_id": "SECURITY_LEVEL", "title" : "DEFINE SECURITY LEVEL", "subtitle" : "This will determine default settings value for the next steps. You'll be allow to modify settings to match your case if needed.", "setting" : {'context': 'global', 'default': 'standard', 'help': 'Determine the default settings value. You can override them.', 'id': 'security-level', 'label': 'Security level', 'regex': '^(security_levels[0]|security_levels[1]|security_levels[2]|security_levels[3])$', 'type': 'select', 'select': [security_levels[0], security_levels[1], security_levels[2], security_levels[3]]} },
+                    {"plugin_id" : "general", "setting_id": "SERVER_NAME", "title" : "DEFINE HOST", "subtitle" : "We need this to connect BunkerWeb to your application. You need to set your domain name."},
+                    {"plugin_id" : "limit", "setting_id": "LIMIT_REQ_URL", "title" : "Define header", "subtitle" : "test header multiple rendering" },
+                  ],
+                    "configs": []
+},
+{
+    "name" : "STEP 2 - ANTIBOT",
+    "description" : "Avoid spammer and bot to access your website.",
+    "settings" : [
+                  {"plugin_id" : "antibot", "setting_id": "USE_ANTIBOT", "title" : "Define the type of your antibot", "subtitle" : "Javascript, Captcha or Cookie don't need additionnal settings to be fill. Recaptcha, Hcaptcha and Turnstile need secret key and site key delivered from providers." },
                  ],
     "configs": [
-        {"name": "my_config_1", "type": "modsec", "data": "..."},
-        {"name": "my_config_2", "type": "server-http", "data": "..."}
+        {"id" : "CUSTOM_CONFIG_MODSEC", "type" : "modsec", "name" : "modsecrules", "subtitle" : "This will determine the modsecurity rules to apply to this service."},
     ]
 },
 ]
 %}
 
 {# Get setting for each settings on steps #}
-
 {% for step in steps %}
         {% for setting in step.get('settings') %}
             {% for plugin in plugins %}
                 {% if setting["plugin_id"] == plugin["id"]%}
+
                     {% if setting.update({"setting" : plugin["settings"][setting["setting_id"]]})%}{%endif%}
+
+                    {# Case multiple, get all settings on same group #}
+                    {% set is_multiple = plugin["settings"][setting["setting_id"]].get("multiple", "") %}
+                    {% if is_multiple %}
+                        {% set multiples = {"multiples" : []}%}
+                        {% for mult_setting, value in plugin["settings"].items() %}
+                            {% if value.get("multiple", "") == is_multiple %}
+                                {% set mult_value = value %}
+                                {% if mult_value.update({"name" : mult_setting}) %}{%endif%}
+                                {% if multiples["multiples"].append(mult_value) %}{%endif%}
+                            {% endif %}
+                        {% endfor %}
+                        {% if setting.update(multiples)%}{% endif %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         {% endfor %}
 {% endfor %}
 
+<input type="hidden" id="security-level-{{security_levels[0]}}" data-settings="{{ standard }}" />
+<input type="hidden" id="security-level-{{security_levels[1]}}" data-settings="{{ advanced }}" />
+<input type="hidden" id="security-level-{{security_levels[2]}}" data-settings="{{ high }}" />
+
 <!-- new and edit form -->
-<form data-simple data-services-simple-modal-form
+<form data-simple data-services-modal-form
         class="!hidden w-full h-[90vh] overflow-auto flex flex-col justify-between"
         id="form-simple-new"
         method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    <input type="hidden" id="simple_operation" value="new" name="simple_operation" />
-    <input type="hidden" value="" name="simple_OLD_SERVER_NAME" />
-    <input type="hidden" value="no" name="simple_is_draft" />
-    <input type="hidden" value="yes" name="simple_is_simple_mode" />
+    <input type="hidden" value="new" name="operation" />
+    <input type="hidden" value="" name="OLD_SERVER_NAME" />
+    <input type="hidden" value="no" name="is_draft" />
+    <input type="hidden" value="easy" name="mode" />
+
     {% for step in steps %}
-    <div data-step="{{loop.index}}" class="flex flex-col">
+    <div data-step="{{loop.index}}" class="flex flex-col {% if loop.index != 1 %} hidden {% endif %}">
         <div class="flex flex-col w-full items-start mt-2">
             <h2 class="ml-2 mr-1 text-xl transition duration-300 ease-in-out font-bold text-md uppercase dark:text-white/90 mb-0" data-simple-step>{{ step.get("name")}}</h2>
-            <p class="ml-2 mr-1 text-sm dark:text-gray-300 mb-1" data-simple-description>{{ step.get("description")}}</p>
+            <p class="ml-2 mr-1 text-base dark:text-gray-300 mb-1" data-simple-description>{{ step.get("description")}}</p>
         </div>
         <div class="w-full min-w-[300px] my-1 sm:my-0">
             <hr class="separator" />
         </div>
+            {% set plugin_simple = step.get('settings') %}
+            {% set configs = step.get('configs') %}
             {% include "settings_simple.html" %}
-
-    </div>
+        </div>
     {% endfor %}
 
     <!-- action button -->
     <div class="w-full flex-col items-center justify-center flex mt-10">
         <div class="flex justify-center">
-            <button data-services-simple-modal-close
+            <button data-services-modal-close
                     type="button"
-                    class="dark:bg-slate-800 close-btn mb-4 mr-3 text-base">Close</button>
-            <button data-services-simple-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
+                    class="close-btn mb-4 mr-3 text-base">Close</button>
+            <button data-simple-back
+                    type="button"
+                    disabled
+                    class="info-btn mb-4 mr-3 text-base">Back</button>
+            <button data-simple-next type="button" class="mb-4 valid-btn">Continue</button>
+            <button data-services-modal-submit type="submit" class="hidden mb-4 valid-btn">Save</button>
         </div>
         <!-- end action button-->
-        <p data-services-simple-modal-error-msg
+        <p data-services-modal-error-msg
             class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
     </div>
 </form>

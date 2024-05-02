@@ -99,13 +99,15 @@
     <input type="hidden" id="operation" value="new" name="operation" />
     <input type="hidden" value="new" name="OLD_SERVER_NAME" />
     <input type="hidden" value="no" name="is_draft" />
+    <input type="hidden" value="advanced" name="mode" />
+
     {% include "settings_plugins.html" %}
     <!-- action button -->
     <div class="w-full flex-col items-center justify-center flex mt-10">
         <div class="flex justify-center">
             <button data-services-modal-close
                     type="button"
-                    class="dark:bg-slate-800 close-btn mb-4 mr-3 text-base">Close</button>
+                    class="close-btn mb-4 mr-3 text-base">Close</button>
             <button data-services-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
         </div>
         <!-- end action button-->

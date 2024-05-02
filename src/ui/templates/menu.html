@@ -36,7 +36,7 @@
         <div class="w-full">
             <a aria-label="link to home"
                class="flex justify-center px-8 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700"
-               href="{% if current_endpoint == 'home' %}#{% else %}loading?next={{ url_for("home") }}{% endif %}">
+               href="{% if current_endpoint == 'home' %}#{% else %}{{ url_for("home") }}{% endif %}">
                 <img src="images/logo-menu-2.png"
                      class="hidden dark:inline w-28 sm:w-36 transition-all duration-200 h-8 sm:h-10"
                      alt="main logo" />
@@ -50,7 +50,7 @@
                 {{ username }}
             </h1>
             <a class="block underline mb-2 text-gray-600 dark:text-gray-400 text-sm text-center hover:brightness-90"
-               href="{% if current_endpoint == 'account' %}#{% else %}loading?next={{ url_for("account") }}{% endif %}">manage account
+               href="{% if current_endpoint == 'account' %}#{% else %}{{ url_for("account") }}{% endif %}">manage account
             </a>
         </div>
         <hr class="h-px mt-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent" />
@@ -77,7 +77,7 @@
             {% for path in paths %}
                 <li class="mt-0.5 w-full">
                     <a class="{% if current_endpoint == path %} font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/10 hover:bg-primary/30 {% else %} dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} dark:text-gray-200 py-1 ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm"
-                       href="{% if current_endpoint == path %}#{% else %}loading?next={{ url_for(path) }}{% endif %}">
+                       href="{% if current_endpoint == path %}#{% else %}{{ url_for(path) }}{% endif %}">
                         <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
                             {% if path == "home" %}
                                 <svg class="stroke-sky-500 h-6 w-6 relative"
@@ -241,24 +241,15 @@
     <div class="flex flex-col justify-end mx-4 mt-2 mb-4">
         <!-- dark/light mode -->
         <div class="min-h-6 ml-12 my-4 flex justify-start">
-            <input type="hidden"
-                   id="csrf_token"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}" />
-            <input {% if dark_mode == True %}checked{% endif %}
+            <input
                    id="darkMode"
                    data-dark-toggle
-                   data-mode-link="{{ url_for('darkmode') }}"
                    class="dark:brightness-125 hover:brightness-75 rounded-10 duration-300 ease-in-out after:rounded-circle after:shadow-2xl after:duration-300 checked:after:translate-x-5.3 h-5 mt-0.5 relative float-left w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-primary checked:bg-primary checked:bg-none checked:bg-right"
                    type="checkbox" />
             <label for="darkMode"
                    data-dark-toggle-label
                    class="dark:text-gray-200 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700">
-                {% if dark_mode == True %}
-                    dark mode
-                {% else %}
                     light mode
-                {% endif %}
             </label>
         </div>
         <!-- end dark/light mode -->

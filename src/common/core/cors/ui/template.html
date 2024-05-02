@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+
+{% set read_doc_text = 'You will find more information about the cors plugin <a target="_blank" href="https://docs.bunkerweb.io/' + bw_version + '/security-tuning/#cors"  class="core-card-text-doc-link">in the documentation</a>.' %}
+
 {% block content %}
     <input type="csrf_token"
            name="csrf_token"
@@ -12,7 +15,7 @@
             <div class="core-card-text-container">
                 <p data-info class="core-card-text">{{plugin.get('description')}}</p>
             </div>
-            <p class="core-card-text-doc">More information available <a href="https://docs.bunkerweb.io/{{ bw_version }}/security-tuning/#cors"  class="core-card-text-doc-link">in the documentation</a>.</p>
+            <p class="core-card-text-doc">{{ read_doc_text|safe }}</p>
         </div>
         <!-- end info -->
 
@@ -116,7 +119,7 @@
         {% else %}
             <div class="core-card">
                 <div class="core-card-wrap">
-                    <h5 class="core-card-title">Deactivated</h5>
+                    <h5 class="core-card-title">Plugin deactivated</h5>
                     <!-- icon -->
                     <div role="img" class="core-card-svg-container">
                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -131,8 +134,9 @@
                     <!-- end icon -->
                 </div>
                 <div class="core-card-text-container">
-                    <p data-info class="core-card-text">This plugin need to be activated to access page.</p>
+                    <p data-info class="core-card-text">{{plugin.get('description')}}</p>
                 </div>
+                <p data-info class="core-card-text-doc">{{ read_doc_text|safe }}</p>
             </div>
             <!-- end info -->
         {% endif %}

@@ -164,6 +164,7 @@ cpulimit
 crash@
 cron@
 crontab
+cscli@
 csplit
 csvtool
 cupsfilter
@@ -522,6 +523,7 @@ vigr
 vimdiff
 vipw
 virsh
+visudo
 volatility@
 wall@
 watch@

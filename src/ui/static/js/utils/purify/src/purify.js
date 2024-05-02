@@ -244,6 +244,11 @@ function createDOMPurify(window = getGlobal()) {
    */
   let SAFE_FOR_TEMPLATES = false;
 
+  /* Output should be safe even for XML used within HTML and alike.
+   * This means, DOMPurify removes comments when containing risky content.
+   */
+  let SAFE_FOR_XML = true;
+
   /* Decide if document with <html>... should be returned */
   let WHOLE_DOCUMENT = false;
 
@@ -383,6 +388,9 @@ function createDOMPurify(window = getGlobal()) {
   /* Keep a reference to config to pass to hooks */
   let CONFIG = null;
 
+  /* Specify the maximum element nesting depth to prevent mXSS */
+  const MAX_NESTING_DEPTH = 255;
+
   /* Ideally, do not touch anything below this line */
   /* ______________________________________________ */
 
@@ -464,6 +472,7 @@ function createDOMPurify(window = getGlobal()) {
     ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
     ALLOW_SELF_CLOSE_IN_ATTR = cfg.ALLOW_SELF_CLOSE_IN_ATTR !== false; // Default true
     SAFE_FOR_TEMPLATES = cfg.SAFE_FOR_TEMPLATES || false; // Default false
+    SAFE_FOR_XML = cfg.SAFE_FOR_XML !== false; // Default true
     WHOLE_DOCUMENT = cfg.WHOLE_DOCUMENT || false; // Default false
     RETURN_DOM = cfg.RETURN_DOM || false; // Default false
     RETURN_DOM_FRAGMENT = cfg.RETURN_DOM_FRAGMENT || false; // Default false
@@ -634,8 +643,6 @@ function createDOMPurify(window = getGlobal()) {
 
   const HTML_INTEGRATION_POINTS = addToSet({}, [
     'foreignobject',
-    'desc',
-    'title',
     'annotation-xml',
   ]);
 
@@ -913,7 +920,8 @@ function createDOMPurify(window = getGlobal()) {
       NodeFilter.SHOW_ELEMENT |
         NodeFilter.SHOW_COMMENT |
         NodeFilter.SHOW_TEXT |
-        NodeFilter.SHOW_PROCESSING_INSTRUCTION,
+        NodeFilter.SHOW_PROCESSING_INSTRUCTION |
+        NodeFilter.SHOW_CDATA_SECTION,
       null
     );
   };
@@ -927,7 +935,13 @@ function createDOMPurify(window = getGlobal()) {
   const _isClobbered = function (elm) {
     return (
       elm instanceof HTMLFormElement &&
-      (typeof elm.nodeName !== 'string' ||
+      // eslint-disable-next-line unicorn/no-typeof-undefined
+      ((typeof elm.__depth !== 'undefined' &&
+        typeof elm.__depth !== 'number') ||
+        // eslint-disable-next-line unicorn/no-typeof-undefined
+        (typeof elm.__removalCount !== 'undefined' &&
+          typeof elm.__removalCount !== 'number') ||
+        typeof elm.nodeName !== 'string' ||
         typeof elm.textContent !== 'string' ||
         typeof elm.removeChild !== 'function' ||
         !(elm.attributes instanceof NamedNodeMap) ||
@@ -1009,6 +1023,22 @@ function createDOMPurify(window = getGlobal()) {
       return true;
     }
 
+    /* Remove any ocurrence of processing instructions */
+    if (currentNode.nodeType === 7) {
+      _forceRemove(currentNode);
+      return true;
+    }
+
+    /* Remove any kind of possibly harmful comments */
+    if (
+      SAFE_FOR_XML &&
+      currentNode.nodeType === 8 &&
+      regExpTest(/<[/\w]/g, currentNode.data)
+    ) {
+      _forceRemove(currentNode);
+      return true;
+    }
+
     /* Remove element if anything forbids its presence */
     if (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName]) {
       /* Check if we have a custom element to handle */
@@ -1037,10 +1067,9 @@ function createDOMPurify(window = getGlobal()) {
           const childCount = childNodes.length;
 
           for (let i = childCount - 1; i >= 0; --i) {
-            parentNode.insertBefore(
-              cloneNode(childNodes[i], true),
-              getNextSibling(currentNode)
-            );
+            const childClone = cloneNode(childNodes[i], true);
+            childClone.__removalCount = (currentNode.__removalCount || 0) + 1;
+            parentNode.insertBefore(childClone, getNextSibling(currentNode));
           }
         }
       }
@@ -1348,8 +1377,30 @@ function createDOMPurify(window = getGlobal()) {
         continue;
       }
 
+      const parentNode = getParentNode(shadowNode);
+
+      /* Set the nesting depth of an element */
+      if (shadowNode.nodeType === 1) {
+        if (parentNode && parentNode.__depth) {
+          /*
+            We want the depth of the node in the original tree, which can
+            change when it's removed from its parent.
+          */
+          shadowNode.__depth =
+            (shadowNode.__removalCount || 0) + parentNode.__depth + 1;
+        } else {
+          shadowNode.__depth = 1;
+        }
+      }
+
+      /* Remove an element if nested too deeply to avoid mXSS */
+      if (shadowNode.__depth >= MAX_NESTING_DEPTH) {
+        _forceRemove(shadowNode);
+      }
+
       /* Deep shadow DOM detected */
       if (shadowNode.content instanceof DocumentFragment) {
+        shadowNode.content.__depth = shadowNode.__depth;
         _sanitizeShadowDOM(shadowNode.content);
       }
 
@@ -1474,8 +1525,30 @@ function createDOMPurify(window = getGlobal()) {
         continue;
       }
 
+      const parentNode = getParentNode(currentNode);
+
+      /* Set the nesting depth of an element */
+      if (currentNode.nodeType === 1) {
+        if (parentNode && parentNode.__depth) {
+          /*
+            We want the depth of the node in the original tree, which can
+            change when it's removed from its parent.
+          */
+          currentNode.__depth =
+            (currentNode.__removalCount || 0) + parentNode.__depth + 1;
+        } else {
+          currentNode.__depth = 1;
+        }
+      }
+
+      /* Remove an element if nested too deeply to avoid mXSS */
+      if (currentNode.__depth >= MAX_NESTING_DEPTH) {
+        _forceRemove(currentNode);
+      }
+
       /* Shadow DOM detected, sanitize it */
       if (currentNode.content instanceof DocumentFragment) {
+        currentNode.content.__depth = currentNode.__depth;
         _sanitizeShadowDOM(currentNode.content);
       }
 

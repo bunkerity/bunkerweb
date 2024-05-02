@@ -131,3 +131,39 @@ tests:
             version: "HTTP/1.1"
           output:
             log_contains: "id \"920520\""
+  - test_title: 920520-8
+    desc: "False positive test for long Accept-Encoding headers from internet.nl"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: "compress, deflate, exi, gzip, pack200-gzip, x-compress, x-gzip"
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920520\""
+  - test_title: 920520-9
+    desc: "False positive test for long Accept-Encoding of length 99"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
+              Host: "localhost"
+              Accept-Encoding: "aes128gcm, br, compress, deflate, exi, identity, pack200-gzip, x-compress, x-gzip, zstd, gzip;q=1.0"
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920520\""

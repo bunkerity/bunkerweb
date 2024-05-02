@@ -43,9 +43,11 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, ubuntu-noble, debian, fedora, rhel, rhel9]
         include:
           - linux: ubuntu
+            package: deb
+          - linux: ubuntu-noble
             package: deb
           - linux: debian
             package: deb
@@ -78,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - id: set-matrix
         run: |
           tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
@@ -111,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - id: set-matrix
         run: |
           tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
@@ -185,7 +187,7 @@ jobs:
     needs: [tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9]
+        linux: [ubuntu, ubuntu-noble, debian, fedora, el, el9]
         arch: [amd64]
         include:
           - release: dev
@@ -195,6 +197,12 @@ jobs:
             separator: _
             suffix: ""
             version: jammy
+            package: deb
+          - linux: ubuntu-noble
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: noble
             package: deb
           - linux: debian
             package_arch: amd64

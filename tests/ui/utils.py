@@ -1,4 +1,5 @@
 from contextlib import suppress
+from datetime import datetime
 from logging import error as log_error, exception as log_exception, info as log_info, warning as log_warning
 from time import sleep
 from typing import List, Optional, Union
@@ -51,6 +52,7 @@ def safe_get_element(
 
 def assert_button_click(driver, button: Union[str, WebElement], by: str = "xpath"):  # type: ignore
     clicked = False
+    current_date = datetime.now()
     while not clicked:
         with suppress(ElementClickInterceptedException):
             if isinstance(button, str):
@@ -67,6 +69,11 @@ def assert_button_click(driver, button: Union[str, WebElement], by: str = "xpath
             button.click()
 
             clicked = True
+
+        if (datetime.now() - current_date).seconds > 10:
+            log_error("Button click failed, exiting ...")
+            exit(1)
+
     return clicked
 
 
@@ -119,6 +126,8 @@ def access_page(driver, button: Union[bool, str, WebElement], name: str, message
         if not isinstance(button, bool) and not clicked:
             clicked = assert_button_click(driver, button)
 
+        sleep(1)
+
         title: Union[WebElement, List[WebElement]] = safe_get_element(
             driver, By.XPATH, "/html/body/div[3]/header/div/nav/h6", driver_wait=WebDriverWait(driver, 45)
         )
@@ -144,8 +153,6 @@ def access_page(driver, button: Union[bool, str, WebElement], name: str, message
 
     if message:
         log_info(f"{name.title()} page loaded successfully")
-
-    driver.set_window_size(2560, 1440)
 
 
 def wait_for_service(service: str = "www.example.com"):

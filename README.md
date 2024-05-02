@@ -273,6 +273,7 @@ List of supported Linux distros :
 
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
+- Ubuntu 24.04 "Noble"
 - Fedora 39
 - RHEL 8.9
 - RHEL 9.3
@@ -280,6 +281,9 @@ List of supported Linux distros :
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
 You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
+
+> [!IMPORTANT]
+> As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0. Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
 
 ## Ansible
 
@@ -291,6 +295,7 @@ List of supported Linux distros :
 
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
+- Ubuntu 24.04 "Noble"
 - Fedora 39
 - RHEL 8.9
 - RHEL 9.3

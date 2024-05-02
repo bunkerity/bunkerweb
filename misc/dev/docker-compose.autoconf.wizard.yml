@@ -88,20 +88,18 @@ services:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
-    command: python -m flask --app main:app run --host=0.0.0.0 --port=7000
     depends_on:
       - bw-docker
     volumes:
       - ../../src/ui/src:/usr/share/bunkerweb/ui/src:ro
       - ../../src/ui/static:/usr/share/bunkerweb/ui/static:ro
       - ../../src/ui/templates:/usr/share/bunkerweb/ui/templates:ro
+      - ../../src/ui/gunicorn.conf.py:/usr/share/bunkerweb/ui/gunicorn.conf.py:ro
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
       - ../../src/ui/utils.py:/usr/share/bunkerweb/ui/utils.py:ro
     environment:
       <<: *env
-      FLASK_APP: "main.py"
-      FLASK_DEBUG: "1"
-      FLASK_ENV: "development"
+      DEBUG: "1"
     networks:
       bw-universe:
         aliases:

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python/
+export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
 
 # Create the ui.env file if it doesn't exist
 if [ ! -f /etc/bunkerweb/ui.env ]; then
@@ -17,7 +17,7 @@ start() {
     python3 -m gunicorn \
         --chdir /usr/share/bunkerweb/ui \
         --config /usr/share/bunkerweb/ui/gunicorn.conf.py \
-        --pythonpath /usr/share/bunkerweb/deps/python/ \
+        --pythonpath /usr/share/bunkerweb/deps/python,/usr/share/bunkerweb/ui \
         --user nginx \
         --group nginx \
         --bind "127.0.0.1:7000" &

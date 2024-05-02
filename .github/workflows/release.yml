@@ -104,11 +104,13 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, ubuntu-noble, debian, fedora, rhel, rhel9]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: latest
           - linux: ubuntu
+            package: deb
+          - linux: ubuntu-noble
             package: deb
           - linux: debian
             package: deb
@@ -141,7 +143,7 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
@@ -191,7 +193,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9]
+        linux: [ubuntu, ubuntu-noble, debian, fedora, el, el9]
         arch: [amd64, arm64]
         include:
           - release: latest
@@ -200,6 +202,11 @@ jobs:
             separator: _
             suffix: ""
             version: jammy
+            package: deb
+          - linux: ubuntu-noble
+            separator: _
+            suffix: ""
+            version: noble
             package: deb
           - linux: debian
             separator: _
@@ -224,6 +231,9 @@ jobs:
           - linux: ubuntu
             arch: amd64
             package_arch: amd64
+          - linux: ubuntu-noble
+            arch: amd64
+            package_arch: amd64
           - linux: debian
             arch: amd64
             package_arch: amd64
@@ -237,6 +247,9 @@ jobs:
             arch: amd64
             package_arch: x86_64
           - linux: ubuntu
+            arch: arm64
+            package_arch: arm64
+          - linux: ubuntu-noble
             arch: arm64
             package_arch: arm64
           - linux: debian

@@ -205,10 +205,33 @@ class darkMode {
     this.darkToggleEl = document.querySelector("[data-dark-toggle]");
     this.darkToggleLabel = document.querySelector("[data-dark-toggle-label]");
     this.csrf = document.querySelector("input#csrf_token");
+    this.darkMode = false;
     this.init();
   }
 
   init() {
+    // Retrieve dark mode from session storage
+    if (sessionStorage.getItem("mode")) {
+      this.darkMode = sessionStorage.getItem("mode") === "dark" ? true : false;
+    } else if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      // dark mode
+      this.darkMode = true;
+      sessionStorage.setItem("mode", "dark");
+    } else {
+      this.darkMode = false;
+      sessionStorage.setItem("mode", "light");
+    }
+
+    // Set dark mode
+    if (this.darkMode && !this.htmlEl.classList.contains("dark")) {
+      this.darkToggleEl.checked = true;
+      this.toggle();
+    }
+
+    // Handle switch
     this.darkToggleEl.addEventListener("change", (e) => {
       this.toggle();
       this.saveMode();
@@ -216,27 +239,15 @@ class darkMode {
   }
 
   toggle() {
-    document.querySelector("html").classList.toggle("dark");
+    this.htmlEl.classList.toggle("dark");
     this.darkToggleLabel.textContent = this.darkToggleEl.checked
       ? "dark mode"
       : "light mode";
   }
 
   async saveMode() {
-    const isDark = this.darkToggleEl.checked ? "true" : "false";
-    const data = {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "X-CSRF-Token": this.csrf.value,
-      },
-      body: JSON.stringify({ darkmode: isDark }),
-    };
-    const send = await fetch(
-      document.querySelector("[data-mode-link]").getAttribute("data-mode-link"),
-      data,
-    );
+    const mode = this.darkToggleEl.checked ? "dark" : "light";
+    sessionStorage.setItem("mode", mode);
   }
 }
 

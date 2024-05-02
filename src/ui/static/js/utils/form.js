@@ -127,7 +127,9 @@ class Select {
           selectCustom.querySelector(`[data-setting-select-text]`).textContent =
             btnValue;
           //add selected to new value
-
+          selectCustom
+            .querySelector(`[data-setting-select-text]`)
+            .setAttribute("data-value", btnValue);
           //change style
           const dropdownEl = btn.closest(`div[data-setting-select-dropdown]`);
           dropdownEl.classList.add("hidden");

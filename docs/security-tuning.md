@@ -178,9 +178,10 @@ This plugin offers seamless integration with various DNS providers for streamlin
 | `LETS_ENCRYPT_DNS_EMAIL`           |           | multisite | no       | Email address for Let's Encrypt notifications.                                          |
 | `USE_LETS_ENCRYPT_DNS_STAGING`     | `no`      | multisite | no       | Set to `yes` to use Let's Encrypt staging server.                                       |
 | `LETS_ENCRYPT_DNS_PROVIDER`        |           | multisite | no       | DNS provider for Let's Encrypt DNS challenges.                                          |
-| `USE_LETS_ENCRYPT_DNS_WILDCARD`    | `no`      | multisite | no       | Set to `yes` to automatically generate wildcard domains in certificates.                |
+| `USE_LETS_ENCRYPT_DNS_WILDCARD`    | `yes`     | multisite | no       | Set to `yes` to automatically generate wildcard domains in certificates.                |
 | `LETS_ENCRYPT_DNS_PROPAGATION`     | `default` | multisite | no       | Time in seconds to wait for DNS propagation.                                            |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |           | multisite | yes      | Credential item for Let's Encrypt DNS provider that contains required credentials.      |
+| `LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS` | `no`      | global    | no       | Clear old certificates when renewing.                                                   |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file and Certbot will read the credentials from it.
@@ -248,7 +249,7 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 You can choose between the following versions of the OWASP Core Rule Set :
 
 - **3** : The version [v3.3.5](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.5) of the OWASP Core Rule Set (***default***)
-- **4** : The version [v4.0.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.0.0) of the OWASP Core Rule Set
+- **4** : The version [v4.2.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.2.0) of the OWASP Core Rule Set
 
 ### Custom configurations
 

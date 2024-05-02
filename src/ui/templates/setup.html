@@ -254,7 +254,7 @@
                                        class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
                                        placeholder="/admin"
                                        value="{{ random_url }}"
-                                       pattern="\/[a-zA-Z0-9\-]{1,255}$"
+                                       pattern="^\/([\/a-zA-Z0-9\-]{0,255})$"
                                        required />
                             </div>
                             <!-- end ui url-->
@@ -440,6 +440,7 @@
           if (!this.urlInp.value.startsWith("/")) {
             this.urlInp.value = "/" + this.urlInp.value;
           }
+          this.urlInp.value = this.urlInp.value.replace("//", "/");
           this.resumeEl.textContent = `http${
             this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
           }://${this.servInp.value}${this.urlInp.value}`;
@@ -592,9 +593,12 @@
 
             // send form and wait for response
 
-            const api = `http${
+            let api = `http${
               this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
             }://${this.servInp.value}${this.urlInp.value}`;
+            if (!api.endsWith("/")) {
+              api = `${api}/`;
+            }
 
             fetch(window.location.href, {
               method: "POST",
@@ -604,11 +608,11 @@
               .then((res) => {
                 if (res.status === 200) {
                   setTimeout(() => {
-                    window.open(`${api}/login`, "_self");
+                    window.open(`${api}login`, "_self");
                   }, 60000);
                   setTimeout(() => {
                     setInterval(() => {
-                      fetch(`${api}/check`, {
+                      fetch(`${api}check`, {
                         mode: "cors",
                         cache: "no-cache",
                       })
@@ -618,7 +622,7 @@
                           }
                         }).then(res => {
                           if (res.message === "ok") {
-                            window.open(`${api}/login`, "_self");
+                            window.open(`${api}login`, "_self");
                           }
                         })
                         .catch((err) => {});

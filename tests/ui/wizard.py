@@ -103,7 +103,7 @@ try:
     password_input.send_keys("password")
     password_input.send_keys(Keys.RETURN)
 
-    sleep(0.3)
+    sleep(3)
 
     try:
         title = safe_get_element(DRIVER, By.XPATH, "/html/body/main/div[1]/div/h1", driver_wait=driver_wait)
