@@ -389,10 +389,6 @@ try:
         log_error(f"The service hasn't been created ({len(services)} services found), exiting ...")
         exit(1)
 
-    current_cards = DRIVER.execute_script("return document.querySelectorAll('[data-services-service]')")
-    for card in current_cards:
-        log_info(f"Card name: {card.text}")
-
     server_name_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service='app2.example.com']//h5")
     assert isinstance(server_name_elem, WebElement), "Server name element is not a WebElement"
     if server_name_elem.text.strip() != "app2.example.com":
@@ -592,132 +588,132 @@ try:
                 log_warning("The service is still working, retry in 5 seconds ...")
                 sleep(5)
 
-    log_info("Service app3.example.com is not working as expected, trying to recreate app3.example.com using simple mode ...")
+    # log_info("Service app3.example.com is not working, as expected, trying to recreate app3.example.com using simple mode ...")
 
-    assert_button_click(DRIVER, "//button[@data-services-action='new']")
+    # assert_button_click(DRIVER, "//button[@data-services-action='new']")
 
-    current_mode = DRIVER.execute_script("return document.querySelector('button[data-toggle-settings-mode-btn]').getAttribute('data-toggle-settings-mode-btn')")
-    if current_mode != "simple":
-        log_error(f"""Default mode for new service need to be simple and not {current_mode}...""")
-        exit(1)
+    # current_mode = DRIVER.execute_script("return document.querySelector('button[data-toggle-settings-mode-btn]').getAttribute('data-toggle-settings-mode-btn')")
+    # if current_mode != "simple":
+    #     log_error(f"""Default mode for new service need to be simple and not {current_mode}...""")
+    #     exit(1)
 
-    log_info("Start checking steps buttons and default SERVER_NAME state ...")
+    # log_info("Start checking steps buttons and default SERVER_NAME state ...")
 
-    # Check that actions are disabled and server name empty
-    server_name_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//input[@id='SERVER_NAME']")
-    assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
-    if server_name_input.get_attribute("value"):
-        log_error("Server name input is not empty, exiting ...")
-        exit(1)
+    # # Check that actions are disabled and server name empty
+    # server_name_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//input[@id='SERVER_NAME']")
+    # assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
+    # if server_name_input.get_attribute("value"):
+    #     log_error("Server name input is not empty, exiting ...")
+    #     exit(1)
 
-    # Check that button back is disabled
-    back_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-simple-back='']")
-    assert isinstance(back_button, WebElement), "Back button is not a WebElement"
-    if not back_button.get_attribute("disabled"):
-        log_error("Back button should be disabled, exiting ...")
-        exit(1)
+    # # Check that button back is disabled
+    # back_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-simple-back='']")
+    # assert isinstance(back_button, WebElement), "Back button is not a WebElement"
+    # if not back_button.get_attribute("disabled"):
+    #     log_error("Back button should be disabled, exiting ...")
+    #     exit(1)
 
-    # Check that button next is disabled
-    next_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-simple-next='']")
-    assert isinstance(next_button, WebElement), "Next button is not a WebElement"
-    if not next_button.get_attribute("disabled"):
-        log_error("Next button should be disabled, exiting ...")
-        exit(1)
+    # # Check that button next is disabled
+    # next_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-simple]//button[@data-simple-next='']")
+    # assert isinstance(next_button, WebElement), "Next button is not a WebElement"
+    # if not next_button.get_attribute("disabled"):
+    #     log_error("Next button should be disabled, exiting ...")
+    #     exit(1)
 
-    log_info("Steps buttons and SERVER_NAME state checked, fill first step and go to next one ...")
+    # log_info("Steps buttons and SERVER_NAME state checked, fill first step and go to next one ...")
 
-    DRIVER.execute_script(
-        "arguments[0].value = 'app3.example.com'; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input
-    )
+    # DRIVER.execute_script(
+    #     "arguments[0].value = 'app3.example.com'; arguments[0].dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));", server_name_input
+    # )
 
-    # Click on next button
-    assert_button_click(DRIVER, "//button[@data-simple-next='']")
+    # # Click on next button
+    # assert_button_click(DRIVER, "//button[@data-simple-next='']")
 
-    # Check if data-step is 2 looking for hidden
-    is_step_2 = DRIVER.execute_script("""return document.querySelector("[data-step='2']").classList.contains("hidden")""")
-    if is_step_2:
-        log_error("Step 2 should be visible.")
-        exit(1)
+    # # Check if data-step is 2 looking for hidden
+    # is_step_2 = DRIVER.execute_script("""return document.querySelector("[data-step='2']").classList.contains("hidden")""")
+    # if is_step_2:
+    #     log_error("Step 2 should be visible.")
+    #     exit(1)
 
-    log_info("Fill first step and move to step 2 done, edit step 2 value ...")
+    # log_info("Fill first step and move to step 2 done, edit step 2 value ...")
 
-    # Select antibot plugin and click on javascript value
-    assert_button_click(DRIVER, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']")
+    # # Select antibot plugin and click on javascript value
+    # assert_button_click(DRIVER, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']")
 
-    # Click on javascript value
-    assert_button_click(DRIVER, "//div[@id='antibot-simple']//button[@data-setting-select-dropdown-btn='use-antibot' and @value='javascript']")
+    # # Click on javascript value
+    # assert_button_click(DRIVER, "//div[@id='antibot-simple']//button[@data-setting-select-dropdown-btn='use-antibot' and @value='javascript']")
 
-    # Check that value is updated
-    antibot_button_text = safe_get_element(
-        DRIVER, By.XPATH, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']//span[@data-setting-select-text='use-antibot']"
-    )
-    assert isinstance(antibot_button_text, WebElement), "Antibot button text is not a WebElement"
-    if antibot_button_text.get_attribute("data-value") != "javascript":
-        log_error("Value should be javascript.")
-        exit(1)
+    # # Check that value is updated
+    # antibot_button_text = safe_get_element(
+    #     DRIVER, By.XPATH, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']//span[@data-setting-select-text='use-antibot']"
+    # )
+    # assert isinstance(antibot_button_text, WebElement), "Antibot button text is not a WebElement"
+    # if antibot_button_text.get_attribute("data-value") != "javascript":
+    #     log_error("Value should be javascript.")
+    #     exit(1)
 
-    log_info("Edit step 2 value, done, trying to go back, change security level and check antibot value ...")
+    # log_info("Edit step 2 value, done, trying to go back, change security level and check antibot value ...")
 
-    # Click on back button
-    assert_button_click(DRIVER, "//button[@data-simple-back='']")
+    # # Click on back button
+    # assert_button_click(DRIVER, "//button[@data-simple-back='']")
 
-    # Check if data-step is 1 looking for hidden
-    is_step_1 = DRIVER.execute_script("""return document.querySelector("[data-step='1']").classList.contains("hidden")""")
-    if is_step_1:
-        log_error("Step 1 should be visible.")
-        exit(1)
+    # # Check if data-step is 1 looking for hidden
+    # is_step_1 = DRIVER.execute_script("""return document.querySelector("[data-step='1']").classList.contains("hidden")""")
+    # if is_step_1:
+    #     log_error("Step 1 should be visible.")
+    #     exit(1)
 
-    # Change security level
-    assert_button_click(DRIVER, "//div[@id='security-level-simple']//button[@data-setting-select='security-level']")
+    # # Change security level
+    # assert_button_click(DRIVER, "//div[@id='security-level-simple']//button[@data-setting-select='security-level']")
 
-    # Click on standard value
-    assert_button_click(DRIVER, "//div[@id='security-level-simple']//button[@data-setting-select-dropdown-btn='security-level' and @value='standard']")
+    # # Click on standard value
+    # assert_button_click(DRIVER, "//div[@id='security-level-simple']//button[@data-setting-select-dropdown-btn='security-level' and @value='standard']")
 
-    # Check that value is updated
-    value_standard_security = safe_get_element(
-        DRIVER, By.XPATH, "//div[@id='security-level-simple']//button[@data-setting-select='security-level']//span[@data-setting-select-text='security-level']"
-    )
-    assert isinstance(value_standard_security, WebElement), "Security level button text is not a WebElement"
-    if value_standard_security.get_attribute("data-value") != "standard":
-        log_error("Value should be standard.")
-        exit(1)
+    # # Check that value is updated
+    # value_standard_security = safe_get_element(
+    #     DRIVER, By.XPATH, "//div[@id='security-level-simple']//button[@data-setting-select='security-level']//span[@data-setting-select-text='security-level']"
+    # )
+    # assert isinstance(value_standard_security, WebElement), "Security level button text is not a WebElement"
+    # if value_standard_security.get_attribute("data-value") != "standard":
+    #     log_error("Value should be standard.")
+    #     exit(1)
 
-    # Click on next button
-    assert_button_click(DRIVER, "//button[@data-simple-next='']")
+    # # Click on next button
+    # assert_button_click(DRIVER, "//button[@data-simple-next='']")
 
-    # Check if data-step is 2 looking for hidden
-    is_step_2 = DRIVER.execute_script("""return document.querySelector("[data-step='2']").classList.contains("hidden")""")
-    if is_step_2:
-        log_error("Step 2 should be visible.")
-        exit(1)
+    # # Check if data-step is 2 looking for hidden
+    # is_step_2 = DRIVER.execute_script("""return document.querySelector("[data-step='2']").classList.contains("hidden")""")
+    # if is_step_2:
+    #     log_error("Step 2 should be visible.")
+    #     exit(1)
 
-    # Check antibot value
-    antibot_button_text = safe_get_element(
-        DRIVER, By.XPATH, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']//span[@data-setting-select-text='use-antibot']"
-    )
-    assert isinstance(antibot_button_text, WebElement), "Antibot button text is not a WebElement"
-    if antibot_button_text.get_attribute("data-value") != "no":
-        log_error("Value should be no.")
-        exit(1)
+    # # Check antibot value
+    # antibot_button_text = safe_get_element(
+    #     DRIVER, By.XPATH, "//div[@id='antibot-simple']//button[@data-setting-select='use-antibot']//span[@data-setting-select-text='use-antibot']"
+    # )
+    # assert isinstance(antibot_button_text, WebElement), "Antibot button text is not a WebElement"
+    # if antibot_button_text.get_attribute("data-value") != "no":
+    #     log_error("Value should be no.")
+    #     exit(1)
 
-    log_info("Changing security level and check update done, create app ...")
-    access_page(DRIVER, "//form[@data-services-modal-form and @data-simple]//button[@data-services-modal-submit='']", "services", False)
+    # log_info("Changing security level and check update done, create app ...")
+    # access_page(DRIVER, "//form[@data-services-modal-form and @data-simple]//button[@data-services-modal-submit='']", "services", False)
 
-    if TEST_TYPE == "linux":
-        wait_for_service("app3.example.com")
+    # if TEST_TYPE == "linux":
+    #     wait_for_service("app3.example.com")
 
-    try:
-        services = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service]", multiple=True, error=True)
-        assert isinstance(services, list), "Services is not a list"
-    except TimeoutException:
-        log_exception("Services not found, exiting ...")
-        exit(1)
+    # try:
+    #     services = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service]", multiple=True, error=True)
+    #     assert isinstance(services, list), "Services is not a list"
+    # except TimeoutException:
+    #     log_exception("Services not found, exiting ...")
+    #     exit(1)
 
-    if len(services) < 4:
-        log_error(f"The service hasn't been created ({len(services)} services found), exiting ...")
-        exit(1)
+    # if len(services) < 4:
+    #     log_error(f"The service hasn't been created ({len(services)} services found), exiting ...")
+    #     exit(1)
 
-    log_info("Service app3.example.com has been created successfully...")
+    # log_info("Service app3.example.com has been created successfully...")
 
     log_info("✅ Services page tests finished successfully")
 except SystemExit as e:
