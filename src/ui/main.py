@@ -883,7 +883,7 @@ def services():
         config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
         server_name = variables["SERVER_NAME"].split(" ")[0]
         was_draft = config.get(f"{server_name}_IS_DRAFT", "no") == "yes"
-        operation = request.form["operation"] 
+        operation = request.form["operation"]
         # Get all variables starting with custom_config and delete them from variables
         custom_configs = []
         config_types = ("http", "stream", "server-http", "server-stream", "default-server-http", "modsec", "modsec-crs")
@@ -1023,6 +1023,8 @@ def services():
                 "settings": dumps(tmp_config),
             }
         )
+
+    services.sort(key=lambda x: x["SERVER_NAME"]["value"])
 
     return render_template(
         "services.html",
