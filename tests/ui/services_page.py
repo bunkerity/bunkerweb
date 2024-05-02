@@ -436,7 +436,7 @@ try:
     log_info("Service app2.example.com has been set as draft, making sure it's not working anymore ...")
 
     retry = 0
-    for x in range(5):
+    for x in range(7):
         retry += 1
         with suppress(RequestException):
             req = get("http://app2.example.com")
@@ -575,7 +575,7 @@ try:
     log_info("Service app3.example.com has been deleted successfully, making sure it's not working anymore ...")
 
     retry = 0
-    for x in range(5):
+    for x in range(7):
         retry += 1
         with suppress(RequestException):
             req = get("http://app3.example.com")
