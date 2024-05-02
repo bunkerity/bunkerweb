@@ -60,13 +60,20 @@ jobs:
           path: /tmp/${{ inputs.LINUX }}
       # Remove existing packages
       - name: Remove existing package
+        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-noble'
         run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Remove existing package
+      - name: Remove existing package el9
         if: inputs.LINUX == 'el9'
         run: package_cloud yank bunkerity/${{ inputs.REPO }}/el/9 bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Remove existing package ubuntu-noble
+        if: inputs.LINUX == 'ubuntu-noble'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/ubuntu/noble bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
