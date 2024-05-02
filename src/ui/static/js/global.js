@@ -231,8 +231,6 @@ class darkMode {
       this.toggle();
     }
 
-    console.log(sessionStorage.getItem("mode"));
-
     // Handle switch
     this.darkToggleEl.addEventListener("change", (e) => {
       this.toggle();
