@@ -138,6 +138,7 @@ def generate_custom_configs(configs: List[Dict[str, Any]], *, original_path: Uni
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
                     tmp_path.write_bytes(custom_config["data"])
             except OSError as e:
+                logger.debug(format_exc())
                 if custom_config["method"] != "manual":
                     logger.error(
                         f"Error while generating custom configs \"{custom_config['name']}\"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}: {e}"
@@ -189,6 +190,7 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
                     for job_file in chain(original_path.joinpath(plugin["id"], "jobs").glob("*"), original_path.joinpath(plugin["id"], "bwcli").glob("*")):
                         job_file.chmod(job_file.stat().st_mode | S_IEXEC)
             except OSError as e:
+                logger.debug(format_exc())
                 if plugin["method"] != "manual":
                     logger.error(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\": {e}")
             except BaseException as e:
