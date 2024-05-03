@@ -23,13 +23,13 @@
       "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
       "type": "text"
     },
-    "GREYLIST_IP_URLS": {
-      "context": "global",
+    "GREYLIST_RDNS": {
+      "context": "multisite",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
-      "id": "greylist-ip-urls",
-      "label": "Greylist IP/network URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "help": "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
+      "id": "greylist-rdns",
+      "label": "Greylist reverse DNS",
+      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "GREYLIST_RDNS_GLOBAL": {
@@ -41,24 +41,6 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
-    "GREYLIST_RDNS": {
-      "context": "multisite",
-      "default": "",
-      "help": "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
-      "id": "greylist-rdns",
-      "label": "Greylist reverse DNS",
-      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
-      "type": "text"
-    },
-    "GREYLIST_RDNS_URLS": {
-      "context": "global",
-      "default": "",
-      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
-      "id": "greylist-rdns-urls",
-      "label": "Greylist reverse DNS URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
-    },
     "GREYLIST_ASN": {
       "context": "multisite",
       "default": "",
@@ -66,15 +48,6 @@
       "id": "greylist-asn",
       "label": "Greylist ASN",
       "regex": "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
-      "type": "text"
-    },
-    "GREYLIST_ASN_URLS": {
-      "context": "global",
-      "default": "",
-      "help": "List of URLs, separated with spaces, containing ASN to put into the greylist.",
-      "id": "greylist-asn-urls",
-      "label": "Greylist ASN URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_USER_AGENT": {
@@ -86,15 +59,6 @@
       "regex": "^.*$",
       "type": "text"
     },
-    "GREYLIST_USER_AGENT_URLS": {
-      "context": "global",
-      "default": "",
-      "help": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
-      "id": "greylist-user-agent-urls",
-      "label": "Greylist User-Agent URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
-    },
     "GREYLIST_URI": {
       "context": "multisite",
       "default": "",
@@ -102,6 +66,42 @@
       "id": "greylist-uri",
       "label": "Greylist URI",
       "regex": "^.*$",
+      "type": "text"
+    },
+    "GREYLIST_IP_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
+      "id": "greylist-ip-urls",
+      "label": "Greylist IP/network URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "GREYLIST_RDNS_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
+      "id": "greylist-rdns-urls",
+      "label": "Greylist reverse DNS URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "GREYLIST_ASN_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing ASN to put into the greylist.",
+      "id": "greylist-asn-urls",
+      "label": "Greylist ASN URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "GREYLIST_USER_AGENT_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
+      "id": "greylist-user-agent-urls",
+      "label": "Greylist User-Agent URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_URI_URLS": {

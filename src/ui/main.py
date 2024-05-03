@@ -51,6 +51,7 @@ from src.ConfigFiles import ConfigFiles
 from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.User import AnonymousUser, User
+from src.Templates import get_ui_templates
 
 from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain
 from common_utils import get_integration, get_version  # type: ignore
@@ -154,6 +155,7 @@ try:
         SEND_FILE_MAX_AGE_DEFAULT=86400,
         SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
         DB=db,
+        UI_TEMPLATES=get_ui_templates(),
     )
 except FileNotFoundError as e:
     app.logger.error(repr(e), e.filename)

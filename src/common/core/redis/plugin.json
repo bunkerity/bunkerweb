@@ -68,24 +68,6 @@
       "regex": "^[0-9]+$",
       "type": "text"
     },
-    "REDIS_KEEPALIVE_IDLE": {
-      "context": "global",
-      "default": "30000",
-      "help": "Max idle time (in ms) before closing redis connection in the pool.",
-      "id": "redis-keepalive-idle",
-      "label": "Redis keepalive idle (ms)",
-      "regex": "^[0-9]+$",
-      "type": "text"
-    },
-    "REDIS_KEEPALIVE_POOL": {
-      "context": "global",
-      "default": "10",
-      "help": "Max number of redis connection(s) kept in the pool.",
-      "id": "redis-keepalive-pool",
-      "label": "Redis keepalive pool",
-      "regex": "^[0-9]+$",
-      "type": "text"
-    },
     "REDIS_USERNAME": {
       "context": "global",
       "default": "",
@@ -138,6 +120,24 @@
       "id": "redis-sentinel-master",
       "label": "Redis sentinel master",
       "regex": "^.*$",
+      "type": "text"
+    },
+    "REDIS_KEEPALIVE_IDLE": {
+      "context": "global",
+      "default": "30000",
+      "help": "Max idle time (in ms) before closing redis connection in the pool.",
+      "id": "redis-keepalive-idle",
+      "label": "Redis keepalive idle (ms)",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "REDIS_KEEPALIVE_POOL": {
+      "context": "global",
+      "default": "10",
+      "help": "Max number of redis connection(s) kept in the pool.",
+      "id": "redis-keepalive-pool",
+      "label": "Redis keepalive pool",
+      "regex": "^[0-9]+$",
       "type": "text"
     }
   }

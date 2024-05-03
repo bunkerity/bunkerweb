@@ -23,15 +23,6 @@
       "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
       "type": "text"
     },
-    "BAD_BEHAVIOR_BAN_TIME": {
-      "context": "multisite",
-      "default": "86400",
-      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.",
-      "id": "bad-behavior-ban-time",
-      "label": "Ban duration (in seconds)",
-      "regex": "^\\d+",
-      "type": "text"
-    },
     "BAD_BEHAVIOR_THRESHOLD": {
       "context": "multisite",
       "default": "10",
@@ -47,6 +38,15 @@
       "help": "Period of time (in seconds) during which we count 'bad' HTTP status codes.",
       "id": "bad-behavior-period",
       "label": "Period (in seconds)",
+      "regex": "^\\d+",
+      "type": "text"
+    },
+    "BAD_BEHAVIOR_BAN_TIME": {
+      "context": "multisite",
+      "default": "86400",
+      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.",
+      "id": "bad-behavior-ban-time",
+      "label": "Ban duration (in seconds)",
       "regex": "^\\d+",
       "type": "text"
     }

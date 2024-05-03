@@ -92,7 +92,15 @@
 }
 
 .popover-settings-container {
-  @apply z-[1000] h-fit max-w-[250px] transition-all duration-500 dark:brightness-90 transition rounded-md p-3 -translate-y-7 fixed bg-blue-500;
+  @apply z-[1000] h-fit max-w-[250px] transition-all duration-500 dark:brightness-90 transition rounded-md p-3 -translate-y-7 fixed;
+}
+
+.info.popover-settings-container {
+  @apply bg-blue-500;
+}
+
+.multisite.popover-settings-container {
+  @apply bg-orange-500;
 }
 
 .popover-tab {

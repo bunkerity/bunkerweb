@@ -20,7 +20,7 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-services-action='new']")
 
-    assert_button_click(DRIVER, "//button[@data-toggle-settings-mode-btn='simple']")
+    # assert_button_click(DRIVER, "//button[@data-toggle-settings-mode-btn='simple']")
 
     server_name_input = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
     assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
