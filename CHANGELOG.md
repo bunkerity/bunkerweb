@@ -7,6 +7,7 @@
 - [BUGFIX] Remove potential false positives with ModSecurity on the jobs page of the web UI
 - [BUGFIX] Fix bwcli not working with Redis sentinel
 - [BUGFIX] Fix potential issues when removing the bunkerweb Linux package
+- [BUGFIX] Fix bug when antibot is enabled and User-Agent or IP address has changed
 - [FEATURE] Add backup plugin to backup and restore easily the database
 - [FEATURE] Add LETS_ENCRYPT_CLEAR_OLD_CERTS setting to control if old certificates should be removed when generating Let's Encrypt certificates (default is no)
 - [FEATURE] Add DISABLE_DEFAULT_SERVER_STRICT_SNI setting to allow/block requests when SNI is unknown or unset (default is no)
@@ -22,6 +23,7 @@
 - [UI] Reporting page : fix missing data and add new ones
 - [UI] Account page : keep license key form even if pro register to easy update
 - [UI] Wizard : Add the possibility to still configure reverse proxy even if an admin user already exists
+- [AUTOCONF] Speedup autoconf process when we have multiple events in short period of time
 - [DOCUMENTATION] Add upgrade procedure for 1.5.7+
 - [DOCUMENTATION] Rename Migrating section to Upgrading
 - [MISC] Support custom bwcli commands using plugins
