@@ -155,7 +155,7 @@ try:
         SEND_FILE_MAX_AGE_DEFAULT=86400,
         SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
         DB=db,
-        UI_TEMPLATES=get_ui_templates()
+        UI_TEMPLATES=get_ui_templates(),
     )
 except FileNotFoundError as e:
     app.logger.error(repr(e), e.filename)
@@ -172,6 +172,7 @@ csrf.init_app(app)
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
+
 
 def get_ui_data():
     ui_data = "Error"

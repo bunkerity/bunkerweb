@@ -6,8 +6,6 @@ import {
   CheckNoMatchFilter,
   showInvalid,
   SettingsAdvanced,
-  SettingsSimple,
-  SettingsSwitch,
 } from "./utils/settings.js";
 
 class SettingsService {
@@ -24,12 +22,6 @@ class SettingsService {
       this.settingsMultiple,
       "services",
     );
-    this.simpleSettings = new SettingsSimple(
-      document.querySelector("[data-simple][data-services-modal-form]"),
-      this.settingsMultiple,
-      "services",
-    );
-
     this.initSettingsService();
   }
 
@@ -117,133 +109,6 @@ class SettingsService {
             forceEnabled,
             emptyServerName,
           );
-
-          // Click on right security level dropdown btn
-          // This will fire security level event listener
-          this.simpleSettings.updateData(
-            action,
-            oldServName,
-            operation,
-            settings,
-            forceEnabled,
-            setMethodUI,
-            emptyServerName,
-          );
-          const modeBtn = document.querySelector(
-            "button[data-toggle-settings-mode-btn]",
-          );
-          const mode = modeBtn.getAttribute("data-toggle-settings-mode-btn");
-          if (action === "new") {
-            mode !== "simple" ? modeBtn.click() : null;
-            document
-              .querySelector(
-                `button[data-setting-select-dropdown-btn="security-level"][value="standard"]`,
-              )
-              .click();
-            document
-              .querySelector(
-                `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
-              )
-              .setAttribute("disabled", "true");
-          } else {
-            mode !== "advanced" ? modeBtn.click() : null;
-            document
-              .querySelector(
-                `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
-              )
-              .removeAttribute("disabled");
-            document
-              .querySelector(
-                `button[data-setting-select-dropdown-btn="security-level"][value="custom"]`,
-              )
-              .click();
-          }
-        }
-      } catch (err) {}
-      // security level
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute("data-setting-select-dropdown-btn") ==
-          "security-level"
-        ) {
-          // get current common values
-          const action = this.simpleSettings.currAction;
-          const oldServName = this.simpleSettings.oldServName;
-          const operation = this.simpleSettings.operation;
-          const forceEnabled = this.simpleSettings.forceEnabled;
-          const setMethodUI = this.simpleSettings.setMethodUI;
-          const emptyServerName = this.simpleSettings.emptyServerName;
-          // get custom security level settings of service if custom choose
-          const value = e.target.closest("button").getAttribute("value");
-
-          // mainSettings is the settings of the service
-          let mainSettings;
-
-          // Try to get settings in a valid format
-          try {
-            mainSettings = JSON.parse(
-              document
-                .querySelector(`[data-old-name][data-value="${oldServName}"]`)
-                .closest("[data-services-service]")
-                .getAttribute("data-settings"),
-            );
-          } catch (err) {}
-
-          try {
-            if (!settings) {
-              mainSettings = JSON.parse(
-                document
-                  .querySelector(`[data-old-name][data-value="${oldServName}"]`)
-                  .closest("[data-services-service]")
-                  .getAttribute("data-settings")
-                  .replaceAll(`'`, `"`),
-              );
-            }
-          } catch (err) {}
-
-          // In case we want a security level, we need to get the settings of the security level
-          // In order to filter and merge both to avoid overriding disabled settings (method != ui|default)
-          let compareSettings = null;
-          if (value !== "custom") {
-            // Try to get settings in a valid format
-            try {
-              compareSettings = JSON.parse(
-                document
-                  .querySelector(`input#security-level-${value}`)
-                  .getAttribute("data-settings"),
-              );
-            } catch (err) {}
-
-            try {
-              if (!compareSettings) {
-                compareSettings = JSON.parse(
-                  document
-                    .querySelector(`input#security-level-${value}`)
-                    .getAttribute("data-settings")
-                    .replaceAll(`'`, `"`),
-                );
-              }
-            } catch (err) {}
-          }
-          // No main settings if new
-          if (action === "new") {
-            mainSettings = JSON.parse(JSON.stringify(compareSettings));
-            compareSettings = null;
-          }
-
-          this.simpleSettings.setSimple(
-            action,
-            oldServName,
-            operation,
-            mainSettings,
-            compareSettings,
-            setMethodUI,
-            forceEnabled,
-            emptyServerName,
-            true,
-          );
         }
       } catch (err) {}
     });
@@ -260,9 +125,6 @@ class ServiceModal {
       "[data-services-tabs-select-header]",
     ]);
     this.modalCard = this.modal.querySelector("[data-services-modal-card]");
-    this.switchModeBtn = this.modal.querySelector(
-      "[data-toggle-settings-mode-btn]",
-    );
     //modal forms
     this.formNewEdit = this.modal.querySelector(
       "[data-advanced][data-services-modal-form]",
@@ -270,9 +132,7 @@ class ServiceModal {
     this.formDelete = this.modal.querySelector(
       "[data-services-modal-form-delete]",
     );
-    this.simpleForm = this.modal.querySelector(
-      "[data-simple][data-services-modal-form]",
-    );
+
     //container
     this.container = document.querySelector("main");
     this.currAction = "";
@@ -370,10 +230,9 @@ class ServiceModal {
     this.setCardViewportHeight(action === "delete" ? false : true);
     this.setHeaderActionsVisible(action === "delete" ? false : true);
     this.SetSelectTabsVisible(action === "delete" ? false : true);
-    this.setModeVisible(action);
+    this.resetFilterSettings();
     if (action === "edit" || action === "new" || action === "clone") {
       this.formNewEdit.classList.remove("hidden");
-      this.simpleForm.classList.remove("hidden");
 
       const oldNameValue = action === "edit" ? oldServName : "";
 
@@ -399,6 +258,20 @@ class ServiceModal {
 
     this.setIsDraft(isDraft === "yes" ? true : false, method);
     this.openModal();
+  }
+
+  resetFilterSettings() {
+    // Reset select
+    const selectTypeAll = document
+      .querySelector("#filter-type[data-services-setting-select-dropdown]")
+      .querySelector(
+        'button[value="all"][data-services-setting-select-dropdown-btn="type"]',
+      );
+    selectTypeAll.click();
+    const inpKeyword = this.modal.querySelector("input#settings-filter");
+    inpKeyword.value = "";
+    // dispatch event input
+    inpKeyword.dispatchEvent(new Event("input"));
   }
 
   setIsDraft(isDraft, method) {
@@ -437,17 +310,11 @@ class ServiceModal {
       this.modal
         .querySelector("[data-toggle-draft-btn]")
         .classList.remove("hidden");
-      this.modal
-        .querySelector("[data-toggle-settings-mode-btn]")
-        .classList.remove("hidden");
     }
 
     if (!setVisible) {
       this.modal
         .querySelector("[data-toggle-draft-btn]")
-        .classList.add("hidden");
-      this.modal
-        .querySelector("[data-toggle-settings-mode-btn]")
         .classList.add("hidden");
     }
   }
@@ -464,29 +331,8 @@ class ServiceModal {
     }
   }
 
-  switchMode(mode) {
-    if (mode === "advanced") {
-      this.formNewEdit.classList.remove("hidden");
-      this.simpleForm.classList.add("hidden");
-    }
-
-    if (mode === "simple") {
-      this.formNewEdit.classList.add("hidden");
-      this.simpleForm.classList.remove("hidden");
-    }
-  }
-
-  setModeVisible(action) {
-    if (action === "new" || action === "clone" || action === "edit") {
-      this.switchModeBtn.classList.remove("hidden");
-    } else {
-      this.switchModeBtn.classList.add("hidden");
-    }
-  }
-
   hideForms() {
     this.formNewEdit.classList.add("hidden");
-    this.simpleForm.classList.add("hidden");
     this.formDelete.classList.add("hidden");
   }
 
@@ -841,13 +687,6 @@ const setFilterGlobal = new FilterSettings(
 );
 
 const settings = new SettingsService();
-
-const switchSettings = new SettingsSwitch(
-  document.querySelector("[data-toggle-settings-mode-btn]"),
-  document.querySelector("main"),
-  ["advanced", "simple"],
-  "services",
-);
 
 const checkServiceModalKeyword = new CheckNoMatchFilter(
   document.querySelector("input#settings-filter"),
