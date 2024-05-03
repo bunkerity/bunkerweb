@@ -278,6 +278,7 @@ class IngressController(Controller):
                         self.__internal_lock.release()
                         locked = False
                         continue
+                    self.wait_applying()
                     self._update_settings()
                     self._instances = self.get_instances()
                     self._services = self.get_services()

@@ -120,6 +120,7 @@ class DockerController(Controller):
             try:
                 if not self.__process_event(event):
                     continue
+                self.wait_applying()
                 self._update_settings()
                 self._instances = self.get_instances()
                 self._services = self.get_services()
