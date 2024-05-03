@@ -10,6 +10,8 @@ import zipfile
 import shutil
 from contextlib import suppress
 
+from os import getenv
+
 
 def print_md_table(settings) -> MarkdownTableWriter:
     writer = MarkdownTableWriter(
@@ -84,8 +86,11 @@ for core in glob("src/common/core/*/plugin.json"):
                 core_settings[core_plugin["name"]] = core_plugin
 
 # Get PRO plugins
-with open("src/VERSION", "r") as f:
-    version = f.read().strip()
+if getenv("VERSION"):
+    version = getenv("VERSION")
+else:
+    with open("src/VERSION", "r") as f:
+        version = f.read().strip()
 url = f"https://assets.bunkerity.com/bw-pro/preview/v{version}.zip"
 response = requests.get(url)
 response.raise_for_status()
@@ -97,9 +102,8 @@ for pro in glob(f"v{version}/*/plugin.json"):
     with open(pro, "r") as f:
         with suppress(Exception):
             pro_plugin = loads(f.read())
-            if len(pro_plugin["settings"]) > 0:
-                core_settings[pro_plugin["name"]] = pro_plugin
-                core_settings[pro_plugin["name"]]["is_pro"] = True
+            core_settings[pro_plugin["name"]] = pro_plugin
+            core_settings[pro_plugin["name"]]["is_pro"] = True
 
 # Print plugins and their settings
 for data in dict(sorted(core_settings.items())).values():
@@ -109,7 +113,8 @@ for data in dict(sorted(core_settings.items())).values():
     print(f"## {data['name']}{pro_crown}\n", file=doc)
     print(f"{stream_support(data['stream'])}\n", file=doc)
     print(f"{data['description']}\n", file=doc)
-    print(print_md_table(data["settings"]), file=doc)
+    if data["settings"]:
+        print(print_md_table(data["settings"]), file=doc)
 
 # Remove zip file
 Path(f"v{version}.zip").unlink()
