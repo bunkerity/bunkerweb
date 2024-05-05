@@ -66,7 +66,7 @@ cffi==1.16.0 \
     --hash=sha256:fa3a0128b152627161ce47201262d3140edb5a5c3da88d73a1b790a959126956 \
     --hash=sha256:fcc8eb6d5902bb1cf6dc4f187ee3ea80a1eba0a89aba40a5cb20a5087d961357
     # via cryptography
-cryptography==42.0.2 \
+cryptography==42.0.6 \
     --hash=sha256:087887e55e0b9c8724cf05361357875adb5c20dec27e5816b653492980d20380 \
     --hash=sha256:09a77e5b2e8ca732a19a90c5bca2d124621a1edb5438c5daa2d2738bfeb02589 \
     --hash=sha256:130c0f77022b2b9c99d8cebcdd834d81705f61c68e91ddd614ce74c657f8b3ea \
