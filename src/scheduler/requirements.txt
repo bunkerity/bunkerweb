@@ -172,7 +172,7 @@ configobj==5.0.8 \
     # via
     #   -r requirements.in
     #   certbot
-cryptography==42.0.5 \
+cryptography==42.0.6 \
     --hash=sha256:0270572b8bd2c833c3981724b8ee9747b3ec96f699a9665470018594301439ee \
     --hash=sha256:111a0d8553afcf8eb02a4fea6ca4f59d48ddb34497aa8706a6cf536f1a5ec576 \
     --hash=sha256:16a48c23a62a2f4a285699dba2e4ff2d1cff3115b9df052cdd976a18856d8e3d \
