@@ -318,6 +318,9 @@ def run_action(plugin: str, function_name: str = ""):
 
         res = method(app=app, args=queries, data=data)
     except AttributeError:
+        if function_name == "pre_render":
+            return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
+
         message = "The plugin does not have a method, see logs for more details"
     except:
         message = "An error occurred while executing the plugin, see logs for more details"
