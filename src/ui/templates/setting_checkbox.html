@@ -8,6 +8,7 @@
     {% set inp_value = setting_input['value'] %}
     {% set global_config_method = global_config.get(inp_name, {'method' : inp_method }).get('method') %}
     {% set global_config_value = global_config.get(inp_name, {'value' : inp_value }).get('value') %}
+    {% set is_read_only = True if setting_input['is_pro_plugin'] and not is_pro_version else False %}
 
     <div data-checkbox-handler="{{ inp_id }}"
             class="relative mb-7 md:mb-0 z-10 ">
@@ -16,9 +17,9 @@
                 name="{{ inp_name_mult }}"
                 data-default-method="{% if inp_name in ['AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE'] %}mode{% else %}{{ global_config_method }}{% endif %}"
                 data-default-value="{{ global_config[inp_name]['value'] }}"
-                {% if inp_name in ['AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE'] or global_config_method != 'ui' and global_config_method != 'default' %} disabled {% endif %}
+                {% if inp_name in ['AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE'] or global_config_method != 'ui' and global_config_method != 'default' or is_read_only %} disabled {% endif %}
                 data-checked="{% if global_config_value == "yes" %}true{% else %}false{% endif %}"
-                checked
+                {% if global_config_value == "yes" %}checked{% endif %}
                 id="checkbox-{{ inp_id }}"
                 class="checkbox"
                 type="checkbox"

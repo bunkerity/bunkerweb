@@ -15,6 +15,7 @@
 - [UI] General : fix select setting crop because of overflow and check if select is out of viewport to determine visible position
 - [UI] General : show logs on UI when pre rendering issue
 - [UI] General : Improve UI performance by using multiple workers for the web server and reducing the number of times we prompt a loading page
+- [UI] General : handle word breaks on dynamic text content
 - [UI] Global config : fix script error while fragment relate to a missing plugin
 - [UI] Global config / services page : filtering settings now open plugin select to highlight remaining plugin
 - [UI] Global config / services page : add combobox on plugin select open to search a plugin quick

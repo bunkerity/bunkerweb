@@ -159,7 +159,7 @@
 }
 
 .settings-tabs-select-btn-svg {
-  @apply ml-4 min-w-fit transition-transform h-4 w-4 fill-primary dark:fill-gray-300;
+  @apply ml-4 min-w-[1rem] transition-transform h-4 w-4 fill-primary dark:fill-gray-300;
 }
 
 .active.settings-tabs-select-dropdown-btn {
