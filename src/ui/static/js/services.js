@@ -223,7 +223,10 @@ class ServiceModal {
     const [action, serviceName, oldServName, isDraft, method] =
       this.getActionData(target);
     this.currAction = action;
-    this.modalTitle.textContent = `${action} ${serviceName}`;
+    // truncate serviceName if more than 15 characters
+    const servName =
+      serviceName.length > 15 ? `${serviceName.slice(0, 15)}...` : serviceName;
+    this.modalTitle.textContent = `${action} ${servName}`;
 
     // show / hide components
     this.hideForms();

@@ -109,7 +109,7 @@
                         data-settings="{{ service['settings'] }}"
 
                      data-{{attribute_name}}-service="{{ service['SERVER_NAME']['value'] }}"
-                     class="dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                     class="flex flex-col justify-between dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
                     <div data-old-name
                          class="hidden"
                          data-value="{{ service['SERVER_NAME']['full_value'] }}"></div>
@@ -120,10 +120,16 @@
                          class="hidden"
                          data-value="{{ service['SERVER_NAME']['method'] }}"></div>
                     <div class="flex justify-between items-start">
-                        <h5 data-{{attribute_name}}-name="{{ service["SERVER_NAME"]['value'] }}"
-                            class="transition duration-300 ease-in-out text-center sm:text-left mb-1 font-bold dark:text-white/90">
+                        <div class="flex flex-col">
+                            <h5 data-{{attribute_name}}-name="{{ service["SERVER_NAME"]['value'] }}"
+                            class="break-all transition duration-300 ease-in-out text-center sm:text-left mb-1 mr-2 font-bold dark:text-white/90">
                             {{ service["SERVER_NAME"]['value'] }}
                         </h5>
+                        <h6 data-{{attribute_name}}-method="{{ service["SERVER_NAME"]['method'] }}"
+                        class="text-left sm:mb-2 font-semibold text-gray-600 dark:text-white/80">
+                        {{ service["SERVER_NAME"]['method'] }}
+                        </h6>
+                        </div>
                         {% if service.get('IS_DRAFT', "no") == "yes" and service["SERVER_NAME"]['method'] in ["ui", "default"] %}
                             <button class="group relative">
                                 <p data-{{attribute_name}}-state="draft"
@@ -153,10 +159,6 @@
                             </button>
                         {% endif %}
                     </div>
-                    <h6 data-{{attribute_name}}-method="{{ service["SERVER_NAME"]['method'] }}"
-                        class="text-left sm:mb-2 font-semibold text-gray-600 dark:text-white/80">
-                        {{ service["SERVER_NAME"]['method'] }}
-                    </h6>
                     {% set details = [
                         {
                             "name": "Reverse proxy",

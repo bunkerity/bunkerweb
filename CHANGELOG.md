@@ -18,8 +18,8 @@
 - [UI] Global config : fix script error while fragment relate to a missing plugin
 - [UI] Global config / services page : filtering settings now open plugin select to highlight remaining plugin
 - [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
-- [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
 - [UI] Global config / services page : add order for settings to always respect the order defined in the plugin
+- [UI] Services page : show any invalid setting value on setting modal and disabled save if case
 - [UI] Reporting page : fix missing data and add new ones
 - [UI] Account page : keep license key form even if pro register to easy update
 - [UI] Wizard : Add the possibility to still configure reverse proxy even if an admin user already exists

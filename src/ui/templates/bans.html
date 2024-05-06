@@ -74,6 +74,7 @@
                 "values": terms
             }
         ] %}
+    {% set is_filter_hidden = True if bans|length == 0 else False %}
         {% include "card_filter.html" %}
         {% include "filter_nomatch.html" %}
 

@@ -47,7 +47,7 @@
         </div>
         <div class="mt-2 w-full px-1">
             <h1 class="mb-0.5 tracking-normal text-primary text-center text-lg break-words whitespace-normal dark:text-gray-300">
-                {{ username }}
+                {{ username|truncate(10, True, '...')}}
             </h1>
             <a class="block underline mb-2 text-gray-600 dark:text-gray-400 text-sm text-center hover:brightness-90"
                href="{% if current_endpoint == 'account' %}#{% else %}{{ url_for("account") }}{% endif %}">manage account

@@ -155,7 +155,11 @@
 }
 
 .settings-tabs-select-btn-text {
-  @apply transition duration-300 ease-in-out dark:text-gray-400 text-primary;
+  @apply transition break-all duration-300 ease-in-out dark:text-gray-400 text-primary;
+}
+
+.settings-tabs-select-btn-svg {
+  @apply ml-4 min-w-fit transition-transform h-4 w-4 fill-primary dark:fill-gray-300;
 }
 
 .active.settings-tabs-select-dropdown-btn {
@@ -171,7 +175,7 @@
 }
 
 .settings-tabs-select-dropdown-btn {
-  @apply flex justify-between border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200;
+  @apply break-all flex justify-between border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200;
 }
 
 /*---------------------------------------------*/
@@ -183,7 +187,7 @@
 /*---------------------------------------------*/
 
 .home-card {
-  @apply dark:brightness-110 sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply break-all break-words dark:brightness-110 sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .home-card-name {
@@ -215,7 +219,7 @@
 }
 
 .home-card-svg-container {
-  @apply dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
+  @apply min-w-12 dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
 }
 
 .version.home-card-svg-container {
@@ -255,11 +259,11 @@
 }
 
 .card-detail-item-title {
-  @apply transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
+  @apply min-w-fit transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
 }
 
 .card-detail-item-subtitle {
-  @apply break-all transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
+  @apply min-w-[2rem] break-all transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
 }
 
 /*---------------------------------------------*/
@@ -387,7 +391,7 @@
 }
 
 .core-card-list-title {
-  @apply mb-4 mt-2 font-bold dark:text-white/90 mx-2;
+  @apply mb-4 font-bold dark:text-white/90;
 }
 
 .core-card-list-container {
@@ -585,3 +589,87 @@
 .file-manager-actions-item-btn {
   @apply rounded dark:text-gray-200 text-primary whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative pl-4 pr-5 pb-2.5 pt-3 font-bold text-center uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
+
+/*----------------------------------------------*/
+/*---------------PLUGINS PAGE-------------------*/
+/*----------------------------------------------*/
+
+.plugins-list-container {
+  @apply overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.plugins-list-container-title-container {
+  @apply col-span-12;
+}
+
+.plugins-list-container-title {
+  @apply mx-2 font-bold dark:text-white/90 mx-2;
+}
+
+.plugins-list-items-container {
+  @apply min-h-[55vh] max-h-80 overflow-auto p-2 col-span-12 relative;
+}
+
+.plugins-list-items-wrap {
+  @apply grid grid-cols-12 gap-3;
+}
+
+.plugins-list-items {
+  @apply py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded;
+}
+
+.enabled.plugins-list-items {
+  @apply bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800;
+}
+
+.disabled.plugins-list-items {
+  @apply cursor-not-allowed bg-gray-300 dark:bg-gray-800;
+}
+
+.plugins-list-items-name {
+  @apply ml-3 mr-2 break-all break-words mb-0 transition duration-300 ease-in-out text-left text-sm md:text-base text-slate-700 dark:text-gray-200;
+}
+
+.disabled.plugins-list-items-name {
+  @apply opacity-80 dark:opacity-60;
+}
+
+.plugins-list-items-actions {
+  @apply flex items-center;
+}
+
+.plugins-list-items-delete {
+  @apply z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px;
+}
+
+.plugins-list-items-delete-svg {
+  @apply h-5 w-5 fill-red-500 dark:brightness-90;
+}
+
+.plugins-list-items-link {
+  @apply hover:-translate-y-px mx-1;
+}
+
+.plugins-list-items-link-svg {
+  @apply h-6 w-6 fill-sky-500 dark dark:brightness-90;
+}
+
+.plugins-list-items-pro {
+  @apply hover:-translate-y-px mx-1 -translate-y-0.5;
+}
+
+.plugins-list-items-pro-svg {
+  @apply h-6 w-6 dark:brightness-90;
+}
+
+/*----------------------------------------------*/
+/*---------------END PLUGINS PAGE---------------*/
+/*----------------------------------------------*/
+
+/*----------------------------------------------*/
+/*---------------SERVICES PAGE------------------*/
+/*----------------------------------------------*/
+
+/*----------------------------------------------*/
+/*---------------END SERVICES PAGE--------------*/
+/*----------------------------------------------*/
