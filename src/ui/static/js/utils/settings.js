@@ -1149,7 +1149,11 @@ class Settings {
 
   setDisabledByMethod(inp, method) {
     // Check if pro
-    const proDisabled = inp.closest('[data-plugin-item]').hasAttribute('data-pro-disabled') ? true : false;
+    const proDisabled = inp
+      .closest("[data-plugin-item]")
+      .hasAttribute("data-pro-disabled")
+      ? true
+      : false;
     if (proDisabled) return inp.setAttribute("disabled", "");
     if (method === "ui" || method === "default") {
       inp.removeAttribute("disabled");
@@ -1272,12 +1276,16 @@ class Settings {
               inp.setAttribute("data-method", method);
             }
 
-            const proDisabled = inp.closest('[data-plugin-item]').hasAttribute('data-pro-disabled') ? true : false;
+            const proDisabled = inp
+              .closest("[data-plugin-item]")
+              .hasAttribute("data-pro-disabled")
+              ? true
+              : false;
 
             if (proDisabled) return inp.setAttribute("disabled", "");
 
-            if (this.forceEnabled) return  inp.removeAttribute("disabled");
-            
+            if (this.forceEnabled) return inp.removeAttribute("disabled");
+
             if (method === "ui" || method === "default") {
               inp.removeAttribute("disabled");
             } else {
@@ -1285,7 +1293,6 @@ class Settings {
             }
 
             if (global) inp.removeAttribute("disabled");
-          
           });
         } catch (err) {}
       }
@@ -1324,6 +1331,7 @@ class SettingsMultiple extends Settings {
             .closest("button")
             .hasAttribute(`data-${this.prefix}-multiple-add`)
         ) {
+          if (this.isAvoidAction(e.target)) return;
           //get plugin from btn
           const btn = e.target.closest("button");
           const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
@@ -1391,6 +1399,7 @@ class SettingsMultiple extends Settings {
             .closest("button")
             .hasAttribute(`data-${this.prefix}-multiple-delete`)
         ) {
+          if (this.isAvoidAction(e.target)) return;
           // We are not removing it really, just hiding it and update values to default
           // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
           const multContainer = e.target.closest(
@@ -1448,6 +1457,16 @@ class SettingsMultiple extends Settings {
         //remove last child
       } catch (err) {}
     });
+  }
+
+  isAvoidAction(target) {
+    // check that not disabled pro plugin
+    const proDisabled = target
+      .closest("[data-plugin-item]")
+      .hasAttribute("data-pro-disabled")
+      ? true
+      : false;
+    return true;
   }
 
   removePrevMultiples() {
