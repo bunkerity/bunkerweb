@@ -1,0 +1,329 @@
+{
+  "IS_LOADING": {
+    "context": "global",
+    "default": "no",
+    "help": "Internal use : set to yes when BW is loading.",
+    "id": "internal-use-loading",
+    "label": "internal use loading",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "NGINX_PREFIX": {
+    "context": "global",
+    "default": "/etc/nginx/",
+    "help": "Where nginx will search for configurations.",
+    "id": "nginx-prefix",
+    "label": "nginx prefix",
+    "regex": "^(\\/[\\-\\w.\\s]+)*\\/$",
+    "type": "text"
+  },
+  "HTTP_PORT": {
+    "context": "global",
+    "default": "8080",
+    "help": "HTTP port number which bunkerweb binds to.",
+    "id": "http-port",
+    "label": "HTTP port",
+    "regex": "^\\d+$",
+    "type": "text"
+  },
+  "HTTPS_PORT": {
+    "context": "global",
+    "default": "8443",
+    "help": "HTTPS port number which bunkerweb binds to.",
+    "id": "https-port",
+    "label": "HTTPS port",
+    "regex": "^\\d+$",
+    "type": "text"
+  },
+  "MULTISITE": {
+    "context": "global",
+    "default": "no",
+    "help": "Multi site activation.",
+    "id": "multisite",
+    "label": "Multisite",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "SERVER_NAME": {
+    "context": "multisite",
+    "default": "www.example.com",
+    "help": "List of the virtual hosts served by bunkerweb.",
+    "id": "server-name",
+    "label": "Server name",
+    "regex": "^((\\S{1,255})(?!.*\\s\\2(\\s|$)))?(\\s(\\S{1,255})(?!.*\\s\\5(\\s|$)))*$",
+    "type": "text"
+  },
+  "WORKER_PROCESSES": {
+    "context": "global",
+    "default": "auto",
+    "help": "Number of worker processes.",
+    "id": "worker-processes",
+    "label": "Worker processes",
+    "regex": "^(auto|\\d+)$",
+    "type": "text"
+  },
+  "WORKER_RLIMIT_NOFILE": {
+    "context": "global",
+    "default": "2048",
+    "help": "Maximum number of open files for worker processes.",
+    "id": "worker-rlimit-nofile",
+    "label": "Open files per worker",
+    "regex": "^\\d+$",
+    "type": "text"
+  },
+  "WORKER_CONNECTIONS": {
+    "context": "global",
+    "default": "1024",
+    "help": "Maximum number of connections per worker.",
+    "id": "worker-connections",
+    "label": "Connections per worker",
+    "regex": "^\\d+$",
+    "type": "text"
+  },
+  "LOG_FORMAT": {
+    "context": "global",
+    "default": "$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
+    "help": "The format to use for access logs.",
+    "id": "log-format",
+    "label": "Log format",
+    "regex": "^.*$",
+    "type": "text"
+  },
+  "LOG_LEVEL": {
+    "context": "global",
+    "default": "notice",
+    "help": "The level to use for error logs.",
+    "id": "log-level",
+    "label": "Log level",
+    "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
+    "type": "select",
+    "select": [
+      "debug",
+      "info",
+      "notice",
+      "warn",
+      "error",
+      "crit",
+      "alert",
+      "emerg"
+    ]
+  },
+  "DNS_RESOLVERS": {
+    "context": "global",
+    "default": "127.0.0.11",
+    "help": "DNS addresses of resolvers to use.",
+    "id": "dns-resolvers",
+    "label": "DNS resolvers",
+    "regex": "^(?! )(( *[^ ]+)(?!.*\\2))*$",
+    "type": "text"
+  },
+  "DATASTORE_MEMORY_SIZE": {
+    "context": "global",
+    "default": "64m",
+    "help": "Size of the internal datastore.",
+    "id": "datastore-memory-size",
+    "label": "Datastore memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "CACHESTORE_MEMORY_SIZE": {
+    "context": "global",
+    "default": "64m",
+    "help": "Size of the internal cachestore.",
+    "id": "cachestore-memory-size",
+    "label": "Cachestore memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "CACHESTORE_IPC_MEMORY_SIZE": {
+    "context": "global",
+    "default": "16m",
+    "help": "Size of the internal cachestore (ipc).",
+    "id": "cachestore-ipc-memory-size",
+    "label": "Cachestore ipc memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "CACHESTORE_MISS_MEMORY_SIZE": {
+    "context": "global",
+    "default": "16m",
+    "help": "Size of the internal cachestore (miss).",
+    "id": "cachestore-miss-memory-size",
+    "label": "Cachestore miss memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "CACHESTORE_LOCKS_MEMORY_SIZE": {
+    "context": "global",
+    "default": "16m",
+    "help": "Size of the internal cachestore (locks).",
+    "id": "cachestore-locks-memory-size",
+    "label": "Cachestore locks memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
+  "USE_API": {
+    "context": "global",
+    "default": "yes",
+    "help": "Activate the API to control BunkerWeb.",
+    "id": "use-api",
+    "label": "Activate API",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "API_HTTP_PORT": {
+    "context": "global",
+    "default": "5000",
+    "help": "Listen port number for the API.",
+    "id": "api-http-listen",
+    "label": "API port number",
+    "regex": "^\\d+$",
+    "type": "text"
+  },
+  "API_LISTEN_IP": {
+    "context": "global",
+    "default": "0.0.0.0",
+    "help": "Listen IP address for the API.",
+    "id": "api-ip-listen",
+    "label": "API listen IP",
+    "regex": "^.*$",
+    "type": "text"
+  },
+  "API_SERVER_NAME": {
+    "context": "global",
+    "default": "bwapi",
+    "help": "Server name (virtual host) for the API.",
+    "id": "api-server-name",
+    "label": "API server name",
+    "regex": "^[^ ]{1,255}$",
+    "type": "text"
+  },
+  "API_WHITELIST_IP": {
+    "context": "global",
+    "default": "127.0.0.0/8",
+    "help": "List of IP/network allowed to contact the API.",
+    "id": "api-whitelist-ip",
+    "label": "API whitelist IP",
+    "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
+    "type": "text"
+  },
+  "AUTOCONF_MODE": {
+    "context": "global",
+    "default": "no",
+    "help": "Enable Autoconf Docker integration.",
+    "id": "autoconf-mode",
+    "label": "Autoconf mode",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "SWARM_MODE": {
+    "context": "global",
+    "default": "no",
+    "help": "Enable Docker Swarm integration.",
+    "id": "swarm-mode",
+    "label": "Swarm mode",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "KUBERNETES_MODE": {
+    "context": "global",
+    "default": "no",
+    "help": "Enable Kubernetes integration.",
+    "id": "kubernetes-mode",
+    "label": "Kubernetes mode",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "SERVER_TYPE": {
+    "context": "multisite",
+    "default": "http",
+    "help": "Server type : http or stream.",
+    "id": "server-type",
+    "label": "Server type",
+    "regex": "^(http|stream)$",
+    "type": "select",
+    "select": ["http", "stream"]
+  },
+  "LISTEN_STREAM": {
+    "context": "multisite",
+    "default": "yes",
+    "help": "Enable listening for non-ssl (passthrough).",
+    "id": "listen-stream",
+    "label": "Listen stream",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "LISTEN_STREAM_PORT": {
+    "context": "multisite",
+    "default": "1337",
+    "help": "Listening port for non-ssl (passthrough).",
+    "id": "listen-stream-port",
+    "label": "Listen stream port",
+    "regex": "^[0-9]+$",
+    "type": "text"
+  },
+  "LISTEN_STREAM_PORT_SSL": {
+    "context": "multisite",
+    "default": "4242",
+    "help": "Listening port for ssl (passthrough).",
+    "id": "listen-stream-port-ssl",
+    "label": "Listen stream port ssl",
+    "regex": "^[0-9]+$",
+    "type": "text"
+  },
+  "USE_UDP": {
+    "context": "multisite",
+    "default": "no",
+    "help": "UDP listen instead of TCP (stream).",
+    "id": "use-udp",
+    "label": "Listen UDP",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "USE_IPV6": {
+    "context": "global",
+    "default": "no",
+    "help": "Enable IPv6 connectivity.",
+    "id": "use-ipv6",
+    "label": "Use IPv6",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "IS_DRAFT": {
+    "context": "multisite",
+    "default": "no",
+    "help": "Internal use : set to yes when the service is in draft mode.",
+    "id": "internal-use-draft",
+    "label": "internal use draft",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "TIMERS_LOG_LEVEL": {
+    "context": "global",
+    "default": "debug",
+    "help": "Log level for timers.",
+    "id": "timers-log-level",
+    "label": "Timers log level",
+    "regex": "^(debug|info|notice|warn|err|crit|alert|emerg)$",
+    "type": "select",
+    "select": [
+      "debug",
+      "info",
+      "notice",
+      "warn",
+      "err",
+      "crit",
+      "alert",
+      "emerg"
+    ]
+  },
+  "OVERRIDE_INSTANCES": {
+    "context": "global",
+    "default": "",
+    "help": "List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 fqdn-or-ip:5000)",
+    "id": "override-instances",
+    "label": "Override instances",
+    "regex": "^.*$",
+    "type": "text"
+  }
+}
