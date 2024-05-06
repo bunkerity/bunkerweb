@@ -44,7 +44,7 @@
     },
     "REVERSE_PROXY_URL": {
       "context": "multisite",
-      "default": "",
+      "default": "/",
       "help": "Location URL that will be proxied.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
