@@ -1,7 +1,9 @@
 from wtforms import Form
-from wtforms.fields import Field, StringField, BooleanField, SelectField, PasswordField
+from wtforms.fields import Field, StringField, BooleanField, SelectField, PasswordField, FormField
 from wtforms.validators import Regexp
 from wtforms.widgets import CheckboxInput
+
+from re import search
 
 class BWBooleanField(Field):
 
@@ -31,9 +33,16 @@ class BWBooleanField(Field):
             return str(self.raw_data[0])
         return "yes"
 
+def number_from_setting_name(setting):
+    res = search(r"_([0-9]+)$", setting)
+    if res:
+        return res.group(1)
+    return "0"
+
 def settings_to_form(settings):
     class SettingsForm(Form):
         pass
+    bw_multiple_forms = {}
     for setting, data in settings.items():
         field_type = None
         field_data = dict(
@@ -70,13 +79,43 @@ def settings_to_form(settings):
         else:
             print(f"unsupported type {data['type']}")
             continue
+        if "multiple" not in data:
+            setattr(
+                SettingsForm,
+                setting,
+                field_type(
+                    **field_data
+                )
+            )
+        else:
+            class BWMultipleForm(Form):
+                pass
+            multiple_key = f"{data['multiple']}-{number_from_setting_name(setting)}"
+            if multiple_key not in bw_multiple_forms:
+                bw_multiple_forms[multiple_key] = BWMultipleForm
+            setattr(
+                bw_multiple_forms[multiple_key],
+                setting,
+                field_type(
+                    **field_data
+                )
+            )
+    for multiple, form in bw_multiple_forms.items():
         setattr(
             SettingsForm,
-            setting,
-            field_type(
-                **field_data
-            )
+            multiple,
+            FormField(form)
         )
     return SettingsForm
 
-
+def compute_form(client_form, request_form, settings):
+    for key, value in request_form.items():
+        real_key = key
+        res = search(r"_([0-9]+)$", setting)
+        if res:
+            real_key = "_".join(key.split("_")[:-1])
+        if real_key in settings:
+            setattr(
+                client_form,
+                key,
+            )

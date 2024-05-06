@@ -1,0 +1,114 @@
+{
+  "id": "limit",
+  "name": "Limit",
+  "description": "Limit maximum number of requests and connections.",
+  "version": "1.0",
+  "stream": "partial",
+  "settings": {
+    "USE_LIMIT_REQ": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Activate limit requests feature.",
+      "id": "use-limit-req",
+      "label": "Activate limit requests",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "LIMIT_REQ_URL": {
+      "context": "multisite",
+      "default": "/",
+      "help": "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
+      "id": "limit-req-url",
+      "label": "Limit request URL",
+      "regex": "^.+$",
+      "type": "text",
+      "multiple": "limit-req"
+    },
+    "LIMIT_REQ_RATE": {
+      "context": "multisite",
+      "default": "2r/s",
+      "help": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
+      "id": "limit-req-rate",
+      "label": "Limit request Rate",
+      "regex": "^\\d+r/[smhd]$",
+      "type": "text",
+      "multiple": "limit-req"
+    },
+    "LIMIT_REQ_URL_1": {
+      "context": "multisite",
+      "default": "/",
+      "help": "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
+      "id": "limit-req-url",
+      "label": "Limit request URL",
+      "regex": "^.+$",
+      "type": "text",
+      "multiple": "limit-req"
+    },
+    "LIMIT_REQ_RATE_1": {
+      "context": "multisite",
+      "default": "2r/s",
+      "help": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
+      "id": "limit-req-rate",
+      "label": "Limit request Rate",
+      "regex": "^\\d+r/[smhd]$",
+      "type": "text",
+      "multiple": "limit-req"
+    },
+    "LIMIT_REQ_URL_2": {
+      "context": "multisite",
+      "default": "/",
+      "help": "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
+      "id": "limit-req-url",
+      "label": "Limit request URL",
+      "regex": "^.+$",
+      "type": "text",
+      "multiple": "limit-req"
+    },
+    "LIMIT_REQ_RATE_2": {
+      "context": "multisite",
+      "default": "2r/s",
+      "help": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
+      "id": "limit-req-rate",
+      "label": "Limit request Rate",
+      "regex": "^\\d+r/[smhd]$",
+      "type": "text",
+      "multiple": "limit-req"
+    },
+    "USE_LIMIT_CONN": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Activate limit connections feature.",
+      "id": "use-limit-conn",
+      "label": "Activate limit connections",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "LIMIT_CONN_MAX_HTTP1": {
+      "context": "multisite",
+      "default": "10",
+      "help": "Maximum number of connections per IP when using HTTP/1.X protocol.",
+      "id": "limit-conn-max-http1",
+      "label": "Maximum number of HTTP/1.X connections",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
+    "LIMIT_CONN_MAX_HTTP2": {
+      "context": "multisite",
+      "default": "100",
+      "help": "Maximum number of streams per IP when using HTTP/2 protocol.",
+      "id": "limit-conn-max-http2",
+      "label": "Maximum number of HTTP/2 streams",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
+    "LIMIT_CONN_MAX_STREAM": {
+      "context": "multisite",
+      "default": "10",
+      "help": "Maximum number of connections per IP when using stream.",
+      "id": "limit-conn-max-stream",
+      "label": "Maximum number of stream connections",
+      "regex": "^\\d+$",
+      "type": "text"
+    }
+  }
+}

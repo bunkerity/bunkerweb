@@ -6,9 +6,11 @@ from forms import settings_to_form
 app = Flask(__name__)
 
 @app.route("/global", methods=['GET', 'POST'])
-def login():
-	with open("settings.json") as f:
-		settings = loads(f.read())
+def global_settings():
+	# with open("settings.json") as f:
+	# 	settings = loads(f.read())
+	with open("limit.json") as f:
+		settings = loads(f.read())["settings"]
 	form = settings_to_form(settings)(request.form)
 	if request.method == "POST" and form.validate():
 		for field in form:
