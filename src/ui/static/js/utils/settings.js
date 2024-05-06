@@ -1149,11 +1149,7 @@ class Settings {
 
   setDisabledByMethod(inp, method) {
     // Check if pro
-    const proDisabled = inp
-      .closest("[data-plugin-item]")
-      .hasAttribute("data-pro-disabled")
-      ? true
-      : false;
+    const proDisabled = inp.closest('[data-plugin-item]').hasAttribute('data-pro-disabled') ? true : false;
     if (proDisabled) return inp.setAttribute("disabled", "");
     if (method === "ui" || method === "default") {
       inp.removeAttribute("disabled");
@@ -1276,16 +1272,12 @@ class Settings {
               inp.setAttribute("data-method", method);
             }
 
-            const proDisabled = inp
-              .closest("[data-plugin-item]")
-              .hasAttribute("data-pro-disabled")
-              ? true
-              : false;
+            const proDisabled = inp.closest('[data-plugin-item]').hasAttribute('data-pro-disabled') ? true : false;
 
             if (proDisabled) return inp.setAttribute("disabled", "");
 
-            if (this.forceEnabled) return inp.removeAttribute("disabled");
-
+            if (this.forceEnabled) return  inp.removeAttribute("disabled");
+            
             if (method === "ui" || method === "default") {
               inp.removeAttribute("disabled");
             } else {
@@ -1293,6 +1285,7 @@ class Settings {
             }
 
             if (global) inp.removeAttribute("disabled");
+          
           });
         } catch (err) {}
       }
