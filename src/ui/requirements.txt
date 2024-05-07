@@ -37,9 +37,9 @@ beautifulsoup4==4.12.3 \
     --hash=sha256:74e3d1928edc070d21748185c46e3fb33490f22f52a3addee9aee0f4f7781051 \
     --hash=sha256:b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed
     # via -r requirements.in
-blinker==1.8.1 \
-    --hash=sha256:5f1cdeff423b77c31b89de0565cd03e5275a03028f44b2b15f912632a58cced6 \
-    --hash=sha256:da44ec748222dcd0105ef975eed946da197d5bdf8bafb6aa92f5bc89da63fa25
+blinker==1.8.2 \
+    --hash=sha256:1779309f71bf239144b9399d06ae925637cf6634cf6bd131104184531bf67c01 \
+    --hash=sha256:8f77b09d3bf7c795e969e9486f39c2c5e9c39d4ee07424be2bc594ece9642d83
     # via flask
 click==8.1.7 \
     --hash=sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28 \
