@@ -962,15 +962,18 @@ def services():
 
         curr_changes = db.check_changes()
 
+        old_server_name = request.form.get("OLD_SERVER_NAME", "")
+        operation = request.form["operation"]
+
         def update_services(threaded: bool = False):
             wait_applying()
 
             manage_bunkerweb(
                 "services",
                 variables,
-                request.form.get("OLD_SERVER_NAME", ""),
+                old_server_name,
                 variables.get("SERVER_NAME", ""),
-                operation=request.form["operation"],
+                operation=operation,
                 is_draft=is_draft,
                 was_draft=was_draft,
                 threaded=threaded,
@@ -992,7 +995,7 @@ def services():
         if request.form["operation"] == "new":
             message = f"Creating {'draft ' if is_draft else ''}service {variables.get('SERVER_NAME', '').split(' ')[0]}"
         elif request.form["operation"] == "edit":
-            message = f"Saving configuration for {'draft ' if is_draft else ''}service {request.form.get('OLD_SERVER_NAME', '').split(' ')[0]}"
+            message = f"Saving configuration for {'draft ' if is_draft else ''}service {old_server_name.split(' ')[0]}"
         elif request.form["operation"] == "delete":
             message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
 
