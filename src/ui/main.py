@@ -1234,6 +1234,8 @@ def plugins():
             if variables["type"] in ("core", "pro"):
                 return redirect_flash_error(f"Can't delete {variables['type']} plugin {variables['name']}", "plugins", True)
 
+            wait_applying()
+
             plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
             for x, plugin in enumerate(plugins):
                 if plugin["id"] == variables["name"]:
@@ -1412,6 +1414,8 @@ def plugins():
 
             if errors >= files_count:
                 return redirect(url_for("loading", next=url_for("plugins")))
+
+            wait_applying()
 
             plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
             for plugin in deepcopy(plugins):
