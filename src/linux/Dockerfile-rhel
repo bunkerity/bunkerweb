@@ -79,6 +79,16 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
+# Copy centos repo
+COPY src/linux/centos.repo /etc/yum.repos.d/centos.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/centos.repo
+
+# Copy RPM-GPG-KEY-CentOS-Official
+COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+# Import RPM-GPG-KEY-CentOS-Official
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
 # Install fpm
 RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
