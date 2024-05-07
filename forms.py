@@ -110,12 +110,17 @@ def settings_to_form(settings):
 
 def compute_form(client_form, request_form, settings):
     for key, value in request_form.items():
+        print(key)
         real_key = key
-        res = search(r"_([0-9]+)$", setting)
+        res = search(r"([a-z\-]+\-[0-9]+\-).*_([0-9]+)$", key)
         if res:
-            real_key = "_".join(key.split("_")[:-1])
-        if real_key in settings:
+            real_key = "_".join(key.replace(res.group(1), "").split("_")[:-1])
+        if real_key in settings and "multiple" in settings[real_key]:
             setattr(
                 client_form,
                 key,
+                StringField(
+                    validators=[Regexp(settings[real_key]["regex"])]
+                )
             )
+    return client_form

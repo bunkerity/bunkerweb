@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 from json import loads
 
-from forms import settings_to_form
+from forms import settings_to_form, compute_form
 
 app = Flask(__name__)
 
@@ -12,7 +12,10 @@ def global_settings():
 	with open("limit.json") as f:
 		settings = loads(f.read())["settings"]
 	form = settings_to_form(settings)(request.form)
-	if request.method == "POST" and form.validate():
+	if request.method == "POST":
+		form = compute_form(form, request.form, settings)
+		if not form.validate():
+			print("error validate")
 		for field in form:
 			print(f"field {field.id} = {field.data}")
 	print(form.errors)
