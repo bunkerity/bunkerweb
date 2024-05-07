@@ -89,12 +89,22 @@ signal(SIGTERM, handle_stop)
 def handle_reload(signum, frame):
     try:
         if SCHEDULER is not None and RUN:
-            # Get the env by reading the .env file
-            tmp_env = dotenv_values(join(sep, "etc", "bunkerweb", "variables.env"))
-            if SCHEDULER.reload(tmp_env):
-                logger.info("Reload successful")
-            else:
-                logger.error("Reload failed")
+            # run the config saver
+            proc = subprocess_run(
+                [
+                    "python3",
+                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                    "--settings",
+                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    "--variables",
+                    join(sep, "etc", "bunkerweb", "variables.env"),
+                ],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                logger.error("Config saver failed, configuration will not work as expected...")
         else:
             logger.warning("Ignored reload operation because scheduler is not running ...")
     except:
@@ -591,19 +601,10 @@ if __name__ == "__main__":
 
         while True:
             threads.clear()
-            ret = db.checked_changes(CHANGES)
-
-            if ret:
-                logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-                stop(1)
 
             if RUN_JOBS_ONCE:
-                # Update the environment variables of the scheduler
-                SCHEDULER.env = env | environ
-                SCHEDULER.setup()
-
                 # Only run jobs once
-                if not SCHEDULER.run_once():
+                if not SCHEDULER.reload(env | environ):
                     logger.error("At least one job in run_once() failed")
                 else:
                     logger.info("All jobs in run_once() were successful")
@@ -683,6 +684,12 @@ if __name__ == "__main__":
                     logger.warning("No BunkerWeb instance found, skipping nginx reload ...")
             except:
                 logger.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
+
+            ret = db.checked_changes(CHANGES)
+
+            if ret:
+                logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+                stop(1)
 
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False

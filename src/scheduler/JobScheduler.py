@@ -325,7 +325,7 @@ class JobScheduler(ApiCaller):
         ret = True
         try:
             self.__env = env
-            super().__init__(apis or [])
+            super().__init__(apis or self.apis)
             self.clear()
             self.__jobs = self.__get_jobs()
             ret = self.run_once()
