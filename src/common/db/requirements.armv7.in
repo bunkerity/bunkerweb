@@ -1,4 +1,4 @@
-cryptography==42.0.6
+cryptography==42.0.7
 psycopg[c,pool]==3.1.18
 PyMySQL==1.1.0
 sqlalchemy==2.0.30
