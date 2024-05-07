@@ -24,7 +24,6 @@ from docker.errors import NotFound as docker_NotFound, APIError as docker_APIErr
 from flask import Flask, Response, flash, jsonify, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError
-from glob import glob
 from hashlib import sha256
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
@@ -42,7 +41,7 @@ from subprocess import PIPE, Popen, call
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread, Lock
 from tempfile import NamedTemporaryFile
-from time import time
+from time import sleep, time
 from werkzeug.utils import secure_filename
 from zipfile import BadZipFile, ZipFile
 
@@ -174,6 +173,22 @@ LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 
 
+def wait_applying():
+    for i in range(31):
+        curr_changes = db.check_changes()
+        if isinstance(curr_changes, str):
+            app.logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
+        elif not any(curr_changes.values()):
+            break
+        else:
+            app.logger.warning(
+                "Scheduler is already applying a configuration, retrying in 1 seconds ...",
+            )
+        sleep(1)
+    if i >= 30:
+        app.logger.error("Too many retries while waiting for scheduler to apply configuration...")
+
+
 def get_ui_data():
     ui_data = "Error"
     while ui_data == "Error":
@@ -191,43 +206,29 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         ui_data["TO_FLASH"] = []
 
     if method == "services":
-        service_custom_confs = glob(join(sep, "etc", "bunkerweb", "configs", "*", args[1].split(" ")[0]))
-        moved = False
-        deleted = False
+        wait_applying()
 
         if operation == "new":
             operation, error = app.config["CONFIG"].new_service(args[0], is_draft=is_draft)
         elif operation == "edit":
-            if args[1].split(" ")[0] != args[2].split(" ")[0] and service_custom_confs:
-                for service_custom_conf in service_custom_confs:
-                    if listdir(service_custom_conf):
-                        move(service_custom_conf, service_custom_conf.replace(f"{sep}{args[1].split(' ')[0]}", f"{sep}{args[2].split(' ')[0]}"))
-                        moved = True
-            operation, error = app.config["CONFIG"].edit_service(
-                args[1], args[0], check_changes=(was_draft != is_draft or not is_draft) and not moved, is_draft=is_draft
-            )
+            operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
         elif operation == "delete":
-            for service_custom_conf in glob(join(sep, "etc", "bunkerweb", "configs", "*", args[2].split(" ")[0])):
-                if listdir(service_custom_conf):
-                    rmtree(service_custom_conf, ignore_errors=True)
-                    deleted = True
-            operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft) and not deleted)
+            operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
 
         if error:
             ui_data["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
             ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
 
-            if (was_draft != is_draft or not is_draft) and (moved or deleted):
+            if was_draft != is_draft or not is_draft:
                 # update changes in db
                 ret = db.checked_changes(["config", "custom_configs"], value=True)
                 if ret:
                     app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
                     ui_data["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
-    if method == "global_config":
+    elif method == "global_config":
+        wait_applying()
         operation = app.config["CONFIG"].edit_global_conf(args[0])
-    elif method == "plugins":
-        app.config["CONFIG"].reload_config()
 
     if operation == "reload":
         operation = app.config["INSTANCES"].reload_instance(args[0])
@@ -1423,9 +1424,6 @@ def plugins():
                 flash(f"Couldn't update external plugins to database: {err}", "error")
             else:
                 flash("Plugins uploaded successfully")
-
-        # Reload instances
-        manage_bunkerweb("plugins")
 
         return redirect(url_for("loading", next=url_for("plugins"), message="Reloading plugins"))
 
