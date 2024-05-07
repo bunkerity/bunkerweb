@@ -1466,7 +1466,8 @@ class SettingsMultiple extends Settings {
       .hasAttribute("data-pro-disabled")
       ? true
       : false;
-    return true;
+      
+    return proDisabled;
   }
 
   removePrevMultiples() {

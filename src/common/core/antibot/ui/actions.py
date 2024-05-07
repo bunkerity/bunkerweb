@@ -9,14 +9,14 @@ def pre_render(**kwargs):
                 "value": data.get("counter_failed_challenges", 0),
                 "title": "Challenge",
                 "subtitle": "Failed",
-                "subtitle_color": "info",
-                "svg_color": "blue",
+                "subtitle_color": "error",
+                "svg_color": "red",
             }
         }
     except BaseException:
         print(format_exc(), flush=True)
         return {
-            "counter_failed_challenges": {"value": "unknown", "title": "Challenge", "subtitle": "Failed", "subtitle_color": "info", "svg_color": "blue"},
+            "counter_failed_challenges": {"value": "unknown", "title": "Challenge", "subtitle": "Failed", "subtitle_color": "error", "svg_color": "red"},
             "error": format_exc(),
         }
 
