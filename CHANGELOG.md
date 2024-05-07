@@ -17,6 +17,8 @@
 - [UI] General : show logs on UI when pre rendering issue
 - [UI] General : Improve UI performance by using multiple workers for the web server and reducing the number of times we prompt a loading page
 - [UI] General : handle word breaks on dynamic text content
+- [UI] General : fix overflow issue with tables on Safari
+- [UI] General : fix static resources issue with firefox leading to loop requests
 - [UI] Global config : fix script error while fragment relate to a missing plugin
 - [UI] Global config / services page : filtering settings now open plugin select to highlight remaining plugin
 - [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
