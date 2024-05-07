@@ -1466,7 +1466,7 @@ class SettingsMultiple extends Settings {
       .hasAttribute("data-pro-disabled")
       ? true
       : false;
-      
+
     return proDisabled;
   }
 

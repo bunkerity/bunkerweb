@@ -64,11 +64,11 @@
     data-checked:disabled:bg-gray-400
     data-checked:disabled:border-gray-400 dark:data-checked:disabled:bg-gray-800
     dark:data-checked:disabled:border-gray-800 data-checked:disabled:text-gray-700
-    dark:data-checked:disabled:text-gray-300;
+    dark:data-checked:disabled:text-gray-300  disabled:cursor-not-allowed;
 }
 
 .custom-select-btn {
-  @apply min-h-[38px] disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-primary flex justify-between align-middle items-center text-left text-sm leading-5.6  w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500;
+  @apply min-h-[38px]  disabled:cursor-not-allowed disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-primary flex justify-between align-middle items-center text-left text-sm leading-5.6  w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
 .custom-dropdown-btn {
@@ -80,7 +80,7 @@
 }
 
 .regular-input {
-  @apply transition-none outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 disabled:opacity-75 focus:border-gray-300/0 focus:ring-1  focus:valid:ring-green-500 focus:invalid:ring-red-500  text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700;
+  @apply transition-none outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 disabled:opacity-75 focus:border-gray-300/0 focus:ring-1  focus:valid:ring-green-500 focus:invalid:ring-red-500  text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:cursor-not-allowed;
 }
 
 .invalid.regular-input {

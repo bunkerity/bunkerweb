@@ -303,11 +303,18 @@ class DisabledPop {
 
   showPopup(el, type = "input") {
     if (!el.hasAttribute("disabled")) return;
+    const isPassword = el
+      .closest("[data-setting-container]")
+      .querySelector("button[data-setting-password]")
+      ? true
+      : false;
     const method = el.getAttribute("data-default-method");
     const popupHTML = `
     <div data-disabled-info class="${
       type === "select" ? "translate-y-2" : ""
-    } right-8 pointer-events-none bg-blue-500 absolute rounded-lg px-2 py-1 z-20 dark:brightness-90">
+    } ${
+      isPassword ? "right-8" : "right-2"
+    } pointer-events-none cursor-not-allowed bg-blue-500 absolute rounded-lg px-2 py-1 z-20 dark:brightness-90">
     <p class="m-0 text-xs text-white dark:text-gray-100">disabled by ${method}</p>
     </div>`;
     let cleanHTML = DOMPurify.sanitize(popupHTML);
