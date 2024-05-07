@@ -75,6 +75,9 @@ jobs:
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-tests:testing local/ubuntu:latest
+      - name: Pull BW linux ubuntu noble test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/ubuntu-noble-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-noble-tests:testing local/ubuntu-noble:latest
       - name: Pull BW linux debian test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity/debian-tests:testing local/debian:latest
@@ -118,6 +121,12 @@ jobs:
       - name: Run Linux ubuntu tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux ubuntu noble tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu-noble"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
