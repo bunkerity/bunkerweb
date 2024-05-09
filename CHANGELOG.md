@@ -3,6 +3,7 @@
 ## v1.5.7 - ????/??/??
 
 - [LINUX] Support Ubuntu 24.04 (Noble)
+- [LINUX] Support RHEL 9.4 instead of 9.3
 - [BUGFIX] Fix rare error when the cache is not properly initialized and jobs are executed
 - [BUGFIX] Fix bug when downloading new mmdb files
 - [BUGFIX] Remove potential false positives with ModSecurity on the jobs page of the web UI

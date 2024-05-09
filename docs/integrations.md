@@ -951,7 +951,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Ubuntu 24.04 "Noble"
 - Fedora 39
 - Red Hat Enterprise Linux (RHEL) 8.9
-- Red Hat Enterprise Linux (RHEL) 9.3
+- Red Hat Enterprise Linux (RHEL) 9.4
 
 Please ensure that you have **NGINX 1.24.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
@@ -1166,7 +1166,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Ubuntu 24.04 "Noble"
 - Fedora 39
 - Red Hat Enterprise Linux (RHEL) 8.9
-- Red Hat Enterprise Linux (RHEL) 9.3
+- Red Hat Enterprise Linux (RHEL) 9.4
 
 To simplify the deployment and configuration process, [Ansible](https://docs.ansible.com/ansible/latest/index.html) can be used as an IT automation tool. Ansible enables you to configure systems, deploy software, and perform advanced IT tasks such as continuous deployments or zero downtime rolling updates.
 
