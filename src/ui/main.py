@@ -408,6 +408,7 @@ def set_csp_header(response):
         + " img-src 'self' data: https://assets.bunkerity.com;"
         + " font-src 'self' data:;"
         + " connect-src *;"
+        + " base-uri 'self';"
     )
     return response
 
