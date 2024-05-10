@@ -711,13 +711,6 @@ class Multiple {
   //for already existing global config multiples
   //global is check
   setDisabledMultServ(inp, method, global) {
-    // Check if pro
-    const proDisabled = inp
-    .closest("[data-plugin-item]")
-    .hasAttribute("data-pro-disabled")
-    ? true
-    : false;
-    if (proDisabled) return inp.setAttribute("disabled", "");
     if (global) return inp.removeAttribute("disabled");
 
     if (method === "ui" || method === "default") {
