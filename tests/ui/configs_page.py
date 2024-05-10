@@ -67,7 +67,7 @@ location /hello {
 
     assert_alert_message(DRIVER, "Created")
 
-    sleep(10)
+    sleep(30)
 
     DRIVER.execute_script("window.open('http://www.example.com/hello','_blank');")
     DRIVER.switch_to.window(DRIVER.window_handles[1])
@@ -166,7 +166,7 @@ location /hello {
 
     assert_alert_message(DRIVER, "Deleted")
 
-    sleep(10)
+    sleep(30)
 
     resp = get("http://www.example.com/hello")
 
@@ -203,7 +203,7 @@ location /hello {
 
     assert_alert_message(DRIVER, "Created")
 
-    sleep(10)
+    sleep(30)
 
     DRIVER.execute_script("window.open('http://app1.example.com/hello','_blank');")
     DRIVER.switch_to.window(DRIVER.window_handles[1])
