@@ -215,8 +215,6 @@ class Multiple {
               .closest("button")
               .hasAttribute(`data-${this.prefix}-multiple-add`)
           ) {
-            if (this.isAvoidAction(e.target)) return;
-
             //get plugin from btn
             const btn = e.target.closest("button");
             const attName = btn.getAttribute(
@@ -284,8 +282,6 @@ class Multiple {
               .closest("button")
               .hasAttribute(`data-${this.prefix}-multiple-delete`)
           ) {
-            if (this.isAvoidAction(e.target)) return;
-
             // We are not removing it really, just hiding it and update values to default
             // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
             const multContainer = e.target.closest(
@@ -343,17 +339,6 @@ class Multiple {
           //remove last child
         } catch (err) {}
       });
-  }
-
-  isAvoidAction(target) {
-    // check that not disabled pro plugin
-    const proDisabled = target
-      .closest("[data-plugin-item]")
-      .hasAttribute("data-pro-disabled")
-      ? true
-      : false;
-
-    return proDisabled;
   }
 
   sortMultipleByContainerAndSuffixe(obj) {
@@ -711,13 +696,6 @@ class Multiple {
   //for already existing global config multiples
   //global is check
   setDisabledMultServ(inp, method, global) {
-    // Check if pro
-    const proDisabled = inp
-    .closest("[data-plugin-item]")
-    .hasAttribute("data-pro-disabled")
-    ? true
-    : false;
-    if (proDisabled) return inp.setAttribute("disabled", "");
     if (global) return inp.removeAttribute("disabled");
 
     if (method === "ui" || method === "default") {

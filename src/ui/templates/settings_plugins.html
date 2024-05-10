@@ -1,7 +1,7 @@
 {% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- plugin item -->
 {% for plugin in plugins %}
-    <div data-advanced data-plugin-item="{{ plugin['id'] }}" {% if  plugin['type'] == 'pro' and not is_pro_version %} data-pro-disabled {% endif %}
+    <div data-advanced data-plugin-item="{{ plugin['id'] }}" {% if  plugin['type'] == 'pro' and not is_pro_version %} data-pro-disabled {% endif %}"
          id="{{ plugin['id'] }}"
          class="{% if loop.index != 1 %}hidden{% endif %} w-full px-1">
         <!-- title and desc -->
