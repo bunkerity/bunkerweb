@@ -36,6 +36,8 @@ try:
     if TEST_TYPE == "linux":
         wait_for_service("app1.example.com")
 
+    sleep(30)
+
     log_info("Navigating to the configs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[5]/a", "configs")
 
