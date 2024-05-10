@@ -24,6 +24,15 @@ services:
       BAD_BEHAVIOR_THRESHOLD: "30"
       CUSTOM_CONF_SERVER_HTTP_port-redirect: "port_in_redirect on;"
       UI_HOST: "http://bw-ui:7000"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     labels:
       - "bunkerweb.INSTANCE=yes"
     networks:
