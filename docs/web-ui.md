@@ -1607,8 +1607,8 @@ After a successful login/password combination, you will be prompted to enter you
     www.example.com_MAX_CLIENT_SIZE=50m
     ```
 
-    Don't forget to restart the `bunkerweb` service :
+    Don't forget to reload the `bunkerweb` service :
 
     ```shell
-    systemctl restart bunkerweb
+    systemctl reload bunkerweb
     ```

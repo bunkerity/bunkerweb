@@ -243,10 +243,10 @@ You will find more settings about reverse proxy in the [settings section](settin
     systemctl status bunkerweb
     ```
 
-    If it's already running, we can restart it :
+    If it's already running, we can reload it :
 
     ```shell
-    systemctl restart bunkerweb
+    systemctl reload bunkerweb
     ```
 
     Otherwise, we will need to start it :
@@ -583,10 +583,10 @@ You will find more settings about reverse proxy in the [settings section](settin
     systemctl status bunkerweb
     ```
 
-    If it's already running, we can restart it :
+    If it's already running, we can reload it :
 
     ```shell
-    systemctl restart bunkerweb
+    systemctl reload bunkerweb
     ```
 
     Otherwise, we will need to start it :
@@ -710,7 +710,11 @@ REAL_IP_HEADER=X-Forwarded-For
     ...
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
+    Please note that it's recommended to issue a restart instead of reload when configuring settings related to proxy protocols :
+
+    ```shell
+    systemctl restart bunkerweb
+    ```
 
 ### Proxy protocol
 
@@ -816,7 +820,11 @@ REAL_IP_HEADER=proxy_protocol
     ...
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
+    Please note that it's recommended to issue a restart instead of reload when configuring settings related to proxy protocols :
+
+    ```shell
+    systemctl restart bunkerweb
+    ```
 
 ## Protect UDP/TCP applications
 
@@ -1076,7 +1084,23 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ...
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
+    Let's check the status of BunkerWeb :
+
+    ```shell
+    systemctl status bunkerweb
+    ```
+
+    If it's already running, we can reload it :
+
+    ```shell
+    systemctl reload bunkerweb
+    ```
+
+    Otherwise, we will need to start it :
+
+    ```shell
+    systemctl start bunkerweb
+    ```
 
 ## Custom configurations
 
@@ -1313,7 +1337,23 @@ Some integrations provide more convenient ways to apply configurations, such as 
     chmod -R 770 /etc/bunkerweb/configs
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
+    Let's check the status of BunkerWeb :
+
+    ```shell
+    systemctl status bunkerweb
+    ```
+
+    If it's already running, we can reload it :
+
+    ```shell
+    systemctl reload bunkerweb
+    ```
+
+    Otherwise, we will need to start it :
+
+    ```shell
+    systemctl start bunkerweb
+    ```
 
 ## PHP
 
@@ -1802,10 +1842,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl status bunkerweb
     ```
 
-    If it's already running we can restart it :
+    If it's already running we can reload it :
 
     ```shell
-    systemctl restart bunkerweb
+    systemctl reload bunkerweb
     ```
 
     Otherwise, we will need to start it :
