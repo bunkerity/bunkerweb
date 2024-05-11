@@ -141,12 +141,10 @@ The first concept is the integration of BunkerWeb into the target environment. W
 The following integrations are officially supported :
 
 - [Docker](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#docker)
-- [Docker autoconf](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#docker-autoconf)
-- [Swarm](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#swarm)
-- [Kubernetes](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#kubernetes)
 - [Linux](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#linux)
-- [Ansible](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#ansible)
-- [Vagrant](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#vagrant)
+- [Docker autoconf](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#docker-autoconf)
+- [Kubernetes](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#kubernetes)
+- [Swarm](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#swarm)
 
 ## Settings
 
@@ -284,36 +282,6 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 
 > [!IMPORTANT]
 > As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0. Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
-
-## Ansible
-
-<p align="center">
-	<img alt="Ansible banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.7/docs/assets/img/integration-ansible.svg" />
-</p>
-
-List of supported Linux distros :
-
-- Debian 12 "Bookworm"
-- Ubuntu 22.04 "Jammy"
-- Ubuntu 24.04 "Noble"
-- Fedora 39
-- RHEL 8.9
-- RHEL 9.4
-
-[Ansible](https://www.ansible.com/) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
-
-A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/bunkerity/bunkerweb) (source code is available [here](https://github.com/bunkerity/bunkerweb-ansible)).
-
-You will find more information in the [Ansible section](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#ansible) of the documentation.
-
-## Vagrant
-
-We maintain ready to use Vagrant boxes hosted on Vagrant cloud for the following providers :
-
-- virtualbox
-- libvirt
-
-You will find more information in the [Vagrant section](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#vagrant) of the documentation.
 
 # Quickstart guide
 

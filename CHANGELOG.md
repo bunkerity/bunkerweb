@@ -31,6 +31,7 @@
 - [AUTOCONF] Speedup autoconf process when we have multiple events in short period of time
 - [DOCUMENTATION] Add upgrade procedure for 1.5.7+
 - [DOCUMENTATION] Rename Migrating section to Upgrading
+- [MISC] Drop support of ansible and vagrant integrations
 - [MISC] Support custom bwcli commands using plugins
 - [MISC] Add Docker labels in autoconf, bw, scheduler, and ui Dockerfiles
 - [DEPS] Update Python base Docker image to version 3.12.3-alpine3.19
