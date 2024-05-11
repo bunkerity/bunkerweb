@@ -35,6 +35,8 @@
 	⚙️ <a href="https://config.bunkerweb.io/?utm_campaign=self&utm_source=github">Configurator</a>
 	 &#124;
 	🗺️ <a href="https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=github">Threatmap</a>
+	 &#124;
+	🔎 <a href="https://forms.gle/e3VgymAteYPnwM1j9">Feedbacks</a>
 </p>
 
 > 🛡️ Make security by default great again !
@@ -338,13 +340,13 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
 | :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
-|   **ClamAV**   |   1.4   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-|   **Coraza**   |   1.4   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).                                                            |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **CrowdSec**  |   1.4   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
-|  **Discord**   |   1.4   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|   **Slack**    |   1.4   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal** |   1.4   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   |   1.4   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |     [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|   **ClamAV**   |   1.5   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+|   **Coraza**   |   1.5   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).                                                            |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
+|  **CrowdSec**  |   1.5   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
+|  **Discord**   |   1.5   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
+|   **Slack**    |   1.5   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
+| **VirusTotal** |   1.5   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+|  **WebHook**   |   1.5   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |     [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 You will find more information in the [plugins section](https://docs.bunkerweb.io/1.5.7/plugins/?utm_campaign=self&utm_source=github) of the documentation.
 

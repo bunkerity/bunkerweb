@@ -659,186 +659,6 @@ networks:
     name: bw-services
 ```
 
-## Swarm
-
-<figure markdown>
-  ![Overview](assets/img/integration-swarm.svg){ align=center, width="600" }
-  <figcaption>Docker Swarm integration</figcaption>
-</figure>
-
-!!! info "Docker autoconf"
-    The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
-
-To enable automatic configuration of BunkerWeb instances, the **autoconf** service requires access to the Docker API. This service listens for Docker Swarm events, such as service creation or deletion, and seamlessly configures the **BunkerWeb instances** in real-time without any downtime. It also monitors other Swarm objects, such as [configs](https://docs.docker.com/engine/swarm/configs/), for custom configurations.
-
-Similar to the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined using labels that start with the **bunkerweb**  prefix.
-
-For an optimal setup, it is recommended to schedule the **BunkerWeb service** as a ***global service*** on all nodes, while the **autoconf, scheduler, and Docker API proxy services** should be scheduled as ***single replicated services***. Please note that the Docker API proxy service needs to be scheduled on a manager node unless you configure it to use a remote API (which is not covered in the documentation).
-
-Since multiple instances of BunkerWeb are running, a shared data store implemented as a [Redis](https://redis.io/) service must be created. These instances will utilize the Redis service to cache and share data. Further details regarding the Redis settings can be found [here](settings.md#redis).
-
-As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
-
-!!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) folder of the repository for more information.
-
-    Clustered database backends setup are out-of-the-scope of this documentation.
-
-Here is the stack boilerplate that you can deploy using `docker stack deploy` :
-
-```yaml
-version: "3.5"
-
-services:
-  bunkerweb:
-    image: bunkerity/bunkerweb:1.5.7
-    ports:
-      - published: 80
-        target: 8080
-        mode: host
-        protocol: tcp
-      - published: 443
-        target: 8443
-        mode: host
-        protocol: tcp
-    environment:
-      - SERVER_NAME=
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-      - SWARM_MODE=yes
-      - MULTISITE=yes
-      - USE_REDIS=yes
-      - REDIS_HOST=bw-redis
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-    networks:
-      - bw-universe
-      - bw-services
-    deploy:
-      mode: global
-      placement:
-        constraints:
-          - "node.role == worker"
-      labels:
-        - "bunkerweb.INSTANCE=yes"
-
-  bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.5.7
-    environment:
-      - SWARM_MODE=yes
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-    networks:
-      - bw-universe
-      - bw-docker
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONFIGS=1
-      - CONTAINERS=1
-      - SERVICES=1
-      - SWARM=1
-      - TASKS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
-    deploy:
-      placement:
-        constraints:
-          - "node.role == manager"
-
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.7
-    environment:
-      - SWARM_MODE=yes
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-    networks:
-      - bw-universe
-      - bw-docker
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
-
-  bw-db:
-    image: mariadb:10.10
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=changeme
-    volumes:
-      - bw-data:/var/lib/mysql
-    networks:
-      - bw-docker
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
-
-  bw-redis:
-    image: redis:7-alpine
-    networks:
-      - bw-universe
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
-
-volumes:
-  bw-data:
-
-networks:
-  bw-universe:
-    name: bw-universe
-    driver: overlay
-    attachable: true
-    ipam:
-      config:
-        - subnet: 10.20.30.0/24
-  bw-services:
-    name: bw-services
-    driver: overlay
-    attachable: true
-  bw-docker:
-    name: bw-docker
-    driver: overlay
-    attachable: true
-```
-
-!!! info "Swarm mandatory setting"
-    Please note that the `SWARM_MODE=yes` environment variable is mandatory when using the Swarm integration.
-
-Once the BunkerWeb Swarm stack is set up and running (see autoconf and scheduler logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
-
-```yaml
-version: "3.5"
-
-services:
-  myapp:
-    image: mywebapp:4.2
-    networks:
-      - bw-services
-    deploy:
-      placement:
-        constraints:
-          - "node.role==worker"
-      labels:
-        - "bunkerweb.MY_SETTING_1=value1"
-        - "bunkerweb.MY_SETTING_2=value2"
-
-networks:
-  bw-services:
-    external: true
-    name: bw-services
-```
-
 ## Kubernetes
 
 <figure markdown>
@@ -1151,4 +971,184 @@ spec:
                 port:
                   number: 8000
 ...
+```
+
+## Swarm
+
+<figure markdown>
+  ![Overview](assets/img/integration-swarm.svg){ align=center, width="600" }
+  <figcaption>Docker Swarm integration</figcaption>
+</figure>
+
+!!! info "Docker autoconf"
+    The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
+
+To enable automatic configuration of BunkerWeb instances, the **autoconf** service requires access to the Docker API. This service listens for Docker Swarm events, such as service creation or deletion, and seamlessly configures the **BunkerWeb instances** in real-time without any downtime. It also monitors other Swarm objects, such as [configs](https://docs.docker.com/engine/swarm/configs/), for custom configurations.
+
+Similar to the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined using labels that start with the **bunkerweb**  prefix.
+
+For an optimal setup, it is recommended to schedule the **BunkerWeb service** as a ***global service*** on all nodes, while the **autoconf, scheduler, and Docker API proxy services** should be scheduled as ***single replicated services***. Please note that the Docker API proxy service needs to be scheduled on a manager node unless you configure it to use a remote API (which is not covered in the documentation).
+
+Since multiple instances of BunkerWeb are running, a shared data store implemented as a [Redis](https://redis.io/) service must be created. These instances will utilize the Redis service to cache and share data. Further details regarding the Redis settings can be found [here](settings.md#redis).
+
+As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
+
+!!! info "Database backend"
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) folder of the repository for more information.
+
+    Clustered database backends setup are out-of-the-scope of this documentation.
+
+Here is the stack boilerplate that you can deploy using `docker stack deploy` :
+
+```yaml
+version: "3.5"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.5.7
+    ports:
+      - published: 80
+        target: 8080
+        mode: host
+        protocol: tcp
+      - published: 443
+        target: 8443
+        mode: host
+        protocol: tcp
+    environment:
+      - SERVER_NAME=
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+      - SWARM_MODE=yes
+      - MULTISITE=yes
+      - USE_REDIS=yes
+      - REDIS_HOST=bw-redis
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+    networks:
+      - bw-universe
+      - bw-services
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - "node.role == worker"
+      labels:
+        - "bunkerweb.INSTANCE=yes"
+
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:1.5.7
+    environment:
+      - SWARM_MODE=yes
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+    networks:
+      - bw-universe
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONFIGS=1
+      - CONTAINERS=1
+      - SERVICES=1
+      - SWARM=1
+      - TASKS=1
+      - LOG_LEVEL=warning
+    networks:
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.7
+    environment:
+      - SWARM_MODE=yes
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+    networks:
+      - bw-universe
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
+
+  bw-db:
+    image: mariadb:10.10
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=changeme
+    volumes:
+      - bw-data:/var/lib/mysql
+    networks:
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
+
+  bw-redis:
+    image: redis:7-alpine
+    networks:
+      - bw-universe
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
+
+volumes:
+  bw-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    driver: overlay
+    attachable: true
+  bw-docker:
+    name: bw-docker
+    driver: overlay
+    attachable: true
+```
+
+!!! info "Swarm mandatory setting"
+    Please note that the `SWARM_MODE=yes` environment variable is mandatory when using the Swarm integration.
+
+Once the BunkerWeb Swarm stack is set up and running (see autoconf and scheduler logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
+
+```yaml
+version: "3.5"
+
+services:
+  myapp:
+    image: mywebapp:4.2
+    networks:
+      - bw-services
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.MY_SETTING_1=value1"
+        - "bunkerweb.MY_SETTING_2=value2"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
 ```
