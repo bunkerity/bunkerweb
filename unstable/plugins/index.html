@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.20">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
     
     
       
@@ -1103,43 +1103,43 @@
 <tbody>
 <tr>
 <td style="text-align: center;"><strong>ClamAV</strong></td>
-<td style="text-align: center;">1.4</td>
+<td style="text-align: center;">1.5</td>
 <td style="text-align: left;">Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Coraza</strong></td>
-<td style="text-align: center;">1.4</td>
+<td style="text-align: center;">1.5</td>
 <td style="text-align: left;">Inspect requests using a the Coraza WAF (alternative of ModSecurity).</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>CrowdSec</strong></td>
-<td style="text-align: center;">1.4</td>
+<td style="text-align: center;">1.5</td>
 <td style="text-align: left;">CrowdSec bouncer for BunkerWeb.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">bunkerweb-plugins/crowdsec</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Discord</strong></td>
-<td style="text-align: center;">1.4</td>
+<td style="text-align: center;">1.5</td>
 <td style="text-align: left;">Send security notifications to a Discord channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Slack</strong></td>
-<td style="text-align: center;">1.4</td>
+<td style="text-align: center;">1.5</td>
 <td style="text-align: left;">Send security notifications to a Slack channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>VirusTotal</strong></td>
-<td style="text-align: center;">1.4</td>
+<td style="text-align: center;">1.5</td>
 <td style="text-align: left;">Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>WebHook</strong></td>
-<td style="text-align: center;">1.4</td>
+<td style="text-align: center;">1.5</td>
 <td style="text-align: left;">Send security notifications to a custom HTTP endpoint using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
 </tr>
@@ -1148,10 +1148,10 @@
 <h2 id="how-to-use-a-plugin">How to use a plugin</h2>
 <h3 id="automatic">Automatic</h3>
 <p>If you want to quickly install external plugins, you can use the <code>EXTERNAL_PLUGIN_URLS</code> setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).</p>
-<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.4.zip</code></p>
+<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.5.zip</code></p>
 <h3 id="manual">Manual</h3>
 <p>The first step is to install the plugin by putting the plugin files inside the corresponding <code>plugins</code> data folder, the procedure depends on your integration :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:7"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label><label for="__tabbed_1_6">Ansible</label><label for="__tabbed_1_7">Vagrant</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>When using the <a href="../integrations/#docker">Docker integration</a>, plugins must be written to the volume mounted on <code>/data/plugins</code> into the scheduler container.</p>
@@ -1312,33 +1312,6 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>/etc/bunkerweb/plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w"> </span>/etc/bunkerweb/plugins
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>When using the <a href="../integrations/#ansible">Ansible integration</a>, you can use the <code>plugins</code> variable to set a local folder containing your plugins that will be copied to your BunkerWeb instances.</p>
-<p>Let's assume that you have plugins inside the <code>bunkerweb-plugins</code> folder :</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins
-</code></pre></div>
-<p>In your Ansible inventory, you can use the <code>plugins</code> variable to set the path of plugins folder :</p>
-<div class="highlight"><pre><span></span><code><span class="k">[mybunkers]</span>
-<span class="na">192.168.0.42 ... custom_plugins</span><span class="o">=</span><span class="s">&quot;{{ playbook_dir }}/bunkerweb-plugins&quot;</span>
-</code></pre></div>
-<p>Or alternatively, in your playbook file :</p>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">hosts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
-<span class="w">  </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_plugins</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">playbook_dir</span><span class="nv"> </span><span class="s">}}/bunkerweb-plugins&quot;</span>
-<span class="w">  </span><span class="nt">roles</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity.bunkerweb</span>
-</code></pre></div>
-<p>Run the playbook :</p>
-<div class="highlight"><pre><span></span><code>ansible-playbook<span class="w"> </span>-i<span class="w"> </span>inventory.yml<span class="w"> </span>playbook.yml
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>When using the <a href="../integrations/#vagrant">Vagrant integration</a>, plugins must be written to the <code>/etc/bunkerweb/plugins</code> folder (you will need to do a <code>vagrant ssh</code> first) :</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>/etc/bunkerweb/plugins
 </code></pre></div>
 </div>
 </div>
@@ -1927,7 +1900,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.dd8806f2.min.js"></script>
+      <script src="../assets/javascripts/bundle.a7c05c9e.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

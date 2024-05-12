@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.20">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
     
     
       
@@ -991,7 +991,7 @@
 <p>When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.</p>
 <p>Please note that you can set <code>LOG_LEVEL</code> setting to <code>info</code> (default : <code>notice</code>) to increase the verbosity of BunkerWeb.</p>
 <p>Here is how you can access the logs, depending on your integration :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:7"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label><label for="__tabbed_1_6">Ansible</label><label for="__tabbed_1_7">Vagrant</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="admonition tip">
@@ -1045,24 +1045,6 @@ docker<span class="w"> </span>service<span class="w"> </span>logs<span class="w"
 <p>You can use the <code>kubectl logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> with the name of your pods) :
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>mybunker
 kubectl<span class="w"> </span>logs<span class="w"> </span>myautoconf
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<p>For errors related to BunkerWeb services (e.g. not starting), you can use <code>journalctl</code> :
-<div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>bunkerweb<span class="w"> </span>--no-pager
-</code></pre></div></p>
-<p>Common logs are located inside the <code>/var/log/bunkerweb</code> directory :
-<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>/var/log/bunkerweb/error.log
-cat<span class="w"> </span>/var/log/bunkerweb/access.log
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<p>For errors related to BunkerWeb services (e.g. not starting), you can use <code>journalctl</code> :
-<div class="highlight"><pre><span></span><code>ansible<span class="w"> </span>-i<span class="w"> </span>inventory.yml<span class="w"> </span>all<span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;journalctl -u bunkerweb --no-pager&quot;</span><span class="w"> </span>--become
-</code></pre></div></p>
-<p>Common logs are located inside the <code>/var/log/bunkerweb</code> directory :
-<div class="highlight"><pre><span></span><code>ansible<span class="w"> </span>-i<span class="w"> </span>inventory.yml<span class="w"> </span>all<span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;cat /var/log/bunkerweb/error.log&quot;</span><span class="w"> </span>--become
-ansible<span class="w"> </span>-i<span class="w"> </span>inventory.yml<span class="w"> </span>all<span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;cat /var/log/bunkerweb/access.log&quot;</span><span class="w"> </span>--become
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1169,7 +1151,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <p>A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info <a href="../security-tuning/#bad-behavior">here</a>). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...</p>
 <h2 id="ip-unban">IP unban</h2>
 <p>You can manually unban an IP which can be useful when doing some tests but it needs the setting <code>USE_API</code> set to <code>yes</code> (which is not the default) so you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label><label for="__tabbed_2_6">Ansible</label><label for="__tabbed_2_7">Vagrant</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>mybunker</code> with the name of your container) :
@@ -1195,16 +1177,6 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <div class="tabbed-block">
 <p>You can use the <code>kubectl exec</code> command (replace <code>myautoconf</code> with the name of your pod) :
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>myautoconf<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<p>You can use the <code>bwcli</code> command (as root) :
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<p>You can use the <code>bwcli</code> command :
-<div class="highlight"><pre><span></span><code>ansible<span class="w"> </span>-i<span class="w"> </span>inventory.yml<span class="w"> </span>all<span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;bwcli unban 1.2.3.4&quot;</span><span class="w"> </span>--become
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1468,7 +1440,7 @@ sqlite&gt;
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.dd8806f2.min.js"></script>
+      <script src="../assets/javascripts/bundle.a7c05c9e.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
