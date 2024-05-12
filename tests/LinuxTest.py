@@ -39,13 +39,20 @@ class LinuxTest(Test):
                     distro,
                     "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip",
                 )
-                if distro in ("ubuntu", "ubuntu-noble"):
+                if distro == "ubuntu":
                     LinuxTest.docker_cp(
                         distro,
                         "./tests/www-deb.conf",
                         "/etc/php/8.1/fpm/pool.d/www.conf",
                     )
                     LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
+                elif distro == "ubuntu-noble":
+                    LinuxTest.docker_cp(
+                        distro,
+                        "./tests/www-deb.conf",
+                        "/etc/php/8.3/fpm/pool.d/www.conf",
+                    )
+                    LinuxTest.docker_exec(distro, "systemctl stop php8.3-fpm ; systemctl start php8.3-fpm")
                 elif distro == "debian":
                     LinuxTest.docker_cp(
                         distro,
