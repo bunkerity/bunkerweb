@@ -147,6 +147,7 @@ The following integrations are officially supported :
 - [Docker autoconf](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#docker-autoconf)
 - [Kubernetes](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#kubernetes)
 - [Swarm](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#swarm)
+- [Microsoft Azure](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#microsoft-azure)
 
 ## Settings
 
@@ -284,6 +285,16 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 
 > [!IMPORTANT]
 > As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0. Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
+
+## Microsoft Azure
+
+<p align="center">
+	<img alt="Azure banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.7/docs/assets/img/integration-azure.webp" />
+</p>
+
+BunkerWeb is refferenced in [Azure Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview) and a ARM template is available in the [Misc folder](https://github.com/bunkerity/bunkerweb/raw/v1.5.7/misc/integrations/azure-arm-template.json)
+
+You will find more information in the [Microsoft Azure](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#microsoft-azure) of the documentation.
 
 # Quickstart guide
 

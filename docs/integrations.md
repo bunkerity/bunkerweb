@@ -1152,3 +1152,58 @@ networks:
     external: true
     name: bw-services
 ```
+
+## Microsoft Azure
+
+<figure markdown>
+  ![Overview](assets/img/integration-azure.webp){ align=center, width="600" }
+  <figcaption>Azure integration</figcaption>
+</figure>
+
+!!! info "Recommended VM size"
+    Please be aware while you choose the SKU of the VM. You must select a SKU compatible with Gen2 VM and we recommend starting at B2s or Ds2 series for optimal use.
+
+You can easily deploy BunkerWeb on your Azure subscription in several ways:
+
+- Azure CLI in Cloud Shell
+- Azure ARM Template
+- Azure portal via the Marketplace
+
+=== "Cloud Shell"
+
+    Create a resource group. Replace value `RG_NAME`
+
+    ```bash
+    az group create --name "RG_NAME" --location "LOCATION"
+    ```
+
+    Create a VM with `Standard_B2s` SKU in the location of the resource group. Replace values `RG_NAME`, `VM_NAME`, `VNET_NAME`, `SUBNET_NAME`
+
+    ```bash
+
+    az vm create --resource-group "RG_NAME" --name "VM_NAME" --image bunkerity:bunkerweb:bunkerweb:latest --accept-term --generate-ssh-keys --vnet-name "VNET_NAME" --size Standard_B2s --subnet "SUBNET_NAME"
+    ```
+
+    Full command. Replace values `RG_NAME`, `VM_NAME`, `LOCATION`, `HOSTNAME`, `USERNAME`, `PUBLIC_IP`, `VNET_NAME`, `SUBNET_NAME`, `NSG_NAME`
+
+    ```bash
+    az vm create --resource-group "RG_NAME" --name "VM_NAME" --location "LOCATION" --image bunkerity:bunkerweb:bunkerweb:latest --accept-term --generate-ssh-keys --computer-name "HOSTNAME" --admin-username "USERNAME" --public-ip-address "PUBLIC_IP" --public-ip-address-allocation Static --size Standard_B2s --public-ip-sku Standard --os-disk-delete-option Delete --nic-delete-option Delete --vnet-name "VNET_NAME" --subnet "SUBNET_NAME" --nsg "NSG_NAME"
+    ```
+
+=== "ARM Template"
+
+    !!! info "Permissions requirement"
+        To deploy a ARM template, you need write access on the resources you're deploying and access to all operations on the Microsoft.Resources/deployments resource type.
+        To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write and Microsoft.Resources/deployments/* permissions. The what-if operation has the same permission requirements.
+
+    Deploy the ARM Template:
+
+    [![Deploy to Azure](assets/img/integration-azure-deploy.svg)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunkerity%2Fbunkerweb%2Fmaster%2Fmisc%2Fintegrations%2Fazure-arm-template.json){:target="_blank"}
+
+=== "Marketplace"
+
+    Login in [Azure portal](https://portal.azure.com){:target="_blank"}.
+
+    Get BunkerWeb from the [Create ressource menu](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb){:target="_blank"}.
+
+    You can also go through the [Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview){:target="_blank"}.
