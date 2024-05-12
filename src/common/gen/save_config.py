@@ -169,7 +169,7 @@ if __name__ == "__main__":
                     )
 
             db = Database(logger, config_files.get("DATABASE_URI", None))
-        else:
+        elif getenv("KUBERNETES_MODE", "no") != "yes":
             docker_client = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
 
             while not docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"}):
