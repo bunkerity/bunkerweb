@@ -1,6 +1,7 @@
 {
   "name": "proxy-protocol",
   "kinds": ["docker"],
+  "delay": 30,
   "timeout": 60,
   "tests": [
     {
