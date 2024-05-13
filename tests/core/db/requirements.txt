@@ -223,9 +223,9 @@ psycopg-binary==3.1.17 \
     --hash=sha256:f6898bf1ca5aa01115807643138e3e20ec603b17a811026bc4a49d43055720a7 \
     --hash=sha256:f9ba559eabb0ba1afd4e0504fa0b10e00a212cac0c4028b8a1c3b087b5c1e5de
     # via psycopg
-psycopg-pool==3.2.1 \
-    --hash=sha256:060b551d1b97a8d358c668be58b637780b884de14d861f4f5ecc48b7563aafb7 \
-    --hash=sha256:6509a75c073590952915eddbba7ce8b8332a440a31e77bba69561483492829ad
+psycopg-pool==3.2.2 \
+    --hash=sha256:273081d0fbfaced4f35e69200c89cb8fbddfe277c38cc86c235b90a2ec2c8153 \
+    --hash=sha256:9e22c370045f6d7f2666a5ad1b0caf345f9f1912195b0b25d0d3bcc4f3a7389c
     # via psycopg
 pycparser==2.22 \
     --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \

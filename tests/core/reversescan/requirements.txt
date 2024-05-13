@@ -138,9 +138,9 @@ fastapi==0.111.0 \
     # via
     #   -r requirements.in
     #   fastapi-cli
-fastapi-cli==0.0.2 \
-    --hash=sha256:589565ba758432632eadcf7b950e0ec76bb283b549784d9df17f261a8a9de476 \
-    --hash=sha256:d7a8ec89fd52ad16c52de9fe7299e4b22c7a32e1bf28aa886e5517e4927423dd
+fastapi-cli==0.0.3 \
+    --hash=sha256:3b6e4d2c4daee940fb8db59ebbfd60a72c4b962bcf593e263e4cc69da4ea3d7f \
+    --hash=sha256:ae233115f729945479044917d949095e829d2d84f56f55ce1ca17627872825a5
     # via fastapi
 h11==0.14.0 \
     --hash=sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d \
