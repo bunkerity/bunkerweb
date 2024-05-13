@@ -114,6 +114,7 @@ Automatically backup your data to an S3 bucket
 |`BACKUP_S3_ROTATION`         |`7`    |global |no      |The number of backups to keep               |
 |`BACKUP_S3_ENDPOINT`         |       |global |no      |The S3 endpoint                             |
 |`BACKUP_S3_BUCKET`           |       |global |no      |The S3 bucket                               |
+|`BACKUP_S3_DIR`              |       |global |no      |The S3 directory                            |
 |`BACKUP_S3_REGION`           |       |global |no      |The S3 region                               |
 |`BACKUP_S3_ACCESS_KEY_ID`    |       |global |no      |The S3 access key ID                        |
 |`BACKUP_S3_ACCESS_KEY_SECRET`|       |global |no      |The S3 access key secret                    |
@@ -564,19 +565,20 @@ STREAM support :x:
 
 Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
 
-|           Setting            |Default |Context|Multiple|                                                           Description                                                            |
-|------------------------------|--------|-------|--------|----------------------------------------------------------------------------------------------------------------------------------|
-|`USE_REPORTING_SMTP`          |`no`    |global |no      |Enable sending the report via email.                                                                                              |
-|`USE_REPORTING_WEBHOOK`       |`no`    |global |no      |Enable sending the report via webhook.                                                                                            |
-|`REPORTING_SCHEDULE`          |`weekly`|global |no      |The frequency at which reports are sent.                                                                                          |
-|`REPORTING_WEBHOOK_URLS`      |        |global |no      |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
-|`REPORTING_SMTP_EMAILS`       |        |global |no      |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
-|`REPORTING_SMTP_HOST`         |        |global |no      |The host server used for SMTP sending.                                                                                            |
-|`REPORTING_SMTP_PORT`         |`465`   |global |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
-|`REPORTING_SMTP_FROM_EMAIL`   |        |global |no      |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
-|`REPORTING_SMTP_FROM_USER`    |        |global |no      |The user authentication value for sending via the from email address.                                                             |
-|`REPORTING_SMTP_FROM_PASSWORD`|        |global |no      |The password authentication value for sending via the from email address.                                                         |
-|`REPORTING_SMTP_SSL`          |`SSL`   |global |no      |Determine whether or not to use a secure connection for SMTP.                                                                     |
+|           Setting            |     Default      |Context|Multiple|                                                           Description                                                            |
+|------------------------------|------------------|-------|--------|----------------------------------------------------------------------------------------------------------------------------------|
+|`USE_REPORTING_SMTP`          |`no`              |global |no      |Enable sending the report via email.                                                                                              |
+|`USE_REPORTING_WEBHOOK`       |`no`              |global |no      |Enable sending the report via webhook.                                                                                            |
+|`REPORTING_SCHEDULE`          |`weekly`          |global |no      |The frequency at which reports are sent.                                                                                          |
+|`REPORTING_WEBHOOK_URLS`      |                  |global |no      |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
+|`REPORTING_SMTP_EMAILS`       |                  |global |no      |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
+|`REPORTING_SMTP_HOST`         |                  |global |no      |The host server used for SMTP sending.                                                                                            |
+|`REPORTING_SMTP_PORT`         |`465`             |global |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
+|`REPORTING_SMTP_FROM_EMAIL`   |                  |global |no      |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
+|`REPORTING_SMTP_FROM_USER`    |                  |global |no      |The user authentication value for sending via the from email address.                                                             |
+|`REPORTING_SMTP_FROM_PASSWORD`|                  |global |no      |The password authentication value for sending via the from email address.                                                         |
+|`REPORTING_SMTP_SSL`          |`SSL`             |global |no      |Determine whether or not to use a secure connection for SMTP.                                                                     |
+|`REPORTING_SMTP_SUBJECT`      |`BunkerWeb Report`|global |no      |The subject line of the email.                                                                                                    |
 
 ## Reverse proxy
 
@@ -590,7 +592,7 @@ Manage reverse proxy configurations.
 |`REVERSE_PROXY_INTERCEPT_ERRORS`       |`yes`                             |multisite|no      |Intercept and rewrite errors.                                                                                                |
 |`REVERSE_PROXY_CUSTOM_HOST`            |                                  |multisite|no      |Override Host header sent to upstream server.                                                                                |
 |`REVERSE_PROXY_HOST`                   |                                  |multisite|yes     |Full URL of the proxied resource (proxy_pass).                                                                               |
-|`REVERSE_PROXY_URL`                    |                                  |multisite|yes     |Location URL that will be proxied.                                                                                           |
+|`REVERSE_PROXY_URL`                    |`/`                               |multisite|yes     |Location URL that will be proxied.                                                                                           |
 |`REVERSE_PROXY_WS`                     |`no`                              |multisite|yes     |Enable websocket on the proxied resource.                                                                                    |
 |`REVERSE_PROXY_HEADERS`                |                                  |multisite|yes     |List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).          |
 |`REVERSE_PROXY_HEADERS_CLIENT`         |                                  |multisite|yes     |List of HTTP headers to send to client separated with semicolons (values for add_header directive).                          |

@@ -552,11 +552,11 @@ STREAM support :x:
 
 The following settings are related to the Limiting requests feature :
 
-| Setting                 | Default | Context   | Multiple | Description                                                                                   |
-| ----------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_REQ`         | `yes`   | multisite | no       | Activate limit requests feature.                                                              |
-| `LIMIT_REQ_URL`         | `/`     | multisite | yes      | URL (PCRE regex) where the limit request will be applied or special value / for all requests. |
-| `LIMIT_REQ_RATE`        | `2r/s`  | multisite | yes      | Rate to apply to the URL (s for second, m for minute, h for hour and d for day).              |
+| Setting          | Default | Context   | Multiple | Description                                                                                   |
+| ---------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------- |
+| `USE_LIMIT_REQ`  | `yes`   | multisite | no       | Activate limit requests feature.                                                              |
+| `LIMIT_REQ_URL`  | `/`     | multisite | yes      | URL (PCRE regex) where the limit request will be applied or special value / for all requests. |
+| `LIMIT_REQ_RATE` | `2r/s`  | multisite | yes      | Rate to apply to the URL (s for second, m for minute, h for hour and d for day).              |
 
 Please note that you can add different rates for different URLs by adding a number as a suffix to the settings for example : `LIMIT_REQ_URL_1=^/url1$`, `LIMIT_REQ_RATE_1=5r/d`, `LIMIT_REQ_URL_2=^/url2/subdir/.*$`, `LIMIT_REQ_RATE_2=1r/m`, ...
 
@@ -675,19 +675,20 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
 
 **List of settings**
 
-| Setting                        | Default  | Context  | Description                                                                                                                        |
-| ------------------------------ | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`     | `global` | Enable sending the report via email.                                                                                               |
-| `USE_REPORTING_WEBHOOK`        | `no`     | `global` | Enable sending the report via webhook.                                                                                             |
-| `REPORTING_SCHEDULE`           | `weekly` | `global` | The frequency at which reports are sent.                                                                                           |
-| `REPORTING_WEBHOOK_URLS`       |          | `global` | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
-| `REPORTING_SMTP_EMAILS`        |          | `global` | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
-| `REPORTING_SMTP_HOST`          |          | `global` | The host server used for SMTP sending.                                                                                             |
-| `REPORTING_SMTP_PORT`          | `465`    | `global` | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
-| `REPORTING_SMTP_FROM_EMAIL`    |          | `global` | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
-| `REPORTING_SMTP_FROM_USER`     |          | `global` | The user authentication value for sending via the from email address.                                                              |
-| `REPORTING_SMTP_FROM_PASSWORD` |          | `global` | The password authentication value for sending via the from email address.                                                          |
-| `REPORTING_SMTP_SSL`           | `SSL`    | `global` | Determine whether or not to use a secure connection for SMTP.                                                                      |
+| Setting                        | Default            | Context | Description                                                                                                                        |
+| ------------------------------ | ------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global  | Enable sending the report via email.                                                                                               |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global  | Enable sending the report via webhook.                                                                                             |
+| `REPORTING_SCHEDULE`           | `weekly`           | global  | The frequency at which reports are sent.                                                                                           |
+| `REPORTING_WEBHOOK_URLS`       |                    | global  | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
+| `REPORTING_SMTP_EMAILS`        |                    | global  | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
+| `REPORTING_SMTP_HOST`          |                    | global  | The host server used for SMTP sending.                                                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | global  | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
+| `REPORTING_SMTP_FROM_USER`     |                    | global  | The user authentication value for sending via the from email address.                                                              |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | The password authentication value for sending via the from email address.                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global  | Determine whether or not to use a secure connection for SMTP.                                                                      |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | The subject line of the email.                                                                                                     |
 
 !!! info "Information and behavior"
     - case `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
@@ -937,17 +938,18 @@ By activating this feature, you're proactively safeguarding your **data's integr
 
 **List of settings**
 
-| Setting                       | Default | Context | Description                                      |
-| ----------------------------- | ------- | ------- | ------------------------------------------------ |
-| `USE_BACKUP_S3`               | `no`    | global  | Enable or disable the S3 backup feature          |
-| `BACKUP_S3_SCHEDULE`          | `daily` | global  | Frequency of the backup (daily, weekly, monthly) |
-| `BACKUP_S3_ROTATION`          | `7`     | global  | Number of backups to keep                        |
-| `BACKUP_S3_ENDPOINT`          |         | global  | S3 endpoint                                      |
-| `BACKUP_S3_BUCKET`            |         | global  | S3 bucket name                                   |
-| `BACKUP_S3_REGION`            |         | global  | S3 region                                        |
-| `BACKUP_S3_ACCESS_KEY_ID`     |         | global  | S3 access key ID                                 |
-| `BACKUP_S3_ACCESS_KEY_SECRET` |         | global  | S3 access key secret                             |
-| `BACKUP_S3_COMP_LEVEL`        | `6`     | global  | Compression level of the backup zip file (1-9)   |
+| Setting                       | Default | Context | Description                                  |
+| ----------------------------- | ------- | ------- | -------------------------------------------- |
+| `USE_BACKUP_S3`               | `no`    | global  | Enable or disable the S3 backup feature      |
+| `BACKUP_S3_SCHEDULE`          | `daily` | global  | The frequency of the backup                  |
+| `BACKUP_S3_ROTATION`          | `7`     | global  | The number of backups to keep                |
+| `BACKUP_S3_ENDPOINT`          |         | global  | The S3 endpoint                              |
+| `BACKUP_S3_BUCKET`            |         | global  | The S3 bucket                                |
+| `BACKUP_S3_DIR`               |         | global  | The S3 directory                             |
+| `BACKUP_S3_REGION`            |         | global  | The S3 region                                |
+| `BACKUP_S3_ACCESS_KEY_ID`     |         | global  | The S3 access key ID                         |
+| `BACKUP_S3_ACCESS_KEY_SECRET` |         | global  | The S3 access key secret                     |
+| `BACKUP_S3_COMP_LEVEL`        | `6`     | global  | The compression level of the backup zip file |
 
 #### Manual backup
 
