@@ -259,7 +259,6 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         ui_data["TO_FLASH"] = []
 
     ui_data["RELOADING"] = False
-    ui_data["PRO_LOADING"] = False
     with LOCK:
         TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
@@ -382,7 +381,15 @@ def error_message(msg: str):
 
 @app.context_processor
 def inject_variables():
+    ui_data = get_ui_data()
     metadata = db.get_metadata()
+
+    curr_changes = db.check_changes()
+
+    if ui_data.get("PRO_LOADING") and not any(curr_changes.values()):
+        ui_data["PRO_LOADING"] = False
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
     # check that is value is in tuple
     return dict(
@@ -393,7 +400,8 @@ def inject_variables():
         pro_expire=metadata["pro_expire"].strftime("%d-%m-%Y") if metadata["pro_expire"] else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
         plugins=app.config["CONFIG"].get_plugins(),
-        bw_version=bw_version,
+        pro_loading=ui_data.get("PRO_LOADING", False),
+        bw_version=metadata["version"],
     )
 
 
@@ -805,13 +813,13 @@ def account():
 
     secret_token = ""
     totp_qr_image = ""
-    ui_data = get_ui_data()
 
     if not current_user.is_two_factor_enabled:
         current_user.refresh_totp()
         secret_token = current_user.secret_token
         totp_qr_image = get_b64encoded_qr_image(current_user.get_authentication_setup_uri())
 
+        ui_data = get_ui_data()
         ui_data["CURRENT_TOTP_TOKEN"] = secret_token
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
@@ -822,7 +830,6 @@ def account():
         is_totp=current_user.is_two_factor_enabled,
         secret_token=secret_token,
         totp_qr_image=totp_qr_image,
-        pro_loading=ui_data.get("PRO_LOADING", False),
     )
 
 
@@ -1152,14 +1159,7 @@ def global_config():
                 global_config.pop(key)
 
     # Display global config
-    ui_data = get_ui_data()
-    return render_template(
-        "global_config.html",
-        username=current_user.get_id(),
-        global_config=global_config,
-        dumped_global_config=dumps(global_config),
-        pro_loading=ui_data.get("PRO_LOADING", False),
-    )
+    return render_template("global_config.html", username=current_user.get_id(), global_config=global_config, dumped_global_config=dumps(global_config))
 
 
 @app.route("/configs", methods=["GET", "POST"])
