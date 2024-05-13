@@ -259,6 +259,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         ui_data["TO_FLASH"] = []
 
     ui_data["RELOADING"] = False
+    ui_data["PRO_LOADING"] = False
     with LOCK:
         TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
@@ -704,10 +705,28 @@ def account():
             metadata["last_pro_check"] = None
             db.set_pro_metadata(metadata)
 
-            # Reload instances
-            manage_bunkerweb("global_config", variable)
-
             flash("Checking license key to upgrade.", "success")
+
+            curr_changes = db.check_changes()
+
+            # Reload instances
+            def update_global_config(threaded: bool = False):
+                wait_applying()
+
+                manage_bunkerweb("global_config", variable, threaded=threaded)
+
+            ui_data = get_ui_data()
+            ui_data["PRO_LOADING"] = True
+
+            if any(curr_changes.values()):
+                ui_data["RELOADING"] = True
+                ui_data["LAST_RELOAD"] = time()
+                Thread(target=update_global_config, args=(True,)).start()
+            else:
+                update_global_config()
+
+            with LOCK:
+                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
             return redirect(url_for("account"))
 
@@ -786,13 +805,13 @@ def account():
 
     secret_token = ""
     totp_qr_image = ""
+    ui_data = get_ui_data()
 
     if not current_user.is_two_factor_enabled:
         current_user.refresh_totp()
         secret_token = current_user.secret_token
         totp_qr_image = get_b64encoded_qr_image(current_user.get_authentication_setup_uri())
 
-        ui_data = get_ui_data()
         ui_data["CURRENT_TOTP_TOKEN"] = secret_token
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
@@ -803,6 +822,7 @@ def account():
         is_totp=current_user.is_two_factor_enabled,
         secret_token=secret_token,
         totp_qr_image=totp_qr_image,
+        pro_loading=ui_data.get("PRO_LOADING", False),
     )
 
 
@@ -1098,16 +1118,20 @@ def global_config():
 
             manage_bunkerweb("global_config", variables, threaded=threaded)
 
+        ui_data = get_ui_data()
+
+        if "PRO_LICENSE_KEY" in variables:
+            ui_data["PRO_LOADING"] = True
+
         if any(curr_changes.values()):
-            ui_data = get_ui_data()
             ui_data["RELOADING"] = True
             ui_data["LAST_RELOAD"] = time()
             Thread(target=update_global_config, args=(True,)).start()
-
-            with LOCK:
-                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
         else:
             update_global_config()
+
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         with suppress(BaseException):
             if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
@@ -1126,8 +1150,16 @@ def global_config():
         for key in global_config.copy():
             if key.startswith(f"{service}_"):
                 global_config.pop(key)
+
     # Display global config
-    return render_template("global_config.html", username=current_user.get_id(), global_config=global_config, dumped_global_config=dumps(global_config))
+    ui_data = get_ui_data()
+    return render_template(
+        "global_config.html",
+        username=current_user.get_id(),
+        global_config=global_config,
+        dumped_global_config=dumps(global_config),
+        pro_loading=ui_data.get("PRO_LOADING", False),
+    )
 
 
 @app.route("/configs", methods=["GET", "POST"])
