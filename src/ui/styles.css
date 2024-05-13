@@ -582,6 +582,30 @@
   @apply h-16 w-24 mr-4;
 }
 
+.core-card-detail {
+  @apply h-fit col-span-12 lg:col-span-6 xl:col-span-6 3xl:col-span-3 p-4 relative overflow-auto  break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-detail-title {
+  @apply mb-2 font-bold dark:text-white/90;
+}
+
+.core-card-detail-items-container {
+  @apply grid grid-cols-1 gap-2 mt-4 mb-6 ml-1;
+}
+
+.core-card-detail-item {
+  @apply grid grid-cols-12 py-1 sm:py-0;
+}
+
+.core-card-detail-item-title {
+  @apply w-full break-all col-span-4 min-w-fit transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
+}
+
+.core-card-detail-item-subtitle {
+  @apply w-full break-all col-span-8 min-w-[2rem] break-all transition duration-300 ease-in-out pl-2  mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
+}
+
 /*---------------------------------------------*/
 /*--------------- END CORE PLUGINS ------------*/
 /*---------------------------------------------*/
@@ -664,12 +688,4 @@
 
 /*----------------------------------------------*/
 /*---------------END PLUGINS PAGE---------------*/
-/*----------------------------------------------*/
-
-/*----------------------------------------------*/
-/*---------------SERVICES PAGE------------------*/
-/*----------------------------------------------*/
-
-/*----------------------------------------------*/
-/*---------------END SERVICES PAGE--------------*/
 /*----------------------------------------------*/
