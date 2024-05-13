@@ -223,8 +223,11 @@ class CLI(ApiCaller):
             except Exception as e:
                 self.__logger.error(f"Failed to delete ban for {ip} from redis: {e}")
 
-        if self.send_to_apis("POST", "/unban", data={"ip": ip}):
-            return True, f"IP {ip} has been unbanned"
+        try:
+            if self.send_to_apis("POST", "/unban", data={"ip": ip}):
+                return True, f"IP {ip} has been unbanned"
+        except BaseException as e:
+            return False, f"Failed to unban {ip}: {e}"
         return False, f"Failed to unban {ip}"
 
     def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
@@ -237,14 +240,20 @@ class CLI(ApiCaller):
             except Exception as e:
                 self.__logger.error(f"Failed to ban {ip} in redis: {e}")
 
-        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
-            return (True, f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}")
+        try:
+            if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
+                return True, f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}"
+        except BaseException as e:
+            return False, f"Failed to ban {ip}: {e}"
         return False, f"Failed to ban {ip}"
 
     def bans(self) -> Tuple[bool, str]:
         servers = {}
 
-        ret, resp = self.send_to_apis("GET", "/bans", response=True)
+        try:
+            ret, resp = self.send_to_apis("GET", "/bans", response=True)
+        except BaseException as e:
+            return False, f"Failed to get bans: {e}"
         if not ret:
             return False, "error"
 
