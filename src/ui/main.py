@@ -1300,10 +1300,10 @@ def plugins():
                 ui_data = get_ui_data()
                 ui_data["RELOADING"] = True
                 ui_data["LAST_RELOAD"] = time()
-                Thread(target=update_plugins, args=(True,)).start()
-
                 with LOCK:
                     TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+                Thread(target=update_plugins, args=(True,)).start()
             else:
                 update_plugins()
         else:
@@ -1510,10 +1510,10 @@ def plugins():
                 ui_data = get_ui_data()
                 ui_data["RELOADING"] = True
                 ui_data["LAST_RELOAD"] = time()
-                Thread(target=update_plugins).start()
-
                 with LOCK:
                     TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+                Thread(target=update_plugins, args=(True,)).start()
             else:
                 update_plugins()
 
