@@ -310,7 +310,10 @@ class Instances:
         if not instance:
             instance = self.__instance_from_id(_id)
 
-        result = instance.reload()
+        try:
+            result = instance.reload()
+        except BaseException as e:
+            return f"Can't reload {instance.name}: {e}"
 
         if result:
             return f"Instance {instance.name} has been reloaded."
@@ -320,7 +323,10 @@ class Instances:
     def start_instance(self, _id) -> str:
         instance = self.__instance_from_id(_id)
 
-        result = instance.start()
+        try:
+            result = instance.start()
+        except BaseException as e:
+            return f"Can't start {instance.name}: {e}"
 
         if result:
             return f"Instance {instance.name} has been started."
@@ -330,7 +336,10 @@ class Instances:
     def stop_instance(self, _id) -> str:
         instance = self.__instance_from_id(_id)
 
-        result = instance.stop()
+        try:
+            result = instance.stop()
+        except BaseException as e:
+            return f"Can't stop {instance.name}: {e}"
 
         if result:
             return f"Instance {instance.name} has been stopped."
@@ -340,7 +349,10 @@ class Instances:
     def restart_instance(self, _id) -> str:
         instance = self.__instance_from_id(_id)
 
-        result = instance.restart()
+        try:
+            result = instance.restart()
+        except BaseException as e:
+            return f"Can't restart {instance.name}: {e}"
 
         if result:
             return f"Instance {instance.name} has been restarted."
@@ -350,14 +362,20 @@ class Instances:
     def get_bans(self, _id: Optional[int] = None) -> List[dict[str, Any]]:
         if _id:
             instance = self.__instance_from_id(_id)
-            resp, instance_bans = instance.bans()
+            try:
+                resp, instance_bans = instance.bans()
+            except:
+                return []
             if not resp:
                 return []
             return instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", [])
 
         bans: List[dict[str, Any]] = []
         for instance in self.get_instances():
-            resp, instance_bans = instance.bans()
+            try:
+                resp, instance_bans = instance.bans()
+            except:
+                continue
             if not resp:
                 continue
             bans.extend(instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", []))
@@ -371,25 +389,40 @@ class Instances:
     def ban(self, ip: str, exp: float, reason: str, _id: Optional[int] = None) -> Union[str, list[str]]:
         if _id:
             instance = self.__instance_from_id(_id)
-            if instance.ban(ip, exp, reason):
-                return ""
+            try:
+                if instance.ban(ip, exp, reason):
+                    return ""
+            except BaseException as e:
+                return f"Can't ban {ip} on {instance.name}: {e}"
             return f"Can't ban {ip} on {instance.name}"
 
-        return [instance.name for instance in self.get_instances() if not instance.ban(ip, exp, reason)]
+        try:
+            return [instance.name for instance in self.get_instances() if not instance.ban(ip, exp, reason)]
+        except BaseException as e:
+            return f"Can't ban {ip}: {e}"
 
     def unban(self, ip: str, _id: Optional[int] = None) -> Union[str, list[str]]:
         if _id:
             instance = self.__instance_from_id(_id)
-            if instance.unban(ip):
-                return ""
+            try:
+                if instance.unban(ip):
+                    return ""
+            except BaseException as e:
+                return f"Can't unban {ip} on {instance.name}: {e}"
             return f"Can't unban {ip} on {instance.name}"
 
-        return [instance.name for instance in self.get_instances() if not instance.unban(ip)]
+        try:
+            return [instance.name for instance in self.get_instances() if not instance.unban(ip)]
+        except BaseException as e:
+            return f"Can't unban {ip}: {e}"
 
     def get_reports(self, _id: Optional[int] = None) -> List[dict[str, Any]]:
         if _id:
             instance = self.__instance_from_id(_id)
-            resp, instance_reports = instance.reports()
+            try:
+                resp, instance_reports = instance.reports()
+            except:
+                return []
             if not resp:
                 return []
             return (instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"]
