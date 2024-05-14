@@ -38,7 +38,7 @@ init() {
 setSelectHandler(handler) {
     handler.addEventListener("click", (e) => {
         try {
-            if(!e.target.closest("button").hasAttribute('data-services-setting-select-dropdown-btn')) return;
+            if(!e.target.closest("button").hasAttribute(`data-${this.prefix}-setting-select-dropdown-btn`)) return;
             const value = e.target.closest("button").getAttribute('value');
             this.updateValue(handler, value);
             this.filter();
@@ -87,7 +87,6 @@ filter() {
 
     this.filters.forEach((filter) => {
         const [filterType, value, filterEls, filterAtt] = this.getFilterData(filter);
-
         // keyword filter means that el filter value must contains the keyword
         if(filterType === "keyword") {
             this.filterKeyword(value, filterEls, filterAtt);
@@ -111,14 +110,12 @@ filter() {
         
     });
     // If no match is found, hide the container and display the no match element
-    setTimeout(() => {
-        if(!this.isAtLeastOneMatch()) {
-            if(this.containerEl) this.containerEl.classList.add("hidden");
-            if(this.noMatchEl) this.noMatchEl.classList.remove("hidden");
-        }
-    }, 50);
+    if(!this.isAtLeastOneMatch()) {
+        console.log("run")
+        if(this.containerEl) this.containerEl.classList.add("hidden");
+        if(this.noMatchEl) this.noMatchEl.classList.remove("hidden");
+    }
 }
-
 
 filterKeyword(value, filterEls, filterAtt) {
     const keyword = value.trim().toLowerCase();

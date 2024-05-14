@@ -580,7 +580,7 @@ const checkServiceModalKeyword = new CheckNoMatchFilter(
     .querySelector("[data-services-modal-form]")
     .querySelectorAll("[data-plugin-item]"),
   document.querySelector("[data-services-modal-form]"),
-  document.querySelector("[data-services-nomatch]"),
+  document.querySelector("[data-advanced][data-services-nomatch]"),
 );
 
 const checkServiceModalSelect = new CheckNoMatchFilter(
@@ -592,7 +592,7 @@ const checkServiceModalSelect = new CheckNoMatchFilter(
     .querySelector("[data-services-modal-form]")
     .querySelectorAll("[data-plugin-item]"),
   document.querySelector("[data-services-modal-form]"),
-  document.querySelector("[data-services-nomatch]"),
+  document.querySelector("[data-advanced][data-services-nomatch]"),
 );
 
 const filterContainer = document.querySelector(`[data-services-filter]`);

@@ -83,7 +83,8 @@
         class="plugins-list-items-container">
        <div data-{{attribute_name}}-list class="plugins-list-items-wrap">
            {% for plugin in plugins %}
-               <div data-{{attribute_name}}-type="{{ plugin['type'] }}"
+               <div data-plugin data-{{attribute_name}}-type="{{ plugin['type'] }}"
+                    data-{{attribute_name}}-name="{{ plugin['name'] }}"
                     class="plugins-list-items {% if plugin['type'] != 'pro' or plugin['type'] == 'pro' and is_pro_version %} enabled {% else %} disabled  {% endif %}">
                    <p data-{{attribute_name}}-content
                       class="plugins-list-items-name {% if plugin['type'] == 'pro' and not is_pro_version %} disabled {% endif %} ">

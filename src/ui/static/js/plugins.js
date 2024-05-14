@@ -1,4 +1,6 @@
-import { CheckNoMatchFilter } from "./utils/settings.js";
+import {
+  Filter
+} from "./utils/dashboard.js";
 
 class Dropdown {
   constructor(prefix = "plugins") {
@@ -162,77 +164,6 @@ class Dropdown {
   hideInp(selector) {
     document.querySelector(selector).closest("div").classList.add("hidden");
     document.querySelector(selector).closest("div").classList.remove("flex");
-  }
-}
-
-class Filter {
-  constructor(prefix = "plugins") {
-    this.prefix = prefix;
-    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
-    this.keyInp = document.querySelector("input#keyword");
-    this.lastType = "all";
-    this.initHandler();
-  }
-
-  initHandler() {
-    //TYPE HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "types"
-        ) {
-          const btn = e.target.closest("button");
-          const btnValue = btn.getAttribute("value");
-
-          this.lastType = btnValue;
-          //run filter
-          this.filter();
-        }
-      } catch (err) {}
-    });
-    //KEYWORD HANDLER
-    this.keyInp.addEventListener("input", (e) => {
-      this.filter();
-    });
-  }
-
-  filter() {
-    const logs = document.querySelector(`[data-${this.prefix}-list]`).children;
-    if (logs.length === 0) return;
-    //reset
-    for (let i = 0; i < logs.length; i++) {
-      const el = logs[i];
-      el.classList.remove("hidden");
-    }
-    //filter type
-    this.setFilterType(logs);
-    this.setFilterKeyword(logs);
-  }
-
-  setFilterType(logs) {
-    if (this.lastType === "all") return;
-    for (let i = 0; i < logs.length; i++) {
-      const el = logs[i];
-      const type = el.getAttribute(`data-${this.prefix}-type`).trim();
-      if (type !== this.lastType) el.classList.add("hidden");
-    }
-  }
-
-  setFilterKeyword(logs) {
-    const keyword = this.keyInp.value.trim().toLowerCase();
-    if (!keyword) return;
-    for (let i = 0; i < logs.length; i++) {
-      const el = logs[i];
-      const content = el
-        .querySelector(`[data-${this.prefix}-content]`)
-        .textContent.trim()
-        .toLowerCase();
-
-      if (!content.includes(keyword)) el.classList.add("hidden");
-    }
   }
 }
 
@@ -511,26 +442,29 @@ class Modal {
 }
 
 const setDropdown = new Dropdown("plugins");
-const setFilter = new Filter("plugins");
 const setUpload = new Upload();
 const setModal = new Modal("plugins");
 
-const checkPluginKeyword = new CheckNoMatchFilter(
-  document.querySelector("input#keyword"),
-  "input",
-  document
-    .querySelector("[data-plugins-list]")
-    .querySelectorAll("[data-plugins-type]"),
-  document.querySelector("[data-plugins-list-container]"),
-  document.querySelector("[data-plugins-nomatch]"),
-);
 
-const checkPluginSelect = new CheckNoMatchFilter(
-  document.querySelectorAll("button[data-plugins-setting-select-dropdown-btn"),
-  "select",
-  document
-    .querySelector("[data-plugins-list]")
-    .querySelectorAll("[data-plugins-type]"),
-  document.querySelector("[data-plugins-list-container]"),
-  document.querySelector("[data-plugins-nomatch]"),
-);
+const filterContainer = document.querySelector("[data-plugins-list-container]");
+if(filterContainer) {
+  const noMatchEl = document.querySelector("[data-plugins-nomatch]");
+  const filterEls = document.querySelectorAll(`[data-plugin]`);
+  const keywordFilter = {
+    "handler": document.querySelector("input#keyword"),
+    "handlerType" : "input",
+    "value" : document.querySelector("input#keyword").value,
+    "filterEls": filterEls,
+    "filterAtt" : "data-plugins-name",
+    "filterType" : "keyword",
+  };
+  const typeFilter = {
+    "handler": document.querySelector("[data-plugins-setting-select-dropdown='types']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-plugins-setting-select-text='types']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-plugins-type",
+    "filterType" : "match",
+  };
+  new Filter("plugins", [keywordFilter, typeFilter], filterContainer, noMatchEl);
+} 
