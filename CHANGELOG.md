@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.5.7 - ????/??/??
+## v1.5.7 - 2024/05/14
 
 - [LINUX] Support Ubuntu 24.04 (Noble)
 - [LINUX] Support RHEL 9.4 instead of 9.3

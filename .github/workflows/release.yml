@@ -106,6 +106,9 @@ jobs:
       matrix:
         linux: [ubuntu, ubuntu-noble, debian, fedora, rhel, rhel9]
         platforms: [linux/amd64, linux/arm64]
+        exclude:
+          - linux: ubuntu-noble
+            platforms: linux/arm64
         include:
           - release: latest
           - linux: ubuntu
