@@ -8,6 +8,10 @@ import {
   SettingsAdvanced,
 } from "./utils/settings.js";
 
+import {
+  Filter
+} from "./utils/dashboard.js";
+
 class SettingsService {
   constructor() {
     this.prefix = "services";
@@ -549,130 +553,8 @@ class Dropdown {
   }
 }
 
-class Filter {
-  constructor(prefix = "services") {
-    this.prefix = prefix;
-    this.container =
-      document.querySelector(`[data-${this.prefix}-filter]`) || null;
-    this.keyInp = document.querySelector("input#service-name-keyword");
-    this.stateValue = "all";
-    this.methodValue = "all";
-    this.initHandler();
-  }
-
-  initHandler() {
-    if (!this.container) return;
-    //STATE HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "state"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="state"]`,
-              )
-              .textContent.trim()
-              .toLowerCase();
-
-            this.stateValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //METHOD HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "method"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="method"]`,
-              )
-              .textContent.trim()
-              .toLowerCase();
-
-            this.methodValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //KEYWORD HANDLER
-    this.keyInp.addEventListener("input", (e) => {
-      this.filter();
-    });
-  }
-
-  filter() {
-    const services = document.querySelectorAll(`[data-${this.prefix}-card]`);
-    if (services.length === 0) return;
-    //reset
-    for (let i = 0; i < services.length; i++) {
-      const el = services[i];
-      el.classList.remove("hidden");
-    }
-    //filter type
-    this.setFilterState(services);
-    this.setFilterMethod(services);
-    this.setFilterKeyword(services);
-  }
-
-  setFilterState(services) {
-    if (this.stateValue === "all") return;
-    for (let i = 0; i < services.length; i++) {
-      const el = services[i];
-      const type = el
-        .querySelector(`[data-${this.prefix}-state]`)
-        .getAttribute(`data-${this.prefix}-state`)
-        .trim()
-        .toLowerCase();
-      if (type !== this.stateValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterMethod(services) {
-    if (this.methodValue === "all") return;
-    for (let i = 0; i < services.length; i++) {
-      const el = services[i];
-      const type = el
-        .querySelector(`[data-${this.prefix}-method]`)
-        .getAttribute(`data-${this.prefix}-method`)
-        .trim()
-        .toLowerCase();
-      if (type !== this.methodValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterKeyword(jobs) {
-    const keyword = this.keyInp.value.trim().toLowerCase();
-    if (!keyword) return;
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      const name = el
-        .querySelector(`[data-${this.prefix}-name]`)
-        .textContent.trim()
-        .toLowerCase();
-
-      if (!name.includes(keyword)) el.classList.add("hidden");
-    }
-  }
-}
 
 const setDropdown = new Dropdown();
-const setFilter = new Filter();
 const setTabsSelect = new TabsSelect(
   document.querySelector("[data-services-tabs-select]"),
   document.querySelector("[data-advanced][data-services-modal-form]"),
@@ -713,22 +595,33 @@ const checkServiceModalSelect = new CheckNoMatchFilter(
   document.querySelector("[data-services-nomatch]"),
 );
 
-try {
-  const checkServiceCardKeyword = new CheckNoMatchFilter(
-    document.querySelectorAll("input#service-name-keyword"),
-    "input",
-    document.querySelectorAll("[data-services-card]"),
-    false,
-    document.querySelector("[data-services-nomatch-card]"),
-  );
-
-  const checkServiceCardSelect = new CheckNoMatchFilter(
-    document.querySelectorAll(
-      "button[data-services-setting-select-dropdown-btn]",
-    ),
-    "select",
-    document.querySelectorAll("[data-services-card]"),
-    false,
-    document.querySelector("[data-services-nomatch-card]"),
-  );
-} catch (e) {}
+const filterContainer = document.querySelector(`[data-services-filter]`);
+if(filterContainer) {
+  const noMatchEl = document.querySelector("[data-services-nomatch-card]");
+  const filterEls = document.querySelectorAll(`[data-services-card]`);
+  const keywordFilter = {
+    "handler": document.querySelector("input#service-name-keyword"),
+    "handlerType" : "input",
+    "value" : document.querySelector("input#service-name-keyword").value,
+    "filterEls": filterEls,
+    "filterAtt" : "data-services-name",
+    "filterType" : "keyword",
+  };
+  const methodFilter = {
+    "handler": document.querySelector("[data-services-setting-select-dropdown='method']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-services-setting-select-text='method']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-services-method",
+    "filterType" : "match",
+  };
+  const stateFilter = {
+    "handler": document.querySelector("[data-services-setting-select-dropdown='state']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-services-setting-select-text='state']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-services-state",
+    "filterType" : "match",
+  };
+  new Filter("services", [keywordFilter, methodFilter, stateFilter], null, noMatchEl);
+} 

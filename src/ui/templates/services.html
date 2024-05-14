@@ -106,7 +106,10 @@
             {% for service in services %}
                 {% set id_server_name = service["SERVER_NAME"]['value'].replace(".", "-") %}
                 <div data-{{attribute_name}}-card
-                        data-settings="{{ service['settings'] }}"
+                     data-{{attribute_name}}-name="{{ service["SERVER_NAME"]['value'] }}"
+                     data-{{attribute_name}}-method="{{ service["SERVER_NAME"]['method'] }}"
+                     data-{{attribute_name}}-state="{{ "draft" if service.get('IS_DRAFT', "no") == "yes" else "online" }}"
+                     data-settings="{{ service['settings'] }}"
 
                      data-{{attribute_name}}-service="{{ service['SERVER_NAME']['value'] }}"
                      class="flex flex-col justify-between dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
@@ -121,11 +124,11 @@
                          data-value="{{ service['SERVER_NAME']['method'] }}"></div>
                     <div class="flex justify-between items-start">
                         <div class="flex flex-col">
-                            <h5 data-{{attribute_name}}-name="{{ service["SERVER_NAME"]['value'] }}"
+                            <h5 
                             class="break-all transition duration-300 ease-in-out text-center sm:text-left mb-1 mr-2 font-bold dark:text-white/90">
                             {{ service["SERVER_NAME"]['value'] }}
                         </h5>
-                        <h6 data-{{attribute_name}}-method="{{ service["SERVER_NAME"]['method'] }}"
+                        <h6 
                         class="text-left sm:mb-2 font-semibold text-gray-600 dark:text-white/80">
                         {{ service["SERVER_NAME"]['method'] }}
                         </h6>
