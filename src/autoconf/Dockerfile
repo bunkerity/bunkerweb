@@ -74,6 +74,6 @@ WORKDIR /usr/share/bunkerweb/autoconf
 
 USER autoconf:autoconf
 
-HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
+HEALTHCHECK --interval=10s --timeout=10s --start-period=60s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
 
 CMD [ "python3", "main.py" ]
