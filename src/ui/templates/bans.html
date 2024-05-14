@@ -130,6 +130,10 @@
                        {% for ban in bans %}
                            <li data-{{attribute_name}}-item
                                data-{{attribute_name}}-list-item="{{ ban }}"
+                               data-{{attribute_name}}-keyword="{{ ban['ip'] }} {{ ban['ban_start'] }} {{ ban['ban_end'] }}"
+                               data-{{attribute_name}}-reason="{{ ban['reason'] }}"
+                               data-{{attribute_name}}-remain="{{ ban['remain'] }}"
+                               data-{{attribute_name}}-term="{{ ban['term'] }}"
                                class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5 break-all">
                                <div data-{{attribute_name}}-ban-select
                                     data-checkbox-handler="ban-item-{{ loop.index }}"
@@ -153,16 +157,16 @@
                                    </svg>
                                </div>
                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 mr-1 my-1"
-                                  data-{{attribute_name}}-ip="{{ ban['ip'] }}">{{ ban['ip'] }}</p>
+                                  >{{ ban['ip'] }}</p>
                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 mr-1 my-1"
-                                  data-{{attribute_name}}-reason="{{ ban['reason'] }}">{{ ban['reason'] }}</p>
+                                  >{{ ban['reason'] }}</p>
                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 mr-1 my-1"
-                                  data-{{attribute_name}}-ban_start="{{ ban['ban_start'] }}">{{ ban['ban_start'] }}</p>
+                                  >{{ ban['ban_start'] }}</p>
                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 mr-1 my-1"
-                                  data-{{attribute_name}}-ban_end="{{ ban['ban_end'] }}">{{ ban['ban_end'] }}</p>
+                                  >{{ ban['ban_end'] }}</p>
                                <p class="dark:text-gray-400 text-sm col-span-3 m-0 mr-1 my-1"
-                                  data-{{attribute_name}}-remain="{{ ban['remain'] }}">{{ ban['remain'] }}</p>
-                               <p class="hidden" data-{{attribute_name}}-term="{{ ban['term'] }}">{{ ban['term'] }}</p>
+                                  >{{ ban['remain'] }}</p>
+                               <p class="hidden">{{ ban['term'] }}</p>
                            </li>
                        {% endfor %}
                    </ul>

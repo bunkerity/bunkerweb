@@ -1,126 +1,7 @@
-import { CheckNoMatchFilter } from "./utils/settings.js";
+import {
+  Filter
+} from "./utils/dashboard.js";
 
-class Filter {
-  constructor(prefix = "bans") {
-    this.prefix = prefix;
-    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
-    this.keyInp = document.querySelector("input#keyword");
-    this.termValue = "all";
-    this.reasonValue = "all";
-    this.initHandler();
-  }
-
-  initHandler() {
-    // REASON HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "reason"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="reason"]`,
-              )
-              .textContent.trim();
-
-            this.reasonValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    // TERM HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "term"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(`[data-${this.prefix}-setting-select-text="term"]`)
-              .textContent.trim();
-
-            this.termValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //KEYWORD HANDLER
-    this.keyInp.addEventListener("input", (e) => {
-      this.filter();
-    });
-  }
-
-  filter() {
-    const bans = document.querySelector(`[data-${this.prefix}-list]`).children;
-    if (bans.length === 0) return;
-    //reset
-    for (let i = 0; i < bans.length; i++) {
-      const el = bans[i];
-      el.classList.remove("hidden");
-    }
-    //filter type
-    this.setFilterKeyword(bans);
-    this.setFilterReason(bans);
-    this.setFilterTerm(bans);
-  }
-
-  setFilterKeyword(bans) {
-    const keyword = this.keyInp.value.trim().toLowerCase();
-    if (!keyword) return;
-    for (let i = 0; i < bans.length; i++) {
-      const el = bans[i];
-
-      const ip = this.getElAttribut(el, "ip");
-      const banStart = this.getElAttribut(el, "ban_start");
-      const banEnd = this.getElAttribut(el, "ban_end");
-      const remain = this.getElAttribut(el, "remain");
-
-      if (
-        !ip.includes(keyword) &&
-        !banStart.includes(keyword) &&
-        !banEnd.includes(keyword) &&
-        !remain.includes(keyword)
-      )
-        el.classList.add("hidden");
-    }
-  }
-
-  setFilterTerm(bans) {
-    if (this.termValue === "all") return;
-    for (let i = 0; i < bans.length; i++) {
-      const el = bans[i];
-      const type = this.getElAttribut(el, "term");
-      if (type !== this.termValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterReason(bans) {
-    if (this.reasonValue === "all") return;
-    for (let i = 0; i < bans.length; i++) {
-      const el = bans[i];
-      const type = this.getElAttribut(el, "reason");
-      if (type !== this.reasonValue) el.classList.add("hidden");
-    }
-  }
-
-  getElAttribut(el, attr) {
-    return el
-      .querySelector(`[data-${this.prefix}-${attr}]`)
-      .getAttribute(`data-${this.prefix}-${attr}`)
-      .trim();
-  }
-}
 
 class Dropdown {
   constructor(prefix = "bans") {
@@ -604,26 +485,38 @@ class AddBanModal {
 }
 
 const setDropdown = new Dropdown();
-const setFilter = new Filter();
 const setUnban = new Unban();
 const setModal = new AddBanModal();
 
-const checkPluginKeyword = new CheckNoMatchFilter(
-  document.querySelector("input#keyword"),
-  "input",
-  document
-    .querySelector("[data-bans-list]")
-    .querySelectorAll("[data-bans-item]"),
-  document.querySelector("[data-bans-list-container]"),
-  document.querySelector("[data-bans-nomatch]"),
-);
+const filterContainer = document.querySelector("[data-bans-list-container]");
+if(filterContainer) {
+  const noMatchEl = document.querySelector("[data-bans-nomatch]");
+  const filterEls = document.querySelectorAll(`[data-bans-item]`);
+  const keywordFilter = {
+    "handler": document.querySelector("input#keyword"),
+    "handlerType" : "input",
+    "value" : document.querySelector("input#keyword").value,
+    "filterEls": filterEls,
+    "filterAtt" : "data-bans-keyword",
+    "filterType" : "keyword",
+  };
+    const reasonFilter = {
+    "handler": document.querySelector("[data-bans-setting-select-dropdown='reason']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-bans-setting-select-text='reason']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-bans-reason",
+    "filterType" : "match",
+  };
 
-const checkPluginSelect = new CheckNoMatchFilter(
-  document.querySelectorAll("button[data-bans-setting-select-dropdown-btn]"),
-  "select",
-  document
-    .querySelector("[data-bans-list]")
-    .querySelectorAll("[data-bans-item]"),
-  document.querySelector("[data-bans-list-container]"),
-  document.querySelector("[data-bans-nomatch]"),
-);
+  const termFilter = {
+    "handler": document.querySelector("[data-bans-setting-select-dropdown='term']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-bans-setting-select-text='term']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-bans-term",
+    "filterType" : "match",
+  };
+  new Filter("bans", [keywordFilter, reasonFilter, termFilter], filterContainer, noMatchEl);
+} 
+
