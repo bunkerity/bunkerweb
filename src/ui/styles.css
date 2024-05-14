@@ -331,7 +331,7 @@
 }
 
 .core-card-status {
-  @apply ml-2 mr-2 mb-2 mt-2 col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-full h-fit transition hover:scale-102 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 h-fit transition hover:scale-102 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-status-container {
