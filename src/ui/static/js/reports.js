@@ -1,202 +1,7 @@
-import { CheckNoMatchFilter } from "./utils/settings.js";
+import {
+  Filter
+} from "./utils/dashboard.js";
 
-class Filter {
-  constructor(prefix = "reports") {
-    this.prefix = prefix;
-    this.keyInp = document.querySelector("input#keyword");
-    this.methodValue = "all";
-    this.statusValue = "all";
-    this.reasonValue = "all";
-    this.countryValue = "all";
-    this.initHandler();
-  }
-
-  initHandler() {
-    this.container =
-      document.querySelector(`[data-${this.prefix}-filter]`) || null;
-
-    if (!this.container) return;
-
-    //METHOD HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "method"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="method"]`
-              )
-              .textContent.trim();
-
-            this.methodValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //COUNTRY HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "country"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="country"]`
-              )
-              .textContent.trim();
-
-            this.countryValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //STATUS HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "status"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="status"]`
-              )
-              .textContent.trim();
-
-            this.statusValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    // REASON HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "reason"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="reason"]`
-              )
-              .textContent.trim();
-
-            this.reasonValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //KEYWORD HANDLER
-    this.keyInp.addEventListener("input", (e) => {
-      this.filter();
-    });
-  }
-
-  filter() {
-    const requests = document.querySelector(
-      `[data-${this.prefix}-list]`
-    ).children;
-    if (requests.length === 0) return;
-    //reset
-    for (let i = 0; i < requests.length; i++) {
-      const el = requests[i];
-      el.classList.remove("hidden");
-    }
-    //filter type
-    this.setFilterMethod(requests);
-    this.setFilterKeyword(requests);
-    this.setFilterStatus(requests);
-    this.setFilterReason(requests);
-    this.setFilterCountry(requests);
-  }
-
-  setFilterMethod(requests) {
-    if (this.methodValue === "all") return;
-    for (let i = 0; i < requests.length; i++) {
-      const el = requests[i];
-      const type = this.getElAttribut(el, "method");
-      if (type !== this.methodValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterCountry(requests) {
-    if (this.countryValue === "all") return;
-    for (let i = 0; i < requests.length; i++) {
-      const el = requests[i];
-      const type = this.getElAttribut(el, "country");
-      if (type !== this.countryValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterKeyword(requests) {
-    const keyword = this.keyInp.value.trim().toLowerCase();
-    if (!keyword) return;
-    for (let i = 0; i < requests.length; i++) {
-      const el = requests[i];
-
-      const url = this.getElAttribut(el, "url");
-      const date = this.getElAttribut(el, "date");
-      const ip = this.getElAttribut(el, "ip");
-      const data = this.getElAttribut(el, "data");
-
-      if (
-        !url.includes(keyword) &&
-        !date.includes(keyword) &&
-        !ip.includes(keyword) &&
-        !data.includes(keyword)
-      )
-        el.classList.add("hidden");
-    }
-  }
-
-  setFilterStatus(requests) {
-    if (this.statusValue === "all") return;
-    for (let i = 0; i < requests.length; i++) {
-      const el = requests[i];
-      const type = this.getElAttribut(el, "status");
-      if (type !== this.statusValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterReason(requests) {
-    if (this.reasonValue === "all") return;
-    for (let i = 0; i < requests.length; i++) {
-      const el = requests[i];
-      const type = this.getElAttribut(el, "reason");
-      if (type !== this.reasonValue) el.classList.add("hidden");
-    }
-  }
-
-  getElAttribut(el, attr) {
-    return el
-      .querySelector(`[data-${this.prefix}-${attr}]`)
-      .getAttribute(`data-${this.prefix}-${attr}`)
-      .trim();
-  }
-}
 
 class Dropdown {
   constructor(prefix = "reports") {
@@ -375,28 +180,52 @@ class Dropdown {
 }
 
 const setDropdown = new Dropdown();
-const setFilter = new Filter();
 
-try {
-  const checkPluginKeyword = new CheckNoMatchFilter(
-    document.querySelector("input#keyword"),
-    "input",
-    document
-      .querySelector("[data-reports-list]")
-      .querySelectorAll("[data-reports-item]"),
-    document.querySelector("[data-reports-list-container]"),
-    document.querySelector("[data-reports-nomatch]")
-  );
+const filterContainer = document.querySelector("[data-reports-list-container]");
+if(filterContainer) {
+  const noMatchEl = document.querySelector("[data-reports-nomatch]");
+  const filterEls = document.querySelectorAll(`[data-reports-item]`);
+  const keywordFilter = {
+    "handler": document.querySelector("input#keyword"),
+    "handlerType" : "input",
+    "value" : document.querySelector("input#keyword").value,
+    "filterEls": filterEls,
+    "filterAtt" : "data-reports-keyword",
+    "filterType" : "keyword",
+  };
+    const countryFilter = {
+    "handler": document.querySelector("[data-reports-setting-select-dropdown='country']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-reports-setting-select-text='country']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-reports-country",
+    "filterType" : "match",
+  };
+  const methodFilter = {
+    "handler": document.querySelector("[data-reports-setting-select-dropdown='method']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-reports-setting-select-text='method']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-reports-method",
+    "filterType" : "match",
+  };
 
-  const checkPluginSelect = new CheckNoMatchFilter(
-    document.querySelectorAll(
-      "button[data-reports-setting-select-dropdown-btn]"
-    ),
-    "select",
-    document
-      .querySelector("[data-reports-list]")
-      .querySelectorAll("[data-reports-item]"),
-    document.querySelector("[data-reports-list-container]"),
-    document.querySelector("[data-reports-nomatch]")
-  );
-} catch (e) {}
+  const statusFilter = {
+    "handler": document.querySelector("[data-reports-setting-select-dropdown='status']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-reports-setting-select-text='status']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-reports-status",
+    "filterType" : "match",
+  };
+
+  const reasonFilter = {
+    "handler": document.querySelector("[data-reports-setting-select-dropdown='reason']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-reports-setting-select-text='reason']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-reports-reason",
+    "filterType" : "match",
+  };
+  new Filter("reports", [keywordFilter, countryFilter, methodFilter, statusFilter, reasonFilter], filterContainer, noMatchEl);
+} 

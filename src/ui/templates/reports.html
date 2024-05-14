@@ -176,25 +176,30 @@
                         <ul class="col-span-12 w-full" data-{{attribute_name}}-list>
                             {% for report in reports %}
                                 <li data-{{attribute_name}}-item
+                                data-{{attribute_name}}-country="{{ report['country'] }}"
+                                data-{{attribute_name}}-method="{{ report['method'] }}"
+                                data-{{attribute_name}}-status="{{ report['status'] }}"
+                                data-{{attribute_name}}-reason="{{ report['reason'] }}"
+                                data-{{attribute_name}}-keyword="{{ report['ip'] }} {{ report['url'] }} {{ report['data'] }} {{ report['date'] }} {{ report['user_agent'] }}"
                                     class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5 break-all">
                                     <p class="text-center flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1"
-                                        data-{{attribute_name}}-date="{{ report['date'] }}">{{ report['date'] }}</p>
+                                        >{{ report['date'] }}</p>
                                     <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1"
-                                        data-{{attribute_name}}-ip="{{ report['ip'] }}">{{ report['ip'] }}</p>
+                                        >{{ report['ip'] }}</p>
                                     <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1"
-                                        data-{{attribute_name}}-country="{{ report['country'] }}">{{ report['country'] }}</p>
+                                        >{{ report['country'] }}</p>
                                     <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 "
-                                        data-{{attribute_name}}-method="{{ report['method'] }}">{{ report["method"] }}</p>
+                                        >{{ report["method"] }}</p>
                                     <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1"
-                                        data-{{attribute_name}}-url="{{ report['url'] }}">{{ report['url'] }}</p>
+                                        >{{ report['url'] }}</p>
                                     <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 "
-                                        data-{{attribute_name}}-status="{{ report['status'] }}">{{ report["status"] }}</p>
+                                        >{{ report["status"] }}</p>
                                     <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1 "
-                                        data-{{attribute_name}}-user_agent="{{ report['user_agent'] }}">{{ report["user_agent"] }}</p>
+                                        >{{ report["user_agent"] }}</p>
                                     <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 "
-                                        data-{{attribute_name}}-reason="{{ report['reason'] }}">{{ report["reason"] }}</p>
+                                        >{{ report["reason"] }}</p>
                                     <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1"
-                                        data-{{attribute_name}}-data="{{ report['data'] }}">{{ report["data"] }}</p>
+                                        >{{ report["data"] }}</p>
                                 </li>
                             {% endfor %}
                         </ul>
