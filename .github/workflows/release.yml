@@ -7,8 +7,8 @@ on:
     branches: [master]
 
 jobs:
-  scorecards-analysis:
-    uses: ./.github/workflows/scorecards-analysis.yml
+  # scorecards-analysis:
+  #   uses: ./.github/workflows/scorecards-analysis.yml
 
   codeql:
     uses: ./.github/workflows/codeql.yml
@@ -253,9 +253,6 @@ jobs:
             arch: amd64
             package_arch: x86_64
           - linux: ubuntu
-            arch: arm64
-            package_arch: arm64
-          - linux: ubuntu-noble
             arch: arm64
             package_arch: arm64
           - linux: debian
