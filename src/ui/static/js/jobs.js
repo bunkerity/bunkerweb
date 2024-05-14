@@ -1,4 +1,6 @@
-import { CheckNoMatchFilter } from "./utils/settings.js";
+import {
+  Filter
+} from "./utils/dashboard.js";
 
 class Dropdown {
   constructor(prefix = "jobs") {
@@ -176,173 +178,6 @@ class Dropdown {
   }
 }
 
-class Filter {
-  constructor(prefix = "jobs") {
-    this.prefix = prefix;
-    this.container =
-      document.querySelector(`[data-${this.prefix}-filter]`) || null;
-    this.keyInp = document.querySelector("input#keyword");
-    this.successValue = "all";
-    this.reloadValue = "all";
-    this.everyValue = "all";
-    this.initHandler();
-  }
-
-  initHandler() {
-    if (!this.container) return;
-    //SUCCESS HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "success"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="success"]`,
-              )
-              .textContent.trim();
-
-            this.successValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //RELOAD HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "reload"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="reload"]`,
-              )
-              .textContent.trim();
-
-            this.reloadValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //EVERY HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "every"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="every"]`,
-              )
-              .textContent.trim();
-
-            this.everyValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //KEYWORD HANDLER
-    this.keyInp.addEventListener("input", (e) => {
-      this.filter();
-    });
-  }
-
-  filter() {
-    const jobs = document.querySelector(`[data-${this.prefix}-list]`).children;
-    if (jobs.length === 0) return;
-    //reset
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      el.classList.remove("hidden");
-    }
-    //filter type
-    this.setFilterSuccess(jobs);
-    this.setFilterEvery(jobs);
-    this.setFilterReload(jobs);
-    this.setFilterKeyword(jobs);
-  }
-
-  setFilterEvery(jobs) {
-    if (this.everyValue === "all") return;
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      const type = el
-        .querySelector(`[data-${this.prefix}-every]`)
-        .getAttribute(`data-${this.prefix}-every`)
-        .trim();
-      if (type !== this.everyValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterSuccess(jobs) {
-    if (this.successValue === "all") return;
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      const type = el
-        .querySelector(`[data-${this.prefix}-success]`)
-        .getAttribute(`data-${this.prefix}-success`)
-        .trim();
-      if (type !== this.successValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterReload(jobs) {
-    if (this.reloadValue === "all") return;
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      const type = el
-        .querySelector(`[data-${this.prefix}-reload]`)
-        .getAttribute(`data-${this.prefix}-reload`)
-        .trim();
-      if (type !== this.reloadValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterKeyword(jobs) {
-    const keyword = this.keyInp.value.trim().toLowerCase();
-    if (!keyword) return;
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      const name = el
-        .querySelector(`[data-${this.prefix}-name]`)
-        .textContent.trim()
-        .toLowerCase();
-      const date = el
-        .querySelector(`[data-${this.prefix}-last_run]`)
-        .textContent.trim()
-        .toLowerCase();
-      const every = el
-        .querySelector(`[data-${this.prefix}-every]`)
-        .textContent.trim()
-        .toLowerCase();
-
-      if (
-        !name.includes(keyword) &&
-        !date.includes(keyword) &&
-        !every.includes(keyword)
-      )
-        el.classList.add("hidden");
-    }
-  }
-}
 
 class Download {
   constructor(prefix = "jobs") {
@@ -377,25 +212,43 @@ class Download {
 }
 
 const setDropdown = new Dropdown("jobs");
-const setFilter = new Filter("jobs");
 const setDownload = new Download();
 
-const checkPluginKeyword = new CheckNoMatchFilter(
-  document.querySelector("input#keyword"),
-  "input",
-  document
-    .querySelector("[data-jobs-list]")
-    .querySelectorAll("[data-jobs-item]"),
-  document.querySelector("[data-jobs-list-container]"),
-  document.querySelector("[data-jobs-nomatch]"),
-);
-
-const checkPluginSelect = new CheckNoMatchFilter(
-  document.querySelectorAll("button[data-jobs-setting-select-dropdown-btn]"),
-  "select",
-  document
-    .querySelector("[data-jobs-list]")
-    .querySelectorAll("[data-jobs-item]"),
-  document.querySelector("[data-jobs-list-container]"),
-  document.querySelector("[data-jobs-nomatch]"),
-);
+const filterContainer = document.querySelector("[data-jobs-list-container]");
+if(filterContainer) {
+  const noMatchEl = document.querySelector("[data-jobs-nomatch]");
+  const filterEls = document.querySelectorAll(`[data-jobs-item]`);
+  const keywordFilter = {
+    "handler": document.querySelector("input#keyword"),
+    "handlerType" : "input",
+    "value" : document.querySelector("input#keyword").value,
+    "filterEls": filterEls,
+    "filterAtt" : "data-jobs-name",
+    "filterType" : "keyword",
+  };
+  const successFilter = {
+    "handler": document.querySelector("[data-jobs-setting-select-dropdown='success']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-jobs-setting-select-text='success']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-jobs-success",
+    "filterType" : "bool",
+  };
+  const reloadFilter = {
+    "handler": document.querySelector("[data-jobs-setting-select-dropdown='reload']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-jobs-setting-select-text='reload']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-jobs-reload",
+    "filterType" : "bool",
+  };
+    const everyFilter = {
+    "handler": document.querySelector("[data-jobs-setting-select-dropdown='every']"),
+    "handlerType" : "select",
+    "value" : document.querySelector("[data-jobs-setting-select-text='every']").textContent.trim().toLowerCase(),
+    "filterEls": filterEls,
+    "filterAtt" : "data-jobs-every",
+    "filterType" : "match",
+  };
+  new Filter("jobs", [keywordFilter, successFilter, reloadFilter, everyFilter], filterContainer, noMatchEl);
+} 

@@ -151,16 +151,18 @@ filterMatch(value, filterEls, filterAtt) {
 
 
 filterBool(value, filterEls, filterAtt) {
+    console.log(value, filterEls, filterAtt)
     // Check if value is undefined or null
-    if(value === undefined || value === null) return;
+    if(value === undefined || value === null || value === "all") return;
 
     for (let i = 0; i < filterEls.length; i++) {
     const el = filterEls[i];
     const elValue = this.getFilterElValue(el, filterAtt);
     const truthyValues = ["yes", "true", "1", true];
-    const isValueTruthy = truthyValues.includes(elValue);
-    
-    if(value && isValueTruthy || !value && !isValueTruthy) {
+    const isValueElTruthy = truthyValues.includes(elValue);
+    const isValueTruthy = truthyValues.includes(value);
+    console.log(value, isValueTruthy)
+    if(isValueElTruthy === isValueTruthy) {
         continue;
     }
 
@@ -173,7 +175,7 @@ filterBool(value, filterEls, filterAtt) {
 
 filterLowerThan(value, filterEls, filterAtt) {
         // Check if value is undefined or null
-        if(!value) return;
+        if(!value || value === 'all') return;
 
     
         for (let i = 0; i < filterEls.length; i++) {
@@ -198,7 +200,7 @@ filterLowerThan(value, filterEls, filterAtt) {
 
     filterHigherThan(value, filterEls, filterAtt) {
         // Check if value is undefined or null
-        if(!value) return;
+        if(!value || value === 'all') return;
     
         for (let i = 0; i < filterEls.length; i++) {
         const el = filterEls[i];

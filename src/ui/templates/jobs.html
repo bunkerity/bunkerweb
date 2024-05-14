@@ -114,15 +114,19 @@
                                                    {"type" : "select", "filter_name" : "success", "value" : value['success'], "custom_class" : "col-span-3"},
                                                ] %}
                        <li data-{{attribute_name}}-item
+                            {% for data in jobs_data %}
+                            data-{{attribute_name}}-{{ data['filter_name'] }}="{{ data['value'] }}"
+                            {%endfor%}
+
                            class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5 break-all">
                            {% for data in jobs_data %}
                                {% if data['type'] == "text" %}
-                                   <p class="{{ data['custom_class'] }} dark:text-gray-400  text-sm  m-0 my-1 mr-1" data-{{attribute_name}}-{{ data['filter_name'] }}="{{ data['value'] }}">
+                                   <p class="{{ data['custom_class'] }} dark:text-gray-400  text-sm  m-0 my-1 mr-1">
                                        {{ data['value'] }}
                                    </p>
                                {% endif %}
                                {% if data['type'] == "check" and data['value'] %}
-                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm  m-0 my-1 mr-1" data-{{attribute_name}}-{{ data['filter_name'] }}="true">
+                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm  m-0 my-1 mr-1">
                                        <svg class="fill-green-500 h-5 w-5"
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 512 512">
@@ -131,7 +135,7 @@
                                    </p>
                                {% endif %}
                                {% if data['type'] == "check" and not data['value'] %}
-                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm m-0 my-1 mr-1" data-{{attribute_name}}-{{ data['filter_name'] }}="false">
+                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm m-0 my-1 mr-1">
                                        <svg class="fill-red-500 h-5 w-5"
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 512 512">
