@@ -67,7 +67,6 @@ else
     export GLOBAL_SEND_ANONYMOUS_REPORT="no"
     export GLOBAL_USE_REVERSE_PROXY="yes"
     export GLOBAL_REVERSE_PROXY_HOST="http://app1:8080"
-    export GLOBAL_REVERSE_PROXY_URL="/"
     export CUSTOM_CONF_MODSEC_test_custom_conf='SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
     sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
@@ -89,7 +88,6 @@ cleanup_stack () {
             sed -i 's@bwadm.example.com_REVERSE_PROXY_URL@REVERSE_PROXY_URL@' docker-compose.yml
             sed -i 's@SERVICE_USE_REVERSE_PROXY@GLOBAL_USE_REVERSE_PROXY@' docker-compose.test.yml
             sed -i 's@SERVICE_REVERSE_PROXY_HOST@GLOBAL_REVERSE_PROXY_HOST@' docker-compose.test.yml
-            sed -i 's@SERVICE_REVERSE_PROXY_URL@GLOBAL_REVERSE_PROXY_URL@' docker-compose.test.yml
 
             if [[ $(sed '16!d' docker-compose.yml) = '      bwadm.example.com_SERVER_NAME: "bwadm.example.com"' ]] ; then
                 sed -i '16d' docker-compose.yml
@@ -123,7 +121,6 @@ cleanup_stack () {
             unset CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf
             export GLOBAL_USE_REVERSE_PROXY="yes"
             export GLOBAL_REVERSE_PROXY_HOST="http://app1:8080"
-            export GLOBAL_REVERSE_PROXY_URL="/"
             sudo rm -f /etc/bunkerweb/configs/modsec-crs/bwadm.example.com/test_service_conf.conf
         fi
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
@@ -387,7 +384,6 @@ do
             sed -i "21i \      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:10001,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" docker-compose.test.yml
             sed -i 's@GLOBAL_USE_REVERSE_PROXY@SERVICE_USE_REVERSE_PROXY@' docker-compose.test.yml
             sed -i 's@GLOBAL_REVERSE_PROXY_HOST@SERVICE_REVERSE_PROXY_HOST@' docker-compose.test.yml
-            sed -i 's@GLOBAL_REVERSE_PROXY_URL@SERVICE_REVERSE_PROXY_URL@' docker-compose.test.yml
         else
             sudo sed -i 's@MULTISITE=.*$@MULTISITE=yes@' /etc/bunkerweb/variables.env
             echo "bwadm.example.com_SERVER_NAME=bwadm.example.com" | sudo tee -a /etc/bunkerweb/variables.env
@@ -403,11 +399,9 @@ do
             export CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf='SecRule REQUEST_FILENAME "@rx ^/test" "id:10001,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
             export SERVICE_USE_REVERSE_PROXY=$GLOBAL_USE_REVERSE_PROXY
             export SERVICE_REVERSE_PROXY_HOST=$GLOBAL_REVERSE_PROXY_HOST
-            export SERVICE_REVERSE_PROXY_URL=$GLOBAL_REVERSE_PROXY_URL
             export SERVICE_SERVER_NAME=$GLOBAL_SERVER_NAME
             unset GLOBAL_USE_REVERSE_PROXY
             unset GLOBAL_REVERSE_PROXY_HOST
-            unset GLOBAL_REVERSE_PROXY_URL
         fi
     elif [ "$test" = "mariadb" ] ; then
         echo "💾 Running tests with MariaDB database ..."

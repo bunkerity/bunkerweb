@@ -89,32 +89,6 @@ Here is how you can access the logs, depending on your integration :
     cat /var/log/bunkerweb/access.log
     ```
 
-=== "Ansible"
-
-    For errors related to BunkerWeb services (e.g. not starting), you can use `journalctl` :
-    ```shell
-    ansible -i inventory.yml all -a "journalctl -u bunkerweb --no-pager" --become
-    ```
-
-    Common logs are located inside the `/var/log/bunkerweb` directory :
-    ```shell
-    ansible -i inventory.yml all -a "cat /var/log/bunkerweb/error.log" --become
-    ansible -i inventory.yml all -a "cat /var/log/bunkerweb/access.log" --become
-    ```
-
-=== "Vagrant"
-
-    For errors related to BunkerWeb services (e.g. not starting), you can use `journalctl` :
-    ```shell
-    journalctl -u bunkerweb --no-pager
-    ```
-
-    Common logs are located inside the `/var/log/bunkerweb` directory :
-    ```shell
-    cat /var/log/bunkerweb/error.log
-    cat /var/log/bunkerweb/access.log
-    ```
-
 ## Permissions
 
 Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](quickstart-guide.md#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
@@ -261,20 +235,6 @@ You can manually unban an IP which can be useful when doing some tests but it ne
     ```
 
 === "Linux"
-
-    You can use the `bwcli` command (as root) :
-    ```shell
-    sudo bwcli unban 1.2.3.4
-    ```
-
-=== "Ansible"
-
-    You can use the `bwcli` command :
-    ```shell
-	ansible -i inventory.yml all -a "bwcli unban 1.2.3.4" --become
-    ```
-
-=== "Vagrant"
 
     You can use the `bwcli` command (as root) :
     ```shell

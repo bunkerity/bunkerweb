@@ -23,6 +23,33 @@
       "regex": "^.*$",
       "type": "text"
     },
+    "CORS_ALLOW_METHODS": {
+      "context": "multisite",
+      "default": "GET, POST, OPTIONS",
+      "help": "Value of the Access-Control-Allow-Methods header.",
+      "id": "cors-allow-methods",
+      "label": "Access-Control-Allow-Methods value",
+      "regex": "^(\\*|(?![, ])(,? ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\3))*)?$",
+      "type": "text"
+    },
+    "CORS_ALLOW_HEADERS": {
+      "context": "multisite",
+      "default": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
+      "help": "Value of the Access-Control-Allow-Headers header.",
+      "id": "cors-allow-headers",
+      "label": "Access-Control-Allow-Headers value",
+      "regex": "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
+      "type": "text"
+    },
+    "CORS_ALLOW_CREDENTIALS": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Send the Access-Control-Allow-Credentials header.",
+      "id": "cors-allow-credentials",
+      "label": "Send Access-Control-Allow-Credentials",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "CORS_EXPOSE_HEADERS": {
       "context": "multisite",
       "default": "Content-Length,Content-Range",
@@ -69,33 +96,6 @@
       "id": "cors-max-age",
       "label": "Access-Control-Max-Age value",
       "regex": "^\\d+$",
-      "type": "text"
-    },
-    "CORS_ALLOW_CREDENTIALS": {
-      "context": "multisite",
-      "default": "no",
-      "help": "Send the Access-Control-Allow-Credentials header.",
-      "id": "cors-allow-credentials",
-      "label": "Send Access-Control-Allow-Credentials",
-      "regex": "^(yes|no)$",
-      "type": "check"
-    },
-    "CORS_ALLOW_METHODS": {
-      "context": "multisite",
-      "default": "GET, POST, OPTIONS",
-      "help": "Value of the Access-Control-Allow-Methods header.",
-      "id": "cors-allow-methods",
-      "label": "Access-Control-Allow-Methods value",
-      "regex": "^(\\*|(?![, ])(,? ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\3))*)?$",
-      "type": "text"
-    },
-    "CORS_ALLOW_HEADERS": {
-      "context": "multisite",
-      "default": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
-      "help": "Value of the Access-Control-Allow-Headers header.",
-      "id": "cors-allow-headers",
-      "label": "Access-Control-Allow-Headers value",
-      "regex": "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
       "type": "text"
     },
     "CORS_DENY_REQUEST": {

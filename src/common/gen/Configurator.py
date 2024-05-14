@@ -8,7 +8,7 @@ from logging import Logger
 from os import cpu_count, listdir, sep
 from os.path import basename, dirname, join
 from pathlib import Path
-from re import compile as re_compile, search as re_search
+from re import compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import Lock, Semaphore, Thread
@@ -229,8 +229,13 @@ class Configurator:
             where, real_var = self.__find_var(variable)
             if not where:
                 return False, f"variable name {variable} doesn't exist"
-            elif not re_search(where[real_var]["regex"], value):
-                return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
+
+            try:
+                if not re_search(where[real_var]["regex"], value):
+                    return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
+            except RegexError:
+                self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
+
             return True, "ok"
         # MULTISITE=yes
         prefixed, real_var = self.__var_is_prefixed(variable)
@@ -239,8 +244,13 @@ class Configurator:
             return False, f"variable name {variable} doesn't exist"
         elif prefixed and where[real_var]["context"] != "multisite":
             return False, f"context of {variable} isn't multisite"
-        elif not re_search(where[real_var]["regex"], value):
-            return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
+
+        try:
+            if not re_search(where[real_var]["regex"], value):
+                return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
+        except RegexError:
+            self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
+
         return True, "ok"
 
     def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, Any]], str]:

@@ -151,7 +151,7 @@
 
         3. **Stop the services**:
             ```bash
-            systemctl stop bunkerweb-scheduler
+            systemctl stop bunkerweb
             systemctl stop bunkerweb-ui
             ```
 
@@ -275,7 +275,7 @@
     4. **Stop the services**.
 
         ```bash
-        systemctl stop bunkerweb-scheduler
+        systemctl stop bunkerweb
         systemctl stop bunkerweb-ui
         ```
 

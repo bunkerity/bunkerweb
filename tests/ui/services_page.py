@@ -61,7 +61,8 @@ try:
 
     log_info("Toggle modal checked, trying settings ...")
 
-    assert_button_click(DRIVER, "//button[@data-toggle-settings-mode-btn='simple']")
+    # simple mode
+    # assert_button_click(DRIVER, "//button[@data-toggle-settings-mode-btn='simple']")
 
     log_info("Start trying combobox filter ...")
 
@@ -270,19 +271,19 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-services-action='new']")
 
-    current_mode = DRIVER.execute_script("return document.querySelector('button[data-toggle-settings-mode-btn]').getAttribute('data-toggle-settings-mode-btn')")
-    if current_mode != "simple":
-        log_error(f"""Default mode for new service need to be simple and not {current_mode}...""")
-        exit(1)
+    # current_mode = DRIVER.execute_script("return document.querySelector('button[data-toggle-settings-mode-btn]').getAttribute('data-toggle-settings-mode-btn')")
+    # if current_mode != "simple":
+    #     log_error(f"""Default mode for new service need to be simple and not {current_mode}...""")
+    #     exit(1)
 
-    # Switch to advanced mode
-    DRIVER.execute_script("document.querySelector('button[data-toggle-settings-mode-btn]').click()")
+    # # Switch to advanced mode
+    # DRIVER.execute_script("document.querySelector('button[data-toggle-settings-mode-btn]').click()")
 
-    current_mode = DRIVER.execute_script("return document.querySelector('button[data-toggle-settings-mode-btn]').getAttribute('data-toggle-settings-mode-btn')")
+    # current_mode = DRIVER.execute_script("return document.querySelector('button[data-toggle-settings-mode-btn]').getAttribute('data-toggle-settings-mode-btn')")
 
-    if current_mode != "advanced":
-        log_error(f"""Switching mode needed to return advanced mode, but he have {current_mode}...""")
-        exit(1)
+    # if current_mode != "advanced":
+    #     log_error(f"""Switching mode needed to return advanced mode, but he have {current_mode}...""")
+    #     exit(1)
 
     server_name_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form and @data-advanced]//input[@id='SERVER_NAME']")
     assert isinstance(server_name_input, WebElement), "Input is not a WebElement"

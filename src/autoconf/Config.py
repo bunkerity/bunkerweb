@@ -61,6 +61,23 @@ class Config(ConfigCaller):
             return True
         return False
 
+    def wait_applying(self):
+        i = 0
+        while i < 10:
+            curr_changes = self._db.check_changes()
+            if isinstance(curr_changes, str):
+                self.__logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
+            elif not any(curr_changes.values()):
+                break
+            else:
+                self.__logger.warning(
+                    "Scheduler is already applying a configuration, retrying in 5 seconds ...",
+                )
+            i += 1
+            sleep(5)
+        if i >= 10:
+            raise Exception("Too many retries while waiting for scheduler to apply configuration...")
+
     def apply(self, instances, services, configs={}, first=False) -> bool:
         success = True
 

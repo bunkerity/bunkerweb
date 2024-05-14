@@ -24,7 +24,6 @@ from docker.errors import NotFound as docker_NotFound, APIError as docker_APIErr
 from flask import Flask, Response, flash, jsonify, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError
-from glob import glob
 from hashlib import sha256
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
@@ -42,7 +41,7 @@ from subprocess import PIPE, Popen, call
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread, Lock
 from tempfile import NamedTemporaryFile
-from time import time
+from time import sleep, time
 from werkzeug.utils import secure_filename
 from zipfile import BadZipFile, ZipFile
 
@@ -155,7 +154,7 @@ try:
         SEND_FILE_MAX_AGE_DEFAULT=86400,
         SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
         DB=db,
-        UI_TEMPLATES=get_ui_templates()
+        UI_TEMPLATES=get_ui_templates(),
     )
 except FileNotFoundError as e:
     app.logger.error(repr(e), e.filename)
@@ -172,6 +171,23 @@ csrf.init_app(app)
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
+
+
+def wait_applying():
+    for i in range(31):
+        curr_changes = db.check_changes()
+        if isinstance(curr_changes, str):
+            app.logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
+        elif not any(curr_changes.values()):
+            break
+        else:
+            app.logger.warning(
+                "Scheduler is already applying a configuration, retrying in 1 seconds ...",
+            )
+        sleep(1)
+    if i >= 30:
+        app.logger.error("Too many retries while waiting for scheduler to apply configuration...")
+
 
 def get_ui_data():
     ui_data = "Error"
@@ -190,43 +206,26 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         ui_data["TO_FLASH"] = []
 
     if method == "services":
-        service_custom_confs = glob(join(sep, "etc", "bunkerweb", "configs", "*", args[1].split(" ")[0]))
-        moved = False
-        deleted = False
-
         if operation == "new":
             operation, error = app.config["CONFIG"].new_service(args[0], is_draft=is_draft)
         elif operation == "edit":
-            if args[1].split(" ")[0] != args[2].split(" ")[0] and service_custom_confs:
-                for service_custom_conf in service_custom_confs:
-                    if listdir(service_custom_conf):
-                        move(service_custom_conf, service_custom_conf.replace(f"{sep}{args[1].split(' ')[0]}", f"{sep}{args[2].split(' ')[0]}"))
-                        moved = True
-            operation, error = app.config["CONFIG"].edit_service(
-                args[1], args[0], check_changes=(was_draft != is_draft or not is_draft) and not moved, is_draft=is_draft
-            )
+            operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
         elif operation == "delete":
-            for service_custom_conf in glob(join(sep, "etc", "bunkerweb", "configs", "*", args[2].split(" ")[0])):
-                if listdir(service_custom_conf):
-                    rmtree(service_custom_conf, ignore_errors=True)
-                    deleted = True
-            operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft) and not deleted)
+            operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
 
         if error:
             ui_data["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
             ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
 
-            if (was_draft != is_draft or not is_draft) and (moved or deleted):
+            if was_draft != is_draft or not is_draft:
                 # update changes in db
                 ret = db.checked_changes(["config", "custom_configs"], value=True)
                 if ret:
                     app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
                     ui_data["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
-    if method == "global_config":
+    elif method == "global_config":
         operation = app.config["CONFIG"].edit_global_conf(args[0])
-    elif method == "plugins":
-        app.config["CONFIG"].reload_config()
 
     if operation == "reload":
         operation = app.config["INSTANCES"].reload_instance(args[0])
@@ -317,6 +316,9 @@ def run_action(plugin: str, function_name: str = ""):
 
         res = method(app=app, args=queries, data=data)
     except AttributeError:
+        if function_name == "pre_render":
+            return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
+
         message = "The plugin does not have a method, see logs for more details"
     except:
         message = "An error occurred while executing the plugin, see logs for more details"
@@ -379,7 +381,15 @@ def error_message(msg: str):
 
 @app.context_processor
 def inject_variables():
+    ui_data = get_ui_data()
     metadata = db.get_metadata()
+
+    curr_changes = db.check_changes()
+
+    if ui_data.get("PRO_LOADING") and not any(curr_changes.values()):
+        ui_data["PRO_LOADING"] = False
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
     # check that is value is in tuple
     return dict(
@@ -390,7 +400,8 @@ def inject_variables():
         pro_expire=metadata["pro_expire"].strftime("%d-%m-%Y") if metadata["pro_expire"] else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
         plugins=app.config["CONFIG"].get_plugins(),
-        bw_version=bw_version,
+        pro_loading=ui_data.get("PRO_LOADING", False),
+        bw_version=metadata["version"],
     )
 
 
@@ -406,6 +417,7 @@ def set_csp_header(response):
         + " img-src 'self' data: https://assets.bunkerity.com;"
         + " font-src 'self' data:;"
         + " connect-src *;"
+        + " base-uri 'self';"
     )
     return response
 
@@ -701,10 +713,28 @@ def account():
             metadata["last_pro_check"] = None
             db.set_pro_metadata(metadata)
 
-            # Reload instances
-            manage_bunkerweb("global_config", variable)
-
             flash("Checking license key to upgrade.", "success")
+
+            curr_changes = db.check_changes()
+
+            # Reload instances
+            def update_global_config(threaded: bool = False):
+                wait_applying()
+
+                manage_bunkerweb("global_config", variable, threaded=threaded)
+
+            ui_data = get_ui_data()
+            ui_data["PRO_LOADING"] = True
+
+            if any(curr_changes.values()):
+                ui_data["RELOADING"] = True
+                ui_data["LAST_RELOAD"] = time()
+                Thread(target=update_global_config, args=(True,)).start()
+            else:
+                update_global_config()
+
+            with LOCK:
+                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
             return redirect(url_for("account"))
 
@@ -958,23 +988,42 @@ def services():
 
         error = 0
 
-        # Reload instances
-        manage_bunkerweb(
-            "services",
-            variables,
-            request.form.get("OLD_SERVER_NAME", ""),
-            variables.get("SERVER_NAME", ""),
-            operation=request.form["operation"],
-            is_draft=is_draft,
-            was_draft=was_draft,
-        )
+        curr_changes = db.check_changes()
+
+        old_server_name = request.form.get("OLD_SERVER_NAME", "")
+        operation = request.form["operation"]
+
+        def update_services(threaded: bool = False):
+            wait_applying()
+
+            manage_bunkerweb(
+                "services",
+                variables,
+                old_server_name,
+                variables.get("SERVER_NAME", ""),
+                operation=operation,
+                is_draft=is_draft,
+                was_draft=was_draft,
+                threaded=threaded,
+            )
+
+        if any(curr_changes.values()):
+            ui_data = get_ui_data()
+            ui_data["RELOADING"] = True
+            ui_data["LAST_RELOAD"] = time()
+            Thread(target=update_services, args=(True,)).start()
+
+            with LOCK:
+                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+        else:
+            update_services()
 
         message = ""
 
         if request.form["operation"] == "new":
             message = f"Creating {'draft ' if is_draft else ''}service {variables.get('SERVER_NAME', '').split(' ')[0]}"
         elif request.form["operation"] == "edit":
-            message = f"Saving configuration for {'draft ' if is_draft else ''}service {request.form.get('OLD_SERVER_NAME', '').split(' ')[0]}"
+            message = f"Saving configuration for {'draft ' if is_draft else ''}service {old_server_name.split(' ')[0]}"
         elif request.form["operation"] == "delete":
             message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
 
@@ -1069,8 +1118,27 @@ def global_config():
                 if setting and setting["global"] and (setting["value"] != value or setting["value"] == config.get(variable, {"value": None})["value"]):
                     variables[f"{service}_{variable}"] = value
 
-        # Reload instances
-        manage_bunkerweb("global_config", variables)
+        curr_changes = db.check_changes()
+
+        def update_global_config(threaded: bool = False):
+            wait_applying()
+
+            manage_bunkerweb("global_config", variables, threaded=threaded)
+
+        ui_data = get_ui_data()
+
+        if "PRO_LICENSE_KEY" in variables:
+            ui_data["PRO_LOADING"] = True
+
+        if any(curr_changes.values()):
+            ui_data["RELOADING"] = True
+            ui_data["LAST_RELOAD"] = time()
+            Thread(target=update_global_config, args=(True,)).start()
+        else:
+            update_global_config()
+
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         with suppress(BaseException):
             if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
@@ -1089,6 +1157,7 @@ def global_config():
         for key in global_config.copy():
             if key.startswith(f"{service}_"):
                 global_config.pop(key)
+
     # Display global config
     return render_template("global_config.html", username=current_user.get_id(), global_config=global_config, dumped_global_config=dumps(global_config))
 
@@ -1229,16 +1298,46 @@ def plugins():
             if variables["type"] in ("core", "pro"):
                 return redirect_flash_error(f"Can't delete {variables['type']} plugin {variables['name']}", "plugins", True)
 
-            plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
-            for x, plugin in enumerate(plugins):
-                if plugin["id"] == variables["name"]:
-                    del plugins[x]
+            curr_changes = db.check_changes()
 
-            err = db.update_external_plugins(plugins)
-            if err:
-                error_message(f"Couldn't update external plugins to database: {err}")
+            def update_plugins(threaded: bool = False):  # type: ignore
+                wait_applying()
+
+                plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
+                for x, plugin in enumerate(plugins):
+                    if plugin["id"] == variables["name"]:
+                        del plugins[x]
+
+                ui_data = get_ui_data()
+
+                err = db.update_external_plugins(plugins)
+                if err:
+                    message = f"Couldn't update external plugins to database: {err}"
+                    if threaded:
+                        ui_data["TO_FLASH"].append({"content": message, "type": "error"})
+                    else:
+                        error_message(message)
+                else:
+                    message = f"Deleted plugin {variables['name']} successfully"
+                    if threaded:
+                        ui_data["TO_FLASH"].append({"content": message, "type": "success"})
+                    else:
+                        flash(message)
+
+                ui_data["RELOADING"] = False
+                with LOCK:
+                    TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+            if any(curr_changes.values()):
+                ui_data = get_ui_data()
+                ui_data["RELOADING"] = True
+                ui_data["LAST_RELOAD"] = time()
+                with LOCK:
+                    TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+                Thread(target=update_plugins, args=(True,)).start()
             else:
-                flash(f"Deleted plugin {variables['name']} successfully")
+                update_plugins()
         else:
             # Upload plugins
             if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
@@ -1408,20 +1507,47 @@ def plugins():
             if errors >= files_count:
                 return redirect(url_for("loading", next=url_for("plugins")))
 
-            plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
-            for plugin in deepcopy(plugins):
-                if plugin["id"] in new_plugins_ids:
-                    flash(f"Plugin {plugin['id']} already exists", "error")
-                    del new_plugins[new_plugins_ids.index(plugin["id"])]
+            curr_changes = db.check_changes()
 
-            err = db.update_external_plugins(new_plugins, delete_missing=False)
-            if err:
-                flash(f"Couldn't update external plugins to database: {err}", "error")
+            def update_plugins(threaded: bool = False):
+                wait_applying()
+
+                plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
+                for plugin in deepcopy(plugins):
+                    if plugin["id"] in new_plugins_ids:
+                        flash(f"Plugin {plugin['id']} already exists", "error")
+                        del new_plugins[new_plugins_ids.index(plugin["id"])]
+
+                ui_data = get_ui_data()
+
+                err = db.update_external_plugins(new_plugins, delete_missing=False)
+                if err:
+                    message = f"Couldn't update external plugins to database: {err}"
+                    if threaded:
+                        ui_data["TO_FLASH"].append({"content": message, "type": "error"})
+                    else:
+                        flash(message, "error")
+                else:
+                    message = "Plugins uploaded successfully"
+                    if threaded:
+                        ui_data["TO_FLASH"].append({"content": message, "type": "success"})
+                    else:
+                        flash("Plugins uploaded successfully")
+
+                ui_data["RELOADING"] = False
+                with LOCK:
+                    TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+            if any(curr_changes.values()):
+                ui_data = get_ui_data()
+                ui_data["RELOADING"] = True
+                ui_data["LAST_RELOAD"] = time()
+                with LOCK:
+                    TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+                Thread(target=update_plugins, args=(True,)).start()
             else:
-                flash("Plugins uploaded successfully")
-
-        # Reload instances
-        manage_bunkerweb("plugins")
+                update_plugins()
 
         return redirect(url_for("loading", next=url_for("plugins"), message="Reloading plugins"))
 

@@ -11,12 +11,10 @@ The first concept is the integration of BunkerWeb into the target environment. W
 The following integrations are officially supported :
 
 - [Docker](integrations.md#docker)
-- [Docker autoconf](integrations.md#docker-autoconf)
-- [Swarm](integrations.md#swarm)
-- [Kubernetes](integrations.md#kubernetes)
 - [Linux](integrations.md#linux)
-- [Ansible](integrations.md#ansible)
-- [Vagrant](integrations.md#vagrant)
+- [Docker autoconf](integrations.md#docker-autoconf)
+- [Kubernetes](integrations.md#kubernetes)
+- [Swarm](integrations.md#swarm)
 
 If you think that a new integration should be supported, do not hesitate to open a [new issue](https://github.com/bunkerity/bunkerweb/issues) on the GitHub repository.
 

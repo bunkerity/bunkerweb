@@ -138,9 +138,13 @@ class Test(ABC):
             if test["type"] == "string":
                 r = get(ex_url, timeout=10, verify=False)
                 ok = test["string"].casefold() in r.text.casefold()
+                if not ok:
+                    log("TEST", "⚠️", f"String not found : {test['string'].casefold()}")
             elif test["type"] == "status":
                 r = get(ex_url, timeout=10, verify=False)
                 ok = test["status"] == r.status_code
+                if not ok:
+                    log("TEST", "⚠️", f"Wrong status code : {str(r.status_code)}")
             if ok and "tls" in test:
                 ex_tls = test["tls"]
                 tls_edit = True
@@ -161,6 +165,7 @@ class Test(ABC):
                     log("TEST", "⚠️", f"wrong cert CN : {x509.get_subject().CN} != {ex_tls}")
             return ok
         except:
+            log("TEST", "⚠️", f"Exception : {format_exc()}")
             return False
         raise (Exception(f"unknown test type {test['type']}"))
 

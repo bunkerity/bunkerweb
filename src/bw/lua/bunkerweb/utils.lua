@@ -606,6 +606,7 @@ utils.get_session = function(ctx)
 					logger:log(ERR, "error while getting variable SESSIONS_CHECK_" .. check .. " : " .. err)
 				elseif check_value == "yes" and value ~= metadata[check] then
 					logger:log(WARN, "session check failed : " .. check .. "!=" .. metadata[check])
+					session:clear_request_cookie()
 					local ok
 					ok, err = session:destroy()
 					if not ok then

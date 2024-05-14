@@ -32,6 +32,24 @@
       "regex": "^\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*$",
       "type": "text"
     },
+    "ANTIBOT_TIME_RESOLVE": {
+      "context": "multisite",
+      "default": "60",
+      "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
+      "id": "antibot-time-resolve",
+      "label": "Time to resolve",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "ANTIBOT_TIME_VALID": {
+      "context": "multisite",
+      "default": "86400",
+      "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
+      "id": "antibot-time-valid",
+      "label": "Time valid",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
     "ANTIBOT_RECAPTCHA_SCORE": {
       "context": "multisite",
       "default": "0.7",
@@ -94,24 +112,6 @@
       "label": "Turnstile secret",
       "regex": "^(0x[\\w\\-]+)?$",
       "type": "password"
-    },
-    "ANTIBOT_TIME_RESOLVE": {
-      "context": "multisite",
-      "default": "60",
-      "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
-      "id": "antibot-time-resolve",
-      "label": "Time to resolve",
-      "regex": "^[0-9]+$",
-      "type": "text"
-    },
-    "ANTIBOT_TIME_VALID": {
-      "context": "multisite",
-      "default": "86400",
-      "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
-      "id": "antibot-time-valid",
-      "label": "Time valid",
-      "regex": "^[0-9]+$",
-      "type": "text"
     }
   }
 }

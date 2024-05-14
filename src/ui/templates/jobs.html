@@ -114,15 +114,15 @@
                                                    {"type" : "select", "filter_name" : "success", "value" : value['success'], "custom_class" : "col-span-3"},
                                                ] %}
                        <li data-{{attribute_name}}-item
-                           class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
+                           class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5 break-all">
                            {% for data in jobs_data %}
                                {% if data['type'] == "text" %}
-                                   <p class="{{ data['custom_class'] }} dark:text-gray-400  text-sm  m-0 my-1" data-{{attribute_name}}-{{ data['filter_name'] }}="{{ data['value'] }}">
+                                   <p class="{{ data['custom_class'] }} dark:text-gray-400  text-sm  m-0 my-1 mr-1" data-{{attribute_name}}-{{ data['filter_name'] }}="{{ data['value'] }}">
                                        {{ data['value'] }}
                                    </p>
                                {% endif %}
                                {% if data['type'] == "check" and data['value'] %}
-                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm  m-0 my-1" data-{{attribute_name}}-{{ data['filter_name'] }}="true">
+                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm  m-0 my-1 mr-1" data-{{attribute_name}}-{{ data['filter_name'] }}="true">
                                        <svg class="fill-green-500 h-5 w-5"
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 512 512">
@@ -131,7 +131,7 @@
                                    </p>
                                {% endif %}
                                {% if data['type'] == "check" and not data['value'] %}
-                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm m-0 my-1" data-{{attribute_name}}-{{ data['filter_name'] }}="false">
+                                   <p class="{{ data['custom_class'] }} flex justify-center dark:text-gray-400  text-sm m-0 my-1 mr-1" data-{{attribute_name}}-{{ data['filter_name'] }}="false">
                                        <svg class="fill-red-500 h-5 w-5"
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 512 512">
@@ -140,7 +140,7 @@
                                    </p>
                                {% endif %}
                                {% if data['type'] == "select" %}
-                                   <div class="{{ data['custom_class'] }} relative dark:text-gray-400 text-sm m-0 my-1"
+                                   <div class="{{ data['custom_class'] }} relative dark:text-gray-400 text-sm m-0 my-1 mr-1"
                                         data-{{attribute_name}}-files>
                                        {% if value['cache'] %}
                                            <button data-{{attribute_name}}-setting-select="{{ job_name }}"
@@ -168,7 +168,7 @@
                                                            value="files"
                                                            class="{% if loop.index == loop.length %}rounded-b-lg {% endif %}{% if loop.first %}rounded-t-lg{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 bg-white dark:bg-slate-700 text-gray-700">
                                                        <span class="flex justify-start items-center">
-                                                           <svg class="h-5.5 w-5.5 stroke-sky-500"
+                                                           <svg class="min-w-fit h-5.5 w-5.5 stroke-sky-500"
                                                                 xmlns="http://www.w3.org/2000/svg"
                                                                 fill="none"
                                                                 viewBox="0 0 24 24"
@@ -176,7 +176,7 @@
                                                                 stroke="currentColor">
                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                            </svg>
-                                                           <span class="transition duration-300 ease-in-out text-gray-700 dark:text-gray-300  ml-2">{{ file['file_name'] }}</span>
+                                                           <span class="overflow-hidden break-word transition duration-300 ease-in-out text-gray-700 dark:text-gray-300  ml-2">{{ file['file_name'] }}</span>
                                                        </span>
                                                    </button>
                                                {% endfor %}

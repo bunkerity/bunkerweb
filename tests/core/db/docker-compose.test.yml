@@ -16,7 +16,6 @@ services:
       GLOBAL_SEND_ANONYMOUS_REPORT: "no"
       GLOBAL_USE_REVERSE_PROXY: "yes"
       GLOBAL_REVERSE_PROXY_HOST: "http://app1:8080"
-      GLOBAL_REVERSE_PROXY_URL: "/"
       GLOBAL_LOG_LEVEL: "info"
       CUSTOM_CONF_MODSEC_test_custom_conf: 'SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
       GLOBAL_SERVER_NAME: "bwadm.example.com"

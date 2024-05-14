@@ -2,11 +2,15 @@
 
 ## v1.5.7 - ????/??/??
 
+- [LINUX] Support Ubuntu 24.04 (Noble)
+- [LINUX] Support RHEL 9.4 instead of 9.3
+- [LINUX] Support hot reload with systemctl reload
 - [BUGFIX] Fix rare error when the cache is not properly initialized and jobs are executed
 - [BUGFIX] Fix bug when downloading new mmdb files
 - [BUGFIX] Remove potential false positives with ModSecurity on the jobs page of the web UI
 - [BUGFIX] Fix bwcli not working with Redis sentinel
 - [BUGFIX] Fix potential issues when removing the bunkerweb Linux package
+- [BUGFIX] Fix bug when antibot is enabled and User-Agent or IP address has changed
 - [FEATURE] Add backup plugin to backup and restore easily the database
 - [FEATURE] Add LETS_ENCRYPT_CLEAR_OLD_CERTS setting to control if old certificates should be removed when generating Let's Encrypt certificates (default is no)
 - [FEATURE] Add DISABLE_DEFAULT_SERVER_STRICT_SNI setting to allow/block requests when SNI is unknown or unset (default is no)
@@ -14,16 +18,21 @@
 - [UI] General : fix select setting crop because of overflow and check if select is out of viewport to determine visible position
 - [UI] General : show logs on UI when pre rendering issue
 - [UI] General : Improve UI performance by using multiple workers for the web server and reducing the number of times we prompt a loading page
+- [UI] General : handle word breaks on dynamic text content
+- [UI] General : fix overflow issue with tables on Safari
+- [UI] General : fix static resources issue with firefox leading to loop requests
 - [UI] Global config : fix script error while fragment relate to a missing plugin
 - [UI] Global config / services page : filtering settings now open plugin select to highlight remaining plugin
 - [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
-- [UI] Global config / services page : add combobox on plugin select open to search a plugin quick
 - [UI] Global config / services page : add order for settings to always respect the order defined in the plugin
+- [UI] Services page : show any invalid setting value on setting modal and disabled save if case
 - [UI] Reporting page : fix missing data and add new ones
 - [UI] Account page : keep license key form even if pro register to easy update
 - [UI] Wizard : Add the possibility to still configure reverse proxy even if an admin user already exists
+- [AUTOCONF] Speedup autoconf process when we have multiple events in short period of time
 - [DOCUMENTATION] Add upgrade procedure for 1.5.7+
 - [DOCUMENTATION] Rename Migrating section to Upgrading
+- [MISC] Drop support of ansible and vagrant integrations
 - [MISC] Support custom bwcli commands using plugins
 - [MISC] Add Docker labels in autoconf, bw, scheduler, and ui Dockerfiles
 - [DEPS] Update Python base Docker image to version 3.12.3-alpine3.19

@@ -112,7 +112,10 @@ class News {
         .insertAdjacentHTML("afterbegin", cleanHTML);
       document.querySelectorAll(`.blog-click-${news.slug}`).forEach((slug) => {
         slug.addEventListener("click", function () {
-          window.open(`${BASE_URL}/blog/post/${news.slug}`, "_blank");
+          window.open(
+            `${BASE_URL}blog/post/${news.slug}?utm_campaign=self&utm_source=ui`,
+            "_blank",
+          );
         });
       });
       document.querySelectorAll(".blog-click-tag").forEach((tag) => {
@@ -126,7 +129,7 @@ class News {
     let tagList = "";
     tags.forEach((tag) => {
       tagList += ` <a
-      href="${this.BASE_URL}/blog/tag/${tag.slug}"
+      href="${this.BASE_URL}/blog/tag/${tag.slug}?utm_campaign=self&utm_source=ui"
       class="blog-click-tag my-0 mr-1 rounded bg-secondary hover:brightness-90 hover:-translate-y-0.4 text-white py-1 px-2 text-sm"
       >
       ${tag.name}

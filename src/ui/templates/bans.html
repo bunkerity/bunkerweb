@@ -74,6 +74,7 @@
                 "values": terms
             }
         ] %}
+    {% set is_filter_hidden = True if bans|length == 0 else False %}
         {% include "card_filter.html" %}
         {% include "filter_nomatch.html" %}
 
@@ -129,7 +130,7 @@
                        {% for ban in bans %}
                            <li data-{{attribute_name}}-item
                                data-{{attribute_name}}-list-item="{{ ban }}"
-                               class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
+                               class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5 break-all">
                                <div data-{{attribute_name}}-ban-select
                                     data-checkbox-handler="ban-item-{{ loop.index }}"
                                     class="relative mb-7 md:mb-0 z-10 ml-2">
@@ -151,15 +152,15 @@
                                        </path>
                                    </svg>
                                </div>
-                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 mr-1 my-1"
                                   data-{{attribute_name}}-ip="{{ ban['ip'] }}">{{ ban['ip'] }}</p>
-                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 mr-1 my-1"
                                   data-{{attribute_name}}-reason="{{ ban['reason'] }}">{{ ban['reason'] }}</p>
-                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 mr-1 my-1"
                                   data-{{attribute_name}}-ban_start="{{ ban['ban_start'] }}">{{ ban['ban_start'] }}</p>
-                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
+                               <p class="dark:text-gray-400 text-sm col-span-2 m-0 mr-1 my-1"
                                   data-{{attribute_name}}-ban_end="{{ ban['ban_end'] }}">{{ ban['ban_end'] }}</p>
-                               <p class="dark:text-gray-400 text-sm col-span-3 m-0 my-1"
+                               <p class="dark:text-gray-400 text-sm col-span-3 m-0 mr-1 my-1"
                                   data-{{attribute_name}}-remain="{{ ban['remain'] }}">{{ ban['remain'] }}</p>
                                <p class="hidden" data-{{attribute_name}}-term="{{ ban['term'] }}">{{ ban['term'] }}</p>
                            </li>

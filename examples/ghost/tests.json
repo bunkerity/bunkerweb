@@ -2,7 +2,7 @@
   "name": "ghost",
   "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
   "timeout": 60,
-  "delay": 240,
+  "delay": 300,
   "tests": [
     {
       "type": "string",

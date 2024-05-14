@@ -304,6 +304,222 @@ networks:
     name: bw-docker
 ```
 
+## Linux
+
+<figure markdown>
+  ![Overview](assets/img/integration-linux.svg){ align=center, width="600" }
+  <figcaption>Linux integration</figcaption>
+</figure>
+
+Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 architectures) include:
+
+- Debian 12 "Bookworm"
+- Ubuntu 22.04 "Jammy"
+- Ubuntu 24.04 "Noble"
+- Fedora 39
+- Red Hat Enterprise Linux (RHEL) 8.9
+- Red Hat Enterprise Linux (RHEL) 9.4
+
+Please ensure that you have **NGINX 1.24.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+
+To simplify the installation process, Linux package repositories for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb). They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer.
+
+=== "Debian"
+
+    The first step is to add NGINX official repository :
+
+    ```shell
+    sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
+    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    http://nginx.org/packages/debian `lsb_release -cs` nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+    ```
+
+    You should now be able to install NGINX 1.24.0 :
+
+    ```shell
+    sudo apt update && \
+    sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
+    ```
+
+    !!! warning "Testing/dev version"
+        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+
+        ```shell
+        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
+        ```
+
+    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+
+    ```shell
+    export UI_WIZARD=1
+    ```
+
+    And finally install BunkerWeb 1.5.7 :
+
+    ```shell
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+    sudo apt update && \
+    sudo -E apt install -y bunkerweb=1.5.7
+    ```
+
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+
+    ```shell
+    sudo apt-mark hold nginx bunkerweb
+    ```
+
+=== "Ubuntu"
+
+    !!! example "Specifications for Ubuntu 24.04"
+        As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0.
+
+        Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
+
+    The first step is to add NGINX official repository :
+
+    ```shell
+    sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
+    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    http://nginx.org/packages/ubuntu jammy nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+    ```
+
+    You should now be able to install NGINX 1.24.0 :
+
+    ```shell
+    sudo apt update && \
+    sudo apt install -y nginx=1.24.0-1~jammy
+    ```
+
+    !!! warning "Testing/dev version"
+        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+
+        ```shell
+        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
+        ```
+
+    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+
+    ```shell
+    export UI_WIZARD=1
+    ```
+
+    And finally install BunkerWeb 1.5.7 :
+
+    ```shell
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+    sudo apt update && \
+    sudo -E apt install -y bunkerweb=1.5.7
+    ```
+
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+
+    ```shell
+    sudo apt-mark hold nginx bunkerweb
+    ```
+
+=== "Fedora"
+
+    Fedora already provides NGINX 1.24.0 that we support :
+
+    ```shell
+    sudo dnf install -y nginx-1.24.0
+    ```
+
+    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+
+    ```shell
+    export UI_WIZARD=1
+    ```
+
+    And finally install BunkerWeb 1.5.7 :
+
+    ```shell
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
+  	sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
+  	sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
+  	sudo dnf makecache && \
+  	sudo -E dnf install -y bunkerweb-1.5.7
+    ```
+
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+
+    ```shell
+    sudo dnf versionlock add nginx && \
+    sudo dnf versionlock add bunkerweb
+    ```
+
+=== "RedHat"
+
+    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
+
+    ```conf
+    [nginx-stable]
+    name=nginx stable repo
+    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+
+    [nginx-mainline]
+    name=nginx mainline repo
+    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=0
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+    ```
+
+    You should now be able to install NGINX 1.24.0 :
+
+    ```shell
+    sudo dnf install nginx-1.24.0
+    ```
+
+    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+
+    ```shell
+    export UI_WIZARD=1
+    ```
+
+    And finally install BunkerWeb 1.5.7 :
+
+    ```shell
+	  sudo dnf install -y epel-release && \
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+    sudo dnf check-update && \
+    sudo -E dnf install -y bunkerweb-1.5.7
+    ```
+
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+
+    ```shell
+    sudo dnf versionlock add nginx && \
+    sudo dnf versionlock add bunkerweb
+    ```
+
+The configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
+
+```conf
+MY_SETTING_1=value1
+MY_SETTING_2=value2
+...
+```
+
+BunkerWeb is managed using systemctl :
+
+- Check BunkerWeb status : `systemctl status bunkerweb`
+- Start it if it's stopped : `systemctl start bunkerweb`
+- Stop it if it's started : `systemctl stop bunkerweb`
+- Reload it to apply new configuration : `systemctl reload bunkerweb`
+- And restart it : `systemctl restart bunkerweb`
+
 ## Docker autoconf
 
 <figure markdown>
@@ -436,186 +652,6 @@ services:
     labels:
       - "bunkerweb.MY_SETTING_1=value1"
       - "bunkerweb.MY_SETTING_2=value2"
-
-networks:
-  bw-services:
-    external: true
-    name: bw-services
-```
-
-## Swarm
-
-<figure markdown>
-  ![Overview](assets/img/integration-swarm.svg){ align=center, width="600" }
-  <figcaption>Docker Swarm integration</figcaption>
-</figure>
-
-!!! info "Docker autoconf"
-    The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
-
-To enable automatic configuration of BunkerWeb instances, the **autoconf** service requires access to the Docker API. This service listens for Docker Swarm events, such as service creation or deletion, and seamlessly configures the **BunkerWeb instances** in real-time without any downtime. It also monitors other Swarm objects, such as [configs](https://docs.docker.com/engine/swarm/configs/), for custom configurations.
-
-Similar to the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined using labels that start with the **bunkerweb**  prefix.
-
-For an optimal setup, it is recommended to schedule the **BunkerWeb service** as a ***global service*** on all nodes, while the **autoconf, scheduler, and Docker API proxy services** should be scheduled as ***single replicated services***. Please note that the Docker API proxy service needs to be scheduled on a manager node unless you configure it to use a remote API (which is not covered in the documentation).
-
-Since multiple instances of BunkerWeb are running, a shared data store implemented as a [Redis](https://redis.io/) service must be created. These instances will utilize the Redis service to cache and share data. Further details regarding the Redis settings can be found [here](settings.md#redis).
-
-As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
-
-!!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) folder of the repository for more information.
-
-    Clustered database backends setup are out-of-the-scope of this documentation.
-
-Here is the stack boilerplate that you can deploy using `docker stack deploy` :
-
-```yaml
-version: "3.5"
-
-services:
-  bunkerweb:
-    image: bunkerity/bunkerweb:1.5.7
-    ports:
-      - published: 80
-        target: 8080
-        mode: host
-        protocol: tcp
-      - published: 443
-        target: 8443
-        mode: host
-        protocol: tcp
-    environment:
-      - SERVER_NAME=
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-      - SWARM_MODE=yes
-      - MULTISITE=yes
-      - USE_REDIS=yes
-      - REDIS_HOST=bw-redis
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-    networks:
-      - bw-universe
-      - bw-services
-    deploy:
-      mode: global
-      placement:
-        constraints:
-          - "node.role == worker"
-      labels:
-        - "bunkerweb.INSTANCE=yes"
-
-  bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.5.7
-    environment:
-      - SWARM_MODE=yes
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-    networks:
-      - bw-universe
-      - bw-docker
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONFIGS=1
-      - CONTAINERS=1
-      - SERVICES=1
-      - SWARM=1
-      - TASKS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
-    deploy:
-      placement:
-        constraints:
-          - "node.role == manager"
-
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.7
-    environment:
-      - SWARM_MODE=yes
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-    networks:
-      - bw-universe
-      - bw-docker
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
-
-  bw-db:
-    image: mariadb:10.10
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=changeme
-    volumes:
-      - bw-data:/var/lib/mysql
-    networks:
-      - bw-docker
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
-
-  bw-redis:
-    image: redis:7-alpine
-    networks:
-      - bw-universe
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
-
-volumes:
-  bw-data:
-
-networks:
-  bw-universe:
-    name: bw-universe
-    driver: overlay
-    attachable: true
-    ipam:
-      config:
-        - subnet: 10.20.30.0/24
-  bw-services:
-    name: bw-services
-    driver: overlay
-    attachable: true
-  bw-docker:
-    name: bw-docker
-    driver: overlay
-    attachable: true
-```
-
-!!! info "Swarm mandatory setting"
-    Please note that the `SWARM_MODE=yes` environment variable is mandatory when using the Swarm integration.
-
-Once the BunkerWeb Swarm stack is set up and running (see autoconf and scheduler logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
-
-```yaml
-version: "3.5"
-
-services:
-  myapp:
-    image: mywebapp:4.2
-    networks:
-      - bw-services
-    deploy:
-      placement:
-        constraints:
-          - "node.role==worker"
-      labels:
-        - "bunkerweb.MY_SETTING_1=value1"
-        - "bunkerweb.MY_SETTING_2=value2"
 
 networks:
   bw-services:
@@ -937,362 +973,237 @@ spec:
 ...
 ```
 
-## Linux
+## Swarm
 
 <figure markdown>
-  ![Overview](assets/img/integration-linux.svg){ align=center, width="600" }
-  <figcaption>Linux integration</figcaption>
+  ![Overview](assets/img/integration-swarm.svg){ align=center, width="600" }
+  <figcaption>Docker Swarm integration</figcaption>
 </figure>
 
-Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 architectures) include:
+!!! info "Docker autoconf"
+    The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
 
-- Debian 12 "Bookworm"
-- Ubuntu 22.04 "Jammy"
-- Ubuntu 24.04 "Noble"
-- Fedora 39
-- Red Hat Enterprise Linux (RHEL) 8.9
-- Red Hat Enterprise Linux (RHEL) 9.3
+To enable automatic configuration of BunkerWeb instances, the **autoconf** service requires access to the Docker API. This service listens for Docker Swarm events, such as service creation or deletion, and seamlessly configures the **BunkerWeb instances** in real-time without any downtime. It also monitors other Swarm objects, such as [configs](https://docs.docker.com/engine/swarm/configs/), for custom configurations.
 
-Please ensure that you have **NGINX 1.24.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Similar to the [Docker autoconf integration](#docker-autoconf), configuration for web services is defined using labels that start with the **bunkerweb**  prefix.
 
-To simplify the installation process, Linux package repositories for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb). They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer.
+For an optimal setup, it is recommended to schedule the **BunkerWeb service** as a ***global service*** on all nodes, while the **autoconf, scheduler, and Docker API proxy services** should be scheduled as ***single replicated services***. Please note that the Docker API proxy service needs to be scheduled on a manager node unless you configure it to use a remote API (which is not covered in the documentation).
 
-=== "Debian"
+Since multiple instances of BunkerWeb are running, a shared data store implemented as a [Redis](https://redis.io/) service must be created. These instances will utilize the Redis service to cache and share data. Further details regarding the Redis settings can be found [here](settings.md#redis).
 
-    The first step is to add NGINX official repository :
+As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
 
-    ```shell
-    sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
-    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
-    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-    http://nginx.org/packages/debian `lsb_release -cs` nginx" \
-    | sudo tee /etc/apt/sources.list.d/nginx.list
-    ```
+!!! info "Database backend"
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) folder of the repository for more information.
 
-    You should now be able to install NGINX 1.24.0 :
+    Clustered database backends setup are out-of-the-scope of this documentation.
 
-    ```shell
-    sudo apt update && \
-    sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
-    ```
+Here is the stack boilerplate that you can deploy using `docker stack deploy` :
 
-    !!! warning "Testing/dev version"
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+```yaml
+version: "3.5"
 
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.5.7
+    ports:
+      - published: 80
+        target: 8080
+        mode: host
+        protocol: tcp
+      - published: 443
+        target: 8443
+        mode: host
+        protocol: tcp
+    environment:
+      - SERVER_NAME=
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+      - SWARM_MODE=yes
+      - MULTISITE=yes
+      - USE_REDIS=yes
+      - REDIS_HOST=bw-redis
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+    networks:
+      - bw-universe
+      - bw-services
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - "node.role == worker"
+      labels:
+        - "bunkerweb.INSTANCE=yes"
 
-    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:1.5.7
+    environment:
+      - SWARM_MODE=yes
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+    networks:
+      - bw-universe
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
-    ```shell
-    export UI_WIZARD=1
-    ```
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONFIGS=1
+      - CONTAINERS=1
+      - SERVICES=1
+      - SWARM=1
+      - TASKS=1
+      - LOG_LEVEL=warning
+    networks:
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
 
-    And finally install BunkerWeb 1.5.7 :
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.7
+    environment:
+      - SWARM_MODE=yes
+      - DOCKER_HOST=tcp://bw-docker:2375
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+    networks:
+      - bw-universe
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
-    ```shell
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
-    sudo apt update && \
-    sudo -E apt install -y bunkerweb=1.5.7
-    ```
+  bw-db:
+    image: mariadb:10.10
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=changeme
+    volumes:
+      - bw-data:/var/lib/mysql
+    networks:
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
+  bw-redis:
+    image: redis:7-alpine
+    networks:
+      - bw-universe
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
-    ```shell
-    sudo apt-mark hold nginx bunkerweb
-    ```
+volumes:
+  bw-data:
 
-=== "Ubuntu"
-
-    !!! example "Specifications for Ubuntu 24.04"
-        As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0.
-
-        Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
-
-    The first step is to add NGINX official repository :
-
-    ```shell
-    sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
-    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
-    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-    http://nginx.org/packages/ubuntu jammy nginx" \
-    | sudo tee /etc/apt/sources.list.d/nginx.list
-    ```
-
-    You should now be able to install NGINX 1.24.0 :
-
-    ```shell
-    sudo apt update && \
-    sudo apt install -y nginx=1.24.0-1~jammy
-    ```
-
-    !!! warning "Testing/dev version"
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
-    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
-
-    ```shell
-    export UI_WIZARD=1
-    ```
-
-    And finally install BunkerWeb 1.5.7 :
-
-    ```shell
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
-    sudo apt update && \
-    sudo -E apt install -y bunkerweb=1.5.7
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
-
-    ```shell
-    sudo apt-mark hold nginx bunkerweb
-    ```
-
-=== "Fedora"
-
-    Fedora already provides NGINX 1.24.0 that we support :
-
-    ```shell
-    sudo dnf install -y nginx-1.24.0
-    ```
-
-    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
-
-    ```shell
-    export UI_WIZARD=1
-    ```
-
-    And finally install BunkerWeb 1.5.7 :
-
-    ```shell
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
-  	sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
-  	sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
-  	sudo dnf makecache && \
-  	sudo -E dnf install -y bunkerweb-1.5.7
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
-
-    ```shell
-    sudo dnf versionlock add nginx && \
-    sudo dnf versionlock add bunkerweb
-    ```
-
-=== "RedHat"
-
-    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
-
-    ```conf
-    [nginx-stable]
-    name=nginx stable repo
-    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-    gpgcheck=1
-    enabled=1
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-
-    [nginx-mainline]
-    name=nginx mainline repo
-    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
-    gpgcheck=1
-    enabled=0
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-    ```
-
-    You should now be able to install NGINX 1.24.0 :
-
-    ```shell
-    sudo dnf install nginx-1.24.0
-    ```
-
-    Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
-
-    ```shell
-    export UI_WIZARD=1
-    ```
-
-    And finally install BunkerWeb 1.5.7 :
-
-    ```shell
-	  sudo dnf install -y epel-release && \
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
-    sudo dnf check-update && \
-    sudo -E dnf install -y bunkerweb-1.5.7
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
-
-    ```shell
-    sudo dnf versionlock add nginx && \
-    sudo dnf versionlock add bunkerweb
-    ```
-
-The configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
-
-```conf
-MY_SETTING_1=value1
-MY_SETTING_2=value2
-...
+networks:
+  bw-universe:
+    name: bw-universe
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    driver: overlay
+    attachable: true
+  bw-docker:
+    name: bw-docker
+    driver: overlay
+    attachable: true
 ```
 
-BunkerWeb is managed using systemctl :
+!!! info "Swarm mandatory setting"
+    Please note that the `SWARM_MODE=yes` environment variable is mandatory when using the Swarm integration.
 
-- Check BunkerWeb status : `systemctl status bunkerweb`
-- Start it if it's stopped : `systemctl start bunkerweb`
-- Stop it if it's started : `systemctl stop bunkerweb`
-- And restart : `systemctl restart bunkerweb`
+Once the BunkerWeb Swarm stack is set up and running (see autoconf and scheduler logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb :
 
-## Ansible
+```yaml
+version: "3.5"
+
+services:
+  myapp:
+    image: mywebapp:4.2
+    networks:
+      - bw-services
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - "bunkerweb.MY_SETTING_1=value1"
+        - "bunkerweb.MY_SETTING_2=value2"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+```
+
+## Microsoft Azure
 
 <figure markdown>
-  ![Overview](assets/img/integration-ansible.svg){ align=center, width="600" }
-  <figcaption>Ansible integration</figcaption>
+  ![Overview](assets/img/integration-azure.webp){ align=center, width="600" }
+  <figcaption>Azure integration</figcaption>
 </figure>
 
-Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 architectures) include:
+!!! info "Recommended VM size"
+    Please be aware while you choose the SKU of the VM. You must select a SKU compatible with Gen2 VM and we recommend starting at B2s or Ds2 series for optimal use.
 
-- Debian 12 "Bookworm"
-- Ubuntu 22.04 "Jammy"
-- Ubuntu 24.04 "Noble"
-- Fedora 39
-- Red Hat Enterprise Linux (RHEL) 8.9
-- Red Hat Enterprise Linux (RHEL) 9.3
+You can easily deploy BunkerWeb on your Azure subscription in several ways:
 
-To simplify the deployment and configuration process, [Ansible](https://docs.ansible.com/ansible/latest/index.html) can be used as an IT automation tool. Ansible enables you to configure systems, deploy software, and perform advanced IT tasks such as continuous deployments or zero downtime rolling updates.
+- Azure CLI in Cloud Shell
+- Azure ARM Template
+- Azure portal via the Marketplace
 
-For BunkerWeb, there is a dedicated Ansible role available on [Ansible Galaxy](https://galaxy.ansible.com/bunkerity/bunkerweb).
+=== "Cloud Shell"
 
-To proceed with the BunkerWeb Ansible role setup, follow these steps:
+    Create a resource group. Replace value `RG_NAME`
 
-1. Begin by creating an inventory file that lists the IP addresses or FQDNs of the remote systems you want to manage. You can either add this information to the `/etc/ansible/hosts` file or create a separate inventory file such as `inventory.yml`. Here's an example using a TOML format:
-
-    ```toml
-    [mybunkers]
-    192.0.2.50
-    192.0.2.51
-    192.0.2.52
+    ```bash
+    az group create --name "RG_NAME" --location "LOCATION"
     ```
 
-2. Next, establish SSH connections to the managed nodes by adding your public SSH keys to the `authorized_keys` file on each remote system. Verify that you can successfully connect to the nodes using SSH.
+    Create a VM with `Standard_B2s` SKU in the location of the resource group. Replace values `RG_NAME`, `VM_NAME`, `VNET_NAME`, `SUBNET_NAME`
 
-3. Create a playbook file, such as `playbook.yml`, which will define the desired configuration using the BunkerWeb Ansible role. Here's an example playbook configuration:
+    ```bash
 
-    ```yaml
-    ---
-    - hosts: all
-      become: true
-      roles:
-        - bunkerity.bunkerweb
+    az vm create --resource-group "RG_NAME" --name "VM_NAME" --image bunkerity:bunkerweb:bunkerweb:latest --accept-term --generate-ssh-keys --vnet-name "VNET_NAME" --size Standard_B2s --subnet "SUBNET_NAME"
     ```
 
-4. Execute the playbook using the `ansible-playbook` command, providing the inventory file and the playbook file as arguments. For example:
+    Full command. Replace values `RG_NAME`, `VM_NAME`, `LOCATION`, `HOSTNAME`, `USERNAME`, `PUBLIC_IP`, `VNET_NAME`, `SUBNET_NAME`, `NSG_NAME`
 
-    ```shell
-    ansible-playbook -i inventory.yml playbook.yml
+    ```bash
+    az vm create --resource-group "RG_NAME" --name "VM_NAME" --location "LOCATION" --image bunkerity:bunkerweb:bunkerweb:latest --accept-term --generate-ssh-keys --computer-name "HOSTNAME" --admin-username "USERNAME" --public-ip-address "PUBLIC_IP" --public-ip-address-allocation Static --size Standard_B2s --public-ip-sku Standard --os-disk-delete-option Delete --nic-delete-option Delete --vnet-name "VNET_NAME" --subnet "SUBNET_NAME" --nsg "NSG_NAME"
     ```
 
-By running the playbook, Ansible will apply the BunkerWeb role to all the hosts specified in the inventory, setting up the desired configuration.
+=== "ARM Template"
 
-the configuration of BunkerWeb is done by using specific role variables :
+    !!! info "Permissions requirement"
+        To deploy a ARM template, you need write access on the resources you're deploying and access to all operations on the Microsoft.Resources/deployments resource type.
+        To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write and Microsoft.Resources/deployments/* permissions. The what-if operation has the same permission requirements.
 
-|         Name          |    Type    | Description                                                                                                                                                                        | Default value         |
-| :-------------------: | :--------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-|  `bunkerweb_version`  |   string   | Version of BunkerWeb to install.                                                                                                                                                   | `1.5.7`               |
-|    `nginx_version`    |   string   | Version of NGINX to install.                                                                                                                                                       | `1.24.0`              |
-|   `freeze_versions`   |  boolean   | Prevent upgrade of BunkerWeb and NGINX when performing packages upgrades.                                                                                                          | `true`                |
-|    `variables_env`    |   string   | Path of the variables.env file to configure BunkerWeb.                                                                                                                             | `files/variables.env` |
-|      `enable_ui`      |  boolean   | Activate the web UI.                                                                                                                                                               | `false`               |
-|      `custom_ui`      |   string   | Path of the ui.env file to configure the web UI.                                                                                                                                   | `files/ui.env`        |
-| `custom_configs_path` | Dictionary | Each entry is a path of the folder containing custom configurations. Keys are the type of custom configs : `http`, `server-http`, `modsec`, `modsec-crs` and `default-server-http` | empty values          |
-|     `custom_www`      |   string   | Path of the www directory to upload.                                                                                                                                               | empty value           |
-|   `custom_plugins`    |   string   | Path of the plugins directory to upload.                                                                                                                                           | empty value           |
-|  `custom_www_owner`   |   string   | Default owner for www files and folders.                                                                                                                                           | `nginx`               |
-|  `custom_www_group`   |   string   | Default group for www files and folders.                                                                                                                                           | `nginx`               |
+    Deploy the ARM Template:
 
-## Vagrant
+    [![Deploy to Azure](assets/img/integration-azure-deploy.svg)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunkerity%2Fbunkerweb%2Fmaster%2Fmisc%2Fintegrations%2Fazure-arm-template.json){:target="_blank"}
 
-<!-- TODO
-<figure markdown>
-  ![Overview](assets/img/integration-vagrant.svg){ align=center }
-  <figcaption>BunkerWeb integration with Vagrant</figcaption>
-</figure>
--->
+=== "Marketplace"
 
-List of supported providers :
+    Login in [Azure portal](https://portal.azure.com){:target="_blank"}.
 
-- virtualbox
-- libvirt
+    Get BunkerWeb from the [Create ressource menu](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb){:target="_blank"}.
 
-!!! note "Supported Base Images"
-    Please be aware that the provided Vagrant boxes are based **exclusively on Ubuntu 22.04 "Jammy"**. While BunkerWeb supports other Linux distributions, the Vagrant setup currently only supports Ubuntu 22.04 as the base operating system. This ensures a consistent and reliable environment for users who want to deploy BunkerWeb using Vagrant.
-
-Similar to other BunkerWeb integrations, the Vagrant setup uses **NGINX version 1.24.0**. This specific version is required to ensure compatibility and smooth functioning with BunkerWeb. Additionally, the Vagrant box includes **PHP** pre-installed, providing a ready-to-use environment for hosting PHP-based applications alongside BunkerWeb.
-
-By using the provided Vagrant box based on Ubuntu 22.04 "Jammy", you benefit from a well-configured and integrated setup, allowing you to focus on developing and securing your applications with BunkerWeb without worrying about the underlying infrastructure.
-
-Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the supported virtualization providers (VirtualBox, and libvirt):
-
-1. Make sure you have Vagrant and one of the supported virtualization providers (VirtualBox or libvirt) installed on your system.
-2. There are two ways to install the Vagrant box with BunkerWeb: either by using a provided Vagrantfile to configure your virtual machine or by creating a new box based on the existing BunkerWeb Vagrant box, offering you flexibility in how you set up your development environment.
-
-=== "Vagrantfile"
-
-    ```shell
-    Vagrant.configure("2") do |config|
-      config.vm.box = "bunkerity/bunkerweb"
-    end
-    ```
-
-    Depending on the virtualization provider you choose, you may need to install additional plugins:
-
-    * For **libvirt**, install the `vagrant-libvirt plugin`. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-    * For **VirtualBox**, install the `vagrant-vbguest` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-
-=== "New Vagrant Box"
-
-    ```shell
-    vagrant init bunkerity/bunkerweb
-    ```
-
-    Depending on the virtualization provider you choose, you may need to install additional plugins:
-
-    * For **libvirt**, install the `vagrant-libvirt plugin`. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-    * For **VirtualBox**, install the `vagrant-vbguest` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
-
-After installing the necessary plugins for your chosen virtualization provider, run the following command to start the virtual machine and install BunkerWeb:
-
-```shell
-vagrant up --provider=virtualbox # or --provider=libvirt
-```
-
-Finally, to access the virtual machine using SSH, execute the following command:
-
-```shell
-vagrant ssh
-```
-
-**Example Vagrantfile**
-
-  Here is an example `Vagrantfile` for installing BunkerWeb on Ubuntu 22.04 "Jammy" using the different supported virtualization providers:
-
-```shell
-Vagrant.configure("2") do |config|
-  # Ubuntu 22.04 "Jammy"
-  config.vm.box = "bunkerity/bunkerweb"
-  # Uncomment the desired virtualization provider
-  # For VirtualBox (default)
-  config.vm.provider "virtualbox"
-  # For libvirt
-  # config.vm.provider "libvirt"
-end
-```
+    You can also go through the [Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview){:target="_blank"}.

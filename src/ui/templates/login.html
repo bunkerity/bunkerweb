@@ -8,7 +8,7 @@
             <title>BunkerWeb UI | Log in</title>
             <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
             <link rel="stylesheet" href="css/dashboard.css" />
-            <link rel="stylesheet" href="css/login.css" />
+            <script src="js/lottie-web.min.js" defer></script>
         </head>
         <body>
             <div data-loader
@@ -111,9 +111,9 @@
                 </div>
                 <!-- end form -->
                 <!-- particles -->
-                <div class="-z-10 fixed lg:relative lg:col-span-1 bg-primary">
-                    <div id="particles-js" class="login-img [&>*]:bg-primary"></div>
-                    <div class="hidden lg:flex justify-center">
+                <div class="-z-10 fixed lg:relative lg:col-span-1 bg-primary w-full h-full">
+                  <div id="lottie-particles" data-lottie="/lotties/PARTICLES.json" class="absolute top-0 left-0 w-full h-full login-img [&>*]:bg-primary"></div>
+                  <div class="h-full w-full hidden relative lg:flex items-center justify-center">
                         <img class="max-w-60 max-h-30"
                              src="images/BUNKERWEB-print-hd-blanc.png"
                              alt="logo" />
@@ -122,7 +122,6 @@
             </main>
             <!-- end particles -->
             <!-- end content -->
-            <script src="js/tsparticles.bundle.min.js" nonce="{{ script_nonce }}"></script>
             <script nonce="{{ script_nonce }}">
       class Loader {
         constructor() {
@@ -198,7 +197,16 @@
 
       const setLoader = new Loader();
       const setFlash = new FlashMsg();
-      tsParticles.loadJSON("particles-js", "json/particles.json");
+
+      window.addEventListener("load", () => {
+        lottie.loadAnimation({
+          container: document.querySelector("#lottie-particles"), // the dom element that will contain the animation
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: "json/PARTICLES.json" // the path to the animation json
+          });
+      });
             </script>
         </body>
     </html>

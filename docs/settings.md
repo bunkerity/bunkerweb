@@ -63,6 +63,8 @@ Bot detection by using a challenge.
 |---------------------------|------------|---------|--------|------------------------------------------------------------------------------------------------------------------------------|
 |`USE_ANTIBOT`              |`no`        |multisite|no      |Activate antibot feature.                                                                                                     |
 |`ANTIBOT_URI`              |`/challenge`|multisite|no      |Unused URI that clients will be redirected to to solve the challenge.                                                         |
+|`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
+|`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
 |`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge.                                                                               |
 |`ANTIBOT_RECAPTCHA_SITEKEY`|            |multisite|no      |Sitekey for reCAPTCHA challenge.                                                                                              |
 |`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                                                                               |
@@ -70,8 +72,6 @@ Bot detection by using a challenge.
 |`ANTIBOT_HCAPTCHA_SECRET`  |            |multisite|no      |Secret for hCaptcha challenge.                                                                                                |
 |`ANTIBOT_TURNSTILE_SITEKEY`|            |multisite|no      |Sitekey for Turnstile challenge.                                                                                              |
 |`ANTIBOT_TURNSTILE_SECRET` |            |multisite|no      |Secret for Turnstile challenge.                                                                                               |
-|`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
-|`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
 
 ## Auth basic
 
@@ -93,12 +93,12 @@ STREAM support :white_check_mark:
 
 Backup your data to a custom location. Ensure the safety and availability of your important files by creating regular backups.
 
-|     Setting      |          Default           |Context|Multiple|                 Description                 |
-|------------------|----------------------------|-------|--------|---------------------------------------------|
-|`USE_BACKUP`      |`yes`                       |global |no      |Enable or disable the backup feature         |
-|`BACKUP_DIRECTORY`|`/var/lib/bunkerweb/backups`|global |no      |The directory where the backup will be stored|
-|`BACKUP_SCHEDULE` |`daily`                     |global |no      |The frequency of the backup                  |
-|`BACKUP_ROTATION` |`7`                         |global |no      |The number of backups to keep                |
+|     Setting      |          Default           |Context|Multiple|                     Description                      |
+|------------------|----------------------------|-------|--------|------------------------------------------------------|
+|`USE_BACKUP`      |`yes`                       |global |no      |Enable or disable the backup feature                  |
+|`BACKUP_SCHEDULE` |`daily`                     |global |no      |The frequency of the backup (daily, weekly or monthly)|
+|`BACKUP_ROTATION` |`7`                         |global |no      |The number of backups to keep                         |
+|`BACKUP_DIRECTORY`|`/var/lib/bunkerweb/backups`|global |no      |The directory where the backup will be stored         |
 
 ## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -114,6 +114,7 @@ Automatically backup your data to an S3 bucket
 |`BACKUP_S3_ROTATION`         |`7`    |global |no      |The number of backups to keep               |
 |`BACKUP_S3_ENDPOINT`         |       |global |no      |The S3 endpoint                             |
 |`BACKUP_S3_BUCKET`           |       |global |no      |The S3 bucket                               |
+|`BACKUP_S3_DIR`              |       |global |no      |The S3 directory                            |
 |`BACKUP_S3_REGION`           |       |global |no      |The S3 region                               |
 |`BACKUP_S3_ACCESS_KEY_ID`    |       |global |no      |The S3 access key ID                        |
 |`BACKUP_S3_ACCESS_KEY_SECRET`|       |global |no      |The S3 access key secret                    |
@@ -129,9 +130,9 @@ Ban IP generating too much 'bad' HTTP status code in a period of time.
 |---------------------------|-----------------------------|---------|--------|--------------------------------------------------------------------------------------------|
 |`USE_BAD_BEHAVIOR`         |`yes`                        |multisite|no      |Activate Bad behavior feature.                                                              |
 |`BAD_BEHAVIOR_STATUS_CODES`|`400 401 403 404 405 429 444`|multisite|no      |List of HTTP status codes considered as 'bad'.                                              |
-|`BAD_BEHAVIOR_BAN_TIME`    |`86400`                      |multisite|no      |The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.|
 |`BAD_BEHAVIOR_THRESHOLD`   |`10`                         |multisite|no      |Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.    |
 |`BAD_BEHAVIOR_COUNT_TIME`  |`60`                         |multisite|no      |Period of time (in seconds) during which we count 'bad' HTTP status codes.                  |
+|`BAD_BEHAVIOR_BAN_TIME`    |`86400`                      |multisite|no      |The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.|
 
 ## Blacklist
 
@@ -143,25 +144,25 @@ Deny access based on internal and external IP/network/rDNS/ASN blacklists.
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------------|---------|--------|------------------------------------------------------------------------------------------------|
 |`USE_BLACKLIST`                   |`yes`                                                                                                                         |multisite|no      |Activate blacklist feature.                                                                     |
 |`BLACKLIST_IP`                    |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to block.                                            |
-|`BLACKLIST_IP_URLS`               |`https://www.dan.me.uk/torlist/?exit`                                                                                         |global   |no      |List of URLs, separated with spaces, containing bad IP/network to block.                        |
-|`BLACKLIST_RDNS_GLOBAL`           |`yes`                                                                                                                         |multisite|no      |Only perform RDNS blacklist checks on global IP addresses.                                      |
 |`BLACKLIST_RDNS`                  |`.shodan.io .censys.io`                                                                                                       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to block.                                  |
-|`BLACKLIST_RDNS_URLS`             |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to block.                  |
+|`BLACKLIST_RDNS_GLOBAL`           |`yes`                                                                                                                         |multisite|no      |Only perform RDNS blacklist checks on global IP addresses.                                      |
 |`BLACKLIST_ASN`                   |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to block.                                           |
-|`BLACKLIST_ASN_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to block.                                   |
 |`BLACKLIST_USER_AGENT`            |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to block.                               |
-|`BLACKLIST_USER_AGENT_URLS`       |`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|global   |no      |List of URLs, separated with spaces, containing bad User-Agent to block.                        |
 |`BLACKLIST_URI`                   |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to block.                                      |
-|`BLACKLIST_URI_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing bad URI to block.                               |
 |`BLACKLIST_IGNORE_IP`             |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to ignore in the blacklist.                          |
-|`BLACKLIST_IGNORE_IP_URLS`        |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.          |
 |`BLACKLIST_IGNORE_RDNS`           |                                                                                                                              |multisite|no      |List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.                |
-|`BLACKLIST_IGNORE_RDNS_URLS`      |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.|
 |`BLACKLIST_IGNORE_ASN`            |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to ignore in the blacklist.                         |
-|`BLACKLIST_IGNORE_ASN_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to ignore in the blacklist.                 |
 |`BLACKLIST_IGNORE_USER_AGENT`     |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.             |
-|`BLACKLIST_IGNORE_USER_AGENT_URLS`|                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.          |
 |`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.                    |
+|`BLACKLIST_IP_URLS`               |`https://www.dan.me.uk/torlist/?exit`                                                                                         |global   |no      |List of URLs, separated with spaces, containing bad IP/network to block.                        |
+|`BLACKLIST_RDNS_URLS`             |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to block.                  |
+|`BLACKLIST_ASN_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to block.                                   |
+|`BLACKLIST_USER_AGENT_URLS`       |`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|global   |no      |List of URLs, separated with spaces, containing bad User-Agent to block.                        |
+|`BLACKLIST_URI_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing bad URI to block.                               |
+|`BLACKLIST_IGNORE_IP_URLS`        |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.          |
+|`BLACKLIST_IGNORE_RDNS_URLS`      |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.|
+|`BLACKLIST_IGNORE_ASN_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to ignore in the blacklist.                 |
+|`BLACKLIST_IGNORE_USER_AGENT_URLS`|                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.          |
 |`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
 
 ## Brotli
@@ -198,14 +199,14 @@ Cross-Origin Resource Sharing.
 |------------------------------|------------------------------------------------------------------------------------|---------|--------|-------------------------------------------------------------------|
 |`USE_CORS`                    |`no`                                                                                |multisite|no      |Use CORS                                                           |
 |`CORS_ALLOW_ORIGIN`           |`*`                                                                                 |multisite|no      |Allowed origins to make CORS requests : PCRE regex or *.           |
+|`CORS_ALLOW_METHODS`          |`GET, POST, OPTIONS`                                                                |multisite|no      |Value of the Access-Control-Allow-Methods header.                  |
+|`CORS_ALLOW_HEADERS`          |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header.                  |
+|`CORS_ALLOW_CREDENTIALS`      |`no`                                                                                |multisite|no      |Send the Access-Control-Allow-Credentials header.                  |
 |`CORS_EXPOSE_HEADERS`         |`Content-Length,Content-Range`                                                      |multisite|no      |Value of the Access-Control-Expose-Headers header.                 |
 |`CROSS_ORIGIN_OPENER_POLICY`  |                                                                                    |multisite|no      |Value for the Cross-Origin-Opener-Policy header.                   |
 |`CROSS_ORIGIN_EMBEDDER_POLICY`|                                                                                    |multisite|no      |Value for the Cross-Origin-Embedder-Policy header.                 |
 |`CROSS_ORIGIN_RESOURCE_POLICY`|                                                                                    |multisite|no      |Value for the Cross-Origin-Resource-Policy header.                 |
 |`CORS_MAX_AGE`                |`86400`                                                                             |multisite|no      |Value of the Access-Control-Max-Age header.                        |
-|`CORS_ALLOW_CREDENTIALS`      |`no`                                                                                |multisite|no      |Send the Access-Control-Allow-Credentials header.                  |
-|`CORS_ALLOW_METHODS`          |`GET, POST, OPTIONS`                                                                |multisite|no      |Value of the Access-Control-Allow-Methods header.                  |
-|`CORS_ALLOW_HEADERS`          |`DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range`|multisite|no      |Value of the Access-Control-Allow-Headers header.                  |
 |`CORS_DENY_REQUEST`           |`yes`                                                                               |multisite|no      |Deny request and don't send it to backend if Origin is not allowed.|
 
 ## Client cache
@@ -289,15 +290,15 @@ Allow access while keeping security features based on internal and external IP/n
 |--------------------------|-------|---------|--------|----------------------------------------------------------------------------------------------|
 |`USE_GREYLIST`            |`no`   |multisite|no      |Activate greylist feature.                                                                    |
 |`GREYLIST_IP`             |       |multisite|no      |List of IP/network, separated with spaces, to put into the greylist.                          |
-|`GREYLIST_IP_URLS`        |       |global   |no      |List of URLs, separated with spaces, containing good IP/network to put into the greylist.     |
-|`GREYLIST_RDNS_GLOBAL`    |`yes`  |multisite|no      |Only perform RDNS greylist checks on global IP addresses.                                     |
 |`GREYLIST_RDNS`           |       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to put into the greylist.                |
-|`GREYLIST_RDNS_URLS`      |       |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.|
+|`GREYLIST_RDNS_GLOBAL`    |`yes`  |multisite|no      |Only perform RDNS greylist checks on global IP addresses.                                     |
 |`GREYLIST_ASN`            |       |multisite|no      |List of ASN numbers, separated with spaces, to put into the greylist.                         |
-|`GREYLIST_ASN_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing ASN to put into the greylist.                 |
 |`GREYLIST_USER_AGENT`     |       |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.             |
-|`GREYLIST_USER_AGENT_URLS`|       |global   |no      |List of URLs, separated with spaces, containing good User-Agent to put into the greylist.     |
 |`GREYLIST_URI`            |       |multisite|no      |List of URI (PCRE regex), separated with spaces, to put into the greylist.                    |
+|`GREYLIST_IP_URLS`        |       |global   |no      |List of URLs, separated with spaces, containing good IP/network to put into the greylist.     |
+|`GREYLIST_RDNS_URLS`      |       |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.|
+|`GREYLIST_ASN_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing ASN to put into the greylist.                 |
+|`GREYLIST_USER_AGENT_URLS`|       |global   |no      |List of URLs, separated with spaces, containing good User-Agent to put into the greylist.     |
 |`GREYLIST_URI_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing bad URI to put into the greylist.             |
 
 ## Gzip
@@ -312,6 +313,7 @@ Compress HTTP requests with the gzip algorithm.
 |`GZIP_TYPES`     |`application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml`|multisite|no      |List of MIME types that will be compressed with gzip.|
 |`GZIP_MIN_LENGTH`|`1000`                                                                                                                                                                                                                                                                                                                                                                                                                          |multisite|no      |Minimum length for gzip compression.                 |
 |`GZIP_COMP_LEVEL`|`5`                                                                                                                                                                                                                                                                                                                                                                                                                             |multisite|no      |The compression level of the gzip algorithm.         |
+|`GZIP_PROXIED`   |`no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                        |multisite|no      |Which kind of proxied requests we should compress.   |
 
 ## HTML injection
 
@@ -516,9 +518,9 @@ Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.
 |`USE_REAL_IP`       |`no`                                     |multisite|no      |Retrieve the real IP of client.                                                                         |
 |`USE_PROXY_PROTOCOL`|`no`                                     |multisite|no      |Enable PROXY protocol communication.                                                                    |
 |`REAL_IP_FROM`      |`192.168.0.0/16 172.16.0.0/12 10.0.0.0/8`|multisite|no      |List of trusted IPs / networks, separated with spaces, where proxied requests come from.                |
-|`REAL_IP_FROM_URLS` |                                         |global   |no      |List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.|
 |`REAL_IP_HEADER`    |`X-Forwarded-For`                        |multisite|no      |HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.                  |
 |`REAL_IP_RECURSIVE` |`yes`                                    |multisite|no      |Perform a recursive search in the header container IP address.                                          |
+|`REAL_IP_FROM_URLS` |                                         |global   |no      |List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.|
 
 ## Redirect
 
@@ -547,14 +549,14 @@ Redis server configuration when using BunkerWeb in cluster mode.
 |`REDIS_SSL`              |`no`   |global |no      |Use SSL/TLS connection with Redis server.                          |
 |`REDIS_SSL_VERIFY`       |`no`   |global |no      |Verify the certificate of Redis server.                            |
 |`REDIS_TIMEOUT`          |`1000` |global |no      |Redis server timeout (in ms) for connect, read and write.          |
-|`REDIS_KEEPALIVE_IDLE`   |`30000`|global |no      |Max idle time (in ms) before closing redis connection in the pool. |
-|`REDIS_KEEPALIVE_POOL`   |`10`   |global |no      |Max number of redis connection(s) kept in the pool.                |
 |`REDIS_USERNAME`         |       |global |no      |Redis username used in AUTH command.                               |
 |`REDIS_PASSWORD`         |       |global |no      |Redis password used in AUTH command.                               |
 |`REDIS_SENTINEL_HOSTS`   |       |global |no      |Redis sentinel hosts with format host:[port] separated with spaces.|
 |`REDIS_SENTINEL_USERNAME`|       |global |no      |Redis sentinel username.                                           |
 |`REDIS_SENTINEL_PASSWORD`|       |global |no      |Redis sentinel password.                                           |
 |`REDIS_SENTINEL_MASTER`  |       |global |no      |Redis sentinel master name.                                        |
+|`REDIS_KEEPALIVE_IDLE`   |`30000`|global |no      |Max idle time (in ms) before closing redis connection in the pool. |
+|`REDIS_KEEPALIVE_POOL`   |`10`   |global |no      |Max number of redis connection(s) kept in the pool.                |
 
 ## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -563,19 +565,20 @@ STREAM support :x:
 
 Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
 
-|           Setting            |Default |Context|Multiple|                                                           Description                                                            |
-|------------------------------|--------|-------|--------|----------------------------------------------------------------------------------------------------------------------------------|
-|`USE_REPORTING_SMTP`          |`no`    |global |no      |Enable sending the report via email.                                                                                              |
-|`USE_REPORTING_WEBHOOK`       |`no`    |global |no      |Enable sending the report via webhook.                                                                                            |
-|`REPORTING_SCHEDULE`          |`weekly`|global |no      |The frequency at which reports are sent.                                                                                          |
-|`REPORTING_WEBHOOK_URLS`      |        |global |no      |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
-|`REPORTING_SMTP_EMAILS`       |        |global |no      |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
-|`REPORTING_SMTP_HOST`         |        |global |no      |The host server used for SMTP sending.                                                                                            |
-|`REPORTING_SMTP_PORT`         |`465`   |global |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
-|`REPORTING_SMTP_FROM_EMAIL`   |        |global |no      |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
-|`REPORTING_SMTP_FROM_USER`    |        |global |no      |The user authentication value for sending via the from email address.                                                             |
-|`REPORTING_SMTP_FROM_PASSWORD`|        |global |no      |The password authentication value for sending via the from email address.                                                         |
-|`REPORTING_SMTP_SSL`          |`SSL`   |global |no      |Determine whether or not to use a secure connection for SMTP.                                                                     |
+|           Setting            |     Default      |Context|Multiple|                                                           Description                                                            |
+|------------------------------|------------------|-------|--------|----------------------------------------------------------------------------------------------------------------------------------|
+|`USE_REPORTING_SMTP`          |`no`              |global |no      |Enable sending the report via email.                                                                                              |
+|`USE_REPORTING_WEBHOOK`       |`no`              |global |no      |Enable sending the report via webhook.                                                                                            |
+|`REPORTING_SCHEDULE`          |`weekly`          |global |no      |The frequency at which reports are sent.                                                                                          |
+|`REPORTING_WEBHOOK_URLS`      |                  |global |no      |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
+|`REPORTING_SMTP_EMAILS`       |                  |global |no      |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
+|`REPORTING_SMTP_HOST`         |                  |global |no      |The host server used for SMTP sending.                                                                                            |
+|`REPORTING_SMTP_PORT`         |`465`             |global |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
+|`REPORTING_SMTP_FROM_EMAIL`   |                  |global |no      |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
+|`REPORTING_SMTP_FROM_USER`    |                  |global |no      |The user authentication value for sending via the from email address.                                                             |
+|`REPORTING_SMTP_FROM_PASSWORD`|                  |global |no      |The password authentication value for sending via the from email address.                                                         |
+|`REPORTING_SMTP_SSL`          |`SSL`             |global |no      |Determine whether or not to use a secure connection for SMTP.                                                                     |
+|`REPORTING_SMTP_SUBJECT`      |`BunkerWeb Report`|global |no      |The subject line of the email.                                                                                                    |
 
 ## Reverse proxy
 
@@ -587,8 +590,9 @@ Manage reverse proxy configurations.
 |---------------------------------------|----------------------------------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------|
 |`USE_REVERSE_PROXY`                    |`no`                              |multisite|no      |Activate reverse proxy mode.                                                                                                 |
 |`REVERSE_PROXY_INTERCEPT_ERRORS`       |`yes`                             |multisite|no      |Intercept and rewrite errors.                                                                                                |
+|`REVERSE_PROXY_CUSTOM_HOST`            |                                  |multisite|no      |Override Host header sent to upstream server.                                                                                |
 |`REVERSE_PROXY_HOST`                   |                                  |multisite|yes     |Full URL of the proxied resource (proxy_pass).                                                                               |
-|`REVERSE_PROXY_URL`                    |                                  |multisite|yes     |Location URL that will be proxied.                                                                                           |
+|`REVERSE_PROXY_URL`                    |`/`                               |multisite|yes     |Location URL that will be proxied.                                                                                           |
 |`REVERSE_PROXY_WS`                     |`no`                              |multisite|yes     |Enable websocket on the proxied resource.                                                                                    |
 |`REVERSE_PROXY_HEADERS`                |                                  |multisite|yes     |List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).          |
 |`REVERSE_PROXY_HEADERS_CLIENT`         |                                  |multisite|yes     |List of HTTP headers to send to client separated with semicolons (values for add_header directive).                          |
@@ -597,6 +601,10 @@ Manage reverse proxy configurations.
 |`REVERSE_PROXY_AUTH_REQUEST`           |                                  |multisite|yes     |Enable authentication using an external provider (value of auth_request directive).                                          |
 |`REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL`|                                  |multisite|yes     |Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).            |
 |`REVERSE_PROXY_AUTH_REQUEST_SET`       |                                  |multisite|yes     |List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).|
+|`REVERSE_PROXY_CONNECT_TIMEOUT`        |`60s`                             |multisite|yes     |Timeout when connecting to the proxied resource.                                                                             |
+|`REVERSE_PROXY_READ_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when reading from the proxied resource.                                                                              |
+|`REVERSE_PROXY_SEND_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when sending to the proxied resource.                                                                                |
+|`REVERSE_PROXY_INCLUDES`               |                                  |multisite|yes     |Additional configuration to include in the location block, separated with spaces.                                            |
 |`USE_PROXY_CACHE`                      |`no`                              |multisite|no      |Enable or disable caching of the proxied resources.                                                                          |
 |`PROXY_CACHE_PATH_LEVELS`              |`1:2`                             |global   |no      |Hierarchy levels of the cache.                                                                                               |
 |`PROXY_CACHE_PATH_ZONE_SIZE`           |`10m`                             |global   |no      |Maximum size of cached metadata when caching proxied resources.                                                              |
@@ -607,11 +615,6 @@ Manage reverse proxy configurations.
 |`PROXY_CACHE_VALID`                    |`200=24h 301=1h 302=24h`          |multisite|no      |Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.                      |
 |`PROXY_NO_CACHE`                       |`$http_pragma $http_authorization`|multisite|no      |Conditions to disable caching of responses.                                                                                  |
 |`PROXY_CACHE_BYPASS`                   |`0`                               |multisite|no      |Conditions to bypass caching of responses.                                                                                   |
-|`REVERSE_PROXY_CONNECT_TIMEOUT`        |`60s`                             |multisite|yes     |Timeout when connecting to the proxied resource.                                                                             |
-|`REVERSE_PROXY_READ_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when reading from the proxied resource.                                                                              |
-|`REVERSE_PROXY_SEND_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when sending to the proxied resource.                                                                                |
-|`REVERSE_PROXY_INCLUDES`               |                                  |multisite|yes     |Additional configuration to include in the location block, separated with spaces.                                            |
-|`REVERSE_PROXY_CUSTOM_HOST`            |                                  |multisite|no      |Override Host header sent to upstream server.                                                                                |
 
 ## Reverse scan
 
@@ -674,13 +677,13 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|----------------------------------------------------------------------------------|
 |`USE_WHITELIST`            |`yes`                                                                                                                                                                       |multisite|no      |Activate whitelist feature.                                                       |
 |`WHITELIST_IP`             |`20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247`         |multisite|no      |List of IP/network, separated with spaces, to put into the whitelist.             |
-|`WHITELIST_IP_URLS`        |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good IP/network to whitelist.     |
-|`WHITELIST_RDNS_GLOBAL`    |`yes`                                                                                                                                                                       |multisite|no      |Only perform RDNS whitelist checks on global IP addresses.                        |
 |`WHITELIST_RDNS`           |`.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com`|multisite|no      |List of reverse DNS suffixes, separated with spaces, to whitelist.                |
-|`WHITELIST_RDNS_URLS`      |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.|
+|`WHITELIST_RDNS_GLOBAL`    |`yes`                                                                                                                                                                       |multisite|no      |Only perform RDNS whitelist checks on global IP addresses.                        |
 |`WHITELIST_ASN`            |`32934`                                                                                                                                                                     |multisite|no      |List of ASN numbers, separated with spaces, to whitelist.                         |
-|`WHITELIST_ASN_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing ASN to whitelist.                 |
 |`WHITELIST_USER_AGENT`     |                                                                                                                                                                            |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to whitelist.             |
-|`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
+|`WHITELIST_IP_URLS`        |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good IP/network to whitelist.     |
+|`WHITELIST_RDNS_URLS`      |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.|
+|`WHITELIST_ASN_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing ASN to whitelist.                 |
+|`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |

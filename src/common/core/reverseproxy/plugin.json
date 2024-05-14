@@ -23,6 +23,15 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "REVERSE_PROXY_CUSTOM_HOST": {
+      "context": "multisite",
+      "default": "",
+      "help": "Override Host header sent to upstream server.",
+      "id": "reverse-proxy-custom-host",
+      "label": "Reverse proxy custom host",
+      "regex": "^.*$",
+      "type": "text"
+    },
     "REVERSE_PROXY_HOST": {
       "context": "multisite",
       "default": "",
@@ -35,7 +44,7 @@
     },
     "REVERSE_PROXY_URL": {
       "context": "multisite",
-      "default": "",
+      "default": "/",
       "help": "Location URL that will be proxied.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
@@ -120,6 +129,46 @@
       "id": "reverse-proxy-auth-request-set",
       "label": "Reverse proxy auth request set",
       "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_CONNECT_TIMEOUT": {
+      "context": "multisite",
+      "default": "60s",
+      "help": "Timeout when connecting to the proxied resource.",
+      "id": "reverse-proxy-connect-timeout",
+      "label": "Reverse proxy connect timeout",
+      "regex": "^\\d+(ms?|[shdwMy])$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_READ_TIMEOUT": {
+      "context": "multisite",
+      "default": "60s",
+      "help": "Timeout when reading from the proxied resource.",
+      "id": "reverse-proxy-read-timeout",
+      "label": "Reverse proxy read timeout",
+      "regex": "^\\d+(ms?|[shdwMy])$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_SEND_TIMEOUT": {
+      "context": "multisite",
+      "default": "60s",
+      "help": "Timeout when sending to the proxied resource.",
+      "id": "reverse-proxy-send-timeout",
+      "label": "Reverse proxy send timeout",
+      "regex": "^\\d+(ms?|[shdwMy])$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_INCLUDES": {
+      "context": "multisite",
+      "default": "",
+      "help": "Additional configuration to include in the location block, separated with spaces.",
+      "id": "reverse-proxy-includes",
+      "label": "Reverse proxy includes",
+      "regex": "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -210,55 +259,6 @@
       "help": "Conditions to bypass caching of responses.",
       "id": "proxy-cache-bypass",
       "label": "Reverse proxy bypass",
-      "regex": "^.*$",
-      "type": "text"
-    },
-    "REVERSE_PROXY_CONNECT_TIMEOUT": {
-      "context": "multisite",
-      "default": "60s",
-      "help": "Timeout when connecting to the proxied resource.",
-      "id": "reverse-proxy-connect-timeout",
-      "label": "Reverse proxy connect timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
-      "multiple": "reverse-proxy"
-    },
-    "REVERSE_PROXY_READ_TIMEOUT": {
-      "context": "multisite",
-      "default": "60s",
-      "help": "Timeout when reading from the proxied resource.",
-      "id": "reverse-proxy-read-timeout",
-      "label": "Reverse proxy read timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
-      "multiple": "reverse-proxy"
-    },
-    "REVERSE_PROXY_SEND_TIMEOUT": {
-      "context": "multisite",
-      "default": "60s",
-      "help": "Timeout when sending to the proxied resource.",
-      "id": "reverse-proxy-send-timeout",
-      "label": "Reverse proxy send timeout",
-      "regex": "^\\d+(ms?|[shdwMy])$",
-      "type": "text",
-      "multiple": "reverse-proxy"
-    },
-    "REVERSE_PROXY_INCLUDES": {
-      "context": "multisite",
-      "default": "",
-      "help": "Additional configuration to include in the location block, separated with spaces.",
-      "id": "reverse-proxy-includes",
-      "label": "Reverse proxy includes",
-      "regex": "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
-      "type": "text",
-      "multiple": "reverse-proxy"
-    },
-    "REVERSE_PROXY_CUSTOM_HOST": {
-      "context": "multisite",
-      "default": "",
-      "help": "Override Host header sent to upstream server.",
-      "id": "reverse-proxy-custom-host",
-      "label": "Reverse proxy custom host",
       "regex": "^.*$",
       "type": "text"
     }

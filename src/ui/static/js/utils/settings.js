@@ -464,7 +464,7 @@ class FilterSettings {
             .toLowerCase();
           const settingEl =
             multSetting.querySelector("input")?.getAttribute("id") ||
-            setting.querySelector("select")?.getAttribute("id") ||
+            multSetting.querySelector("select")?.getAttribute("id") ||
             "";
           const settingId = settingEl.trim().toLowerCase().replaceAll("_", " ");
           if (
@@ -1148,6 +1148,13 @@ class Settings {
   }
 
   setDisabledByMethod(inp, method) {
+    // Check if pro
+    const proDisabled = inp
+      .closest("[data-plugin-item]")
+      .hasAttribute("data-pro-disabled")
+      ? true
+      : false;
+    if (proDisabled) return inp.setAttribute("disabled", "");
     if (method === "ui" || method === "default") {
       inp.removeAttribute("disabled");
     } else {
@@ -1269,17 +1276,23 @@ class Settings {
               inp.setAttribute("data-method", method);
             }
 
-            if (this.forceEnabled) {
+            const proDisabled = inp
+              .closest("[data-plugin-item]")
+              .hasAttribute("data-pro-disabled")
+              ? true
+              : false;
+
+            if (proDisabled) return inp.setAttribute("disabled", "");
+
+            if (this.forceEnabled) return inp.removeAttribute("disabled");
+
+            if (method === "ui" || method === "default") {
               inp.removeAttribute("disabled");
             } else {
-              if (method === "ui" || method === "default") {
-                inp.removeAttribute("disabled");
-              } else {
-                inp.setAttribute("disabled", "");
-              }
-
-              if (global) inp.removeAttribute("disabled");
+              inp.setAttribute("disabled", "");
             }
+
+            if (global) inp.removeAttribute("disabled");
           });
         } catch (err) {}
       }
@@ -1318,6 +1331,7 @@ class SettingsMultiple extends Settings {
             .closest("button")
             .hasAttribute(`data-${this.prefix}-multiple-add`)
         ) {
+          if (this.isAvoidAction(e.target)) return;
           //get plugin from btn
           const btn = e.target.closest("button");
           const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
@@ -1385,6 +1399,7 @@ class SettingsMultiple extends Settings {
             .closest("button")
             .hasAttribute(`data-${this.prefix}-multiple-delete`)
         ) {
+          if (this.isAvoidAction(e.target)) return;
           // We are not removing it really, just hiding it and update values to default
           // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
           const multContainer = e.target.closest(
@@ -1442,6 +1457,17 @@ class SettingsMultiple extends Settings {
         //remove last child
       } catch (err) {}
     });
+  }
+
+  isAvoidAction(target) {
+    // check that not disabled pro plugin
+    const proDisabled = target
+      .closest("[data-plugin-item]")
+      .hasAttribute("data-pro-disabled")
+      ? true
+      : false;
+
+    return proDisabled;
   }
 
   removePrevMultiples() {
@@ -2028,436 +2054,6 @@ class SettingsAdvanced extends SettingsEditor {
   }
 }
 
-class SettingsSimple extends SettingsEditor {
-  constructor(formEl, multSettingsName, prefix = "services") {
-    super("simple", formEl, multSettingsName, prefix);
-    this.nextBtn = this.container.querySelector("button[data-simple-next]");
-    this.backBtn = this.container.querySelector("button[data-simple-back]");
-    this.initSimple();
-  }
-
-  initSimple() {
-    window.addEventListener("DOMContentLoaded", () => {
-      this.container.addEventListener("input", (e) => {
-        this.checkVisibleInpsValidity();
-      });
-    });
-
-    // SIMPLE MODE ACTIONS
-    this.nextBtn.addEventListener("click", () => {
-      this.nextSimpleStep();
-    });
-
-    this.backBtn.addEventListener("click", () => {
-      this.prevSimpleStep();
-    });
-  }
-
-  setSimple(
-    action = this.currAction,
-    oldServName = this.oldServName,
-    operation = this.operation,
-    mainSettings,
-    compareSettings = null,
-    setMethodUI = false,
-    forceEnabled = false,
-    emptyServerName = false,
-    resetSteps = false
-  ) {
-    const settings =
-      compareSettings && Object.keys(compareSettings).length > 0
-        ? this.filterSettings(mainSettings, compareSettings)
-        : mainSettings;
-
-    this.updateData(
-      action,
-      oldServName,
-      operation,
-      settings,
-      setMethodUI,
-      forceEnabled,
-      emptyServerName
-    );
-    this.setSettingsSimple();
-    this.setEditorSettings();
-    this.resetServerName();
-    if (resetSteps) this.resetSimpleMode();
-    this.checkVisibleInpsValidity();
-  }
-
-  filterSettings(mainSettings, compareSettings) {
-    const mergeSettings = {};
-    // handle custom configs, we only keep security level config on new, else we get only service configs
-    const configsToGetFrom =
-      this.currAction === "new" ? compareSettings : mainSettings;
-    const customConfSettings = []; // Allow to delete custom configs
-    for (const [key, value] of Object.entries(configsToGetFrom)) {
-      if (key.startsWith("CUSTOM_CONFIG")) {
-        mergeSettings[key] = value;
-        customConfSettings.push(key);
-      }
-    }
-
-    // Delete merged custom configs
-    for (let i = 0; i < customConfSettings.length; i++) {
-      try {
-        delete mainSettings[customConfSettings[i]];
-      } catch (e) {}
-
-      try {
-        delete compareSettings[customConfSettings[i]];
-      } catch (e) {}
-    }
-
-    // get the highest suffix number in mainSettings
-    let highestMainSuffix = 0;
-    let highestCompareSuffix = 0;
-    // This will allow
-    const settingsConflicts = [];
-    for (const [key, value] of Object.entries(mainSettings)) {
-      const [mainSuffix, mainIsSuffixe, mainName] = this.getSuffixData(key);
-      // Case same key (same setting) and not a multiple
-      // Keep the one with a method != than ui or default if exists
-      // Else keep the one from compareSettings that is the securityLevel
-      if (key in compareSettings && !mainName.includes(this.multSettingsName)) {
-        const method = mainSettings[key]["method"];
-        if (method !== "ui" && method !== "default") {
-          mergeSettings[key] = value;
-        } else {
-          highestMainSuffix = mergeSettings[key] = compareSettings[key];
-        }
-        settingsConflicts.push(key);
-        continue;
-      }
-      // Need to check if is a multiple from a list because we can have custom configs with suffixe too
-      if (this.multSettingsName.includes(mainName)) {
-        highestMainSuffix = mainIsSuffixe
-          ? Math.max(highestMainSuffix, suffixeNum)
-          : highestMainSuffix;
-        settingsConflicts.push(key);
-      }
-      const [compareSuffix, compareIsSuffixe, compareName] =
-        this.getSuffixData(key);
-
-      // Need to check if is a multiple from a list because we can have custom configs with suffixe too
-      if (this.multSettingsName.includes(compareName)) {
-        highestCompareSuffix = compareIsSuffixe
-          ? Math.max(highestCompareSuffix, suffixeNum)
-          : highestCompareSuffix;
-        settingsConflicts.push(key);
-      }
-    }
-
-    // Case highest main suffixe is higher than compare suffixe
-    // Start updating starting from the highest suffix looping on all suffixed
-    // Until we reached the highest compare suffixe
-    if (highestCompareSuffix >= highestMainSuffix) {
-      highestMainSuffix++;
-      for (let i = 0; i <= highestCompareSuffix; i++) {
-        // Check if the setting is a multiple and match the current suffixe
-        for (const [key, value] of Object.entries(compareSettings)) {
-          const [compareSuffix, compareIsSuffixe, compareName] =
-            this.getSuffixData(key);
-          // Need to check if is a multiple from a list because we can have custom configs with suffixe too
-          if (!this.multSettingsName.includes(compareName)) continue;
-          // Case multiple,  update suffixe to the highest available if needed
-          const newNameSuffixe = key.replace(
-            `_${compareName}`,
-            `_${highestMainSuffix}`
-          );
-          mergeSettings[newNameSuffixe] = value;
-        }
-        // Update for the next loop to get the next suffixe
-        highestMainSuffix++;
-      }
-    }
-    // Else, add compare settings without changing anything
-    else {
-      for (const [key, value] of Object.entries(compareSettings)) {
-        const [compareSuffix, compareIsSuffixe, compareName] =
-          this.getSuffixData(key);
-        // Need to check if is a multiple from a list because we can have custom configs with suffixe too
-        if (!this.multSettingsName.includes(compareName)) continue;
-        mergeSettings[key] = value;
-      }
-    }
-
-    // Delete conflicts settings in order to merge the rest
-    for (let i = 0; i < settingsConflicts.length; i++) {
-      try {
-        delete mainSettings[settingsConflicts[i]];
-      } catch (e) {}
-      try {
-        delete compareSettings[settingsConflicts[i]];
-      } catch (e) {}
-    }
-
-    // Merge the rest of the settings
-    const mergeAllSettings = {
-      ...mergeSettings,
-      ...mainSettings,
-      ...compareSettings,
-    };
-    return mergeAllSettings;
-  }
-
-  setSettingsSimple() {
-    this.setRegularInps();
-    this.setMultipleInps();
-  }
-
-  resetSimpleMode() {
-    // reset button
-    this.backBtn.setAttribute("disabled", "");
-    this.nextBtn.removeAttribute("disabled");
-    // hidden all steps and show first one
-    const steps = this.container.querySelectorAll("[data-step]");
-    steps.forEach((step) => {
-      step.classList.add("hidden");
-    });
-    const firstStep = this.container.querySelector("[data-step='1']");
-    firstStep.classList.remove("hidden");
-    this.updateSimpleActions();
-  }
-
-  nextSimpleStep() {
-    // get current step
-    const currStep = this.container.querySelector("[data-step]:not(.hidden)");
-    const currStepNum = currStep.getAttribute("data-step");
-    // get next step and  next step + 1 to determine if continue or save
-    const nextStep = this.container.querySelector(
-      `[data-step="${+currStepNum + 1}"]`
-    );
-    // hide current step and show next one
-    currStep.classList.add("hidden");
-    nextStep.classList.remove("hidden");
-
-    this.checkVisibleInpsValidity();
-    this.updateSimpleActions();
-  }
-
-  prevSimpleStep() {
-    // get current step
-    const currStep = this.container.querySelector("[data-step]:not(.hidden)");
-    const currStepNum = currStep.getAttribute("data-step");
-    // get next step and  next step + 1 to determine if continue or save
-    const prevStep = this.container.querySelector(
-      `[data-step="${+currStepNum - 1}"]`
-    );
-
-    // hide current step and show next one
-    currStep.classList.add("hidden");
-    prevStep.classList.remove("hidden");
-
-    this.checkVisibleInpsValidity();
-    this.updateSimpleActions();
-  }
-
-  updateSimpleActions() {
-    const currStep = this.container.querySelector("[data-step]:not(.hidden)");
-    const currStepNum = currStep.getAttribute("data-step");
-    // get next step and  next step + 1 to determine if continue or save
-    const prevStep = this.container.querySelector(
-      `[data-step="${+currStepNum - 1}"]`
-    );
-
-    const nextStep = this.container.querySelector(
-      `[data-step="${+currStepNum + 1}"]`
-    );
-
-    // Handle case last step or not
-    if (nextStep) {
-      this.nextBtn.classList.remove("hidden");
-      this.submitBtn.classList.add("hidden");
-    }
-
-    if (!nextStep) {
-      this.nextBtn.classList.add("hidden");
-      this.submitBtn.classList.remove("hidden");
-    }
-
-    if (prevStep) {
-      this.backBtn.removeAttribute("disabled");
-    }
-
-    if (!prevStep) {
-      this.backBtn.setAttribute("disabled", "");
-    }
-  }
-
-  checkVisibleInpsValidity() {
-    try {
-      const inps = this.container.querySelectorAll(
-        "[data-step]:not(.hidden) input[data-setting-input]"
-      );
-      // merge input with visible and not visible
-      if (inps.length <= 0) return;
-
-      let isAllValid = true;
-      let invalidInpName = "";
-      let invalidInp = null;
-
-      for (let i = 0; i < inps.length; i++) {
-        // for all inputs
-        if (!inps[i].validity.valid) {
-          invalidInp = inps[i];
-          isAllValid = false;
-          invalidInpName = inps[i].getAttribute("name");
-          break;
-        }
-
-        // special case for SERVER_NAME
-        if (
-          inps[i].getAttribute("name") === "SERVER_NAME" &&
-          inps[i].value !== ""
-        ) {
-          // Case conflict with another server name
-          const serverNames = document.querySelectorAll(
-            "[data-services-service]"
-          );
-          const serverNameValue = inps[i].getAttribute("value");
-          serverNames.forEach((serverName) => {
-            const name = serverName.getAttribute("data-services-service");
-            if (name === serverNameValue) return;
-            if (name === inps[i].value) {
-              invalidInpName = inps[i]?.getAttribute("name");
-              isAllValid = false;
-            }
-          });
-        }
-      }
-
-      const errMsg = this.container.querySelector(
-        "[data-services-modal-error-msg]"
-      );
-      if (!isAllValid) {
-        invalidInp.classList.add("invalid");
-        const invalidEl = invalidInp
-          .closest("form")
-          .querySelector(`[data-invalid=${invalidInp.getAttribute("id")}]`);
-        invalidEl.classList.remove("hidden", "md:hidden");
-        // Wait a little that modal is fully open to focus on invalid input, because not working when element is hidden
-        setTimeout(() => {
-          // only focus  if not another input is focus
-          if (document.activeElement.tagName !== "INPUT") invalidInp.focus();
-        }, 30);
-
-        errMsg.textContent = `${invalidInpName} must be valid to submit`;
-        errMsg.classList.remove("hidden");
-        this.nextBtn.setAttribute("disabled", "");
-      }
-
-      if (isAllValid) {
-        errMsg.classList.add("hidden");
-        this.nextBtn.removeAttribute("disabled");
-      }
-    } catch (e) {}
-  }
-}
-
-class SettingsRaw extends SettingsMultiple {
-  constructor(mode, formEl, multSettingsName, prefix = "services") {
-    super(mode, formEl, multSettingsName, prefix);
-    this.initRaw();
-  }
-
-  initRaw() {
-    window.addEventListener("DOMContentLoaded", () => {
-      this.container.addEventListener("input", (e) => {
-        this.checkVisibleInpsValidity();
-      });
-    });
-  }
-
-  setRaw(
-    action,
-    oldServName,
-    operation,
-    settings,
-    setMethodUI = false,
-    forceEnabled = false,
-    emptyServerName = false
-  ) {
-    this.updateData(
-      action,
-      oldServName,
-      operation,
-      settings,
-      setMethodUI,
-      forceEnabled,
-      emptyServerName
-    );
-    this.setSettingsRaw(settings, setMethodUI, forceEnabled, emptyServerName);
-  }
-
-  setSettingsRaw(settings, setMethodUI = false, forceEnabled = false) {}
-}
-
-class SettingsSwitch {
-  constructor(
-    switchBtn,
-    container = document.querySelector("main"),
-    modes = ["advanced", "simple"],
-    prefix = "services"
-  ) {
-    this.prefix = prefix;
-    this.modes = modes;
-    this.switchModeBtn = switchBtn;
-    // dict with mode as key and form element as value
-    this.container = container;
-    this.init();
-  }
-
-  init() {
-    this.switchModeBtn.addEventListener("click", () => {
-      // Get
-      const currMode = this.switchModeBtn.getAttribute(
-        "data-toggle-settings-mode-btn"
-      );
-      // Get current mode index in this.modes to get next one or first element if no next
-      const currModeIndex = this.modes.indexOf(currMode);
-      const nextMode = this.modes[currModeIndex + 1] || this.modes[0];
-      this.setSettingMode(nextMode);
-    });
-  }
-
-  // Switch settings mode and update button
-  setSettingMode(mode) {
-    const currMode = this.switchModeBtn.getAttribute(
-      "data-toggle-settings-mode-btn"
-    );
-
-    if (currMode === mode) return;
-    if (!this.switchModeBtn) return;
-
-    const elsToShow =
-      mode === "advanced"
-        ? this.container.querySelectorAll("[data-advanced]")
-        : this.container.querySelectorAll("[data-simple]");
-
-    const elsToHide =
-      mode === "advanced"
-        ? this.container.querySelectorAll("[data-simple]")
-        : this.container.querySelectorAll("[data-advanced]");
-    elsToHide.forEach((setting) => {
-      setting.classList.add("!hidden");
-    });
-    elsToShow.forEach((setting) => {
-      setting.classList.remove("!hidden");
-    });
-    // button
-    this.switchModeBtn.setAttribute("data-toggle-settings-mode-btn", mode);
-    const switchEls = this.switchModeBtn.querySelectorAll(
-      "[data-toggle-settings-mode]"
-    );
-    switchEls.forEach((el) => {
-      el.getAttribute("data-toggle-settings-mode") === mode
-        ? el.classList.remove("hidden")
-        : el.classList.add("hidden");
-    });
-  }
-}
-
 export {
   Popover,
   Tabs,
@@ -2469,6 +2065,4 @@ export {
   Settings,
   SettingsMultiple,
   SettingsAdvanced,
-  SettingsSimple,
-  SettingsSwitch,
 };

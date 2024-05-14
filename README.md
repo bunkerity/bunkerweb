@@ -35,6 +35,8 @@
 	⚙️ <a href="https://config.bunkerweb.io/?utm_campaign=self&utm_source=github">Configurator</a>
 	 &#124;
 	🗺️ <a href="https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=github">Threatmap</a>
+	 &#124;
+	🔎 <a href="https://forms.gle/e3VgymAteYPnwM1j9">Feedbacks</a>
 </p>
 
 > 🛡️ Make security by default great again !
@@ -141,12 +143,11 @@ The first concept is the integration of BunkerWeb into the target environment. W
 The following integrations are officially supported :
 
 - [Docker](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#docker)
-- [Docker autoconf](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#docker-autoconf)
-- [Swarm](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#swarm)
-- [Kubernetes](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#kubernetes)
 - [Linux](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#linux)
-- [Ansible](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#ansible)
-- [Vagrant](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#vagrant)
+- [Docker autoconf](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#docker-autoconf)
+- [Kubernetes](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#kubernetes)
+- [Swarm](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#swarm)
+- [Microsoft Azure](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#microsoft-azure)
 
 ## Settings
 
@@ -276,7 +277,7 @@ List of supported Linux distros :
 - Ubuntu 24.04 "Noble"
 - Fedora 39
 - RHEL 8.9
-- RHEL 9.3
+- RHEL 9.4
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
@@ -285,35 +286,15 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 > [!IMPORTANT]
 > As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0. Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
 
-## Ansible
+## Microsoft Azure
 
 <p align="center">
-	<img alt="Ansible banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.7/docs/assets/img/integration-ansible.svg" />
+	<img alt="Azure banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.7/docs/assets/img/integration-azure.webp" />
 </p>
 
-List of supported Linux distros :
+BunkerWeb is referenced in the [Azure Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview) and a ARM template is available in the [misc folder](https://github.com/bunkerity/bunkerweb/raw/v1.5.7/misc/integrations/azure-arm-template.json).
 
-- Debian 12 "Bookworm"
-- Ubuntu 22.04 "Jammy"
-- Ubuntu 24.04 "Noble"
-- Fedora 39
-- RHEL 8.9
-- RHEL 9.3
-
-[Ansible](https://www.ansible.com/) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
-
-A specific BunkerWeb Ansible role is available on [Ansible Galaxy](https://galaxy.ansible.com/bunkerity/bunkerweb) (source code is available [here](https://github.com/bunkerity/bunkerweb-ansible)).
-
-You will find more information in the [Ansible section](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#ansible) of the documentation.
-
-## Vagrant
-
-We maintain ready to use Vagrant boxes hosted on Vagrant cloud for the following providers :
-
-- virtualbox
-- libvirt
-
-You will find more information in the [Vagrant section](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#vagrant) of the documentation.
+You will find more information in the [Microsoft Azure section](https://docs.bunkerweb.io/1.5.7/integrations/?utm_campaign=self&utm_source=github#microsoft-azure) of the documentation.
 
 # Quickstart guide
 
@@ -370,13 +351,13 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
 | :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
-|   **ClamAV**   |   1.4   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-|   **Coraza**   |   1.4   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).                                                            |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
-|  **CrowdSec**  |   1.4   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
-|  **Discord**   |   1.4   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
-|   **Slack**    |   1.4   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
-| **VirusTotal** |   1.4   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   |   1.4   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |     [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|   **ClamAV**   |   1.5   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+|   **Coraza**   |   1.5   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).                                                            |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
+|  **CrowdSec**  |   1.5   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
+|  **Discord**   |   1.5   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
+|   **Slack**    |   1.5   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
+| **VirusTotal** |   1.5   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+|  **WebHook**   |   1.5   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |     [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 You will find more information in the [plugins section](https://docs.bunkerweb.io/1.5.7/plugins/?utm_campaign=self&utm_source=github) of the documentation.
 

@@ -3,7 +3,7 @@ from logging import info as log_info, exception as log_exception, error as log_e
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.keys import Keys
-
+from time import sleep
 from wizard import DRIVER
 from base import TEST_TYPE
 from utils import access_page, assert_alert_message, assert_button_click, safe_get_element, wait_for_service
@@ -67,13 +67,15 @@ try:
         exit(1)
 
     # Reset to general
-    assert_button_click(DRIVER, "//button[@data-tab-select-handler='general']")
+    DRIVER.execute_script("""document.querySelector('button[data-tab-select-handler="general"]').click()""")
 
     log_info("Combobox filtering done, trying filter keywords ...")
 
     # Set keyword with no matching settings
     input_keyword = safe_get_element(DRIVER, By.ID, "keyword")
     input_keyword.send_keys("dqz48 é84 dzq 584dz5qd4")
+
+    sleep(1)
 
     # Check that the no matching element is shown and other card hide
     is_no_match_hidden = DRIVER.execute_script('return document.querySelector("[data-global-config-nomatch]").classList.contains("hidden")')

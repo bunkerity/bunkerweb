@@ -14,19 +14,10 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
-    "BACKUP_DIRECTORY": {
-      "context": "global",
-      "default": "/var/lib/bunkerweb/backups",
-      "help": "The directory where the backup will be stored",
-      "id": "backup-directory",
-      "label": "Backup directory",
-      "regex": "^.*$",
-      "type": "text"
-    },
     "BACKUP_SCHEDULE": {
       "context": "global",
       "default": "daily",
-      "help": "The frequency of the backup",
+      "help": "The frequency of the backup (daily, weekly or monthly)",
       "id": "backup-schedule",
       "label": "Backup schedule",
       "regex": "^(daily|weekly|monthly)$",
@@ -40,6 +31,15 @@
       "id": "backup-rotation",
       "label": "Backup rotation",
       "regex": "^[1-9][0-9]*$",
+      "type": "text"
+    },
+    "BACKUP_DIRECTORY": {
+      "context": "global",
+      "default": "/var/lib/bunkerweb/backups",
+      "help": "The directory where the backup will be stored",
+      "id": "backup-directory",
+      "label": "Backup directory",
+      "regex": "^.*$",
       "type": "text"
     }
   },

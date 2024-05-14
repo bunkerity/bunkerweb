@@ -57,7 +57,7 @@
         <form data-global-config-form
               id="form-edit-global-config"
               method="post"
-              class="flex flex-col justify-between overflow-hidden overflow-y-auto dark:brightness-110 col-span-12 break-words bg-white shadow-xl p-4 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+              class="flex flex-col justify-between overflow-hidden overflow-y-auto col-span-12 break-words bg-white shadow-xl p-4 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <!-- plugin item -->
             {% include "settings_plugins.html" %}

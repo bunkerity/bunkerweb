@@ -64,11 +64,11 @@
     data-checked:disabled:bg-gray-400
     data-checked:disabled:border-gray-400 dark:data-checked:disabled:bg-gray-800
     dark:data-checked:disabled:border-gray-800 data-checked:disabled:text-gray-700
-    dark:data-checked:disabled:text-gray-300;
+    dark:data-checked:disabled:text-gray-300  disabled:cursor-not-allowed;
 }
 
 .custom-select-btn {
-  @apply disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-primary flex justify-between align-middle items-center text-left text-sm leading-5.6  w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500;
+  @apply min-h-[38px]  disabled:cursor-not-allowed disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-primary flex justify-between align-middle items-center text-left text-sm leading-5.6  w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
 .custom-dropdown-btn {
@@ -80,7 +80,7 @@
 }
 
 .regular-input {
-  @apply transition-none outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 disabled:opacity-75 focus:border-gray-300/0 focus:ring-1  focus:valid:ring-green-500 focus:invalid:ring-red-500  text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700;
+  @apply transition-none outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 disabled:opacity-75 focus:border-gray-300/0 focus:ring-1  focus:valid:ring-green-500 focus:invalid:ring-red-500  text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:cursor-not-allowed;
 }
 
 .invalid.regular-input {
@@ -92,7 +92,15 @@
 }
 
 .popover-settings-container {
-  @apply z-[1000] h-fit max-w-[250px] transition-all duration-500 dark:brightness-90 transition rounded-md p-3 -translate-y-7 fixed bg-blue-500;
+  @apply z-[1000] h-fit max-w-[250px] transition-all duration-500 dark:brightness-90 transition rounded-md p-3 -translate-y-7 fixed;
+}
+
+.info.popover-settings-container {
+  @apply bg-blue-500;
+}
+
+.multisite.popover-settings-container {
+  @apply bg-orange-500;
 }
 
 .popover-tab {
@@ -147,7 +155,11 @@
 }
 
 .settings-tabs-select-btn-text {
-  @apply transition duration-300 ease-in-out dark:text-gray-400 text-primary;
+  @apply transition break-all duration-300 ease-in-out dark:text-gray-400 text-primary;
+}
+
+.settings-tabs-select-btn-svg {
+  @apply ml-4 min-w-[1rem] transition-transform h-4 w-4 fill-primary dark:fill-gray-300;
 }
 
 .active.settings-tabs-select-dropdown-btn {
@@ -163,7 +175,7 @@
 }
 
 .settings-tabs-select-dropdown-btn {
-  @apply flex justify-between border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200;
+  @apply break-all flex justify-between border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200;
 }
 
 /*---------------------------------------------*/
@@ -175,7 +187,7 @@
 /*---------------------------------------------*/
 
 .home-card {
-  @apply dark:brightness-110 sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply break-all break-words dark:brightness-110 sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .home-card-name {
@@ -207,7 +219,7 @@
 }
 
 .home-card-svg-container {
-  @apply dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
+  @apply min-w-12 dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
 }
 
 .version.home-card-svg-container {
@@ -247,11 +259,11 @@
 }
 
 .card-detail-item-title {
-  @apply transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
+  @apply min-w-fit transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
 }
 
 .card-detail-item-subtitle {
-  @apply break-all transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
+  @apply min-w-[2rem] break-all transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
 }
 
 /*---------------------------------------------*/
@@ -319,11 +331,11 @@
 }
 
 .core-card-status {
-  @apply ml-2 mr-2 mb-2 mt-2 col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-fit h-fit transition hover:scale-102 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-full h-fit transition hover:scale-102 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-status-container {
-  @apply mx-1 flex justify-start items-center;
+  @apply flex justify-between items-center;
 }
 
 .core-card-status-title {
@@ -379,7 +391,7 @@
 }
 
 .core-card-list-title {
-  @apply mb-4 mt-2 font-bold dark:text-white/90 mx-2;
+  @apply mb-4 font-bold dark:text-white/90;
 }
 
 .core-card-list-container {
@@ -570,6 +582,30 @@
   @apply h-16 w-24 mr-4;
 }
 
+.core-card-detail {
+  @apply h-fit col-span-12 lg:col-span-6 xl:col-span-6 3xl:col-span-3 p-4 relative overflow-auto  break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-detail-title {
+  @apply mb-2 font-bold dark:text-white/90;
+}
+
+.core-card-detail-items-container {
+  @apply grid grid-cols-1 gap-2 mt-4 mb-6 ml-1;
+}
+
+.core-card-detail-item {
+  @apply grid grid-cols-12 py-1 sm:py-0;
+}
+
+.core-card-detail-item-title {
+  @apply w-full break-all col-span-4 min-w-fit transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
+}
+
+.core-card-detail-item-subtitle {
+  @apply w-full break-all col-span-8 min-w-[2rem] break-all transition duration-300 ease-in-out pl-2  mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
+}
+
 /*---------------------------------------------*/
 /*--------------- END CORE PLUGINS ------------*/
 /*---------------------------------------------*/
@@ -577,3 +613,79 @@
 .file-manager-actions-item-btn {
   @apply rounded dark:text-gray-200 text-primary whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative pl-4 pr-5 pb-2.5 pt-3 font-bold text-center uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
+
+/*----------------------------------------------*/
+/*---------------PLUGINS PAGE-------------------*/
+/*----------------------------------------------*/
+
+.plugins-list-container {
+  @apply overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.plugins-list-container-title-container {
+  @apply col-span-12;
+}
+
+.plugins-list-container-title {
+  @apply mx-2 font-bold dark:text-white/90 mx-2;
+}
+
+.plugins-list-items-container {
+  @apply min-h-[55vh] max-h-80 overflow-auto p-2 col-span-12 relative;
+}
+
+.plugins-list-items-wrap {
+  @apply grid grid-cols-12 gap-3;
+}
+
+.plugins-list-items {
+  @apply py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded;
+}
+
+.enabled.plugins-list-items {
+  @apply bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800;
+}
+
+.disabled.plugins-list-items {
+  @apply cursor-not-allowed bg-gray-300 dark:bg-gray-800;
+}
+
+.plugins-list-items-name {
+  @apply ml-3 mr-2 break-all break-words mb-0 transition duration-300 ease-in-out text-left text-sm md:text-base text-slate-700 dark:text-gray-200;
+}
+
+.disabled.plugins-list-items-name {
+  @apply opacity-80 dark:opacity-60;
+}
+
+.plugins-list-items-actions {
+  @apply flex items-center;
+}
+
+.plugins-list-items-delete {
+  @apply z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px;
+}
+
+.plugins-list-items-delete-svg {
+  @apply h-5 w-5 fill-red-500 dark:brightness-90;
+}
+
+.plugins-list-items-link {
+  @apply hover:-translate-y-px mx-1;
+}
+
+.plugins-list-items-link-svg {
+  @apply h-6 w-6 fill-sky-500 dark dark:brightness-90;
+}
+
+.plugins-list-items-pro {
+  @apply hover:-translate-y-px mx-1 -translate-y-0.5;
+}
+
+.plugins-list-items-pro-svg {
+  @apply h-6 w-6 dark:brightness-90;
+}
+
+/*----------------------------------------------*/
+/*---------------END PLUGINS PAGE---------------*/
+/*----------------------------------------------*/

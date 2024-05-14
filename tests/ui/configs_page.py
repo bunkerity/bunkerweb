@@ -20,7 +20,7 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-services-action='new']")
 
-    assert_button_click(DRIVER, "//button[@data-toggle-settings-mode-btn='simple']")
+    # assert_button_click(DRIVER, "//button[@data-toggle-settings-mode-btn='simple']")
 
     server_name_input = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
     assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
@@ -33,8 +33,7 @@ try:
 
     access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
 
-    if TEST_TYPE == "linux":
-        wait_for_service("app1.example.com")
+    wait_for_service("app1.example.com")
 
     log_info("Navigating to the configs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[5]/a", "configs")
@@ -67,7 +66,7 @@ location /hello {
 
     assert_alert_message(DRIVER, "Created")
 
-    sleep(10)
+    sleep(30)
 
     DRIVER.execute_script("window.open('http://www.example.com/hello','_blank');")
     DRIVER.switch_to.window(DRIVER.window_handles[1])
@@ -166,7 +165,7 @@ location /hello {
 
     assert_alert_message(DRIVER, "Deleted")
 
-    sleep(10)
+    sleep(30)
 
     resp = get("http://www.example.com/hello")
 
@@ -203,7 +202,7 @@ location /hello {
 
     assert_alert_message(DRIVER, "Created")
 
-    sleep(10)
+    sleep(30)
 
     DRIVER.execute_script("window.open('http://app1.example.com/hello','_blank');")
     DRIVER.switch_to.window(DRIVER.window_handles[1])

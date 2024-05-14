@@ -6,7 +6,7 @@ from os import sep
 from flask import flash
 from json import loads as json_loads
 from pathlib import Path
-from re import search as re_search
+from re import error as RegexError, search as re_search
 from typing import List, Literal, Optional, Tuple
 
 
@@ -126,8 +126,11 @@ class Config:
                     flash(f"Variable {k} is not valid.", "error")
                     continue
 
-            if re_search(plugins_settings[setting]["regex"], v):
-                check = True
+            try:
+                if re_search(plugins_settings[setting]["regex"], v):
+                    check = True
+            except RegexError:
+                self.__db.logger.warning(f"Invalid regex for setting {setting} : {plugins_settings[setting]['regex']}, ignoring regex check")
 
             if not check:
                 error = 1

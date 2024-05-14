@@ -243,106 +243,10 @@ You will find more settings about reverse proxy in the [settings section](settin
     systemctl status bunkerweb
     ```
 
-    If it's already running, we can restart it :
+    If it's already running, we can reload it :
 
     ```shell
-    systemctl restart bunkerweb
-    ```
-
-    Otherwise, we will need to start it :
-
-    ```shell
-    systemctl start bunkerweb
-    ```
-
-=== "Ansible"
-
-    We will assume that you already have a service running and you want to use BunkerWeb as a reverse-proxy.
-
-    The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
-
-    ```shell
-    python3 -m http.server -b 127.0.0.1
-    ```
-
-    Content of the `my_variables.env` configuration file :
-
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    SERVER_NAME=www.example.com
-    USE_REVERSE_PROXY=yes
-    REVERSE_PROXY_URL=/
-    REVERSE_PROXY_HOST=http://127.0.0.1:8000
-    ```
-
-    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
-
-    ```yaml
-    [mybunkers]
-      192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-    ```
-
-    Or alternatively, in your playbook file :
-
-    ```yaml
-    - hosts: all
-      become: true
-      vars:
-        - variables_env: "{{ playbook_dir }}/my_variables.env"
-      roles:
-        - bunkerity.bunkerweb
-    ```
-
-    You can now run the playbook :
-
-    ```shell
-    ansible-playbook -i inventory.yml playbook.yml
-    ```
-
-=== "Vagrant"
-
-    We will assume that you already have the [Vagrant integration](integrations.md#vagrant) stack running on your machine.
-
-    The following command will run a basic HTTP server on the port 8000 and deliver the files in the current directory :
-
-    ```shell
-    python3 -m http.server -b 127.0.0.1
-    ```
-
-    Configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file.
-
-	  Connect to your vagrant machine :
-
-    ```shell
-    vagrant ssh
-    ```
-
-	  And then you can edit the `variables.env` file in your host machine like this :
-
-    ```conf
-    SERVER_NAME=www.example.com
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    USE_REVERSE_PROXY=yes
-    REVERSE_PROXY_URL=/
-    REVERSE_PROXY_HOST=http://127.0.0.1:8000
-    ```
-
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
-    If it's already running we can restart it :
-
-    ```shell
-    systemctl restart bunkerweb
+    systemctl reload bunkerweb
     ```
 
     Otherwise, we will need to start it :
@@ -679,110 +583,10 @@ You will find more settings about reverse proxy in the [settings section](settin
     systemctl status bunkerweb
     ```
 
-    If it's already running, we can restart it :
+    If it's already running, we can reload it :
 
     ```shell
-    systemctl restart bunkerweb
-    ```
-
-    Otherwise, we will need to start it :
-
-    ```shell
-    systemctl start bunkerweb
-    ```
-
-=== "Ansible"
-
-    We will assume that you already have a service running and you want to use BunkerWeb as a reverse-proxy.
-
-    The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory (repeat it and change the port if you want to test BunkerWeb) :
-
-    ```shell
-    python3 -m http.server -b 127.0.0.1 8001
-    ```
-
-    Content of the `my_variables.env` configuration file :
-
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    MULTISITE=yes
-    SERVER_NAME=app1.example.com app2.example.com app3.example.com
-    USE_REVERSE_PROXY=yes
-    REVERSE_PROXY_URL=/
-    app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
-    app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
-    app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
-    ```
-
-    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
-
-    ```yaml
-    [mybunkers]
-      192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-    ```
-
-    Or alternatively, in your playbook file :
-
-    ```yaml
-    - hosts: all
-      become: true
-      vars:
-        - variables_env: "{{ playbook_dir }}/my_variables.env"
-      roles:
-        - bunkerity.bunkerweb
-    ```
-
-    You can now run the playbook :
-
-    ```shell
-    ansible-playbook -i inventory.yml playbook.yml
-    ```
-
-=== "Vagrant"
-
-    We will assume that you already have the [Vagrant integration](integrations.md#vagrant) stack running on your machine.
-
-	  First of all, connect to your vagrant machine :
-
-    ```shell
-    vagrant ssh
-    ```
-
-    The following command will run a basic HTTP server on the port 8001 and deliver the files in the current directory (repeat it and change the port if you want to test BunkerWeb) :
-
-    ```shell
-    python3 -m http.server -b 127.0.0.1 8001
-    ```
-
-	  And then you can edit the `variables.env` file in your host machine like this :
-
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    MULTISITE=yes
-    SERVER_NAME=app1.example.com app2.example.com app3.example.com
-    USE_REVERSE_PROXY=yes
-    REVERSE_PROXY_URL=/
-    app1.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8001
-    app2.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8002
-    app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
-    ```
-
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
-    If it's already running we can restart it :
-
-    ```shell
-    systemctl restart bunkerweb
+    systemctl reload bunkerweb
     ```
 
     Otherwise, we will need to start it :
@@ -906,57 +710,11 @@ REAL_IP_HEADER=X-Forwarded-For
     ...
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
-
-=== "Ansible"
-
-    You will need to add the settings to your `my_variables.env` configuration file :
-
-    ```conf
-    ...
-    USE_REAL_IP=yes
-    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-    REAL_IP_HEADER=X-Forwarded-For
-    ...
-    ```
-
-    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
-
-    ```yaml
-    [mybunkers]
-    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-    ```
-
-	  Or alternatively, in your playbook file :
-
-    ```yaml
-    - hosts: all
-        become: true
-        vars:
-          - variables_env: "{{ playbook_dir }}/my_variables.env"
-        roles:
-          - bunkerity.bunkerweb
-    ```
-
-    Run the playbook :
+    Please note that it's recommended to issue a restart instead of reload when configuring settings related to proxy protocols :
 
     ```shell
-    ansible-playbook -i inventory.yml playbook.yml
+    systemctl restart bunkerweb
     ```
-
-=== "Vagrant"
-
-    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
-
-    ```conf
-    ...
-    USE_REAL_IP=yes
-    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-    REAL_IP_HEADER=X-Forwarded-For
-    ...
-    ```
-
-    Don't forget to restart the BunkerWeb service once it's done.
 
 ### Proxy protocol
 
@@ -1062,59 +820,11 @@ REAL_IP_HEADER=proxy_protocol
     ...
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
-
-=== "Ansible"
-
-    You will need to add the settings to your `my_variables.env` configuration file :
-
-    ```conf
-    ...
-    USE_REAL_IP=yes
-    USE_PROXY_PROTOCOL=yes
-    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-    REAL_IP_HEADER=proxy_protocol
-    ...
-    ```
-
-    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
-
-    ```yaml
-    [mybunkers]
-    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-    ```
-
-	  Or alternatively, in your playbook file :
-
-    ```yaml
-    - hosts: all
-        become: true
-        vars:
-          - variables_env: "{{ playbook_dir }}/my_variables.env"
-        roles:
-          - bunkerity.bunkerweb
-    ```
-
-    Run the playbook :
+    Please note that it's recommended to issue a restart instead of reload when configuring settings related to proxy protocols :
 
     ```shell
-    ansible-playbook -i inventory.yml playbook.yml
+    systemctl restart bunkerweb
     ```
-
-=== "Vagrant"
-
-    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
-
-    ```conf
-    ...
-    USE_REAL_IP=yes
-    USE_PROXY_PROTOCOL=yes
-    REAL_IP_FROM=1.2.3.0/24 100.64.0.0/16
-    REAL_IP_HEADER=proxy_protocol
-    ...
-    ```
-
-    Don't forget to restart the BunkerWeb service once it's done.
 
 ## Protect UDP/TCP applications
 
@@ -1374,67 +1084,23 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ...
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
-
-=== "Ansible"
-
-    You will need to add the settings to your `my_variables.env` configuration file :
-
-    ```conf
-    ...
-    SERVER_NAME=app1.example.com app2.example.com
-    MULTISITE=yes
-    USE_REVERSE_PROXY=yes
-    SERVER_TYPE=stream
-    app1.example.com_REVERSE_PROXY_HOST=myapp1.domain.or.ip:9000
-    app1.example.com_LISTEN_STREAM_PORT=10000
-    app2.example.com_REVERSE_PROXY_HOST=myapp2.domain.or.ip:9000
-    app2.example.com_LISTEN_STREAM_PORT=20000
-    ...
-    ```
-
-    In your Ansible inventory, you can use the `variables_env` variable to set the path of configuration file :
-
-    ```yaml
-    [mybunkers]
-    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
-    ```
-
-	  Or alternatively, in your playbook file :
-
-    ```yaml
-    - hosts: all
-        become: true
-        vars:
-          - variables_env: "{{ playbook_dir }}/my_variables.env"
-        roles:
-          - bunkerity.bunkerweb
-    ```
-
-    Run the playbook :
+    Let's check the status of BunkerWeb :
 
     ```shell
-    ansible-playbook -i inventory.yml playbook.yml
+    systemctl status bunkerweb
     ```
 
-=== "Vagrant"
+    If it's already running, we can reload it :
 
-    You will need to add the settings to the `/etc/bunkerweb/variables.env` file :
-
-    ```conf
-    ...
-    SERVER_NAME=app1.example.com app2.example.com
-    MULTISITE=yes
-    USE_REVERSE_PROXY=yes
-    SERVER_TYPE=stream
-    app1.example.com_REVERSE_PROXY_HOST=myapp1.domain.or.ip:9000
-    app1.example.com_LISTEN_STREAM_PORT=10000
-    app2.example.com_REVERSE_PROXY_HOST=myapp2.domain.or.ip:9000
-    app2.example.com_LISTEN_STREAM_PORT=20000
-    ...
+    ```shell
+    systemctl reload bunkerweb
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
+    Otherwise, we will need to start it :
+
+    ```shell
+    systemctl start bunkerweb
+    ```
 
 ## Custom configurations
 
@@ -1671,72 +1337,23 @@ Some integrations provide more convenient ways to apply configurations, such as 
     chmod -R 770 /etc/bunkerweb/configs
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
-
-=== "Ansible"
-
-    The `custom_configs_path[]` variable is a dictionary with configuration types (`http`, `server-http`, `modsec`, `modsec-crs`, `stream` and `server-stream`) as keys and the corresponding values are path containing the configuration files.
-
-    Here is an example for server-http/hello-world.conf :
-
-    ```conf
-    location /hello {
-      default_type 'text/plain';
-      content_by_lua_block {
-        ngx.say('world')
-      }
-    }
-    ```
-
-    And the corresponding `custom_configs_path[server-http]` variable used in your inventory :
-
-    ```yaml
-      [mybunkers]
-      192.168.0.42 custom_configs_path={"server-http": "{{ playbook_dir }}/server-http"}
-    ```
-
-    Or alternatively, in your playbook file :
-
-    ```yaml
-    - hosts: all
-      become: true
-      vars:
-        - custom_configs_path: {
-            server-http: "{{ playbook_dir }}/server-http"
-          }
-      roles:
-        - bunkerity.bunkerweb
-    ```
-
-    Run the playbook :
+    Let's check the status of BunkerWeb :
 
     ```shell
-    ansible-playbook -i inventory.yml playbook.yml
+    systemctl status bunkerweb
     ```
 
-=== "Vagrant"
-
-    When using the [Vagrant integration](integrations.md#vagrant), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
-
-    Here is an example for server-http/hello-world.conf :
-
-    ```conf
-    location /hello {
-      default_type 'text/plain';
-      content_by_lua_block {
-        ngx.say('world')
-      }
-    }
-    ```
-
-    Because BunkerWeb runs as an unprivileged user (nginx:nginx), you will need to edit the permissions :
+    If it's already running, we can reload it :
 
     ```shell
-    chown -R root:nginx /etc/bunkerweb/configs && \
-    chmod -R 770 /etc/bunkerweb/configs
+    systemctl reload bunkerweb
     ```
 
-    Don't forget to restart the BunkerWeb service once it's done.
+    Otherwise, we will need to start it :
+
+    ```shell
+    systemctl start bunkerweb
+    ```
 
 ## PHP
 
@@ -2225,102 +1842,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl status bunkerweb
     ```
 
-    If it's already running we can restart it :
+    If it's already running we can reload it :
 
     ```shell
-    systemctl restart bunkerweb
-    ```
-
-    Otherwise, we will need to start it :
-
-    ```shell
-    systemctl start bunkerweb
-    ```
-
-=== "Ansible"
-
-    !!! info "Linux"
-        Please follow the instruction for Linux integration to create a local `www` folder (permissions are not needed, Ansible will do it for you).
-
-    We will assume that you already have the [Ansible integration](integrations.md#ansible) setup on your machine.
-
-    Content of the `my_variables.env` configuration file :
-
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    MULTISITE=yes
-    SERVER_NAME=app1.example.com app2.example.com app3.example.com
-    app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-    app1.example.com_LOCAL_PHP_PATH=/var/www/html/app1.example.com
-    app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-    app2.example.com_LOCAL_PHP_PATH=/var/www/html/app2.example.com
-    app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-    app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
-    ```
-
-    The `custom_site` variable can be used to specify a directory containing your application files (e.g : `www`) that will be copied to `/var/www/html` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory (replace `www-data` with the user running the PHP-FPM service):
-
-    ```ini
-    [mybunkers]
-    192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" custom_www="{{ playbook_dir }}/my_app" custom_www_owner="www-data"
-    ```
-
-    Or alternatively, in your playbook file :
-
-    ```yaml
-    - hosts: all
-      become: true
-      vars:
-      - variables_env: "{{ playbook_dir }}/my_variables.env"
-      - custom_www: "{{ playbook_dir }}/www"
-      - custom_www_owner: "www-data"
-      roles:
-      - bunkerity.bunkerweb
-    ```
-
-	You can now run the playbook :
-
-	```shell
-	ansible-playbook -i inventory.yml playbook.yml
-	```
-
-=== "Vagrant"
-
-    !!! info "Linux"
-        Please follow the instruction for Linux integration to create the `/var/www/html` folder.
-
-    We will assume that you already have the [Vagrant integration](integrations.md#vagrant) stack running on your machine.
-
-    Once PHP files are copied into the `/var/www/html`folder, you can now edit the `/etc/bunkerweb/variable.env` file :
-
-    ```conf
-    HTTP_PORT=80
-    HTTPS_PORT=443
-    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
-    API_LISTEN_IP=127.0.0.1
-    MULTISITE=yes
-    SERVER_NAME=app1.example.com app2.example.com app3.example.com
-    app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-    app1.example.com_LOCAL_PHP_PATH=/var/www/html/app1.example.com
-    app2.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-    app2.example.com_LOCAL_PHP_PATH=/var/www/html/app2.example.com
-    app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
-    app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
-    ```
-
-    Let's check the status of BunkerWeb :
-
-    ```shell
-    systemctl status bunkerweb
-    ```
-
-    If it's already running we can restart it :
-
-    ```shell
-    systemctl restart bunkerweb
+    systemctl reload bunkerweb
     ```
 
     Otherwise, we will need to start it :
