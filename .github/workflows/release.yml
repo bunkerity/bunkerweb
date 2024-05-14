@@ -198,6 +198,9 @@ jobs:
       matrix:
         linux: [ubuntu, ubuntu-noble, debian, fedora, el, el9]
         arch: [amd64, arm64]
+        exclude:
+          - linux: ubuntu-noble
+            arch: arm64
         include:
           - release: latest
             repo: bunkerweb
