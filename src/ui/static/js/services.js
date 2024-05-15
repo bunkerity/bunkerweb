@@ -235,8 +235,8 @@ class ServiceModal {
     this.setCardViewportHeight(action === "delete" ? false : true);
     this.setHeaderActionsVisible(action === "delete" ? false : true);
     this.SetSelectTabsVisible(action === "delete" ? false : true);
-    this.resetFilterSettings();
     if (action === "edit" || action === "new" || action === "clone") {
+      this.resetFilterSettings();
       this.formNewEdit.classList.remove("hidden");
 
       const oldNameValue = action === "edit" ? oldServName : "";
