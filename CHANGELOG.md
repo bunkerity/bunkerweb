@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.8 - ????/??/??
+
+- [FEATURE] Add nightly build of the OWASP coreruleset that are automatically downloaded and updated
+
 ## v1.5.7 - 2024/05/14
 
 - [LINUX] Support Ubuntu 24.04 (Noble)

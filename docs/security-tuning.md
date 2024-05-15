@@ -241,7 +241,7 @@ ModSecurity is integrated and enabled by default alongside the OWASP Core Rule S
 | :-----------------------: | :-----: | :---------------------------------------------------------------------------------------------------- |
 |     `USE_MODSECURITY`     |  `yes`  | When set to `yes`, ModSecurity will be enabled.                                                       |
 |   `USE_MODSECURITY_CRS`   |  `yes`  | When set to `yes` and `USE_MODSECURITY` is also set to `yes`, the OWASP Core Rule Set will be loaded. |
-| `MODSECURITY_CRS_VERSION` |   `3`   | Version of the OWASP Core Rule Set to use.                                                            |
+| `MODSECURITY_CRS_VERSION` |   `3`   | Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).                         |
 
 !!! warning "ModSecurity and the OWASP Core Rule Set"
     **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set enabled**. The only downsides are the false positives that may occur. But they can be fixed with some efforts and the CRS team maintains a list of exclusions for common applications (e.g., WordPress, Nextcloud, Drupal, Cpanel, ...).
@@ -250,6 +250,10 @@ You can choose between the following versions of the OWASP Core Rule Set :
 
 - **3** : The version [v3.3.5](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.5) of the OWASP Core Rule Set (***default***)
 - **4** : The version [v4.2.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.2.0) of the OWASP Core Rule Set
+- **nightly** : The latest [nightly](https://github.com/coreruleset/coreruleset/releases/tag/nightly) build of the OWASP Core Rule Set which is updated every day
+
+!!! example "OWASP Core Rule Set's nightly build"
+    The nightly build of the OWASP Core Rule Set is updated every day and contains the latest rules. It is recommended to use it in a staging environment before using it in production.
 
 ### Custom configurations
 

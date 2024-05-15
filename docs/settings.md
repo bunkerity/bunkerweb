@@ -368,16 +368,16 @@ STREAM support :white_check_mark:
 
 Automatic creation, renewal and configuration of Let's Encrypt certificates using DNS challenges.
 
-|             Setting              | Default | Context |Multiple|                                      Description                                      |
-|----------------------------------|---------|---------|--------|---------------------------------------------------------------------------------------|
-|`AUTO_LETS_ENCRYPT_DNS`           |`no`     |multisite|no      |Activate automatic Let's Encrypt DNS.                                                  |
-|`LETS_ENCRYPT_DNS_EMAIL`          |         |multisite|no      |The email address to use for Let's Encrypt notifications.                              |
-|`USE_LETS_ENCRYPT_DNS_STAGING`    |`no`     |multisite|no      |Use the Let's Encrypt staging environment.                                             |
-|`LETS_ENCRYPT_DNS_PROVIDER`       |         |multisite|no      |The DNS provider to use for DNS challenges.                                            |
-|`USE_LETS_ENCRYPT_DNS_WILDCARD`   |`yes`    |multisite|no      |Create wildcard certificates for all domains using DNS challenges.                     |
-|`LETS_ENCRYPT_DNS_PROPAGATION`    |`default`|multisite|no      |The time to wait for DNS propagation in seconds.                                       |
-|`LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`|         |multisite|yes     |Configuration item that will be added to the credentials.ini file for the DNS provider.|
-|`LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS`|`no`     |global   |no      |Clear old certificates when renewing.                                                  |
+|             Setting              | Default | Context |Multiple|                                                        Description                                                         |
+|----------------------------------|---------|---------|--------|----------------------------------------------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT_DNS`           |`no`     |multisite|no      |Activate automatic Let's Encrypt DNS.                                                                                       |
+|`LETS_ENCRYPT_DNS_EMAIL`          |         |multisite|no      |The email address to use for Let's Encrypt notifications.                                                                   |
+|`USE_LETS_ENCRYPT_DNS_STAGING`    |`no`     |multisite|no      |Use the Let's Encrypt staging environment.                                                                                  |
+|`LETS_ENCRYPT_DNS_PROVIDER`       |         |multisite|no      |The DNS provider to use for DNS challenges.                                                                                 |
+|`USE_LETS_ENCRYPT_DNS_WILDCARD`   |`yes`    |multisite|no      |Create wildcard certificates for all domains using DNS challenges.                                                          |
+|`LETS_ENCRYPT_DNS_PROPAGATION`    |`default`|multisite|no      |The time to wait for DNS propagation in seconds.                                                                            |
+|`LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`|         |multisite|yes     |Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456').|
+|`LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS`|`no`     |global   |no      |Clear old certificates when renewing.                                                                                       |
 
 ## Limit
 
@@ -448,14 +448,14 @@ STREAM support :x:
 
 Management of the ModSecurity WAF.
 
-|             Setting             |   Default    | Context |Multiple|               Description                |
-|---------------------------------|--------------|---------|--------|------------------------------------------|
-|`USE_MODSECURITY`                |`yes`         |multisite|no      |Enable ModSecurity WAF.                   |
-|`USE_MODSECURITY_CRS`            |`yes`         |multisite|no      |Enable OWASP Core Rule Set.               |
-|`MODSECURITY_CRS_VERSION`        |`3`           |multisite|no      |Version of the OWASP Core Rule Set to use.|
-|`MODSECURITY_SEC_AUDIT_ENGINE`   |`RelevantOnly`|multisite|no      |SecAuditEngine directive of ModSecurity.  |
-|`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.   |
-|`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.|
+|             Setting             |   Default    | Context |Multiple|                                 Description                                 |
+|---------------------------------|--------------|---------|--------|-----------------------------------------------------------------------------|
+|`USE_MODSECURITY`                |`yes`         |multisite|no      |Enable ModSecurity WAF.                                                      |
+|`USE_MODSECURITY_CRS`            |`yes`         |multisite|no      |Enable OWASP Core Rule Set.                                                  |
+|`MODSECURITY_CRS_VERSION`        |`3`           |multisite|no      |Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).|
+|`MODSECURITY_SEC_AUDIT_ENGINE`   |`RelevantOnly`|multisite|no      |SecAuditEngine directive of ModSecurity.                                     |
+|`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.                                      |
+|`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.                                   |
 
 ## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
