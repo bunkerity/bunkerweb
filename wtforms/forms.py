@@ -3,11 +3,55 @@ from wtforms.fields import Field, StringField, BooleanField, SelectField, Passwo
 from wtforms.validators import Regexp
 from wtforms.widgets import CheckboxInput
 
+
+
 from re import search
+
+class CheckboxSettingWidget(CheckboxInput):
+    def __init__(self, error_class='has_errors'):
+        super(CheckboxInput, self).__init__()
+        self.error_class = error_class
+
+    def __call__(self, field, **kwargs):
+        kwargs.setdefault('id', field.id)
+        kwargs.setdefault('name', field.name)
+        kwargs.setdefault('type', 'checkbox')
+        kwargs.setdefault('data-default-method', "mode" if kwargs['name'] in ('AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE') else field.method if hasattr(field, 'method') else 'default')
+        kwargs.setdefault('value', field.global_config_value)
+        kwargs.setdefault('data-pattern', field.regex)
+
+        kwargs.setdefault('checked', "")
+        return f"""<div data-checkbox-handler="{kwargs['id']}"> 
+            class="relative mb-7 md:mb-0 z-10 ">
+            {self.input(field, **kwargs)} {self.label(field, {"class": "sr-only", "for": kwargs['name']})}
+        <input id="{kwargs['name']}"
+                name="{kwargs['name']}"
+                data-default-method="{% if inp_name in ['AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE'] %}mode{% else %}{{ global_config_method }}{% endif %}"
+                data-default-value="{{ global_config[inp_name]['value'] }}"
+                {% if inp_name in ['AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE'] or global_config_method != 'ui' and global_config_method != 'default' or is_read_only %} disabled {% endif %}
+                data-checked="{% if global_config_value == "yes" %}true{% else %}false{% endif %}"
+                {% if global_config_value == "yes" %}checked{% endif %}
+                id="checkbox-{kwargs['id']}"
+                class="checkbox"
+                type="checkbox"
+                data-pattern="{{ inp_regex|safe }}"
+                value="{{ global_config_value }}"
+                {% if is_multiple %} data-is-multiple {% endif %}
+                />
+        <svg data-checkbox-handler="{kwargs['id']}"
+                class="pointer-events-none	absolute fill-white dark:fill-gray-300 left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512">
+            <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
+            </path>
+        </svg>
+    </div>
+"""
+
 
 class BWBooleanField(Field):
 
-    widget = CheckboxInput()
+    widget = CheckboxSetting()
     false_values = (False, "false", "")
 
     def __init__(self, label=None, validators=None, false_values=None, **kwargs):
