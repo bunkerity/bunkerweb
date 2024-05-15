@@ -1417,7 +1417,7 @@ class SettingsMultiple extends Settings {
               inps.forEach((inp) => {
                 // case checkbox
                 if (inp.getAttribute("type") === "checkbox") {
-                  const defaultVal = inp.getAttribute("data-default") || "";
+                  const defaultVal = inp.getAttribute("data-default-value") || "";
 
                   if (defaultVal === "yes" && !inp.checked) {
                     inp.click();
@@ -1426,7 +1426,7 @@ class SettingsMultiple extends Settings {
 
                 // case regular
                 if (inp.getAttribute("type") !== "checkbox") {
-                  const defaultVal = inp.getAttribute("data-default") || "";
+                  const defaultVal = inp.getAttribute("data-default-value") || "";
                   inp.setAttribute("value", defaultVal);
                   inp.value = defaultVal;
                 }
@@ -1438,7 +1438,7 @@ class SettingsMultiple extends Settings {
                 "button[data-setting-select]",
               );
               selects.forEach((select) => {
-                const defaultVal = select.getAttribute("data-default") || "";
+                const defaultVal = select.getAttribute("data-default-value") || "";
                 select
                   .querySelector("data-setting-select-text")
                   .setAttribute("data-value", defaultVal);
