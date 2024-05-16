@@ -1,4 +1,11 @@
 import { createApp } from "vue";
+import { createPinia } from "pinia";
+import { getI18n } from "@utils/lang.js";
 import Test from "./Test.vue";
 
-createApp(Test).mount("#app");
+const pinia = createPinia();
+
+createApp(Test)
+  .use(pinia)
+  .use(getI18n(["dashboard", "api", "action", "bans", "inp"]))
+  .mount("#app");

@@ -39,7 +39,7 @@ function buildVite(dir) {
   return isErr;
 }
 
-// CLIENT : Change dir structure
+// Change dir structure for flask app
 function updateClientDir() {
   let isErr = false;
   const srcDir = resolve(`./${clientBuildDir}/src/pages`);
@@ -58,6 +58,11 @@ function updateClientDir() {
     // And move from static to templates
     const templateDir = resolve(`./${clientBuildDir}/templates`);
 
+    // Create template dir if not exist
+    if (!fs.existsSync(resolve("./templates"))) {
+      fs.mkdirSync(resolve("./templates"));
+    }
+
     fs.readdir(templateDir, (err, subdirs) => {
       subdirs.forEach((subdir) => {
         // Get absolute path of current subdir
@@ -67,9 +72,11 @@ function updateClientDir() {
         // Copy file to move it from /template/page to /template
         fs.copyFileSync(
           `${currPath}/${subdir}.html`,
-          resolve(`./static/templates/${subdir}.html`),
+          resolve(`./templates/${subdir}.html`),
         );
+        // Delete useless dir
         fs.rmSync(currPath, { recursive: true, force: true });
+        fs.rmSync(`./${clientBuildDir}/templates/`, { recursive: true, force: true });
       });
     });
   } catch (err) {
