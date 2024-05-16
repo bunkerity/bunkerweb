@@ -151,7 +151,7 @@ const emits = defineEmits(["inp"]);
 
 <template>
   <Base>
-    <Header :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
+    <Header :required="props.required" :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
 
 <select :name="props.name" class="hidden">
   <option
@@ -180,11 +180,6 @@ const emits = defineEmits(["inp"]);
     @click="toggleSelect()"
     :class="['select-btn', props.inpClass]"
   >
-    <span
-      v-if="props.required"
-      class="font-bold text-red-500 absolute right-[5px] top-[-20px]"
-      >*
-    </span>
     <span :id="`${props.id}-text`" class="select-btn-name">
       {{ select.value || props.value }}
     </span>

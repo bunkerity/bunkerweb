@@ -21,7 +21,7 @@ const checkboxData = {
   value: 'yes',
   name: 'test-checkbox',
   disabled: false,
-  required: false,
+  required: true,
   label: 'Test checkbox',
   tabId: '1',
 
@@ -33,7 +33,7 @@ const selectData = {
   values: ['yes', 'no'],
   name: 'test-select',
   disabled: false,
-  required: false,
+  required: true,
   label: 'Test select',
   tabId: '1',
 }
@@ -44,7 +44,7 @@ const inputData = {
   type: "text",
   name: 'test-input',
   disabled: false,
-  required: false,
+  required: true,
   label: 'Test input',
   pattern : "(test)",
   tabId: '1',

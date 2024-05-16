@@ -42,6 +42,10 @@ const props = defineProps({
         type: String,
         required: true,
     },
+    required: {
+        type: Boolean,
+        required: false,
+    },
     disabled: {
         type: Boolean,
         required: false,
@@ -138,7 +142,7 @@ onMounted(() => {
 
 <template>
   <Base>
-  <Header :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
+  <Header :required="props.required" :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
 
   <div class="relative flex flex-col items-start">
     <input

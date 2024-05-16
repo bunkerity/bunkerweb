@@ -92,7 +92,7 @@ onMounted(() => {
 
 <template>
   <Base>
-  <Header :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
+  <Header :required="props.required" :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
 
   <div class="relative z-10 flex flex-col items-start">
     <input

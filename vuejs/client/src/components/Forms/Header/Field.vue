@@ -6,6 +6,7 @@ import { defineProps } from "vue";
   *
   label: string,
   name: string,
+  required: boolean,
   version: string,
   hideLabel: boolean,
   required: boolean,
@@ -23,6 +24,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+    required: {
+        type: Boolean,
+        required: false,
+    },
   version: {
     type: String,
     required: false,
@@ -39,7 +44,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div :class="[props.hideLabel ? 'hidden' : '', props.headerClass]">
+  <div :class="['relative', props.hideLabel ? 'hidden' : '', props.headerClass]">
     <label
       :class="[props.label ? '' : 'sr-only']"
       :for="props.name"
@@ -49,7 +54,7 @@ const props = defineProps({
   </label>
   <span
     v-if="props.required"
-    class="font-bold text-red-500 absolute right-[5px] top-[-20px]"
+    class="font-bold text-red-500 absolute ml-1"
     >*
   </span>
   </div>
