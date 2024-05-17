@@ -10,7 +10,6 @@ export const useEventStore = defineStore("event", () => {
 
   // add only if the event is not already in the store
   function addEvent(name, value) {
-    console.log(event.value)
     if (!(name in event.value)) event.value[name] = value;
   }
 

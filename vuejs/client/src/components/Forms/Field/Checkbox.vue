@@ -3,6 +3,7 @@ import { reactive, defineProps, onMounted, ref } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
+import ErrorField from "@components/Forms/Error/Field.vue";
 
 /*
   COMPONENT DESCRIPTION
@@ -32,6 +33,22 @@ import Header from "@components/Forms/Header/Field.vue";
   *
   *
   PROPS EXAMPLE
+  *
+  *
+  { 
+  containerClass : "", 
+  columns : {"pc": 6, "tablet": 12, "mobile": 12}, 
+  id:"test-check", 
+  value: "yes", 
+  label: "Checkbox", 
+  name: "checkbox", 
+  required: true, 
+  version: "v1.0.0", 
+  hideLabel: false, 
+  headerClass: "text-red-500" 
+  }
+  *
+  *
 */
 
 const props = defineProps({
@@ -68,6 +85,7 @@ const props = defineProps({
     version: {
         type: String,
         required: false,
+        default : ""
     },
     hideLabel: {
         type: Boolean,
@@ -75,19 +93,23 @@ const props = defineProps({
     },
     containerClass : {
       type: String,
-      required: false
+      required: false,
+      default : ""
     },
     headerClass: {
         type: String,
         required: false,
+        default : ""
     },
     inpClass: {
         type: String,
         required: false,
+        default : ""
     },
     tabId: {
         type: [String, Number],
         required: false,
+        default: ""
     },
 });
 
@@ -149,18 +171,7 @@ onMounted(() => {
         d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"
       ></path>
     </svg>
-    <p
-      :aria-hidden="checkbox.isValid ? 'true' : 'false'"
-      role="alert"
-      :class="[checkbox.isValid ? 'hidden' : '']"
-      class="input-error-msg"
-    >
-      {{
-        checkbox.isValid
-          ? $t("inp_input_valid")
-          : $t("inp_input_error_required")
-      }}
-    </p>
+    <ErrorField :isValid="checkbox.isValid" :isValue="checkbox.isValid" />
   </div>
 </Container>
 </template>

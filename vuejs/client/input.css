@@ -231,6 +231,18 @@ body {
   @apply border-gray-50/0 ring-1 ring-green-500;
 }
 
+.invalid.select-btn,
+.invalid.select-btn:hover,
+.invalid.select-btn:focus,
+.invalid.select-btn:active {
+  @apply border-gray-50/0 ring-1 ring-red-500;
+}
+
+.valid.select-btn:focus,
+.valid.select-btn:active {
+  @apply border-gray-50/0 ring-1 ring-green-500;
+}
+
 .invalid.checkbox,
 .invalid.checkbox:hover,
 .invalid.checkbox:focus,
@@ -247,6 +259,10 @@ body {
 .invalid.input-regular:disabled:hover,
 .invalid.input-regular:disabled:focus,
 .invalid.input-regular:disabled:active,
+.invalid.select-btn:disabled,
+.invalid.select-btn:disabled:hover,
+.invalid.select-btn:disabled:focus,
+.invalid.select-btn:disabled:active,
 .invalid.checkbox:disabled,
 .invalid.checkbox:disabled:hover,
 .invalid.checkbox:disabled:focus,
@@ -255,6 +271,10 @@ body {
 .valid.input-regular:disabled:hover,
 .valid.input-regular:disabled:focus,
 .valid.input-regular:disabled:active,
+.valid.select-btn:disabled,
+.valid.select-btn:disabled:hover,
+.valid.select-btn:disabled:focus,
+.valid.select-btn:disabled:active,
 .valid.checkbox:disabled,
 .valid.checkbox:disabled:hover,
 .valid.checkbox:disabled:focus,

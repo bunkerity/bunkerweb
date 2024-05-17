@@ -1,8 +1,10 @@
 <script setup>
 import { computed, ref, watch, onBeforeMount, onMounted } from 'vue';
-import Container from "@components/Widget/Container.vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useEventStore } from "@store/event.js";
+import Container from "@components/Widget/Container.vue";
+import IconAdd from "@components/Icons/Button/Add.vue";
+
 
 /*
   COMPONENT DESCRIPTION
@@ -20,6 +22,7 @@ import { useEventStore } from "@store/event.js";
   *
     id: string,
     text: string,
+    type: string<"button"|"submit">,
     disabled: boolean,
     hideText: boolean,
     color: string,
@@ -59,6 +62,11 @@ const props = defineProps({
   text : {
     type: String,
     required: true
+  },
+  type : {
+    type: String,
+    required: false,
+    default : "button"
   },
   disabled : {
     type: Boolean,
@@ -161,14 +169,17 @@ function updateData(isClick = false) {
 </script>
 
 <template>
-<Container :containerClass="`w-full m-1 ${props.containerClass}`" :columns="props.columns">
-  <button ref="btnEl" @click="updateData(true)" :id="props.id"
+<Container :containerClass="`w-full m-2 ${props.containerClass}`" :columns="props.columns">
+  <button :type="props.type" ref="btnEl" @click="updateData(true)" :id="props.id"
   :tabindex="props.tabId || contentIndex"
   :class="[buttonClass]"
   :disabled="props.disabled || false"
   :aria-describedby="`${props.id}-text`"
   >
-    <span :class="[props.hideText ? 'sr-only' : '']" :id="`${props.id}-text`">{{ props.text }}</span>
+    <span :class="[props.hideText ? 'sr-only' : '', 
+    props.iconName ? 'mr-2' : ''
+    ]" :id="`${props.id}-text`">{{ props.text }}</span>
+    <IconAdd v-if="props.iconName === 'add'" :iconName="props.iconName" :iconColor="props.iconColor" />
   </button>
 </Container>
 </template>

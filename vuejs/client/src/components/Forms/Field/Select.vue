@@ -3,6 +3,7 @@ import { ref, reactive, watch, onMounted, defineEmits, defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
+import ErrorField from "@components/Forms/Error/Field.vue";
 
 
 /* 
@@ -22,6 +23,7 @@ import Header from "@components/Forms/Header/Field.vue";
   values:  array,
   disabled: boolean,
   required: boolean,
+  requiredValues : array,
   label: string,
   name: string,
   version: string,
@@ -42,6 +44,7 @@ import Header from "@components/Forms/Header/Field.vue";
     name: 'test-input',
     disabled: false,
     required: true,
+    requiredValues : ['no'], // need required to be checked
     label: 'Test select',
   }
   *
@@ -76,6 +79,11 @@ const props = defineProps({
         type: Boolean,
         required: false,
     },
+    requiredValues : {
+      type: Array,
+      required: false,
+      default : []
+    },
     label: {
         type: String,
         required: true,
@@ -87,6 +95,7 @@ const props = defineProps({
     version: {
         type: String,
         required: false,
+        default : ""
     },
     hideLabel: {
         type: Boolean,
@@ -94,19 +103,23 @@ const props = defineProps({
     },
     containerClass : {
       type: String,
-      required: false
+      required: false,
+      default : ""
     },
     headerClass: {
         type: String,
         required: false,
+        default : ""
     },
     inpClass: {
         type: String,
         required: false,
+        default : ""
     },
     tabId: {
         type: [String, Number],
         required: false,
+        default: ""
     },
 });
 
@@ -128,6 +141,7 @@ const select = reactive({
   // If we use select.value : props.value
   // Component will not re-render after props.value change
   value: "",
+  isValid: false,
 });
 
 const selectBtn = ref();
@@ -146,6 +160,7 @@ function changeValue(newValue) {
   // Allow on template to switch from prop value to component own value
   // Then send the new value to parent
   select.value = newValue;
+  // Check if value is required and if it is in requiredValueselect.isValid = !props.required ? true : props.requiredValues.includes(newValue) ? true : false;
   closeSelect();
   return newValue;
 }
@@ -211,7 +226,8 @@ const emits = defineEmits(["inp"]);
     data-select-dropdown
     :disabled="props.disabled || false"
     @click="toggleSelect()"
-    :class="['select-btn', props.inpClass]"
+    :class="['select-btn',         select.isValid ? 'valid' : 'invalid',
+     props.inpClass]"
   >
     <span :id="`${props.id}-text`" class="select-btn-name">
       {{ select.value || props.value }}
@@ -257,6 +273,8 @@ const emits = defineEmits(["inp"]);
       {{ value }}
     </button>
   </div>
+  <ErrorField :isValisd="select.isValid" :isValue="true" />
+
   <!-- end dropdown-->
 </div>
 <!-- end custom-->

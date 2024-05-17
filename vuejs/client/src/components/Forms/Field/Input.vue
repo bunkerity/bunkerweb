@@ -3,6 +3,7 @@ import { reactive, ref, defineEmits, onMounted, defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
+import ErrorField from "@components/Forms/Error/Field.vue";
 
 
 /* 
@@ -115,19 +116,23 @@ const props = defineProps({
     },
     containerClass : {
       type: String,
-      required: false
+      required: false,
+      default : ""
     },
     headerClass: {
         type: String,
         required: false,
+        default : ""
     },
     inpClass: {
         type: String,
         required: false,
+        default : ""
     },
     tabId: {
         type: [String, Number],
         required: false,
+        default : ""
     },
 
 });
@@ -279,20 +284,7 @@ onMounted(() => {
         </svg>
       </button>
     </div>
-    <p
-      :aria-hidden="inp.isValid ? 'true' : 'false'"
-      role="alert"
-      :class="[inp.isValid ? 'hidden' : '']"
-      class="input-error-msg"
-    >
-      {{
-        inp.isValid
-          ? $t("inp_input_valid")
-          : !inp.value
-            ? $t("inp_input_error_required")
-            : $t("inp_input_error_format")
-      }}
-    </p>
+    <ErrorField :isValid="inp.isValid" :isValue="!!inp.value" />
   </div>
   </Container>
 </template>

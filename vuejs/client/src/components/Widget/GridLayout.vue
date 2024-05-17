@@ -59,7 +59,7 @@ const props = defineProps({
 })
 
 const containerClass = computed(() => {
-    if(props.type === 'card') return 'bg-white rounded shadow-md w-full';
+    if(props.type === 'card') return 'bg-white rounded-xl shadow-md w-full';
     return '';
 })
 
@@ -68,14 +68,14 @@ const gridClass = computed(() => {
 })
 
 const titleClass = computed(() => {
-    if(props.type === 'card') return 'text-2xl font-bold text-center m-4';
+    if(props.type === 'card') return 'text-2xl font-bold mb-2';
     return ''
 })
 </script>
 
 <template>
-<div :class="[containerClass, gridClass, props.gridLayoutClass]">
-    <h1 v-if="props.title" :class="[titleClass]">{{ props.title }}</h1>
+<div :class="[containerClass, gridClass, props.gridLayoutClass, 'p-4 m-4']">
+    <h1 v-if="props.title" :class="[titleClass, 'col-span-12']">{{ props.title }}</h1>
     <slot></slot>
 </div>
 </template>
