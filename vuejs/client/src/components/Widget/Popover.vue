@@ -3,6 +3,10 @@ import { reactive, onMounted, defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
+  id: {
+    type: String,
+    required: true,
+  },
   content: {
     type: String,
     required: false,
@@ -11,7 +15,7 @@ const props = defineProps({
     type: String,
     required: false,
   },
-  iconClass: {
+  iconColor: {
     type: String,
     required: false,
   },
@@ -27,22 +31,6 @@ const props = defineProps({
 const popover = reactive({
   isOpen: false,
   isHover: false,
-});
-
-// Different style for desktop and mobile
-const tab = reactive({
-  isMobile: false,
-  // format label to fit id
-  id: props.content.trim().toLowerCase().replaceAll(" ", "-").substring(0, 15) + "popover",
-});
-
-onMounted(() => {
-  // When component is created but before is insert on DOM
-  // Check window width to determine we need to display mobile or desktop tab design
-  tab.isMobile = window.innerWidth >= 768 ? false : true;
-  window.addEventListener("resize", () => {
-    tab.isMobile = window.innerWidth >= 768 ? false : true;
-  });
 });
 
 function showPopover() {
@@ -61,9 +49,9 @@ function hidePopover() {
 <template>
   <component
     :tabindex="contentIndex"
-    :aria-controls="`${tab.id}`"
+    :aria-controls="`${props.id}-popover-text`"
     :aria-expanded="popover.isOpen ? 'true' : 'false'"
-    :aria-describedby="`${tab.id}-text`"
+    :aria-describedby="`${props.id}-popover-text`"
     :is="props.tag"
     role="button"
     @focusin="showPopover()"
@@ -72,9 +60,6 @@ function hidePopover() {
     @pointerleave="hidePopover()"
     class="cursor-pointer flex justify-start w-full"
   >
-    <span :id="`${tab.id}-text`" class="sr-only">
-      {{ $t("dashboard_popover_button_desc") }}
-    </span>
     <svg
       role="img"
       aria-hidden="true"
@@ -88,13 +73,13 @@ function hidePopover() {
     </svg>
   </component>
   <div
-    :id="`${tab.label}-popover-${tab.id}`"
+    :id="`${props.id}-popover-container`"
     role="status"
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
     v-show="popover.isOpen"
     :class="['popover-settings-container']"
     :aria-description="$t('dashboard_popover_detail_desc')"
   >
-    <p :id="${tab.id}-text" class="popover-settings-text"><slot></slot></p>
+    <p :id="`${props.id}-popover-text`" class="popover-settings-text"><slot></slot></p>
   </div>
 </template>

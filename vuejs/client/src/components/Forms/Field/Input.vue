@@ -5,42 +5,14 @@ import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 
-
-/* 
-  COMPONENT DESCRIPTION
-  *
-  *
-  This input component is used to create a complete input (label, validator message).
-  It is mainly use for input setting form.  
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  id: string,
-  columns : <object|boolean>,
-  name: string,
-  type: string<"text"|"email"|"password"|"number"|"tel"|"url">,
-  disabled: boolean,
-  value: string,
-  placeholder: string,
-  pattern: string,
-  clipboard: boolean,
-  readonly: boolean,
-  label: string,
-  name: string,
-  version: string,
-  hideLabel: boolean,
-  required: boolean,
-  containerClass: string,
-  headerClass: string,
-  inpClass: string,
-  tabId: string || number,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
+/** 
+  @name Forms/Field/Input.vue
+  @description This component is used to create a complete input field input with error handling and label.
+  We can add a clipboard button to copy the input value.
+  We can also add a password button to show the password.
+  We can also add popover to display more information.
+  It is mainly use in forms.
+  @example
   {
     id: 'test-input',
     value: 'yes',
@@ -50,11 +22,25 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     required: true,
     label: 'Test input',
     pattern : "(test)",
-    tabId: '1',
   }
-  *
-  *
+  @param {string} id
+  @param {string} name
+  @param {string} type - text, email, password, number, tel, url
+  @param {string} value
+  @param {string} label
+  @param {boolean} [disabled=false]
+  @param {boolean} [required=false]
+  @param {string} [placeholder=""]
+  @param {string} [pattern="(?.*)"]
+  @param {boolean} [clipboard=false] - allow to copy the input value
+  @param {boolean} [readonly=false] - allow to read only the input value
+  @param {boolean} [hideLabel=false]
+  @param {string} [containerClass=""]
+  @param {string} [inpClass=""]
+  @param {string} [headerClass=""]
+  @param {string|number} [tabId=""]
 */
+
 const props = defineProps({
   // id && value && method
     id: {

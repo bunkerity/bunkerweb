@@ -1,41 +1,30 @@
 <script setup>
 import { computed } from 'vue';
 
-/* 
-  COMPONENT DESCRIPTION
-  *
-  *
-  This GridLayout component is used at the top level of a page layout.
-  This component will determine the position of layout components based on the grid columns.
+/** 
+  @name Widget/GridLayout.vue
+  @description This component is used for top level page layout.
+  This will determine the position of layout components based on the grid system.
   We can create card, modal, table and others top level layout using this component.
-  The content of this component is grid based.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  type : <"card"|"table"|...>  (will determine component style)
-  title: string,
-  columns : { pc: int, tablet: int, mobile: int},
-  gridLayoutClass : <"items-start"|"items-center"|"items-end">
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
-  type: "card",
-  title: "Test",
-  columns: { pc: 12, tablet: 12, mobile: 12},
-  gridLayoutClass: "items-start"
-  *
-  *
+  This component is mainly use as Grid parent component.
+  @example
+  {
+    type: "card",
+    title: "Test",
+    columns: { pc: 12, tablet: 12, mobile: 12},
+    gridLayoutClass: "items-start"
+  }
+  @param {string} [type="card"] - Type of layout component, we can have : card, table, modal and others
+  @param {string} [title=""] - Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title.
+  @param {object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
+  @param {string} [gridLayoutClass="items-start"] - Additional class
 */
 
 const props = defineProps({
     type : {
         type: String,
         required: false,
-        default : "grid"
+        default : "card"
     },
     title : {
         type: String,

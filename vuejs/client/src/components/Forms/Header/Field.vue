@@ -1,38 +1,23 @@
 <script setup>
 import { defineProps } from "vue";
 
-/* 
-  COMPONENT DESCRIPTION
-  *
-  *
-  This header component is used with field in order to link a label to field type.
-  We can show additionnal data, like validaiton pattern with invalid message,
-  Or add some popovers elements.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  label: string,
-  name: string,
-  required: boolean,
-  version: string,
-  hideLabel: boolean,
-  required: boolean,
-  headerClass: string,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
+/** 
+  @name Forms/Header/Field.vue
+  @description This component is used with field in order to link a label to field type.
+  We can add popover to display more information.
+  Always use with field component.
+  @example
   {
     label: 'Test',
     version : "0.1.0",
     name: 'test-input',
     required: true,
   }
-  *
-  *
+  @param {string} label
+  @param {string} name
+  @param {boolean} [required=false]
+  @param {boolean} [hideLabel=false]
+  @param {string} [headerClass=""]
 */
 
 const props = defineProps({

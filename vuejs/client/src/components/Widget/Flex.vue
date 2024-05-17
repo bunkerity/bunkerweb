@@ -1,25 +1,17 @@
 <script setup>
 import { computed } from 'vue';
 
-/*
-  COMPONENT DESCRIPTION
-  *
-  *
-  This container component is used to align groups of components horizontally using flex.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  flexClass: string,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
+/** 
+  @name Widget/Flex.vue
+  @description This component is a basic container that can be used to wrap other components.
+  Per default, it aligns the components horizontally using flex.
+  We can define additional class too.
+  This component is mainly use as widget container or for groups of widget.
+  @example
+  {
   flexClass: "flex-start"
-  *
-  *
+  }
+  @param {string} [flexClass="flex-start"] - Additional class
 */
 
 const props = defineProps({

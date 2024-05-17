@@ -3,28 +3,19 @@ import { reactive, onBeforeMount } from "vue";
 import Checkbox from "@components/Forms/Field/Checkbox.vue";
 import Select from "@components/Forms/Field/Select.vue";
 import Input from "@components/Forms/Field/Input.vue";
+import Datepicker from "@components/Forms/Field/Datepicker.vue";
+import Button from "@components/Widget/Button.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import Grid from "@components/Widget/Grid.vue";
 
-/* 
-  COMPONENT DESCRIPTION
-  *
-  *
-  This Builder component is used to create complete pages content with multiple components.
-  This is an abstract component that will be used to create any kind of page content.
-  You need to determine each container and each widget inside it.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  builder : array,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
-  [{
+/**
+  @name Builder.vue
+  @description This component is a wrapper to create a complete page using containers and widgets.
+  We have to define each container and each widget inside it.
+  This is an abstract component that will be used to create any kind of page content (base dashboard elements like menu and news excluded)
+  @example
+  [
+   {
         "type": "card",  // this can be a "card", "modal", "table"... etc
         "containerClass": "", // tailwind css grid class (items-start, ...)
         "containerColumns" : {"pc": 12, "tablet": 12, "mobile": 12},
@@ -40,10 +31,9 @@ import Grid from "@components/Widget/Grid.vue";
                         data : {containerClass : "", columns : {"pc": 6, "tablet": 12, "mobile": 12}, id: 'test-select', value: 'yes', values: ['yes', 'no'], name: 'test-select', disabled: false, required: true, label: 'Test select', tabId: '1',}
                 }
         ]
-        },
+   }
   ]
-  *
-  *
+  @param {array} builder - Array of containers and widgets
 */
 
 const props = defineProps({
@@ -69,6 +59,8 @@ const props = defineProps({
                                 <Checkbox v-if="widget.type === 'Checkbox'" v-bind="widget.data"></Checkbox>
                                 <Select v-if="widget.type === 'Select'" v-bind="widget.data"></Select>
                                 <Input v-if="widget.type === 'Input'" v-bind="widget.data"></Input>
+                                <Datepicker v-if="widget.type === 'Datepicker'" v-bind="widget.data"></Datepicker>
+                                <Button v-if="widget.type === 'Button'" v-bind="widget.data"></Button>
                         </template>
                 </Grid>
         </GridLayout>

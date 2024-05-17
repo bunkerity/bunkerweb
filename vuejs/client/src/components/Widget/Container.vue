@@ -1,31 +1,19 @@
 <script setup>
 import { computed } from 'vue';
 
-/* 
-  COMPONENT DESCRIPTION
-  *
-  *
-  This container component is mainly use as widget container.
-  Each widget can define the base class for the container.
-  In case we columns, this will use it too for positioning.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  class: string,
-  columns: object,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
+/** 
+  @name Widget/Container.vue
+  @description This component is a basic container that can be used to wrap other components.
+  In case we are working with grid system, we can add columns to position the container.
+  We can define additional class too.
+  This component is mainly use as widget container.
+  @example
   {
-    class: "w-full h-full bg-white rounded shadow-md",
+    containerClass: "w-full h-full bg-white rounded shadow-md",
     columns: { pc: 12, tablet: 12, mobile: 12}
   }
-  *
-  *
+  @param {string} [containerClass=""] - Additional class
+  @param {object|boolean} [columns=false] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
 */
 
 const props = defineProps({

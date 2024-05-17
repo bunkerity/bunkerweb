@@ -1,26 +1,16 @@
 <script setup>
 
-/*
-  COMPONENT DESCRIPTION
-  *
-  *
-  This error field component is used to show a feedback message to the user when the field is invalid.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  isValid: boolean,
-  isValue: boolean,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
-  isValid: false,
-  isValue: false,
-  *
-  *
+/** 
+  @name Forms/Error/Field.vue
+  @description This component is used to display a feedback message to user when a field is invalid.
+  It is used with /Forms/Field components.
+  @example
+  {
+    isValid: false,
+    isValue: false,
+  }
+  @param {boolean} [isValid=false] - Check if the field is valid
+  @param {boolean} [isValue=false] - Check if the field has a value, display a different message if the field is empty or not
 */
 
 const props = defineProps({

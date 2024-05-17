@@ -5,6 +5,37 @@ import { useEventStore } from "@store/event.js";
 import Container from "@components/Widget/Container.vue";
 import IconAdd from "@components/Icons/Button/Add.vue";
 
+/** 
+  @name Widget/Button.vue
+  @description This component is a standard button.
+  You can link this button to the event store on click with eventAttr.
+  This will allow you to share a value with other components, for example switching form on a click.
+  The eventAttr object must contain the store name and the value to send on click at least.
+  It can also contain the target id element and the expanded value, this will add additionnal accessibility attributs to the button.
+  @example
+  {
+    id: "open-modal-btn",
+    text: "Open modal",
+    disabled: false,
+    hideText: true,
+    color: "green",
+    size: "normal",
+    iconName: "modal",
+    iconColor: "white",
+    eventAttr: {"store" : "modal", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},7
+  }
+  @param {string} id
+  @param {string} text - Content of the button
+  @param {string} [type="button"] - Can be of type button || submit
+  @param {boolean} [disabled=false]
+  @param {boolean} [hideText=false] - Hide text to only display icon
+  @param {string} [color="primary"] 
+  @param {string} [size="normal"] - Can be of size sm || normal || lg || xl
+  @param {string} [iconName=""] - Name in lowercase of icons store on /Icons/Button
+  @param {string} [iconColor=""]
+  @param {object} [eventAttr={}] - Store event on click {"store" : <store_name>, "default" : <default_value>,  "value" : <value_stored_on_click>, "target"<optional> : <target_id_element>, "valueExpanded" : "expanded_value"}
+  @param {string|number} [tabId=""]
+*/
 
 /*
   COMPONENT DESCRIPTION

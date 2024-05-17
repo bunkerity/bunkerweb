@@ -5,50 +5,35 @@ import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 
-/*
-  COMPONENT DESCRIPTION
-  *
-  *
-  This checkbox component is used to create a complete checkbox (label, validator message).
-  It is mainly use for checkbox setting form.  
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  id: string,
-  columns: object,
-  value: string,
-  disabled: boolean,
-  required: boolean,
-  label: string,
-  name: string,
-  version: string,
-  hideLabel: boolean,
-  required: boolean,
-  containerClass: string,
-  headerClass: string,
-  inpClass: string,
-  tabId: string || number,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
+
+/** 
+  @name Forms/Field/Checkbox.vue
+  @description This component is used to create a complete checkbox field input with error handling and label.
+  We can also add popover to display more information.
+  It is mainly use in forms.
+  @example
   { 
-  containerClass : "", 
   columns : {"pc": 6, "tablet": 12, "mobile": 12}, 
   id:"test-check", 
   value: "yes", 
   label: "Checkbox", 
   name: "checkbox", 
   required: true, 
-  version: "v1.0.0", 
   hideLabel: false, 
   headerClass: "text-red-500" 
   }
-  *
-  *
+  @param {string} id
+  @param {string} name
+  @param {string} label
+  @param {string} value
+  @param {boolean} [disabled=false]
+  @param {boolean} [required=false]
+  @param {object} [columns={"pc": "12", "tab": "12", "mob": "12}]
+  @param {boolean} [hideLabel=false]
+  @param {string} [containerClass=""]
+  @param {string} [headerClass=""]
+  @param {string} [inpClass=""] 
+  @param {string|number} [tabId=""]
 */
 
 const props = defineProps({

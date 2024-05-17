@@ -1,26 +1,15 @@
 <script setup>
 import { computed } from 'vue';
 
-
-/* 
-  COMPONENT DESCRIPTION
-  *
-  *
-  This svg component is used to create a complete svg icon for a button.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-  iconColor: string,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
-  iconColor: 'white',
-  *
-  *
+/** 
+  @name Icons/Button/Add.vue
+  @description This component is used to create a complete svg icon for a button.
+  This svg is related to a add action button.
+  @example
+  {
+    iconColor: 'white',
+  }
+  @param {string} [iconColor="white"]
 */
 
 const props = defineProps({

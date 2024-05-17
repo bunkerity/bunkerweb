@@ -11,39 +11,15 @@ import "@assets/css/datepicker-foundation.css";
 import "@assets/css/flatpickr.css";
 import "@assets/css/flatpickr.dark.css";
 
-/*
-  COMPONENT DESCRIPTION
-  *
-  *
-  This datepicker component is used to create a complete datepicker (label, validator message).
+/** 
+  @name Forms/Field/Datepicker.vue
+  @description This component is used to create a complete datepicker field input with error handling and label.
   You can define a default date, a min and max date, and a format.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-    id: string,
-    name: string,
-    label: string,
-    hideLabel: boolean,
-    headerClass: string,
-    containerClass: string,
-    columns: object || boolean,
-    disabled: boolean,
-    required: boolean,
-    defaultDate: string || number || date,
-    noPickBeforeStamp: string || number,
-    noPickAfterStamp: string || number,
-    inpClass: string,
-    tabId: string || number,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
+  We can also add popover to display more information.
+  It is mainly use in forms.
+  @example
   { 
     id: 'test-date',
-    containerClass : "",
     columns : {"pc": 6, "tablet": 12, "mobile": 12},
     disabled: false,
     required: true,
@@ -51,10 +27,20 @@ import "@assets/css/flatpickr.dark.css";
     noPickBeforeStamp: 1735682600000,
     noPickAfterStamp: 1735689600000,
     inpClass: "text-center",
-    tabId: "1",
   }
-  *
-  *
+  @param {string} id
+  @param {string} name
+  @param {string} label
+  @param {string|number|date} [defaultDate=null] - Default date when instanciate
+  @param {string|number} [noPickBeforeStamp=""] - Impossible to pick a date before this date
+  @param {string|number} [noPickAfterStamp=""] - Impossible to pick a date after this date
+  @param {boolean} [hideLabel=false]
+  @param {object|boolean} [columns={"pc": "12", "tab": "12", "mob": "12}]
+  @param {boolean} [disabled=false]
+  @param {boolean} [required=false]
+  @param {string} [headerClass=""]
+  @param {string} [containerClass=""]
+  @param {string|number} [tabId=""]
 */
 
 const props = defineProps({

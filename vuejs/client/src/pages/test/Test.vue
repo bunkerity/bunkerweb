@@ -24,8 +24,8 @@ const selectData = {
   values: ['yes', 'no'],
   name: 'test-select',
   disabled: false,
-  required: true,
-  requiredValues : ['no'],
+  required: false,
+  requiredValues : ["no"],
   label: 'Test select',
   tabId: '1',
 }

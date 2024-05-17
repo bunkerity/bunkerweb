@@ -1,4 +1,3 @@
-<script setup>
 import { ref, reactive, watch, onMounted, defineEmits, defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
@@ -7,7 +6,7 @@ import ErrorField from "@components/Forms/Error/Field.vue";
 
 
 /** 
-  @name Forms/Field/Select.vue
+  @name Select.vue
   @description This component is used to create a complete select field input with error handling and label.
   We can be more precise by adding values that need to be selected to be valid.
   We can also add popover to display more information.
@@ -24,21 +23,17 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     label: 'Test select',
   }
   @param {string} id
-  @param {string} name
-  @param {string} value
-  @param {string} label
-  @param {array} values
+  @param {string} text - content of the button
+  @param {string} [type="button"] - button || submit
   @param {boolean} [disabled=false]
-  @param {boolean} [required=false]
-  @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
-  @param {object|boolean} [columns={"pc": "12", "tab": "12", "mob": "12}]
-  @param {boolean} [hideLabel=false]
-  @param {string} [containerClass=""]
-  @param {string} [inpClass=""]
-  @param {string} [headerClass=""]
+  @param {boolean} [hideText=false] - hide text to only display icon
+  @param {string} [color="primary"] 
+  @param {string} [size="normal"] - sm || normal || lg || xl
+  @param {string} [iconName=""] - store on components/Icons/Button
+  @param {string} [iconColor=""]
+  @param {object} [eventAttr={}] - {"store" : <store_name>, "default" : <default_value>,  "value" : <value_stored_on_click>, "target"<optional> : <target_id_element>, "valueExpanded" : "expanded_value"}
   @param {string|number} [tabId=""]
 */
-
 
 const props = defineProps({
   // id && value && method
@@ -184,89 +179,3 @@ onMounted(() => {
 });
 
 const emits = defineEmits(["inp"]);
-</script>
-
-<template>
-  <Container :containerClass="`w-full m-1 p-1 ${props.containerClass}`" :columns="props.columns">
-    <Header :required="props.required" :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
-
-<select :name="props.name" class="hidden">
-  <option
-    v-for="(value, id) in props.values"
-    :key="id"
-    :value="value"
-    @click="$emit('inp', changeValue(value))"
-    :selected="select.value && select.value === value || !select.value && value === props.value ? true : false"
-  >
-    {{ value }}
-  </option>
-</select>
-<!-- end default select -->
-
-<!--custom-->
-<div class="relative">
-  <button
-    :name="`${props.name}-custom`"	
-    :tabindex="props.tabId || contentIndex"
-    ref="selectBtn"
-    :aria-controls="`${props.id}-custom`"
-    :aria-expanded="select.isOpen ? 'true' : 'false'"
-    :aria-description="$t('inp_select_dropdown_button_desc')"
-    data-select-dropdown
-    :disabled="props.disabled || false"
-    @click="toggleSelect()"
-    :class="['select-btn',         select.isValid ? 'valid' : 'invalid',
-     props.inpClass]"
-  >
-    <span :id="`${props.id}-text`" class="select-btn-name">
-      {{ select.value || props.value }}
-    </span>
-    <!-- chevron -->
-    <svg
-      role="img"
-      aria-hidden="true"
-      :class="[select.isOpen ? '-rotate-180' : '']"
-      class="select-btn-svg"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-    >
-      <path
-        d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-      />
-    </svg>
-    <!-- end chevron -->
-  </button>
-  <!-- dropdown-->
-  <div
-    role="radiogroup"
-    :style="{ width: selectWidth }"
-    :id="`${props.id}-custom`"
-    :class="[select.isOpen ? 'flex' : 'hidden']"
-    class="select-dropdown-container"
-    :aria-description="$t('inp_select_dropdown_desc')"
-  >
-    <button
-      :tabindex="contentIndex"
-      v-for="(value, id) in props.values"
-      role="radio"
-      @click="$emit('inp', changeValue(value))"
-      :class="[
-        id === 0 ? 'first' : '',
-        id === props.values.length - 1 ? 'last' : '',
-        value === select.value && select.value === value || !select.value && value === props.value ? 'active' : '',
-        'select-dropdown-btn',
-      ]"
-      :aria-controls="`${props.id}-text`"
-      :aria-checked="select.value && select.value === value || !select.value && value === props.value ? 'true' : 'false'"
-    >
-      {{ value }}
-    </button>
-  </div>
-  <ErrorField :isValid="select.isValid" :isValue="true" />
-
-  <!-- end dropdown-->
-</div>
-<!-- end custom-->
-</Container>
- 
-</template>
