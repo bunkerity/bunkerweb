@@ -2,9 +2,13 @@
 import { computed } from 'vue';
 
 /* 
+  COMPONENT DESCRIPTION
+  *
+  *
   This Grid component is a container with a grid system.
   In case we are adding columns, this will be added, so it can be used with parent grid.
-
+  *
+  *
   PROPS ARGUMENTS
   *
   *
@@ -12,6 +16,13 @@ import { computed } from 'vue';
   title: string,
   columns : { pc: int, tablet: int, mobile: int},
   class : <"items-start"|"items-center"|"items-end">
+  *
+  *
+  PROPS EXAMPLE
+  *
+  *
+  columns: { pc: 12, tablet: 12, mobile: 12},
+  gridClass: "items-start"
   *
   *
 */

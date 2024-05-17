@@ -3,6 +3,7 @@ import { reactive, onBeforeMount } from "vue";
 import Checkbox from "@components/Forms/Field/Checkbox.vue";
 import Select from "@components/Forms/Field/Select.vue";
 import Input from "@components/Forms/Field/Input.vue";
+import Button from "@components/Widget/Button.vue";
 import Builder from "@components/Builder.vue";
 // Define reactive properties
 const data = reactive({
@@ -38,11 +39,23 @@ const builder = [{
         ]
     },
 ]
+
+const buttonData = {
+  id: 'test-button',
+  text: 'Test button',
+  type: 'button',
+  disabled: false,
+  eventAttr: {"store" : "modal", "default" : "close", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},
+  columns: {"pc": 12, "tablet": 12, "mobile": 12},
+  tabId: '1',
+
+}
 </script>
 
 <template>
     <div class="bg-secondary flex flex-col items-center justify-center h-full">
       <div style="width: 300px;">
+        <Button v-bind="buttonData" />
         <Builder :builder="builder" />
       </div>
     </div>

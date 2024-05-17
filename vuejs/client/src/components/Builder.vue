@@ -6,22 +6,29 @@ import Input from "@components/Forms/Field/Input.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import Grid from "@components/Widget/Grid.vue";
 
-const props = defineProps({
-    builder : {
-        type: Array,
-        required: true,
-    },
-})
-
-// Example of builder
-const builder = [{
-        // we are starting with the top level container name
-        // this can be a "card", "modal", "table"... etc
-        "type": "card",
+/* 
+  COMPONENT DESCRIPTION
+  *
+  *
+  This Builder component is used to create complete pages content with multiple components.
+  This is an abstract component that will be used to create any kind of page content.
+  You need to determine each container and each widget inside it.
+  *
+  *
+  PROPS ARGUMENTS
+  *
+  *
+  builder : array,
+  *
+  *
+  PROPS EXAMPLE
+  *
+  *
+  [{
+        "type": "card",  // this can be a "card", "modal", "table"... etc
         "containerClass": "", // tailwind css grid class (items-start, ...)
         "containerColumns" : {"pc": 12, "tablet": 12, "mobile": 12},
-        // container title
-        "title" : "My awesome card",
+        "title" : "My awesome card", // container title
         // Each widget need a name (here type) and associated data
         // We need to send specific data for each widget type
         widgets: [
@@ -33,8 +40,18 @@ const builder = [{
                         data : {containerClass : "", columns : {"pc": 6, "tablet": 12, "mobile": 12}, id: 'test-select', value: 'yes', values: ['yes', 'no'], name: 'test-select', disabled: false, required: true, label: 'Test select', tabId: '1',}
                 }
         ]
+        },
+  ]
+  *
+  *
+*/
+
+const props = defineProps({
+    builder : {
+        type: Array,
+        required: true,
     },
-]
+})
 </script>
 
 <template>

@@ -6,9 +6,13 @@ import Header from "@components/Forms/Header/Field.vue";
 
 
 /* 
+  COMPONENT DESCRIPTION
+  *
+  *
   This input component is used to create a complete input (label, validator message).
   It is mainly use for input setting form.  
-
+  *
+  *
   PROPS ARGUMENTS
   *
   *
@@ -31,6 +35,22 @@ import Header from "@components/Forms/Header/Field.vue";
   headerClass: string,
   inpClass: string,
   tabId: string || number,
+  *
+  *
+  PROPS EXAMPLE
+  *
+  *
+  {
+    id: 'test-input',
+    value: 'yes',
+    type: "text",
+    name: 'test-input',
+    disabled: false,
+    required: true,
+    label: 'Test input',
+    pattern : "(test)",
+    tabId: '1',
+  }
   *
   *
 */
@@ -107,7 +127,7 @@ const props = defineProps({
     },
     tabId: {
         type: [String, Number],
-        required: true,
+        required: false,
     },
 
 });

@@ -6,9 +6,13 @@ import Header from "@components/Forms/Header/Field.vue";
 
 
 /* 
+  COMPONENT DESCRIPTION
+  *
+  *
   This select component is used to create a complete select (label, validator message).
   It is mainly use for select setting form.  
-
+  *
+  *
   PROPS ARGUMENTS
   *
   *
@@ -26,6 +30,20 @@ import Header from "@components/Forms/Header/Field.vue";
   inpClass: string,
   headerClass: string,
   tabId: string || number,
+  *
+  *
+  PROPS EXAMPLE
+  *
+  *
+  {
+    id: 'test-input',
+    value: 'yes',
+    values : ['yes', 'no'],
+    name: 'test-input',
+    disabled: false,
+    required: true,
+    label: 'Test select',
+  }
   *
   *
 */

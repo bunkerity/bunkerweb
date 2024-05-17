@@ -2,18 +2,31 @@
 import { computed } from 'vue';
 
 /* 
+  COMPONENT DESCRIPTION
+  *
+  *
   This GridLayout component is used at the top level of a page layout.
   This component will determine the position of layout components based on the grid columns.
   We can create card, modal, table and others top level layout using this component.
   The content of this component is grid based.
-
+  *
+  *
   PROPS ARGUMENTS
   *
   *
   type : <"card"|"table"|...>  (will determine component style)
   title: string,
   columns : { pc: int, tablet: int, mobile: int},
-  verticalAlign : <"items-start"|"items-center"|"items-end">
+  gridLayoutClass : <"items-start"|"items-center"|"items-end">
+  *
+  *
+  PROPS EXAMPLE
+  *
+  *
+  type: "card",
+  title: "Test",
+  columns: { pc: 12, tablet: 12, mobile: 12},
+  gridLayoutClass: "items-start"
   *
   *
 */

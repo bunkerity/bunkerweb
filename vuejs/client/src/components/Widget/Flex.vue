@@ -1,20 +1,29 @@
 <script setup>
 import { computed } from 'vue';
 
-/* 
+/*
+  COMPONENT DESCRIPTION
+  *
+  *
   This container component is used to align groups of components horizontally using flex.
-
+  *
+  *
   PROPS ARGUMENTS
   *
   *
-  class: string,
-  horizontalAlign: string<"flex-start"|"center"|"flex-end"|"space-between"|"space-around"|"space-evenly">,
+  flexClass: string,
+  *
+  *
+  PROPS EXAMPLE
+  *
+  *
+  flexClass: "flex-start"
   *
   *
 */
 
 const props = defineProps({
-    class: {
+    flexClass: {
         type: String,
         required: false,
         default : "flex-start"
@@ -22,7 +31,7 @@ const props = defineProps({
 })
 
 const flexClass = computed(() => {
-    return `w-full flex ${props.class}`;
+    return `w-full flex ${props.flexClass}`;
 })
 
 </script>

@@ -4,10 +4,14 @@ import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 
-/* 
+/*
+  COMPONENT DESCRIPTION
+  *
+  *
   This checkbox component is used to create a complete checkbox (label, validator message).
   It is mainly use for checkbox setting form.  
-
+  *
+  *
   PROPS ARGUMENTS
   *
   *
@@ -27,6 +31,7 @@ import Header from "@components/Forms/Header/Field.vue";
   tabId: string || number,
   *
   *
+  PROPS EXAMPLE
 */
 
 const props = defineProps({
