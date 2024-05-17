@@ -1,14 +1,19 @@
 <script setup>
 import { ref, reactive, watch, onMounted, defineEmits, defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
-import Base from "@components/Forms/Field/Base.vue";
+import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 
 
-/* PROPS ARGUMENTS
+/* 
+  This select component is used to create a complete select (label, validator message).
+  It is mainly use for select setting form.  
+
+  PROPS ARGUMENTS
   *
   *
   id: string,
+  columns : <object|boolean>,
   value:  string,
   values:  array,
   disabled: boolean,
@@ -17,6 +22,7 @@ import Header from "@components/Forms/Header/Field.vue";
   name: string,
   version: string,
   hideLabel: boolean,
+  containerClass: string,
   inpClass: string,
   headerClass: string,
   tabId: string || number,
@@ -30,6 +36,11 @@ const props = defineProps({
     id: {
         type: String,
         required: true,
+    },
+    columns: {
+      type: [Object, Boolean],
+      required: false,
+      default: false
     },
     value: {
         type: String,
@@ -62,6 +73,10 @@ const props = defineProps({
     hideLabel: {
         type: Boolean,
         required: false,
+    },
+    containerClass : {
+      type: String,
+      required: false
     },
     headerClass: {
         type: String,
@@ -150,7 +165,7 @@ const emits = defineEmits(["inp"]);
 </script>
 
 <template>
-  <Base>
+  <Container :containerClass="`w-full m-1 p-1 ${props.containerClass}`" :columns="props.columns">
     <Header :required="props.required" :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
 
 <select :name="props.name" class="hidden">
@@ -227,6 +242,6 @@ const emits = defineEmits(["inp"]);
   <!-- end dropdown-->
 </div>
 <!-- end custom-->
-  </Base>
+</Container>
  
 </template>

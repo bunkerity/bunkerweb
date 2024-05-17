@@ -1,13 +1,18 @@
 <script setup>
 import { reactive, defineProps, onMounted, ref } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
-import Base from "@components/Forms/Field/Base.vue";
+import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 
-/* PROPS ARGUMENTS
+/* 
+  This checkbox component is used to create a complete checkbox (label, validator message).
+  It is mainly use for checkbox setting form.  
+
+  PROPS ARGUMENTS
   *
   *
   id: string,
+  columns: object,
   value: string,
   disabled: boolean,
   required: boolean,
@@ -16,17 +21,24 @@ import Header from "@components/Forms/Header/Field.vue";
   version: string,
   hideLabel: boolean,
   required: boolean,
+  containerClass: string,
   headerClass: string,
   inpClass: string,
   tabId: string || number,
   *
   *
 */
+
 const props = defineProps({
   // id && value && method
     id: {
         type: String,
         required: true,
+    },
+    columns: {
+      type: [Object, Boolean],
+      required: false,
+      default : false
     },
     value: {
         type: String,
@@ -55,6 +67,10 @@ const props = defineProps({
     hideLabel: {
         type: Boolean,
         required: false,
+    },
+    containerClass : {
+      type: String,
+      required: false
     },
     headerClass: {
         type: String,
@@ -91,7 +107,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Base>
+  <Container :containerClass="`w-full m-1 p-1 ${props.containerClass}`" :columns="props.columns">
   <Header :required="props.required" :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
 
   <div class="relative z-10 flex flex-col items-start">
@@ -141,5 +157,5 @@ onMounted(() => {
       }}
     </p>
   </div>
-</Base>
+</Container>
 </template>

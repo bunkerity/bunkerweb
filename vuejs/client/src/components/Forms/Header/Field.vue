@@ -1,7 +1,13 @@
 <script setup>
 import { defineProps } from "vue";
 
-/* PROPS ARGUMENTS
+/* 
+  This header component is used with field in order to link a label to field type.
+  We can show additionnal data, like validaiton pattern with invalid message,
+  Or add some popovers elements.
+
+
+  PROPS ARGUMENTS
   *
   *
   label: string,
