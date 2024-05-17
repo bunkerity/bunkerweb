@@ -141,7 +141,7 @@ const select = reactive({
   // If we use select.value : props.value
   // Component will not re-render after props.value change
   value: "",
-  isValid: false,
+  isValid: !props.required ? true : props.requiredValues.length <= 0 ? true : props.requiredValues.includes(props.value) ? true : false,
 });
 
 const selectBtn = ref();
@@ -160,7 +160,9 @@ function changeValue(newValue) {
   // Allow on template to switch from prop value to component own value
   // Then send the new value to parent
   select.value = newValue;
-  // Check if value is required and if it is in requiredValueselect.isValid = !props.required ? true : props.requiredValues.includes(newValue) ? true : false;
+  // Check if value is required and if it is in requiredValues
+  console.log(newValue, props.requiredValues, props.requiredValues.includes(newValue) ? true : false);
+  select.isValid = !props.required ? true : props.requiredValues.length <= 0 ? true : props.requiredValues.includes(newValue) ? true : false;
   closeSelect();
   return newValue;
 }
@@ -273,7 +275,7 @@ const emits = defineEmits(["inp"]);
       {{ value }}
     </button>
   </div>
-  <ErrorField :isValisd="select.isValid" :isValue="true" />
+  <ErrorField :isValid="select.isValid" :isValue="true" />
 
   <!-- end dropdown-->
 </div>
