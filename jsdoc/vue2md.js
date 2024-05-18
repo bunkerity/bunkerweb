@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
+const finalFile = "COMPONENTS.md";
 const inputFolder = path.join(__dirname, "components");
 const ouputFolder = path.join(__dirname, "output");
 
@@ -109,7 +110,7 @@ function formatMd() {
   });
 
   // Create a md file to merge
-  const merge = path.join(ouputFolder, "COMPONENTS.md");
+  const merge = path.join(ouputFolder, finalFile);
   fs.writeFileSync(merge, "", "utf8");
   // Append each file in the order
   order.forEach((item) => {
@@ -131,7 +132,6 @@ function formatMd() {
     }
     tag += " ";
 
-    console.log(tag);
     // Each time, get the first level title and add it to the titles array
     data.split("\n").forEach((line) => {
       if (line.startsWith(tag) && line.includes("/")) {
