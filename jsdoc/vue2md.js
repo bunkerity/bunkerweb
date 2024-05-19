@@ -1,10 +1,30 @@
 const fs = require("fs");
 const path = require("path");
 
+// Merge all components md on this file name
 const finalFile = "COMPONENTS.md";
+// Where we have all SFC components
 const inputFolder = path.join(__dirname, "components");
+// Where we want to output md components file
 const ouputFolder = path.join(__dirname, "output");
 
+// Check that input folder exists
+if (!fs.existsSync(inputFolder)) {
+  console.error("Input folder does not exist");
+  process.exit(1);
+}
+
+// Create the output folder if it doesn't exist
+if (!fs.existsSync(ouputFolder)) {
+  fs.mkdirSync(ouputFolder);
+}
+
+// Remove previous content of the output folder
+fs.readdirSync(ouputFolder).forEach((file) => {
+  fs.unlinkSync(path.join(ouputFolder, file));
+});
+
+// Allow to get all subfolders from inputFolder
 function flatten(lists) {
   return lists.reduce((a, b) => a.concat(b), []);
 }
@@ -32,9 +52,9 @@ function vue2js() {
       withFileTypes: true,
     });
     files.forEach((file) => {
+      // Get only .vue file
       if (file.isFile() && file.name.endsWith(".vue")) {
         const src = path.join(folder, file.name);
-        const fileName = file.name.replace(".vue", ".js");
         const data = fs.readFileSync(src, "utf8");
         // Get only the content between <script setup> and </script> tag
         const script = data.match(/<script setup>([\s\S]*?)<\/script>/g);
@@ -43,6 +63,7 @@ function vue2js() {
           .replace("<script setup>", "")
           .replace("</script>", "");
         // Create a file on the output folder with the same name but with .js extension
+        const fileName = file.name.replace(".vue", ".js");
         const dest = path.join(ouputFolder, fileName);
         fs.writeFileSync(dest, script[0], "utf8");
       }
@@ -80,15 +101,15 @@ function js2md() {
 }
 
 // Format each md file to remove specific content
-function formatMd() {
+function mergeMd() {
   // Get all files from the output folder
   const files = fs.readdirSync(ouputFolder, { withFileTypes: true });
   files.forEach((file, id) => {
     let data = fs.readFileSync(path.join(ouputFolder, file.name), "utf8");
-    // Remove ### Table of contents
-    data = data.replace("### Table of Contents", "");
     // In case we have "[1]:", remove everything after
     data = data.replace(/\[\d+\]:[\s\S]*?$/g, "");
+    // Remove ### Table of contents
+    data = data.replace("### Table of Contents", "");
     // Remove everything after the first ## tag
     const index = data.indexOf("## ");
     data = data.substring(index);
@@ -96,6 +117,7 @@ function formatMd() {
   });
 
   // Create order using the tag title path of each file
+  // For example using Form/Input.vue
   const order = [];
   files.forEach((file, id) => {
     // Get the title from first line
@@ -104,19 +126,25 @@ function formatMd() {
     order.push({ path: filePath, file: file });
   });
 
-  // Sort order by path
+  // Sort by path
   order.sort((a, b) => {
     return a.path.localeCompare(b.path);
   });
 
-  // Create a md file to merge
+  // Create the md file to merge
   const merge = path.join(ouputFolder, finalFile);
   fs.writeFileSync(merge, "", "utf8");
-  // Append each file in the order
+  // Append each file in order
   order.forEach((item) => {
     let data = fs.readFileSync(path.join(ouputFolder, item.file.name), "utf8");
     fs.appendFileSync(merge, data, "utf8");
   });
+}
+
+// Format merge file
+function formatMd() {
+  // Create a md file to merge
+  const merge = path.join(ouputFolder, finalFile);
 
   // Get data from merge
   let data = fs.readFileSync(merge, "utf8");
@@ -171,7 +199,7 @@ function formatMd() {
     });
   }
 
-  // Update the child of .vue component title
+  // Update the child of .vue component title to keep title levels consistency
   let componentTag = "";
   let dataSplit = data.split("\n");
   data.split("\n").forEach((line, id) => {
@@ -190,31 +218,15 @@ function formatMd() {
       dataSplit[id] = updateLine;
     }
   });
-  // Update the data adn merge
+  // Update the data with split
   data = dataSplit.join("\n");
 
-  // Remove 3 first lines
+  // Remove 3 first lines if needed (case documentation.js comment)
   data = data.split("\n").slice(3).join("\n");
-
   fs.writeFileSync(merge, data, "utf8");
 }
 
-// Check that input folder exists
-if (!fs.existsSync(inputFolder)) {
-  console.error("Input folder does not exist");
-  process.exit(1);
-}
-
-// Create the output folder if it doesn't exist
-if (!fs.existsSync(ouputFolder)) {
-  fs.mkdirSync(ouputFolder);
-}
-
-// Remove previous content of the output folder
-fs.readdirSync(ouputFolder).forEach((file) => {
-  fs.unlinkSync(path.join(ouputFolder, file));
-});
-
 vue2js();
 js2md();
+mergeMd();
 formatMd();
