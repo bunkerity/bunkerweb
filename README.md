@@ -27,7 +27,7 @@ We need to work on the front-end here, then build and move to flask app the reso
 - Run `flask --app main.py run` then access `/test` to get Vue.js rendering app using flask data `Title from Flask !`
 - `/test2` is case with no flask data (can be handle on a div or directly on Vue app)
 
-# jsdoc
+# jsdoc (render doc from .vue components)
 
 We can create a markdown documentation for components.
 
