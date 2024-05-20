@@ -13,7 +13,7 @@
     <div data-checkbox-handler="{{ inp_id }}"
             class="relative mb-7 md:mb-0 z-10 ">
         <label class="sr-only" for="{{ inp_name_mult }}">{{ inp_name }}</label>
-        <input id="{{ inp_name_mult }}"
+        <input {% if is_readonly%}disabled{% endif %} id="{{ inp_name_mult }}"
                 name="{{ inp_name_mult }}"
                 data-default-method="{% if inp_name in ['AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE'] %}mode{% else %}{{ global_config_method }}{% endif %}"
                 data-default-value="{{ global_config[inp_name]['value'] }}"

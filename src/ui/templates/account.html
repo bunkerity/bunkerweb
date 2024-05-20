@@ -142,7 +142,7 @@
                      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                     <h5 class="input-title">License key</h5>
                     <label class="sr-only" for="license">License key</label>
-                    <input type="password"
+                    <input {% if is_readonly%}disabled{% endif %} type="password"
                            id="license"
                            name="license"
                            class="col-span-12 regular-input"
@@ -173,7 +173,7 @@
                     </div>
                 </div>
                 <div class="col-span-12 flex justify-center mt-6">
-                    <button type="submit"
+                    <button {% if is_readonly%}disabled{% endif %} type="submit"
                             id="activate-key-button"
                             name="activate-key-button"
                             class="valid-btn">SAVE</button>
@@ -200,7 +200,7 @@
                 <div class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                     <h5 class="input-title">Username</h5>
                     <label class="sr-only" for="admin_username">New username</label>
-                    <input type="text"
+                    <input {% if is_readonly%}disabled{% endif %} type="text"
                            id="admin_username"
                            name="admin_username"
                            class="col-span-12 regular-input"
@@ -216,7 +216,7 @@
                      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                     <h5 class="input-title">Password</h5>
                     <label class="sr-only" for="curr_password">Password</label>
-                    <input type="password"
+                    <input {% if is_readonly%}disabled{% endif %} type="password"
                            id="curr_password"
                            name="curr_password"
                            class="col-span-12 regular-input"
@@ -249,7 +249,7 @@
                 </div>
                 <!-- end password inpt-->
                 <div class="col-span-12 flex justify-center mt-6">
-                    <button type="submit"
+                    <button {% if is_readonly%}disabled{% endif %} type="submit"
                             id="username-button"
                             name="username-button"
                             value="username"
@@ -277,7 +277,7 @@
                  class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                 <h5 class="input-title">Password</h5>
                 <label class="sr-only" for="curr_password">Password</label>
-                <input type="password"
+                <input {% if is_readonly%}disabled{% endif %} type="password"
                        id="curr_password"
                        name="curr_password"
                        class="col-span-12 regular-input"
@@ -314,7 +314,7 @@
                  class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                 <h5 class="input-title">New password</h5>
                 <label class="sr-only" for="admin_password">New password</label>
-                <input type="password"
+                <input {% if is_readonly%}disabled{% endif %} type="password"
                        id="admin_password"
                        name="admin_password"
                        class="col-span-12 regular-input"
@@ -351,7 +351,7 @@
                  class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                 <h5 class="input-title">Confirm new password</h5>
                 <label class="sr-only" for="admin_password_check">Confirm new password</label>
-                <input type="password"
+                <input {% if is_readonly%}disabled{% endif %} type="password"
                        id="admin_password_check"
                        name="admin_password_check"
                        class="col-span-12 regular-input"
@@ -384,7 +384,7 @@
                 <strong class="opacity-0 font-normal text-sm text-red-500" data-pw-alert>Value does not match password</strong>
             </div>
             <div class="col-span-12 flex justify-center">
-                <button type="submit" id="pw-button" name="pw-button" class="valid-btn">Save</button>
+                <button {% if is_readonly%}disabled{% endif %} type="submit" id="pw-button" name="pw-button" class="valid-btn">Save</button>
             </div>
         </form>
         <form data-tab-item="totp"
@@ -426,7 +426,7 @@
                      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                     <h5 class="input-title">Secret token</h5>
                     <label class="sr-only" for="secret_token">secret token</label>
-                    <input type="password"
+                    <input {% if is_readonly%}disabled{% endif %} type="password"
                            id="secret_token"
                            name="secret_token"
                            class="col-span-12 regular-input"
@@ -477,7 +477,7 @@
                 <div class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                     <h5 class="input-title">2FA code</h5>
                     <label class="sr-only" for="totp_token">totp code</label>
-                    <input type="text"
+                    <input {% if is_readonly%}disabled{% endif %} type="text"
                            id="totp_token"
                            name="totp_token"
                            class="col-span-12 regular-input"
@@ -492,7 +492,7 @@
                  class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                 <h5 class="input-title">Password</h5>
                 <label class="sr-only" for="curr_password">Password</label>
-                <input type="password"
+                <input {% if is_readonly%}disabled{% endif %} type="password"
                        id="curr_password"
                        name="curr_password"
                        class="col-span-12 regular-input"
@@ -525,7 +525,7 @@
             </div>
             <!-- end password inpt-->
             <div class="col-span-12 flex justify-center mt-6">
-                <button type="submit"
+                <button {% if is_readonly%}disabled{% endif %} type="submit"
                         id="totp-button"
                         name="totp-button"
                         value="totp"

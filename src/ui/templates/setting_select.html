@@ -33,7 +33,7 @@
     <!-- end default hidden-->
     <!--custom-->
     <div data-select-container class="relative">
-        <button {% if global_config_method != 'ui' and global_config_method != 'default' or is_read_only %}disabled{% endif %}
+        <button {% if is_readonly%}disabled{% endif %} {% if global_config_method != 'ui' and global_config_method != 'default' or is_read_only %}disabled{% endif %}
                 data-setting-select="{{ inp_id }}"
                 data-default-value="{{ global_config_value }}"
                 data-default-method="{{ global_config_method }}"

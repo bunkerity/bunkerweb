@@ -147,7 +147,7 @@
                                    <div class="{{ data['custom_class'] }} relative dark:text-gray-400 text-sm m-0 my-1 mr-1"
                                         data-{{attribute_name}}-files>
                                        {% if value['cache'] %}
-                                           <button data-{{attribute_name}}-setting-select="{{ job_name }}"
+                                           <button {% if is_readonly%}disabled{% endif %} data-{{attribute_name}}-setting-select="{{ job_name }}"
                                                    class="py-1 text-sm disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left leading-6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
                                                <span id="jobs-{{ job_name }}"
                                                      data-name="jobs-{{ job_name }}"

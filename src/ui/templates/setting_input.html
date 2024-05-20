@@ -13,7 +13,7 @@
 
     <div class="relative flex items-center">
         <label class="sr-only" for="{{ inp_name_mult }}">{{ inp_name }}</label>
-        <input {% if inp_name == "SERVER_NAME" %}required{% endif %}
+        <input {% if is_readonly%}disabled{% endif %} {% if inp_name == "SERVER_NAME" %}required{% endif %}
                 data-default-value="{{ global_config_value }}"
                 data-default-method="{{ global_config_method }}"
                 data-setting-input

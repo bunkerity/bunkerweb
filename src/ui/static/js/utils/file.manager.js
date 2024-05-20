@@ -5,6 +5,12 @@ class FolderNav {
       `[data-${this.prefix}-breadcrumb]`,
     );
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
+    this.isReadonly =
+      document
+        .querySelector(`[data-${this.prefix}-container]`)
+        .getAttribute(`data-readonly`) === "true"
+        ? true
+        : false;
     this.listContainer = document.querySelector(
       `[data-${this.prefix}-folders]`,
     );
@@ -95,6 +101,9 @@ class FolderNav {
   updateActions(folder) {
     // for root
     if (!folder) return this.addFileEl.setAttribute("disabled", "");
+
+    if (folder && this.isReadonly)
+      return this.addFileEl.setAttribute("disabled", "");
     //check if folder allow add file/folder
     const isAddFile = folder.getAttribute("data-can-create-file") || "False";
     isAddFile === "True"
@@ -326,6 +335,12 @@ class FolderModal {
     this.prefix = prefix;
     //container
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
+    this.isReadonly =
+      document
+        .querySelector(`[data-${this.prefix}-container]`)
+        .getAttribute(`data-readonly`) === "true"
+        ? true
+        : false;
     //add service/file elements
     this.breadContainer = document.querySelector(
       `[data-${this.prefix}-breadcrumb]`,
@@ -580,28 +595,30 @@ class FolderModal {
     if (action === "new") {
       this.modalSubmit.textContent = "add";
       this.setSubmitBtnType("valid-btn");
-      return;
     }
     if (action === "view") {
       this.modalSubmit.textContent = "ok";
       this.setSubmitBtnType("valid-btn");
-      return;
     }
     if (action === "edit") {
       this.setSubmitBtnType("edit-btn");
       this.modalSubmit.textContent = "edit";
-      return;
     }
 
     if (action === "delete") {
       this.setSubmitBtnType("delete-btn");
       this.modalSubmit.textContent = "delete";
-      return;
     }
     if (action === "download") {
       this.setSubmitBtnType("info-btn");
       this.modalSubmit.textContent = "download";
-      return;
+    }
+
+    // readonly logic
+    if (["new", "edit", "delete"].includes(action) && this.isReadonly) {
+      this.modalSubmit.setAttribute("disabled", "true");
+    } else {
+      this.modalSubmit.removeAttribute("disabled");
     }
   }
 

@@ -13,6 +13,7 @@
         ] %}
     {% include "card_info.html" %}
 
+    {% if not is_readonly %}
     <!-- upload layout -->
     <div data-{{attribute_name}}-upload
          class="p-4 col-span-12 md:col-span-7 2xl:col-span-4 grid grid-cols-12 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
@@ -49,6 +50,8 @@
         </div>
     </div>
     <!-- end upload layout -->
+    {% endif %}
+
     <!-- filter -->
     {% set filters = [
         {
@@ -104,7 +107,7 @@
                            </a>
                        {% endif %}
                        {% if plugin['type'] == "external" %}
-                           <button data-{{attribute_name}}-action="delete"
+                           <button {% if is_readonly%}disabled{% endif %}  data-{{attribute_name}}-action="delete"
                                    name="{{ plugin['id'] }}"
                                    aria-label="delete plugin"
                                    class="plugins-list-items-delete">
