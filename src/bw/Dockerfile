@@ -68,7 +68,7 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
-# There are no CVEs to fix for this image
+RUN apk add --no-cache "busybox>=1.35.0-r30" "busybox-binsh>=1.35.0-r30" "ssl_client>=1.35.0-r30" # CVE-2023-42366
 
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
 LABEL version "1.5.7"
