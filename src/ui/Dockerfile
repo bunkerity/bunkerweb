@@ -63,6 +63,7 @@ RUN apk add --no-cache bash unzip libmagic mariadb-client postgresql-client sqli
 
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
+RUN apk add --no-cache "libcrypto3>=3.1.5-r0" "libssl3>=3.1.5-r0" # CVE-2024-4603
 
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
 LABEL version "1.5.7"
