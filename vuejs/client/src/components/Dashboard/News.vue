@@ -2,6 +2,13 @@
 import { onMounted, reactive } from "vue";
 import { newsIndex } from "@utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
+
+/** 
+  @name Dashboard/News.vue
+  @description This component will display news from BunkerWeb blog and allow users to subscribe to the newsletter.
+  Case the news API is not available, it will display a message.
+*/
+
 // Use to update position when banner is visible or not
 const bannerStore = useBannerStore();
 
@@ -11,16 +18,47 @@ const news = reactive({
   posts: [],
 });
 
+function loadNews() {
+      // Check if data, and if case, that data is not older than one hour
+      // Case it is, refetch
+      if (sessionStorage.getItem("lastRefetch") !== null) {
+        const storeStamp = sessionStorage.getItem("lastRefetch");
+        const nowStamp = Math.round(new Date().getTime() / 1000);
+        if (+nowStamp > storeStamp) {
+          sessionStorage.removeItem("lastRefetch");
+          sessionStorage.removeItem("lastNews");
+        }
+      }
+
+      // Case we already have the data
+      if (sessionStorage.getItem("lastNews") !== null)
+        return news.posts = JSON.parse(sessionStorage.getItem("lastNews"));
+
+      // Try to fetch api data
+      fetch("https://www.bunkerweb.io/api/posts/0/2")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          const reverseData = res.data.reverse();
+          if (
+            !sessionStorage.getItem("lastNews") &&
+            !sessionStorage.getItem("lastRefetch")
+          ) {
+            sessionStorage.setItem(
+              "lastRefetch",
+              Math.round(new Date().getTime() / 1000) + 3600,
+            );
+            sessionStorage.setItem("lastNews", JSON.stringify(reverseData));
+          }
+          news.posts = reverseData;
+        })
+        .catch((e) => {});
+}
+
+
 onMounted(() => {
-  try {
-    fetch("https://www.bunkerweb.io/api/posts/0/2")
-      .then((res) => {
-        return res.json();
-      })
-      .then((res) => {
-        news.posts = res.data;
-      });
-  } catch (err) {}
+  loadNews();
 });
 </script>
 
@@ -32,7 +70,6 @@ onMounted(() => {
     :aria-expanded="news.isActive ? 'true' : 'false'"
     @click="news.isActive = news.isActive ? false : true"
     :class="['news-float-btn', bannerStore.bannerClass]"
-    class="news-float-btn"
     aria-describedby="sidebar-news-toggle"
   >
     <span class="sr-only" id="sidebar-news-toggle">
@@ -56,7 +93,7 @@ onMounted(() => {
   <aside
     :aria-hidden="news.isActive ? 'false' : 'true'"
     id="sidebar-news"
-    :class="[news.isActive ? '' : 'translate-x-[22.5rem]', 'news-sidebar']"
+    :class="[news.isActive ? '' : 'active', 'news-sidebar']"
   >
     <!-- close btn-->
     <button
@@ -94,12 +131,44 @@ onMounted(() => {
     </div>
     <hr class="line-separator" />
     <!-- end header -->
-    {{ news.posts }}
     <!-- news-->
-    <div class="flex-auto overflow-auto">
+    <div class="news-sidebar-posts-container">
       <p v-if="news.posts.length === 0" class="news-sidebar-no-posts-content">
         {{ $t("dashboard_news_fetch_error") }}
       </p>
+      <a  :href="`https://www.bunkerweb.io/blog/post/bunkerweb/${post.slug}`" class="news-sidebar-post"
+       v-for="(post, index) in news.posts" :key="index"
+      >
+        <div>
+            <img  aria-hidden="true"
+                class="news-sidebar-post-img"
+                :src="post.photo.url"
+                alt="image"
+            />
+            <span 
+            class="news-sidebar-post-title">{{post.title}}</span>
+        </div>
+        <div class="h-full">
+            <div  
+            class="news-sidebar-post-excerpt">
+                {{post.excerpt}}
+            </div>
+            <div class="news-sidebar-post-tags-container">
+                <a v-for="tag in post.tags"
+                :href="`https://www.bunlerweb.io/blog/tag/${tag.slug}?utm_campaign=self&utm_source=ui`"
+                class="news-sidebar-post-tag"
+                >
+                {{ tag.name }}
+                </a>
+            </div>
+
+            <div class="news-sidebar-post-date-container">
+                <span class="news-sidebar-post-date"
+                >Posted on : {{post.date}}
+                </span>
+            </div>
+        </div>
+      </a> 
     </div>
     <!-- end news-->
 
@@ -127,11 +196,11 @@ onMounted(() => {
           required
         />
       </div>
-      <div class="flex mt-2 mb-4">
-        <div class="relative">
+      <div class="news-newsletter-checkbox-container">
+        <div class="news-newsletter-checkbox-wrap">
           <div
             data-checkbox-handler="newsletter-check"
-            class="relative mb-7 md:mb-0"
+            class="news-newsletter-checkbox-input-container"
           >
             <input
               :tabindex="news.isActive ? newsIndex : '-1'"

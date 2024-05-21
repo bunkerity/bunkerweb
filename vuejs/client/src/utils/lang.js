@@ -1,5 +1,13 @@
 import { createI18n } from "vue-i18n";
 
+/**
+  @name lang.js
+  @description This file contains utils to manage the language of the application.
+  This is here that we retrieve json files to add translations.
+  This lang.js works with vue-i18n.
+  We need to instanciate the i18n object in the main file of the application inside /pages.
+*/
+
 import en from "@lang/en.json" assert { type: "json" };
 
 const availablesLangs = ["en"];

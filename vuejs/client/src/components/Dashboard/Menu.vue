@@ -1,23 +1,32 @@
 <script setup>
-import MenuSvgHome from "@components/Menu/Svg/Home.vue";
-import MenuSvgInstances from "@components/Menu/Svg/Instances.vue";
-import MenuSvgGlobalConf from "@components/Menu/Svg/GlobalConf.vue";
-import MenuSvgConfigs from "@components/Menu/Svg/Configs.vue";
-import MenuSvgPlugins from "@components/Menu/Svg/Plugins.vue";
-import MenuSvgJobs from "@components/Menu/Svg/Jobs.vue";
-import MenuSvgTwitter from "@components/Menu/Svg/Twitter.vue";
-import MenuSvgLinkedin from "@components/Menu/Svg/Linkedin.vue";
-import MenuSvgDiscord from "@components/Menu/Svg/Discord.vue";
-import MenuSvgServices from "@components/Menu/Svg/Services.vue";
-import MenuSvgGithub from "@components/Menu/Svg/Github.vue";
-import MenuSvgBans from "@components/Menu/Svg/Bans.vue";
-import MenuSvgActions from "@components/Menu/Svg/Actions.vue";
-import MenuSvgReporting from "@components/Menu/Svg/Reporting.vue";
-import { reactive, onMounted } from "vue";
+import MenuSvgHome from "@components/Icons/Menu/Home.vue";
+import MenuSvgInstances from "@components/Icons/Menu/Instances.vue";
+import MenuSvgGlobalConf from "@components/Icons/Menu/GlobalConf.vue";
+import MenuSvgConfigs from "@components/Icons/Menu/Configs.vue";
+import MenuSvgPlugins from "@components/Icons/Menu/Plugins.vue";
+import MenuSvgCache from "@components/Icons/Menu/Cache.vue";
+import MenuSvgJobs from "@components/Icons/Menu/Jobs.vue";
+import MenuSvgBans from "@components/Icons/Menu/Bans.vue";
+import MenuSvgReports from "@components/Icons/Menu/Reports.vue";
+import MenuSvgLogs from "@components/Icons/Menu/Logs.vue";
+import MenuSvgCore from "@components/Icons/Menu/Core.vue";
+import MenuSvgPro from "@components/Icons/Menu/Pro.vue";
+import MenuSvgTwitter from "@components/Icons/Menu/Twitter.vue";
+import MenuSvgLinkedin from "@components/Icons/Menu/Linkedin.vue";
+import MenuSvgDiscord from "@components/Icons/Menu/Discord.vue";
+import MenuSvgServices from "@components/Icons/Menu/Services.vue";
+import MenuSvgGithub from "@components/Icons/Menu/Github.vue";
+import { reactive, onMounted, onBeforeMount } from "vue";
 import { menuIndex, menuFloatIndex } from "@/utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
 import logoMenu2 from "@public/images/logo-menu-2.png";
 import logoMenu from "@public/images/logo-menu.png";
+
+/** 
+  @name Dashboard/Menu.vue
+  @description This component is a menu that display essential links.
+  You have all the links to the main pages, the plugins pages, the social links and the logout button.
+*/
 
 // Use to update position when banner is visible or not
 const bannerStore = useBannerStore();
@@ -52,18 +61,19 @@ const navList = [
     svg: MenuSvgPlugins,
     path: "/plugins",
   },
-  { tag: "jobs", svg: MenuSvgJobs, path: "/jobs" },
+  {
+    tag: "cache",
+    svg: MenuSvgCache,
+    path: "/cache",
+  },
+  {
+    tag: "reports",
+    svg: MenuSvgReports,
+    path: "/reports",
+  },
   { tag: "bans", svg: MenuSvgBans, path: "/bans" },
-  {
-    tag: "actions",
-    svg: MenuSvgActions,
-    path: "/actions",
-  },
-  {
-    tag: "reporting",
-    svg: MenuSvgReporting,
-    path: "/reporting",
-  },
+  { tag: "jobs", svg: MenuSvgJobs, path: "/jobs" },
+  { tag: "logs", svg: MenuSvgLogs, path: "/jobs" },
 ];
 
 // Social links
@@ -96,6 +106,7 @@ const menu = reactive({
   isActive: false, // Handle menu display/expand
   isDesktop: true, // Expand logic exclude with desktop
   currPath: false,
+  username : "",
 });
 
 function getDarkMode() {
@@ -141,10 +152,10 @@ function toggleMenu() {
 }
 
 // Check device desktop using breakpoint
-onMounted(() => {
+onBeforeMount(() => {
   // setup darkmode
   menu.darkMode = getDarkMode();
-
+  updateMode();
   // Get current route and try to match with a menu item to highlight
   const pathName = window.location.pathname.toLowerCase();
   navList.forEach((item) => {
@@ -157,6 +168,12 @@ onMounted(() => {
   window.addEventListener("resize", () => {
     menu.isDesktop = window.innerWidth < 1200 ? false : true;
   });
+
+  // Get username
+  const dataAtt = 'data-server-global';
+  const dataEl = document.querySelector(`[${dataAtt}]`);
+  const data = dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt) ? JSON.parse(dataEl.getAttribute(dataAtt)) : {};
+  menu.username = data?.username || "";
 });
 </script>
 
@@ -194,9 +211,9 @@ onMounted(() => {
     data-sidebar-menu
     :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
     :class="[
-      'menu-container xl:translate-x-0',
+      'menu-container',
       bannerStore.bannerClass,
-      menu.isDesktop ? true : menu.isActive ? '' : 'active',
+      menu.isDesktop ? 'active' : menu.isActive ? 'active' : 'inactive',
     ]"
   >
     <!-- close btn-->
@@ -231,25 +248,25 @@ onMounted(() => {
 
     <div class="menu-top-content">
       <!-- logo and version -->
-      <div class="w-full">
+      <div class="menu-logo-container">
         <a
           :tabindex="
             menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
           "
           aria-labelledby="logo-link-label"
-          class="menu-logo-container"
+          class="menu-logo-link-container"
           :href="menu.currPath === '/home' ? '#' : '/home'"
         >
           <span id="logo-link-label" class="sr-only">
             {{ $t("dashboard_logo_link_label") }}
           </span>
-          <img :aria-hidden="'true'" :src="logoMenu2" class="menu-logo-dark" />
-          <img :aria-hidden="'true'" :src="logoMenu" class="menu-logo-light" />
+          <img :aria-hidden="'true'" v-if="menu.darkMode" :src="logoMenu2" class="menu-logo-dark" />
+          <img :aria-hidden="'true'" v-if="!menu.darkMode" :src="logoMenu" class="menu-logo-light" />
         </a>
       </div>
-      <div class="mt-2 w-full px-1">
+      <div class="menu-account-title-container">
         <h1 class="menu-account-title">
-          {{ username.substring(0, 10) }}
+          {{ menu.username }}
         </h1>
         <a class="menu-account-link" href="/account">manage account </a>
       </div>
@@ -257,10 +274,10 @@ onMounted(() => {
       <!-- end logo version -->
     </div>
 
-    <div :class="[menu - nav - list - container, bannerStore.bannerClass]">
+    <div :class="['menu-nav-list-container', bannerStore.bannerClass]">
       <ul role="navigation" class="menu-nav-list">
         <!-- item -->
-        <li v-for="(item, id) in navList" :key="id" class="mt-0.5 w-full">
+        <li v-for="(item, id) in navList" :key="id" class="menu-nav-list-item">
           <a
             :tabindex="
               menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
@@ -286,7 +303,7 @@ onMounted(() => {
       <!-- end default anchor -->
 
       <!-- plugins -->
-      <ul>
+      <ul v-if="menu.pagePlugins.length">
         <li class="menu-page-plugin-item-title">
           <p class="menu-page-plugin-title">
             {{ $t("dashboard_menu_plugins_title") }}
@@ -305,36 +322,8 @@ onMounted(() => {
             :href="`/plugins?plugin_id=${plugin.id}`"
           >
             <div aria-hidden="true" class="menu-page-plugin-svg-container">
-              <svg
-                v-if="plugin.type !== 'pro'"
-                role="img"
-                aria-hidden="true"
-                class="fill-gray-500 h-5 w-5 relative"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 384 512"
-              >
-                <path
-                  d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z"
-                />
-              </svg>
-              <svg
-                v-if="plugin.type === 'pro'"
-                class="h-5 w-5 dark:brightness-90 relative"
-                viewBox="0 0 48 46"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  class="fill-yellow-500"
-                  d="M43.218 28.2327L43.6765 23.971C43.921 21.6973 44.0825 20.1957 43.9557 19.2497L44 19.25C46.071 19.25 47.75 17.5711 47.75 15.5C47.75 13.4289 46.071 11.75 44 11.75C41.929 11.75 40.25 13.4289 40.25 15.5C40.25 16.4366 40.5935 17.2931 41.1613 17.9503C40.346 18.4535 39.2805 19.515 37.6763 21.1128C36.4405 22.3438 35.8225 22.9593 35.1333 23.0548C34.7513 23.1075 34.3622 23.0532 34.0095 22.898C33.373 22.6175 32.9485 21.8567 32.0997 20.335L27.6262 12.3135C27.1025 11.3747 26.6642 10.5889 26.2692 9.95662C27.89 9.12967 29 7.44445 29 5.5C29 2.73857 26.7615 0.5 24 0.5C21.2385 0.5 19 2.73857 19 5.5C19 7.44445 20.11 9.12967 21.7308 9.95662C21.3358 10.589 20.8975 11.3746 20.3738 12.3135L15.9002 20.335C15.0514 21.8567 14.627 22.6175 13.9905 22.898C13.6379 23.0532 13.2487 23.1075 12.8668 23.0548C12.1774 22.9593 11.5595 22.3438 10.3238 21.1128C8.71968 19.515 7.6539 18.4535 6.83882 17.9503C7.4066 17.2931 7.75 16.4366 7.75 15.5C7.75 13.4289 6.07107 11.75 4 11.75C1.92893 11.75 0.25 13.4289 0.25 15.5C0.25 17.5711 1.92893 19.25 4 19.25L4.04428 19.2497C3.91755 20.1957 4.07905 21.6973 4.32362 23.971L4.782 28.2327C5.03645 30.5982 5.24802 32.849 5.50717 34.875H42.4928C42.752 32.849 42.9635 30.5982 43.218 28.2327Z"
-                  fill="#1C274C"
-                />
-                <path
-                  class="fill-yellow-500"
-                  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z"
-                  fill="#1C274C"
-                />
-              </svg>
+              <MenuSvgCore                 v-if="plugin.type !== 'pro'" />
+              <MenuSvgPro                 v-if="plugin.type === 'pro'" />
             </div>
             <span class="menu-page-plugin-name">{{ plugin.name }}</span>
           </a>
@@ -391,7 +380,7 @@ onMounted(() => {
       <!-- end social-->
 
       <!-- logout-->
-      <div class="w-full">
+      <div class="menu-logout-content">
         <button
           :tabindex="
             menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'

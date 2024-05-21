@@ -2,13 +2,97 @@
 import { onMounted, reactive } from "vue";
 import { useBannerStore } from "@store/global.js";
 import { bannerIndex } from "@utils/tabindex.js";
+import { computed } from "vue";
+
+/** 
+  @name Dashboard/Banner.vue
+  @description This component is a banner that display news.
+  The banner will display news from the api if available, otherwise it will display default news.
+*/
+
 const bannerStore = useBannerStore();
 
 const banner = reactive({
   visibleId: 1,
+  default : [
+    {
+      title: "title_1",
+      link: "link_1",
+      linkText: "link_text_1",
+    },
+    {
+      title: "title_2",
+      link: "link_2",
+      linkText: "link_text_2",
+    },
+    {
+      title: "title_3",
+      link: "link_3",
+      linkText: "link_text_3",
+    },
+  ],
+  api: [],
+  apiFormat : computed(() => {
+    if(banner.api.length === 0) return [];
+    // deep copy
+    const data = JSON.parse(JSON.stringify(banner.api));
+      data.forEach((item, index) => {
+      // I want to match everything inside class and replace it
+      data[index].content = item.content.replace(/class='(.+?)'|class="(.+?)"/g, 'class="banner-item-text"');
+    });
+    return data
+  }),
 });
 
+const data = [{
+  "content": "<p class='p-0 mx-'>content_1</p>",
+}]
+// I want to replace the content class content by banner-item-text
+
 function setupBanner() {
+  // Check if data, and if case, that data is not older than one hour
+  // Case it is, refetch
+    if (sessionStorage.getItem("bannerRefetch") !== null) {
+      const storeStamp = sessionStorage.getItem("bannerRefetch");
+      const nowStamp = Math.round(new Date().getTime() / 1000);
+      if (+nowStamp > storeStamp) {
+        sessionStorage.removeItem("bannerRefetch");
+        sessionStorage.removeItem("bannerNews");
+      }
+    }
+    // Case we already have the data
+    if (sessionStorage.getItem("bannerNews") !== null) {
+      banner.api =
+        JSON.parse(sessionStorage.getItem("bannerNews"))
+        banner.default = [];
+        return;
+    }
+    // Try to fetch api data
+    fetch("https://www.bunkerweb.io/api/bw-ui-news")
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        sessionStorage.setItem("bannerNews", JSON.stringify(res.data[0].data));
+        // Refetch after one hour
+        sessionStorage.setItem(
+          "bannerRefetch",
+          Math.round(new Date().getTime() / 1000) + 3600,
+        );
+        banner.api = res.data[0].data;
+        if(banner.api.length > 0) {
+          banner.default = [];
+        }
+        runBanner();
+      })
+      .catch((e) => {
+        console.error(e);
+        runBanner();
+      });
+  }
+
+// Banner animation effect
+function runBanner() {
   const nextDelay = 14000;
   const transDuration = 10000;
   // Switch item every interval and
@@ -67,22 +151,32 @@ onMounted(() => {
   <div id="banner" tabindex="-1" role="list" class="banner-container">
     <div role="img" aria-hidden="true" class="banner-bg"></div>
     <div
-      v-for="index in 3"
+      v-for="(bannerEl, index) in banner.default"
       role="listitem"
       :id="`banner-item-${index}`"
       class="banner-item"
       :class="[index === 1 ? 'left-0' : 'left-full opacity-0']"
     >
       <p class="banner-item-text">
-        {{ $t(`dashboard_banner_title_${index}`) }}
+        {{  bannerEl.title }}
         <a
           :tabindex="bannerIndex"
           class="banner-item-link"
-          :href="$t(`dashboard_banner_link_${index}`)"
+          :href="bannerEl.link"
         >
-          {{ $t(`dashboard_banner_link_text_${index}`) }}
+          {{ bannerEl.linkText }}
         </a>
       </p>
+    </div>
+    <div
+      v-for="(bannerEl, index) in banner.apiFormat"
+      role="listitem"
+      :id="`banner-item-${index}`"
+      class="banner-item"
+      :class="[index === 1 ? 'left-0' : 'left-full opacity-0']"
+    >
+      <div
+        v-html="bannerEl.content"></div>
     </div>
   </div>
 </template>

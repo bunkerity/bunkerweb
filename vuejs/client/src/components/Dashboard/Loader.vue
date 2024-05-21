@@ -2,6 +2,11 @@
 import { onMounted } from "vue";
 import logoMenu2 from "@public/images/logo-menu-2.png";
 
+/** 
+  @name Dashboard/Loader.vue
+  @description This component is a loader used to transition between pages.
+*/
+
 onMounted(() => {
   class Loader {
     constructor() {
@@ -44,7 +49,7 @@ onMounted(() => {
     data-loader
     class="loader-container"
   >
-    <p id="loader-text" class="sr-only">{{ $t("dashboard_loader_label") }}</p>
+    <p id="loader-text" class="sr-only">{{ $t("dashboard_loading") }}</p>
     <img
       role="img"
       aria-hidden="true"

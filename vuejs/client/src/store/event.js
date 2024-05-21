@@ -2,9 +2,12 @@ import { data } from "autoprefixer";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-// This store allow to share data between components related to events
-// For example, a click button event can create and store a value in this store to be use in another component
-
+/**
+  @name useEventStore
+  @description Store to share data between components related to events (click, change, ...).
+  We can toggle a component visibility, change a value, etc... using this store.
+  Be aware that this store better work using primitive values (string, number, boolean) and not objects.
+*/
 export const useEventStore = defineStore("event", () => {
   const event = ref({});
 

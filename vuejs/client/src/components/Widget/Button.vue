@@ -37,51 +37,6 @@ import IconAdd from "@components/Icons/Button/Add.vue";
   @param {string|number} [tabId=""]
 */
 
-/*
-  COMPONENT DESCRIPTION
-  *
-  *
-  This button component is a standard button.
-  We can link this button to a store on click with eventAttr.
-
-  Stores allow to share a value with other components, for example switching form on a click.
-  We need to determine the store name and the value to send on click.
-  *
-  *
-  PROPS ARGUMENTS
-  *
-  *
-    id: string,
-    text: string,
-    type: string<"button"|"submit">,
-    disabled: boolean,
-    hideText: boolean,
-    color: string,
-    size: string<"sm"|"normal"|"lg"|"xl">,
-    iconName: string,
-    iconColor: string,
-    eventAttr: object,
-    tabId: string || number,
-  *
-  *
-  PROPS EXAMPLE
-  *
-  *
-  {
-    id: "open-modal-btn",
-    text: "Open modal",
-    disabled: false,
-    hideText: true,
-    color: "green",
-    size: "normal",
-    iconName: "modal",
-    iconColor: "white",
-    eventAttr: {"store" : "modal", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},7
-  }
-  *
-  *
-*/
-
 const eventStore = useEventStore();
 
 const props = defineProps({

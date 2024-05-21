@@ -4,6 +4,13 @@ import { footerIndex } from "@utils/tabindex";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
+/** 
+  @name Dashboard/Footer.vue
+  @description This component is a footer that display essential links.
+  You have all the links to the main website, the documentation, the privacy policy, the blog, the license and the sitemap.
+*/
+
+
 const items = [
   {
     href: "https://www.bunkerweb.io?utm_campaign=self&utm_source=ui",

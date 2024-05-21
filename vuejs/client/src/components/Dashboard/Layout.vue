@@ -1,14 +1,19 @@
 <script setup>
 // Components
-import Footer from "@components/Footer.vue";
-import Loader from "@components/Loader.vue";
-import LangSwitch from "@components/LangSwitch.vue";
-import Menu from "@components/Menu.vue";
-import FeedbackStructure from "@components/Feedback/Structure.vue";
-import News from "@components/News.vue";
-import Header from "@components/Header.vue";
-import Refresh from "@components/Refresh.vue";
-import Banner from "@components/Banner.vue";
+import Footer from "@components/dashboard/Footer.vue";
+import Loader from "@components/dashboard/Loader.vue";
+import LangSwitch from "@components/dashboard/LangSwitch.vue";
+import Menu from "@components/dashboard/Menu.vue";
+import News from "@components/dashboard/News.vue";
+import Header from "@components/dashboard/Header.vue";
+import Banner from "@components/dashboard/Banner.vue";
+
+/** 
+  @name Dashboard/Layout.vue
+  @description This component is a layout that wraps the main content of the dashboard.
+  It includes the header, the menu, the news, the language switcher, the loader, the banner and the footer.
+  The content part is a slot that can be filled with custom components or using the Builder.vue.
+*/
 </script>
 
 <template>
@@ -18,12 +23,12 @@ import Banner from "@components/Banner.vue";
   <Loader />
   <LangSwitch />
   <Banner />
+  <Menu />
+  <News />
+  <Header />
   <!-- info -->
   <main role="main" class="content-container">
-    <Menu />
-    <News />
     <div class="content-wrap">
-      <Header />
       <slot></slot>
     </div>
     <Footer />

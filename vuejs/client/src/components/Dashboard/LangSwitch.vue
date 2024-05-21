@@ -1,6 +1,14 @@
 <script setup>
 import { reactive } from "vue";
 import { langIndex } from "@utils/tabindex.js";
+
+/** 
+  @name Dashboard/LangSwitch.vue
+  @description This component is a float element with a flag of the current language.
+  When clicked, it will display a list of available languages, clicking on one will change the language.
+  Your language isn't here ? You can contribute by following the part of the documentation about translations.
+*/
+
 const lang = reactive({
   isOpen: false,
 });
