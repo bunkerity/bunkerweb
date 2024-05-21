@@ -14,9 +14,9 @@
 
     <!-- actions -->
     <div class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">
-        <button data-add-ban
+        <button {% if is_readonly%}disabled{% endif %} data-add-ban
                 type="button"
-                class="dark:bg-green-500/90 duration-300 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white dark:text-gray-200 uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                class="disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0 dark:bg-green-500/90 duration-300 dark:text-gray-100 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
             <span class="mr-2">Add ban</span>
             <svg xmlns="http://www.w3.org/2000/svg"
                  fill="none"
@@ -139,7 +139,7 @@
                                     data-checkbox-handler="ban-item-{{ loop.index }}"
                                     class="relative mb-7 md:mb-0 z-10 ml-2">
                                    <label class="sr-only" for="ban-item-{{ loop.index }}">Ban ip {{ loop.index }}</label>
-                                   <input id="ban-item-{{ loop.index }}"
+                                   <input {% if is_readonly%}disabled{% endif %} id="ban-item-{{ loop.index }}"
                                           name="ban-item-{{ loop.index }}"
                                           data-default-method="ui"
                                           data-default-value="no"
@@ -182,7 +182,7 @@
            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
            <input type="hidden" name="operation" value="unban">
            <input data-unban-inp type="hidden" name="data" value="">
-           <button data-unban-btn
+           <button {% if is_readonly%}disabled{% endif %} data-unban-btn
                    disabled
                    type="submit"
                    class="valid-btn mr-3 text-base">UNBAN</button>

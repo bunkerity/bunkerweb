@@ -68,9 +68,13 @@ def set_sqlite_pragma(dbapi_connection, _):
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
 
-    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None, log: bool = True) -> None:
+    def __init__(
+        self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
+    ) -> None:
         """Initialize the database"""
         self.logger = logger
+        self.readonly = False
+        self.fallback_readonly = False
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -80,6 +84,16 @@ class Database:
 
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
+
+        sqlalchemy_string_readonly = getenv("DATABASE_URI_READONLY", "")
+
+        if not sqlalchemy_string:
+            sqlalchemy_string = sqlalchemy_string_readonly or "sqlite:////var/lib/bunkerweb/db.sqlite3"
+
+            if sqlalchemy_string == sqlalchemy_string_readonly:
+                self.readonly = True
+                if log:
+                    self.logger.warning("The database connection is set to read-only, the changes will not be saved")
 
         match = self.DB_STRING_RX.search(sqlalchemy_string)
         if not match:
@@ -105,19 +119,20 @@ class Database:
             )  # ? This is strongly recommended as psycopg is the new way to connect to postgresql
 
         self.database_uri = sqlalchemy_string
+        self.database_uri_readonly = sqlalchemy_string_readonly
         error = False
 
-        engine_kwargs = {
+        self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
             "pool_pre_ping": True,
             "pool_recycle": 1800,
             "pool_size": 40,
             "max_overflow": 20,
-        }
+        } | kwargs
 
         try:
-            self.sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
+            self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
         except ArgumentError:
             self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
@@ -139,29 +154,37 @@ class Database:
 
         while not_connected:
             try:
-                with self.sql_engine.connect() as conn:
-                    conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
-                    conn.execute(text("DROP TABLE test"))
+                if not self.readonly:
+                    with self.sql_engine.connect() as conn:
+                        conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
+                        conn.execute(text("DROP TABLE test"))
+                else:
+                    with self.sql_engine.connect() as conn:
+                        conn.execute(text("SELECT 1"))
+
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
                 if retries <= 0:
-                    self.logger.error(
-                        f"Can't connect to database : {format_exc()}",
-                    )
+                    if not self.readonly and "attempt to write a readonly database" in str(e):
+                        self.logger.warning("The database is read-only, trying one last time to connect in read-only mode")
+                        self.sql_engine.dispose(close=True)
+                        self.sql_engine = create_engine(sqlalchemy_string_readonly, **self._engine_kwargs)
+                        self.readonly = True
+                        self.fallback_readonly = True
+                        continue
+                    self.logger.error(f"Can't connect to database : {format_exc()}")
                     _exit(1)
 
                 if "attempt to write a readonly database" in str(e):
                     if log:
                         self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
-                    self.sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
+                    self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
                 elif log:
-                    self.logger.warning(
-                        "Can't connect to database, retrying in 5 seconds ...",
-                    )
+                    self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
                 retries -= 1
                 sleep(5)
             except BaseException:
@@ -170,7 +193,7 @@ class Database:
 
         self.suffix_rx = re_compile(r"_\d+$")
         if log:
-            self.logger.info("✅ Database connection established")
+            self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
 
     def __del__(self) -> None:
         """Close the database"""
@@ -180,6 +203,25 @@ class Database:
         if self.sql_engine:
             self.sql_engine.dispose()
 
+    def retry_connection(self) -> None:
+        """Retry the connection to the database"""
+
+        assert self.sql_engine is not None
+
+        try:
+            self.sql_engine.dispose(close=True)
+            self.sql_engine = create_engine(self.database_uri, **self._engine_kwargs)
+            self.fallback_readonly = False
+            self.readonly = False
+        except (OperationalError, DatabaseError) as e:
+            if self.database_uri_readonly and "attempt to write a readonly database" in str(e):
+                self.sql_engine.dispose(close=True)
+                self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
+                self.fallback_readonly = True
+                self.readonly = True
+                return
+            raise e
+
     @contextmanager
     def __db_session(self) -> Any:
         try:
@@ -188,13 +230,27 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
+        if self.fallback_readonly:
+            # ? If the database is forced to be read-only, we try to connect as a non read-only user every time until the database is writable
+            with suppress(OperationalError, DatabaseError):
+                self.retry_connection()
+
         with self.sql_engine.connect() as conn:
             session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
             session = scoped_session(session_factory)
             try:
                 yield session
-            except BaseException:
+            except BaseException as e:
                 session.rollback()
+
+                if self.database_uri_readonly and "attempt to write a readonly database" in str(e):
+                    self.sql_engine.dispose(close=True)
+                    self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
+                    self.fallback_readonly = True
+                    self.readonly = True
+                    self.logger.warning("The database is read-only, falling back to read-only mode")
+                    return
+
                 raise
             finally:
                 session.remove()
@@ -202,6 +258,9 @@ class Database:
     def set_autoconf_load(self, value: bool = True) -> str:
         """Set the autoconf_loaded value"""
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             try:
                 metadata = session.query(Metadata).get(1)
 
@@ -227,6 +286,9 @@ class Database:
     def set_scheduler_first_start(self, value: bool = False) -> str:
         """Set the scheduler_first_start value"""
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             try:
                 metadata = session.query(Metadata).get(1)
 
@@ -243,6 +305,9 @@ class Database:
     def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
         """Set the pro metadata values"""
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             try:
                 metadata = session.query(Metadata).get(1)
 
@@ -287,6 +352,9 @@ class Database:
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             try:
                 metadata = session.query(Metadata).get(1)
 
@@ -400,6 +468,9 @@ class Database:
             "instances",
         ]
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             try:
                 metadata = session.query(Metadata).get(1)
 
@@ -426,6 +497,10 @@ class Database:
 
     def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
+
+        if self.readonly:
+            return False, "The database is read-only, the changes will not be saved"
+
         assert self.sql_engine is not None, "The database engine is not initialized"
 
         inspector = inspect(self.sql_engine)
@@ -846,6 +921,9 @@ class Database:
         """Save the config in the database"""
         to_put = []
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             # Delete all the old config
             session.query(Global_values).filter(Global_values.method == method).delete()
             session.query(Services_settings).filter(Services_settings.method == method).delete()
@@ -1098,6 +1176,9 @@ class Database:
         """Save the custom configs in the database"""
         message = ""
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             # Delete all the old config
             session.query(Custom_configs).filter(Custom_configs.method == method).delete()
 
@@ -1303,6 +1384,9 @@ class Database:
     def update_job(self, plugin_id: str, job_name: str, success: bool) -> str:
         """Update the job last_run in the database"""
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             job = session.query(Jobs).filter_by(plugin_id=plugin_id, name=job_name).first()
 
             if not job:
@@ -1318,7 +1402,7 @@ class Database:
 
         return ""
 
-    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None):
+    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None) -> str:
         job_name = job_name or argv[0].replace(".py", "")
         filters = {"file_name": file_name}
         if job_name:
@@ -1327,7 +1411,15 @@ class Database:
             filters["service_id"] = service_id
 
         with self.__db_session() as session:
-            session.query(Jobs_cache).filter_by(**filters).delete()
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            try:
+                session.query(Jobs_cache).filter_by(**filters).delete()
+            except BaseException:
+                return format_exc()
+
+        return ""
 
     def upsert_job_cache(
         self,
@@ -1342,6 +1434,9 @@ class Database:
         job_name = job_name or argv[0].replace(".py", "")
         service_id = service_id or None
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             cache = session.query(Jobs_cache).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
 
             if not cache:
@@ -1372,6 +1467,9 @@ class Database:
         to_put = []
         changes = False
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(type=_type).all()
 
             db_ids = []
@@ -1422,6 +1520,10 @@ class Database:
                 )
 
                 if db_plugin:
+                    if plugin["method"] not in (db_plugin.method, "autoconf"):
+                        self.logger.warning(f'Plugin "{plugin["id"]}" already exists, but the method is different, skipping update')
+                        continue
+
                     if db_plugin.type not in ("external", "pro"):
                         self.logger.warning(
                             f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external or non-pro plugin is forbidden for security reasons)",  # noqa: E501
@@ -1896,7 +1998,6 @@ class Database:
                     "method": plugin.method,
                     "page": page is not None,
                     "settings": {},
-                    "bwcli": {},
                     "checksum": plugin.checksum,
                 } | ({"data": plugin.data} if with_data else {})
 
@@ -1932,6 +2033,8 @@ class Database:
                         ]
 
                 for command in session.query(BwcliCommands).with_entities(BwcliCommands.name, BwcliCommands.file_name).filter_by(plugin_id=plugin.id):
+                    if "bwcli" not in data:
+                        data["bwcli"] = {}
                     data["bwcli"][command.name] = command.file_name
 
                 plugins.append(data)
@@ -2062,6 +2165,9 @@ class Database:
     def add_instance(self, hostname: str, port: int, server_name: str, changed: Optional[bool] = True) -> str:
         """Add instance."""
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             db_instance = session.query(Instances).with_entities(Instances.hostname).filter_by(hostname=hostname).first()
 
             if db_instance is not None:
@@ -2086,6 +2192,9 @@ class Database:
         """Update instances."""
         to_put = []
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             session.query(Instances).delete()
 
             for instance in instances:
@@ -2175,7 +2284,11 @@ class Database:
     def create_ui_user(self, username: str, password: bytes, *, secret_token: Optional[str] = None, method: str = "manual") -> str:
         """Create ui user."""
         with self.__db_session() as session:
-            if self.get_ui_user():
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            user = session.query(Users).filter_by(id=1).first()
+            if user:
                 return "User already exists"
 
             session.add(Users(id=1, username=username, password=password.decode("utf-8"), secret_token=secret_token, method=method))
@@ -2192,6 +2305,9 @@ class Database:
     ) -> str:
         """Update ui user."""
         with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
             user = session.query(Users).filter_by(id=1).first()
             if not user:
                 return "User not found"

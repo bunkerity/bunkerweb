@@ -10,3 +10,4 @@ src/ui/templates/settings_plugins.html:hashicorp-tf-password:297
 src/ui/templates/settings_plugins.html:hashicorp-tf-password:106
 src/ui/templates/account.html:hashicorp-tf-password:154
 src/ui/templates/account.html:hashicorp-tf-password:162
+src/common/core/errors/files/error.html:aws-access-token:20

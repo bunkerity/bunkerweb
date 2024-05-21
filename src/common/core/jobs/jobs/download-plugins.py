@@ -9,7 +9,7 @@ from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from uuid import uuid4
-from json import JSONDecodeError, loads
+from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
 from tarfile import open as tar_open
 from traceback import format_exc
@@ -176,26 +176,27 @@ try:
             rmtree(plugin_path, ignore_errors=True)
             continue
 
-        plugin_file = loads(plugin_path.joinpath("plugin.json").read_text(encoding="utf-8"))
-
         with BytesIO() as plugin_content:
             with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                tar.add(plugin_path, arcname=plugin_path.name)
-            plugin_content.seek(0)
-            value = plugin_content.getvalue()
+                tar.add(plugin_path, arcname=plugin_path.name, recursive=True)
+            plugin_content.seek(0, 0)
 
-        plugin_file.update(
-            {
-                "type": "external",
-                "page": plugin_path.joinpath("ui").is_dir(),
-                "method": "scheduler",
-                "data": value,
-                "checksum": bytes_hash(value, algorithm="sha256"),
-            }
-        )
+            with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
+                plugin_data = json_load(f)
 
-        external_plugins.append(plugin_file)
-        external_plugins_ids.append(plugin_file["id"])
+            checksum = bytes_hash(plugin_content, algorithm="sha256")
+            plugin_data.update(
+                {
+                    "type": "external",
+                    "page": plugin_path.joinpath("ui").is_dir(),
+                    "method": "scheduler",
+                    "data": plugin_content.getvalue(),
+                    "checksum": checksum,
+                }
+            )
+
+        external_plugins.append(plugin_data)
+        external_plugins_ids.append(plugin_data["id"])
 
     lock = Lock()
 

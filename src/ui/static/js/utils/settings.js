@@ -1000,6 +1000,7 @@ class Settings {
     this.oldServName = "";
     this.setMethodUI = false;
     this.forceEnabled = false;
+    this.forceDisabled = false;
     this.emptyServerName = false;
     this.currSettings = {};
     this.initSettings();
@@ -1170,6 +1171,7 @@ class Settings {
     setMethodUI,
     forceEnabled,
     emptyServerName,
+    forceDisabled,
   ) {
     // Get global needed data
     this.currAction = action;
@@ -1179,6 +1181,7 @@ class Settings {
     this.setMethodUI = setMethodUI;
     this.forceEnabled = forceEnabled;
     this.emptyServerName = emptyServerName;
+    this.forceDisabled = forceDisabled;
 
     this.updateOperation();
     this.updateOldNameValue();
@@ -1282,17 +1285,27 @@ class Settings {
               ? true
               : false;
 
-            if (proDisabled) return inp.setAttribute("disabled", "");
+            let inpDisabledState = inp;
+            if (inp.tagName === "SELECT")
+              inpDisabledState = inp.parentElement
+                .querySelector("[data-select-container]")
+                .querySelector("button[data-setting-select]");
 
-            if (this.forceEnabled) return inp.removeAttribute("disabled");
+            if (this.forceDisabled)
+              return inpDisabledState.setAttribute("disabled", "");
+            if (proDisabled)
+              return inpDisabledState.setAttribute("disabled", "");
+
+            if (this.forceEnabled)
+              return inpDisabledState.removeAttribute("disabled");
 
             if (method === "ui" || method === "default") {
-              inp.removeAttribute("disabled");
+              inpDisabledState.removeAttribute("disabled");
             } else {
-              inp.setAttribute("disabled", "");
+              inpDisabledState.setAttribute("disabled", "");
             }
 
-            if (global) inp.removeAttribute("disabled");
+            if (global) inpDisabledState.removeAttribute("disabled");
           });
         } catch (err) {}
       }
@@ -1417,7 +1430,8 @@ class SettingsMultiple extends Settings {
               inps.forEach((inp) => {
                 // case checkbox
                 if (inp.getAttribute("type") === "checkbox") {
-                  const defaultVal = inp.getAttribute("data-default-value") || "";
+                  const defaultVal =
+                    inp.getAttribute("data-default-value") || "";
 
                   if (defaultVal === "yes" && !inp.checked) {
                     inp.click();
@@ -1426,7 +1440,8 @@ class SettingsMultiple extends Settings {
 
                 // case regular
                 if (inp.getAttribute("type") !== "checkbox") {
-                  const defaultVal = inp.getAttribute("data-default-value") || "";
+                  const defaultVal =
+                    inp.getAttribute("data-default-value") || "";
                   inp.setAttribute("value", defaultVal);
                   inp.value = defaultVal;
                 }
@@ -1438,7 +1453,8 @@ class SettingsMultiple extends Settings {
                 "button[data-setting-select]",
               );
               selects.forEach((select) => {
-                const defaultVal = select.getAttribute("data-default-value") || "";
+                const defaultVal =
+                  select.getAttribute("data-default-value") || "";
                 select
                   .querySelector("data-setting-select-text")
                   .setAttribute("data-value", defaultVal);
@@ -1467,7 +1483,10 @@ class SettingsMultiple extends Settings {
       ? true
       : false;
 
-    return proDisabled;
+    const isReadOnly = this.forceDisabled;
+    if (proDisabled || isReadOnly) return true;
+
+    return false;
   }
 
   removePrevMultiples() {
@@ -1958,6 +1977,7 @@ class SettingsAdvanced extends SettingsEditor {
     setMethodUI = false,
     forceEnabled = false,
     emptyServerName = false,
+    forceDisabled = false,
   ) {
     this.updateData(
       action,
@@ -1967,6 +1987,7 @@ class SettingsAdvanced extends SettingsEditor {
       setMethodUI,
       forceEnabled,
       emptyServerName,
+      forceDisabled,
     );
     this.setSettingsAdvanced();
     this.resetServerName();

@@ -1,6 +1,6 @@
 {% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- main container -->
-<div data-{{ current_endpoint }}-container class="min-h-[400px] flex flex-col justify-between dark:brightness-110 md:min-h-50-screen col-span-12 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+<div data-readonly="{% if is_readonly %}true{% else %}false{% endif %}" data-{{ current_endpoint }}-container class="min-h-[400px] flex flex-col justify-between dark:brightness-110 md:min-h-50-screen col-span-12 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
     <div class="mb-4 px-3">
         <div class="w-full grid-cols-12 grid">
             <div class="col-span-12 md:col-span-8">

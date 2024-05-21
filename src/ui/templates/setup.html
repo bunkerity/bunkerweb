@@ -180,6 +180,7 @@
                             {% else %}
                                 <h6 class="col-span-12 block text-left font-bold mb-4 mt-2">🧑‍🚀 An admin user already exists</h6>
                             {% endif %}
+                                                        <h2 class="col-span-12 block text-left font-bold my-4 text-2xl">Newsletter</h2>
                             <!-- email inpt-->
                             <div class="flex flex-col relative col-span-12 mx-2 max-w-[400px] w-full">
                                 <h5 class="text-base mb-1 transition duration-300 ease-in-out text-md font-bold m-0">Email</h5>
@@ -536,6 +537,7 @@
           this.servInp = document.querySelector("#server_name");
           this.sslCheck = document.querySelector("#auto_lets_encrypt");
           this.urlInp = document.querySelector("#ui_url");
+          this.newsForm = document.querySelector("#newsletter-form");
           this.emailInp = document.querySelector("#newsletter-email")
           this.checkEmailInp = document.querySelector("#newsletter-check");
           this.loaderContainer = document.querySelector("[data-loader]");
@@ -572,6 +574,11 @@
             } catch (err) {}
           });
 
+          // Avoid reload on newsletter submit
+          this.newsForm.addEventListener('submit' (e) => {
+            e.preventDefault()
+          })
+
           // Submit
           this.formEl.addEventListener("submit", (e) => {
             {% if not ui_user %}
@@ -587,7 +594,7 @@
             this.hideErrMsg();
 
             // Send email
-            if(this.checkEmailInp.checked) {
+            if(this.checkEmailInp.checked && this.checkEmailInp.checkValidity()) {
               this.subscribe();
             }
 
@@ -644,7 +651,7 @@
 
         subscribe() {
           document.querySelector('#newsletter-form-email').value = this.emailInp.value;
-          document.querySelector('#newsletter-form').submit();
+          this.newsForm.submit();
         }
 
         {% if not ui_user %}

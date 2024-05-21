@@ -173,9 +173,23 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
     pro = "pro" in original_path.parts
 
     # Remove old external/pro plugins files
-    logger.info(f"Removing old {'pro ' if pro else ''}external plugins files ...")
+    logger.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
     if original_path.is_dir():
         for file in original_path.glob("*"):
+            try:
+                index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
+            except StopIteration:
+                index = -1
+
+            if index > -1:
+                with BytesIO() as plugin_content:
+                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                        tar.add(file, arcname=file.name, recursive=True)
+                    plugin_content.seek(0, 0)
+                    if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
+                        continue
+                    logger.debug(f"Checksum of {file} has changed, removing it ...")
+
             if file.is_symlink() or file.is_file():
                 with suppress(OSError):
                     file.unlink()
@@ -272,33 +286,32 @@ def api_to_instance(api):
     }
 
 
-def run_in_slave_mode(db: Database, dotenv_env: Dict[str, Any]):
-    # Instantiate db
-    db = Database(logger, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
+def run_in_slave_mode():
+    assert SCHEDULER is not None
 
     # Wait for init
-    while not db.is_initialized():
+    while not SCHEDULER.db.is_initialized():
         logger.warning("Database is not initialized, retrying in 5s ...")
         sleep(5)
 
     # Wait for first config
-    env = db.get_config()
-    while not db.is_first_config_saved() or not env:
+    env = SCHEDULER.db.get_config()
+    while not SCHEDULER.db.is_first_config_saved() or not env:
         logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
         sleep(5)
-        env = db.get_config()
+        env = SCHEDULER.db.get_config()
 
     # Download plugins
-    pro_plugins = db.get_plugins(_type="pro", with_data=True)
+    pro_plugins = SCHEDULER.db.get_plugins(_type="pro", with_data=True)
     generate_external_plugins(pro_plugins, original_path=PRO_PLUGINS_PATH)
-    external_plugins = db.get_plugins(_type="external", with_data=True)
+    external_plugins = SCHEDULER.db.get_plugins(_type="external", with_data=True)
     generate_external_plugins(external_plugins)
 
     # Download custom configs
-    generate_custom_configs(db.get_custom_configs())
+    generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
     # Download caches
-    generate_caches(pro_plugins + external_plugins, db)
+    generate_caches(pro_plugins + external_plugins, SCHEDULER.db)
 
     # Gen config
     content = ""
@@ -353,18 +366,18 @@ if __name__ == "__main__":
         nginx_variables_path = Path(sep, "etc", "nginx", "variables.env")
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
-        db = Database(logger, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
+        SCHEDULER = JobScheduler(environ, logger, INTEGRATION, db=Database(logger, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
         if SLAVE_MODE:
-            run_in_slave_mode(db, dotenv_env)
+            run_in_slave_mode()
             stop(1)
 
         if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
-            while not db.is_initialized():
+            while not SCHEDULER.db.is_initialized():
                 logger.warning("Database is not initialized, retrying in 5s ...")
                 sleep(5)
 
-            while not db.is_autoconf_loaded():
+            while not SCHEDULER.db.is_autoconf_loaded():
                 logger.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
                 sleep(5)
 
@@ -373,8 +386,8 @@ if __name__ == "__main__":
             or not tmp_variables_path.exists()
             or not nginx_variables_path.exists()
             or (tmp_variables_path.read_text(encoding="utf-8") != nginx_variables_path.read_text(encoding="utf-8"))
-            or db.is_initialized()
-            and db.get_config() != dotenv_env
+            or SCHEDULER.db.is_initialized()
+            and SCHEDULER.db.get_config() != dotenv_env
         ):
             # run the config saver
             proc = subprocess_run(
@@ -393,19 +406,19 @@ if __name__ == "__main__":
                 logger.error("Config saver failed, configuration will not work as expected...")
 
             if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf"):
-                while not db.is_initialized():
+                while not SCHEDULER.db.is_initialized():
                     logger.warning("Database is not initialized, retrying in 5s ...")
                     sleep(5)
 
-                env = db.get_config()
-                while not db.is_first_config_saved() or not env:
+                env = SCHEDULER.db.get_config()
+                while not SCHEDULER.db.is_first_config_saved() or not env:
                     logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
                     sleep(5)
-                    env = db.get_config()
+                    env = SCHEDULER.db.get_config()
 
-        env = db.get_config()
+        env = SCHEDULER.db.get_config()
 
-        env["DATABASE_URI"] = db.database_uri
+        env["DATABASE_URI"] = SCHEDULER.db.database_uri
 
         # Override instances if needed
         override_instances = env.get("OVERRIDE_INSTANCES", "")
@@ -415,7 +428,7 @@ if __name__ == "__main__":
                 apis.append(API(instance))
 
         # Instantiate scheduler
-        SCHEDULER = JobScheduler(env | environ, logger, INTEGRATION, db=db, apis=apis)
+        SCHEDULER.env = env | environ
 
         if INTEGRATION in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
             # Automatically setup the scheduler apis
@@ -425,16 +438,16 @@ if __name__ == "__main__":
                 if not SCHEDULER.apis:
                     logger.warning("No BunkerWeb API found, retrying in 5s ...")
                     sleep(5)
-            db.update_instances([api_to_instance(api) for api in SCHEDULER.apis])
+            SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis])
 
-        scheduler_first_start = db.is_scheduler_first_start()
+        scheduler_first_start = SCHEDULER.db.is_scheduler_first_start()
 
         logger.info("Scheduler started ...")
 
         # Checking if any custom config has been created by the user
         logger.info("Checking if there are any changes in custom configs ...")
         custom_configs = []
-        db_configs = db.get_custom_configs()
+        db_configs = SCHEDULER.db.get_custom_configs()
         changes = False
         for file in CUSTOM_CONFIGS_PATH.rglob("*.conf"):
             if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
@@ -460,12 +473,12 @@ if __name__ == "__main__":
         changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
         if changes:
-            err = db.save_custom_configs(custom_configs, "manual")
+            err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
             if err:
                 logger.error(f"Couldn't save some manually created custom configs to database: {err}")
 
         if (scheduler_first_start and db_configs) or changes:
-            generate_custom_configs(db.get_custom_configs())
+            generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
         del custom_configs, db_configs
 
@@ -473,51 +486,55 @@ if __name__ == "__main__":
             # Check if any external or pro plugin has been added by the user
             logger.info(f"Checking if there are any changes in {_type} plugins ...")
             plugin_path = EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH
+            db_plugins = SCHEDULER.db.get_plugins(_type=_type)
             external_plugins = []
             tmp_external_plugins = []
             for file in plugin_path.glob("*/plugin.json"):
-                plugin_content = BytesIO()
-                with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                    tar.add(file.parent, arcname=file.parent.name, recursive=True)
-                plugin_content.seek(0, 0)
+                with BytesIO() as plugin_content:
+                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                        tar.add(file.parent, arcname=file.parent.name, recursive=True)
+                    plugin_content.seek(0, 0)
 
-                with file.open("r", encoding="utf-8") as f:
-                    plugin_data = json_load(f)
+                    with file.open("r", encoding="utf-8") as f:
+                        plugin_data = json_load(f)
 
-                common_data = plugin_data | {
-                    "type": _type,
-                    "page": file.parent.joinpath("ui").is_dir(),
-                }
-                jobs = common_data.pop("jobs", [])
-
-                tmp_external_plugins.append(common_data)
-
-                checksum = bytes_hash(plugin_content, algorithm="sha256")
-                external_plugins.append(
-                    common_data
-                    | {
-                        "method": "manual",
-                        "data": plugin_content.getvalue(),
+                    checksum = bytes_hash(plugin_content, algorithm="sha256")
+                    common_data = plugin_data | {
+                        "type": _type,
+                        "page": file.parent.joinpath("ui").is_dir(),
                         "checksum": checksum,
                     }
-                    | ({"jobs": jobs} if jobs else {})
-                )
+                    jobs = common_data.pop("jobs", [])
 
-            db_plugins = db.get_plugins(_type=_type)
-            tmp_db_plugins = []
-            for db_plugin in db_plugins.copy():
-                db_plugin.pop("method", None)
-                tmp_db_plugins.append(db_plugin)
+                    try:
+                        index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
+                    except StopIteration:
+                        index = -1
 
-            changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in tmp_db_plugins}
+                    if index > -1 and checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
+                        continue
 
-            if changes:
-                err = db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
-                if err:
-                    logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+                    tmp_external_plugins.append(common_data.copy())
 
-            if (scheduler_first_start and db_plugins) or changes:
-                generate_external_plugins(db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
+                    external_plugins.append(
+                        common_data
+                        | {
+                            "method": "manual",
+                            "data": plugin_content.getvalue(),
+                        }
+                        | ({"jobs": jobs} if jobs else {})
+                    )
+
+            if tmp_external_plugins:
+                changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
+
+                if changes:
+                    err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
+                    if err:
+                        logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+
+                if (scheduler_first_start and db_plugins) or changes:
+                    generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
 
         check_plugin_changes("external")
         check_plugin_changes("pro")
@@ -531,12 +548,12 @@ if __name__ == "__main__":
         if not SCHEDULER.run_single("download-pro-plugins"):
             logger.warning("download-pro-plugins job failed at first start, pro plugins settings set by the user may not be up to date ...")
 
-        changes = db.check_changes()
+        changes = SCHEDULER.db.check_changes()
         if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf") and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
             if changes["pro_plugins_changed"]:
-                generate_external_plugins(db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
+                generate_external_plugins(SCHEDULER.db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
             if changes["external_plugins_changed"]:
-                generate_external_plugins(db.get_plugins(_type="external", with_data=True))
+                generate_external_plugins(SCHEDULER.db.get_plugins(_type="external", with_data=True))
 
             # run the config saver to save potential ignored external plugins settings
             logger.info("Running config saver to save potential ignored external plugins settings ...")
@@ -557,8 +574,8 @@ if __name__ == "__main__":
                 )
 
             SCHEDULER.update_jobs()
-            env = db.get_config()
-            env["DATABASE_URI"] = db.database_uri
+            env = SCHEDULER.db.get_config()
+            env["DATABASE_URI"] = SCHEDULER.db.database_uri
 
         logger.info("Executing scheduler ...")
 
@@ -582,7 +599,7 @@ if __name__ == "__main__":
             else:
                 logger.info(f"Successfully sent {CACHE_PATH} folder")
 
-        def listen_for_instances_reload(db: Database):
+        def listen_for_instances_reload():
             from docker import DockerClient
 
             global SCHEDULER
@@ -592,12 +609,12 @@ if __name__ == "__main__":
                 if event["Action"] in ("start", "die"):
                     logger.info(f"🐋 Detected {event['Action']} event on container {event['Actor']['Attributes']['name']}")
                     SCHEDULER.auto_setup()
-                    db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
+                    SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
                     if event["Action"] == "start":
-                        db.checked_changes(value=True)
+                        SCHEDULER.db.checked_changes(value=True)
 
         if INTEGRATION == "Docker" and not override_instances:
-            Thread(target=listen_for_instances_reload, args=(db,), name="listen_for_instances_reload").start()
+            Thread(target=listen_for_instances_reload, name="listen_for_instances_reload").start()
 
         while True:
             threads.clear()
@@ -685,7 +702,7 @@ if __name__ == "__main__":
             except:
                 logger.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
-            ret = db.checked_changes(CHANGES)
+            ret = SCHEDULER.db.checked_changes(CHANGES)
 
             if ret:
                 logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
@@ -700,9 +717,11 @@ if __name__ == "__main__":
             INSTANCES_NEED_GENERATION = False
 
             if scheduler_first_start:
-                ret = db.set_scheduler_first_start()
+                ret = SCHEDULER.db.set_scheduler_first_start()
 
-                if ret:
+                if ret == "The database is read-only, the changes will not be saved":
+                    logger.warning("The database is read-only, the scheduler first start will not be saved")
+                elif ret:
                     logger.error(f"An error occurred when setting the scheduler first start : {ret}")
                     stop(1)
                 scheduler_first_start = False
@@ -725,7 +744,7 @@ if __name__ == "__main__":
 
                     DB_LOCK_FILE.unlink(missing_ok=True)
 
-                    changes = db.check_changes()
+                    changes = SCHEDULER.db.check_changes()
 
                     if isinstance(changes, str):
                         raise Exception(f"An error occurred when checking for changes in the database : {changes}")
@@ -783,22 +802,22 @@ if __name__ == "__main__":
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")
-                    generate_custom_configs(db.get_custom_configs())
+                    generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")
-                    generate_external_plugins(db.get_plugins(_type="external", with_data=True))
+                    generate_external_plugins(SCHEDULER.db.get_plugins(_type="external", with_data=True))
                     SCHEDULER.update_jobs()
 
                 if PRO_PLUGINS_NEED_GENERATION:
                     CHANGES.append("pro_plugins")
-                    generate_external_plugins(db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
+                    generate_external_plugins(SCHEDULER.db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
                     SCHEDULER.update_jobs()
 
                 if CONFIG_NEED_GENERATION:
                     CHANGES.append("config")
-                    env = db.get_config()
-                    env["DATABASE_URI"] = db.database_uri
+                    env = SCHEDULER.db.get_config()
+                    env["DATABASE_URI"] = SCHEDULER.db.database_uri
 
     except:
         logger.error(f"Exception while executing scheduler : {format_exc()}")
