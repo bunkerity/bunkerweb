@@ -16,21 +16,22 @@ const banner = reactive({
   visibleId: 1,
   default : [
     {
-      title: "title_1",
-      link: "link_1",
-      linkText: "link_text_1",
+      title: "Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial",
+      link: "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro",
+      linkText: "here",
     },
     {
-      title: "title_2",
-      link: "link_2",
-      linkText: "link_text_2",
+      title: "Need premium support or tailored consulting around BunkerWeb ? Check out our",
+      link: "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#services",
+      linkText: "professional services.",
     },
     {
-      title: "title_3",
-      link: "link_3",
-      linkText: "link_text_3",
+      title: "Be part of the Bunker community by joining the",
+      link: "Discord chat.",
+      linkText: "https://discord.bunkerweb.io",
     },
   ],
+  isTabIndex: false,
   api: [],
   apiFormat : computed(() => {
     if(banner.api.length === 0) return [];
@@ -44,9 +45,6 @@ const banner = reactive({
   }),
 });
 
-const data = [{
-  "content": "<p class='p-0 mx-'>content_1</p>",
-}]
 // I want to replace the content class content by banner-item-text
 
 function setupBanner() {
@@ -65,6 +63,7 @@ function setupBanner() {
       banner.api =
         JSON.parse(sessionStorage.getItem("bannerNews"))
         banner.default = [];
+        runBanner();
         return;
     }
     // Try to fetch api data
@@ -93,10 +92,10 @@ function setupBanner() {
 
 // Banner animation effect
 function runBanner() {
-  const nextDelay = 14000;
-  const transDuration = 10000;
+  const nextDelay = 8000;
+  const transDuration = 1000;
   // Switch item every interval and
-  setInterval(() => {
+  setTimeout(() => {
     const prev = banner.visibleId;
     banner.visibleId = banner.visibleId === 3 ? 1 : banner.visibleId + 1;
     const next = banner.visibleId;
@@ -122,17 +121,21 @@ function runBanner() {
     newItem.classList.add("transition-all");
     newItem.classList.add("left-0");
     newItem.classList.remove("left-full");
+
+    runBanner();
   }, nextDelay);
 
+}
   // Observe banner and set is visible or not to
   // Update float button and menu position
-  let options = {
+function observeBanner() {
+  const options = {
     root: null,
     rootMargin: "0px",
     threshold: 0.35,
   };
 
-  let observer = new IntersectionObserver((entries, observer) => {
+  const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) bannerStore.setBannerVisible(true);
       if (!entry.isIntersecting) bannerStore.setBannerVisible(false);
@@ -142,13 +145,52 @@ function runBanner() {
   observer.observe(document.getElementById("banner"));
 }
 
+function noTabindex() {
+  const bannerItems = document.querySelectorAll(".banner-item");
+  bannerItems.forEach((item) => {
+    item.classList.remove("banner-tabindex-highlight", 'banner-tabindex-hide');
+  });
+}
+
+function isTabindex() {
+  const activeElement = document.activeElement;
+    const bannerItems = document.querySelectorAll(".banner-item");
+    bannerItems.forEach((item) => {
+      item.classList.add("banner-tabindex-hide");
+      item.classList.remove("banner-tabindex-highlight");
+  }); 
+    // Higher z-index for the focused element
+    activeElement.closest('.banner-item').classList.add("banner-tabindex-highlight");
+    activeElement.closest('.banner-item').classList.remove("banner-tabindex-hide");
+}
+
+
+// Focus with tabindex break banner animation
+// When a banner is focused, we need to add in front of the current banner the focus element
+// And remove it when the focus is lost
+function handleTabIndex() {
+  // Get the active element after tabindex click
+  document.addEventListener("keyup", (e) => {
+    if(e.key !== "Tab" && !document.activeElement.classList.contains("banner-item-text")) return;
+    if(document.activeElement.classList.contains("banner-item-text")) {
+      isTabindex();
+      return;
+    } else {
+      noTabindex();
+    }
+  });
+}
+
+
 onMounted(() => {
+  observeBanner();
   setupBanner();
+  handleTabIndex();
 });
 </script>
 
 <template>
-  <div id="banner" tabindex="-1" role="list" class="banner-container">
+  <div id="banner" role="list" class="banner-container">
     <div role="img" aria-hidden="true" class="banner-bg"></div>
     <div
       v-for="(bannerEl, index) in banner.default"

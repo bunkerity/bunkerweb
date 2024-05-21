@@ -9,11 +9,12 @@ import { createI18n } from "vue-i18n";
 */
 
 import en from "@lang/en.json" assert { type: "json" };
+import fr from "@lang/fr.json" assert { type: "json" };
 
-const availablesLangs = ["en"];
+const availablesLangs = ["en", "fr"];
 
 function getAllLang() {
-  return { en: en };
+  return { en: en, fr : fr };
 }
 
 function getAllLangCurrPage(pagesArr) {

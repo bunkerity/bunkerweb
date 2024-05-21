@@ -268,7 +268,7 @@ onBeforeMount(() => {
         <h1 class="menu-account-title">
           {{ menu.username }}
         </h1>
-        <a class="menu-account-link" href="/account">manage account </a>
+        <a :tabindex=" menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'" class="menu-account-link" href="/account">manage account </a>
       </div>
       <hr class="menu-separator" />
       <!-- end logo version -->

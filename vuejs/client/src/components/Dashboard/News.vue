@@ -136,7 +136,7 @@ onMounted(() => {
       <p v-if="news.posts.length === 0" class="news-sidebar-no-posts-content">
         {{ $t("dashboard_news_fetch_error") }}
       </p>
-      <a  :href="`https://www.bunkerweb.io/blog/post/bunkerweb/${post.slug}`" class="news-sidebar-post"
+      <a :tabindex="news.isActive ? newsIndex : '-1'"  :href="`https://www.bunkerweb.io/blog/post/bunkerweb/${post.slug}?utm_campaign=self&utm_source=ui`" class="news-sidebar-post"
        v-for="(post, index) in news.posts" :key="index"
       >
         <div>

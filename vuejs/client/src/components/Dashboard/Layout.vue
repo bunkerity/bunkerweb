@@ -8,6 +8,7 @@ import News from "@components/dashboard/News.vue";
 import Header from "@components/dashboard/Header.vue";
 import Banner from "@components/dashboard/Banner.vue";
 import Feedback from "@components/dashboard/Feedback.vue";
+import { onMounted } from "vue";
 
 /** 
   @name Dashboard/Layout.vue

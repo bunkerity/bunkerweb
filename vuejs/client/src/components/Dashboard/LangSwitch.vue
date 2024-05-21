@@ -34,7 +34,7 @@ function updateLangStorage(lang) {
         :aria-checked="$i18n.locale === locale ? 'true' : 'false'"
       >
         <button
-          :tabindex="lang.isOpen ? langIndex : -1"
+          :tabindex="lang.isOpen ? langIndex : '-1'"
           @click="
             () => {
               lang.isOpen = false;
