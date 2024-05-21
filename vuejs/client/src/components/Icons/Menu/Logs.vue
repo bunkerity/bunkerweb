@@ -1,4 +1,10 @@
-<script setup></script>
+<script setup>
+/** 
+  @name Icons/Menu/Logs.vue
+  @description This component is used to create a complete svg icon for the menu.
+  This svg is related to the logs link in the menu.
+*/
+</script>
 <template>
   <svg  role="img"
     aria-hidden="true" class="stroke-gray-600 dark:fill-gray-500 h-6 w-6 relative"

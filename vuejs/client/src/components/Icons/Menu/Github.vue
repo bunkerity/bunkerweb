@@ -1,4 +1,10 @@
-<script setup></script>
+<script setup>
+/** 
+  @name Icons/Menu/Github.vue
+  @description This component is used to create a complete svg icon for the menu.
+  This svg is related to the github social link in the menu.
+*/
+</script>
 <template>
   <svg
     role="img"

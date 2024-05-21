@@ -1,4 +1,10 @@
-<script setup></script>
+<script setup>
+/** 
+  @name Icons/Menu/Cache.vue
+  @description This component is used to create a complete svg icon for the menu.
+  This svg is related to the cache link in the menu.
+*/
+</script>
 <template>
   <svg     role="img"
     aria-hidden="true" class="stroke-pink-600 h-5.5 w-5.5 relative"

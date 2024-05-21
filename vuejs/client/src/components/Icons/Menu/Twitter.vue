@@ -1,4 +1,10 @@
-<script setup></script>
+<script setup>
+/** 
+  @name Icons/Menu/Twitter.vue
+  @description This component is used to create a complete svg icon for the menu.
+  This svg is related to the twitter social link in the menu.
+*/
+</script>
 <template>
   <svg
     role="img"

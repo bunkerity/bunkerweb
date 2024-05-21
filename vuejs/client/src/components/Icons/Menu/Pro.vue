@@ -1,4 +1,10 @@
-<script setup></script>
+<script setup>
+/** 
+  @name Icons/Menu/Pro.vue
+  @description This component is used to create a complete svg icon for the menu.
+  This svg is related to the plugins pro page link in the menu.
+*/
+</script>
 <template>
     <svg
     class="h-5 w-5 dark:brightness-90 relative"
