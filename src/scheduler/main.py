@@ -173,9 +173,23 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
     pro = "pro" in original_path.parts
 
     # Remove old external/pro plugins files
-    logger.info(f"Removing old {'pro ' if pro else ''}external plugins files ...")
+    logger.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
     if original_path.is_dir():
         for file in original_path.glob("*"):
+            try:
+                index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
+            except StopIteration:
+                index = -1
+
+            if index > -1:
+                with BytesIO() as plugin_content:
+                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                        tar.add(file, arcname=file.name, recursive=True)
+                    plugin_content.seek(0, 0)
+                    if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
+                        continue
+                    logger.debug(f"Checksum of {file} has changed, removing it ...")
+
             if file.is_symlink() or file.is_file():
                 with suppress(OSError):
                     file.unlink()
@@ -472,51 +486,55 @@ if __name__ == "__main__":
             # Check if any external or pro plugin has been added by the user
             logger.info(f"Checking if there are any changes in {_type} plugins ...")
             plugin_path = EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH
+            db_plugins = SCHEDULER.db.get_plugins(_type=_type)
             external_plugins = []
             tmp_external_plugins = []
             for file in plugin_path.glob("*/plugin.json"):
-                plugin_content = BytesIO()
-                with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                    tar.add(file.parent, arcname=file.parent.name, recursive=True)
-                plugin_content.seek(0, 0)
+                with BytesIO() as plugin_content:
+                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                        tar.add(file.parent, arcname=file.parent.name, recursive=True)
+                    plugin_content.seek(0, 0)
 
-                with file.open("r", encoding="utf-8") as f:
-                    plugin_data = json_load(f)
+                    with file.open("r", encoding="utf-8") as f:
+                        plugin_data = json_load(f)
 
-                common_data = plugin_data | {
-                    "type": _type,
-                    "page": file.parent.joinpath("ui").is_dir(),
-                }
-                jobs = common_data.pop("jobs", [])
-
-                tmp_external_plugins.append(common_data)
-
-                checksum = bytes_hash(plugin_content, algorithm="sha256")
-                external_plugins.append(
-                    common_data
-                    | {
-                        "method": "manual",
-                        "data": plugin_content.getvalue(),
+                    checksum = bytes_hash(plugin_content, algorithm="sha256")
+                    common_data = plugin_data | {
+                        "type": _type,
+                        "page": file.parent.joinpath("ui").is_dir(),
                         "checksum": checksum,
                     }
-                    | ({"jobs": jobs} if jobs else {})
-                )
+                    jobs = common_data.pop("jobs", [])
 
-            db_plugins = SCHEDULER.db.get_plugins(_type=_type)
-            tmp_db_plugins = []
-            for db_plugin in db_plugins.copy():
-                db_plugin.pop("method", None)
-                tmp_db_plugins.append(db_plugin)
+                    try:
+                        index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
+                    except StopIteration:
+                        index = -1
 
-            changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in tmp_db_plugins}
+                    if index > -1 and checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
+                        continue
 
-            if changes:
-                err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
-                if err:
-                    logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+                    tmp_external_plugins.append(common_data.copy())
 
-            if (scheduler_first_start and db_plugins) or changes:
-                generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
+                    external_plugins.append(
+                        common_data
+                        | {
+                            "method": "manual",
+                            "data": plugin_content.getvalue(),
+                        }
+                        | ({"jobs": jobs} if jobs else {})
+                    )
+
+            if tmp_external_plugins:
+                changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
+
+                if changes:
+                    err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
+                    if err:
+                        logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+
+                if (scheduler_first_start and db_plugins) or changes:
+                    generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
 
         check_plugin_changes("external")
         check_plugin_changes("pro")

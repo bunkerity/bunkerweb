@@ -92,7 +92,8 @@ class Database:
 
             if sqlalchemy_string == sqlalchemy_string_readonly:
                 self.readonly = True
-                self.logger.warning("The database connection is set to read-only, the changes will not be saved")
+                if log:
+                    self.logger.warning("The database connection is set to read-only, the changes will not be saved")
 
         match = self.DB_STRING_RX.search(sqlalchemy_string)
         if not match:
@@ -1519,6 +1520,10 @@ class Database:
                 )
 
                 if db_plugin:
+                    if plugin["method"] not in (db_plugin.method, "autoconf"):
+                        self.logger.warning(f'Plugin "{plugin["id"]}" already exists, but the method is different, skipping update')
+                        continue
+
                     if db_plugin.type not in ("external", "pro"):
                         self.logger.warning(
                             f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external or non-pro plugin is forbidden for security reasons)",  # noqa: E501
@@ -1993,7 +1998,6 @@ class Database:
                     "method": plugin.method,
                     "page": page is not None,
                     "settings": {},
-                    "bwcli": {},
                     "checksum": plugin.checksum,
                 } | ({"data": plugin.data} if with_data else {})
 
@@ -2029,6 +2033,8 @@ class Database:
                         ]
 
                 for command in session.query(BwcliCommands).with_entities(BwcliCommands.name, BwcliCommands.file_name).filter_by(plugin_id=plugin.id):
+                    if "bwcli" not in data:
+                        data["bwcli"] = {}
                     data["bwcli"][command.name] = command.file_name
 
                 plugins.append(data)
