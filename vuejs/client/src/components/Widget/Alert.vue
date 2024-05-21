@@ -15,17 +15,15 @@ import { defineProps, defineEmits, reactive } from "vue";
     message: "Your action has been successfully completed",
     delayToClose: 5000,
   }
-  @param {string} [id=`feedback-alert-${message.substring(0, 10)}`]
-  @param {string} [isFixed=false] - Determine if the alert is fixed (visible bottom right of page) or relative (inside a container)
-  @param {string} type - The type of the alert, can be success, error, warning or info
   @param {string} title - The title of the alert
   @param {string} message - The message of the alert
+  @param {boolean} [canClose=true] - Determine if the alert can be closed by user (add a close button), by default it is closable
+  @param {string} [id=`feedback-alert-${message.substring(0, 10)}`]
+  @param {string} [isFixed=false] - Determine if the alert is fixed (visible bottom right of page) or relative (inside a container)
+  @param {string} [type="info"] - The type of the alert, can be success, error, warning or info
   @param {number} [delayToClose=0] - The delay to auto close alert in ms, by default always visible
+  @param {string} [tabId="-1"] - The tabindex of the alert
 */
-
-const alert = reactive({
-  visible: true,
-})
 
 const props = defineProps({
   id: {
@@ -40,7 +38,8 @@ const props = defineProps({
   },
   type: {
     type: String,
-    required: true,
+    required: false,
+    default : "info"
   },
   title: {
     type: [Number, String],
@@ -55,12 +54,21 @@ const props = defineProps({
     required: false,
     default: 0,
   },
+  canClose: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
   tabId: {
     type: [String, Number],
     required: false,
     default: "-1"
   },
 });
+
+const alert = reactive({
+  visible: true,
+})
 
 onMounted(() => {
   if (props.delayToClose > 0) {
@@ -80,9 +88,7 @@ onMounted(() => {
   >
   <div 
     :class="[
-      props.type !== 'success' && props.type !== 'error'
-        ? 'default'
-        : props.type,
+      props.type,
         'feedback-alert-wrap',
     ]"
   >

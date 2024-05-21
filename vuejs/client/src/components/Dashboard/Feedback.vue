@@ -11,6 +11,9 @@ import { onBeforeMount } from "vue";
   This will display an ephemeral on the bottom right of the page and a sidebar with all the feedbacks.
 */
 
+const feedback = reactive({
+  data: [],
+});
 
 // Handle feedback history panel
 const dropdown = reactive({
@@ -31,11 +34,11 @@ onBeforeMount(() => {
 <template>
 
   <Alert
-    v-if="feedback.data.length > 0"
-    :title="feedback.data[feedback.data.length - 1].title"
-    :message="feedback.data[feedback.data.length - 1].message"
+    v-for="(item, id) in feedback.data"
+    :title="feedback.data[id].title"
+    :message="feedback.data[id].message"
     :delayToClose="5000"
-    :type="feedback.data[feedback.data.length - 1].type"
+    :type="feedback.data[id].type"
     :tabId="feedbackIndex"
     :isFixed="true"
   />
@@ -113,10 +116,10 @@ onBeforeMount(() => {
     <div class="feedback-header">
       <div class="float-left">
         <h5 class="feedback-header-title">
-          {{ $t("dashboard_actions_title") }}
+          {{ $t("dashboard_feedback_title") }}
         </h5>
         <p class="feedback-header-subtitle">
-          {{ $t("dashboard_actions_subtitle") }}
+          {{ $t("dashboard_feedback_subtitle") }}
         </p>
       </div>
     </div>
@@ -128,7 +131,7 @@ onBeforeMount(() => {
         :id="item.id"
         :title="item.title"
         :message="item.message"
-        :tabId=" dropdown.isOpen? feedbackIndex : '-1'        "
+        :tabId="dropdown.isOpen ? feedbackIndex : '-1'"
       />
   </aside>
   <!-- end right sidebar -->

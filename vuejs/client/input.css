@@ -1141,15 +1141,15 @@ body {
 /* FEEDBACK */
 
 .feedback-float-btn-container {
-  @apply transition-all hover:brightness-75 dark:hover:brightness-105 fixed right-20 sm:right-24 xl:right-24 z-990;
+  @apply transition-all hover:brightness-75 dark:hover:brightness-105 fixed right-4 sm:right-[9.75rem] xl:right-24 z-990;
 }
 
 .no-banner.feedback-float-btn-container {
-  @apply top-2;
+  @apply top-[4rem] sm:top-2;
 }
 
 .banner.feedback-float-btn-container {
-  @apply top-[4.5rem];
+  @apply top-[8rem] sm:top-[4.5rem];
 }
 
 .feedback-float-btn {
@@ -1209,11 +1209,11 @@ body {
 
 
 .feedback-alert-container {
-  @apply flex justify-center w-full sm:max-w-[300px] z-[1000];
+  @apply flex justify-center w-full;
 }
 
 .feedback-alert-container.is-fixed {
-  @apply  fixed right-0 bottom-0;
+  @apply  fixed right-0 bottom-0  sm:max-w-[300px] z-[1000];
 }
 
 .feedback-alert-wrap {

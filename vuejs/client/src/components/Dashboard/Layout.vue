@@ -7,6 +7,7 @@ import Menu from "@components/dashboard/Menu.vue";
 import News from "@components/dashboard/News.vue";
 import Header from "@components/dashboard/Header.vue";
 import Banner from "@components/dashboard/Banner.vue";
+import Feedback from "@components/dashboard/Feedback.vue";
 
 /** 
   @name Dashboard/Layout.vue
@@ -24,6 +25,7 @@ import Banner from "@components/dashboard/Banner.vue";
   <LangSwitch />
   <Banner />
   <Menu />
+  <Feedback />
   <News />
   <Header />
   <!-- info -->
