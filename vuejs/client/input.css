@@ -462,7 +462,7 @@ body {
 }
 
 .menu-float-btn {
-  @apply transition-all scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 xl:hidden fixed p-3 text-xl bg-white shadow cursor-pointer  right-4 sm:right-[9.75rem] xl:right-24 z-990 rounded-circle text-slate-700 flex justify-center items-center;
+  @apply transition-all dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 xl:hidden fixed p-3 text-xl bg-white shadow cursor-pointer right-4 sm:right-[9.25rem] xl:right-24 z-990 rounded-circle text-slate-700 flex justify-center items-center;
 }
 
 .menu-float-btn-svg {
@@ -470,11 +470,11 @@ body {
 }
 
 .no-banner.menu-float-btn {
-  @apply top-[4rem] sm:top-2;
+  @apply top-[4.25rem] sm:top-2;
 }
 
 .banner.menu-float-btn {
-  @apply top-[8rem] sm:top-[4.5rem];
+  @apply top-[8.25rem] sm:top-[4.5rem];
 }
 
 .menu-close-btn {
@@ -633,7 +633,7 @@ body {
 /* NEWS */
 
 .news-float-btn {
-  @apply transition-all scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer right-20 sm:right-6 z-990 rounded-circle text-slate-700 flex justify-center items-center;
+  @apply transition-all dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer right-[4.75rem] sm:right-6 z-990 rounded-circle text-slate-700 flex justify-center items-center;
 }
 
 .news-float-btn-svg {
@@ -1148,7 +1148,7 @@ body {
 /* FEEDBACK */
 
 .feedback-float-btn-container {
-  @apply transition-all hover:brightness-75 dark:hover:brightness-105 fixed right-5 sm:right-[5.5rem]  z-990;
+  @apply transition-all hover:brightness-75 dark:hover:brightness-105 fixed right-4 sm:right-[5.5rem]  z-990;
 }
 
 .no-banner.feedback-float-btn-container {
@@ -1160,7 +1160,7 @@ body {
 }
 
 .feedback-float-btn {
-  @apply transition-all scale-90 sm:scale-100 dark:brightness-95 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700 flex justify-center items-center;
+  @apply transition-all dark:brightness-95 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700 flex justify-center items-center;
 }
 
 .feedback-float-btn-svg {
