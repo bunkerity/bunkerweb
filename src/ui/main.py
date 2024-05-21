@@ -391,6 +391,10 @@ def inject_variables():
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
+    if db.readonly and db.fallback_readonly:
+        with suppress(BaseException):
+            db.retry_connection()
+
     # check that is value is in tuple
     return dict(
         script_nonce=app.config["SCRIPT_NONCE"],
@@ -402,7 +406,7 @@ def inject_variables():
         plugins=app.config["CONFIG"].get_plugins(),
         pro_loading=ui_data.get("PRO_LOADING", False),
         bw_version=metadata["version"],
-        is_readonly=False,
+        is_readonly=db.readonly,
     )
 
 
