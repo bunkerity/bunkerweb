@@ -90,10 +90,11 @@ COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosoff
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
 # Install fpm
-RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils && \
+RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
+  dnf install -y ruby-devel && \
   gem install fpm
 
 # Setup BW
