@@ -1,12 +1,13 @@
 <script setup>
 import { reactive, onBeforeMount } from "vue";
+import Grid from "@components/Widget/Grid.vue";
+import GridLayout from "@components/Widget/GridLayout.vue";
 import Checkbox from "@components/Forms/Field/Checkbox.vue";
 import Select from "@components/Forms/Field/Select.vue";
 import Input from "@components/Forms/Field/Input.vue";
 import Datepicker from "@components/Forms/Field/Datepicker.vue";
 import Button from "@components/Widget/Button.vue";
-import GridLayout from "@components/Widget/GridLayout.vue";
-import Grid from "@components/Widget/Grid.vue";
+import Stat from "@components/Widget/Stat.vue";
 
 /**
   @name Builder.vue
@@ -16,12 +17,20 @@ import Grid from "@components/Widget/Grid.vue";
   @example
   [
    {
-        "type": "card",  // this can be a "card", "modal", "table"... etc
-        "containerClass": "", // tailwind css grid class (items-start, ...)
+        // this can be a "card", "modal", "table"... etc
+        "type": "card",  
+
+        // container custom key
+        "title" : "My awesome card", 
+
+        // additionnal tailwind css class
+        "containerClass": "", 
+
+        // We can define the top level grid system (GridLayout.vue)
         "containerColumns" : {"pc": 12, "tablet": 12, "mobile": 12},
-        "title" : "My awesome card", // container title
+
         // Each widget need a name (here type) and associated data
-        // We need to send specific data for each widget type
+        // We need to send specific data for each widget typ
         widgets: [
                 {
                         type : "Checkbox", 
@@ -45,24 +54,23 @@ const props = defineProps({
 </script>
 
 <template>
-<div class="grid grid-cols-12">
-        <!-- top level grid (layout) -->
-        <GridLayout v-for="(container, index) in props.builder" :key="index"
-            :gridLayoutClass="container.containerClass"
-            :type="container.type"
-            :title="container.title"
-            :columns="container.containerColumns">
-                <!-- widget grid -->
-                <Grid>
-                        <!-- widget element -->
-                        <template v-for="(widget, index) in container.widgets" :key="index">
-                                <Checkbox v-if="widget.type === 'Checkbox'" v-bind="widget.data"></Checkbox>
-                                <Select v-if="widget.type === 'Select'" v-bind="widget.data"></Select>
-                                <Input v-if="widget.type === 'Input'" v-bind="widget.data"></Input>
-                                <Datepicker v-if="widget.type === 'Datepicker'" v-bind="widget.data"></Datepicker>
-                                <Button v-if="widget.type === 'Button'" v-bind="widget.data"></Button>
-                        </template>
-                </Grid>
-        </GridLayout>
-</div>
+<!-- top level grid (layout) -->
+<GridLayout v-for="(container, index) in props.builder" :key="index"
+        :gridLayoutClass="container.containerClass"
+        :type="container.type"
+        :title="container.title"
+        :columns="container.containerColumns">
+        <!-- widget grid -->
+        <Grid>
+                <!-- widget element -->
+                <template v-for="(widget, index) in container.widgets" :key="index">
+                        <Checkbox v-if="widget.type === 'Checkbox'" v-bind="widget.data"></Checkbox>
+                        <Select v-if="widget.type === 'Select'" v-bind="widget.data"></Select>
+                        <Input v-if="widget.type === 'Input'" v-bind="widget.data"></Input>
+                        <Datepicker v-if="widget.type === 'Datepicker'" v-bind="widget.data"></Datepicker>
+                        <Button v-if="widget.type === 'Button'" v-bind="widget.data"></Button>
+                        <Stat v-if="widget.type === 'Stat'" v-bind="widget.data"></Stat>
+                </template>
+        </Grid>
+</GridLayout>
 </template>

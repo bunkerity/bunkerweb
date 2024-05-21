@@ -15,8 +15,8 @@ import { defineProps, defineEmits, reactive } from "vue";
     message: "Your action has been successfully completed",
     delayToClose: 5000,
   }
-  @param {string} title - The title of the alert
-  @param {string} message - The message of the alert
+  @param {string} title - The title of the alert. Can be a translation key or by default raw text.
+  @param {string} message - The message of the alert. Can be a translation key or by default raw text.
   @param {boolean} [canClose=true] - Determine if the alert can be closed by user (add a close button), by default it is closable
   @param {string} [id=`feedback-alert-${message.substring(0, 10)}`]
   @param {string} [isFixed=false] - Determine if the alert is fixed (visible bottom right of page) or relative (inside a container)
@@ -94,7 +94,7 @@ onMounted(() => {
   >
     <div class="feedback-alert-header">
       <h5 class="feedback-alert-title">
-        {{ `${props.title}` }}
+        {{ $t(props.title, props.title)  }}
       </h5>
       <button
         :tabindex="props.tabId"
@@ -116,7 +116,7 @@ onMounted(() => {
         </svg>
       </button>
     </div>
-    <p class="feedback-alert-text">{{ props.message }}</p>
+    <p class="feedback-alert-text">{{ $t(props.message, props.message) }}</p>
   </div>
   </div>
 </template>

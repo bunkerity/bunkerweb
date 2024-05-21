@@ -29,13 +29,13 @@ import "@assets/css/flatpickr.dark.css";
     inpClass: "text-center",
   }
   @param {string} id
-  @param {string} name
-  @param {string} label
+  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string|number|date} [defaultDate=null] - Default date when instanciate
   @param {string|number} [noPickBeforeStamp=""] - Impossible to pick a date before this date
   @param {string|number} [noPickAfterStamp=""] - Impossible to pick a date after this date
   @param {boolean} [hideLabel=false]
-  @param {object|boolean} [columns={"pc": "12", "tab": "12", "mob": "12}]
+  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
   @param {string} [headerClass=""]

@@ -25,7 +25,7 @@ import IconAdd from "@components/Icons/Button/Add.vue";
     eventAttr: {"store" : "modal", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},7
   }
   @param {string} id
-  @param {string} text - Content of the button
+  @param {string} text - Content of the button. Can be a translation key or by default raw text.
   @param {string} [type="button"] - Can be of type button || submit
   @param {boolean} [disabled=false]
   @param {boolean} [hideText=false] - Hide text to only display icon
@@ -164,7 +164,7 @@ function updateData(isClick = false) {
   >
     <span :class="[props.hideText ? 'sr-only' : '', 
     props.iconName ? 'mr-2' : ''
-    ]" :id="`${props.id}-text`">{{ props.text }}</span>
+    ]" :id="`${props.id}-text`">{{  $t(props.text, props.text) }}</span>
     <IconAdd v-if="props.iconName === 'add'" :iconName="props.iconName" :iconColor="props.iconColor" />
   </button>
 </Container>

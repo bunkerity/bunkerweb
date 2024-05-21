@@ -13,8 +13,8 @@ import { defineProps } from "vue";
     name: 'test-input',
     required: true,
   }
-  @param {string} label
-  @param {string} name
+  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {boolean} [required=false]
   @param {boolean} [hideLabel=false]
   @param {string} [headerClass=""]
@@ -55,7 +55,7 @@ const props = defineProps({
       :for="props.name"
       class="relative lowercase capitalize-first my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-300"
     >
-    {{ props.label ? props.label : props.name }} <span v-if="props.version">{{ props.version }}</span>
+    {{ props.label ? $t(props.label, props.label) : $t(props.name, props.name) }} <span v-if="props.version">{{ props.version }}</span>
   </label>
   <span
     v-if="props.required"

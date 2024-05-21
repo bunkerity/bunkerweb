@@ -24,14 +24,14 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     label: 'Test select',
   }
   @param {string} id
-  @param {string} name
+  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
-  @param {string} label
   @param {array} values
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
   @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
-  @param {object|boolean} [columns={"pc": "12", "tab": "12", "mob": "12}]
+  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
   @param {boolean} [hideLabel=false]
   @param {string} [containerClass=""]
   @param {string} [inpClass=""]

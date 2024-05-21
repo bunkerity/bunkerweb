@@ -24,10 +24,11 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     pattern : "(test)",
   }
   @param {string} id
-  @param {string} name
   @param {string} type - text, email, password, number, tel, url
+  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.  @param {string} label
   @param {string} value
-  @param {string} label
+  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
   @param {string} [placeholder=""]

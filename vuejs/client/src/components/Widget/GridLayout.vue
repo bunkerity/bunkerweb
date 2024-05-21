@@ -48,12 +48,12 @@ const props = defineProps({
 })
 
 const containerClass = computed(() => {
-    if(props.type === 'card') return 'bg-white rounded-xl shadow-md w-full';
+    if(props.type === 'card') return 'card';
     return '';
 })
 
 const gridClass = computed(() => {
-    return `grid grid-cols-12 w-full col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
+    return `break-words grid grid-cols-12 w-full col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
 })
 
 const titleClass = computed(() => {
@@ -63,8 +63,8 @@ const titleClass = computed(() => {
 </script>
 
 <template>
-<div :class="[containerClass, gridClass, props.gridLayoutClass, 'p-4 m-4']">
-    <h1 v-if="props.title" :class="[titleClass, 'col-span-12']">{{ props.title }}</h1>
+<div data-grid-layout :class="[containerClass, gridClass, props.gridLayoutClass, 'p-4']">
+    <h1 v-if="props.title" :class="[titleClass, 'col-span-12']">{{ $t(props.title, props.title) }}</h1>
     <slot></slot>
 </div>
 </template>

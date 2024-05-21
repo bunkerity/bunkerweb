@@ -29,7 +29,7 @@ const flexClass = computed(() => {
 </script>
 
 <template>
-<div :class="[flexClass]">
+<div data-flex :class="[flexClass]">
     <slot></slot>
 </div>
 </template>

@@ -35,7 +35,7 @@ const gridClass = computed(() => {
 </script>
 
 <template>
-  <div :class="[props.containerClass ? props.containerClass : '', gridClass]">
+  <div data-container :class="[props.containerClass ? props.containerClass : '', gridClass]">
     <slot></slot>
   </div>
 </template>
