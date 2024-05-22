@@ -46,31 +46,41 @@ import Stat from "@components/Widget/Stat.vue";
 */
 
 const props = defineProps({
-    builder : {
-        type: Array,
-        required: true,
-    },
-})
+  builder: {
+    type: Array,
+    required: true,
+  },
+});
 </script>
 
 <template>
-<!-- top level grid (layout) -->
-<GridLayout v-for="(container, index) in props.builder" :key="index"
-        :gridLayoutClass="container.containerClass"
-        :type="container.type"
-        :title="container.title"
-        :columns="container.containerColumns">
-        <!-- widget grid -->
-        <Grid>
-                <!-- widget element -->
-                <template v-for="(widget, index) in container.widgets" :key="index">
-                        <Checkbox v-if="widget.type === 'Checkbox'" v-bind="widget.data"></Checkbox>
-                        <Select v-if="widget.type === 'Select'" v-bind="widget.data"></Select>
-                        <Input v-if="widget.type === 'Input'" v-bind="widget.data"></Input>
-                        <Datepicker v-if="widget.type === 'Datepicker'" v-bind="widget.data"></Datepicker>
-                        <Button v-if="widget.type === 'Button'" v-bind="widget.data"></Button>
-                        <Stat v-if="widget.type === 'Stat'" v-bind="widget.data"></Stat>
-                </template>
-        </Grid>
-</GridLayout>
+  <!-- top level grid (layout) -->
+  <GridLayout
+    v-for="(container, index) in props.builder"
+    :key="index"
+    :gridLayoutClass="container.containerClass"
+    :type="container.type"
+    :title="container.title"
+    :link="container.link"
+    :columns="container.containerColumns"
+  >
+    <!-- widget grid -->
+    <Grid>
+      <!-- widget element -->
+      <template v-for="(widget, index) in container.widgets" :key="index">
+        <Checkbox
+          v-if="widget.type === 'Checkbox'"
+          v-bind="widget.data"
+        ></Checkbox>
+        <Select v-if="widget.type === 'Select'" v-bind="widget.data"></Select>
+        <Input v-if="widget.type === 'Input'" v-bind="widget.data"></Input>
+        <Datepicker
+          v-if="widget.type === 'Datepicker'"
+          v-bind="widget.data"
+        ></Datepicker>
+        <Button v-if="widget.type === 'Button'" v-bind="widget.data"></Button>
+        <Stat v-if="widget.type === 'Stat'" v-bind="widget.data"></Stat>
+      </template>
+    </Grid>
+  </GridLayout>
 </template>

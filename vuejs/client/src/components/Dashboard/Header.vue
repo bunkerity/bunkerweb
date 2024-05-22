@@ -12,6 +12,10 @@ const header = reactive({
     if (header.splitPath.length === 0) return "page";
     return header.splitPath[header.splitPath.length - 1];
   }),
+  lastPath: computed(() => {
+    if (header.splitPath.length === 0) return "page";
+    return header.splitPath[header.splitPath.length - 1];
+  }),
 });
 
 onMounted(() => {
@@ -42,13 +46,15 @@ onMounted(() => {
       <div class="header-wrap">
         <nav>
           <!-- breadcrumb -->
-          <h2 class="header-title">{{ header.currPath }}</h2>
+          <h2 class="header-title">
+            {{ $t(`dashboard_${header.currPath}`, header.currPath) }}
+          </h2>
           <ul class="header-breadcrumb-container">
             <li class="header-breadcrumb-item first">
               {{ $t("dashboard_bw") }}
             </li>
             <li class="header-breadcrumb-item slash mobile active">
-              {{ header.splitPath[header.splitPath.length - 1] }}
+              {{ $t(`dashboard_${header.lastPath}`, header.lastPath) }}
             </li>
           </ul>
         </nav>
