@@ -392,20 +392,6 @@ def inject_variables():
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
-    if db.database_uri and db.readonly:
-        try:
-            db.retry_connection()
-            db.readonly = False
-            app.logger.info("The database is no longer read-only, defaulting to read-write mode")
-        except BaseException:
-            try:
-                db.retry_connection(readonly=True)
-            except BaseException:
-                if db.database_uri_readonly:
-                    with suppress(BaseException):
-                        db.retry_connection(fallback=True)
-            db.readonly = True
-
     # check that is value is in tuple
     return dict(
         script_nonce=app.config["SCRIPT_NONCE"],
@@ -464,7 +450,11 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
-    db_user = db.get_ui_user()
+    try:
+        db_user = db.get_ui_user()
+    except BaseException:
+        db_user = db.get_ui_user()
+
     if db_user:
         app.config["USER"] = User(**db_user)
 

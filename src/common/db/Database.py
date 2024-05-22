@@ -74,6 +74,7 @@ class Database:
         """Initialize the database"""
         self.logger = logger
         self.readonly = False
+        self.last_fallback = None
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -168,9 +169,11 @@ class Database:
                         if not self.readonly:
                             self.logger.warning("The database is read-only, trying one last time to connect in read-only mode")
                             self.readonly = True
+                            self.last_fallback = datetime.now()
                         elif self.database_uri_readonly and sqlalchemy_string != self.database_uri_readonly:
                             self.logger.warning("Can't connect to the database in read-only mode, falling back to read-only one")
                             sqlalchemy_string = self.database_uri_readonly
+                            self.last_fallback = datetime.now()
                         else:
                             self.logger.error(f"Can't connect to database : {format_exc()}")
                             _exit(1)
@@ -206,7 +209,7 @@ class Database:
         if self.sql_engine:
             self.sql_engine.dispose()
 
-    def retry_connection(self, *, readonly: bool = False, fallback: bool = False) -> None:
+    def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
         """Retry the connection to the database"""
 
         assert self.sql_engine is not None
@@ -215,7 +218,7 @@ class Database:
             raise ValueError("The fallback parameter is set to True but the read-only database URI is not set")
 
         self.sql_engine.dispose(close=True)
-        self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs)
+        self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
 
         if fallback or readonly:
             with self.sql_engine.connect() as conn:
@@ -234,47 +237,51 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        if self.database_uri and self.readonly:
+        if self.database_uri and self.readonly and self.last_fallback and (datetime.now() - self.last_fallback).total_seconds() > 30:
             # ? If the database is forced to be read-only, we try to connect as a non read-only user every time until the database is writable
             try:
-                self.retry_connection()
+                self.retry_connection(pool_timeout=1)
                 self.readonly = False
                 self.logger.info("The database is no longer read-only, defaulting to read-write mode")
             except (OperationalError, DatabaseError):
                 try:
-                    self.retry_connection(readonly=True)
+                    self.retry_connection(readonly=True, pool_timeout=1)
                 except (OperationalError, DatabaseError):
                     if self.database_uri_readonly:
                         with suppress(OperationalError, DatabaseError):
-                            self.retry_connection(fallback=True)
+                            self.retry_connection(fallback=True, pool_timeout=1)
                 self.readonly = True
 
-        with self.sql_engine.connect() as conn:
-            session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
-            session = scoped_session(session_factory)
-            try:
+        session = None
+        try:
+            with self.sql_engine.connect() as conn:
+                session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
+                session = scoped_session(session_factory)
                 yield session
-            except BaseException as e:
+        except BaseException as e:
+            if session:
                 session.rollback()
 
-                if "attempt to write a readonly database" in str(e):
-                    self.logger.warning("The database is read-only, retrying in read-only mode ...")
-                    try:
-                        self.retry_connection(readonly=True)
-                    except (OperationalError, DatabaseError):
-                        if self.database_uri_readonly:
-                            self.logger.warning("Can't connect to the database in read-only mode, falling back to read-only one")
-                            with suppress(OperationalError, DatabaseError):
-                                self.retry_connection(fallback=True)
-
+            if "attempt to write a readonly database" in str(e):
+                self.logger.warning("The database is read-only, retrying in read-only mode ...")
+                try:
+                    self.retry_connection(readonly=True, pool_timeout=1)
+                except (OperationalError, DatabaseError):
+                    if self.database_uri_readonly:
+                        self.logger.warning("Can't connect to the database in read-only mode, falling back to read-only one")
+                        with suppress(OperationalError, DatabaseError):
+                            self.retry_connection(fallback=True, pool_timeout=1)
+                self.readonly = True
+                self.last_fallback = datetime.now()
+            elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
+                self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+                with suppress(OperationalError, DatabaseError):
+                    self.retry_connection(fallback=True, pool_timeout=1)
                     self.readonly = True
-                elif isinstance(e, ConnectionRefusedError) and self.database_uri_readonly:
-                    self.logger.warning("Can't connect to the database, falling back to read-only one ...")
-                    with suppress(OperationalError, DatabaseError):
-                        self.retry_connection(fallback=True)
-
-                raise
-            finally:
+                    self.last_fallback = datetime.now()
+            raise
+        finally:
+            if session:
                 session.remove()
 
     def set_autoconf_load(self, value: bool = True) -> str:
