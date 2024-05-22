@@ -71,7 +71,7 @@ try:
 
     log_info("Redirected to login page, waiting for login form ...")
 
-    safe_get_element(DRIVER, By.TAG_NAME, "form")
+    safe_get_element(DRIVER, By.TAG_NAME, "form", driver_wait=driver_wait)
 
     log_info("Form found, trying to access another page without being logged in ...")
 
