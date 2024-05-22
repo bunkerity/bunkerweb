@@ -600,7 +600,7 @@ regex==2024.5.10 \
     --hash=sha256:f03b1dbd4d9596dd84955bb40f7d885204d6aac0d56a919bb1e0ff2fb7e1735a \
     --hash=sha256:fa9335674d7c819674467c7b46154196c51efbaf5f5715187fd366814ba3fa39
     # via mkdocs-material
-requests==2.31.0 \
+requests==2.32.0 \
     --hash=sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f \
     --hash=sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1
     # via
