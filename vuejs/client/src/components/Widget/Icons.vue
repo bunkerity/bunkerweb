@@ -19,6 +19,8 @@ import Task  from "@components/Icons/Task.vue";
 import Trespass  from "@components/Icons/Trespass.vue";
 import Twitter  from "@components/Icons/Twitter.vue";
 import Wire  from "@components/Icons/Wire.vue";
+import Funnel  from "@components/Icons/Funnel.vue";
+
 import { computed } from "vue";
 
 /** 
@@ -76,4 +78,5 @@ const props = defineProps({
     <Trespass v-if="props.iconName === 'trespass'" :iconClass="props.iconClass" :iconColor="props.iconColor" />
     <Twitter v-if="props.iconName === 'twitter'" :iconClass="props.iconClass" :iconColor="props.iconColor" />
     <Wire v-if="props.iconName === 'wire'" :iconClass="props.iconClass" :iconColor="props.iconColor" />
+    <Funnel v-if="props.iconName === 'funnel'" :iconClass="props.iconClass" :iconColor="props.iconColor" />
 </template>

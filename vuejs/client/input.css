@@ -835,11 +835,11 @@ body {
 }
 
 .stat-svg {
-  @apply leading-none text-lg relative scale-[0.6];
+  @apply leading-none text-lg relative w-6 h-6;
 }
 
 .stat-svg-container {
-  @apply absolute top-0 right-0 min-w-12 dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
+  @apply absolute top-0 right-0 min-w-12 dark:brightness-90 flex justify-center items-center w-12 h-12 text-center rounded-circle;
 }
 
 
@@ -1634,6 +1634,15 @@ body {
 .info.stat-svg
  {
   @apply fill-sky-500;
+}
+
+.white.default-svg,
+.white.btn-svg,
+.white.menu-svg,
+.white.social-svg,
+.white.stat-svg
+ {
+  @apply fill-white;
 }
 
 .purple.default-svg,

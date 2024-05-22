@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import IconList from '@components/Icons/List.vue';
+import Icons from '@components/Widget/Icons.vue';
 
 /** 
   @name Widget/Stat.vue
@@ -82,11 +82,11 @@ onMounted(() => {
     }
 })
 </script>
-<template>
+<template> 
     <component ref="statEl" :is="props.link ? 'a' : 'div'"
         :class="['stat-container', props.statClass]">
         <!-- text -->
-        <div :class="['stat-content-container', props.icon ? 'is-icon' : 'no-icon']">
+        <div :class="['stat-content-container', props.iconName ? 'is-icon' : 'no-icon']">
             <p class="stat-title">{{  $t(props.title, props.title) }}</p>
             <!-- version of user -->
             <h5 class="stat-value">{{  $t(props.value, props.value) }}</h5>
@@ -94,10 +94,10 @@ onMounted(() => {
         </div>
         <!-- end text -->
         <!-- icon -->
-        <div v-if="props.icon" role="img"
+        <div v-if="props.iconName" role="img"
                 aria-label="version"
                 :class="['stat-svg-container', props.iconColor]">
-            <IconList :iconName="props.icon" :iconClass="'stat-svg'" :iconColor="props.iconColor" />
+            <Icons :iconName="props.iconName" :iconClass="'stat-svg'" :iconColor="'white'" />
         </div>
         <!-- end icon -->
     </component>

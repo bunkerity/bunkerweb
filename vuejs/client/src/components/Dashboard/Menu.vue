@@ -62,7 +62,7 @@ const navList = [
     svgColor : "amber",
     path: "/reports",
   },
-  { tag: "bans", svg: "trespass", svgColor : "red", path: "/bans" },
+  { tag: "bans", svg: "funnel", svgColor : "red", path: "/bans" },
   { tag: "jobs", svg: "task", svgColor : "emerald", path: "/jobs" },
   { tag: "logs", svg: "list", svgColor : "dark", path: "/logs" },
 ];
