@@ -174,6 +174,7 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
 
     # Remove old external/pro plugins files
     logger.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
+    ignored_plugins = set()
     if original_path.is_dir():
         for file in original_path.glob("*"):
             try:
@@ -187,6 +188,7 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
                         tar.add(file, arcname=file.name, recursive=True)
                     plugin_content.seek(0, 0)
                     if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
+                        ignored_plugins.add(file.name)
                         continue
                     logger.debug(f"Checksum of {file} has changed, removing it ...")
 
@@ -200,6 +202,9 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
         logger.info(f"Generating new {'pro ' if pro else ''}external plugins ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
+            if plugin["id"] in ignored_plugins:
+                continue
+
             try:
                 if plugin["data"]:
                     tmp_path = TMP_PATH.joinpath(f"{plugin['id']}_{plugin['name']}.tar.gz")
