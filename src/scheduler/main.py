@@ -177,12 +177,9 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
     ignored_plugins = set()
     if original_path.is_dir():
         for file in original_path.glob("*"):
-            try:
+            with suppress(StopIteration, IndexError):
                 index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
-            except StopIteration:
-                index = -1
 
-            if index > -1:
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
                         tar.add(file, arcname=file.name, recursive=True)
@@ -511,13 +508,11 @@ if __name__ == "__main__":
                     }
                     jobs = common_data.pop("jobs", [])
 
-                    try:
+                    with suppress(StopIteration, IndexError):
                         index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
-                    except StopIteration:
-                        index = -1
 
-                    if index > -1 and checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
-                        continue
+                        if checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
+                            continue
 
                     tmp_external_plugins.append(common_data.copy())
 
