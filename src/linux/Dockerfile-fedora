@@ -67,7 +67,7 @@ WORKDIR /usr/share/bunkerweb
 
 # Install fpm
 RUN dnf update -y && \
-    dnf install -y ruby ruby-devel redhat-rpm-config rpm-build && \
+    dnf install -y ruby ruby-devel redhat-rpm-config rpm-build gcc make && \
     gem install -N fpm
 
 # Setup BW
