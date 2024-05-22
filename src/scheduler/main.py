@@ -289,17 +289,21 @@ def api_to_instance(api):
 def run_in_slave_mode():
     assert SCHEDULER is not None
 
-    # Wait for init
-    while not SCHEDULER.db.is_initialized():
-        logger.warning("Database is not initialized, retrying in 5s ...")
+    ready = False
+    while not ready:
+        db_metadata = SCHEDULER.db.get_metadata()
+        env = SCHEDULER.db.get_config()
+        if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
+            logger.warning("Database is not initialized, retrying in 5s ...")
+        elif not db_metadata["first_config_saved"] or not env:
+            logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
+        else:
+            ready = True
+            continue
         sleep(5)
 
-    # Wait for first config
-    env = SCHEDULER.db.get_config()
-    while not SCHEDULER.db.is_first_config_saved() or not env:
-        logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
-        sleep(5)
-        env = SCHEDULER.db.get_config()
+    # Instantiate scheduler environment
+    SCHEDULER.env = env | environ
 
     # Download plugins
     pro_plugins = SCHEDULER.db.get_plugins(_type="pro", with_data=True)
@@ -372,22 +376,14 @@ if __name__ == "__main__":
             run_in_slave_mode()
             stop(1)
 
-        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
-            while not SCHEDULER.db.is_initialized():
-                logger.warning("Database is not initialized, retrying in 5s ...")
-                sleep(5)
-
-            while not SCHEDULER.db.is_autoconf_loaded():
-                logger.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
-                sleep(5)
+        db_metadata = SCHEDULER.db.get_metadata()
 
         if (
-            INTEGRATION in ("Swarm", "Kubernetes", "Autoconf")
+            isinstance(db_metadata, str)
+            or (db_metadata["is_initialized"] and SCHEDULER.db.get_config() != dotenv_env)
             or not tmp_variables_path.exists()
             or not nginx_variables_path.exists()
             or (tmp_variables_path.read_text(encoding="utf-8") != nginx_variables_path.read_text(encoding="utf-8"))
-            or SCHEDULER.db.is_initialized()
-            and SCHEDULER.db.get_config() != dotenv_env
         ):
             # run the config saver
             proc = subprocess_run(
@@ -405,19 +401,19 @@ if __name__ == "__main__":
             if proc.returncode != 0:
                 logger.error("Config saver failed, configuration will not work as expected...")
 
-            if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf"):
-                while not SCHEDULER.db.is_initialized():
-                    logger.warning("Database is not initialized, retrying in 5s ...")
-                    sleep(5)
-
-                env = SCHEDULER.db.get_config()
-                while not SCHEDULER.db.is_first_config_saved() or not env:
-                    logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
-                    sleep(5)
-                    env = SCHEDULER.db.get_config()
+        ready = False
+        while not ready:
+            db_metadata = SCHEDULER.db.get_metadata()
+            if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
+                logger.warning("Database is not initialized, retrying in 5s ...")
+            elif INTEGRATION in ("Swarm", "Kubernetes", "Autoconf") and not db_metadata["autoconf_loaded"]:
+                logger.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
+            else:
+                ready = True
+                continue
+            sleep(5)
 
         env = SCHEDULER.db.get_config()
-
         env["DATABASE_URI"] = SCHEDULER.db.database_uri
 
         # Override instances if needed
@@ -427,7 +423,7 @@ if __name__ == "__main__":
             for instance in override_instances.split(" "):
                 apis.append(API(instance))
 
-        # Instantiate scheduler
+        # Instantiate scheduler environment
         SCHEDULER.env = env | environ
 
         if INTEGRATION in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
@@ -440,7 +436,7 @@ if __name__ == "__main__":
                     sleep(5)
             SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis])
 
-        scheduler_first_start = SCHEDULER.db.is_scheduler_first_start()
+        scheduler_first_start = db_metadata["scheduler_first_start"]
 
         logger.info("Scheduler started ...")
 
@@ -548,11 +544,11 @@ if __name__ == "__main__":
         if not SCHEDULER.run_single("download-pro-plugins"):
             logger.warning("download-pro-plugins job failed at first start, pro plugins settings set by the user may not be up to date ...")
 
-        changes = SCHEDULER.db.check_changes()
-        if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf") and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
-            if changes["pro_plugins_changed"]:
+        db_metadata = SCHEDULER.db.get_metadata()
+        if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf") and (db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]):
+            if db_metadata["pro_plugins_changed"]:
                 generate_external_plugins(SCHEDULER.db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
-            if changes["external_plugins_changed"]:
+            if db_metadata["external_plugins_changed"]:
                 generate_external_plugins(SCHEDULER.db.get_plugins(_type="external", with_data=True))
 
             # run the config saver to save potential ignored external plugins settings
@@ -717,7 +713,7 @@ if __name__ == "__main__":
             INSTANCES_NEED_GENERATION = False
 
             if scheduler_first_start:
-                ret = SCHEDULER.db.set_scheduler_first_start()
+                ret = SCHEDULER.db.set_metadata({"scheduler_first_start": False})
 
                 if ret == "The database is read-only, the changes will not be saved":
                     logger.warning("The database is read-only, the scheduler first start will not be saved")
@@ -744,20 +740,20 @@ if __name__ == "__main__":
 
                     DB_LOCK_FILE.unlink(missing_ok=True)
 
-                    changes = SCHEDULER.db.check_changes()
+                    db_metadata = SCHEDULER.db.get_metadata()
 
-                    if isinstance(changes, str):
-                        raise Exception(f"An error occurred when checking for changes in the database : {changes}")
+                    if isinstance(db_metadata, str):
+                        raise Exception(f"An error occurred when checking for changes in the database : {db_metadata}")
 
                     # check if the plugins have changed since last time
-                    if changes["pro_plugins_changed"]:
+                    if db_metadata["pro_plugins_changed"]:
                         logger.info("Pro plugins changed, generating ...")
                         PRO_PLUGINS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
 
-                    if changes["external_plugins_changed"]:
+                    if db_metadata["external_plugins_changed"]:
                         logger.info("External plugins changed, generating ...")
                         PLUGINS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
@@ -765,21 +761,21 @@ if __name__ == "__main__":
                         NEED_RELOAD = True
 
                     # check if the custom configs have changed since last time
-                    if changes["custom_configs_changed"]:
+                    if db_metadata["custom_configs_changed"]:
                         logger.info("Custom configs changed, generating ...")
                         CONFIGS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True
 
                     # check if the config have changed since last time
-                    if changes["config_changed"]:
+                    if db_metadata["config_changed"]:
                         logger.info("Config changed, generating ...")
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
 
                     # check if the instances have changed since last time
-                    if changes["instances_changed"]:
+                    if db_metadata["instances_changed"]:
                         logger.info("Instances changed, generating ...")
                         INSTANCES_NEED_GENERATION = True
                         CONFIGS_NEED_GENERATION = True

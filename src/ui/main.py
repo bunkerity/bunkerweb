@@ -174,18 +174,24 @@ REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655
 
 
 def wait_applying():
-    for i in range(31):
-        curr_changes = db.check_changes()
-        if isinstance(curr_changes, str):
-            app.logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
-        elif not any(curr_changes.values()):
-            break
+    current_time = datetime.now()
+    ready = False
+    while not ready and (datetime.now() - current_time).seconds < 120:
+        db_metadata = db.get_metadata()
+        if isinstance(db_metadata, str):
+            app.logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
+        elif not any(
+            v
+            for k, v in db_metadata.items()
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+        ):
+            ready = True
+            continue
         else:
-            app.logger.warning(
-                "Scheduler is already applying a configuration, retrying in 1 seconds ...",
-            )
+            app.logger.warning("Scheduler is already applying a configuration, retrying in 1s ...")
         sleep(1)
-    if i >= 30:
+
+    if not ready:
         app.logger.error("Too many retries while waiting for scheduler to apply configuration...")
 
 
@@ -384,9 +390,13 @@ def inject_variables():
     ui_data = get_ui_data()
     metadata = db.get_metadata()
 
-    curr_changes = db.check_changes()
+    db_metadata = db.get_metadata()
 
-    if ui_data.get("PRO_LOADING") and not any(curr_changes.values()):
+    if ui_data.get("PRO_LOADING") and not any(
+        v
+        for k, v in db_metadata.items()
+        if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+    ):
         ui_data["PRO_LOADING"] = False
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
@@ -716,11 +726,11 @@ def account():
             # by setting the last check to None
             metadata = db.get_metadata()
             metadata["last_pro_check"] = None
-            db.set_pro_metadata(metadata)
+            db.set_metadata(metadata)
 
             flash("Checking license key to upgrade.", "success")
 
-            curr_changes = db.check_changes()
+            db_metadata = db.get_metadata()
 
             # Reload instances
             def update_global_config(threaded: bool = False):
@@ -731,7 +741,11 @@ def account():
             ui_data = get_ui_data()
             ui_data["PRO_LOADING"] = True
 
-            if any(curr_changes.values()):
+            if any(
+                v
+                for k, v in db_metadata.items()
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+            ):
                 ui_data["RELOADING"] = True
                 ui_data["LAST_RELOAD"] = time()
                 Thread(target=update_global_config, args=(True,)).start()
@@ -993,7 +1007,7 @@ def services():
 
         error = 0
 
-        curr_changes = db.check_changes()
+        db_metadata = db.get_metadata()
 
         old_server_name = request.form.get("OLD_SERVER_NAME", "")
         operation = request.form["operation"]
@@ -1012,7 +1026,11 @@ def services():
                 threaded=threaded,
             )
 
-        if any(curr_changes.values()):
+        if any(
+            v
+            for k, v in db_metadata.items()
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+        ):
             ui_data = get_ui_data()
             ui_data["RELOADING"] = True
             ui_data["LAST_RELOAD"] = time()
@@ -1123,7 +1141,7 @@ def global_config():
                 if setting and setting["global"] and (setting["value"] != value or setting["value"] == config.get(variable, {"value": None})["value"]):
                     variables[f"{service}_{variable}"] = value
 
-        curr_changes = db.check_changes()
+        db_metadata = db.get_metadata()
 
         def update_global_config(threaded: bool = False):
             wait_applying()
@@ -1135,7 +1153,11 @@ def global_config():
         if "PRO_LICENSE_KEY" in variables:
             ui_data["PRO_LOADING"] = True
 
-        if any(curr_changes.values()):
+        if any(
+            v
+            for k, v in db_metadata.items()
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+        ):
             ui_data["RELOADING"] = True
             ui_data["LAST_RELOAD"] = time()
             Thread(target=update_global_config, args=(True,)).start()
@@ -1303,7 +1325,7 @@ def plugins():
             if variables["type"] in ("core", "pro"):
                 return redirect_flash_error(f"Can't delete {variables['type']} plugin {variables['name']}", "plugins", True)
 
-            curr_changes = db.check_changes()
+            db_metadata = db.get_metadata()
 
             def update_plugins(threaded: bool = False):  # type: ignore
                 wait_applying()
@@ -1333,7 +1355,11 @@ def plugins():
                 with LOCK:
                     TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
-            if any(curr_changes.values()):
+            if any(
+                v
+                for k, v in db_metadata.items()
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+            ):
                 ui_data = get_ui_data()
                 ui_data["RELOADING"] = True
                 ui_data["LAST_RELOAD"] = time()
@@ -1512,7 +1538,7 @@ def plugins():
             if errors >= files_count:
                 return redirect(url_for("loading", next=url_for("plugins")))
 
-            curr_changes = db.check_changes()
+            db_metadata = db.get_metadata()
 
             def update_plugins(threaded: bool = False):
                 wait_applying()
@@ -1543,7 +1569,11 @@ def plugins():
                 with LOCK:
                     TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
-            if any(curr_changes.values()):
+            if any(
+                v
+                for k, v in db_metadata.items()
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+            ):
                 ui_data = get_ui_data()
                 ui_data["RELOADING"] = True
                 ui_data["LAST_RELOAD"] = time()

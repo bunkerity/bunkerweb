@@ -58,13 +58,16 @@ def on_starting(server):
 
     INTEGRATION = get_integration()
 
-    if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
-        while not db.is_autoconf_loaded():
+    ready = False
+    while not ready:
+        db_metadata = db.get_metadata()
+        if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
+            LOGGER.warning("Database is not initialized, retrying in 5s ...")
+        elif INTEGRATION in ("Swarm", "Kubernetes", "Autoconf") and not db_metadata["autoconf_loaded"]:
             LOGGER.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
-            sleep(5)
-
-    while not db.is_initialized():
-        LOGGER.warning("Database is not initialized, retrying in 5s ...")
+        else:
+            ready = True
+            continue
         sleep(5)
 
     USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")

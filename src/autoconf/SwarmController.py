@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from time import sleep
 from traceback import format_exc
 from threading import Thread, Lock
@@ -150,33 +151,28 @@ class SwarmController(Controller):
             error = False
             try:
                 for event in self.__client.events(decode=True, filters={"type": event_type}):
-                    self.__internal_lock.acquire()
-                    locked = True
-                    if not self.__process_event(event):
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-                    try:
-                        self.wait_applying()
-                        self._update_settings()
-                        self._instances = self.get_instances()
-                        self._services = self.get_services()
-                        self._configs = self.get_configs()
-                        if not self.update_needed(self._instances, self._services, configs=self._configs):
-                            self.__internal_lock.release()
+                    with self.__internal_lock:
+                        locked = True
+                        if not self.__process_event(event):
                             locked = False
                             continue
-                        self._logger.info(f"Caught Swarm event ({event_type}), deploying new configuration ...")
-                        if not self.apply_config():
-                            self._logger.error("Error while deploying new configuration")
-                        else:
-                            self._logger.info(
-                                "Successfully deployed new configuration 🚀",
-                            )
-                            self._set_autoconf_load_db()
-                    except:
-                        self._logger.error(f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}")
-                    self.__internal_lock.release()
+                        try:
+                            self.wait_applying()
+                            self._update_settings()
+                            self._instances = self.get_instances()
+                            self._services = self.get_services()
+                            self._configs = self.get_configs()
+                            if not self.update_needed(self._instances, self._services, configs=self._configs):
+                                locked = False
+                                continue
+                            self._logger.info(f"Caught Swarm event ({event_type}), deploying new configuration ...")
+                            if not self.apply_config():
+                                self._logger.error("Error while deploying new configuration")
+                            else:
+                                self._logger.info("Successfully deployed new configuration 🚀")
+                                self._set_autoconf_load_db()
+                        except:
+                            self._logger.error(f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}")
                     locked = False
             except:
                 self._logger.error(
@@ -185,7 +181,8 @@ class SwarmController(Controller):
                 error = True
             finally:
                 if locked:
-                    self.__internal_lock.release()
+                    with suppress(BaseException):
+                        self.__internal_lock.release()
                     locked = False
                 if error is True:
                     self._logger.warning("Got exception, retrying in 10 seconds ...")

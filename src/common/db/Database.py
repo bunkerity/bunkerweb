@@ -10,6 +10,7 @@ from os.path import join
 from pathlib import Path
 from re import compile as re_compile
 from sys import argv, path as sys_path
+from threading import Lock
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
@@ -54,6 +55,8 @@ from sqlalchemy.pool import QueuePool
 from sqlite3 import Connection as SQLiteConnection
 
 install_as_MySQLdb()
+
+LOCK = Lock()
 
 
 @event.listens_for(Engine, "connect")
@@ -235,119 +238,26 @@ class Database:
             with suppress(OperationalError, DatabaseError):
                 self.retry_connection()
 
-        with self.sql_engine.connect() as conn:
-            session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
-            session = scoped_session(session_factory)
-            try:
-                yield session
-            except BaseException as e:
-                session.rollback()
+        with LOCK:
+            with self.sql_engine.connect() as conn:
+                session_factory = sessionmaker(bind=conn, autoflush=True, expire_on_commit=False)
+                session = scoped_session(session_factory)
+                try:
+                    yield session
+                except BaseException as e:
+                    session.rollback()
 
-                if self.database_uri_readonly and "attempt to write a readonly database" in str(e):
-                    self.sql_engine.dispose(close=True)
-                    self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
-                    self.fallback_readonly = True
-                    self.readonly = True
-                    self.logger.warning("The database is read-only, falling back to read-only mode")
-                    return
+                    if self.database_uri_readonly and "attempt to write a readonly database" in str(e):
+                        self.sql_engine.dispose(close=True)
+                        self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
+                        self.fallback_readonly = True
+                        self.readonly = True
+                        self.logger.warning("The database is read-only, falling back to read-only mode")
+                        return
 
-                raise
-            finally:
-                session.remove()
-
-    def set_autoconf_load(self, value: bool = True) -> str:
-        """Set the autoconf_loaded value"""
-        with self.__db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
-
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                metadata.autoconf_loaded = value
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def is_autoconf_loaded(self) -> bool:
-        """Check if the autoconf is loaded"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.autoconf_loaded).filter_by(id=1).first()
-                return metadata is not None and metadata.autoconf_loaded
-            except (ProgrammingError, OperationalError):
-                return False
-
-    def set_scheduler_first_start(self, value: bool = False) -> str:
-        """Set the scheduler_first_start value"""
-        with self.__db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
-
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                metadata.scheduler_first_start = value
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
-        """Set the pro metadata values"""
-        with self.__db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
-
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                for key, value in data.items():
-                    setattr(metadata, key, value)
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def is_scheduler_first_start(self) -> bool:
-        """Check if it's the scheduler's first start"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.scheduler_first_start).filter_by(id=1).first()
-                return metadata is not None and metadata.scheduler_first_start
-            except (ProgrammingError, OperationalError):
-                return True
-
-    def is_first_config_saved(self) -> bool:
-        """Check if the first configuration has been saved"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.first_config_saved).filter_by(id=1).first()
-                return metadata is not None and metadata.first_config_saved
-            except (ProgrammingError, OperationalError):
-                return False
-
-    def is_initialized(self) -> bool:
-        """Check if the database is initialized"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.is_initialized).filter_by(id=1).first()
-                return metadata is not None and metadata.is_initialized
-            except (ProgrammingError, OperationalError, DatabaseError):
-                return False
+                    raise
+                finally:
+                    session.remove()
 
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
@@ -380,16 +290,25 @@ class Database:
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
         data = {
-            "version": "1.5.7",
-            "integration": "unknown",
-            "database_version": "Unknown",
+            "is_initialized": False,
             "is_pro": "no",
             "pro_expire": None,
+            "pro_status": "invalid",
             "pro_services": 0,
             "pro_overlapped": False,
-            "pro_status": "invalid",
             "last_pro_check": None,
-            "default": True,
+            "first_config_saved": False,
+            "autoconf_loaded": False,
+            "scheduler_first_start": True,
+            "custom_configs_changed": False,
+            "external_plugins_changed": False,
+            "pro_plugins_changed": False,
+            "config_changed": False,
+            "instances_changed": False,
+            "integration": "unknown",
+            "version": "1.5.7",
+            "database_version": "Unknown",  # ? Extracted from the database
+            "default": True,  # ? Extra field to know if the returned data is the default one
         }
         with self.__db_session() as session:
             try:
@@ -397,66 +316,40 @@ class Database:
                 data["database_version"] = (
                     session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"]
                 )[0]
-                metadata = (
-                    session.query(Metadata)
-                    .with_entities(
-                        Metadata.version,
-                        Metadata.integration,
-                        Metadata.is_pro,
-                        Metadata.pro_expire,
-                        Metadata.pro_services,
-                        Metadata.pro_overlapped,
-                        Metadata.pro_status,
-                        Metadata.last_pro_check,
-                    )
-                    .filter_by(id=1)
-                    .first()
-                )
+                metadata = session.query(Metadata).filter_by(id=1).first()
                 if metadata:
-                    data.update(
-                        {
-                            "version": metadata.version,
-                            "integration": metadata.integration,
-                            "is_pro": metadata.is_pro,
-                            "pro_expire": metadata.pro_expire,
-                            "pro_services": metadata.pro_services,
-                            "pro_overlapped": metadata.pro_overlapped,
-                            "pro_status": metadata.pro_status,
-                            "last_pro_check": metadata.last_pro_check,
-                            "default": False,
-                        }
-                    )
+                    for key in data.copy():
+                        if hasattr(metadata, key) and key not in ("database_version", "default"):
+                            data[key] = getattr(metadata, key)
+                    data["default"] = False
             except BaseException:
                 self.logger.debug(f"Can't get the metadata: {format_exc()}")
 
         return data
 
-    def check_changes(self) -> Union[Dict[str, bool], bool, str]:
-        """Check if either the config, the custom configs, plugins or instances have changed inside the database"""
+    def set_metadata(self, data: Dict[str, Any]) -> str:
+        """Set the metadata values"""
         with self.__db_session() as session:
-            try:
-                metadata = (
-                    session.query(Metadata)
-                    .with_entities(
-                        Metadata.custom_configs_changed,
-                        Metadata.external_plugins_changed,
-                        Metadata.pro_plugins_changed,
-                        Metadata.config_changed,
-                        Metadata.instances_changed,
-                    )
-                    .filter_by(id=1)
-                    .first()
-                )
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
 
-                return dict(
-                    custom_configs_changed=metadata is not None and metadata.custom_configs_changed,
-                    external_plugins_changed=metadata is not None and metadata.external_plugins_changed,
-                    pro_plugins_changed=metadata is not None and metadata.pro_plugins_changed,
-                    config_changed=metadata is not None and metadata.config_changed,
-                    instances_changed=metadata is not None and metadata.instances_changed,
-                )
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                for key, value in data.items():
+                    if not hasattr(metadata, key):
+                        self.logger.warning(f"Metadata key {key} does not exist")
+                        continue
+
+                    setattr(metadata, key, value)
+                session.commit()
             except BaseException:
                 return format_exc()
+
+        return ""
 
     def checked_changes(self, changes: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""

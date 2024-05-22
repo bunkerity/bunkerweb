@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from time import sleep
 from traceback import format_exc
 from typing import List
@@ -272,41 +273,29 @@ class IngressController(Controller):
             error = False
             try:
                 for event in w.stream(what):
-                    self.__internal_lock.acquire()
-                    locked = True
-                    if not self.__process_event(event):
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-                    self.wait_applying()
-                    self._update_settings()
-                    self._instances = self.get_instances()
-                    self._services = self.get_services()
-                    self._configs = self.get_configs()
-                    if not self.update_needed(self._instances, self._services, configs=self._configs):
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-                    self._logger.info(
-                        f"Caught kubernetes event ({watch_type}), deploying new configuration ...",
-                    )
-                    try:
-                        ret = self.apply_config()
-                        if not ret:
-                            self._logger.error(
-                                "Error while deploying new configuration ...",
-                            )
-                        else:
-                            self._logger.info(
-                                "Successfully deployed new configuration 🚀",
-                            )
-
-                            self._set_autoconf_load_db()
-                    except:
-                        self._logger.error(
-                            f"Exception while deploying new configuration :\n{format_exc()}",
-                        )
-                    self.__internal_lock.release()
+                    with self.__internal_lock:
+                        locked = True
+                        if not self.__process_event(event):
+                            locked = False
+                            continue
+                        self.wait_applying()
+                        self._update_settings()
+                        self._instances = self.get_instances()
+                        self._services = self.get_services()
+                        self._configs = self.get_configs()
+                        if not self.update_needed(self._instances, self._services, configs=self._configs):
+                            locked = False
+                            continue
+                        self._logger.info(f"Caught kubernetes event ({watch_type}), deploying new configuration ...")
+                        try:
+                            ret = self.apply_config()
+                            if not ret:
+                                self._logger.error("Error while deploying new configuration ...")
+                            else:
+                                self._logger.info("Successfully deployed new configuration 🚀")
+                                self._set_autoconf_load_db()
+                        except:
+                            self._logger.error(f"Exception while deploying new configuration :\n{format_exc()}")
                     locked = False
             except ApiException as e:
                 if e.status != 410:
@@ -321,7 +310,8 @@ class IngressController(Controller):
                 error = True
             finally:
                 if locked:
-                    self.__internal_lock.release()
+                    with suppress(BaseException):
+                        self.__internal_lock.release()
                     locked = False
 
                 if error is True:

@@ -6,7 +6,6 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",), ("core", "backup"))]:
@@ -48,10 +47,9 @@ try:
         LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
         sys_exit(0)
 
-    with Lock():
-        is_scheduler_first_start = JOB.db.is_scheduler_first_start()
+    db_metadata = JOB.db.get_metadata()
 
-    if is_scheduler_first_start:
+    if isinstance(db_metadata, str) or db_metadata["scheduler_first_start"]:
         LOGGER.info("First start of the scheduler, skipping backup ...")
         sys_exit(0)
 

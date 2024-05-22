@@ -227,35 +227,28 @@ if __name__ == "__main__":
             config_files = config.get_config()
 
         bunkerweb_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
-        db_initialized = db.is_initialized()
+        db_metadata = db.get_metadata()
+        db_initialized = isinstance(db_metadata, str) or not db_metadata["is_initialized"]
 
         if not db_initialized:
-            logger.info(
-                "Database not initialized, initializing ...",
-            )
+            logger.info("Database not initialized, initializing ...")
             ret, err = db.init_tables(
-                [config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")],
-                bunkerweb_version,
+                [config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")], bunkerweb_version
             )
 
             # Initialize database tables
             if err:
-                logger.error(
-                    f"Exception while initializing database : {err}",
-                )
+                logger.error(f"Exception while initializing database : {err}")
                 sys_exit(1)
             elif not ret:
-                logger.info(
-                    "Database tables are already initialized, skipping creation ...",
-                )
+                logger.info("Database tables are already initialized, skipping creation ...")
             else:
                 logger.info("Database tables initialized")
         else:
             logger.info("Database is already initialized, checking for changes ...")
 
             ret, err = db.init_tables(
-                [config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")],
-                bunkerweb_version,
+                [config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")], bunkerweb_version
             )
 
             if not ret and err:
@@ -298,12 +291,7 @@ if __name__ == "__main__":
             if apis:
                 for api in apis:
                     endpoint_data = api.endpoint.replace("http://", "").split(":")
-                    err = db.add_instance(
-                        endpoint_data[0],
-                        endpoint_data[1].replace("/", ""),
-                        api.host,
-                        changed=False,
-                    )
+                    err = db.add_instance(endpoint_data[0], endpoint_data[1].replace("/", ""), api.host, changed=False)
 
                     if err:
                         logger.warning(err)
@@ -312,12 +300,7 @@ if __name__ == "__main__":
                             changes.append("instances")
                         logger.info(f"Instance {endpoint_data[0]} successfully saved to database")
             else:
-                err = db.add_instance(
-                    "127.0.0.1",
-                    config_files.get("API_HTTP_PORT", 5000),
-                    config_files.get("API_SERVER_NAME", "bwapi"),
-                    changed=False,
-                )
+                err = db.add_instance("127.0.0.1", config_files.get("API_HTTP_PORT", 5000), config_files.get("API_SERVER_NAME", "bwapi"), changed=False)
 
                 if err:
                     logger.warning(err)
@@ -333,9 +316,7 @@ if __name__ == "__main__":
     except SystemExit as e:
         sys_exit(e.code)
     except:
-        logger.error(
-            f"Exception while executing config saver : {format_exc()}",
-        )
+        logger.error(f"Exception while executing config saver : {format_exc()}")
         sys_exit(1)
 
     # We're done

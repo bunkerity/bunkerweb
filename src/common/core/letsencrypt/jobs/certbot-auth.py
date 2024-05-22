@@ -4,7 +4,6 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -30,10 +29,8 @@ try:
     # Cluster case
     if integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
         db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
-        lock = Lock()
 
-        with lock:
-            instances = db.get_instances()
+        instances = db.get_instances()
 
         LOGGER.info(f"Sending challenge to {len(instances)} instances")
         for instance in instances:

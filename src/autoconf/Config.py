@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+from datetime import datetime
 from os import getenv
 from time import sleep
 from copy import deepcopy
@@ -62,20 +64,24 @@ class Config(ConfigCaller):
         return False
 
     def wait_applying(self):
-        i = 0
-        while i < 10:
-            curr_changes = self._db.check_changes()
-            if isinstance(curr_changes, str):
-                self.__logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
-            elif not any(curr_changes.values()):
-                break
+        current_time = datetime.now()
+        ready = False
+        while not ready and (datetime.now() - current_time).seconds < 240:
+            db_metadata = self._db.get_metadata()
+            if isinstance(db_metadata, str):
+                self.__logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
+            elif not any(
+                v
+                for k, v in db_metadata.items()
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+            ):
+                ready = True
+                continue
             else:
-                self.__logger.warning(
-                    "Scheduler is already applying a configuration, retrying in 5 seconds ...",
-                )
-            i += 1
+                self.__logger.warning("Scheduler is already applying a configuration, retrying in 5 seconds ...")
             sleep(5)
-        if i >= 10:
+
+        if not ready:
             raise Exception("Too many retries while waiting for scheduler to apply configuration...")
 
     def apply(self, instances, services, configs={}, first=False) -> bool:
@@ -119,24 +125,28 @@ class Config(ConfigCaller):
                         }
                     )
 
-        while not self._db.is_initialized():
-            self.__logger.warning(
-                "Database is not initialized, retrying in 5 seconds ...",
-            )
-            sleep(5)
+        current_time = datetime.now()
+        ready = False
+        while not ready and (datetime.now() - current_time).seconds < 120:
+            db_metadata = self._db.get_metadata()
+            if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
+                self.__logger.warning("Database is not initialized, retrying in 5s ...")
+                sleep(5)
+                continue
+            ready = True
+
+        if not ready:
+            self.__logger.error(f"Timeout while waiting for database to be initialized, ignoring changes ...\ndb data: {db_metadata}")
+            return False
 
         # wait until changes are applied
-        while True:
-            curr_changes = self._db.check_changes()
-            if isinstance(curr_changes, str):
-                self.__logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
-            elif not any(curr_changes.values()):
-                break
-            else:
-                self.__logger.warning(
-                    "Scheduler is already applying a configuration, retrying in 5 seconds ...",
-                )
-            sleep(5)
+        ready = False
+        with suppress(BaseException):
+            self.wait_applying()
+            ready = True
+
+        if not ready:
+            self.__logger.warning("Timeout while waiting for scheduler to apply configuration, continuing anyway...")
 
         # update instances in database
         if "instances" in changes:

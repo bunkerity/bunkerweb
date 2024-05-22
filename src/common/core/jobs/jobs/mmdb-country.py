@@ -7,7 +7,6 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
 from typing import Optional
 
@@ -24,7 +23,6 @@ from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
 status = 0
-LOCK = Lock()
 
 
 def request_mmdb() -> Optional[Response]:

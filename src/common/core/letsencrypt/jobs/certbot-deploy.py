@@ -6,7 +6,6 @@ from os.path import join
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
-from threading import Lock
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -38,10 +37,8 @@ try:
         files = {"archive.tar.gz": tgz}
 
         db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
-        lock = Lock()
 
-        with lock:
-            instances = db.get_instances()
+        instances = db.get_instances()
 
         for instance in instances:
             endpoint = f"http://{instance['hostname']}:{instance['port']}"

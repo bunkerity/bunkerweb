@@ -8,7 +8,6 @@ from re import MULTILINE, search
 from shutil import rmtree
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
-from threading import Lock
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -22,7 +21,6 @@ from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("MODSECURITY.coreruleset-nightly", getenv("LOG_LEVEL", "INFO"))
 status = 0
-LOCK = Lock()
 
 CRS_PATH = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs")
 

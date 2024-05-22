@@ -7,7 +7,6 @@ from os.path import join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
@@ -198,14 +197,11 @@ try:
         external_plugins.append(plugin_data)
         external_plugins_ids.append(plugin_data["id"])
 
-    lock = Lock()
-
     for plugin in db.get_plugins(_type="external", with_data=True):
         if plugin["method"] != "scheduler" and plugin["id"] not in external_plugins_ids:
             external_plugins.append(plugin)
 
-    with lock:
-        err = db.update_external_plugins(external_plugins)
+    err = db.update_external_plugins(external_plugins)
 
     if err:
         LOGGER.error(f"Couldn't update external plugins to database: {err}")

@@ -72,11 +72,9 @@ class Controller(Config):
 
     def _set_autoconf_load_db(self):
         if not self._loaded:
-            ret = self._db.set_autoconf_load(True)
+            ret = self._db.set_metadata({"autoconf_loaded": True})
             if ret:
-                self._logger.warning(
-                    f"Can't set autoconf loaded metadata to true in database: {ret}",
-                )
+                self._logger.warning(f"Can't set autoconf loaded metadata to true in database: {ret}")
             else:
                 self._loaded = True
 

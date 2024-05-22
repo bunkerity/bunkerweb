@@ -8,7 +8,6 @@ from os.path import join
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
@@ -168,7 +167,7 @@ try:
 
     default_metadata["last_pro_check"] = current_date
     metadata = default_metadata | metadata
-    db.set_pro_metadata(metadata)
+    db.set_metadata(metadata)
 
     if metadata["is_pro"] != db_metadata["is_pro"]:
         clean_pro_plugins(db)
@@ -194,7 +193,7 @@ try:
 
             if clean:
                 metadata = default_metadata.copy()
-                db.set_pro_metadata(metadata)
+                db.set_metadata(metadata)
                 clean_pro_plugins(db)
             else:
                 LOGGER.warning("Skipping the check for new or updated Pro plugins...")
@@ -302,14 +301,11 @@ try:
         pro_plugins.append(plugin_data)
         pro_plugins_ids.append(plugin_data["id"])
 
-    lock = Lock()
-
     for plugin in db.get_plugins(_type="pro", with_data=True):
         if plugin["method"] != "scheduler" and plugin["id"] not in pro_plugins_ids:
             pro_plugins.append(plugin)
 
-    with lock:
-        err = db.update_external_plugins(pro_plugins, _type="pro")
+    err = db.update_external_plugins(pro_plugins, _type="pro")
 
     if err:
         LOGGER.error(f"Couldn't update Pro plugins to database: {err}")

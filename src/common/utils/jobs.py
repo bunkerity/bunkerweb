@@ -49,16 +49,14 @@ class Job:
         self.logger = logger or self.db.logger
 
         if not deprecated:
-            with LOCK:
-                is_scheduler_first_start = self.db.is_scheduler_first_start()
-            if not is_scheduler_first_start:
+            db_metadata = self.db.get_metadata()
+            if not isinstance(db_metadata, str) and not db_metadata["scheduler_first_start"]:
                 self.restore_cache(manual=False)
 
     def restore_cache(self, *, job_name: str = "", plugin_id: str = "", manual: bool = True) -> bool:
         """Restore job cache files from database."""
         ret = True
-        with LOCK:
-            job_cache_files = self.db.get_jobs_cache_files(plugin_id=plugin_id or self.job_path.name)  # type: ignore
+        job_cache_files = self.db.get_jobs_cache_files(plugin_id=plugin_id or self.job_path.name)  # type: ignore
 
         job_name = job_name or self.job_name
         plugin_cache_files = set()
@@ -131,10 +129,9 @@ class Job:
             if with_data:
                 ret_data["data"] = cache_path.read_bytes()
 
-        with LOCK:
-            if not ret_data:
-                return self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, plugin_id=plugin_id or self.job_path.name, with_info=with_info, with_data=with_data)  # type: ignore
-            ret_data.update(self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, plugin_id=plugin_id or self.job_path.name, with_info=True, with_data=False) or {})  # type: ignore
+        if not ret_data:
+            return self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, plugin_id=plugin_id or self.job_path.name, with_info=with_info, with_data=with_data)  # type: ignore
+        ret_data.update(self.db.get_job_cache_file(job_name or self.job_name, name, service_id=service_id, plugin_id=plugin_id or self.job_path.name, with_info=True, with_data=False) or {})  # type: ignore
         return ret_data
 
     def is_cached_file(
@@ -184,10 +181,9 @@ class Job:
             checksum = bytes_hash(content)
 
         try:
-            with LOCK:
-                err = self.db.upsert_job_cache(service_id, name, content, job_name=job_name or self.job_name, checksum=checksum)  # type: ignore
-                if err:
-                    ret = False
+            err = self.db.upsert_job_cache(service_id, name, content, job_name=job_name or self.job_name, checksum=checksum)  # type: ignore
+            if err:
+                ret = False
 
             if ret and isinstance(file_cache, Path) and delete_file and file_cache != cache_path:
                 file_cache.unlink(missing_ok=True)
@@ -223,8 +219,7 @@ class Job:
             rmtree(job_path, ignore_errors=True)
 
         try:
-            with LOCK:
-                self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
+            self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
         except:
             return False, f"exception :\n{format_exc()}"
         return ret, err
