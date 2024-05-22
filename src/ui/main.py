@@ -201,7 +201,6 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     # Do the operation
     error = 0
     ui_data = get_ui_data()
-    operation = ""
 
     if "TO_FLASH" not in ui_data:
         ui_data["TO_FLASH"] = []
@@ -214,11 +213,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         elif operation == "delete":
             operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
 
-        if error:
-            ui_data["TO_FLASH"].append({"content": operation, "type": "error"})
-        else:
-            ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
-
+        if not error:
             if was_draft != is_draft or not is_draft:
                 # update changes in db
                 ret = db.checked_changes(["config", "custom_configs"], value=True)

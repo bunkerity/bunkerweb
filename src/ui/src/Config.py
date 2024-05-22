@@ -136,7 +136,7 @@ class Config:
 
         return error
 
-    def reload_config(self) -> str:
+    def reload_config(self) -> Optional[str]:
         return self.__gen_conf(self.get_config(methods=False), self.get_services(methods=False))
 
     def new_service(self, variables: dict, is_draft: bool = False) -> Tuple[str, int]:
