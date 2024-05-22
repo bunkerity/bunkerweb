@@ -470,7 +470,9 @@ def before_request():
             and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts"))
             and request.path.endswith("/login")
         ):
-            return redirect(url_for("login", next=request.path))
+            logout_user()
+            session.clear()
+            return redirect(url_for("login"))
 
         # Case not login page, keep on 2FA before any other access
         if (
