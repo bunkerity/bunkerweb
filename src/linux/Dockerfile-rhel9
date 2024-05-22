@@ -81,10 +81,11 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Install fpm
-RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils && \
+RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
+  dnf install -y ruby-devel && \
   gem install fpm
 
 # Setup BW

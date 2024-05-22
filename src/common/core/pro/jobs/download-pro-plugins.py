@@ -10,7 +10,7 @@ from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from uuid import uuid4
-from json import JSONDecodeError, load, loads
+from json import JSONDecodeError, load as json_load, loads
 from shutil import copytree, rmtree
 from tarfile import open as tar_open
 from traceback import format_exc
@@ -152,9 +152,9 @@ try:
             metadata = resp.json()["data"]
             LOGGER.debug(f"Got BunkerWeb Pro license metadata: {metadata}")
             metadata["pro_expire"] = datetime.strptime(metadata["pro_expire"], "%Y-%m-%d") if metadata["pro_expire"] else None
-            if metadata["pro_services"] < int(data["service_number"]):
-                metadata["pro_overlapped"] = True
             metadata["is_pro"] = metadata["pro_status"] == "active"
+            if metadata["is_pro"] and metadata["pro_services"] < int(data["service_number"]):
+                metadata["pro_overlapped"] = True
 
     # ? If we already checked today, skip the check and if the metadata is the same, skip the check
     if (
@@ -188,7 +188,7 @@ try:
                     for chunk in resp.iter_content(chunk_size=8192):
                         resp_content.write(chunk)
                     resp_content.seek(0)
-                    resp_data = load(resp_content)
+                    resp_data = json_load(resp_content)
 
                 clean = resp_data.get("action") == "clean"
 
@@ -212,7 +212,7 @@ try:
     if not metadata["is_pro"]:
         if metadata["pro_overlapped"]:
             LOGGER.warning(
-                f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']}"
+                f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']})"
             )
 
         if pro_license_key:
@@ -280,26 +280,27 @@ try:
             rmtree(plugin_path, ignore_errors=True)
             continue
 
-        plugin_file = loads(plugin_path.joinpath("plugin.json").read_text(encoding="utf-8"))
-
         with BytesIO() as plugin_content:
             with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                tar.add(plugin_path, arcname=plugin_path.name)
-            plugin_content.seek(0)
-            value = plugin_content.getvalue()
+                tar.add(plugin_path, arcname=plugin_path.name, recursive=True)
+            plugin_content.seek(0, 0)
 
-        plugin_file.update(
-            {
-                "type": "pro",
-                "page": plugin_path.joinpath("ui").is_dir(),
-                "method": "scheduler",
-                "data": value,
-                "checksum": bytes_hash(value, algorithm="sha256"),
-            }
-        )
+            with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
+                plugin_data = json_load(f)
 
-        pro_plugins.append(plugin_file)
-        pro_plugins_ids.append(plugin_file["id"])
+            checksum = bytes_hash(plugin_content, algorithm="sha256")
+            plugin_data.update(
+                {
+                    "type": "pro",
+                    "page": plugin_path.joinpath("ui").is_dir(),
+                    "method": "scheduler",
+                    "data": plugin_content.getvalue(),
+                    "checksum": checksum,
+                }
+            )
+
+        pro_plugins.append(plugin_data)
+        pro_plugins_ids.append(plugin_data["id"])
 
     lock = Lock()
 

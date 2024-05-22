@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.5.7 - ????/??/??
+## v1.5.8 - ????/??/??
+
+- [FEATURE] Add nightly build of the OWASP coreruleset that are automatically downloaded and updated
+- [FEATURE] Enhance security on error pages, default server page and loading page by adding a custom `Content-Security-Policy` header with nonces and removing the `Server` header
+
+## v1.5.7 - 2024/05/14
 
 - [LINUX] Support Ubuntu 24.04 (Noble)
 - [LINUX] Support RHEL 9.4 instead of 9.3

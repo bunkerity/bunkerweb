@@ -5,6 +5,12 @@ class FolderNav {
       `[data-${this.prefix}-breadcrumb]`,
     );
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
+    this.isReadonly =
+      document
+        .querySelector(`[data-${this.prefix}-container]`)
+        .getAttribute(`data-readonly`) === "true"
+        ? true
+        : false;
     this.listContainer = document.querySelector(
       `[data-${this.prefix}-folders]`,
     );
@@ -95,6 +101,9 @@ class FolderNav {
   updateActions(folder) {
     // for root
     if (!folder) return this.addFileEl.setAttribute("disabled", "");
+
+    if (folder && this.isReadonly)
+      return this.addFileEl.setAttribute("disabled", "");
     //check if folder allow add file/folder
     const isAddFile = folder.getAttribute("data-can-create-file") || "False";
     isAddFile === "True"
@@ -282,6 +291,12 @@ class FolderDropdown {
 
 class FolderEditor {
   constructor() {
+    this.isReadonly =
+      document
+        .querySelector(`[data-global-is-readonly]`)
+        .getAttribute(`data-global-is-readonly`) === "true"
+        ? true
+        : false;
     this.editor = ace.edit("editor");
     this.darkMode = document.querySelector("[data-dark-toggle]");
     this.initEditor();
@@ -291,6 +306,7 @@ class FolderEditor {
   initEditor() {
     //editor options
     this.editor.setShowPrintMargin(false);
+    this.editor.setReadOnly(this.isReadonly);
     this.setDarkMode();
   }
 
@@ -315,10 +331,6 @@ class FolderEditor {
       ? this.editor.setTheme("ace/theme/dracula")
       : this.editor.setTheme("ace/theme/dawn");
   }
-
-  readOnlyBool(bool) {
-    this.editor.setReadOnly(bool);
-  }
 }
 
 class FolderModal {
@@ -326,6 +338,12 @@ class FolderModal {
     this.prefix = prefix;
     //container
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
+    this.isReadonly =
+      document
+        .querySelector(`[data-${this.prefix}-container]`)
+        .getAttribute(`data-readonly`) === "true"
+        ? true
+        : false;
     //add service/file elements
     this.breadContainer = document.querySelector(
       `[data-${this.prefix}-breadcrumb]`,
@@ -580,28 +598,30 @@ class FolderModal {
     if (action === "new") {
       this.modalSubmit.textContent = "add";
       this.setSubmitBtnType("valid-btn");
-      return;
     }
     if (action === "view") {
       this.modalSubmit.textContent = "ok";
       this.setSubmitBtnType("valid-btn");
-      return;
     }
     if (action === "edit") {
       this.setSubmitBtnType("edit-btn");
       this.modalSubmit.textContent = "edit";
-      return;
     }
 
     if (action === "delete") {
       this.setSubmitBtnType("delete-btn");
       this.modalSubmit.textContent = "delete";
-      return;
     }
     if (action === "download") {
       this.setSubmitBtnType("info-btn");
       this.modalSubmit.textContent = "download";
-      return;
+    }
+
+    // readonly logic
+    if (["new", "edit", "delete"].includes(action) && this.isReadonly) {
+      this.modalSubmit.setAttribute("disabled", "true");
+    } else {
+      this.modalSubmit.removeAttribute("disabled");
     }
   }
 
@@ -649,8 +669,10 @@ class FolderModal {
 
   //UTILS
   disabledDOMInpt(bool) {
-    this.modalPathName.disabled = bool;
-    ace.edit("editor").setReadOnly(bool);
+    if (this.isReadonly) ace.edit("editor").setReadOnly(true);
+    if (this.isReadonly) this.modalPathName.disabled = true;
+    if (!this.isReadonly) this.modalPathName.disabled = bool;
+    if (!this.isReadonly) ace.edit("editor").setReadOnly(bool);
   }
 
   closeModal() {

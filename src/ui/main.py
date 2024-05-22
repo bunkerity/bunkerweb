@@ -175,7 +175,7 @@ REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655
 
 def wait_applying():
     for i in range(31):
-        curr_changes = db.check_changes()
+        curr_changes = app.config["DB"].check_changes()
         if isinstance(curr_changes, str):
             app.logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
         elif not any(curr_changes.values()):
@@ -197,9 +197,9 @@ def get_ui_data():
     return ui_data
 
 
-def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False):
+def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False) -> int:
     # Do the operation
-    error = False
+    error = 0
     ui_data = get_ui_data()
 
     if "TO_FLASH" not in ui_data:
@@ -213,19 +213,15 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         elif operation == "delete":
             operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
 
-        if error:
-            ui_data["TO_FLASH"].append({"content": operation, "type": "error"})
-        else:
-            ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
-
+        if not error:
             if was_draft != is_draft or not is_draft:
                 # update changes in db
-                ret = db.checked_changes(["config", "custom_configs"], value=True)
+                ret = app.config["DB"].checked_changes(["config", "custom_configs"], value=True)
                 if ret:
                     app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
                     ui_data["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
     elif method == "global_config":
-        operation = app.config["CONFIG"].edit_global_conf(args[0])
+        operation, error = app.config["CONFIG"].edit_global_conf(args[0])
 
     if operation == "reload":
         operation = app.config["INSTANCES"].reload_instance(args[0])
@@ -237,14 +233,12 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         operation = app.config["INSTANCES"].restart_instance(args[0])
     elif not error:
         operation = "The scheduler will be in charge of reloading the instances."
-    else:
-        operation = ""
 
     if operation:
         if isinstance(operation, list):
             for op in operation:
                 ui_data["TO_FLASH"].append({"content": f"Reload failed for the instance {op}", "type": "error"})
-        elif operation.startswith("Can't"):
+        elif operation.startswith(("Can't", "The database is read-only")):
             ui_data["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
             ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
@@ -262,16 +256,18 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     with LOCK:
         TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
+    return error
+
 
 # UTILS
 def run_action(plugin: str, function_name: str = ""):
     message = ""
-    module = db.get_plugin_actions(plugin)
+    module = app.config["DB"].get_plugin_actions(plugin)
 
     if module is None:
         return {"status": "ko", "code": 404, "message": "The actions.py file for the plugin does not exist"}
 
-    obfuscation = db.get_plugin_obfuscation(plugin)
+    obfuscation = app.config["DB"].get_plugin_obfuscation(plugin)
     tmp_dir = None
 
     try:
@@ -382,9 +378,9 @@ def error_message(msg: str):
 @app.context_processor
 def inject_variables():
     ui_data = get_ui_data()
-    metadata = db.get_metadata()
+    metadata = app.config["DB"].get_metadata()
 
-    curr_changes = db.check_changes()
+    curr_changes = app.config["DB"].check_changes()
 
     if ui_data.get("PRO_LOADING") and not any(curr_changes.values()):
         ui_data["PRO_LOADING"] = False
@@ -402,6 +398,7 @@ def inject_variables():
         plugins=app.config["CONFIG"].get_plugins(),
         pro_loading=ui_data.get("PRO_LOADING", False),
         bw_version=metadata["version"],
+        is_readonly=app.config["DB"].readonly,
     )
 
 
@@ -448,7 +445,11 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
-    db_user = db.get_ui_user()
+    try:
+        db_user = app.config["DB"].get_ui_user()
+    except BaseException:
+        db_user = app.config["DB"].get_ui_user()
+
     if db_user:
         app.config["USER"] = User(**db_user)
 
@@ -465,7 +466,9 @@ def before_request():
             and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts"))
             and request.path.endswith("/login")
         ):
-            return redirect(url_for("login", next=request.path))
+            logout_user()
+            session.clear()
+            return redirect(url_for("login"))
 
         # Case not login page, keep on 2FA before any other access
         if (
@@ -551,7 +554,7 @@ def setup():
         if not app.config["USER"]:
             app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"], method="ui")
 
-            ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
+            ret = app.config["DB"].create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
             if ret:
                 return redirect_flash_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
@@ -674,7 +677,7 @@ def home():
         version=bw_version,
         instances_number=len(instances),
         services_number=services,
-        plugins_errors=db.get_plugins_errors(),
+        plugins_errors=app.config["DB"].get_plugins_errors(),
         instance_health_count=instance_health_count,
         services_scheduler_count=services_scheduler_count,
         services_ui_count=services_ui_count,
@@ -709,19 +712,22 @@ def account():
 
             # Force job to contact PRO API
             # by setting the last check to None
-            metadata = db.get_metadata()
+            metadata = app.config["DB"].get_metadata()
             metadata["last_pro_check"] = None
-            db.set_pro_metadata(metadata)
+            app.config["DB"].set_pro_metadata(metadata)
 
-            flash("Checking license key to upgrade.", "success")
-
-            curr_changes = db.check_changes()
+            curr_changes = app.config["DB"].check_changes()
 
             # Reload instances
             def update_global_config(threaded: bool = False):
                 wait_applying()
 
-                manage_bunkerweb("global_config", variable, threaded=threaded)
+                if not manage_bunkerweb("global_config", variable, threaded=threaded):
+                    message = "Checking license key to upgrade."
+                    if threaded:
+                        ui_data["TO_FLASH"].append({"content": message, "type": "success"})
+                    else:
+                        flash(message)
 
             ui_data = get_ui_data()
             ui_data["PRO_LOADING"] = True
@@ -795,7 +801,7 @@ def account():
                 TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         user = User(username, password, is_two_factor_enabled=is_two_factor_enabled, secret_token=secret_token, method=current_user.method)
-        ret = db.update_ui_user(
+        ret = app.config["DB"].update_ui_user(
             username, user.password_hash, is_two_factor_enabled, secret_token, current_user.method if request.form["operation"] == "totp" else "ui"
         )
         if ret:
@@ -988,7 +994,7 @@ def services():
 
         error = 0
 
-        curr_changes = db.check_changes()
+        curr_changes = app.config["DB"].check_changes()
 
         old_server_name = request.form.get("OLD_SERVER_NAME", "")
         operation = request.form["operation"]
@@ -1118,7 +1124,7 @@ def global_config():
                 if setting and setting["global"] and (setting["value"] != value or setting["value"] == config.get(variable, {"value": None})["value"]):
                     variables[f"{service}_{variable}"] = value
 
-        curr_changes = db.check_changes()
+        curr_changes = app.config["DB"].check_changes()
 
         def update_global_config(threaded: bool = False):
             wait_applying()
@@ -1165,7 +1171,7 @@ def global_config():
 @app.route("/configs", methods=["GET", "POST"])
 @login_required
 def configs():
-    db_configs = db.get_custom_configs()
+    db_configs = app.config["DB"].get_custom_configs()
 
     if request.method == "POST":
         operation = ""
@@ -1257,7 +1263,7 @@ def configs():
             del db_configs[index]
             operation = f"Deleted config {name}{f' for service {service_id}' if service_id else ''}"
 
-        error = db.save_custom_configs([config for config in db_configs if config["method"] == "ui"], "ui")
+        error = app.config["DB"].save_custom_configs([config for config in db_configs if config["method"] == "ui"], "ui")
         if error:
             app.logger.error(f"Could not save custom configs: {error}")
             return redirect_flash_error("Couldn't save custom configs", "configs", True)
@@ -1298,7 +1304,7 @@ def plugins():
             if variables["type"] in ("core", "pro"):
                 return redirect_flash_error(f"Can't delete {variables['type']} plugin {variables['name']}", "plugins", True)
 
-            curr_changes = db.check_changes()
+            curr_changes = app.config["DB"].check_changes()
 
             def update_plugins(threaded: bool = False):  # type: ignore
                 wait_applying()
@@ -1310,7 +1316,7 @@ def plugins():
 
                 ui_data = get_ui_data()
 
-                err = db.update_external_plugins(plugins)
+                err = app.config["DB"].update_external_plugins(plugins)
                 if err:
                     message = f"Couldn't update external plugins to database: {err}"
                     if threaded:
@@ -1507,7 +1513,7 @@ def plugins():
             if errors >= files_count:
                 return redirect(url_for("loading", next=url_for("plugins")))
 
-            curr_changes = db.check_changes()
+            curr_changes = app.config["DB"].check_changes()
 
             def update_plugins(threaded: bool = False):
                 wait_applying()
@@ -1520,7 +1526,7 @@ def plugins():
 
                 ui_data = get_ui_data()
 
-                err = db.update_external_plugins(new_plugins, delete_missing=False)
+                err = app.config["DB"].update_external_plugins(new_plugins, delete_missing=False)
                 if err:
                     message = f"Couldn't update external plugins to database: {err}"
                     if threaded:
@@ -1657,7 +1663,7 @@ def custom_plugin(plugin: str):
     if request.method == "GET":
 
         # Check template
-        page = db.get_plugin_template(plugin)
+        page = app.config["DB"].get_plugin_template(plugin)
 
         if not page:
             return error_message("The plugin does not have a template"), 404
@@ -1790,7 +1796,7 @@ def cache():
             path_to_dict(
                 join(sep, "var", "cache", "bunkerweb"),
                 is_cache=True,
-                db_data=db.get_jobs_cache_files(),
+                db_data=app.config["DB"].get_jobs_cache_files(),
                 services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
             )
         ],
@@ -2139,6 +2145,9 @@ def bans():
             flash("Couldn't connect to redis, ban list might be incomplete", "error")
 
     if request.method == "POST":
+        if app.config["DB"].readonly:
+            return redirect_flash_error("Read only mode is enabled", "bans")
+
         # Check variables
         is_request_form("bans")
 
@@ -2246,7 +2255,7 @@ def bans():
 @app.route("/jobs", methods=["GET"])
 @login_required
 def jobs():
-    return render_template("jobs.html", jobs=db.get_jobs(), jobs_errors=db.get_plugins_errors(), username=current_user.get_id())
+    return render_template("jobs.html", jobs=app.config["DB"].get_jobs(), jobs_errors=app.config["DB"].get_plugins_errors(), username=current_user.get_id())
 
 
 @app.route("/jobs/download", methods=["GET"])
@@ -2262,7 +2271,7 @@ def jobs_download():
 
     file_name = secure_filename(file_name)
 
-    cache_file = db.get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
+    cache_file = app.config["DB"].get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
 
     if not cache_file:
         return jsonify({"status": "ko", "message": "file not found"}), 404

@@ -1204,6 +1204,6 @@ You can easily deploy BunkerWeb on your Azure subscription in several ways:
 
     Login in [Azure portal](https://portal.azure.com){:target="_blank"}.
 
-    Get BunkerWeb from the [Create ressource menu](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb){:target="_blank"}.
+    Get BunkerWeb from the [Create resource menu](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb){:target="_blank"}.
 
     You can also go through the [Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview){:target="_blank"}.

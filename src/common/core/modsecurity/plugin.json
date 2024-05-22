@@ -26,12 +26,12 @@
     "MODSECURITY_CRS_VERSION": {
       "context": "multisite",
       "default": "3",
-      "help": "Version of the OWASP Core Rule Set to use.",
+      "help": "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
       "id": "modsecurity-crs-version",
       "label": "Core Rule Set Version",
-      "regex": "^(3|4)$",
+      "regex": "^(3|4|nightly)$",
       "type": "select",
-      "select": ["3", "4"]
+      "select": ["3", "4", "nightly"]
     },
     "MODSECURITY_SEC_AUDIT_ENGINE": {
       "context": "multisite",
@@ -62,5 +62,13 @@
       "regex": "^A(([B-K])(?!.*\\2))+Z$",
       "type": "text"
     }
-  }
+  },
+  "jobs": [
+    {
+      "name": "coreruleset-nightly",
+      "file": "coreruleset-nightly.py",
+      "every": "day",
+      "reload": true
+    }
+  ]
 }

@@ -64,7 +64,7 @@
             <!-- end plugin item -->
             <!-- submit -->
             <div class="flex w-full justify-center mt-8 mb-2">
-                <button type="submit" class="valid-btn">SAVE</button>
+                <button  {% if is_readonly%}disabled{% endif %} type="submit" class="valid-btn">SAVE</button>
             </div>
             <!-- end submit -->
         </form>

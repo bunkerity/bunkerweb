@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from copy import deepcopy
 from functools import partial
 from glob import glob
@@ -45,7 +46,7 @@ class JobScheduler(ApiCaller):
         super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
         self.__integration = integration
-        self.__db = db or Database(self.__logger)
+        self.db = db or Database(self.__logger)
         self.__env = env or {}
         self.__env.update(environ)
         self.__jobs = self.__get_jobs()
@@ -76,7 +77,7 @@ class JobScheduler(ApiCaller):
         apis = []
         try:
             with self.__thread_lock:
-                instances = self.__db.get_instances()
+                instances = self.db.get_instances()
             for instance in instances:
                 api = API(f"http://{instance['hostname']}:{instance['port']}", host=instance["server_name"])
                 apis.append(api)
@@ -204,7 +205,7 @@ class JobScheduler(ApiCaller):
 
     def __update_job(self, plugin: str, name: str, success: bool):
         with self.__thread_lock:
-            err = self.__db.update_job(plugin, name, success)
+            err = self.db.update_job(plugin, name, success)
 
         if not err:
             self.__logger.info(f"Successfully updated database for the job {name} from plugin {plugin}")
@@ -226,13 +227,34 @@ class JobScheduler(ApiCaller):
 
     def run_pending(self) -> bool:
         threads = []
-        self.__job_success = True
-        self.__job_reload = False
-
         for job in schedule_jobs:
             if not job.should_run:
                 continue
             threads.append(Thread(target=self.__run_in_thread, args=((job.run,),)))
+
+        if not threads:
+            return True
+
+        if self.db.database_uri and self.db.readonly:
+            try:
+                self.db.retry_connection(pool_timeout=5)
+                self.db.readonly = False
+                self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
+            except BaseException:
+                try:
+                    self.db.retry_connection(readonly=True, pool_timeout=5)
+                except BaseException:
+                    if self.db.database_uri_readonly:
+                        with suppress(BaseException):
+                            self.db.retry_connection(fallback=True, pool_timeout=5)
+                self.db.readonly = True
+
+            if self.db.readonly:
+                self.__logger.error("Database is in read-only mode, jobs will not be executed")
+                return True
+
+        self.__job_success = True
+        self.__job_reload = False
 
         for thread in threads:
             thread.start()
@@ -267,6 +289,24 @@ class JobScheduler(ApiCaller):
         return success
 
     def run_once(self) -> bool:
+        if self.db.database_uri and self.db.readonly:
+            try:
+                self.db.retry_connection(pool_timeout=1)
+                self.db.readonly = False
+                self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
+            except BaseException:
+                try:
+                    self.db.retry_connection(readonly=True, pool_timeout=1)
+                except BaseException:
+                    if self.db.database_uri_readonly:
+                        with suppress(BaseException):
+                            self.db.retry_connection(fallback=True, pool_timeout=1)
+                self.db.readonly = True
+
+            if self.db.readonly:
+                self.__logger.error("Database is in read-only mode, jobs will not be executed")
+                return True
+
         threads = []
         self.__job_success = True
         self.__job_reload = False
@@ -290,6 +330,24 @@ class JobScheduler(ApiCaller):
         return ret
 
     def run_single(self, job_name: str) -> bool:
+        if self.db.database_uri and self.db.readonly:
+            try:
+                self.db.retry_connection(pool_timeout=1)
+                self.db.readonly = False
+                self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
+            except BaseException:
+                try:
+                    self.db.retry_connection(readonly=True, pool_timeout=1)
+                except BaseException:
+                    if self.db.database_uri_readonly:
+                        with suppress(BaseException):
+                            self.db.retry_connection(fallback=True, pool_timeout=1)
+                self.db.readonly = True
+
+            if self.db.readonly:
+                self.__logger.error("Database is in read-only mode, jobs will not be executed")
+                return True
+
         if self.__lock:
             self.__lock.acquire()
 

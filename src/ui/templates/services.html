@@ -31,13 +31,13 @@
          class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">
         <div data-is-draft class="hidden" data-value="no"></div>
         <div data-service-method class="hidden" data-value="ui"></div>
-        <button data-{{attribute_name}}-action="new"
+        <button {% if is_readonly%}disabled{% endif %} data-{{attribute_name}}-action="new"
                 data-{{attribute_name}}-name="service"
                 data-old-name
                 data-value="new"
                 data-settings="{}"
                 type="button"
-                class="dark:bg-green-500/90 duration-300 dark:text-gray-100 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                class="disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0 dark:bg-green-500/90 duration-300 dark:text-gray-100 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
             <span class="mr-2">new service</span>
             <svg xmlns="http://www.w3.org/2000/svg"
                  fill="none"
@@ -284,8 +284,10 @@
                         {% endif %}
                         {% for button in action_buttons %}
                             <button
+                             {% if button['name'] == "clone" and is_readonly%}disabled{% endif %}
                             {% if button['name'] == "clone" or button['name'] == "edit"%}
                             data-settings="{{ service['settings'] }}"
+
                             {% endif %}
                             {% if button['name'] == "new"%}
                             data-settings="{}"
@@ -293,7 +295,7 @@
                             data-{{attribute_name}}-action="{{ button['name'] }}"
                                     aria-label="{{ button['label'] }}"
                                     data-{{attribute_name}}-name="{{ service['SERVER_NAME']['value'] }}"
-                                    class="dark:brightness-90 z-20 mx-1 bg-{{ button['color'] }} hover:bg-{{ button['color'] }}/80 focus:bg-{{ button['color'] }}/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md">
+                                    class="disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0 dark:brightness-90 z-20 mx-1 bg-{{ button['color'] }} hover:bg-{{ button['color'] }}/80 focus:bg-{{ button['color'] }}/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md">
                                 {% if button['name'] == "clone" %}
                                     <svg xmlns="http://www.w3.org/2000/svg"
                                          viewBox="0 0 24 24"

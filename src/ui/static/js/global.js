@@ -513,38 +513,84 @@ class Banner {
 
 class Clipboard {
   constructor() {
+    this.isCopy = false;
     this.init();
   }
 
   init() {
-    // Show clipboard copy if https
-    window.addEventListener("load", () => {
+    // Show clipboard copy if https and has permissions
+    window.addEventListener("load", async () => {
       if (!window.location.href.startsWith("https://")) return;
-
       document.querySelectorAll("[data-clipboard-copy]").forEach((el) => {
         el.classList.remove("hidden");
       });
     });
 
-    window.addEventListener("click", (e) => {
+    window.addEventListener("click", async (e) => {
       if (!e.target.hasAttribute("data-clipboard-target")) return;
+      this.isCopy = false;
+      // With Chrome
+      try {
+        navigator.permissions
+          .query({ name: "clipboard-write" })
+          .then((result) => {
+            if (result.state === "granted" || result.state === "prompt") {
+              /* write to the clipboard now */
+              const copyEl = document.querySelector(
+                e.target.getAttribute("data-clipboard-target"),
+              );
 
-      navigator.permissions
-        .query({ name: "clipboard-write" })
-        .then((result) => {
-          if (result.state === "granted" || result.state === "prompt") {
-            /* write to the clipboard now */
-            const copyEl = document.querySelector(
-              e.target.getAttribute("data-clipboard-target"),
-            );
+              copyEl.select();
+              copyEl.setSelectionRange(0, 99999); // For mobile devices
 
-            copyEl.select();
-            copyEl.setSelectionRange(0, 99999); // For mobile devices
+              // Copy the text inside the text field
 
-            // Copy the text inside the text field
-            navigator.clipboard.writeText(copyEl.value);
-          }
-        });
+              navigator.clipboard.writeText(copyEl.value);
+              // Stop selecting
+              copyEl.blur();
+              this.isCopy = true;
+            }
+          });
+      } catch (e) {}
+      // With Firefox
+      try {
+        if (this.isCopy) return;
+        /* write to the clipboard now */
+        const copyEl = document.querySelector(
+          e.target.getAttribute("data-clipboard-target"),
+        );
+
+        copyEl.select();
+        copyEl.setSelectionRange(0, 99999); // For mobile devices
+
+        // Copy the text inside the text field
+
+        navigator.clipboard.writeText(copyEl.value);
+        // Stop selecting
+        copyEl.blur();
+        this.isCopy = true;
+      } catch (e) {}
+      // Default
+      try {
+        if (this.isCopy) return;
+        /* write to the clipboard now */
+        const copyEl = document.querySelector(
+          e.target.getAttribute("data-clipboard-target"),
+        );
+
+        copyEl.select();
+        copyEl.setSelectionRange(0, 99999); // For mobile devices
+
+        // Copy the text inside the text field
+
+        navigator.clipboard.writeText(copyEl.value);
+        // Stop selecting
+        copyEl.blur();
+
+        document.execCommand("copy");
+
+        this.isCopy = true;
+      } catch (e) {}
     });
   }
 }

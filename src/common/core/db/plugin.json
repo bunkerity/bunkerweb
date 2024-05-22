@@ -11,7 +11,16 @@
       "help": "The database URI, following the sqlalchemy format.",
       "id": "database-uri",
       "label": "The database URI",
-      "regex": "^(postgresql|mysql|mariadb|sqlite|oracle)(\\+[\\w\\-]+)?:.+$",
+      "regex": "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
+      "type": "text"
+    },
+    "DATABASE_URI_READONLY": {
+      "context": "global",
+      "default": "",
+      "help": "The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.",
+      "id": "database-uri-readonly",
+      "label": "The database URI for read-only operations",
+      "regex": "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
       "type": "text"
     },
     "DATABASE_LOG_LEVEL": {

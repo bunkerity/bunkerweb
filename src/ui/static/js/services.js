@@ -24,6 +24,11 @@ class SettingsService {
       this.settingsMultiple,
       "services",
     );
+    this.isReadOnly =
+      document
+        .querySelector("[data-services-modal]")
+        .getAttribute("data-readonly") === "true";
+
     this.initSettingsService();
   }
 
@@ -96,6 +101,7 @@ class SettingsService {
             operation,
           ] = this.getActionData(e.target);
 
+          const forceDisabled = this.isReadOnly ? true : false;
           const forceEnabled = action === "new" ? true : false;
           const setMethodUI =
             action === "new" || action === "clone" ? true : false;
@@ -110,6 +116,7 @@ class SettingsService {
             setMethodUI,
             forceEnabled,
             emptyServerName,
+            forceDisabled,
           );
         }
       } catch (err) {}
@@ -121,6 +128,10 @@ class ServiceModal {
   constructor() {
     //modal elements
     this.modal = document.querySelector("[data-services-modal]");
+    this.isReadOnly =
+      document
+        .querySelector("[data-services-modal]")
+        .getAttribute("data-readonly") === "true";
     this.modalTitle = this.modal.querySelector("[data-services-modal-title]");
     this.modalTabs = this.modal.querySelector(["[data-services-tabs-select]"]);
     this.modalTabsHeader = this.modal.querySelector([
@@ -235,8 +246,8 @@ class ServiceModal {
     this.setCardViewportHeight(action === "delete" ? false : true);
     this.setHeaderActionsVisible(action === "delete" ? false : true);
     this.SetSelectTabsVisible(action === "delete" ? false : true);
-    this.resetFilterSettings();
     if (action === "edit" || action === "new" || action === "clone") {
+      this.resetFilterSettings();
       this.formNewEdit.classList.remove("hidden");
 
       const oldNameValue = action === "edit" ? oldServName : "";
@@ -262,7 +273,10 @@ class ServiceModal {
     }
 
     this.setIsDraft(isDraft === "yes" ? true : false, method);
-    this.openModal();
+    setTimeout(() => {
+      this.setActionBtns();
+      this.openModal();
+    }, 50);
   }
 
   resetFilterSettings() {
@@ -277,6 +291,20 @@ class ServiceModal {
     inpKeyword.value = "";
     // dispatch event input
     inpKeyword.dispatchEvent(new Event("input"));
+  }
+
+  setActionBtns() {
+    if (this.isReadOnly) {
+      this.modal.querySelectorAll("button[type='submit']").forEach((btn) => {
+        btn.setAttribute("disabled", "true");
+      });
+    }
+
+    if (!this.isReadOnly) {
+      this.modal.querySelectorAll("button[type='submit']").forEach((btn) => {
+        btn.removeAttribute("disabled");
+      });
+    }
   }
 
   setIsDraft(isDraft, method) {
