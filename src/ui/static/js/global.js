@@ -85,7 +85,7 @@ class News {
     ) {
       sessionStorage.setItem(
         "lastRefetch",
-        Math.round(new Date().getTime() / 1000) + 3600,
+        Math.round(new Date().getTime() / 1000) + 3600
       );
       sessionStorage.setItem("lastNews", JSON.stringify(lastNews));
     }
@@ -102,7 +102,7 @@ class News {
         news.photo.url,
         news.excerpt,
         news.tags,
-        news.date,
+        news.date
       );
       const BASE_URL = this.BASE_URL;
       let cleanHTML = DOMPurify.sanitize(cardHTML);
@@ -114,7 +114,7 @@ class News {
         slug.addEventListener("click", function () {
           window.open(
             `${BASE_URL}blog/post/${news.slug}?utm_campaign=self&utm_source=ui`,
-            "_blank",
+            "_blank"
           );
         });
       });
@@ -268,7 +268,7 @@ class FlashMsg {
       if (Number(this.flashCount.textContent) > 0) this.animeBtn();
       // display only one fixed flash message
       const flashFixedEls = document.querySelectorAll(
-        "[data-flash-message-fixed]",
+        "[data-flash-message-fixed]"
       );
       if (flashFixedEls.length > 1) {
         flashFixedEls.forEach((el, i) => {
@@ -298,7 +298,7 @@ class FlashMsg {
           flashEl.remove();
           //update count
           this.flashCount.textContent = document.querySelectorAll(
-            "[data-flash-message]",
+            "[data-flash-message]"
           ).length;
         }
       } catch (err) {}
@@ -401,7 +401,7 @@ class Banner {
     // Try to get data from api
     if (sessionStorage.getItem("bannerNews") !== null) {
       return this.updateBanner(
-        JSON.parse(sessionStorage.getItem("bannerNews")),
+        JSON.parse(sessionStorage.getItem("bannerNews"))
       );
     }
     fetch("https://www.bunkerweb.io/api/bw-ui-news")
@@ -413,7 +413,7 @@ class Banner {
         // Refetch after one hour
         sessionStorage.setItem(
           "bannerRefetch",
-          Math.round(new Date().getTime() / 1000) + 3600,
+          Math.round(new Date().getTime() / 1000) + 3600
         );
         return this.updateBanner(res.data[0].data);
       })
@@ -446,7 +446,7 @@ class Banner {
         this.bannerEl.querySelector(
           `[role="listitem"][data-id="${
             +visibleEl.getAttribute("data-id") + 1
-          }"]`,
+          }"]`
         ) || this.bannerEl.querySelector(`[role="listitem"][data-id="0"]`);
 
       // Hide current one
@@ -513,38 +513,84 @@ class Banner {
 
 class Clipboard {
   constructor() {
+    this.isCopy = false;
     this.init();
   }
 
   init() {
-    // Show clipboard copy if https
-    window.addEventListener("load", () => {
+    // Show clipboard copy if https and has permissions
+    window.addEventListener("load", async () => {
       if (!window.location.href.startsWith("https://")) return;
-
       document.querySelectorAll("[data-clipboard-copy]").forEach((el) => {
         el.classList.remove("hidden");
       });
     });
 
-    window.addEventListener("click", (e) => {
+    window.addEventListener("click", async (e) => {
       if (!e.target.hasAttribute("data-clipboard-target")) return;
+      this.isCopy = false;
+      // With Chrome
+      try {
+        navigator.permissions
+          .query({ name: "clipboard-write" })
+          .then((result) => {
+            if (result.state === "granted" || result.state === "prompt") {
+              /* write to the clipboard now */
+              const copyEl = document.querySelector(
+                e.target.getAttribute("data-clipboard-target")
+              );
 
-      navigator.permissions
-        .query({ name: "clipboard-write" })
-        .then((result) => {
-          if (result.state === "granted" || result.state === "prompt") {
-            /* write to the clipboard now */
-            const copyEl = document.querySelector(
-              e.target.getAttribute("data-clipboard-target"),
-            );
+              copyEl.select();
+              copyEl.setSelectionRange(0, 99999); // For mobile devices
 
-            copyEl.select();
-            copyEl.setSelectionRange(0, 99999); // For mobile devices
+              // Copy the text inside the text field
 
-            // Copy the text inside the text field
-            navigator.clipboard.writeText(copyEl.value);
-          }
-        });
+              navigator.clipboard.writeText(copyEl.value);
+              // Stop selecting
+              copyEl.blur();
+              this.isCopy = true;
+            }
+          });
+      } catch (e) {}
+      // With Firefox
+      try {
+        if (this.isCopy) return;
+        /* write to the clipboard now */
+        const copyEl = document.querySelector(
+          e.target.getAttribute("data-clipboard-target")
+        );
+
+        copyEl.select();
+        copyEl.setSelectionRange(0, 99999); // For mobile devices
+
+        // Copy the text inside the text field
+
+        navigator.clipboard.writeText(copyEl.value);
+        // Stop selecting
+        copyEl.blur();
+        this.isCopy = true;
+      } catch (e) {}
+      // Default
+      try {
+        if (this.isCopy) return;
+        /* write to the clipboard now */
+        const copyEl = document.querySelector(
+          e.target.getAttribute("data-clipboard-target")
+        );
+
+        copyEl.select();
+        copyEl.setSelectionRange(0, 99999); // For mobile devices
+
+        // Copy the text inside the text field
+
+        navigator.clipboard.writeText(copyEl.value);
+        // Stop selecting
+        copyEl.blur();
+
+        document.execCommand("copy");
+
+        this.isCopy = true;
+      } catch (e) {}
     });
   }
 }
@@ -563,13 +609,13 @@ const setMenu = new Menu();
 const setNewsSidebar = new Sidebar(
   "[data-sidebar-info]",
   "[data-sidebar-info-open]",
-  "[data-sidebar-info-close]",
+  "[data-sidebar-info-close]"
 );
 
 const setFlashSidebar = new Sidebar(
   "[data-flash-sidebar]",
   "[data-flash-sidebar-open]",
-  "[data-flash-sidebar-close]",
+  "[data-flash-sidebar-close]"
 );
 
 const setClipboard = new Clipboard();
