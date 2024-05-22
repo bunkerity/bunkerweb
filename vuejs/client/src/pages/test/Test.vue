@@ -69,7 +69,7 @@ const buttonSVGData = {
   eventAttr: {"store" : "modal", "default" : "close", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},
   columns: {"pc": 12, "tablet": 12, "mobile": 12},
   tabId: '1',
-  iconName : "add"
+  iconName : "plus"
 }
 
 const buttonOnlySVGData = {
@@ -81,7 +81,7 @@ const buttonOnlySVGData = {
   eventAttr: {"store" : "modal", "default" : "close", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},
   columns: {"pc": 12, "tablet": 12, "mobile": 12},
   tabId: '1',
-  iconName : "add"
+  iconName : "plus"
 }
 </script>
 

@@ -1,21 +1,5 @@
 <script setup>
-import MenuSvgHome from "@components/Icons/Menu/Home.vue";
-import MenuSvgInstances from "@components/Icons/Menu/Instances.vue";
-import MenuSvgGlobalConf from "@components/Icons/Menu/GlobalConf.vue";
-import MenuSvgConfigs from "@components/Icons/Menu/Configs.vue";
-import MenuSvgPlugins from "@components/Icons/Menu/Plugins.vue";
-import MenuSvgCache from "@components/Icons/Menu/Cache.vue";
-import MenuSvgJobs from "@components/Icons/Menu/Jobs.vue";
-import MenuSvgBans from "@components/Icons/Menu/Bans.vue";
-import MenuSvgReports from "@components/Icons/Menu/Reports.vue";
-import MenuSvgLogs from "@components/Icons/Menu/Logs.vue";
-import MenuSvgCore from "@components/Icons/Menu/Core.vue";
-import MenuSvgPro from "@components/Icons/Menu/Pro.vue";
-import MenuSvgTwitter from "@components/Icons/Menu/Twitter.vue";
-import MenuSvgLinkedin from "@components/Icons/Menu/Linkedin.vue";
-import MenuSvgDiscord from "@components/Icons/Menu/Discord.vue";
-import MenuSvgServices from "@components/Icons/Menu/Services.vue";
-import MenuSvgGithub from "@components/Icons/Menu/Github.vue";
+import Icons from "@components/Widget/Icons.vue";
 import { reactive, onMounted, onBeforeMount } from "vue";
 import { menuIndex, menuFloatIndex } from "@/utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
@@ -34,46 +18,53 @@ const bannerStore = useBannerStore();
 // Navigation with components
 // resolveComponent allow to replace a tag by a real Vue component
 const navList = [
-  { tag: "home", svg: MenuSvgHome, path: "/home" },
+  { tag: "home", svg: "house", svgColor : "cyan", path: "/home" },
   {
     tag: "instances",
-    svg: MenuSvgInstances,
+    svg: "box",
+    svgColor: "dark",
     path: "/instances",
   },
 
   {
     tag: "global_config",
-    svg: MenuSvgGlobalConf,
+    svg: "settings",
+    svgColor : "blue",
     path: "/global-config",
   },
   {
     tag: "services",
-    svg: MenuSvgServices,
+    svg: "disk",
+    svgColor : "orange",
     path: "/services",
   },
   {
     tag: "configs",
-    svg: MenuSvgConfigs,
+    svg: "gear",
+    svgColor : "purple",
     path: "/configs",
   },
   {
     tag: "plugins",
-    svg: MenuSvgPlugins,
+    svg: "puzzle",
+    svgColor : "yellow",
     path: "/plugins",
   },
   {
     tag: "cache",
-    svg: MenuSvgCache,
+    svg: "carton",
+    svgColor : "purple",
     path: "/cache",
   },
   {
     tag: "reports",
-    svg: MenuSvgReports,
+    svg: "flag",
+    svgColor : "amber",
     path: "/reports",
   },
-  { tag: "bans", svg: MenuSvgBans, path: "/bans" },
-  { tag: "jobs", svg: MenuSvgJobs, path: "/jobs" },
-  { tag: "logs", svg: MenuSvgLogs, path: "/jobs" },
+  { tag: "bans", svg: "trespass", svgColor : "red", path: "/bans" },
+  { tag: "jobs", svg: "task", svgColor : "emerald", path: "/jobs" },
+  { tag: "logs", svg: "list", svgColor : "dark", path: "/logs" },
 ];
 
 // Social links
@@ -81,22 +72,26 @@ const socialList = [
   {
     tag: "twitter",
     href: "https://twitter.com/bunkerity",
-    svg: MenuSvgTwitter,
+    svg: "twitter",
+    svgColor : "twitter"
   },
   {
     tag: "linkedin",
     href: "https://www.linkedin.com/company/bunkerity/",
-    svg: MenuSvgLinkedin,
+    svg: "linkedin",
+    svgColor : "linkedin"
   },
   {
     tag: "discord",
     href: "https://discord.gg/fTf46FmtyD",
-    svg: MenuSvgDiscord,
+    svg: "discord",
+    svgColor : "discord"
   },
   {
     tag: "github",
     href: "https://github.com/bunkerity",
-    svg: MenuSvgGithub,
+    svg: "github",
+    svgColor: "github"
   },
 ];
 
@@ -291,7 +286,7 @@ onBeforeMount(() => {
             "
           >
             <div class="menu-nav-item-container">
-              <component :is="item.svg"></component>
+              <Icons :iconName="item.svg" :iconClass="'menu-svg'" :iconColor="item.svgColor" />
             </div>
             <span class="menu-nav-item-title">
               {{ $t(`dashboard_${item.tag}`) }}
@@ -322,8 +317,7 @@ onBeforeMount(() => {
             :href="`/plugins?plugin_id=${plugin.id}`"
           >
             <div aria-hidden="true" class="menu-page-plugin-svg-container">
-              <MenuSvgCore                 v-if="plugin.type !== 'pro'" />
-              <MenuSvgPro                 v-if="plugin.type === 'pro'" />
+              <Icons :iconName="plugin.type === 'pro' ? 'crown' : 'free'" :iconClass="'menu-svg'" :iconColor="plugin.type === 'pro' ? 'amber' : 'dark'" />
             </div>
             <span class="menu-page-plugin-name">{{ plugin.name }}</span>
           </a>
@@ -373,7 +367,7 @@ onBeforeMount(() => {
             <span :id="`${item}-id`" class="sr-only">
               {{ $t(`dashboard_menu_${item.tag}_label`) }}
             </span>
-            <component :is="item.svg"></component>
+            <Icons :iconName="item.svg" :iconClass="'social-svg'" :iconColor="item.svgColor" />
           </a>
         </li>
       </ul>

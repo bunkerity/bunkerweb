@@ -3,7 +3,7 @@ import { computed, ref, watch, onBeforeMount, onMounted } from 'vue';
 import { contentIndex } from "@utils/tabindex.js";
 import { useEventStore } from "@store/event.js";
 import Container from "@components/Widget/Container.vue";
-import IconAdd from "@components/Icons/Button/Add.vue";
+import Icons from "@components/Widget/Icons.vue";
 
 /** 
   @name Widget/Button.vue
@@ -31,7 +31,7 @@ import IconAdd from "@components/Icons/Button/Add.vue";
   @param {boolean} [hideText=false] - Hide text to only display icon
   @param {string} [color="primary"] 
   @param {string} [size="normal"] - Can be of size sm || normal || lg || xl
-  @param {string} [iconName=""] - Name in lowercase of icons store on /Icons/Button
+  @param {string} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
   @param {string} [iconColor=""]
   @param {object} [eventAttr={}] - Store event on click {"store" : <store_name>, "default" : <default_value>,  "value" : <value_stored_on_click>, "target"<optional> : <target_id_element>, "valueExpanded" : "expanded_value"}
   @param {string|number} [tabId=""]
@@ -107,7 +107,7 @@ const props = defineProps({
 const btnEl = ref();
 
 const buttonClass = computed(() => {
-    return `btn btn-${props.color} btn-${props.size}`
+    return `btn ${props.color} ${props.size}`
 })
 
 onMounted(() => {
@@ -165,7 +165,7 @@ function updateData(isClick = false) {
     <span :class="[props.hideText ? 'sr-only' : '', 
     props.iconName ? 'mr-2' : ''
     ]" :id="`${props.id}-text`">{{  $t(props.text, props.text) }}</span>
-    <IconAdd v-if="props.iconName === 'add'" :iconName="props.iconName" :iconColor="props.iconColor" />
+    <Icons :iconName="props.iconName" :iconClass="'btn-svg'" :iconColor="props.iconColor" />
   </button>
 </Container>
 </template>

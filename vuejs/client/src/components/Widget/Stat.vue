@@ -1,11 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import IconCrown from '@components/Icons/Stat/Crown.vue';
-import IconFree from '@components/Icons/Stat/Free.vue';
-import IconInstances from '@components/Icons/Stat/Instances.vue';
-import IconPlugins from '@components/Icons/Stat/Plugins.vue';
-import IconServices from '@components/Icons/Stat/Services.vue';
-import IconVersion from '@components/Icons/Stat/Version.vue';
+import IconList from '@components/Icons/List.vue';
 
 /** 
   @name Widget/Stat.vue
@@ -25,7 +20,7 @@ import IconVersion from '@components/Icons/Stat/Version.vue';
   @param {string} title - The title of the stat. Can be a translation key or by default raw text.
   @param {string|number} value - The value of the stat
   @param {string} [subtitle=""] - The subtitle of the stat. Can be a translation key or by default raw text.
-  @param {string} [icon=""] - A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase.
+  @param {string} [iconName=""] - A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase.
   @param {string} [iconColor="sky"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink, lime, rose, fuchsia, violet, lightBlue, warmGray, trueGray, coolGray, blueGray, white, black)
   @param {string} [link=""] - A link to redirect when the card is clicked. Case falsy value, element is a div, , else it is an anchor.
   @param {string} [subtitleColor="info"] - The color of the subtitle between error, success, warning, info
@@ -46,7 +41,7 @@ const props = defineProps({
         required: false,
         default : ""
     },
-    icon: {
+    iconName: {
         type: String,
         required: false,
         default : ""
@@ -102,12 +97,7 @@ onMounted(() => {
         <div v-if="props.icon" role="img"
                 aria-label="version"
                 :class="['stat-svg-container', props.iconColor]">
-            <IconCrown v-if="props.icon === 'crown'" />
-            <IconFree v-else-if="props.icon === 'free'" />
-            <IconInstances v-else-if="props.icon === 'instances'" />
-            <IconPlugins v-else-if="props.icon === 'plugins'" />
-            <IconServices v-else-if="props.icon === 'services'" />
-            <IconVersion v-else-if="props.icon === 'version'" />
+            <IconList :iconName="props.icon" :iconClass="'stat-svg'" :iconColor="props.iconColor" />
         </div>
         <!-- end icon -->
     </component>
