@@ -253,10 +253,11 @@ STREAM support :white_check_mark:
 
 Integrate easily the Database.
 
-|      Setting       |                 Default                 |Context|Multiple|                   Description                    |
-|--------------------|-----------------------------------------|-------|--------|--------------------------------------------------|
-|`DATABASE_URI`      |`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
-|`DATABASE_LOG_LEVEL`|`warning`                                |global |no      |The level to use for database logs.               |
+|        Setting        |                 Default                 |Context|Multiple|                                                               Description                                                               |
+|-----------------------|-----------------------------------------|-------|--------|-----------------------------------------------------------------------------------------------------------------------------------------|
+|`DATABASE_URI`         |`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.                                                                                       |
+|`DATABASE_URI_READONLY`|                                         |global |no      |The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.|
+|`DATABASE_LOG_LEVEL`   |`warning`                                |global |no      |The level to use for database logs.                                                                                                      |
 
 ## DNSBL
 

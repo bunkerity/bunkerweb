@@ -1,3 +1,4 @@
+from contextlib import suppress
 from json import loads
 from glob import glob
 from os import sep
@@ -7,7 +8,7 @@ from os.path import join
 def get_ui_templates():
     ui_templates = []
     for template_file in glob(join(sep, "usr", "share", "bunkerweb", "templates", "*.json")):
-        try:
+        with suppress(BaseException):  # TODO: log exceptions
             ui_template = {}
             with open(template_file, "r") as f:
                 bw_template = loads(f.read())
@@ -23,9 +24,5 @@ def get_ui_templates():
                     ui_step["settings"].append(ui_setting)
                 ui_template["steps"].append(ui_step)
             ui_templates.append(ui_template)
-        except Exception as e:
-            # print(e)
-            # TODO: log
-            pass
     # print(ui_templates, flush=True)
     return ui_templates
