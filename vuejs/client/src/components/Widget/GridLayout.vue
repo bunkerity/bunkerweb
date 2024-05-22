@@ -62,11 +62,6 @@ const gridClass = computed(() => {
   return `break-words grid grid-cols-12 w-full col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
 });
 
-const titleClass = computed(() => {
-  if (props.type === "card") return "text-2xl font-bold mb-2";
-  return "";
-});
-
 const gridLayoutEl = ref();
 
 onMounted(() => {
@@ -88,9 +83,6 @@ onMounted(() => {
     data-grid-layout
     :class="[containerClass, gridClass, props.gridLayoutClass, 'p-4']"
   >
-    <h1 v-if="props.title" :class="[titleClass, 'col-span-12']">
-      {{ $t(props.title, props.title) }}
-    </h1>
     <slot></slot>
   </component>
 </template>

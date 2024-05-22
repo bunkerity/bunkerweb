@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed } from "vue";
 
 /** 
   @name Widget/Grid.vue
@@ -16,17 +16,19 @@ import { computed } from 'vue';
 */
 
 const props = defineProps({
-    gridClass : {
-            type: String,
-            required: false,
-            default: "items-start"
-        },
-})
-
+  gridClass: {
+    type: String,
+    required: false,
+    default: "items-start",
+  },
+});
 </script>
 
 <template>
-<div data-grid :class="[props.gridClass, 'col-span-12 grid grid-cols-12 w-full']">
+  <div
+    data-grid
+    :class="[props.gridClass, 'col-span-12 grid grid-cols-12 w-full  relative']"
+  >
     <slot></slot>
-</div>
+  </div>
 </template>

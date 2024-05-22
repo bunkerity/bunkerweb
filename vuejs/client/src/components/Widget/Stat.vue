@@ -1,10 +1,12 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import Icons from "@components/Widget/Icons.vue";
+import StatTitle from "@components/Stat/Title.vue";
+import StatValue from "@components/Stat/Value.vue";
+import StatSubtitle from "@components/Stat/Subtitle.vue";
+import StatIcon from "@components/Stat/Icon.vue";
 
 /** 
   @name Widget/Stat.vue
-  @description This component is a basic stat element that can be used to display a title, a value and an icon.
+  @description This component is wrapper of all stat components.
   This component has no grid system and will always get the full width of the parent.
   This component is mainly use inside a blank card.
   @example
@@ -71,27 +73,18 @@ const props = defineProps({
         props.iconName ? 'is-icon' : 'no-icon',
       ]"
     >
-      <p class="stat-title">{{ $t(props.title, props.title) }}</p>
-      <!-- version of user -->
-      <h5 class="stat-value">{{ $t(props.value, props.value) }}</h5>
-      <p v-if="props.subtitle" :class="['stat-subtitle', props.subtitleColor]">
-        {{ $t(props.subtitle, props.subtitle) }}
-      </p>
-    </div>
-    <!-- end text -->
-    <!-- icon -->
-    <div
-      v-if="props.iconName"
-      role="img"
-      aria-label="version"
-      :class="['stat-svg-container', props.iconColor]"
-    >
-      <Icons
-        :iconName="props.iconName"
-        :iconClass="'stat-svg'"
-        :iconColor="'white'"
+      <StatTitle :title="props.title" />
+      <StatValue :value="props.value" />
+      <StatSubtitle
+        v-if="props.subtitle"
+        :subtitle="props.subtitle"
+        :subtitleColor="props.subtitleColor"
       />
     </div>
-    <!-- end icon -->
+    <StatIcon
+      v-if="props.iconName"
+      :iconName="props.iconName"
+      :iconColor="props.iconColor"
+    />
   </div>
 </template>

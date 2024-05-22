@@ -2,12 +2,17 @@
 import { reactive, onBeforeMount } from "vue";
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
+import TitleCard from "@components/Title/Card.vue";
 import Checkbox from "@components/Forms/Field/Checkbox.vue";
 import Select from "@components/Forms/Field/Select.vue";
 import Input from "@components/Forms/Field/Input.vue";
 import Datepicker from "@components/Forms/Field/Datepicker.vue";
 import Button from "@components/Widget/Button.vue";
 import Stat from "@components/Widget/Stat.vue";
+import StatTitle from "@components/Stat/Title.vue";
+import StatSubtitle from "@components/Stat/Subtitle.vue";
+import StatValue from "@components/Stat/Value.vue";
+import StatIcon from "@components/Stat/Icon.vue";
 
 /**
   @name Builder.vue
@@ -68,18 +73,20 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <Checkbox
-          v-if="widget.type === 'Checkbox'"
+        <TitleCard v-if="widget.type === 'TitleCard'" v-bind="widget.data" />
+        <Checkbox v-if="widget.type === 'Checkbox'" v-bind="widget.data" />
+        <Select v-if="widget.type === 'Select'" v-bind="widget.data" />
+        <Input v-if="widget.type === 'Input'" v-bind="widget.data" />
+        <Datepicker v-if="widget.type === 'Datepicker'" v-bind="widget.data" />
+        <Button v-if="widget.type === 'Button'" v-bind="widget.data" />
+        <Stat v-if="widget.type === 'Stat'" v-bind="widget.data" />
+        <StatTitle v-if="widget.type === 'StatTitle'" v-bind="widget.data" />
+        <StatSubtitle
+          v-if="widget.type === 'StatSubtitle'"
           v-bind="widget.data"
-        ></Checkbox>
-        <Select v-if="widget.type === 'Select'" v-bind="widget.data"></Select>
-        <Input v-if="widget.type === 'Input'" v-bind="widget.data"></Input>
-        <Datepicker
-          v-if="widget.type === 'Datepicker'"
-          v-bind="widget.data"
-        ></Datepicker>
-        <Button v-if="widget.type === 'Button'" v-bind="widget.data"></Button>
-        <Stat v-if="widget.type === 'Stat'" v-bind="widget.data"></Stat>
+        />
+        <StatValue v-if="widget.type === 'StatValue'" v-bind="widget.data" />
+        <StatIcon v-if="widget.type === 'StatIcon'" v-bind="widget.data" />
       </template>
     </Grid>
   </GridLayout>
