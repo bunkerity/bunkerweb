@@ -1,8 +1,8 @@
 <script setup>
-import StatTitle from "@components/Stat/Title.vue";
-import StatValue from "@components/Stat/Value.vue";
-import StatSubtitle from "@components/Stat/Subtitle.vue";
-import StatIcon from "@components/Stat/Icon.vue";
+import TitleStat from "@components/Title/Stat.vue";
+import ContentStat from "@components/Content/Stat.vue";
+import SubtitleStat from "@components/Subtitle/Stat.vue";
+import IconStat from "@components/Icon/Stat.vue";
 
 /** 
   @name Widget/Stat.vue
@@ -73,15 +73,15 @@ const props = defineProps({
         props.iconName ? 'is-icon' : 'no-icon',
       ]"
     >
-      <StatTitle :title="props.title" />
-      <StatValue :value="props.value" />
-      <StatSubtitle
+      <TitleStat :title="props.title" />
+      <ContentStat :value="props.value" />
+      <SubtitleStat
         v-if="props.subtitle"
         :subtitle="props.subtitle"
         :subtitleColor="props.subtitleColor"
       />
     </div>
-    <StatIcon
+    <IconStat
       v-if="props.iconName"
       :iconName="props.iconName"
       :iconColor="props.iconColor"

@@ -1,10 +1,10 @@
 <script setup>
 import Icons from "@/components/Widget/Icons.vue";
 /** 
-  @name Stat/Icon.vue
+  @name Icon/Stat.vue
   @description This component is a icon used with stats.
   This can be used alone in case we don't need a complete stat widget.
-  In case you have a title, subtitle, value and icon to display, you can directly use Stat widget.
+  In case you have a title, subtitle, stat and icon to display, you can directly use Stat widget.
     @example
   {
     iconName: "crown",

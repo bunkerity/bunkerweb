@@ -76,7 +76,7 @@ const builder = [
     // We need to send specific data for each widget type
     widgets: [
       {
-        type: "StatIcon",
+        type: "IconStat",
         data: {
           iconName: "crown",
           iconColor: "yellow",
@@ -84,21 +84,21 @@ const builder = [
         },
       },
       {
-        type: "StatTitle",
+        type: "TitleStat",
         data: {
           title: "stat title",
           titleClass: "col-span-12",
         },
       },
       {
-        type: "StatValue",
+        type: "ContentStat",
         data: {
           value: "20",
           valueClass: "col-span-12",
         },
       },
       {
-        type: "StatSubtitle",
+        type: "SubtitleStat",
         data: {
           subtitle: "some subtitle",
           subtitleClass: "col-span-12",

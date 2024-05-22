@@ -807,6 +807,11 @@ body {
   @apply capitalize-first hover:italic hover:brightness-90 block sm:px-4 py-1 lg:pt-1 lg:pb-1 text-sm tracking-wide font-normal transition duration-300 ease-in-out text-white dark:text-white;
 }
 
+/* CONTENT COMPONENT */
+.content-title {
+  @apply text-lg font-bold mb-2 col-span-12;
+}
+
 /* STAT COMPONENT */
 
 .stat-container {

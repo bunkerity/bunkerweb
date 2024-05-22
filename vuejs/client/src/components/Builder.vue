@@ -9,10 +9,10 @@ import Input from "@components/Forms/Field/Input.vue";
 import Datepicker from "@components/Forms/Field/Datepicker.vue";
 import Button from "@components/Widget/Button.vue";
 import Stat from "@components/Widget/Stat.vue";
-import StatTitle from "@components/Stat/Title.vue";
-import StatSubtitle from "@components/Stat/Subtitle.vue";
-import StatValue from "@components/Stat/Value.vue";
-import StatIcon from "@components/Stat/Icon.vue";
+import TitleStat from "@components/Title/Stat.vue";
+import ContentStat from "@components/Content/Stat.vue";
+import SubtitleStat from "@components/Subtitle/Stat.vue";
+import IconStat from "@components/Icon/Stat.vue";
 
 /**
   @name Builder.vue
@@ -80,13 +80,16 @@ const props = defineProps({
         <Datepicker v-if="widget.type === 'Datepicker'" v-bind="widget.data" />
         <Button v-if="widget.type === 'Button'" v-bind="widget.data" />
         <Stat v-if="widget.type === 'Stat'" v-bind="widget.data" />
-        <StatTitle v-if="widget.type === 'StatTitle'" v-bind="widget.data" />
-        <StatSubtitle
-          v-if="widget.type === 'StatSubtitle'"
+        <TitleStat v-if="widget.type === 'TitleStat'" v-bind="widget.data" />
+        <SubtitleStat
+          v-if="widget.type === 'SubtitleStat'"
           v-bind="widget.data"
         />
-        <StatValue v-if="widget.type === 'StatValue'" v-bind="widget.data" />
-        <StatIcon v-if="widget.type === 'StatIcon'" v-bind="widget.data" />
+        <ContentStat
+          v-if="widget.type === 'ContentStat'"
+          v-bind="widget.data"
+        />
+        <IconStat v-if="widget.type === 'IconStat'" v-bind="widget.data" />
       </template>
     </Grid>
   </GridLayout>

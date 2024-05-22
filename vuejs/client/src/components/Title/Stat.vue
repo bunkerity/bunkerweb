@@ -1,9 +1,9 @@
 <script setup>
 /** 
-  @name Stat/Title.vue
+  @name Title/Stat.vue
   @description This component is a title used with stats.
   This can be used alone in case we don't need a complete stat widget.
-  In case you have a title, subtitle, value and icon to display, you can directly use Stat widget.
+  In case you have a title, subtitle, stat and icon to display, you can directly use Stat widget.
     @example
   {
     title: "Total Users",

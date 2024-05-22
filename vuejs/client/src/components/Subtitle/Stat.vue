@@ -3,7 +3,7 @@
   @name Stat/Subtitle.vue
   @description This component is a subtitle used with stats.
   This can be used alone in case we don't need a complete stat widget.
-  In case you have a title, subtitle, value and icon to display, you can directly use Stat widget.
+  In case you have a title, subtitle, stat and icon to display, you can directly use Stat widget.
     @example
   {
     subtitle: "Last 30 days",
