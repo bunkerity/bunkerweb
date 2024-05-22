@@ -106,7 +106,7 @@
                                </svg>
                            </a>
                        {% endif %}
-                       {% if plugin['type'] == "external" %}
+                       {% if plugin['type'] == "external" and plugin['method'] in ('ui', 'manual') %}
                            <button {% if is_readonly%}disabled{% endif %}  data-{{attribute_name}}-action="delete"
                                    name="{{ plugin['id'] }}"
                                    aria-label="delete plugin"
