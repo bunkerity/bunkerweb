@@ -40,7 +40,7 @@
                         <!-- button list-->
                         <div class="relative w-full flex justify-center sm:justify-end">
                             {% if instance._type == "local" and instance.health %}
-                                <button  {% if is_readonly%}disabled{% endif %} type="submit"
+                                <button type="submit"
                                         name="operation"
                                         value="restart"
                                         class="edit-btn mx-1 text-xs">Restart</button>
@@ -50,18 +50,18 @@
                                         class="delete-btn mx-1 text-xs">Stop</button>
                             {% endif %}
                             {% if not instance._type == "local" and instance.health %}
-                                <button  {% if is_readonly%}disabled{% endif %} type="submit"
+                                <button type="submit"
                                         name="operation"
                                         value="reload"
                                         class="edit-btn mx-1 text-xs">Reload</button>
-                                <button  {% if is_readonly%}disabled{% endif %} type="submit"
+                                <button type="submit"
                                         name="operation"
                                         value="stop"
                                         class="delete-btn mx-1 text-xs">Stop</button>
                             {% endif %}
                             {% if instance._type == "local" and not instance.health or not
                                 instance._type == "local" and not instance.health %}
-                                <button  {% if is_readonly%}disabled{% endif %} type="submit"
+                                <button type="submit"
                                         name="operation"
                                         value="start"
                                         class="valid-btn mx-1 text-xs">Start</button>

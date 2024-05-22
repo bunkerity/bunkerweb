@@ -291,6 +291,12 @@ class FolderDropdown {
 
 class FolderEditor {
   constructor() {
+    this.isReadonly =
+      document
+        .querySelector(`[data-global-is-readonly]`)
+        .getAttribute(`data-global-is-readonly`) === "true"
+        ? true
+        : false;
     this.editor = ace.edit("editor");
     this.darkMode = document.querySelector("[data-dark-toggle]");
     this.initEditor();
@@ -300,6 +306,7 @@ class FolderEditor {
   initEditor() {
     //editor options
     this.editor.setShowPrintMargin(false);
+    this.editor.setReadOnly(this.isReadonly);
     this.setDarkMode();
   }
 
@@ -323,10 +330,6 @@ class FolderEditor {
     bool
       ? this.editor.setTheme("ace/theme/dracula")
       : this.editor.setTheme("ace/theme/dawn");
-  }
-
-  readOnlyBool(bool) {
-    this.editor.setReadOnly(bool);
   }
 }
 
@@ -666,8 +669,10 @@ class FolderModal {
 
   //UTILS
   disabledDOMInpt(bool) {
-    this.modalPathName.disabled = bool;
-    ace.edit("editor").setReadOnly(bool);
+    if (this.isReadonly) ace.edit("editor").setReadOnly(true);
+    if (this.isReadonly) this.modalPathName.disabled = true;
+    if (!this.isReadonly) this.modalPathName.disabled = bool;
+    if (!this.isReadonly) ace.edit("editor").setReadOnly(bool);
   }
 
   closeModal() {

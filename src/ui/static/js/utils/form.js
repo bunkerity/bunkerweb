@@ -268,11 +268,18 @@ class Password {
 
 class DisabledPop {
   constructor() {
+    this.isReadonly =
+      document
+        .querySelector("[data-global-is-readonly]")
+        .getAttribute("data-global-is-readonly") === "true"
+        ? true
+        : false;
     this.init();
   }
 
   init() {
     window.addEventListener("pointerover", (e) => {
+      if (this.isReadonly) return;
       //for checkbox and regular inputs
       if (
         e.target.tagName === "INPUT" &&
@@ -292,6 +299,8 @@ class DisabledPop {
     });
 
     window.addEventListener("pointerout", (e) => {
+      if (this.isReadonly) return;
+
       try {
         const popupEl = e.target
           .closest("div")

@@ -666,11 +666,15 @@
 }
 
 .plugins-list-items-delete {
-  @apply z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px;
+  @apply z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px disabled:cursor-not-allowed;
 }
 
 .plugins-list-items-delete-svg {
   @apply h-5 w-5 fill-red-500 dark:brightness-90;
+}
+
+.readonly.plugins-list-items-delete-svg {
+  @apply cursor-not-allowed opacity-[0.5];
 }
 
 .plugins-list-items-link {
