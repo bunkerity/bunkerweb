@@ -197,10 +197,11 @@ def get_ui_data():
     return ui_data
 
 
-def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False):
+def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False) -> int:
     # Do the operation
-    error = False
+    error = 0
     ui_data = get_ui_data()
+    operation = ""
 
     if "TO_FLASH" not in ui_data:
         ui_data["TO_FLASH"] = []
@@ -225,7 +226,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
                     app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
                     ui_data["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
     elif method == "global_config":
-        operation = app.config["CONFIG"].edit_global_conf(args[0])
+        operation, error = app.config["CONFIG"].edit_global_conf(args[0])
 
     if operation == "reload":
         operation = app.config["INSTANCES"].reload_instance(args[0])
@@ -237,14 +238,12 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         operation = app.config["INSTANCES"].restart_instance(args[0])
     elif not error:
         operation = "The scheduler will be in charge of reloading the instances."
-    else:
-        operation = ""
 
     if operation:
         if isinstance(operation, list):
             for op in operation:
                 ui_data["TO_FLASH"].append({"content": f"Reload failed for the instance {op}", "type": "error"})
-        elif operation.startswith("Can't"):
+        elif operation.startswith(("Can't", "The database is read-only")):
             ui_data["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
             ui_data["TO_FLASH"].append({"content": operation, "type": "success"})
@@ -261,6 +260,8 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     ui_data["RELOADING"] = False
     with LOCK:
         TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+    return error
 
 
 # UTILS
@@ -391,9 +392,19 @@ def inject_variables():
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
-    if db.readonly and db.fallback_readonly:
-        with suppress(BaseException):
+    if db.database_uri and db.readonly:
+        try:
             db.retry_connection()
+            db.readonly = False
+            app.logger.info("The database is no longer read-only, defaulting to read-write mode")
+        except BaseException:
+            try:
+                db.retry_connection(readonly=True)
+            except BaseException:
+                if db.database_uri_readonly:
+                    with suppress(BaseException):
+                        db.retry_connection(fallback=True)
+            db.readonly = True
 
     # check that is value is in tuple
     return dict(
@@ -720,15 +731,18 @@ def account():
             metadata["last_pro_check"] = None
             db.set_pro_metadata(metadata)
 
-            flash("Checking license key to upgrade.", "success")
-
             curr_changes = db.check_changes()
 
             # Reload instances
             def update_global_config(threaded: bool = False):
                 wait_applying()
 
-                manage_bunkerweb("global_config", variable, threaded=threaded)
+                if not manage_bunkerweb("global_config", variable, threaded=threaded):
+                    message = "Checking license key to upgrade."
+                    if threaded:
+                        ui_data["TO_FLASH"].append({"content": message, "type": "success"})
+                    else:
+                        flash(message)
 
             ui_data = get_ui_data()
             ui_data["PRO_LOADING"] = True
