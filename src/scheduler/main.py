@@ -15,7 +15,7 @@ from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
 from sys import path as sys_path
 from tarfile import open as tar_open
-from threading import Thread
+from threading import Event, Thread
 from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Union
@@ -25,12 +25,14 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from dotenv import dotenv_values
+from schedule import every as schedule_every, run_pending
 
 from common_utils import bytes_hash, dict_to_frozenset, get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 from API import API  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
 
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
@@ -71,8 +73,17 @@ SCHEDULER_TMP_ENV_PATH.touch()
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 LOGGER = setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
-SLAVE_MODE = environ.get("SLAVE_MODE", "no") == "yes"
-MASTER_MODE = environ.get("MASTER_MODE", "no") == "yes"
+HEALTHCHECK_INTERVAL = getenv("HEALTHCHECK_INTERVAL", "10")
+
+if not HEALTHCHECK_INTERVAL.isdigit():
+    LOGGER.error("HEALTHCHECK_INTERVAL must be an integer, defaulting to 10")
+    HEALTHCHECK_INTERVAL = 10
+
+HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
+HEALTHCHECK_EVENT = Event()
+
+SLAVE_MODE = getenv("SLAVE_MODE", "no") == "yes"
+MASTER_MODE = getenv("MASTER_MODE", "no") == "yes"
 
 
 def handle_stop(signum, frame):
@@ -341,7 +352,67 @@ def run_in_slave_mode():  # TODO: Refactor this feature
         sleep(5)
 
 
-# TODO: add a health check for the scheduler's BunkerWeb instances
+def healthcheck_job():
+    return  # TODO: remove this when the healthcheck endpoint is ready @fl0ppy-d1sk
+
+    if HEALTHCHECK_EVENT.is_set():
+        LOGGER.warning("Healthcheck job is already running, skipping execution ...")
+        return
+
+    try:
+        assert SCHEDULER is not None
+    except AssertionError:
+        return
+
+    HEALTHCHECK_EVENT.set()
+
+    for db_instance in SCHEDULER.db.get_instances():
+        try:
+            bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
+            sent, err, status, resp = bw_instance.request("GET", "health")
+
+            if not sent:
+                LOGGER.warning(
+                    f"instances_healthcheck - Can't send API request to {bw_instance.endpoint}health : {err}, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ..."
+                )
+                if bw_instance in SCHEDULER.apis:
+                    SCHEDULER.apis.remove(bw_instance)
+                continue
+            if status != 200:
+                LOGGER.warning(
+                    f"instances_healthcheck - Error while sending API request to {bw_instance.endpoint}health : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ..."
+                )
+                if bw_instance in SCHEDULER.apis:
+                    SCHEDULER.apis.remove(bw_instance)
+                continue
+
+            if resp["state"] == "loading":
+                LOGGER.info(f"instances_healthcheck - Instance {bw_instance.endpoint} is loading, sending config ...")
+                api_caller = ApiCaller([bw_instance])
+                api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
+                api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
+                api_caller.send_files(PRO_PLUGINS_PATH, "/pro_plugins")
+                api_caller.send_files(join(sep, "etc", "nginx"), "/confs")
+                api_caller.send_files(CACHE_PATH, "/cache")
+                if api_caller.send_to_apis("POST", "/reload"):
+                    LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
+                else:
+                    LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
+            elif resp["state"] == "down":
+                LOGGER.warning(f"instances_healthcheck - Instance {bw_instance.endpoint} is down")
+                if bw_instance in SCHEDULER.apis:
+                    SCHEDULER.apis.remove(bw_instance)
+                continue
+
+            if bw_instance not in SCHEDULER.apis:
+                SCHEDULER.apis.append(bw_instance)
+        except BaseException:
+            LOGGER.exception(f"instances_healthcheck - Exception while checking instance {bw_instance.endpoint}")
+            if bw_instance in SCHEDULER.apis:
+                SCHEDULER.apis.remove(bw_instance)
+
+    HEALTHCHECK_EVENT.clear()
+
 
 if __name__ == "__main__":
     try:
@@ -371,6 +442,8 @@ if __name__ == "__main__":
         if SLAVE_MODE:
             run_in_slave_mode()
             stop(1)
+
+        schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
 
         db_metadata = SCHEDULER.db.get_metadata()
 
@@ -685,8 +758,9 @@ if __name__ == "__main__":
             errors = 0
             while RUN and not NEED_RELOAD:
                 try:
-                    SCHEDULER.run_pending()
                     sleep(1)
+                    run_pending()
+                    SCHEDULER.run_pending()
                     current_time = datetime.now()
 
                     while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():

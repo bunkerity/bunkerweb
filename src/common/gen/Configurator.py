@@ -194,6 +194,7 @@ class Configurator:
                     "SLAVE_MODE",
                     "MASTER_MODE",
                     "CUSTOM_LOG_LEVEL",
+                    "HEALTHCHECK_INTERVAL",
                     "GPG_KEY",
                     "HOME",
                     "HOSTNAME",
