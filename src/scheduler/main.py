@@ -374,15 +374,6 @@ if __name__ == "__main__":
             run_in_slave_mode()
             stop(1)
 
-        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
-            while not SCHEDULER.db.is_initialized():
-                logger.warning("Database is not initialized, retrying in 5s ...")
-                sleep(5)
-
-            while not SCHEDULER.db.is_autoconf_loaded():
-                logger.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
-                sleep(5)
-
         if (
             INTEGRATION in ("Swarm", "Kubernetes", "Autoconf")
             or not tmp_variables_path.exists()
