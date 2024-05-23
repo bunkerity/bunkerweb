@@ -1,6 +1,4 @@
 <script setup>
-import { computed } from "vue";
-
 /** 
   @name Widget/Grid.vue
   @description This component is a basic container that can be used to wrap other components.

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed } from "vue";
 
 /** 
   @name Widget/Container.vue
@@ -17,25 +17,30 @@ import { computed } from 'vue';
 */
 
 const props = defineProps({
-  containerClass : {
+  containerClass: {
     type: String,
     required: false,
-    default : ""
+    default: "",
   },
   columns: {
     type: [Object, Boolean],
     required: false,
-    default: false
+    default: false,
   },
-})
+});
 
 const gridClass = computed(() => {
-    return props.columns ? `col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}` : '';
-})
+  return props.columns
+    ? `col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`
+    : "";
+});
 </script>
 
 <template>
-  <div data-container :class="[props.containerClass ? props.containerClass : '', gridClass]">
+  <div
+    data-container
+    :class="[props.containerClass ? props.containerClass : '', gridClass]"
+  >
     <slot></slot>
   </div>
 </template>

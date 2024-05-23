@@ -1,7 +1,7 @@
 <script setup>
 /** 
-  @name Title/Card.vue
-  @description This component is a used as card title.
+  @name Title/CardContent.vue
+  @description This component is similar to TitleCard but with a lower size.
   This can be used outside of the card container.
     @example
   {
@@ -26,7 +26,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <h1 v-if="props.title" :class="[props.titleClass, 'card-title']">
+  <h2 v-if="props.title" :class="[props.titleClass, 'card-content-title']">
     {{ $t(props.title, props.title) }}
-  </h1>
+  </h2>
 </template>

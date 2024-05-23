@@ -14,7 +14,7 @@ import fr from "@lang/fr.json" assert { type: "json" };
 const availablesLangs = ["en", "fr"];
 
 function getAllLang() {
-  return { en: en, fr : fr };
+  return { en: en, fr: fr };
 }
 
 function getAllLangCurrPage(pagesArr) {
@@ -42,6 +42,8 @@ export function getI18n(pagesArr = []) {
     fallbackLocale: "en",
     messages, // set locale messages
     availableLocales: availablesLangs,
+    fallbackWarn: false,
+    missingWarn: false,
   });
 
   return i18n;
@@ -68,7 +70,7 @@ export function getLocalLang() {
     navigator.languages &&
     navigator.languages > 0 &&
     availablesLangs.indexOf(
-      navigator.languages[0].split("-")[0].toLowerCase(),
+      navigator.languages[0].split("-")[0].toLowerCase()
     ) !== -1
   ) {
     return navigator.languages[0].split("-")[0].toLowerCase();

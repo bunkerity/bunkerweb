@@ -23,7 +23,6 @@ const builder = [
   {
     // we are starting with the top level container name
     // this can be a "card", "modal", "table"... etc
-    type: "card",
     containerColumns: { pc: 12, tablet: 12, mobile: 12 },
     // Each widget need a name (here type) and associated data
     // We need to send specific data for each widget type
@@ -71,7 +70,6 @@ const builder = [
     containerClass: "", // tailwind css grid class (items-start, ...)
     containerColumns: { pc: 12, tablet: 12, mobile: 12 },
     // container title
-    title: "My awesome card",
     // Each widget need a name (here type) and associated data
     // We need to send specific data for each widget type
     widgets: [
@@ -93,8 +91,8 @@ const builder = [
       {
         type: "ContentStat",
         data: {
-          value: "20",
-          valueClass: "col-span-12",
+          stat: "20",
+          statClass: "col-span-12",
         },
       },
       {
@@ -106,12 +104,58 @@ const builder = [
       },
     ],
   },
+  {
+    // we are starting with the top level container name
+    // this can be a "card", "modal", "table"... etc
+    type: "card",
+    containerClass: "", // tailwind css grid class (items-start, ...)
+    containerColumns: { pc: 12, tablet: 12, mobile: 12 },
+    // container title
+    // Each widget need a name (here type) and associated data
+    // We need to send specific data for each widget type
+    widgets: [
+      {
+        type: "Instance",
+        data: {
+          details: [
+            { key: "HOSTNAME", value: "www.example.com" },
+            { key: "METHOD", value: "UI" },
+            { key: "PORT", value: "1084" },
+            { key: "STATUS", value: "active" },
+          ],
+          status: "success",
+          title: "www.example.com",
+          buttons: [
+            {
+              text: "reload",
+              color: "edit",
+              size: "normal",
+            },
+            {
+              text: "Stop",
+              color: "error",
+              size: "normal",
+              eventAttr: {
+                store: "modal",
+                default: "close",
+                value: "open",
+                target: "modal_id",
+                valueExpanded: "open",
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
 ];
 </script>
 
 <template>
-  <div class="bg-secondary flex flex-col items-center justify-center h-full">
-    <div style="width: 600px">
+  <div
+    class="bg-secondary flex flex-col items-center justify-center h-full gap-4"
+  >
+    <div style="width: 600px" class="gap-4 grid grid-cols-12">
       <Builder :builder="builder" />
     </div>
   </div>

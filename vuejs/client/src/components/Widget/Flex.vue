@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed } from "vue";
 
 /** 
   @name Widget/Flex.vue
@@ -15,21 +15,20 @@ import { computed } from 'vue';
 */
 
 const props = defineProps({
-    flexClass: {
-        type: String,
-        required: false,
-        default : "flex-start"
-    },
-})
+  flexClass: {
+    type: String,
+    required: false,
+    default: "flex-start",
+  },
+});
 
 const flexClass = computed(() => {
-    return `w-full flex ${props.flexClass}`;
-})
-
+  return `w-full flex ${props.flexClass}`;
+});
 </script>
 
 <template>
-<div data-flex :class="[flexClass]">
+  <div data-flex :class="[flexClass]">
     <slot></slot>
-</div>
+  </div>
 </template>

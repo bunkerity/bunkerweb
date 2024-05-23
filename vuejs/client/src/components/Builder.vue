@@ -1,18 +1,30 @@
 <script setup>
 import { reactive, onBeforeMount } from "vue";
+// Containers
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
+// Title
 import TitleCard from "@components/Title/Card.vue";
+import TitleCardContent from "@components/Title/CardContent.vue";
+import TitleStat from "@components/Title/Stat.vue";
+// Subtitle
+import SubtitleStat from "@components/Subtitle/Stat.vue";
+// Content
+import ContentStat from "@components/Content/Stat.vue";
+import ContentDetailList from "@components/Content/DetailList.vue";
+// Icon
+import IconStat from "@components/Icon/Stat.vue";
+import IconStatus from "@components/Icon/Status.vue";
+// Form
 import Checkbox from "@components/Forms/Field/Checkbox.vue";
 import Select from "@components/Forms/Field/Select.vue";
 import Input from "@components/Forms/Field/Input.vue";
 import Datepicker from "@components/Forms/Field/Datepicker.vue";
+// Widget
 import Button from "@components/Widget/Button.vue";
+import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Stat from "@components/Widget/Stat.vue";
-import TitleStat from "@components/Title/Stat.vue";
-import ContentStat from "@components/Content/Stat.vue";
-import SubtitleStat from "@components/Subtitle/Stat.vue";
-import IconStat from "@components/Icon/Stat.vue";
+import Instance from "@components/Widget/Instance.vue";
 
 /**
   @name Builder.vue
@@ -74,6 +86,10 @@ const props = defineProps({
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
         <TitleCard v-if="widget.type === 'TitleCard'" v-bind="widget.data" />
+        <TitleCardContent
+          v-if="widget.type === 'TitleCardContent'"
+          v-bind="widget.data"
+        />
         <Checkbox v-if="widget.type === 'Checkbox'" v-bind="widget.data" />
         <Select v-if="widget.type === 'Select'" v-bind="widget.data" />
         <Input v-if="widget.type === 'Input'" v-bind="widget.data" />
@@ -90,6 +106,16 @@ const props = defineProps({
           v-bind="widget.data"
         />
         <IconStat v-if="widget.type === 'IconStat'" v-bind="widget.data" />
+        <Instance v-if="widget.type === 'Instance'" v-bind="widget.data" />
+        <IconStatus v-if="widget.type === 'IconStatus'" v-bind="widget.data" />
+        <ContentDetailList
+          v-if="widget.type === 'ContentDetailList'"
+          v-bind="widget.data"
+        />
+        <ButtonGroup
+          v-if="widget.type === 'ButtonGroup'"
+          v-bind="widget.data"
+        />
       </template>
     </Grid>
   </GridLayout>

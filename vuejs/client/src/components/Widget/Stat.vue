@@ -1,4 +1,5 @@
 <script setup>
+import Container from "@components/Widget/Container.vue";
 import TitleStat from "@components/Title/Stat.vue";
 import ContentStat from "@components/Content/Stat.vue";
 import SubtitleStat from "@components/Subtitle/Stat.vue";
@@ -65,7 +66,7 @@ const props = defineProps({
 });
 </script>
 <template>
-  <div :class="['stat-container', props.statClass]">
+  <Container :columns="{ pc: 12, tablet: 12, mobile: 12 }">
     <!-- text -->
     <div
       :class="[
@@ -86,5 +87,5 @@ const props = defineProps({
       :iconName="props.iconName"
       :iconColor="props.iconColor"
     />
-  </div>
+  </Container>
 </template>

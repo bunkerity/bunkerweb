@@ -72,6 +72,10 @@
   "dashboard_banner_link_text_1": "Check BunkerWeb Panel",
   "dashboard_banner_link_text_2": "demo wep app !",
   "dashboard_banner_link_text_3": "website !",
+  "dashboard_status_success": "status active or success.",
+  "dashboard_status_error": "status inactive or error.",
+  "dashboard_status_warning": "status warning or alert.",
+  "dashboard_status_info": "status loading or waiting or unknown.",
   "action_send": "send {name}",
   "action_disable": "disable {name}",
   "action_enable": "enable {name}",
@@ -103,5 +107,11 @@
   "home_all_methods_included": "all methods included",
   "home_plugins": "plugins",
   "home_no_error": "no error",
-  "home_errors_found": "errors found"
+  "home_errors_found": "errors found",
+  "instance_hostname": "hostname",
+  "instances_method": "method",
+  "instances_port": "port",
+  "instances_status": "status",
+  "instances_active": "active",
+  "instances_inactive": "inactive"
 }

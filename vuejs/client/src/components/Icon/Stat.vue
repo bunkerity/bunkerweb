@@ -1,5 +1,6 @@
 <script setup>
 import Icons from "@/components/Widget/Icons.vue";
+
 /** 
   @name Icon/Stat.vue
   @description This component is a icon used with stats.

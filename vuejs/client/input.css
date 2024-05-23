@@ -807,16 +807,41 @@ body {
   @apply capitalize-first hover:italic hover:brightness-90 block sm:px-4 py-1 lg:pt-1 lg:pb-1 text-sm tracking-wide font-normal transition duration-300 ease-in-out text-white dark:text-white;
 }
 
+/* STATUS COMPONENT */
+
+.status-svg-container {
+  @apply absolute top-1 right-0;
+}
+
+.status-icon {
+  @apply h-6 w-6 rounded-full;
+}
+
 /* CONTENT COMPONENT */
+
 .content-title {
   @apply text-lg font-bold mb-2 col-span-12;
 }
 
-/* STAT COMPONENT */
+/* CONTENT DETAIL LSIT COMPONENT */
 
-.stat-container {
-  @apply col-span-12 relative;
+.content-detail-list-container {
+  @apply grid grid-cols-12 gap-2 my-4;
 }
+
+.content-detail-list-item {
+  @apply flex items-center col-span-1 py-1 sm:py-0;
+}
+
+.content-detail-list-title {
+  @apply min-w-fit transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
+}
+
+.content-detail-list-subtitle {
+  @apply min-w-[2rem] break-all transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
+}
+
+/* STAT COMPONENT */
 
 .stat-content-container.no-icon {
   @apply mr-1;
@@ -853,7 +878,11 @@ body {
 }
 
 .card-title {
-  @apply text-2xl font-bold mb-2 col-span-12;
+  @apply break-words max-w-[80%] font-bold mb-2 col-span-12 dark:text-white/90 transition duration-300 ease-in-out text-2xl;
+}
+
+.card-content-title {
+  @apply break-words max-w-[80%] mb-2 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl;
 }
 
 /* CARD INFO */
@@ -900,19 +929,23 @@ body {
   @apply bg-white text-red-500 border border-red-500 hover:border-red-500/80 focus:border-red-500/80 hover:text-red-500/80 focus:text-red-500/80;
 }
 
-.btn.delete {
+.btn.delete,
+.btn.error {
   @apply bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80;
 }
 
-.btn.valid {
+.btn.valid,
+.btn.success {
   @apply bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80;
 }
 
-.btn.edit {
+.btn.edit,
+.btn.warning {
   @apply bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80;
 }
 
-.btn.info {
+.btn.info,
+.btn.load {
   @apply bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80;
 }
 
@@ -1387,21 +1420,25 @@ body {
 
 /* BACKGROUND COLOR MODIFIER */
 
+.success.status-icon,
 .success.stat-svg-container,
 .success.feedback-alert-wrap {
   @apply bg-green-500;
 }
 
+.error.status-icon,
 .error.stat-svg-container,
 .error.feedback-alert-wrap {
   @apply bg-red-500;
 }
 
+.warning.status-icon,
 .warning.stat-svg-container,
 .warning.feedback-alert-wrap {
   @apply bg-yellow-500;
 }
 
+.info.status-icon,
 .info.stat-svg-container,
 .info.feedback-alert-wrap {
   @apply bg-sky-500;

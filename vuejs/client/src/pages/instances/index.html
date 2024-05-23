@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/flag-icons.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BunkerWeb | DASHBOARD</title>
+  </head>
+  <body>
+    <div class="hidden" data-server-global='{"username" : "admin"}'></div>
+    <div class="hidden"
+         data-server-flash='[{"type" : "success", "title" : "title", "message" : "Success feedback"}, {"type" : "error", "title" : "title", "message" : "Error feedback"}, {"type" : "warning", "title" : "title", "message" : "Warning feedback"}, {"type" : "info", "title" : "title", "message" : "Info feedback"}]'>
+    </div>
+    <div class="hidden"
+         data-server-builder='[{"type":"card", "link" : "/services", "containerClass":"","containerColumns":{"pc":4,"tablet":6,"mobile":12},"widgets":[{"type":"Stat", "link": "https://github.com/bunkerity/bunkerweb","data":{"title":"home_version","subtitle":"home_all_features_available","subtitleColor":"success","value":"home_pro","iconName":"crown","iconColor":"amber"}}]},{"type":"card","containerClass":"","containerColumns":{"pc":4,"tablet":6,"mobile":12},"widgets":[{"type":"Stat","data":{"title":"home_version_number","subtitle":"home_latest_version","subtitleColor":"success","value":"1.5.7","iconName":"wire","iconColor":"teal"}}]},{"type":"card","containerClass":"","containerColumns":{"pc":4,"tablet":6,"mobile":12},"widgets":[{"type":"Stat","data":{"title":"home_instances","subtitle":"home_total_number","subtitleColor":"info", "value":"1","iconName":"box","iconColor":"dark"}}]}, {"type":"card","containerClass":"","containerColumns":{"pc":4,"tablet":6,"mobile":12},"widgets":[{"type":"Stat","data":{"title":"home_services","subtitle":"home_all_methods_included","subtitleColor":"info","value":"2","iconName":"disk","iconColor":"orange"}}]}, {"type":"card","containerClass":"","containerColumns":{"pc":4,"tablet":6,"mobile":12},"widgets":[{"type":"Stat","data":{"title":"home_plugins","subtitle":"home_no_error","subtitleColor":"success","value":"42","iconName":"puzzle","iconColor":"yellow"}}]}]'>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="instances.js"></script>
+  </body>
+</html>
