@@ -351,8 +351,9 @@ class Database:
                         if hasattr(metadata, key) and key not in ("database_version", "default"):
                             data[key] = getattr(metadata, key)
                     data["default"] = False
-            except BaseException:
-                self.logger.debug(f"Can't get the metadata: {format_exc()}")
+            except BaseException as e:
+                if "doesn't exist" not in str(e):
+                    self.logger.debug(f"Can't get the metadata: {format_exc()}")
 
         return data
 
@@ -2084,7 +2085,7 @@ class Database:
                 )
             return cache_files
 
-    def add_instance(self, hostname: str, port: int, server_name: str, changed: Optional[bool] = True) -> str:
+    def add_instance(self, hostname: str, port: int, server_name: str, method: str, changed: Optional[bool] = True) -> str:
         """Add instance."""
         with self.__db_session() as session:
             if self.readonly:
@@ -2095,7 +2096,7 @@ class Database:
             if db_instance is not None:
                 return f"Instance {hostname} already exists, will not be added."
 
-            session.add(Instances(hostname=hostname, port=port, server_name=server_name))
+            session.add(Instances(hostname=hostname, port=port, server_name=server_name, method=method))
 
             if changed:
                 with suppress(ProgrammingError, OperationalError):
@@ -2106,18 +2107,18 @@ class Database:
             try:
                 session.commit()
             except BaseException:
-                return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}).\n{format_exc()}"
+                return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}, method: {method}).\n{format_exc()}"
 
         return ""
 
-    def update_instances(self, instances: List[Dict[str, Any]], changed: Optional[bool] = True) -> str:
+    def update_instances(self, instances: List[Dict[str, Any]], method: str, changed: Optional[bool] = True) -> str:
         """Update instances."""
         to_put = []
         with self.__db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.query(Instances).delete()
+            session.query(Instances).filter(Instances.method == method).delete()
 
             for instance in instances:
                 to_put.append(
@@ -2125,6 +2126,7 @@ class Database:
                         hostname=instance["hostname"],
                         port=instance["env"].get("API_HTTP_PORT", 5000),
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
+                        method=method,
                     )
                 )
 
@@ -2142,16 +2144,21 @@ class Database:
 
         return ""
 
-    def get_instances(self) -> List[Dict[str, Any]]:
+    def get_instances(self, *, method: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get instances."""
         with self.__db_session() as session:
+            query = session.query(Instances)
+            if method:
+                query = query.filter_by(method=method)
+
             return [
                 {
                     "hostname": instance.hostname,
                     "port": instance.port,
                     "server_name": instance.server_name,
+                    "method": instance.method,
                 }
-                for instance in (session.query(Instances).with_entities(Instances.hostname, Instances.port, Instances.server_name))
+                for instance in query
             ]
 
     def get_plugin_actions(self, plugin: str) -> Optional[Any]:

@@ -9,22 +9,8 @@ services:
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
-      - SERVER_NAME=app1.example.com
       - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
-      - USE_BUNKERNET=no
-      - USE_BLACKLIST=no
-      - USE_WHITELIST=no
-      - SEND_ANONYMOUS_REPORT=no
-      - LOG_LEVEL=info
-      - SERVE_FILES=no
-      - DISABLE_DEFAULT_SERVER=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://app1:8080
-      - EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/dev.zip
-      - CUSTOM_CONF_MODSEC_CRS_reqbody-suppress=SecRuleRemoveById 200002
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -39,35 +25,39 @@ services:
       dockerfile: ./src/scheduler/Dockerfile
     depends_on:
       - bunkerweb
-      - bw-docker
     volumes:
       - bw-data:/data
       - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
     environment:
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - LOG_LEVEL=debug
+      - BUNKERWEB_INSTANCES=bunkerweb
+      - SERVER_NAME=app1.example.com
+      - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
+      - USE_BUNKERNET=no
+      - USE_BLACKLIST=no
+      - USE_WHITELIST=no
+      - SEND_ANONYMOUS_REPORT=no
+      - CUSTOM_LOG_LEVEL=debug
+      - LOG_LEVEL=info
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/dev.zip
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://app1:8080
+      - |
+        CUSTOM_CONF_MODSEC_CRS_reqbody-suppress=
+        SecRuleRemoveById 200002
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
           - bw-scheduler
-      bw-docker:
-        aliases:
-          - bw-scheduler
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      bw-docker:
-        aliases:
-          - bw-docker
 
   app1:
     image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
     networks:
       bw-services:
         aliases:
@@ -85,5 +75,3 @@ networks:
         - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
-  bw-docker:
-    name: bw-docker

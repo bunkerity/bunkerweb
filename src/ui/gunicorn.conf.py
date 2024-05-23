@@ -11,7 +11,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import get_integration  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
@@ -56,15 +55,11 @@ def on_starting(server):
 
     db = Database(LOGGER, ui=True)
 
-    INTEGRATION = get_integration()
-
     ready = False
     while not ready:
         db_metadata = db.get_metadata()
         if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
             LOGGER.warning("Database is not initialized, retrying in 5s ...")
-        elif INTEGRATION in ("Swarm", "Kubernetes", "Autoconf") and not db_metadata["autoconf_loaded"]:
-            LOGGER.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
         else:
             ready = True
             continue

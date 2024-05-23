@@ -3,7 +3,7 @@
 from contextlib import suppress
 from time import sleep
 from traceback import format_exc
-from typing import List
+from typing import Dict, List
 from kubernetes import client, config, watch
 from kubernetes.client.exceptions import ApiException
 from threading import Thread, Lock
@@ -27,9 +27,11 @@ class IngressController(Controller):
         ]
 
     def _to_instances(self, controller_instance) -> List[dict]:
-        instance = {}
-        instance["name"] = controller_instance.metadata.name
-        instance["hostname"] = controller_instance.status.pod_ip or controller_instance.metadata.name
+        instance = {
+            "name": controller_instance.metadata.name,
+            "hostname": controller_instance.metadata.name,
+            "env": self._get_scheduler_env(),
+        }
         health = False
         if controller_instance.status.conditions:
             for condition in controller_instance.status.conditions:
@@ -37,28 +39,6 @@ class IngressController(Controller):
                     health = True
                     break
         instance["health"] = health
-        instance["env"] = {}
-        pod = None
-        for container in controller_instance.spec.containers:
-            if container.name == "bunkerweb":
-                pod = container
-                break
-        if not pod:
-            self._logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
-        else:
-            for env in pod.env:
-                instance["env"][env.name] = env.value or ""
-        for controller_service in self._get_controller_services():
-            if controller_service.metadata.annotations:
-                for (
-                    annotation,
-                    value,
-                ) in controller_service.metadata.annotations.items():
-                    if not annotation.startswith("bunkerweb.io/"):
-                        continue
-                    variable = annotation.replace("bunkerweb.io/", "", 1)
-                    if self._is_setting(variable):
-                        instance["env"][variable] = value
         return [instance]
 
     def _get_controller_services(self) -> list:
@@ -176,23 +156,26 @@ class IngressController(Controller):
                                 service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
         return services
 
-    def _get_static_services(self) -> List[dict]:
-        services = []
+    def _get_scheduler_env(self) -> Dict[str, str]:
         variables = {}
         for instance in self.__corev1.list_pod_for_all_namespaces(watch=False).items:
-            if not instance.metadata.annotations or "bunkerweb.io/INSTANCE" not in instance.metadata.annotations:
+            if not instance.metadata.annotations or "bunkerweb.io/SCHEDULER" not in instance.metadata.annotations:
                 continue
 
             pod = None
             for container in instance.spec.containers:
-                if container.name == "bunkerweb":
+                if container.name == "bunkerweb-scheduler":
                     pod = container
                     break
             if not pod:
                 continue
 
             variables = {env.name: env.value or "" for env in pod.env}
+        return variables
 
+    def _get_static_services(self) -> List[dict]:
+        services = []
+        variables = self._get_scheduler_env()
         if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
             for server_name in variables["SERVER_NAME"].strip().split(" "):
                 service = {"SERVER_NAME": server_name}
@@ -299,14 +282,10 @@ class IngressController(Controller):
                     locked = False
             except ApiException as e:
                 if e.status != 410:
-                    self._logger.error(
-                        f"API exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
-                    )
+                    self._logger.error(f"API exception while reading k8s event (type = {watch_type}) :\n{format_exc()}")
                     error = True
             except:
-                self._logger.error(
-                    f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
-                )
+                self._logger.error(f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}")
                 error = True
             finally:
                 if locked:

@@ -23,7 +23,7 @@ class BWLogger(Logger):
 
 setLoggerClass(BWLogger)
 
-default_level = _nameToLevel.get(getenv("LOG_LEVEL", "INFO").upper(), INFO)
+default_level = _nameToLevel.get(getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper(), INFO)
 basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     datefmt="[%Y-%m-%d %H:%M:%S]",

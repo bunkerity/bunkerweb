@@ -54,7 +54,7 @@
             {% for setting, value in plugin["settings"].items() %}
                 {% set setting_input = { "is_pro_plugin" : True if plugin["type"] == "pro" else False, "name" : setting, "context" : value.get("context"), "method" : value.get("method"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "value" : value.get("value"), "is_multiple" : False, "levels" : value.get('levels', {})} %}
 
-                {% if setting != "IS_DRAFT" and (current_endpoint == "global-config" and setting not in ["SERVER_NAME", "IS_LOADING"] or current_endpoint == "services" and value['context'] == "multisite") %}
+                {% if setting != "IS_DRAFT" and (current_endpoint == "global-config" and setting not in ["SERVER_NAME", "IS_LOADING", "BUNKERWEB_INSTANCES"] or current_endpoint == "services" and value['context'] == "multisite") %}
                     {% if value['multiple'] and value['multiple'] not in multList %}
                         {% if multList.append(value['multiple']) %}{% endif %}
                     {% endif %}

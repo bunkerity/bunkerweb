@@ -317,12 +317,12 @@
       "emerg"
     ]
   },
-  "OVERRIDE_INSTANCES": {
+  "BUNKERWEB_INSTANCES": {
     "context": "global",
-    "default": "",
-    "help": "List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 fqdn-or-ip:5000)",
-    "id": "override-instances",
-    "label": "Override instances",
+    "default": "127.0.0.1",
+    "help": "List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 http://fqdn-or-ip:5000)",
+    "id": "bunkerweb-instances",
+    "label": "BunkerWeb instances",
     "regex": "^.*$",
     "type": "text"
   }

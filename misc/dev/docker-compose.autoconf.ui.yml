@@ -2,7 +2,7 @@ x-env: &env
   DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
   DOCKER_HOST: "tcp://bw-docker:2375"
   AUTOCONF_MODE: "yes"
-  LOG_LEVEL: "debug"
+  CUSTOM_LOG_LEVEL: "debug"
 
 services:
   bunkerweb:
@@ -15,19 +15,8 @@ services:
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
-      - SERVER_NAME=
-      - MULTISITE=yes
       - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
-      - AUTOCONF_MODE=yes
-      - USE_BUNKERNET=no
-      - USE_BLACKLIST=no
-      - USE_WHITELIST=no
-      - SEND_ANONYMOUS_REPORT=no
-      - LOG_LEVEL=info
-      - SERVE_FILES=no
-      - DISABLE_DEFAULT_SERVER=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -45,8 +34,12 @@ services:
       - bw-docker
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
+        aliases:
+          - bw-autoconf
+      bw-db:
         aliases:
           - bw-autoconf
       bw-docker:
@@ -59,37 +52,36 @@ services:
       dockerfile: ./src/scheduler/Dockerfile
     depends_on:
       - bunkerweb
-      - bw-docker
     volumes:
       - bw-data:/data
     environment:
       <<: *env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      USE_WHITELIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
           - bw-scheduler
-      bw-docker:
+      bw-db:
         aliases:
           - bw-scheduler
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      bw-docker:
-        aliases:
-          - bw-docker
 
   bw-ui:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
-    depends_on:
-      - bw-docker
     volumes:
       - ../../src/ui/src:/usr/share/bunkerweb/ui/src:ro
       - ../../src/ui/static:/usr/share/bunkerweb/ui/static:ro
@@ -102,11 +94,12 @@ services:
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
       DEBUG: "1"
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
           - bw-ui
-      bw-docker:
+      bw-db:
         aliases:
           - bw-ui
     labels:
@@ -126,13 +119,28 @@ services:
       - MYSQL_PASSWORD=secret
     volumes:
       - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
-      bw-docker:
+      bw-db:
         aliases:
           - bw-db
 
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - LOG_LEVEL=warning
+    restart: "unless-stopped"
+    networks:
+      bw-docker:
+        aliases:
+          - bw-docker
+
   app1:
     image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
     networks:
       bw-services:
         aliases:
@@ -156,5 +164,7 @@ networks:
         - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
+  bw-db:
+    name: bw-db
   bw-docker:
     name: bw-docker

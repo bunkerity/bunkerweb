@@ -201,6 +201,7 @@ class Instances(Base):
     hostname = Column(String(256), primary_key=True)
     port = Column(Integer, nullable=False)
     server_name = Column(String(256), nullable=False)
+    method = Column(METHODS_ENUM, nullable=False, default="manual")
 
 
 class Users(Base):

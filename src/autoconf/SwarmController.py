@@ -32,13 +32,6 @@ class SwarmController(Controller):
     def _to_instances(self, controller_instance) -> List[dict]:
         self.__swarm_instances.append(controller_instance.id)
         instances = []
-        instance_env = {}
-        for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
-            variable = env.split("=")[0]
-            value = env.replace(f"{variable}=", "", 1)
-            if self._is_setting(variable):
-                instance_env[variable] = value
-
         for task in controller_instance.tasks():
             if task["DesiredState"] != "running":
                 continue
@@ -47,7 +40,7 @@ class SwarmController(Controller):
                     "name": task["ID"],
                     "hostname": f"{controller_instance.name}.{task['NodeID']}.{task['ID']}",
                     "health": task["Status"]["State"] == "running",
-                    "env": instance_env,
+                    "env": self._get_scheduler_env(),
                 }
             )
         return instances
@@ -64,19 +57,25 @@ class SwarmController(Controller):
             service[real_variable] = value
         return [service]
 
-    def _get_static_services(self) -> List[dict]:
-        services = []
-        variables = {}
-        for instance in self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"}):
+    def _get_scheduler_env(self) -> Dict[str, str]:
+        env = {}
+        for instance in self.__client.services.list(filters={"label": "bunkerweb.type=scheduler"}):
             if not instance.attrs or not instance.attrs.get("Spec", {}).get("TaskTemplate", {}).get("ContainerSpec", {}).get("Env"):
                 continue
 
             for env in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
                 variable = env.split("=")[0]
                 value = env.replace(f"{variable}=", "", 1)
-                variables[variable] = value
+                env[variable] = value
+        return env
+
+    def _get_static_services(self) -> List[dict]:
+        services = []
+        variables = self._get_scheduler_env()
         if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
             for server_name in variables["SERVER_NAME"].strip().split(" "):
+                if not server_name:
+                    continue
                 service = {}
                 service["SERVER_NAME"] = server_name
                 for variable, value in variables.items():
@@ -175,9 +174,7 @@ class SwarmController(Controller):
                             self._logger.error(f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}")
                     locked = False
             except:
-                self._logger.error(
-                    f"Exception while reading Swarm event ({event_type}) :\n{format_exc()}",
-                )
+                self._logger.error(f"Exception while reading Swarm event ({event_type}) :\n{format_exc()}")
                 error = True
             finally:
                 if locked:

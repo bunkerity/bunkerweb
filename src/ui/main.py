@@ -19,8 +19,6 @@ from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse as dateutil_parse
-from docker import DockerClient
-from docker.errors import NotFound as docker_NotFound, APIError as docker_APIError, DockerException
 from flask import Flask, Response, flash, jsonify, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError
@@ -29,9 +27,6 @@ from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, dumps, loads as json_loads
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from kubernetes import client as kube_client
-from kubernetes import config as kube_config
-from kubernetes.client.exceptions import ApiException as kube_ApiException
 from redis import Redis, Sentinel
 from regex import compile as re_compile, match as regex_match
 from requests import get
@@ -53,7 +48,7 @@ from src.User import AnonymousUser, User
 from src.Templates import get_ui_templates
 
 from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain
-from common_utils import get_integration, get_version  # type: ignore
+from common_utils import get_version  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
@@ -96,7 +91,7 @@ app = Flask(__name__, static_url_path="/", static_folder="static", template_fold
 
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
 app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
-app.logger = setup_logger("UI")
+app.logger = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
 FLASK_SECRET = getenv("FLASK_SECRET")
 
@@ -113,19 +108,6 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.anonymous_user = AnonymousUser
 PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
-
-INTEGRATION = get_integration()
-
-docker_client = None
-kubernetes_client = None
-if INTEGRATION in ("Docker", "Swarm", "Autoconf"):
-    try:
-        docker_client: DockerClient = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
-    except (docker_APIError, DockerException):
-        app.logger.warning("No docker host found")
-elif INTEGRATION == "Kubernetes":
-    kube_config.load_incluster_config()
-    kubernetes_client = kube_client.CoreV1Api()
 
 db = Database(app.logger, ui=True, log=False)
 
@@ -146,7 +128,7 @@ if not TMP_DIR.joinpath(".ui.json").is_file():
 
 try:
     app.config.update(
-        INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION, db),
+        INSTANCES=Instances(db),
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(),
         WTF_CSRF_SSL_STRICT=False,
@@ -655,8 +637,7 @@ def home():
         remote_version = basename(r.url).strip().replace("v", "")
 
     config = app.config["CONFIG"].get_config(with_drafts=True)
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
-    instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
+    instances = app.config["INSTANCES"].get_instances()
 
     instance_health_count = 0
 
@@ -892,9 +873,7 @@ def instances():
         )
 
     # Display instances
-    config = app.config["CONFIG"].get_config()
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
-    instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
+    instances = app.config["INSTANCES"].get_instances()
     return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id())
 
 
@@ -1837,9 +1816,7 @@ def cache():
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    config = app.config["CONFIG"].get_config(with_drafts=True)
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
-    instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
+    instances = app.config["INSTANCES"].get_instances()
     return render_template("logs.html", instances=instances, username=current_user.get_id())
 
 
@@ -1992,53 +1969,56 @@ def logs_container(container_id):
 
     logs = []
     tmp_logs = []
-    if docker_client:
-        try:
-            if INTEGRATION != "Swarm":
-                docker_logs = docker_client.containers.get(container_id).logs(  # type: ignore
-                    stdout=True,
-                    stderr=True,
-                    since=datetime.fromtimestamp(last_update),
-                    timestamps=True,
-                )
-            else:
-                docker_logs = docker_client.services.get(container_id).logs(  # type: ignore
-                    stdout=True,
-                    stderr=True,
-                    since=datetime.fromtimestamp(last_update),
-                    timestamps=True,
-                )
+    return jsonify({"logs": logs, "last_update": int(time() * 1000)})
 
-            tmp_logs = docker_logs.decode("utf-8", errors="replace").split("\n")[0:-1]
-        except docker_NotFound:
-            return (
-                jsonify(
-                    {
-                        "status": "ko",
-                        "message": f"Container with ID {container_id} not found!",
-                    }
-                ),
-                404,
-            )
-    elif kubernetes_client:
-        try:
-            kubernetes_logs = kubernetes_client.read_namespaced_pod_log(
-                container_id,
-                getenv("KUBERNETES_NAMESPACE", "default"),
-                since_seconds=int(datetime.now().timestamp() - last_update),
-                timestamps=True,
-            )
-            tmp_logs = kubernetes_logs.split("\n")[0:-1]
-        except kube_ApiException:
-            return (
-                jsonify(
-                    {
-                        "status": "ko",
-                        "message": f"Pod with ID {container_id} not found!",
-                    }
-                ),
-                404,
-            )
+    # TODO: find a solution for this
+    # if docker_client:
+    #     try:
+    #         if INTEGRATION != "Swarm":
+    #             docker_logs = docker_client.containers.get(container_id).logs(  # type: ignore
+    #                 stdout=True,
+    #                 stderr=True,
+    #                 since=datetime.fromtimestamp(last_update),
+    #                 timestamps=True,
+    #             )
+    #         else:
+    #             docker_logs = docker_client.services.get(container_id).logs(  # type: ignore
+    #                 stdout=True,
+    #                 stderr=True,
+    #                 since=datetime.fromtimestamp(last_update),
+    #                 timestamps=True,
+    #             )
+
+    #         tmp_logs = docker_logs.decode("utf-8", errors="replace").split("\n")[0:-1]
+    #     except docker_NotFound:
+    #         return (
+    #             jsonify(
+    #                 {
+    #                     "status": "ko",
+    #                     "message": f"Container with ID {container_id} not found!",
+    #                 }
+    #             ),
+    #             404,
+    #         )
+    # elif kubernetes_client:
+    #     try:
+    #         kubernetes_logs = kubernetes_client.read_namespaced_pod_log(
+    #             container_id,
+    #             getenv("KUBERNETES_NAMESPACE", "default"),
+    #             since_seconds=int(datetime.now().timestamp() - last_update),
+    #             timestamps=True,
+    #         )
+    #         tmp_logs = kubernetes_logs.split("\n")[0:-1]
+    #     except kube_ApiException:
+    #         return (
+    #             jsonify(
+    #                 {
+    #                     "status": "ko",
+    #                     "message": f"Pod with ID {container_id} not found!",
+    #                 }
+    #             ),
+    #             404,
+    #         )
 
     for log in tmp_logs:
         split = log.split(" ")

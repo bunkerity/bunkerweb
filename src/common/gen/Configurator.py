@@ -187,18 +187,25 @@ class Configurator:
                 config[variable] = value
             elif (
                 "CUSTOM_CONF" not in variable
-                and not variable.startswith(("PYTHON", "KUBERNETES_SERVICE_", "KUBERNETES_PORT_", "SVC_"))
+                and not variable.startswith(("_", "PYTHON", "KUBERNETES_SERVICE_", "KUBERNETES_PORT_", "SVC_"))
                 and variable
                 not in (
+                    "DOCKER_HOST",
+                    "SLAVE_MODE",
+                    "MASTER_MODE",
+                    "CUSTOM_LOG_LEVEL",
                     "GPG_KEY",
+                    "HOME",
+                    "HOSTNAME",
                     "LANG",
                     "PATH",
                     "NGINX_VERSION",
                     "NJS_VERSION",
+                    "PATH",
                     "PKG_RELEASE",
-                    "DOCKER_HOST",
-                    "SLAVE_MODE",
-                    "MASTER_MODE",
+                    "PWD",
+                    "SHLVL",
+                    "SERVER_SOFTWARE",
                 )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
