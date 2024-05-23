@@ -268,15 +268,23 @@ class Password {
 
 class DisabledPop {
   constructor() {
+    this.isReadonly =
+      document
+        .querySelector("[data-global-is-readonly]")
+        .getAttribute("data-global-is-readonly") === "true"
+        ? true
+        : false;
     this.init();
   }
 
   init() {
     window.addEventListener("pointerover", (e) => {
+      if (this.isReadonly) return;
       //for checkbox and regular inputs
       if (
-        e.target.tagName === "INPUT" &&
-        e.target.hasAttribute("data-default-method")
+        (e.target.tagName === "INPUT" &&
+          e.target.hasAttribute("data-default-method")) ||
+        e.target.hasAttribute("data-method")
       ) {
         const el = e.target;
         this.showPopup(el, "input");
@@ -292,6 +300,8 @@ class DisabledPop {
     });
 
     window.addEventListener("pointerout", (e) => {
+      if (this.isReadonly) return;
+
       try {
         const popupEl = e.target
           .closest("div")
@@ -308,7 +318,8 @@ class DisabledPop {
       .querySelector("button[data-setting-password]")
       ? true
       : false;
-    const method = el.getAttribute("data-default-method");
+    const method =
+      el.getAttribute("data-method") || el.getAttribute("data-default-method");
     const popupHTML = `
     <div data-disabled-info class="${
       type === "select" ? "translate-y-2" : ""

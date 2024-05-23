@@ -16,9 +16,9 @@ try:
     log_info("Navigating to the bans page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[9]/a", "bans")
 
-    try:
-        safe_get_element(DRIVER, By.XPATH, "/html/body/main/div/div[2]/div/h5", error=True)
-    except TimeoutException:
+    is_ban_list_hidden = DRIVER.execute_script("return document.querySelector('[data-bans-list-container]').classList.contains('hidden')")
+
+    if not is_ban_list_hidden:
         log_exception("Bans present even though they shouldn't be, exiting ...")
         exit(1)
 

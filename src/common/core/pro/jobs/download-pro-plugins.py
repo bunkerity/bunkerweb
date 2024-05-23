@@ -151,9 +151,9 @@ try:
             metadata = resp.json()["data"]
             LOGGER.debug(f"Got BunkerWeb Pro license metadata: {metadata}")
             metadata["pro_expire"] = datetime.strptime(metadata["pro_expire"], "%Y-%m-%d") if metadata["pro_expire"] else None
-            if metadata["pro_services"] < int(data["service_number"]):
-                metadata["pro_overlapped"] = True
             metadata["is_pro"] = metadata["pro_status"] == "active"
+            if metadata["is_pro"] and metadata["pro_services"] < int(data["service_number"]):
+                metadata["pro_overlapped"] = True
 
     # ? If we already checked today, skip the check and if the metadata is the same, skip the check
     if (
@@ -211,7 +211,7 @@ try:
     if not metadata["is_pro"]:
         if metadata["pro_overlapped"]:
             LOGGER.warning(
-                f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']}"
+                f"You have exceeded the number of services allowed by your BunkerWeb Pro license: {metadata['pro_services']} (current: {data['service_number']})"
             )
 
         if pro_license_key:

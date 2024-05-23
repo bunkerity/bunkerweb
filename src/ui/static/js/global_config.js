@@ -13,6 +13,12 @@ class Multiple {
   constructor(prefix) {
     this.prefix = prefix;
     this.container = document.querySelector("main");
+    this.isReadonly =
+      document
+        .querySelector("[data-global-is-readonly]")
+        .getAttribute("data-global-is-readonly") === "true"
+        ? true
+        : false;
     this.init();
   }
 
@@ -185,7 +191,9 @@ class Multiple {
       ? true
       : false;
 
-    return proDisabled;
+    if (proDisabled || this.isReadonly) return true;
+
+    return false;
   }
 
   sortMultipleByContainerAndSuffixe(obj) {
@@ -543,6 +551,7 @@ class Multiple {
   //for already existing global config multiples
   //global is check
   setDisabledMultServ(inp, method, global) {
+    if (o) return inp.setAttribute("disabled", "");
     // Check if pro
     const proDisabled = inp
       .closest("[data-plugin-item]")

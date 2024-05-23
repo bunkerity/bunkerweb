@@ -49,10 +49,7 @@ class Config:
         conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
 
-        err = self.__db.save_config(conf, "ui", changed=check_changes)
-
-        if err:
-            self.__db.logger.warning(f"Couldn't save config to database : {err}, config may not work as expected")
+        return self.__db.save_config(conf, "ui", changed=check_changes)
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -139,8 +136,8 @@ class Config:
 
         return error
 
-    def reload_config(self) -> None:
-        self.__gen_conf(self.get_config(methods=False), self.get_services(methods=False))
+    def reload_config(self) -> Optional[str]:
+        return self.__gen_conf(self.get_config(methods=False), self.get_services(methods=False))
 
     def new_service(self, variables: dict, is_draft: bool = False) -> Tuple[str, int]:
         """Creates a new service from the given variables
@@ -167,7 +164,9 @@ class Config:
                 return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
-        self.__gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
+        ret = self.__gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
+        if ret:
+            return ret, 1
         return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
 
     def edit_service(self, old_server_name: str, variables: dict, *, check_changes: bool = True, is_draft: bool = False) -> Tuple[str, int]:
@@ -205,10 +204,12 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        self.__gen_conf(config, services, check_changes=check_changes, changed_service=variables["SERVER_NAME"])
+        ret = self.__gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0])
+        if ret:
+            return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
-    def edit_global_conf(self, variables: dict) -> str:
+    def edit_global_conf(self, variables: dict) -> Tuple[str, int]:
         """Edits the global conf
 
         Parameters
@@ -221,8 +222,10 @@ class Config:
         str
             the confirmation message
         """
-        self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
-        return "The global configuration has been edited."
+        ret = self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
+        if ret:
+            return ret, 1
+        return "The global configuration has been edited.", 0
 
     def delete_service(self, service_name: str, *, check_changes: bool = True) -> Tuple[str, int]:
         """Deletes a service
@@ -269,5 +272,7 @@ class Config:
                     if k in service:
                         service.pop(k)
 
-        self.__gen_conf(new_env, new_services, check_changes=check_changes)
+        ret = self.__gen_conf(new_env, new_services, check_changes=check_changes)
+        if ret:
+            return ret, 1
         return f"Configuration for {service_name} has been deleted.", 0

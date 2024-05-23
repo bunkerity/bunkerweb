@@ -174,19 +174,18 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
 
     # Remove old external/pro plugins files
     logger.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
+    ignored_plugins = set()
     if original_path.is_dir():
         for file in original_path.glob("*"):
-            try:
+            with suppress(StopIteration, IndexError):
                 index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
-            except StopIteration:
-                index = -1
 
-            if index > -1:
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
                         tar.add(file, arcname=file.name, recursive=True)
                     plugin_content.seek(0, 0)
                     if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
+                        ignored_plugins.add(file.name)
                         continue
                     logger.debug(f"Checksum of {file} has changed, removing it ...")
 
@@ -200,6 +199,9 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
         logger.info(f"Generating new {'pro ' if pro else ''}external plugins ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
+            if plugin["id"] in ignored_plugins:
+                continue
+
             try:
                 if plugin["data"]:
                     tmp_path = TMP_PATH.joinpath(f"{plugin['id']}_{plugin['name']}.tar.gz")
@@ -502,13 +504,11 @@ if __name__ == "__main__":
                     }
                     jobs = common_data.pop("jobs", [])
 
-                    try:
+                    with suppress(StopIteration, IndexError):
                         index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
-                    except StopIteration:
-                        index = -1
 
-                    if index > -1 and checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
-                        continue
+                        if checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
+                            continue
 
                     tmp_external_plugins.append(common_data.copy())
 
