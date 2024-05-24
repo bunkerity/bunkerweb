@@ -9,10 +9,12 @@ services:
     pull_policy: never
     ports:
       - 80:80
+      - 443:433
     environment:
       SERVER_NAME: ""
       MULTISITE: "yes"
       HTTP_PORT: "80"
+      HTTPS_PORT: "433"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       LOG_LEVEL: "info"
       USE_BUNKERNET: "no"
