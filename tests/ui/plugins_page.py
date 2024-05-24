@@ -20,7 +20,7 @@ try:
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[6]/a", "plugins")
 
     for _ in range(5):
-        get(f"http://www.example.com{UI_URL}/?id=/etc/passwd")
+        get(f"http://www.example.com{UI_URL}/?id=/etc/passwd", verify=False)
         sleep(1)
 
     sleep(7)

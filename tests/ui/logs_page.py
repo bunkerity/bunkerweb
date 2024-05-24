@@ -137,6 +137,7 @@ try:
         f"http://www.example.com{UI_URL}/logs/{first_instance}?from_date={int((current_date - timedelta(weeks=1)).timestamp())}&to_date={int((current_date - timedelta(days=1)).timestamp())}",
         headers={"Host": "www.example.com", "User-Agent": DRIVER.execute_script("return navigator.userAgent;")},
         cookies={"session": DRIVER.get_cookies()[0]["value"]},
+        verify=False,
     )
 
     if len(resp.json()["logs"]) != 0:
