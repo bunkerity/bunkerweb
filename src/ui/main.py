@@ -445,11 +445,13 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
-    try:
-        db_user = app.config["DB"].get_ui_user()
-    except BaseException:
-        db_user = app.config["DB"].get_ui_user()
+    if not app.config["DB"].readonly:
+        try:
+            app.config["DB"].test_write()
+        except BaseException:
+            app.config["DB"].readonly = True
 
+    db_user = app.config["DB"].get_ui_user()
     if db_user:
         app.config["USER"] = User(**db_user)
 
