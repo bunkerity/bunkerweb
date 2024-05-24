@@ -12,6 +12,7 @@ from re import compile as re_compile
 from sys import argv, path as sys_path
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from time import sleep
+from uuid import uuid4
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from model import (
@@ -165,8 +166,9 @@ class Database:
                         conn.execute(text("SELECT 1"))
                 else:
                     with self.sql_engine.connect() as conn:
-                        conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
-                        conn.execute(text("DROP TABLE test"))
+                        table_name = uuid4().hex
+                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+                        conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
@@ -217,8 +219,10 @@ class Database:
     def test_write(self):
         """Test the write access to the database"""
         with self.__db_session() as session:
-            session.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
-            session.execute(text("DROP TABLE test"))
+            table_name = uuid4().hex
+            session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
+            session.commit()
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
         """Retry the connection to the database"""
