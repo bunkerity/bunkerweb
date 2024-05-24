@@ -560,7 +560,7 @@ class Database:
                 # Rename the old tables
                 db_version_id = db_version.replace(".", "_")
                 for table_name in metadata.tables.keys():
-                    if table_name not in Base.metadata.tables:
+                    if table_name in Base.metadata.tables:
                         with self.__db_session() as session:
                             if inspector.has_table(f"{table_name}_{db_version_id}"):
                                 self.logger.warning(f'Table "{table_name}" already exists, dropping it to make room for the new one')
