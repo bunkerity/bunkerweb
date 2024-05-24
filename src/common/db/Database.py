@@ -12,7 +12,6 @@ from re import compile as re_compile
 from sys import argv, path as sys_path
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from time import sleep
-from traceback import format_exc
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from model import (
@@ -136,8 +135,8 @@ class Database:
         except ArgumentError:
             self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
-        except SQLAlchemyError:
-            self.logger.error(f"Error when trying to create the engine: {format_exc()}")
+        except SQLAlchemyError as e:
+            self.logger.error(f"Error when trying to create the engine: {e}")
             error = True
         finally:
             if error:
@@ -175,10 +174,10 @@ class Database:
                             sqlalchemy_string = self.database_uri_readonly
                             self.last_fallback = datetime.now()
                         else:
-                            self.logger.error(f"Can't connect to database : {format_exc()}")
+                            self.logger.error(f"Can't connect to database : {e}")
                             _exit(1)
                     else:
-                        self.logger.error(f"Can't connect to database : {format_exc()}")
+                        self.logger.error(f"Can't connect to database : {e}")
                         _exit(1)
 
                 if "attempt to write a readonly database" in str(e):
@@ -193,8 +192,8 @@ class Database:
                     self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
                 retries -= 1
                 sleep(5)
-            except BaseException:
-                self.logger.error(f"Error when trying to connect to the database: {format_exc()}")
+            except BaseException as e:
+                self.logger.error(f"Error when trying to connect to the database: {e}")
                 exit(1)
 
         self.suffix_rx = re_compile(r"_\d+$")
@@ -208,6 +207,12 @@ class Database:
 
         if self.sql_engine:
             self.sql_engine.dispose()
+
+    def test_write(self):
+        """Test the write access to the database"""
+        with self.__db_session() as session:
+            session.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
+            session.execute(text("DROP TABLE test"))
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
         """Retry the connection to the database"""
@@ -298,8 +303,8 @@ class Database:
 
                 metadata.autoconf_loaded = value
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -326,8 +331,8 @@ class Database:
 
                 metadata.scheduler_first_start = value
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -346,8 +351,8 @@ class Database:
                 for key, value in data.items():
                     setattr(metadata, key, value)
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -401,8 +406,8 @@ class Database:
                         )
                     )
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -455,8 +460,8 @@ class Database:
                             "default": False,
                         }
                     )
-            except BaseException:
-                self.logger.debug(f"Can't get the metadata: {format_exc()}")
+            except BaseException as e:
+                self.logger.debug(f"Can't get the metadata: {e}")
 
         return data
 
@@ -484,8 +489,8 @@ class Database:
                     config_changed=metadata is not None and metadata.config_changed,
                     instances_changed=metadata is not None and metadata.instances_changed,
                 )
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
     def checked_changes(self, changes: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
@@ -519,8 +524,8 @@ class Database:
                 if "instances" in changes:
                     metadata.instances_changed = value
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -574,8 +579,8 @@ class Database:
 
         try:
             Base.metadata.create_all(self.sql_engine, checkfirst=True)
-        except BaseException:
-            return False, format_exc()
+        except BaseException as e:
+            return False, str(e)
 
         if db_version and db_version != bunkerweb_version:
             with self.__db_session() as session:
@@ -941,8 +946,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return False, format_exc()
+            except BaseException as e:
+                return False, str(e)
 
         return True, ""
 
@@ -1177,8 +1182,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -1270,8 +1275,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return f"{f'{message}{endl}' if message else ''}{format_exc()}"
+            except BaseException as e:
+                return f"{f'{message}{endl}' if message else ''}{e}"
 
         return message
 
@@ -1426,8 +1431,8 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -1445,8 +1450,8 @@ class Database:
 
             try:
                 session.query(Jobs_cache).filter_by(**filters).delete()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -1486,8 +1491,8 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -1998,8 +2003,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -2212,8 +2217,8 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}).\n{format_exc()}"
+            except BaseException as e:
+                return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}).\n{e}"
 
         return ""
 
@@ -2244,8 +2249,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -2324,8 +2329,8 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -2349,7 +2354,7 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
