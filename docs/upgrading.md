@@ -170,7 +170,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo -E apt install -y bunkerweb=1.5.7
+                    sudo apt install -y bunkerweb=1.5.7
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
@@ -194,7 +194,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo -E dnf install -y bunkerweb-1.5.7
+                    sudo dnf install -y bunkerweb-1.5.7
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :

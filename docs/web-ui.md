@@ -39,7 +39,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 !!! info "Wizard"
 
-    The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`http://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
+    The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`https://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
 
 <figure markdown>
   ![Overview](assets/img/ui-wizard-account.webp){ align=center, width="350" }
@@ -70,7 +70,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
 
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
@@ -162,7 +162,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -269,7 +269,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -399,7 +399,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -717,7 +717,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
 
 ## Account management
 
