@@ -1,4 +1,4 @@
-FROM fedora:39@sha256:ee042eb5527cfe117d279af0fff4461ad0c5441a8ef36deea9d98a2eb0130a90 as builder
+FROM fedora:40@sha256:5ce8497aeea599bf6b54ab3979133923d82aaa4f6ca5ced1812611b197c79eb0 as builder
 
 ENV OS=fedora
 ENV NGINX_VERSION 1.24.0
@@ -54,7 +54,7 @@ COPY src/scheduler scheduler
 COPY src/ui ui
 COPY src/VERSION VERSION
 
-FROM fedora:39@sha256:ee042eb5527cfe117d279af0fff4461ad0c5441a8ef36deea9d98a2eb0130a90
+FROM fedora:40@sha256:5ce8497aeea599bf6b54ab3979133923d82aaa4f6ca5ced1812611b197c79eb0
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
