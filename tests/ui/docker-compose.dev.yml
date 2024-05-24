@@ -10,12 +10,12 @@ services:
       dockerfile: src/bw/Dockerfile
     ports:
       - 80:80
-      - 443:433
+      - 443:443
     environment:
       SERVER_NAME: ""
       MULTISITE: "yes"
       HTTP_PORT: "80"
-      HTTPS_PORT: "433"
+      HTTPS_PORT: "443"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
