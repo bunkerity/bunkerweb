@@ -78,17 +78,25 @@ def on_starting(server):
         USER = User(**USER)
 
         if getenv("ADMIN_USERNAME") or getenv("ADMIN_PASSWORD"):
-            if USER.method == "manual":
+            override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
+            if USER.method == "manual" or override_admin_creds:
                 updated = False
                 if getenv("ADMIN_USERNAME", "") and USER.get_id() != getenv("ADMIN_USERNAME", ""):
                     USER.id = getenv("ADMIN_USERNAME", "")
                     updated = True
                 if getenv("ADMIN_PASSWORD", "") and not USER.check_password(getenv("ADMIN_PASSWORD", "")):
-                    USER.update_password(getenv("ADMIN_PASSWORD", ""))
-                    updated = True
+                    if not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "")):
+                        LOGGER.warning(
+                            "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). It will not be updated."
+                        )
+                    else:
+                        USER.update_password(getenv("ADMIN_PASSWORD", ""))
+                        updated = True
 
                 if updated:
-                    ret = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token)
+                    if override_admin_creds:
+                        LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
+                    ret = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token, method="manual")
                     if ret:
                         LOGGER.error(f"Couldn't update the admin user in the database: {ret}")
                         exit(1)
