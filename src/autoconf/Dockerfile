@@ -9,7 +9,6 @@ RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/autoconf/requirements.txt /tmp/req/requirements-autoconf.txt
-COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.armv7.txt /tmp/req/requirements-db.armv7.txt
 
@@ -58,7 +57,7 @@ RUN apk add --no-cache bash && \
   chmod -R 770 /data && \
   chown -R root:autoconf INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
-  chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/* && \
+  chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py && \
   chmod 660 INTEGRATION
 
 # Fix CVEs
