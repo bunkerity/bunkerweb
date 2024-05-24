@@ -148,8 +148,15 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
+        DATABASE_RETRY_TIMEOUT = getenv("DATABASE_RETRY_TIMEOUT", "60")
+        if not DATABASE_RETRY_TIMEOUT.isdigit():
+            self.logger.warning(f"Invalid DATABASE_RETRY_TIMEOUT value: {DATABASE_RETRY_TIMEOUT}, using default value (60)")
+            DATABASE_RETRY_TIMEOUT = "60"
+
+        DATABASE_RETRY_TIMEOUT = int(DATABASE_RETRY_TIMEOUT)
+
+        current_time = datetime.now()
         not_connected = True
-        retries = 15
 
         while not_connected:
             try:
@@ -163,8 +170,8 @@ class Database:
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
-                if retries <= 0:
-                    if "attempt to write a readonly database" in str(e):
+                if (datetime.now() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
+                    if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
                         if not self.readonly:
                             self.logger.warning("The database is read-only, trying one last time to connect in read-only mode")
                             self.readonly = True
@@ -174,13 +181,13 @@ class Database:
                             sqlalchemy_string = self.database_uri_readonly
                             self.last_fallback = datetime.now()
                         else:
-                            self.logger.error(f"Can't connect to database : {e}")
+                            self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
                             _exit(1)
                     else:
-                        self.logger.error(f"Can't connect to database : {e}")
+                        self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
                         _exit(1)
 
-                if "attempt to write a readonly database" in str(e):
+                if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
                     if log:
                         self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
@@ -190,7 +197,6 @@ class Database:
                     continue
                 elif log:
                     self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
-                retries -= 1
                 sleep(5)
             except BaseException as e:
                 self.logger.error(f"Error when trying to connect to the database: {e}")
@@ -267,7 +273,7 @@ class Database:
             if session:
                 session.rollback()
 
-            if "attempt to write a readonly database" in str(e):
+            if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
                 self.logger.warning("The database is read-only, retrying in read-only mode ...")
                 try:
                     self.retry_connection(readonly=True, pool_timeout=1)
