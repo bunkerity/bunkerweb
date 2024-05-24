@@ -576,6 +576,7 @@ def setup():
                     "REVERSE_PROXY_HOST": request.form["ui_host"],
                     "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
                     "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
+                    "GENERATE_SELF_SIGNED_SSL": "yes" if request.form.get("auto_lets_encrypt", "no") == "no" else "no",
                     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
                     "MAX_CLIENT_SIZE": "50m",
                 },
