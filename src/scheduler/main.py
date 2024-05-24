@@ -726,7 +726,6 @@ if __name__ == "__main__":
 
             if ret:
                 logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-                stop(1)
 
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False
@@ -743,7 +742,6 @@ if __name__ == "__main__":
                     logger.warning("The database is read-only, the scheduler first start will not be saved")
                 elif ret:
                     logger.error(f"An error occurred when setting the scheduler first start : {ret}")
-                    stop(1)
                 scheduler_first_start = False
 
             if not HEALTHY_PATH.is_file():
