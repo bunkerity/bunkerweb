@@ -752,6 +752,16 @@ When your BunkerWeb instance has upgraded to the PRO version, you will see your 
 
 ### Username / Password
 
+!!! tip "Overriding admin credentials from environment variables"
+
+    If you want to override the admin credentials from environment variables, you can set the following variables :
+
+    - `OVERRIDE_ADMIN_CREDS` : set it to `yes` to enable the override even if the admin credentials are already set (default is `no`)
+    - `ADMIN_USERNAME` : username to access the web UI
+    - `ADMIN_PASSWORD` : password to access the web UI
+
+    The web UI will use these variables to authenticate you.
+
 !!! warning "Lost password/username"
 
     In case you forgot your UI credentials, you can reset them from the CLI following [the steps described in the troubleshooting section](troubleshooting.md#web-ui).

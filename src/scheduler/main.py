@@ -178,10 +178,15 @@ def generate_custom_configs(configs: List[Dict[str, Any]], *, original_path: Uni
             LOGGER.error("Sending custom configs failed, configuration will not work as expected...")
 
 
-def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
+def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]], *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
     pro = "pro" in original_path.parts
+
+    if not plugins:
+        assert SCHEDULER is not None
+        plugins = SCHEDULER.db.get_plugins(_type="pro" if pro else "external", with_data=True)
+        assert plugins is not None, "Couldn't get plugins from database"
 
     # Remove old external/pro plugins files
     LOGGER.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
@@ -486,6 +491,8 @@ if __name__ == "__main__":
         # Instantiate scheduler environment
         SCHEDULER.env = env
 
+        threads = []
+
         SCHEDULER.apis = []
         for db_instance in SCHEDULER.db.get_instances():
             SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
@@ -494,43 +501,43 @@ if __name__ == "__main__":
 
         LOGGER.info("Scheduler started ...")
 
-        # Checking if any custom config has been created by the user
-        LOGGER.info("Checking if there are any changes in custom configs ...")
-        custom_configs = []
-        db_configs = SCHEDULER.db.get_custom_configs()
-        changes = False
-        for file in CUSTOM_CONFIGS_PATH.rglob("*.conf"):
-            if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
-                LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
+        def check_configs_changes():
+            # Checking if any custom config has been created by the user
+            LOGGER.info("Checking if there are any changes in custom configs ...")
+            custom_configs = []
+            db_configs = SCHEDULER.db.get_custom_configs()
+            changes = False
+            for file in CUSTOM_CONFIGS_PATH.rglob("*.conf"):
+                if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
+                    LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
 
-            content = file.read_text(encoding="utf-8")
-            service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
-            config_type = file.parent.parent.name if service_id else file.parent.name
+                content = file.read_text(encoding="utf-8")
+                service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
+                config_type = file.parent.parent.name if service_id else file.parent.name
 
-            saving = True
-            in_db = False
-            for db_conf in db_configs:
-                if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
-                    in_db = True
+                saving = True
+                in_db = False
+                for db_conf in db_configs:
+                    if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
+                        in_db = True
 
-            if not in_db and content.startswith("# CREATED BY ENV"):
-                saving = False
-                changes = True
+                if not in_db and content.startswith("# CREATED BY ENV"):
+                    saving = False
+                    changes = True
 
-            if saving:
-                custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem)})
+                if saving:
+                    custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem)})
 
-        changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
+            changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
-        if changes:
-            err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
-            if err:
-                LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
+            if changes:
+                err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
+                if err:
+                    LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
 
-        if (scheduler_first_start and db_configs) or changes:
             generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
-        del custom_configs, db_configs
+        threads.append(Thread(target=check_configs_changes))
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
@@ -581,11 +588,15 @@ if __name__ == "__main__":
                     if err:
                         LOGGER.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
 
-                if (scheduler_first_start and db_plugins) or changes:
-                    generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
+            generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
 
-        check_plugin_changes("external")
-        check_plugin_changes("pro")
+        threads.extend([Thread(target=check_plugin_changes, args=("external",)), Thread(target=check_plugin_changes, args=("pro",))])
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
 
         LOGGER.info("Running plugins download jobs ...")
 
@@ -598,10 +609,18 @@ if __name__ == "__main__":
 
         db_metadata = SCHEDULER.db.get_metadata()
         if db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]:
+            threads.clear()
+
             if db_metadata["pro_plugins_changed"]:
-                generate_external_plugins(SCHEDULER.db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
+                threads.append(Thread(target=generate_external_plugins, args=(None,), kwargs={"original_path": PRO_PLUGINS_PATH}))
             if db_metadata["external_plugins_changed"]:
-                generate_external_plugins(SCHEDULER.db.get_plugins(_type="external", with_data=True))
+                threads.append(Thread(target=generate_external_plugins, args=(None,)))
+
+            for thread in threads:
+                thread.start()
+
+            for thread in threads:
+                thread.join()
 
             # run the config saver to save potential ignored external plugins settings
             LOGGER.info("Running config saver to save potential ignored external plugins settings ...")
@@ -630,7 +649,6 @@ if __name__ == "__main__":
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
         CHANGES = []
-        threads = []
 
         def send_nginx_configs():
             LOGGER.info(f"Sending {join(sep, 'etc', 'nginx')} folder ...")

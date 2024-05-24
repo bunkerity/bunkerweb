@@ -320,7 +320,7 @@
                                     Your BunkerWeb UI final URL will be
                                 </h5>
                                 <p class="family-text text-center text-sm md:text-base break-words w-full px-4"
-                                   data-resume>http://</p>
+                                   data-resume>https://</p>
                             </div>
                             <div class="col-span-12 flex justify-center">
                                 <button tabindex="2"
@@ -370,7 +370,7 @@
             e.preventDefault();
             this.updateCheck("unknown");
             // get resume
-            const api = `http://${this.servInp.value}/setup/check`;
+            const api = `${location.protocol}://${this.servInp.value}/setup/check`;
             fetch(api)
               .then((res) => {
                 this.updateCheck("success");
@@ -437,14 +437,12 @@
         }
 
         updateResume() {
-          this.servInp.value = this.servInp.value.replace('https://', '').replace('http://', '');
+          this.servInp.value = this.servInp.value.replace('https://', '');
           if (!this.urlInp.value.startsWith("/")) {
             this.urlInp.value = "/" + this.urlInp.value;
           }
           this.urlInp.value = this.urlInp.value.replace("//", "/");
-          this.resumeEl.textContent = `http${
-            this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
-          }://${this.servInp.value}${this.urlInp.value}`;
+          this.resumeEl.textContent = `https://${this.servInp.value}${this.urlInp.value}`;
         }
       }
 
@@ -600,9 +598,7 @@
 
             // send form and wait for response
 
-            let api = `http${
-              this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
-            }://${this.servInp.value}${this.urlInp.value}`;
+            let api = `https://${this.servInp.value}${this.urlInp.value}`;
             if (!api.endsWith("/")) {
               api = `${api}/`;
             }
