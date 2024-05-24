@@ -96,11 +96,11 @@ def on_starting(server):
                 if updated:
                     if override_admin_creds:
                         LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
-                    ret = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token, method="manual")
-                    if ret:
-                        LOGGER.error(f"Couldn't update the admin user in the database: {ret}")
-                        exit(1)
-                    LOGGER.info("The admin user was updated successfully")
+                    err = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token, method="manual")
+                    if err:
+                        LOGGER.error(f"Couldn't update the admin user in the database: {err}")
+                    else:
+                        LOGGER.info("The admin user was updated successfully")
             else:
                 LOGGER.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
     elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
