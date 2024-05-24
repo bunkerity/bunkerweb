@@ -158,6 +158,7 @@ class Database:
 
         current_time = datetime.now()
         not_connected = True
+        fallback = False
 
         while not_connected:
             try:
@@ -173,27 +174,24 @@ class Database:
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
                 if (datetime.now() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
-                    if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
-                        if not self.readonly:
-                            self.logger.warning("The database is read-only, trying one last time to connect in read-only mode")
-                            self.readonly = True
-                            self.last_fallback = datetime.now()
-                        elif self.database_uri_readonly and sqlalchemy_string != self.database_uri_readonly:
-                            self.logger.warning("Can't connect to the database in read-only mode, falling back to read-only one")
-                            sqlalchemy_string = self.database_uri_readonly
-                            self.last_fallback = datetime.now()
-                        else:
-                            self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
-                            _exit(1)
-                    else:
-                        self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
-                        _exit(1)
+                    if not fallback and self.database_uri_readonly:
+                        self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds. Falling back to read-only database connection")
+                        self.sql_engine.dispose(close=True)
+                        self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
+                        self.readonly = True
+                        self.last_fallback = datetime.now()
+                        fallback = True
+                        continue
+                    self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    _exit(1)
 
                 if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
                     if log:
-                        self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
+                        self.logger.warning("The database is read-only. Retrying in read-only mode in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
                     self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
+                    self.readonly = True
+                    self.last_fallback = datetime.now()
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
