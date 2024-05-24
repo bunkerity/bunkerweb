@@ -286,7 +286,7 @@
 }
 
 .core-card-list-large {
-  @apply overflow-x-auto overflow-y-hidden ml-2 mr-2 mt-2 h-fit sm:h-full mb-2 sm:mb-0 transition hover:scale-102 col-span-12 lg:col-span-6 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply overflow-x-auto overflow-y-hidden ml-2 mr-2 mt-2 h-fit lg:h-full mb-2 lg:mb-0 transition hover:scale-102 col-span-12 lg:col-span-6 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-filter {
