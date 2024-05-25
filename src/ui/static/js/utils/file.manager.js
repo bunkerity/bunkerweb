@@ -2,7 +2,7 @@ class FolderNav {
   constructor(prefix) {
     this.prefix = prefix;
     this.breadContainer = document.querySelector(
-      `[data-${this.prefix}-breadcrumb]`,
+      `[data-${this.prefix}-breadcrumb]`
     );
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
     this.isReadonly =
@@ -12,11 +12,11 @@ class FolderNav {
         ? true
         : false;
     this.listContainer = document.querySelector(
-      `[data-${this.prefix}-folders]`,
+      `[data-${this.prefix}-folders]`
     );
     this.els = document.querySelectorAll(`div[data-${this.prefix}-element]`);
     this.files = document.querySelectorAll(
-      `div[data-${this.prefix}-element][data-_type='file']`,
+      `div[data-${this.prefix}-element][data-_type='file']`
     );
     this.addFileEl = document.querySelector(`[data-${this.prefix}-add-file]`);
     this.initSorted();
@@ -91,8 +91,8 @@ class FolderNav {
     this.removeBreadElByLvl(+prevLvl);
     const folder = document.querySelector(
       `div[data-${this.prefix}-element][data-path='${item.getAttribute(
-        "data-path",
-      )}']`,
+        "data-path"
+      )}']`
     );
     this.updateActions(folder);
   }
@@ -113,7 +113,7 @@ class FolderNav {
 
   showCurrentFolderEls(path, lvl) {
     const nestedEl = document.querySelectorAll(
-      `div[data-path^="${path}/"][data-level="${+lvl + 1}"]`,
+      `div[data-path^="${path}/"][data-level="${+lvl + 1}"]`
     );
     for (let i = 0; i < nestedEl.length; i++) {
       const el = nestedEl[i];
@@ -157,7 +157,7 @@ class FolderNav {
   //the clicked bread item
   removeBreadElByLvl(lvl) {
     const breadcrumbItem = this.breadContainer.querySelectorAll(
-      `[data-${this.prefix}-breadcrumb-item]`,
+      `[data-${this.prefix}-breadcrumb-item]`
     );
     breadcrumbItem.forEach((item) => {
       if (
@@ -216,7 +216,7 @@ class FolderDropdown {
     this.prefix = prefix;
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
     this.dropEls = document.querySelectorAll(
-      `[data-${this.prefix}-action-dropdown]`,
+      `[data-${this.prefix}-action-dropdown]`
     );
     this.init();
   }
@@ -262,7 +262,7 @@ class FolderDropdown {
             .closest("button")
             .getAttribute(`data-${this.prefix}-action-dropdown-btn`);
           const dropEl = document.querySelector(
-            `[data-${this.prefix}-action-dropdown="${att}"]`,
+            `[data-${this.prefix}-action-dropdown="${att}"]`
           );
           this.hideDrop(dropEl);
         }
@@ -346,33 +346,33 @@ class FolderModal {
         : false;
     //add service/file elements
     this.breadContainer = document.querySelector(
-      `[data-${this.prefix}-breadcrumb]`,
+      `[data-${this.prefix}-breadcrumb]`
     );
     this.addConfContainer = document.querySelector(
-      `[data-${this.prefix}-add-container]`,
+      `[data-${this.prefix}-add-container]`
     );
     //modal DOM elements
     this.form = document.querySelector(`[data-${this.prefix}-modal-form]`);
     this.modalEl = document.querySelector(`[data-${this.prefix}-modal]`);
     this.modalTitle = this.modalEl.querySelector(
-      `[data-${this.prefix}-modal-title]`,
+      `[data-${this.prefix}-modal-title]`
     );
     this.modalPath = this.modalEl.querySelector(
-      `[data-${this.prefix}-modal-path]`,
+      `[data-${this.prefix}-modal-path]`
     );
     this.modalEditor = this.modalEl.querySelector(
-      `[data-${this.prefix}-modal-editor]`,
+      `[data-${this.prefix}-modal-editor]`
     );
     this.modalPathPrev = this.modalPath.querySelector(
-      `p[data-${this.prefix}-modal-path-prefix]`,
+      `p[data-${this.prefix}-modal-path-prefix]`
     );
     this.modalPathName = this.modalPath.querySelector("input");
     this.modalPathSuffix = this.modalPath.querySelector(
-      `p[data-${this.prefix}-modal-path-suffix]`,
+      `p[data-${this.prefix}-modal-path-suffix]`
     );
 
     this.modalSubmit = this.modalEl.querySelector(
-      `[data-${this.prefix}-modal-submit]`,
+      `[data-${this.prefix}-modal-submit]`
     );
     //hidden input for backend
     this.modalInpPath = this.modalEl.querySelector("#path");
@@ -380,6 +380,9 @@ class FolderModal {
     this.modalInpType = this.modalEl.querySelector("#_type");
     this.modalInpOldName = this.modalEl.querySelector("#old_name");
     this.modalTxtarea = this.modalEl.querySelector("#content");
+    this.modalDelMsg = this.modalEl.querySelector(
+      `[data-${this.prefix}-modal-delete]`
+    );
     //HANDLERS
     //modal and values logic after clicking add file/folder button
     this.initAddConfig();
@@ -408,7 +411,7 @@ class FolderModal {
             "file",
             "",
             "",
-            this.getLevelFromBread(),
+            this.getLevelFromBread()
           );
         }
       } catch (err) {}
@@ -478,7 +481,7 @@ class FolderModal {
     var element = document.createElement("a");
     element.setAttribute(
       "href",
-      "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+      "data:text/plain;charset=utf-8," + encodeURIComponent(text)
     );
     element.setAttribute("download", filename);
 
@@ -533,7 +536,7 @@ class FolderModal {
     //title
     this.modalTitle.textContent = `${action} ${type}`;
     this.setInpt(action, path, type, name);
-    this.setEditor(type, content);
+    this.setEditor(action, type, content);
     this.setSubmitTxt(action);
     this.setPath(action, path, type, name, level);
     this.setDisabled(action);
@@ -559,8 +562,8 @@ class FolderModal {
   setPath(action, path, type) {
     let [prevPath, name] = this.separatePath(path);
     //remove conf if file type
-    this.modalPathSuffix.textContent =
-      type === "file" && this.prefix === "configs" ? ".conf" : "";
+    const suffix = type === "file" && this.prefix === "configs" ? ".conf" : "";
+    this.modalPathSuffix.textContent = suffix;
     name =
       type === "file" && this.prefix === "configs"
         ? name.replace(".conf", "")
@@ -574,6 +577,21 @@ class FolderModal {
     if (action !== "new") {
       this.modalPathPrev.textContent = `${prevPath}`;
       this.modalPathName.value = `${name}`;
+    }
+
+    if (action === "delete") {
+      this.modalDelMsg.textContent = `Are you sure to delete ${prevPath}${name}${suffix} ?`;
+      this.modalDelMsg.classList.remove("hidden");
+      this.modalPathPrev.classList.add("hidden");
+      this.modalPathName.classList.add("hidden");
+      this.modalPathSuffix.classList.add("hidden");
+    }
+
+    if (action !== "delete") {
+      this.modalPathName.classList.remove("hidden");
+      this.modalPathPrev.classList.remove("hidden");
+      this.modalPathSuffix.classList.remove("hidden");
+      this.modalDelMsg.classList.add("hidden");
     }
   }
 
@@ -634,13 +652,15 @@ class FolderModal {
       "delete-btn",
       "valid-btn",
       "edit-btn",
-      "info-btn",
+      "info-btn"
     );
   }
 
   //show only if type file and display text
-  setEditor(type, content) {
+  setEditor(action, type, content) {
     //SHOW LOGIC
+    if (action === "delete") return this.modalEditor.classList.add("hidden");
+
     if (type === "folder") this.modalEditor.classList.add("hidden");
 
     if (type === "file") this.modalEditor.classList.remove("hidden");
