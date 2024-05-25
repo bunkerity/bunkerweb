@@ -76,7 +76,7 @@ LABEL url "https://www.bunkerweb.io"
 LABEL bunkerweb.type "bunkerweb"
 LABEL bunkerweb.INSTANCE "bunkerweb"
 
-EXPOSE 8080/tcp 8443/tcp
+EXPOSE 8080/tcp 8443/tcp 8443/udp
 
 USER nginx:nginx
 
