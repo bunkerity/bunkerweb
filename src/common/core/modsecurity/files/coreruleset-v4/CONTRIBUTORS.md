@@ -146,3 +146,5 @@
 - [NiceYouKnow](https://github.com/NiceYouKnow)
 - [floyd](https://github.com/floyd)
 - [superlgn](https://github.com/superlgn)
+- [TimDiam0nd](https://github.com/TimDiam0nd)
+- [brentclark](https://github.com/brentclark)

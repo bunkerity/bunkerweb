@@ -122,42 +122,88 @@
 2. **Upgrade BunkerWeb**:
       - Upgrade BunkerWeb to the latest version.
 
-    === "Docker"
+        === "Docker"
 
-        1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
-            ```yaml
-            services:
-                bunkerweb:
-                    image: bunkerity/bunkerweb:1.5.7
-                    ...
-                bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.5.7
-                    ...
-                bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.5.7
-                    ...
-                bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.5.7
-                    ...
-            ```
+            1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
+                ```yaml
+                services:
+                    bunkerweb:
+                        image: bunkerity/bunkerweb:1.5.8
+                        ...
+                    bw-scheduler:
+                        image: bunkerity/bunkerweb-scheduler:1.5.8
+                        ...
+                    bw-autoconf:
+                        image: bunkerity/bunkerweb-autoconf:1.5.8
+                        ...
+                    bw-ui:
+                        image: bunkerity/bunkerweb-ui:1.5.8
+                        ...
+                ```
 
-        2. **Restart the containers**: Restart the containers to apply the changes.
-            ```bash
-            docker compose down
-            docker compose up -d
-            ```
+            2. **Restart the containers**: Restart the containers to apply the changes.
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
 
-    === "Linux"
+        === "Linux"
 
-        3. **Stop the services**:
-            ```bash
-            systemctl stop bunkerweb
-            systemctl stop bunkerweb-ui
-            ```
+            3. **Stop the services**:
+                ```bash
+                systemctl stop bunkerweb
+                systemctl stop bunkerweb-ui
+                ```
 
-        4. **Update BunkerWeb**:
-            - Update BunkerWeb to the latest version by following the instructions in the [integration Linux page](integrations.md#linux).
+            4. **Update BunkerWeb**:
 
+                === "Debian/Ubuntu"
+
+                    First, if you have previously hold the BunkerWeb package, unhold it :
+
+                    You can print a list of packages on hold with `apt-mark showhold`
+
+                    ```shell
+                    sudo apt-mark unhold bunkerweb
+                    ```
+
+                    Them, you can update BunkerWeb package :
+
+                    ```shell
+                    sudo apt install -y bunkerweb=1.5.8
+                    ```
+
+                    To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
+
+                    ```shell
+                    sudo apt-mark hold bunkerweb
+                    ```
+
+                    More details in the [integration Linux page](integrations.md#__tabbed_1_1).
+
+                === "Fedora/RedHat"
+
+                    First, if you have previously hold the BunkerWeb package, unhold it :
+
+                    You can print a list of packages on hold with `dnf versionlock list`
+
+                    ```shell
+                    sudo dnf versionlock delete package bunkerweb
+                    ```
+
+                    Them, you can update BunkerWeb package :
+
+                    ```shell
+                    sudo dnf install -y bunkerweb-1.5.8
+                    ```
+
+                    To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
+
+                    ```shell
+                    sudo dnf versionlock add bunkerweb
+                    ```
+
+                    More details in the [integration Linux page](integrations.md#__tabbed_1_3).
 
 3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
 
@@ -321,7 +367,7 @@
 
 !!! warning "Read this if you were a 1.4.X user"
 
-    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) folder of the repository.
+    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.5.8/misc/integrations) folder of the repository.
 
 ### Scheduler
 

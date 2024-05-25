@@ -101,12 +101,7 @@ class Job:
         with LOCK:
             if not manual and self.job_path.is_dir():
                 for file in self.job_path.rglob("*"):
-                    skipped = False
                     if file.as_posix().startswith(tuple(ignored_dirs)):
-                        skipped = True
-                        break
-
-                    if skipped:
                         continue
 
                     self.logger.debug(f"Checking if {file} should be removed")

@@ -14,7 +14,7 @@ from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
 from sys import path as sys_path
-from tarfile import open as tar_open
+from tarfile import TarFile, open as tar_open
 from threading import Event, Thread
 from time import sleep
 from traceback import format_exc
@@ -247,12 +247,15 @@ def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]], *, origin
             LOGGER.error(f"Sending {'pro ' if pro else ''}external plugins failed, configuration will not work as expected...")
 
 
-def generate_caches(plugins: List[Any], db: Database):
+def generate_caches(plugins: List[Dict[str, Any]]):
+    assert SCHEDULER is not None
+
     for plugin in plugins:
-        job_cache_files = db.get_jobs_cache_files(plugin_id=plugin["id"])
+        job_cache_files = SCHEDULER.db.get_jobs_cache_files(plugin_id=plugin["id"])
         plugin_cache_files = set()
         ignored_dirs = set()
         job_path = Path(sep, "var", "cache", "bunkerweb", plugin["id"])
+
         for job_cache_file in job_cache_files:
             cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
             plugin_cache_files.add(cache_path)
@@ -266,22 +269,28 @@ def generate_caches(plugins: List[Any], db: Database):
                     rmtree(extract_path, ignore_errors=True)
                     extract_path.mkdir(parents=True, exist_ok=True)
                     with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
+                        assert isinstance(tar, TarFile)
                         try:
-                            tar.extractall(extract_path, filter="fully_trusted")
-                        except TypeError:
-                            tar.extractall(extract_path)
-                else:
-                    cache_path.parent.mkdir(parents=True, exist_ok=True)
-                    cache_path.write_bytes(job_cache_file["data"])
+                            for member in tar.getmembers():
+                                try:
+                                    tar.extract(member, path=extract_path)
+                                except Exception as e:
+                                    LOGGER.error(f"Error extracting {member.name}: {e}")
+                        except Exception as e:
+                            LOGGER.error(f"Error extracting tar file: {e}")
+                    LOGGER.debug(f"Restored cache directory {extract_path}")
+                    continue
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                cache_path.write_bytes(job_cache_file["data"])
+                LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
             except BaseException as e:
                 LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
+
         if job_path.is_dir():
             for file in job_path.rglob("*"):
-                skipped = False
                 if file.as_posix().startswith(tuple(ignored_dirs)):
-                    skipped = True
-                if skipped:
                     continue
+
                 LOGGER.debug(f"Checking if {file} should be removed")
                 if file not in plugin_cache_files and file.is_file():
                     LOGGER.debug(f"Removing non-cached file {file}")
@@ -325,7 +334,7 @@ def run_in_slave_mode():  # TODO: Refactor this feature
     generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
     # Download caches
-    generate_caches(pro_plugins + external_plugins, SCHEDULER.db)
+    generate_caches(pro_plugins + external_plugins)
 
     # Gen config
     content = ""
@@ -531,9 +540,12 @@ if __name__ == "__main__":
             changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
             if changes:
-                err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
-                if err:
-                    LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
+                try:
+                    err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
+                    if err:
+                        LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
+                except BaseException as e:
+                    LOGGER.error(f"Error while saving custom configs to database: {e}")
 
             generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
@@ -584,9 +596,12 @@ if __name__ == "__main__":
                 changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
 
                 if changes:
-                    err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
-                    if err:
-                        LOGGER.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+                    try:
+                        err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
+                        if err:
+                            LOGGER.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+                    except BaseException as e:
+                        LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
 
             generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
 
@@ -672,6 +687,8 @@ if __name__ == "__main__":
                     LOGGER.error("At least one job in run_once() failed")
                 else:
                     LOGGER.info("All jobs in run_once() were successful")
+                    if SCHEDULER.db.readonly:
+                        generate_caches(SCHEDULER.db.get_plugins())
 
             if CONFIG_NEED_GENERATION:
                 content = ""
@@ -744,11 +761,12 @@ if __name__ == "__main__":
             except:
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
-            ret = SCHEDULER.db.checked_changes(CHANGES)
-
-            if ret:
-                LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-                stop(1)
+            try:
+                ret = SCHEDULER.db.checked_changes(CHANGES)
+                if ret:
+                    LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+            except BaseException as e:
+                LOGGER.error(f"Error while setting changes to checked in the database: {e}")
 
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False
@@ -759,14 +777,17 @@ if __name__ == "__main__":
             INSTANCES_NEED_GENERATION = False
 
             if scheduler_first_start:
-                ret = SCHEDULER.db.set_metadata({"scheduler_first_start": False})
+                try:
+                    ret = SCHEDULER.db.set_metadata({"scheduler_first_start": False})
 
-                if ret == "The database is read-only, the changes will not be saved":
-                    LOGGER.warning("The database is read-only, the scheduler first start will not be saved")
-                elif ret:
-                    LOGGER.error(f"An error occurred when setting the scheduler first start : {ret}")
-                    stop(1)
-                scheduler_first_start = False
+                    if ret == "The database is read-only, the changes will not be saved":
+                        LOGGER.warning("The database is read-only, the scheduler first start will not be saved")
+                    elif ret:
+                        LOGGER.error(f"An error occurred when setting the scheduler first start : {ret}")
+                except BaseException as e:
+                    LOGGER.error(f"Error while setting the scheduler first start : {e}")
+                finally:
+                    scheduler_first_start = False
 
             if not HEALTHY_PATH.is_file():
                 HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")

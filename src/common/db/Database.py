@@ -13,7 +13,7 @@ from sys import argv, path as sys_path
 from threading import Lock
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from time import sleep
-from traceback import format_exc
+from uuid import uuid4
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from model import (
@@ -46,6 +46,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
+    IntegrityError,
     OperationalError,
     ProgrammingError,
     SQLAlchemyError,
@@ -139,8 +140,8 @@ class Database:
         except ArgumentError:
             self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
-        except SQLAlchemyError:
-            self.logger.error(f"Error when trying to create the engine: {format_exc()}")
+        except SQLAlchemyError as e:
+            self.logger.error(f"Error when trying to create the engine: {e}")
             error = True
         finally:
             if error:
@@ -152,8 +153,16 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
+        DATABASE_RETRY_TIMEOUT = getenv("DATABASE_RETRY_TIMEOUT", "60")
+        if not DATABASE_RETRY_TIMEOUT.isdigit():
+            self.logger.warning(f"Invalid DATABASE_RETRY_TIMEOUT value: {DATABASE_RETRY_TIMEOUT}, using default value (60)")
+            DATABASE_RETRY_TIMEOUT = "60"
+
+        DATABASE_RETRY_TIMEOUT = int(DATABASE_RETRY_TIMEOUT)
+
+        current_time = datetime.now()
         not_connected = True
-        retries = 15
+        fallback = False
 
         while not_connected:
             try:
@@ -162,42 +171,39 @@ class Database:
                         conn.execute(text("SELECT 1"))
                 else:
                     with self.sql_engine.connect() as conn:
-                        conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
-                        conn.execute(text("DROP TABLE test"))
+                        table_name = uuid4().hex
+                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+                        conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
-                if retries <= 0:
-                    if "attempt to write a readonly database" in str(e):
-                        if not self.readonly:
-                            self.logger.warning("The database is read-only, trying one last time to connect in read-only mode")
-                            self.readonly = True
-                            self.last_fallback = datetime.now()
-                        elif self.database_uri_readonly and sqlalchemy_string != self.database_uri_readonly:
-                            self.logger.warning("Can't connect to the database in read-only mode, falling back to read-only one")
-                            sqlalchemy_string = self.database_uri_readonly
-                            self.last_fallback = datetime.now()
-                        else:
-                            self.logger.error(f"Can't connect to database : {format_exc()}")
-                            _exit(1)
-                    else:
-                        self.logger.error(f"Can't connect to database : {format_exc()}")
-                        _exit(1)
+                if (datetime.now() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
+                    if not fallback and self.database_uri_readonly:
+                        self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds. Falling back to read-only database connection")
+                        self.sql_engine.dispose(close=True)
+                        self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
+                        self.readonly = True
+                        self.last_fallback = datetime.now()
+                        fallback = True
+                        continue
+                    self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    _exit(1)
 
-                if "attempt to write a readonly database" in str(e):
+                if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
                     if log:
-                        self.logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
+                        self.logger.warning("The database is read-only. Retrying in read-only mode in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
                     self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
+                    self.readonly = True
+                    self.last_fallback = datetime.now()
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
                 elif log:
                     self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
-                retries -= 1
                 sleep(5)
-            except BaseException:
-                self.logger.error(f"Error when trying to connect to the database: {format_exc()}")
+            except BaseException as e:
+                self.logger.error(f"Error when trying to connect to the database: {e}")
                 exit(1)
 
         self.suffix_rx = re_compile(r"_\d+$")
@@ -211,6 +217,14 @@ class Database:
 
         if self.sql_engine:
             self.sql_engine.dispose()
+
+    def test_write(self):
+        """Test the write access to the database"""
+        with self.__db_session() as session:
+            table_name = uuid4().hex
+            session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
+            session.commit()
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
         """Retry the connection to the database"""
@@ -266,7 +280,7 @@ class Database:
                 if session:
                     session.rollback()
 
-                if "attempt to write a readonly database" in str(e):
+                if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
                     self.logger.warning("The database is read-only, retrying in read-only mode ...")
                     try:
                         self.retry_connection(readonly=True, pool_timeout=1)
@@ -311,8 +325,8 @@ class Database:
                         )
                     )
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -335,7 +349,7 @@ class Database:
             "config_changed": False,
             "instances_changed": False,
             "integration": "unknown",
-            "version": "1.5.7",
+            "version": "1.5.8",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -353,7 +367,7 @@ class Database:
                     data["default"] = False
             except BaseException as e:
                 if "doesn't exist" not in str(e):
-                    self.logger.debug(f"Can't get the metadata: {format_exc()}")
+                    self.logger.debug(f"Can't get the metadata: {e}")
 
         return data
 
@@ -376,8 +390,8 @@ class Database:
 
                     setattr(metadata, key, value)
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -413,8 +427,8 @@ class Database:
                 if "instances" in changes:
                     metadata.instances_changed = value
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -439,12 +453,23 @@ class Database:
 
             if db_version != bunkerweb_version:
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
-                metadata = sql_metadata()
-                metadata.reflect(self.sql_engine)
+                curren_time = datetime.now()
+                error = True
+                while error:
+                    try:
+                        metadata = sql_metadata()
+                        metadata.reflect(self.sql_engine)
+                        error = False
+                    except BaseException as e:
+                        if (datetime.now() - curren_time).total_seconds() > 10:
+                            raise e
+                        sleep(1)
+
+                assert isinstance(metadata, sql_metadata)
 
                 for table_name in Base.metadata.tables.keys():
                     if not inspector.has_table(table_name):
-                        self.logger.warning(f'Table "{table_name}" is missing')
+                        self.logger.warning(f'Table "{table_name}" is missing, creating it')
                         has_all_tables = False
                         continue
 
@@ -460,6 +485,7 @@ class Database:
                                 self.logger.warning(f'Table "{table_name}" already exists, dropping it to make room for the new one')
                                 session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
                             session.execute(text(f"ALTER TABLE {table_name} RENAME TO {table_name}_{db_version_id}"))
+                            session.commit()
 
                 Base.metadata.drop_all(self.sql_engine)
 
@@ -468,26 +494,8 @@ class Database:
 
         try:
             Base.metadata.create_all(self.sql_engine, checkfirst=True)
-        except BaseException:
-            return False, format_exc()
-
-        if db_version and db_version != bunkerweb_version:
-            with self.__db_session() as session:
-                for table_name, data in old_data.items():
-                    for row in data:
-                        has_external_column = "external" in row
-                        row = {
-                            column: getattr(row, column)
-                            for column in Base.metadata.tables[table_name].columns.keys() + (["external"] if has_external_column else [])
-                            if hasattr(row, column)
-                        }
-
-                        # ? As the external column has been replaced by the type column, we need to update the data if the column exists
-                        if table_name == "bw_plugins" and "external" in row:
-                            row["type"] = "external" if row.pop("external") else "core"
-
-                        session.execute(Base.metadata.tables[table_name].insert().values(row))
-                session.commit()
+        except BaseException as e:
+            return False, str(e)
 
         to_put = []
         with self.__db_session() as session:
@@ -520,6 +528,30 @@ class Database:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
 
+                db_values = [
+                    plugin.id
+                    for plugin in session.query(Plugins)
+                    .with_entities(Plugins.id)
+                    .filter(Plugins.id.in_([plugin["id"] for plugin in plugins if "id" in plugin]))
+                ]
+                missing_values = [plugin for plugin in db_values if plugin not in [plugin["id"] for plugin in plugins if "id" in plugin]]
+
+                if missing_values:
+                    # Remove plugins that are no longer in the list
+                    session.query(Plugins).filter(Plugins.id.in_(missing_values)).delete()
+                    session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_values)).delete()
+                    session.query(BwcliCommands).filter(BwcliCommands.plugin_id.in_(missing_values)).delete()
+
+                    for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_values)):
+                        session.query(Jobs_cache).filter(Jobs_cache.job_name == plugin_job.name).delete()
+                        session.query(Jobs).filter(Jobs.name == plugin_job.name).delete()
+
+                    for plugin_setting in session.query(Settings).with_entities(Settings.id).filter(Settings.plugin_id.in_(missing_values)):
+                        session.query(Selects).filter(Selects.setting_id == plugin_setting.id).delete()
+                        session.query(Services_settings).filter(Services_settings.setting_id == plugin_setting.id).delete()
+                        session.query(Global_values).filter(Global_values.setting_id == plugin_setting.id).delete()
+                        session.query(Settings).filter(Settings.id == plugin_setting.id).delete()
+
                 for plugin in plugins:
                     settings = {}
                     jobs = []
@@ -540,6 +572,16 @@ class Database:
                         commands = plugin.pop("bwcli", {})
                         if not isinstance(commands, dict):
                             commands = {}
+
+                    if "bw_plugins" in old_data:
+                        found = False
+                        for i, old_plugin in enumerate(old_data["bw_plugins"]):
+                            if old_plugin.id == plugin["id"]:
+                                found = True
+                                break
+
+                        if found:
+                            del old_data["bw_plugins"][i]
 
                     db_plugin = session.query(Plugins).filter_by(id=plugin["id"]).first()
                     if db_plugin:
@@ -587,6 +629,23 @@ class Database:
                             )
                         )
 
+                    db_values = [setting.id for setting in session.query(Settings).with_entities(Settings.id).filter_by(plugin_id=plugin["id"])]
+                    missing_values = [setting for setting in db_values if setting not in settings]
+
+                    if missing_values:
+                        # Remove settings that are no longer in the list
+                        self.logger.warning(f'Removing {len(missing_values)} settings from plugin "{plugin["id"]}" as they are no longer in the list')
+                        session.query(Settings).filter(Settings.id.in_(missing_values)).delete()
+                        session.query(Selects).filter(Selects.setting_id.in_(missing_values)).delete()
+                        session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_values)).delete()
+                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_values)).delete()
+
+                        if "bw_settings" in old_data:
+                            indexes = [i for i, setting in enumerate(old_data["bw_settings"]) if setting.plugin_id == plugin["id"]]
+                            if indexes:
+                                for i in indexes:
+                                    del old_data["bw_settings"][i]
+
                     order = 0
                     for setting, value in settings.items():
                         value.update(
@@ -596,6 +655,17 @@ class Database:
                                 "id": setting,
                             }
                         )
+
+                        if "bw_settings" in old_data:
+                            found = False
+                            for i, old_setting in enumerate(old_data["bw_settings"]):
+                                if old_setting.id == value["id"]:
+                                    found = True
+                                    break
+
+                            if found:
+                                del old_data["bw_settings"][i]
+
                         db_setting = session.query(Settings).filter_by(id=setting).first()
                         select_values = value.pop("select", [])
 
@@ -643,6 +713,12 @@ class Database:
                         db_values = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"])]
                         missing_values = [select for select in db_values if select not in select_values]
 
+                        if "bw_selects" in old_data and missing_values:
+                            indexes = [i for i, select in enumerate(old_data["bw_selects"]) if select.setting_id == value["id"]]
+                            if indexes:
+                                for i in indexes:
+                                    del old_data["bw_selects"][i]
+
                         if select_values:
                             if missing_values:
                                 # Remove selects that are no longer in the list
@@ -650,6 +726,16 @@ class Database:
                                 session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
 
                             for select in select_values:
+                                if "bw_selects" in old_data:
+                                    found = False
+                                    for i, old_select in enumerate(old_data["bw_selects"]):
+                                        if old_select.value == select:
+                                            found = True
+                                            break
+
+                                    if found:
+                                        del old_data["bw_selects"][i]
+
                                 if select not in db_values:
                                     to_put.append(Selects(setting_id=value["id"], value=select))
                         else:
@@ -669,7 +755,23 @@ class Database:
                         session.query(Jobs).filter(Jobs.name.in_(missing_names), Jobs.plugin_id == plugin["id"]).delete()
                         session.query(Jobs_cache).filter(Jobs_cache.job_name.in_(missing_names)).delete()
 
+                        if "bw_jobs" in old_data:
+                            indexes = [i for i, job in enumerate(old_data["bw_jobs"]) if job.plugin_id == plugin["id"]]
+                            if indexes:
+                                for i in indexes:
+                                    del old_data["bw_jobs"][i]
+
                     for job in jobs:
+                        if "bw_jobs" in old_data:
+                            found = False
+                            for i, old_job in enumerate(old_data["bw_jobs"]):
+                                if old_job.name == job["name"]:
+                                    found = True
+                                    break
+
+                            if found:
+                                del old_data["bw_jobs"][i]
+
                         db_job = (
                             session.query(Jobs)
                             .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
@@ -700,6 +802,16 @@ class Database:
                                 updates[Jobs.last_run] = None
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
+
+                    if "bw_plugin_pages" in old_data:
+                        found = False
+                        for i, plugin_page in enumerate(old_data["bw_plugin_pages"]):
+                            if plugin_page.plugin_id == plugin["id"]:
+                                found = True
+                                break
+
+                        if found:
+                            del old_data["bw_plugin_pages"][i]
 
                     plugin_path = (
                         Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"])
@@ -805,7 +917,23 @@ class Database:
                         self.logger.warning(f'Removing {len(missing_names)} commands from plugin "{plugin["id"]}" as they are no longer in the list')
                         session.query(BwcliCommands).filter(BwcliCommands.name.in_(missing_names), BwcliCommands.plugin_id == plugin["id"]).delete()
 
+                        if "bwcli_commands" in old_data:
+                            indexes = [i for i, command in enumerate(old_data["bwcli_commands"]) if command.plugin_id == plugin["id"]]
+                            if indexes:
+                                for i in indexes:
+                                    del old_data["bwcli_commands"][i]
+
                     for command, file_name in commands.items():
+                        if "bwcli_commands" in old_data:
+                            found = False
+                            for i, old_command in enumerate(old_data["bwcli_commands"]):
+                                if old_command.name == command:
+                                    found = True
+                                    break
+
+                            if found:
+                                del old_data["bwcli_commands"][i]
+
                         db_command = session.query(BwcliCommands).with_entities(BwcliCommands.file_name).filter_by(name=command, plugin_id=plugin["id"]).first()
                         command_path = plugin_path.joinpath("bwcli", file_name)
 
@@ -835,8 +963,41 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return False, format_exc()
+            except BaseException as e:
+                return False, str(e)
+
+        if db_version and db_version != bunkerweb_version:
+            for table_name, data in old_data.items():
+                if table_name == "bw_metadata" or not data:
+                    continue
+
+                self.logger.warning(f'Restoring data for table "{table_name}"')
+                self.logger.debug(f"Data: {data}")
+                for row in data:
+                    has_external_column = "external" in row
+                    row = {
+                        column: getattr(row, column)
+                        for column in Base.metadata.tables[table_name].columns.keys() + (["external"] if has_external_column else [])
+                        if hasattr(row, column)
+                    }
+
+                    # ? As the external column has been replaced by the type column, we need to update the data if the column exists
+                    if table_name == "bw_plugins" and "external" in row:
+                        row["type"] = "external" if row.pop("external") else "core"
+
+                    with self.__db_session() as session:
+                        try:
+                            # Check if the row already exists in the table
+                            existing_row = session.query(Base.metadata.tables[table_name]).filter_by(**row).first()
+                            if not existing_row:
+                                session.execute(Base.metadata.tables[table_name].insert().values(row))
+                                session.commit()
+                        except IntegrityError as e:
+                            session.rollback()
+                            if "Duplicate entry" not in str(e):
+                                self.logger.error(f"Error when trying to restore data for table {table_name}: {e}")
+                                continue
+                            self.logger.debug(e)
 
         return True, ""
 
@@ -1071,8 +1232,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -1164,8 +1325,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return f"{f'{message}{endl}' if message else ''}{format_exc()}"
+            except BaseException as e:
+                return f"{f'{message}{endl}' if message else ''}{e}"
 
         return message
 
@@ -1320,8 +1481,8 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -1339,8 +1500,8 @@ class Database:
 
             try:
                 session.query(Jobs_cache).filter_by(**filters).delete()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -1380,8 +1541,8 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -1892,8 +2053,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -2106,8 +2267,8 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}, method: {method}).\n{format_exc()}"
+            except BaseException as e:
+                return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}, method: {method}).\n{e}"
 
         return ""
 
@@ -2139,8 +2300,8 @@ class Database:
             try:
                 session.add_all(to_put)
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -2224,8 +2385,8 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
 
@@ -2249,7 +2410,7 @@ class Database:
 
             try:
                 session.commit()
-            except BaseException:
-                return format_exc()
+            except BaseException as e:
+                return str(e)
 
         return ""
