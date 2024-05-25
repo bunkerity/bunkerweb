@@ -1,7 +1,7 @@
 FROM redhat/ubi9:9.4@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052951021caf429494 as builder
 
 ENV OS=rhel
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.0
 
 # Copy centos repo
 COPY src/linux/centos-9.repo /etc/yum.repos.d/centos.repo

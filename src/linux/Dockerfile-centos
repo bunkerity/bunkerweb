@@ -1,7 +1,7 @@
 FROM quay.io/centos/centos:stream8@sha256:7b56a6667ca1e57935a055307bca430e1c3d9d328365240c69e21a225f507a5f as builder
 
 ENV OS=centos
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.0
 
 # Copy centos repo
 COPY src/linux/centos.repo /etc/yum.repos.d/centos.repo
@@ -23,7 +23,7 @@ RUN dnf update -y && \
     yum-utils redhat-lsb-core && \
     dnf module -y reset ruby && dnf module -y enable ruby:2.6 && dnf module -y install ruby:2.6/common && \
     gem install fpm && \
-    # TODO: find a way to install nginx-1.24.0 as it's not yet available in centos 8
+    # TODO: find a way to install nginx-1.26.0 as it's not yet available in centos 8
     dnf install nginx-${NGINX_VERSION} -y
 
 WORKDIR /tmp/bunkerweb/deps
