@@ -483,9 +483,12 @@ if __name__ == "__main__":
             changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
             if changes:
-                err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
-                if err:
-                    logger.error(f"Couldn't save some manually created custom configs to database: {err}")
+                try:
+                    err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
+                    if err:
+                        logger.error(f"Couldn't save some manually created custom configs to database: {err}")
+                except BaseException as e:
+                    logger.error(f"Error while saving custom configs to database: {e}")
 
             generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
@@ -536,9 +539,12 @@ if __name__ == "__main__":
                 changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
 
                 if changes:
-                    err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
-                    if err:
-                        logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+                    try:
+                        err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
+                        if err:
+                            logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+                    except BaseException as e:
+                        logger.error(f"Error while saving {_type} plugins to database: {e}")
 
             generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
 
@@ -627,9 +633,17 @@ if __name__ == "__main__":
                 if event["Action"] in ("start", "die"):
                     logger.info(f"🐋 Detected {event['Action']} event on container {event['Actor']['Attributes']['name']}")
                     SCHEDULER.auto_setup()
-                    SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
-                    if event["Action"] == "start":
-                        SCHEDULER.db.checked_changes(value=True)
+                    try:
+                        ret = SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
+                        if ret:
+                            logger.error(f"Error while updating instances after {event['Action']} event: {ret}")
+                            continue
+                        if event["Action"] == "start":
+                            ret = SCHEDULER.db.checked_changes(value=True)
+                            if ret:
+                                logger.error(f"Error while setting changes to checked in the database after {event['Action']} event: {ret}")
+                    except BaseException as e:
+                        logger.error(f"Error while updating instances after {event['Action']} event: {e}")
 
         if INTEGRATION == "Docker" and not override_instances:
             Thread(target=listen_for_instances_reload, name="listen_for_instances_reload").start()
@@ -722,10 +736,12 @@ if __name__ == "__main__":
             except:
                 logger.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
-            ret = SCHEDULER.db.checked_changes(CHANGES)
-
-            if ret:
-                logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+            try:
+                ret = SCHEDULER.db.checked_changes(CHANGES)
+                if ret:
+                    logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+            except BaseException as e:
+                logger.error(f"Error while setting changes to checked in the database: {e}")
 
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False
@@ -736,13 +752,17 @@ if __name__ == "__main__":
             INSTANCES_NEED_GENERATION = False
 
             if scheduler_first_start:
-                ret = SCHEDULER.db.set_scheduler_first_start()
+                try:
+                    ret = SCHEDULER.db.set_scheduler_first_start()
 
-                if ret == "The database is read-only, the changes will not be saved":
-                    logger.warning("The database is read-only, the scheduler first start will not be saved")
-                elif ret:
-                    logger.error(f"An error occurred when setting the scheduler first start : {ret}")
-                scheduler_first_start = False
+                    if ret == "The database is read-only, the changes will not be saved":
+                        logger.warning("The database is read-only, the scheduler first start will not be saved")
+                    elif ret:
+                        logger.error(f"An error occurred when setting the scheduler first start : {ret}")
+                except BaseException as e:
+                    logger.error(f"Error while setting the scheduler first start : {e}")
+                finally:
+                    scheduler_first_start = False
 
             if not HEALTHY_PATH.is_file():
                 HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")
