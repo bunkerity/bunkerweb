@@ -445,15 +445,17 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
-    if not app.config["DB"].readonly:
-        try:
-            app.config["DB"].test_write()
-        except BaseException:
-            app.config["DB"].readonly = True
 
-    db_user = app.config["DB"].get_ui_user()
-    if db_user:
-        app.config["USER"] = User(**db_user)
+    if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
+        if not app.config["DB"].readonly:
+            try:
+                app.config["DB"].test_write()
+            except BaseException:
+                app.config["DB"].readonly = True
+
+        db_user = app.config["DB"].get_ui_user()
+        if db_user:
+            app.config["USER"] = User(**db_user)
 
     app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
 
