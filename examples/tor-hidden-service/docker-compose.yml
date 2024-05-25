@@ -12,7 +12,7 @@ services:
       - bw-universe
 
   mybunker:
-    image: bunkerity/bunkerweb:1.5.7
+    image: bunkerity/bunkerweb:1.5.8
     environment:
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       # disable common security measures based on IP
@@ -34,7 +34,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.7
+    image: bunkerity/bunkerweb-scheduler:1.5.8
     depends_on:
       - mybunker
     environment:

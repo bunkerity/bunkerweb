@@ -71,7 +71,7 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 RUN apk add --no-cache "busybox>=1.35.0-r30" "busybox-binsh>=1.35.0-r30" "ssl_client>=1.35.0-r30" # CVE-2023-42366
 
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
-LABEL version "1.5.7"
+LABEL version "1.5.8"
 LABEL url "https://www.bunkerweb.io"
 LABEL bunkerweb.type "bunkerweb"
 LABEL bunkerweb.INSTANCE "bunkerweb"

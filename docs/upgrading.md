@@ -128,16 +128,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.5.7
+                        image: bunkerity/bunkerweb:1.5.8
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.5.7
+                        image: bunkerity/bunkerweb-scheduler:1.5.8
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.5.7
+                        image: bunkerity/bunkerweb-autoconf:1.5.8
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.5.7
+                        image: bunkerity/bunkerweb-ui:1.5.8
                         ...
                 ```
 
@@ -170,7 +170,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.5.7
+                    sudo apt install -y bunkerweb=1.5.8
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
@@ -194,7 +194,7 @@
                     Them, you can update BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.5.7
+                    sudo dnf install -y bunkerweb-1.5.8
                     ```
 
                     To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
@@ -367,7 +367,7 @@
 
 !!! warning "Read this if you were a 1.4.X user"
 
-    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) folder of the repository.
+    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.5.8/misc/integrations) folder of the repository.
 
 ### Scheduler
 
