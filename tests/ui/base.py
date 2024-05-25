@@ -33,7 +33,7 @@ ready = False
 retries = 0
 while not ready:
     with suppress(RequestException):
-        status_code = get(f"http://{DEFAULT_SERVER}/setup").status_code
+        status_code = get(f"http://{DEFAULT_SERVER}/setup", verify=False).status_code
 
         if status_code > 500 and status_code != 502:
             log_error("An error occurred with the server, exiting ...")

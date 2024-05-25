@@ -1207,3 +1207,5 @@ You can easily deploy BunkerWeb on your Azure subscription in several ways:
     Get BunkerWeb from the [Create resource menu](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb){:target="_blank"}.
 
     You can also go through the [Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview){:target="_blank"}.
+
+You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your virtual machine.

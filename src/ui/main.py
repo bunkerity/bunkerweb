@@ -445,11 +445,13 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
-    try:
-        db_user = app.config["DB"].get_ui_user()
-    except BaseException:
-        db_user = app.config["DB"].get_ui_user()
+    if not app.config["DB"].readonly:
+        try:
+            app.config["DB"].test_write()
+        except BaseException:
+            app.config["DB"].readonly = True
 
+    db_user = app.config["DB"].get_ui_user()
     if db_user:
         app.config["USER"] = User(**db_user)
 
@@ -518,6 +520,9 @@ def setup():
             return redirect(url_for("login"), 301)
 
     if request.method == "POST":
+        if app.config["DB"].readonly:
+            return redirect_flash_error("Database is in read-only mode", "setup")
+
         is_request_form("setup")
 
         required_keys = ["server_name", "ui_host", "ui_url"]
@@ -576,6 +581,7 @@ def setup():
                     "REVERSE_PROXY_HOST": request.form["ui_host"],
                     "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
                     "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
+                    "GENERATE_SELF_SIGNED_SSL": "yes" if request.form.get("auto_lets_encrypt", "no") == "no" else "no",
                     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
                     "MAX_CLIENT_SIZE": "50m",
                 },
@@ -604,7 +610,6 @@ def setup():
 @login_required
 def totp():
     if request.method == "POST":
-
         is_request_form("totp")
 
         is_request_params(["totp_token"], "totp")
@@ -690,6 +695,9 @@ def home():
 @login_required
 def account():
     if request.method == "POST":
+        if app.config["DB"].readonly:
+            return redirect_flash_error("Database is in read-only mode", "account")
+
         # Check form data validity
         is_request_form("account")
 
@@ -888,6 +896,8 @@ def instances():
 @login_required
 def services():
     if request.method == "POST":
+        if app.config["DB"].readonly:
+            return redirect_flash_error("Database is in read-only mode", "services")
 
         is_request_params(["operation", "is_draft"], "services", True)
 
@@ -1089,6 +1099,9 @@ def services():
 @login_required
 def global_config():
     if request.method == "POST":
+        if app.config["DB"].readonly:
+            return redirect_flash_error("Database is in read-only mode", "global_config")
+
         # Check variables
         variables = request.form.to_dict().copy()
         del variables["csrf_token"]
@@ -1174,6 +1187,9 @@ def configs():
     db_configs = app.config["DB"].get_custom_configs()
 
     if request.method == "POST":
+        if app.config["DB"].readonly:
+            return redirect_flash_error("Database is in read-only mode", "configs")
+
         operation = ""
 
         is_request_params(["operation"], "configs", True)
@@ -1291,6 +1307,9 @@ def plugins():
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
     if request.method == "POST":
+        if app.config["DB"].readonly:
+            return redirect_flash_error("Database is in read-only mode", "plugins")
+
         error = 0
         # Delete plugin
         if "operation" in request.form and request.form["operation"] == "delete":
@@ -1586,6 +1605,9 @@ def plugins():
 @app.route("/plugins/upload", methods=["POST"])
 @login_required
 def upload_plugin():
+    if app.config["DB"].readonly:
+        return {"status": "ko", "message": "Database is in read-only mode"}, 403
+
     if not request.files:
         return {"status": "ko"}, 400
 
@@ -2074,6 +2096,9 @@ def reports():
 @app.route("/bans", methods=["GET", "POST"])
 @login_required
 def bans():
+    if request.method == "POST" and app.config["DB"].readonly:
+        return redirect_flash_error("Database is in read-only mode", "bans")
+
     redis_client = None
     db_config = app.config["CONFIG"].get_config(methods=False)
     use_redis = db_config.get("USE_REDIS", "no") == "yes"
@@ -2145,9 +2170,6 @@ def bans():
             flash("Couldn't connect to redis, ban list might be incomplete", "error")
 
     if request.method == "POST":
-        if app.config["DB"].readonly:
-            return redirect_flash_error("Read only mode is enabled", "bans")
-
         # Check variables
         is_request_form("bans")
 

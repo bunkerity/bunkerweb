@@ -204,7 +204,7 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        ret = self.__gen_conf(config, services, check_changes=check_changes, changed_service=variables["SERVER_NAME"])
+        ret = self.__gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0])
         if ret:
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0

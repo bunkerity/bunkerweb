@@ -86,7 +86,7 @@ try:
 
     log_info("Reload filter is working, trying jobs cache ...")
 
-    resp = get(f"http://www.example.com{UI_URL}/jobs/download?job_name=mmdb-country&file_name=country.mmdb")
+    resp = get(f"http://www.example.com{UI_URL}/jobs/download?job_name=mmdb-country&file_name=country.mmdb", verify=False)
 
     if resp.status_code != 200:
         log_error("The cache download is not working, exiting ...")

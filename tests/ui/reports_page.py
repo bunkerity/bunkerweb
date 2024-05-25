@@ -21,7 +21,7 @@ try:
         log_info("No reports found, generating some ...")
 
         for _ in range(5):
-            get("http://www.example.com/?id=/etc/passwd")
+            get("http://www.example.com/?id=/etc/passwd", verify=False)
             sleep(1)
 
         sleep(7)

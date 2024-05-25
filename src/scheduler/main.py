@@ -14,7 +14,7 @@ from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
 from sys import path as sys_path
-from tarfile import open as tar_open
+from tarfile import TarFile, open as tar_open
 from threading import Thread
 from time import sleep
 from traceback import format_exc
@@ -167,10 +167,15 @@ def generate_custom_configs(configs: List[Dict[str, Any]], *, original_path: Uni
             logger.error("Sending custom configs failed, configuration will not work as expected...")
 
 
-def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
+def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]], *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
     pro = "pro" in original_path.parts
+
+    if not plugins:
+        assert SCHEDULER is not None
+        plugins = SCHEDULER.db.get_plugins(_type="pro" if pro else "external", with_data=True)
+        assert plugins is not None, "Couldn't get plugins from database"
 
     # Remove old external/pro plugins files
     logger.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
@@ -231,12 +236,15 @@ def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: U
             logger.error(f"Sending {'pro ' if pro else ''}external plugins failed, configuration will not work as expected...")
 
 
-def generate_caches(plugins: List[Any], db: Database):
+def generate_caches(plugins: List[Dict[str, Any]]):
+    assert SCHEDULER is not None
+
     for plugin in plugins:
-        job_cache_files = db.get_jobs_cache_files(plugin_id=plugin["id"])
+        job_cache_files = SCHEDULER.db.get_jobs_cache_files(plugin_id=plugin["id"])
         plugin_cache_files = set()
         ignored_dirs = set()
         job_path = Path(sep, "var", "cache", "bunkerweb", plugin["id"])
+
         for job_cache_file in job_cache_files:
             cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
             plugin_cache_files.add(cache_path)
@@ -250,22 +258,28 @@ def generate_caches(plugins: List[Any], db: Database):
                     rmtree(extract_path, ignore_errors=True)
                     extract_path.mkdir(parents=True, exist_ok=True)
                     with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
+                        assert isinstance(tar, TarFile)
                         try:
-                            tar.extractall(extract_path, filter="fully_trusted")
-                        except TypeError:
-                            tar.extractall(extract_path)
-                else:
-                    cache_path.parent.mkdir(parents=True, exist_ok=True)
-                    cache_path.write_bytes(job_cache_file["data"])
+                            for member in tar.getmembers():
+                                try:
+                                    tar.extract(member, path=extract_path)
+                                except Exception as e:
+                                    logger.error(f"Error extracting {member.name}: {e}")
+                        except Exception as e:
+                            logger.error(f"Error extracting tar file: {e}")
+                    logger.debug(f"Restored cache directory {extract_path}")
+                    continue
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                cache_path.write_bytes(job_cache_file["data"])
+                logger.debug(f"Restored cache file {job_cache_file['file_name']}")
             except BaseException as e:
                 logger.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
+
         if job_path.is_dir():
             for file in job_path.rglob("*"):
-                skipped = False
                 if file.as_posix().startswith(tuple(ignored_dirs)):
-                    skipped = True
-                if skipped:
                     continue
+
                 logger.debug(f"Checking if {file} should be removed")
                 if file not in plugin_cache_files and file.is_file():
                     logger.debug(f"Removing non-cached file {file}")
@@ -313,7 +327,7 @@ def run_in_slave_mode():
     generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
     # Download caches
-    generate_caches(pro_plugins + external_plugins, SCHEDULER.db)
+    generate_caches(pro_plugins + external_plugins)
 
     # Gen config
     content = ""
@@ -374,15 +388,6 @@ if __name__ == "__main__":
             run_in_slave_mode()
             stop(1)
 
-        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
-            while not SCHEDULER.db.is_initialized():
-                logger.warning("Database is not initialized, retrying in 5s ...")
-                sleep(5)
-
-            while not SCHEDULER.db.is_autoconf_loaded():
-                logger.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
-                sleep(5)
-
         if (
             INTEGRATION in ("Swarm", "Kubernetes", "Autoconf")
             or not tmp_variables_path.exists()
@@ -432,6 +437,8 @@ if __name__ == "__main__":
         # Instantiate scheduler
         SCHEDULER.env = env | environ
 
+        threads = []
+
         if INTEGRATION in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
             # Automatically setup the scheduler apis
             while not SCHEDULER.apis:
@@ -440,49 +447,52 @@ if __name__ == "__main__":
                 if not SCHEDULER.apis:
                     logger.warning("No BunkerWeb API found, retrying in 5s ...")
                     sleep(5)
-            SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis])
+            threads.append(Thread(target=SCHEDULER.db.update_instances, args=([api_to_instance(api) for api in SCHEDULER.apis],)))
 
         scheduler_first_start = SCHEDULER.db.is_scheduler_first_start()
 
         logger.info("Scheduler started ...")
 
-        # Checking if any custom config has been created by the user
-        logger.info("Checking if there are any changes in custom configs ...")
-        custom_configs = []
-        db_configs = SCHEDULER.db.get_custom_configs()
-        changes = False
-        for file in CUSTOM_CONFIGS_PATH.rglob("*.conf"):
-            if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
-                logger.warning(f"Custom config file {file} is not in the correct path, skipping ...")
+        def check_configs_changes():
+            # Checking if any custom config has been created by the user
+            logger.info("Checking if there are any changes in custom configs ...")
+            custom_configs = []
+            db_configs = SCHEDULER.db.get_custom_configs()
+            changes = False
+            for file in CUSTOM_CONFIGS_PATH.rglob("*.conf"):
+                if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
+                    logger.warning(f"Custom config file {file} is not in the correct path, skipping ...")
 
-            content = file.read_text(encoding="utf-8")
-            service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
-            config_type = file.parent.parent.name if service_id else file.parent.name
+                content = file.read_text(encoding="utf-8")
+                service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
+                config_type = file.parent.parent.name if service_id else file.parent.name
 
-            saving = True
-            in_db = False
-            for db_conf in db_configs:
-                if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
-                    in_db = True
+                saving = True
+                in_db = False
+                for db_conf in db_configs:
+                    if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
+                        in_db = True
 
-            if not in_db and content.startswith("# CREATED BY ENV"):
-                saving = False
-                changes = True
+                if not in_db and content.startswith("# CREATED BY ENV"):
+                    saving = False
+                    changes = True
 
-            if saving:
-                custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem)})
+                if saving:
+                    custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem)})
 
-        changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
+            changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
-        if changes:
-            err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
-            if err:
-                logger.error(f"Couldn't save some manually created custom configs to database: {err}")
+            if changes:
+                try:
+                    err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
+                    if err:
+                        logger.error(f"Couldn't save some manually created custom configs to database: {err}")
+                except BaseException as e:
+                    logger.error(f"Error while saving custom configs to database: {e}")
 
-        if (scheduler_first_start and db_configs) or changes:
             generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
-        del custom_configs, db_configs
+        threads.append(Thread(target=check_configs_changes))
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
@@ -529,15 +539,22 @@ if __name__ == "__main__":
                 changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
 
                 if changes:
-                    err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
-                    if err:
-                        logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+                    try:
+                        err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
+                        if err:
+                            logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+                    except BaseException as e:
+                        logger.error(f"Error while saving {_type} plugins to database: {e}")
 
-                if (scheduler_first_start and db_plugins) or changes:
-                    generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
+            generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
 
-        check_plugin_changes("external")
-        check_plugin_changes("pro")
+        threads.extend([Thread(target=check_plugin_changes, args=("external",)), Thread(target=check_plugin_changes, args=("pro",))])
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
 
         logger.info("Running plugins download jobs ...")
 
@@ -550,10 +567,18 @@ if __name__ == "__main__":
 
         changes = SCHEDULER.db.check_changes()
         if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf") and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
+            threads.clear()
+
             if changes["pro_plugins_changed"]:
-                generate_external_plugins(SCHEDULER.db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
+                threads.append(Thread(target=generate_external_plugins, args=(None,), kwargs={"original_path": PRO_PLUGINS_PATH}))
             if changes["external_plugins_changed"]:
-                generate_external_plugins(SCHEDULER.db.get_plugins(_type="external", with_data=True))
+                threads.append(Thread(target=generate_external_plugins, args=(None,)))
+
+            for thread in threads:
+                thread.start()
+
+            for thread in threads:
+                thread.join()
 
             # run the config saver to save potential ignored external plugins settings
             logger.info("Running config saver to save potential ignored external plugins settings ...")
@@ -584,7 +609,6 @@ if __name__ == "__main__":
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
         CHANGES = []
-        threads = []
 
         def send_nginx_configs():
             logger.info(f"Sending {join(sep, 'etc', 'nginx')} folder ...")
@@ -609,9 +633,17 @@ if __name__ == "__main__":
                 if event["Action"] in ("start", "die"):
                     logger.info(f"🐋 Detected {event['Action']} event on container {event['Actor']['Attributes']['name']}")
                     SCHEDULER.auto_setup()
-                    SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
-                    if event["Action"] == "start":
-                        SCHEDULER.db.checked_changes(value=True)
+                    try:
+                        ret = SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
+                        if ret:
+                            logger.error(f"Error while updating instances after {event['Action']} event: {ret}")
+                            continue
+                        if event["Action"] == "start":
+                            ret = SCHEDULER.db.checked_changes(value=True)
+                            if ret:
+                                logger.error(f"Error while setting changes to checked in the database after {event['Action']} event: {ret}")
+                    except BaseException as e:
+                        logger.error(f"Error while updating instances after {event['Action']} event: {e}")
 
         if INTEGRATION == "Docker" and not override_instances:
             Thread(target=listen_for_instances_reload, name="listen_for_instances_reload").start()
@@ -625,6 +657,8 @@ if __name__ == "__main__":
                     logger.error("At least one job in run_once() failed")
                 else:
                     logger.info("All jobs in run_once() were successful")
+                    if SCHEDULER.db.readonly:
+                        generate_caches(SCHEDULER.db.get_plugins())
 
             if CONFIG_NEED_GENERATION:
                 content = ""
@@ -702,11 +736,12 @@ if __name__ == "__main__":
             except:
                 logger.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
-            ret = SCHEDULER.db.checked_changes(CHANGES)
-
-            if ret:
-                logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-                stop(1)
+            try:
+                ret = SCHEDULER.db.checked_changes(CHANGES)
+                if ret:
+                    logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+            except BaseException as e:
+                logger.error(f"Error while setting changes to checked in the database: {e}")
 
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False
@@ -717,14 +752,17 @@ if __name__ == "__main__":
             INSTANCES_NEED_GENERATION = False
 
             if scheduler_first_start:
-                ret = SCHEDULER.db.set_scheduler_first_start()
+                try:
+                    ret = SCHEDULER.db.set_scheduler_first_start()
 
-                if ret == "The database is read-only, the changes will not be saved":
-                    logger.warning("The database is read-only, the scheduler first start will not be saved")
-                elif ret:
-                    logger.error(f"An error occurred when setting the scheduler first start : {ret}")
-                    stop(1)
-                scheduler_first_start = False
+                    if ret == "The database is read-only, the changes will not be saved":
+                        logger.warning("The database is read-only, the scheduler first start will not be saved")
+                    elif ret:
+                        logger.error(f"An error occurred when setting the scheduler first start : {ret}")
+                except BaseException as e:
+                    logger.error(f"Error while setting the scheduler first start : {e}")
+                finally:
+                    scheduler_first_start = False
 
             if not HEALTHY_PATH.is_file():
                 HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")

@@ -167,7 +167,7 @@ location /hello {
 
     sleep(30)
 
-    resp = get("http://www.example.com/hello")
+    resp = get("http://www.example.com/hello", verify=False)
 
     if resp.status_code != 404:
         log_error("The config hasn't been deleted correctly, exiting ...")
@@ -221,7 +221,7 @@ location /hello {
     DRIVER.close()
     DRIVER.switch_to.window(DRIVER.window_handles[0])
 
-    resp = get("http://www.example.com/hello")
+    resp = get("http://www.example.com/hello", verify=False)
 
     if resp.status_code != 404:
         log_error("The config didn't get created only for the app1.example.com service, exiting ...")

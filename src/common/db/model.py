@@ -90,6 +90,15 @@ class Settings(Base):
     plugin = relationship("Plugins", back_populates="settings")
 
 
+class Selects(Base):
+    __tablename__ = "bw_selects"
+
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    value = Column(String(256), primary_key=True)
+
+    setting = relationship("Settings", back_populates="selects")
+
+
 class Global_values(Base):
     __tablename__ = "bw_global_values"
 
@@ -184,15 +193,6 @@ class Custom_configs(Base):
     method = Column(METHODS_ENUM, nullable=False)
 
     service = relationship("Services", back_populates="custom_configs")
-
-
-class Selects(Base):
-    __tablename__ = "bw_selects"
-
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    value = Column(String(256), primary_key=True)
-
-    setting = relationship("Settings", back_populates="selects")
 
 
 class Instances(Base):

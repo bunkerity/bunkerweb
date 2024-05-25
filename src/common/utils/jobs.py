@@ -9,7 +9,7 @@ from os.path import sep
 from pathlib import Path
 from shutil import rmtree
 from sys import argv
-from tarfile import open as tar_open
+from tarfile import TarFile, open as tar_open
 from threading import Lock
 from traceback import format_exc
 from typing import Any, Dict, Literal, Optional, Tuple, Union
@@ -80,15 +80,22 @@ class Job:
                         rmtree(extract_path, ignore_errors=True)
                         extract_path.mkdir(parents=True, exist_ok=True)
                         with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
+                            assert isinstance(tar, TarFile)
                             try:
-                                tar.extractall(extract_path, filter="fully_trusted")
-                            except TypeError:
-                                tar.extractall(extract_path)
+                                for member in tar.getmembers():
+                                    try:
+                                        tar.extract(member, path=extract_path)
+                                    except Exception as e:
+                                        self.logger.error(f"Error extracting {member.name}: {e}")
+                            except Exception as e:
+                                self.logger.error(f"Error extracting tar file: {e}")
+                    self.logger.debug(f"Restored cache directory {extract_path}")
                     continue
                 elif job_cache_file["job_name"] != job_name:
                     continue
                 cache_path.parent.mkdir(parents=True, exist_ok=True)
                 cache_path.write_bytes(job_cache_file["data"])
+                self.logger.debug(f"Restored cache file {job_cache_file['file_name']}")
             except BaseException as e:
                 self.logger.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
                 ret = False
@@ -96,12 +103,7 @@ class Job:
         with LOCK:
             if not manual and self.job_path.is_dir():
                 for file in self.job_path.rglob("*"):
-                    skipped = False
                     if file.as_posix().startswith(tuple(ignored_dirs)):
-                        skipped = True
-                        break
-
-                    if skipped:
                         continue
 
                     self.logger.debug(f"Checking if {file} should be removed")
@@ -207,7 +209,7 @@ class Job:
             tgz.add(dir_path, arcname=".")
         content.seek(0, 0)
 
-        return self.cache_file(file_name, content.read(), job_name=job_name, service_id=service_id)
+        return self.cache_file(file_name, content.getvalue(), job_name=job_name, service_id=service_id)
 
     def del_cache(self, name: str, *, job_name: str = "", service_id: str = "") -> Tuple[bool, str]:
         """Delete cache file from database and local cache file."""
