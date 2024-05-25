@@ -19,7 +19,7 @@ __DATA__
 === TEST 1: matched with d
 --- stream_server_config
     content_by_lua_block {
-        m = ngx.re.match("hello", "(he|hell)", "d")
+        local m = ngx.re.match("hello", "(he|hell)", "d")
         if m then
             ngx.say(m[0])
         else
@@ -34,7 +34,7 @@ hell
 === TEST 2: matched with d + j
 --- stream_server_config
     content_by_lua_block {
-        m = ngx.re.match("hello", "(he|hell)", "jd")
+        local m = ngx.re.match("hello", "(he|hell)", "jd")
         if m then
             ngx.say(m[0])
         else
@@ -49,7 +49,7 @@ hell
 === TEST 3: not matched with j
 --- stream_server_config
     content_by_lua_block {
-        m = ngx.re.match("world", "(he|hell)", "d")
+        local m = ngx.re.match("world", "(he|hell)", "d")
         if m then
             ngx.say(m[0])
         else
@@ -64,7 +64,7 @@ not matched!
 === TEST 4: matched with do
 --- stream_server_config
     content_by_lua_block {
-        m = ngx.re.match("hello", "he|hell", "do")
+        local m = ngx.re.match("hello", "he|hell", "do")
         if m then
             ngx.say(m[0])
             ngx.say(m[1])
@@ -83,7 +83,7 @@ nil
 === TEST 5: not matched with do
 --- stream_server_config
     content_by_lua_block {
-        m = ngx.re.match("world", "([0-9]+)", "do")
+        local m = ngx.re.match("world", "([0-9]+)", "do")
         if m then
             ngx.say(m[0])
         else
@@ -152,3 +152,26 @@ exec opts: 0
 你
 --- no_error_log
 [error]
+
+
+
+=== TEST 8: matched dfa after nfa
+--- stream_server_config
+    content_by_lua_block {
+        local m1 = ngx.re.match("hello", "(a)(a)(a)")
+        if m1 then
+            ngx.say(m1[0])
+        else
+            ngx.say("not matched!")
+        end
+
+        local m2 = ngx.re.match("world", "w", "d")
+        if m2 then
+            ngx.say(m2[0])
+        else
+            ngx.say("not matched!")
+        end
+    }
+--- stream_response
+not matched!
+w
