@@ -6,6 +6,7 @@
 - [FEATURE] Enhance security on error pages, default server page and loading page by adding a custom `Content-Security-Policy` header with nonces and removing the `Server` header
 - [UI] Force HTTPS on setup wizard
 - [UI] Fallback to self-signed certificate when UI is installed with setup wizard and let's encrypt is not used
+- [DEPS] Updated coreruleset-v4 version to v4.3.0
 
 ## v1.5.7 - 2024/05/14
 
