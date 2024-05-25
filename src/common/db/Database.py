@@ -45,6 +45,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
+    IntegrityError,
     OperationalError,
     ProgrammingError,
     SQLAlchemyError,
@@ -558,12 +559,23 @@ class Database:
 
             if db_version != bunkerweb_version:
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
-                metadata = sql_metadata()
-                metadata.reflect(self.sql_engine)
+                curren_time = datetime.now()
+                error = True
+                while error:
+                    try:
+                        metadata = sql_metadata()
+                        metadata.reflect(self.sql_engine)
+                        error = False
+                    except BaseException as e:
+                        if (datetime.now() - curren_time).total_seconds() > 10:
+                            raise e
+                        sleep(1)
+
+                assert isinstance(metadata, sql_metadata)
 
                 for table_name in Base.metadata.tables.keys():
                     if not inspector.has_table(table_name):
-                        self.logger.warning(f'Table "{table_name}" is missing')
+                        self.logger.warning(f'Table "{table_name}" is missing, creating it')
                         has_all_tables = False
                         continue
 
@@ -579,6 +591,7 @@ class Database:
                                 self.logger.warning(f'Table "{table_name}" already exists, dropping it to make room for the new one')
                                 session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
                             session.execute(text(f"ALTER TABLE {table_name} RENAME TO {table_name}_{db_version_id}"))
+                            session.commit()
 
                 Base.metadata.drop_all(self.sql_engine)
 
@@ -589,24 +602,6 @@ class Database:
             Base.metadata.create_all(self.sql_engine, checkfirst=True)
         except BaseException as e:
             return False, str(e)
-
-        if db_version and db_version != bunkerweb_version:
-            with self.__db_session() as session:
-                for table_name, data in old_data.items():
-                    for row in data:
-                        has_external_column = "external" in row
-                        row = {
-                            column: getattr(row, column)
-                            for column in Base.metadata.tables[table_name].columns.keys() + (["external"] if has_external_column else [])
-                            if hasattr(row, column)
-                        }
-
-                        # ? As the external column has been replaced by the type column, we need to update the data if the column exists
-                        if table_name == "bw_plugins" and "external" in row:
-                            row["type"] = "external" if row.pop("external") else "core"
-
-                        session.execute(Base.metadata.tables[table_name].insert().values(row))
-                session.commit()
 
         to_put = []
         with self.__db_session() as session:
@@ -639,6 +634,30 @@ class Database:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
 
+                db_values = [
+                    plugin.id
+                    for plugin in session.query(Plugins)
+                    .with_entities(Plugins.id)
+                    .filter(Plugins.id.in_([plugin["id"] for plugin in plugins if "id" in plugin]))
+                ]
+                missing_values = [plugin for plugin in db_values if plugin not in [plugin["id"] for plugin in plugins if "id" in plugin]]
+
+                if missing_values:
+                    # Remove plugins that are no longer in the list
+                    session.query(Plugins).filter(Plugins.id.in_(missing_values)).delete()
+                    session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_values)).delete()
+                    session.query(BwcliCommands).filter(BwcliCommands.plugin_id.in_(missing_values)).delete()
+
+                    for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_values)):
+                        session.query(Jobs_cache).filter(Jobs_cache.job_name == plugin_job.name).delete()
+                        session.query(Jobs).filter(Jobs.name == plugin_job.name).delete()
+
+                    for plugin_setting in session.query(Settings).with_entities(Settings.id).filter(Settings.plugin_id.in_(missing_values)):
+                        session.query(Selects).filter(Selects.setting_id == plugin_setting.id).delete()
+                        session.query(Services_settings).filter(Services_settings.setting_id == plugin_setting.id).delete()
+                        session.query(Global_values).filter(Global_values.setting_id == plugin_setting.id).delete()
+                        session.query(Settings).filter(Settings.id == plugin_setting.id).delete()
+
                 for plugin in plugins:
                     settings = {}
                     jobs = []
@@ -659,6 +678,16 @@ class Database:
                         commands = plugin.pop("bwcli", {})
                         if not isinstance(commands, dict):
                             commands = {}
+
+                    if "bw_plugins" in old_data:
+                        found = False
+                        for i, old_plugin in enumerate(old_data["bw_plugins"]):
+                            if old_plugin.id == plugin["id"]:
+                                found = True
+                                break
+
+                        if found:
+                            del old_data["bw_plugins"][i]
 
                     db_plugin = session.query(Plugins).filter_by(id=plugin["id"]).first()
                     if db_plugin:
@@ -706,6 +735,23 @@ class Database:
                             )
                         )
 
+                    db_values = [setting.id for setting in session.query(Settings).with_entities(Settings.id).filter_by(plugin_id=plugin["id"])]
+                    missing_values = [setting for setting in db_values if setting not in settings]
+
+                    if missing_values:
+                        # Remove settings that are no longer in the list
+                        self.logger.warning(f'Removing {len(missing_values)} settings from plugin "{plugin["id"]}" as they are no longer in the list')
+                        session.query(Settings).filter(Settings.id.in_(missing_values)).delete()
+                        session.query(Selects).filter(Selects.setting_id.in_(missing_values)).delete()
+                        session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_values)).delete()
+                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_values)).delete()
+
+                        if "bw_settings" in old_data:
+                            indexes = [i for i, setting in enumerate(old_data["bw_settings"]) if setting.plugin_id == plugin["id"]]
+                            if indexes:
+                                for i in indexes:
+                                    del old_data["bw_settings"][i]
+
                     order = 0
                     for setting, value in settings.items():
                         value.update(
@@ -715,6 +761,17 @@ class Database:
                                 "id": setting,
                             }
                         )
+
+                        if "bw_settings" in old_data:
+                            found = False
+                            for i, old_setting in enumerate(old_data["bw_settings"]):
+                                if old_setting.id == value["id"]:
+                                    found = True
+                                    break
+
+                            if found:
+                                del old_data["bw_settings"][i]
+
                         db_setting = session.query(Settings).filter_by(id=setting).first()
                         select_values = value.pop("select", [])
 
@@ -762,6 +819,12 @@ class Database:
                         db_values = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"])]
                         missing_values = [select for select in db_values if select not in select_values]
 
+                        if "bw_selects" in old_data and missing_values:
+                            indexes = [i for i, select in enumerate(old_data["bw_selects"]) if select.setting_id == value["id"]]
+                            if indexes:
+                                for i in indexes:
+                                    del old_data["bw_selects"][i]
+
                         if select_values:
                             if missing_values:
                                 # Remove selects that are no longer in the list
@@ -769,6 +832,16 @@ class Database:
                                 session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
 
                             for select in select_values:
+                                if "bw_selects" in old_data:
+                                    found = False
+                                    for i, old_select in enumerate(old_data["bw_selects"]):
+                                        if old_select.value == select:
+                                            found = True
+                                            break
+
+                                    if found:
+                                        del old_data["bw_selects"][i]
+
                                 if select not in db_values:
                                     to_put.append(Selects(setting_id=value["id"], value=select))
                         else:
@@ -788,7 +861,23 @@ class Database:
                         session.query(Jobs).filter(Jobs.name.in_(missing_names), Jobs.plugin_id == plugin["id"]).delete()
                         session.query(Jobs_cache).filter(Jobs_cache.job_name.in_(missing_names)).delete()
 
+                        if "bw_jobs" in old_data:
+                            indexes = [i for i, job in enumerate(old_data["bw_jobs"]) if job.plugin_id == plugin["id"]]
+                            if indexes:
+                                for i in indexes:
+                                    del old_data["bw_jobs"][i]
+
                     for job in jobs:
+                        if "bw_jobs" in old_data:
+                            found = False
+                            for i, old_job in enumerate(old_data["bw_jobs"]):
+                                if old_job.name == job["name"]:
+                                    found = True
+                                    break
+
+                            if found:
+                                del old_data["bw_jobs"][i]
+
                         db_job = (
                             session.query(Jobs)
                             .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
@@ -819,6 +908,16 @@ class Database:
                                 updates[Jobs.last_run] = None
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
+
+                    if "bw_plugin_pages" in old_data:
+                        found = False
+                        for i, plugin_page in enumerate(old_data["bw_plugin_pages"]):
+                            if plugin_page.plugin_id == plugin["id"]:
+                                found = True
+                                break
+
+                        if found:
+                            del old_data["bw_plugin_pages"][i]
 
                     plugin_path = (
                         Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"])
@@ -924,7 +1023,23 @@ class Database:
                         self.logger.warning(f'Removing {len(missing_names)} commands from plugin "{plugin["id"]}" as they are no longer in the list')
                         session.query(BwcliCommands).filter(BwcliCommands.name.in_(missing_names), BwcliCommands.plugin_id == plugin["id"]).delete()
 
+                        if "bwcli_commands" in old_data:
+                            indexes = [i for i, command in enumerate(old_data["bwcli_commands"]) if command.plugin_id == plugin["id"]]
+                            if indexes:
+                                for i in indexes:
+                                    del old_data["bwcli_commands"][i]
+
                     for command, file_name in commands.items():
+                        if "bwcli_commands" in old_data:
+                            found = False
+                            for i, old_command in enumerate(old_data["bwcli_commands"]):
+                                if old_command.name == command:
+                                    found = True
+                                    break
+
+                            if found:
+                                del old_data["bwcli_commands"][i]
+
                         db_command = session.query(BwcliCommands).with_entities(BwcliCommands.file_name).filter_by(name=command, plugin_id=plugin["id"]).first()
                         command_path = plugin_path.joinpath("bwcli", file_name)
 
@@ -956,6 +1071,39 @@ class Database:
                 session.commit()
             except BaseException as e:
                 return False, str(e)
+
+        if db_version and db_version != bunkerweb_version:
+            for table_name, data in old_data.items():
+                if table_name == "bw_metadata" or not data:
+                    continue
+
+                self.logger.warning(f'Restoring data for table "{table_name}"')
+                self.logger.debug(f"Data: {data}")
+                for row in data:
+                    has_external_column = "external" in row
+                    row = {
+                        column: getattr(row, column)
+                        for column in Base.metadata.tables[table_name].columns.keys() + (["external"] if has_external_column else [])
+                        if hasattr(row, column)
+                    }
+
+                    # ? As the external column has been replaced by the type column, we need to update the data if the column exists
+                    if table_name == "bw_plugins" and "external" in row:
+                        row["type"] = "external" if row.pop("external") else "core"
+
+                    with self.__db_session() as session:
+                        try:
+                            # Check if the row already exists in the table
+                            existing_row = session.query(Base.metadata.tables[table_name]).filter_by(**row).first()
+                            if not existing_row:
+                                session.execute(Base.metadata.tables[table_name].insert().values(row))
+                                session.commit()
+                        except IntegrityError as e:
+                            session.rollback()
+                            if "Duplicate entry" not in str(e):
+                                self.logger.error(f"Error when trying to restore data for table {table_name}: {e}")
+                                continue
+                            self.logger.debug(e)
 
         return True, ""
 
