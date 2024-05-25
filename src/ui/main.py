@@ -416,6 +416,9 @@ def set_csp_header(response):
         + " connect-src *;"
         + " base-uri 'self';"
     )
+    if app.config["DB"].readonly:
+        flash("Database connection is in read-only mode : no modification possible.", "error")
+
     return response
 
 

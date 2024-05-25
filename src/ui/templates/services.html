@@ -284,7 +284,7 @@
                         {% endif %}
                         {% for button in action_buttons %}
                             <button
-                             {% if button['name'] == "clone" and is_readonly%}disabled{% endif %}
+                             {% if button['name'] == "clone" and is_readonly or button['name'] == "delete" and is_readonly%}disabled{% endif %}
                             {% if button['name'] == "clone" or button['name'] == "edit"%}
                             data-settings="{{ service['settings'] }}"
 
