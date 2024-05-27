@@ -107,9 +107,9 @@
     "HTTP3_ALT_SVC_PORT": {
       "context": "multisite",
       "default": "443",
-      "help": "HTTP3 alternate service port.",
+      "help": "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.",
       "id": "http3-alt-svc-port",
-      "label": "HTTP3 alt svc port",
+      "label": "HTTP3 Alt-Svc port",
       "regex": "^\\d+$",
       "type": "text"
     },
