@@ -283,9 +283,6 @@ Repositories of Linux packages for BunkerWeb are available on [PackageCloud](htt
 
 You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.8/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 
-> [!IMPORTANT]
-> As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0. Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
-
 ## Microsoft Azure
 
 <p align="center">

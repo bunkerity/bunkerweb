@@ -3,7 +3,7 @@ FROM quay.io/centos/centos:stream8@sha256:a8692b39e546eed9177d495db1edfd97bb6de7
 RUN yum install -y initscripts  # for old "service"
 
 ENV container=docker
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.0
 
 RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
 rm -f /lib/systemd/system/multi-user.target.wants/*;\

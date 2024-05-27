@@ -2354,3 +2354,141 @@ ok
 lua tcp socket abort queueing
 --- no_error_log
 [error]
+
+
+
+=== TEST 53: wrong first argument of setkeepalive()
+--- config
+    location /foo {
+        server_tokens off;
+        keepalive_timeout 60s;
+        echo foo;
+    }
+--- stream_server_config
+    content_by_lua_block {
+        local sock = ngx.socket.tcp()
+        sock:settimeouts(1000, 1000, 1000)
+
+        local ok, err = sock:connect("127.0.0.1", $TEST_NGINX_SERVER_PORT)
+        if not ok then
+            ngx.say("failed to connect: ", err)
+            return
+        end
+
+        ngx.say("connected: ", ok)
+
+        local req = "GET /foo HTTP/1.1\r\nHost: localhost\r\nConnection: keepalive\r\n\r\n"
+
+        local bytes, err = sock:send(req)
+        if not bytes then
+            ngx.say("failed to send request: ", err)
+            return
+        end
+
+        ngx.say("request sent: ", bytes)
+
+        local reader = sock:receiveuntil("\r\n0\r\n\r\n")
+        local data, err = reader()
+        if not data then
+            ngx.say("failed to receive response body: ", err)
+            return
+        end
+
+        ngx.say("received response of ", #data, " bytes")
+
+        local ok, err = sock:setkeepalive()
+        if not ok then
+            ngx.say("failed to set reusable: ", err)
+            return
+        end
+
+        ok, err = sock:connect("127.0.0.1", $TEST_NGINX_SERVER_PORT)
+        if not ok then
+            ngx.say("failed to connect: ", err)
+            return
+        end
+
+        local ok, err = sock:setkeepalive("not a number")
+        if not ok then
+            ngx.say("failed to set reusable: ", err)
+            return
+        end
+    }
+--- stream_response
+connected: 1
+request sent: 61
+received response of 156 bytes
+--- error_log eval
+qr/\Qbad argument #1 to 'setkeepalive' (number expected, got string)\E/
+--- no_error_log 
+[crit]
+--- timeout: 4
+
+
+
+=== TEST 54: wrong second argument of setkeepalive()
+--- config
+    location /foo {
+        server_tokens off;
+        keepalive_timeout 60s;
+        echo foo;
+    }
+--- stream_server_config
+    content_by_lua_block {
+        local sock = ngx.socket.tcp()
+        sock:settimeouts(1000, 1000, 1000)
+
+        local ok, err = sock:connect("127.0.0.1", $TEST_NGINX_SERVER_PORT)
+        if not ok then
+            ngx.say("failed to connect: ", err)
+            return
+        end
+
+        ngx.say("connected: ", ok)
+
+        local req = "GET /foo HTTP/1.1\r\nHost: localhost\r\nConnection: keepalive\r\n\r\n"
+
+        local bytes, err = sock:send(req)
+        if not bytes then
+            ngx.say("failed to send request: ", err)
+            return
+        end
+
+        ngx.say("request sent: ", bytes)
+
+        local reader = sock:receiveuntil("\r\n0\r\n\r\n")
+        local data, err = reader()
+        if not data then
+            ngx.say("failed to receive response body: ", err)
+            return
+        end
+
+        ngx.say("received response of ", #data, " bytes")
+
+        local ok, err = sock:setkeepalive()
+        if not ok then
+            ngx.say("failed to set reusable: ", err)
+            return
+        end
+
+        ok, err = sock:connect("127.0.0.1", $TEST_NGINX_SERVER_PORT)
+        if not ok then
+            ngx.say("failed to connect: ", err)
+            return
+        end
+
+        local ok, err = sock:setkeepalive(10, "not a number")
+        if not ok then
+            ngx.say("failed to set reusable: ", err)
+            return
+        end
+    }
+--- stream_response
+connected: 1
+request sent: 61
+received response of 156 bytes
+--- error_log eval
+qr/\Qbad argument #2 to 'setkeepalive' (number expected, got string)\E/
+--- no_error_log 
+[crit]
+--- timeout: 4

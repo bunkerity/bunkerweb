@@ -1,6 +1,6 @@
 FROM redhat/ubi9-init:9.4-6.1714668826@sha256:dfae07a6c86c27ac5f33e1c3953906171eb4b65756d8e9817bd47d1b05854d90
 
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.0
 
 # Copy centos repo
 COPY src/linux/centos-9.repo /etc/yum.repos.d/centos.repo

@@ -29,9 +29,9 @@
     },
     {
       "id": "nginx",
-      "name": "Nginx v1.24.0",
+      "name": "Nginx v1.26.0",
       "url": "https://github.com/nginx/nginx.git",
-      "commit": "84cd7217778b8b3a2e395194b641ea14050344f1"
+      "commit": "361f6bf4b1cd5057d8f6365d1c0a94f3d72824e4"
     },
     {
       "id": "ngx_brotli",
@@ -225,9 +225,9 @@
     },
     {
       "id": "stream-lua-nginx-module",
-      "name": "stream-lua-nginx-module v0.0.14",
+      "name": "stream-lua-nginx-module v0.0.14+ (10 commits after to include nginx 1.26.0 fixes)",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "cafa6f55333541d1c78767a286fa434c97574a4c"
+      "commit": "bea8a0c0de94cede71554f53818ac0267d675d63"
     },
     {
       "id": "zlib",
