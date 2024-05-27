@@ -402,6 +402,67 @@ local function generate_key(config)
   return ctx_ptr[0]
 end
 
+local function compose_key(config)
+  local typ = config.type or 'RSA'
+  local key_type
+
+  if typ == "RSA" then
+    key_type = evp_macro.EVP_PKEY_RSA
+  elseif typ == "EC" then
+    key_type = evp_macro.EVP_PKEY_EC
+  elseif evp_macro.ecx_curves[typ] then
+    key_type = evp_macro.ecx_curves[typ]
+  else
+    return nil, "unsupported type " .. typ
+  end
+  if key_type == 0 then
+    return nil, "the linked OpenSSL library doesn't support " .. typ .. " key"
+  end
+
+  local key, err, key_free, _
+
+  if key_type == evp_macro.EVP_PKEY_EC then
+    key = C.EC_KEY_new()
+    if key == nil then
+      return nil, "EC_KEY_new failed"
+    end
+    key_free = C.EC_KEY_free
+    _, err = ec_lib.set_parameters(key, config.params)
+  elseif key_type == evp_macro.EVP_PKEY_RSA then
+    key = C.RSA_new()
+    if key == nil then
+      return nil, "RSA_new failed"
+    end
+    key_free = C.RSA_free
+    _, err = rsa_lib.set_parameters(key, config.params)
+  elseif key_type == evp_macro.EVP_PKEY_ED25519 or
+         key_type == evp_macro.EVP_PKEY_X25519 or
+         key_type == evp_macro.EVP_PKEY_ED448 or
+         key_type == evp_macro.EVP_PKEY_X448 then
+    key_free = function() end
+    key, err = ecx_lib.set_parameters(key_type, nil, config.params)
+  end
+
+  if err then
+    return nil, "failed to construct " .. typ.. " key from parameters: " .. err
+  end
+
+  local ctx = C.EVP_PKEY_new()
+  if ctx == nil then
+    key_free(key)
+    return nil, "EVP_PKEY_new() failed"
+  end
+
+  local code = C.EVP_PKEY_assign(ctx, key_type, key)
+  if code ~= 1 then
+    key_free(key)
+    C.EVP_PKEY_free(ctx)
+    return nil, "EVP_PKEY_assign() failed"
+  end
+
+  return ctx
+end
+
 local load_key_try_funcs = {} do
   -- TODO: pkcs1 load functions are not required in openssl 3.0
   local _load_key_try_funcs = {
@@ -506,9 +567,13 @@ function _M.new(s, opts)
   local ctx, err
   s = s or {}
   if type(s) == 'table' then
-    ctx, err = generate_key(s)
+    if s.params then
+      ctx, err = compose_key(s)
+    else
+      ctx, err = generate_key(s)
+    end
     if err then
-      err = "pkey.new:generate_key: " .. err
+      err = "pkey.new:new_key: " .. err
     end
   elseif type(s) == 'string' then
     ctx, err = load_pem_der(s, opts or empty_table, load_key_try_funcs)
@@ -656,8 +721,9 @@ end
 
 local ASYMMETRIC_OP_ENCRYPT = 0x1
 local ASYMMETRIC_OP_DECRYPT = 0x2
-local ASYMMETRIC_OP_SIGN_RAW = 0x4
-local ASYMMETRIC_OP_VERIFY_RECOVER = 0x8
+local ASYMMETRIC_OP_SIGN_RAW = 0x3
+local ASYMMETRIC_OP_VERIFY_RAW = 0x4
+local ASYMMETRIC_OP_VERIFY_RECOVER = 0x5
 
 local function asymmetric_routine(self, s, op, padding, opts)
   if type(s) ~= "string" then
@@ -701,6 +767,10 @@ local function asymmetric_routine(self, s, op, padding, opts)
     fint = C.EVP_PKEY_sign_init
     f = C.EVP_PKEY_sign
     op_name = "sign"
+  elseif op == ASYMMETRIC_OP_VERIFY_RAW then
+    fint = C.EVP_PKEY_verify_init
+    f = C.EVP_PKEY_verify
+    op_name = "verify"
   elseif op == ASYMMETRIC_OP_VERIFY_RECOVER then
     fint = C.EVP_PKEY_verify_recover_init
     f = C.EVP_PKEY_verify_recover
@@ -725,13 +795,25 @@ local function asymmetric_routine(self, s, op, padding, opts)
     return nil, "pkey:asymmetric_routine: " .. err
   end
 
-  local length = ptr_of_size_t(self.buf_size)
-
-  if f(pkey_ctx, self.buf, length, s, #s) <= 0 then
-    return nil, format_error("pkey:asymmetric_routine EVP_PKEY_" .. op_name)
+  local buf, buf_len
+  if opts and opts.buf_in then
+    buf = opts.buf_in
+    buf_len = #buf
+  else
+    buf = self.buf
+    buf_len = ptr_of_size_t(self.buf_size)
   end
 
-  return ffi_str(self.buf, length[0]), nil
+  code = f(pkey_ctx, buf, buf_len, s, #s)
+  if code <= 0 then
+    return nil, format_error("pkey:asymmetric_routine EVP_PKEY_" .. op_name, code)
+  end
+
+  if not opts or not opts.buf_in then
+    return ffi_str(self.buf, buf_len[0]), nil
+  end
+
+  return true
 end
 
 _M.PADDINGS = rsa_macro.paddings
@@ -751,6 +833,16 @@ function _M:sign_raw(s, padding, opts)
   end
 
   return asymmetric_routine(self, s, ASYMMETRIC_OP_SIGN_RAW, padding, opts)
+end
+
+function _M:verify_raw(signature, hashed_message, md_alg, padding, opts)
+  opts = opts or {}
+  opts.buf_in = signature
+  if md_alg then
+    table.insert(opts, "digest:" .. md_alg)
+  end
+
+  return asymmetric_routine(self, hashed_message, ASYMMETRIC_OP_VERIFY_RAW, padding, opts)
 end
 
 function _M:verify_recover(s, padding, opts)

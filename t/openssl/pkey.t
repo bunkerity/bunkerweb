@@ -225,6 +225,39 @@ nil
 
 
 
+=== TEST 9: compose: Compose key from parameters
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            local p_384 = myassert(require("resty.openssl.pkey").new({
+                type = "EC",
+                "ec_paramgen_curve:secp384r1",
+            }))
+            local out = myassert(p_384:to_PEM('private'))
+            local params = p_384:get_parameters()
+
+            local newp_384, err = myassert(require("resty.openssl.pkey").new({
+                type = "EC",
+                params = {
+                    private = params.private,
+                    public = params.public,
+                    group = params.group
+                }
+            }))
+            local out2 = myassert(newp_384:to_PEM('private'))
+            ngx.say(out == out2)
+        }
+    }
+--- request
+    GET /t
+--- response_body
+true
+--- no_error_log
+[error]
+
+
+
 === TEST 9: paramgen: Outpus DH and EC params
 --- http_config eval: $::HttpConfig
 --- config
@@ -883,7 +916,7 @@ pkey:verify: expect a string at #1
 
 
 
-=== TEST 27: signature: Raw sign and recover
+=== TEST 27: signature: Raw sign, raw verify and recover
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -895,12 +928,25 @@ pkey:verify: expect a string at #1
 
             local v = myassert(p:verify_recover(s))
             ngx.say(v == "🕶️")
+
+            local p = myassert(require("resty.openssl.pkey").new({
+                type = "EC",
+                curve = "prime256v1",
+            }))
+
+            local hashed = myassert(require("resty.openssl.digest").new("sha384"):final("🕶️"))
+
+            local s = myassert(p:sign_raw(hashed))
+
+            local v = myassert(p:verify_raw(s, hashed, "sha384"))
+            ngx.say(v == true)
         }
     }
 --- request
     GET /t
 --- response_body eval
 "256
+true
 true
 "
 --- no_error_log
