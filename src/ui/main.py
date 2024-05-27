@@ -448,9 +448,24 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
+    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
 
     if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
-        if not app.config["DB"].readonly:
+        if app.config["DB"].database_uri and app.config["DB"].readonly:
+            try:
+                app.config["DB"].retry_connection(pool_timeout=1)
+                app.config["DB"].readonly = False
+                app.logger.info("The database is no longer read-only, defaulting to read-write mode")
+            except BaseException:
+                try:
+                    app.config["DB"].retry_connection(readonly=True, pool_timeout=1)
+                except BaseException:
+                    if app.config["DB"].database_uri_readonly:
+                        with suppress(BaseException):
+                            app.config["DB"].retry_connection(fallback=True, pool_timeout=1)
+                app.config["DB"].readonly = True
+
+        if not app.config["DB"].readonly and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
                 app.config["DB"].test_write()
             except BaseException:
@@ -460,39 +475,22 @@ def before_request():
         if db_user:
             app.config["USER"] = User(**db_user)
 
-    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
+        if current_user.is_authenticated:
+            passed = True
 
-    if current_user.is_authenticated:
-        passed = True
+            # Case not login page, keep on 2FA before any other access
+            if not session.get("totp_validated", False) and current_user.is_two_factor_enabled and "/totp" not in request.path:
+                if not request.path.endswith("/login"):
+                    return redirect(url_for("totp", next=request.form.get("next")))
+                passed = False
+            elif session.get("ip") != request.remote_addr:
+                passed = False
+            elif session.get("user_agent") != request.headers.get("User-Agent"):
+                passed = False
 
-        # Go back from totp to login
-        if (
-            not session.get("totp_validated", False)
-            and current_user.is_two_factor_enabled
-            and "/totp" not in request.path
-            and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts"))
-            and request.path.endswith("/login")
-        ):
-            logout_user()
-            session.clear()
-            return redirect(url_for("login"))
-
-        # Case not login page, keep on 2FA before any other access
-        if (
-            not session.get("totp_validated", False)
-            and current_user.is_two_factor_enabled
-            and "/totp" not in request.path
-            and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts"))
-        ):
-            return redirect(url_for("totp", next=request.form.get("next")))
-        elif session.get("ip") != request.remote_addr:
-            passed = False
-        elif session.get("user_agent") != request.headers.get("User-Agent"):
-            passed = False
-
-        if not passed:
-            logout_user()
-            session.clear()
+            if not passed:
+                logout_user()
+                session.clear()
 
 
 @app.route("/", strict_slashes=False)
