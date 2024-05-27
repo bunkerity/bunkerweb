@@ -9,7 +9,7 @@
 - [FEATURE] Enhance security on error pages, default server page and loading page by adding a custom `Content-Security-Policy` header with nonces and removing the `Server` header
 - [FEATURE] Add new DATABASE_URI_READONLY setting to allow setting up a fallback read-only database URI in case the main database URI is not available
 - [FEATURE] Add automatic fallback to either read-only on the primary database or to the read-only database URI when the main database URI is not available and automatically switch back to the main database URI when it becomes available again
-- [FEATURE] Add experimental support of HTTP/3 (QUIC) with NGINX
+- [FEATURE] Add experimental support of HTTP/3 (QUIC)
 - [FEATURE] Optimize the way the scheduler handles jobs and the way the jobs are executed
 - [FEATURE] Optimize the way the cache files are being refreshed from the database
 - [UI] Force HTTPS on setup wizard
