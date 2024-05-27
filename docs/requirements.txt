@@ -685,7 +685,7 @@ webencodings==0.5.1 \
     # via
     #   cssselect2
     #   tinycss2
-zipp==3.18.2 \
-    --hash=sha256:6278d9ddbcfb1f1089a88fde84481528b07b0e10474e09dcfe53dad4069fa059 \
-    --hash=sha256:dce197b859eb796242b0622af1b8beb0a722d52aa2f57133ead08edd5bf5374e
+zipp==3.19.0 \
+    --hash=sha256:952df858fb3164426c976d9338d3961e8e8b3758e2e059e0f754b8c4262625ee \
+    --hash=sha256:96dc6ad62f1441bcaccef23b274ec471518daf4fbbc580341204936a5a3dddec
     # via pytablewriter
