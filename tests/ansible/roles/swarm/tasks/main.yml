@@ -18,7 +18,7 @@
     name: docker
     state: forcereinstall
     executable: pip3
-    version: "6.1.3"
+    version: "7.1.0"
 
 - name: Add IP address of all hosts to all hosts
   lineinfile:
