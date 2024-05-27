@@ -5,7 +5,7 @@ x-env: &env
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.7
+    image: bunkerity/bunkerweb:1.5.8
     pull_policy: never
     ports:
       - 80:80
@@ -43,7 +43,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.7
+    image: bunkerity/bunkerweb-scheduler:1.5.8
     pull_policy: never
     depends_on:
       - bw
@@ -57,7 +57,7 @@ services:
       - bw-universe
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.7
+    image: bunkerity/bunkerweb-ui:1.5.8
     pull_policy: never
     depends_on:
       - bw

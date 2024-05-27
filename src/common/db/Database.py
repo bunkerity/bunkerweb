@@ -217,6 +217,7 @@ class Database:
 
     def test_write(self):
         """Test the write access to the database"""
+        self.logger.debug("Testing write access to the database ...")
         with self.__db_session() as session:
             table_name = uuid4().hex
             session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
@@ -225,6 +226,8 @@ class Database:
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
         """Retry the connection to the database"""
+
+        self.logger.debug(f"Retrying the connection to the database {'in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
 
         assert self.sql_engine is not None
 
@@ -423,7 +426,7 @@ class Database:
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
         data = {
-            "version": "1.5.7",
+            "version": "1.5.8",
             "integration": "unknown",
             "database_version": "Unknown",
             "is_pro": "no",
@@ -484,7 +487,6 @@ class Database:
                         Metadata.custom_configs_changed,
                         Metadata.external_plugins_changed,
                         Metadata.pro_plugins_changed,
-                        Metadata.config_changed,
                         Metadata.instances_changed,
                     )
                     .filter_by(id=1)
@@ -495,21 +497,24 @@ class Database:
                     custom_configs_changed=metadata is not None and metadata.custom_configs_changed,
                     external_plugins_changed=metadata is not None and metadata.external_plugins_changed,
                     pro_plugins_changed=metadata is not None and metadata.pro_plugins_changed,
-                    config_changed=metadata is not None and metadata.config_changed,
                     instances_changed=metadata is not None and metadata.instances_changed,
+                    plugins_config_changed=self.check_plugin_changes(),
                 )
+            except BaseException as e:
+                return str(e)
+
+    def check_plugin_changes(self) -> Union[List[str], str]:
+        """Check if the plugins have changed inside the database"""
+        with self.__db_session() as session:
+            try:
+                plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(config_changed=True).all()
+                return [plugin.id for plugin in plugins]
             except BaseException as e:
                 return str(e)
 
     def checked_changes(self, changes: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
-        changes = changes or [
-            "config",
-            "custom_configs",
-            "external_plugins",
-            "pro_plugins",
-            "instances",
-        ]
+        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"]
         with self.__db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -523,7 +528,6 @@ class Database:
                 if "config" in changes:
                     if not metadata.first_config_saved:
                         metadata.first_config_saved = True
-                    metadata.config_changed = value
                 if "custom_configs" in changes:
                     metadata.custom_configs_changed = value
                 if "external_plugins" in changes:
@@ -532,6 +536,25 @@ class Database:
                     metadata.pro_plugins_changed = value
                 if "instances" in changes:
                     metadata.instances_changed = value
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def checked_plugins_changes(self, plugins: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
+        """Set changed bit for plugins"""
+        with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            plugins = plugins or []
+
+            try:
+                query = session.query(Plugins)
+                if plugins:
+                    query = query.filter(Plugins.id.in_(plugins))
+                query.update({Plugins.config_changed: value})
                 session.commit()
             except BaseException as e:
                 return str(e)
@@ -1114,9 +1137,29 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            # Delete all the old config
-            session.query(Global_values).filter(Global_values.method == method).delete()
-            session.query(Services_settings).filter(Services_settings.method == method).delete()
+            changed_plugins = set()
+            changed_services = False
+
+            for db_global_config in session.query(Global_values).filter_by(method=method).all():
+                key = db_global_config.setting_id
+                if db_global_config.suffix:
+                    key = f"{key}_{db_global_config.suffix}"
+
+                if key not in config and (db_global_config.suffix or f"{key}_0" not in config):
+                    session.delete(db_global_config)
+                    changed_plugins.add(session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_global_config.setting_id).first().plugin_id)
+
+                    if key == "SERVER_NAME":
+                        changed_services = True
+
+            for db_service_config in session.query(Services_settings).filter_by(method=method).all():
+                key = f"{db_service_config.service_id}_{db_service_config.setting_id}"
+                if db_service_config.suffix:
+                    key = f"{key}_{db_service_config.suffix}"
+
+                if key not in config and (db_service_config.suffix or f"{key}_0" not in config):
+                    session.delete(db_service_config)
+                    changed_plugins.add(session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first().plugin_id)
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -1137,6 +1180,7 @@ class Database:
                         session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete()
                         session.query(Custom_configs).filter(Custom_configs.service_id.in_(missing_ids)).delete()
                         session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(missing_ids)).delete()
+                        changed_services = True
 
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
                 db_drafts = {service.id for service in db_services if service.is_draft}
@@ -1149,6 +1193,7 @@ class Database:
                     if missing_drafts:
                         # Remove drafts that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_drafts)).update({Services.is_draft: False})
+                        changed_services = True
 
                 for draft in drafts:
                     if draft not in db_drafts:
@@ -1157,6 +1202,7 @@ class Database:
                             db_ids[draft] = {"method": method, "is_draft": True}
                         elif method == db_ids[draft]["method"]:
                             session.query(Services).filter(Services.id == draft).update({Services.is_draft: True})
+                            changed_services = True
 
                 if config.get("MULTISITE", "no") == "yes":
                     global_values = []
@@ -1167,7 +1213,7 @@ class Database:
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
-                        setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
+                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
 
                         if not setting and services:
                             try:
@@ -1178,10 +1224,12 @@ class Database:
                             if server_name not in db_ids:
                                 to_put.append(Services(id=server_name, method=method, is_draft=server_name in drafts))
                                 db_ids[server_name] = {"method": method, "is_draft": server_name in drafts}
+                                if server_name not in drafts:
+                                    changed_services = True
 
                             key = key.replace(f"{server_name}_", "")
                             original_key = original_key.replace(f"{server_name}_", "")
-                            setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
+                            setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
 
                             if not setting:
                                 continue
@@ -1189,11 +1237,7 @@ class Database:
                             service_setting = (
                                 session.query(Services_settings)
                                 .with_entities(Services_settings.value, Services_settings.method)
-                                .filter_by(
-                                    service_id=server_name,
-                                    setting_id=key,
-                                    suffix=suffix,
-                                )
+                                .filter_by(service_id=server_name, setting_id=key, suffix=suffix)
                                 .first()
                             )
 
@@ -1203,45 +1247,29 @@ class Database:
                                 ):
                                     continue
 
-                                to_put.append(
-                                    Services_settings(
-                                        service_id=server_name,
-                                        setting_id=key,
-                                        value=value,
-                                        suffix=suffix,
-                                        method=method,
-                                    )
-                                )
+                                changed_plugins.add(setting.plugin_id)
+                                to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
                             elif method in (service_setting.method, "autoconf") and service_setting.value != value:
-                                if key != "SERVER_NAME" and (
-                                    (original_key not in config and value == setting.default) or (original_key in config and value == config[original_key])
-                                ):
-                                    session.query(Services_settings).filter(
-                                        Services_settings.service_id == server_name,
-                                        Services_settings.setting_id == key,
-                                        Services_settings.suffix == suffix,
-                                    ).delete()
-                                    continue
-
-                                session.query(Services_settings).filter(
+                                changed_plugins.add(setting.plugin_id)
+                                query = session.query(Services_settings).filter(
                                     Services_settings.service_id == server_name,
                                     Services_settings.setting_id == key,
                                     Services_settings.suffix == suffix,
-                                ).update(
-                                    {
-                                        Services_settings.value: value,
-                                        Services_settings.method: method,
-                                    }
                                 )
+
+                                if key != "SERVER_NAME" and (
+                                    (original_key not in config and value == setting.default) or (original_key in config and value == config[original_key])
+                                ):
+                                    query.delete()
+                                    continue
+
+                                query.update({Services_settings.value: value, Services_settings.method: method})
                         elif setting and original_key not in global_values:
                             global_values.append(original_key)
                             global_value = (
                                 session.query(Global_values)
                                 .with_entities(Global_values.value, Global_values.method)
-                                .filter_by(
-                                    setting_id=key,
-                                    suffix=suffix,
-                                )
+                                .filter_by(setting_id=key, suffix=suffix)
                                 .first()
                             )
 
@@ -1249,31 +1277,16 @@ class Database:
                                 if value == setting.default:
                                     continue
 
-                                to_put.append(
-                                    Global_values(
-                                        setting_id=key,
-                                        value=value,
-                                        suffix=suffix,
-                                        method=method,
-                                    )
-                                )
+                                changed_plugins.add(setting.plugin_id)
+                                to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
                             elif method in (global_value.method, "autoconf") and global_value.value != value:
-                                if value == setting.default:
-                                    session.query(Global_values).filter(
-                                        Global_values.setting_id == key,
-                                        Global_values.suffix == suffix,
-                                    ).delete()
-                                    continue
+                                changed_plugins.add(setting.plugin_id)
+                                query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
-                                session.query(Global_values).filter(
-                                    Global_values.setting_id == key,
-                                    Global_values.suffix == suffix,
-                                ).update(
-                                    {
-                                        Global_values.value: value,
-                                        Global_values.method: method,
-                                    }
-                                )
+                                if value == setting.default:
+                                    query.delete()
+                                    continue
+                                query.update({Global_values.value: value, Global_values.method: method})
                 else:
                     if (
                         config.get("SERVER_NAME", "www.example.com")
@@ -1283,6 +1296,7 @@ class Database:
                         .first()
                     ):
                         to_put.append(Services(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0], method=method))
+                        changed_services = True
 
                     for key, value in config.items():
                         suffix = 0
@@ -1290,7 +1304,7 @@ class Database:
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
-                        setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
+                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
 
                         if not setting:
                             continue
@@ -1306,26 +1320,16 @@ class Database:
                             if value == setting.default:
                                 continue
 
-                            to_put.append(
-                                Global_values(
-                                    setting_id=key,
-                                    value=value,
-                                    suffix=suffix,
-                                    method=method,
-                                )
-                            )
+                            changed_plugins.add(setting.plugin_id)
+                            to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
                         elif global_value.method == method and value != global_value.value:
-                            if value == setting.default:
-                                session.query(Global_values).filter(
-                                    Global_values.setting_id == key,
-                                    Global_values.suffix == suffix,
-                                ).delete()
-                                continue
+                            changed_plugins.add(setting.plugin_id)
+                            query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
-                            session.query(Global_values).filter(
-                                Global_values.setting_id == key,
-                                Global_values.suffix == suffix,
-                            ).update({Global_values.value: value})
+                            if value == setting.default:
+                                query.delete()
+                                continue
+                            query.update({Global_values.value: value})
 
             if changed:
                 with suppress(ProgrammingError, OperationalError):
@@ -1333,7 +1337,11 @@ class Database:
                     if metadata is not None:
                         if not metadata.first_config_saved:
                             metadata.first_config_saved = True
-                        metadata.config_changed = True
+
+                    if changed_services:
+                        session.query(Plugins).update({Plugins.config_changed: True})
+                    elif changed_plugins:
+                        session.query(Plugins).filter(Plugins.id.in_(changed_plugins)).update({Plugins.config_changed: True})
 
             try:
                 session.add_all(to_put)

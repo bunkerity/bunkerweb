@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.7
+    image: bunkerity/bunkerweb:1.5.8
     ports:
       - 80:8080
       - 443:8443
@@ -53,7 +53,7 @@ services:
       - app2.example.com_REVERSE_PROXY_HEADERS=X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.7
+    image: bunkerity/bunkerweb-scheduler:1.5.8
     depends_on:
       - mybunker
     environment:

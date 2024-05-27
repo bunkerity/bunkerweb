@@ -10,7 +10,7 @@ from os import cpu_count, environ, getenv, sep
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from schedule import (
     Job,
     clear as schedule_clear,
@@ -274,7 +274,7 @@ class JobScheduler(ApiCaller):
 
         return success
 
-    def run_once(self) -> bool:
+    def run_once(self, plugins: Optional[List[str]] = None) -> bool:
         err = self.try_database_readonly()
         if err:
             return True
@@ -283,7 +283,12 @@ class JobScheduler(ApiCaller):
         self.__job_success = True
         self.__job_reload = False
 
+        plugins = plugins or []
+
         for plugin, jobs in self.__jobs.items():
+            if plugins and plugin not in plugins:
+                continue
+
             # Add job to the list of jobs to run in the order they are defined
             jobs_jobs = [partial(self.__job_wrapper, job["path"], plugin, job["name"], job["file"]) for job in jobs]
 
@@ -337,14 +342,14 @@ class JobScheduler(ApiCaller):
     def clear(self):
         schedule_clear()
 
-    def reload(self, env: Dict[str, Any], apis: Optional[list] = None) -> bool:
+    def reload(self, env: Dict[str, Any], apis: Optional[list] = None, *, changed_plugins: Optional[List[str]] = None) -> bool:
         ret = True
         try:
             self.__env = env
             super().__init__(apis or self.apis)
             self.clear()
             self.__jobs = self.__get_jobs()
-            ret = self.run_once()
+            ret = self.run_once(changed_plugins)
             self.setup()
         except:
             self.__logger.error(f"Exception while reloading scheduler {format_exc()}")

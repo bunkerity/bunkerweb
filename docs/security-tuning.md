@@ -137,7 +137,14 @@ Besides the HTTPS / SSL/TLS configuration, the following settings related to HTT
 | `AUTO_REDIRECT_HTTP_TO_HTTPS` |       `yes`       | When set to `yes`, will redirect every HTTP request to HTTPS only if BunkerWeb is configured with HTTPS.     |
 |        `SSL_PROTOCOLS`        | `TLSv1.2 TLSv1.3` | List of supported SSL/TLS protocols when SSL is enabled.                                                     |
 |            `HTTP2`            |       `yes`       | When set to `yes`, will enable HTTP2 protocol support when using HTTPS.                                      |
+|            `HTTP3`            |       `yes`       | When set to `yes`, will enable HTTP3 protocol support when using HTTPS.                                      |
+|     `HTTP3_ALT_SVC_PORT`      |       `443`       | HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.                         |
 |         `LISTEN_HTTP`         |       `yes`       | When set to `no`, BunkerWeb will not listen for HTTP requests. Useful if you want HTTPS only for example.    |
+
+!!! example "About HTTP3"
+    HTTP/3 is the next version of the HTTP protocol. It is based on Google's QUIC protocol which is a transport layer protocol that provides security and reliability features. HTTP/3 is designed to improve the performance of websites and web applications.
+
+    **Remember that NGINX's support for HTTP/3 is still experimental and may not be suitable for all use cases.**
 
 ### Let's Encrypt
 
@@ -602,7 +609,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.8/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 

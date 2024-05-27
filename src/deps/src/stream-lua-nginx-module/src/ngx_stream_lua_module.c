@@ -864,12 +864,20 @@ ngx_stream_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_stream_lua_srv_conf_t       *conf = child;
 
 #if (NGX_STREAM_SSL)
+#if defined(nginx_version) && nginx_version >= 1025005
+    ngx_stream_ssl_srv_conf_t       *sscf;
+#else
     ngx_stream_ssl_conf_t           *sscf;
+#endif
 
     dd("merge srv conf");
 
     sscf = ngx_stream_conf_get_module_srv_conf(cf, ngx_stream_ssl_module);
+#if defined(nginx_version) && nginx_version >= 1025005
+    if (sscf && sscf->ssl.ctx) {
+#else
     if (sscf && sscf->listen) {
+#endif
         if (conf->srv.ssl_client_hello_src.len == 0) {
             conf->srv.ssl_client_hello_src = prev->srv.ssl_client_hello_src;
             conf->srv.ssl_client_hello_src_key =

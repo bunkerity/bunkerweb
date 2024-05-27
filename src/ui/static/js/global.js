@@ -557,43 +557,73 @@ class Clipboard {
       } catch (e) {}
       // With Firefox
       try {
-        if (this.isCopy) return;
-        /* write to the clipboard now */
-        const copyEl = document.querySelector(
-          e.target.getAttribute("data-clipboard-target")
-        );
+        if (!this.isCopy) {
+          /* write to the clipboard now */
+          const copyEl = document.querySelector(
+            e.target.getAttribute("data-clipboard-target")
+          );
 
-        copyEl.select();
-        copyEl.setSelectionRange(0, 99999); // For mobile devices
+          copyEl.select();
+          copyEl.setSelectionRange(0, 99999); // For mobile devices
 
-        // Copy the text inside the text field
+          // Copy the text inside the text field
 
-        navigator.clipboard.writeText(copyEl.value);
-        // Stop selecting
-        copyEl.blur();
-        this.isCopy = true;
+          navigator.clipboard.writeText(copyEl.value);
+          // Stop selecting
+          copyEl.blur();
+          this.isCopy = true;
+        }
       } catch (e) {}
       // Default
       try {
-        if (this.isCopy) return;
-        /* write to the clipboard now */
-        const copyEl = document.querySelector(
-          e.target.getAttribute("data-clipboard-target")
-        );
+        if (!this.isCopy) {
+          /* write to the clipboard now */
+          const copyEl = document.querySelector(
+            e.target.getAttribute("data-clipboard-target")
+          );
 
-        copyEl.select();
-        copyEl.setSelectionRange(0, 99999); // For mobile devices
+          copyEl.select();
+          copyEl.setSelectionRange(0, 99999); // For mobile devices
 
-        // Copy the text inside the text field
+          // Copy the text inside the text field
 
-        navigator.clipboard.writeText(copyEl.value);
-        // Stop selecting
-        copyEl.blur();
+          navigator.clipboard.writeText(copyEl.value);
+          // Stop selecting
 
-        document.execCommand("copy");
+          document.execCommand("copy");
+          copyEl.blur();
 
-        this.isCopy = true;
+          this.isCopy = true;
+        }
       } catch (e) {}
+
+      // Show feedback
+      const btn = e.target.closest("[data-clipboard-copy]");
+      const feedbackEl = document.createElement("div");
+      feedbackEl.classList.add(
+        "absolute",
+        "top-0",
+        "right-0",
+        "p-1",
+        "text-white",
+        "text-xs",
+        "rounded",
+        "opacity-0",
+        "transition-opacity",
+        "duration-300",
+        this.isCopy ? "bg-green-500" : "bg-red-500"
+      );
+      feedbackEl.textContent = this.isCopy ? "Copied!" : "Error!";
+      btn.appendChild(feedbackEl);
+      setTimeout(() => {
+        feedbackEl.classList.remove("opacity-0");
+      }, 50);
+      setTimeout(() => {
+        feedbackEl.classList.add("opacity-0");
+      }, 1200);
+      setTimeout(() => {
+        feedbackEl.remove();
+      }, 1550);
     });
   }
 }

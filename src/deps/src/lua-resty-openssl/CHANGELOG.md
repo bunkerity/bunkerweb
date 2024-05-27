@@ -2,12 +2,22 @@
 ## [Unreleased]
 
 
+<a name="1.4.0"></a>
+## [1.4.0] - 2024-05-27
+### bug fixes
+- **ec:** add missing cdef for EC_POINT_free [2093e88](https://github.com/fffonion/lua-resty-openssl/commit/2093e8814ccfbe830ba594a71f05870cac208e9c)
+
+### features
+- **pkey:** allow pkey.new to compose from parameters [91a30f6](https://github.com/fffonion/lua-resty-openssl/commit/91a30f6988e3fc696363ce1445b49a3f6ee8f35e)
+- **pkey:** add pkey:verify_raw [0016308](https://github.com/fffonion/lua-resty-openssl/commit/0016308c9e3a2ccfdfe674ede64e462060f7b13b)
+
+
 <a name="1.3.1"></a>
 ## [1.3.1] - 2024-04-22
 ### bug fixes
 - **aux/jwk:** remove ecx.d if exporting as public key [9d34ff8](https://github.com/fffonion/lua-resty-openssl/commit/9d34ff8fd79debbcf155f74af0b161083b6a8385)
-- **aux/nginx:** fix the typo of get_socket_ssl in the stream module [0aa315e](https://github.com/fffonion/lua-resty-openssl/commit/0aa315efe3d98d38d8d77dedf687958b62d8b184)
-- **aux/nginx:** remove extra sanity test that prevent usage of lua-kong-nginx-module [7bd2d0a](https://github.com/fffonion/lua-resty-openssl/commit/7bd2d0aabe82219071fe9fd1b30e49ff88bd5472)
+- **aux/nginx:** fix the typo of get_socket_ssl in the stream module [ad18b3c](https://github.com/fffonion/lua-resty-openssl/commit/ad18b3c18c7ec3db175aabfbf6928141c3b53b17)
+- **aux/nginx:** remove extra sanity test that prevent usage of lua-kong-nginx-module [2323526](https://github.com/fffonion/lua-resty-openssl/commit/2323526766b131bde94052449c41a331e93288bd)
 
 
 <a name="1.3.0"></a>
@@ -591,7 +601,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.1...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.4.0...HEAD
+[1.4.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.1...1.4.0
 [1.3.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.2.0...1.2.1

@@ -433,6 +433,8 @@ Miscellaneous settings.
 |`ROOT_FOLDER`                      |                       |multisite|no      |Root folder containing files to serve (/var/www/html/{server_name} if unset).                                                |
 |`SSL_PROTOCOLS`                    |`TLSv1.2 TLSv1.3`      |multisite|no      |The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.                      |
 |`HTTP2`                            |`yes`                  |multisite|no      |Support HTTP2 protocol when HTTPS is enabled.                                                                                |
+|`HTTP3`                            |`no`                   |multisite|no      |Support HTTP3 protocol when HTTPS is enabled.                                                                                |
+|`HTTP3_ALT_SVC_PORT`               |`443`                  |multisite|no      |HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.                                         |
 |`LISTEN_HTTP`                      |`yes`                  |multisite|no      |Respond to (insecure) HTTP requests.                                                                                         |
 |`USE_OPEN_FILE_CACHE`              |`no`                   |multisite|no      |Enable open file cache feature                                                                                               |
 |`OPEN_FILE_CACHE`                  |`max=1000 inactive=20s`|multisite|no      |Open file cache directive                                                                                                    |

@@ -89,6 +89,10 @@ signal(SIGTERM, handle_stop)
 def handle_reload(signum, frame):
     try:
         if SCHEDULER is not None and RUN:
+            if SCHEDULER.db.readonly:
+                logger.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
+                return
+
             # run the config saver
             proc = subprocess_run(
                 [
@@ -396,32 +400,35 @@ if __name__ == "__main__":
             or SCHEDULER.db.is_initialized()
             and SCHEDULER.db.get_config() != dotenv_env
         ):
-            # run the config saver
-            proc = subprocess_run(
-                [
-                    "python3",
-                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                    "--settings",
-                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                ]
-                + (["--variables", str(tmp_variables_path)] if args.variables else []),
-                stdin=DEVNULL,
-                stderr=STDOUT,
-                check=False,
-            )
-            if proc.returncode != 0:
-                logger.error("Config saver failed, configuration will not work as expected...")
+            if SCHEDULER.db.readonly:
+                logger.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
+            else:
+                # run the config saver
+                proc = subprocess_run(
+                    [
+                        "python3",
+                        join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                        "--settings",
+                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    ]
+                    + (["--variables", str(tmp_variables_path)] if args.variables else []),
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                    check=False,
+                )
+                if proc.returncode != 0:
+                    logger.error("Config saver failed, configuration will not work as expected...")
 
-            if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf"):
-                while not SCHEDULER.db.is_initialized():
-                    logger.warning("Database is not initialized, retrying in 5s ...")
-                    sleep(5)
+                if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf"):
+                    while not SCHEDULER.db.is_initialized():
+                        logger.warning("Database is not initialized, retrying in 5s ...")
+                        sleep(5)
 
-                env = SCHEDULER.db.get_config()
-                while not SCHEDULER.db.is_first_config_saved() or not env:
-                    logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
-                    sleep(5)
                     env = SCHEDULER.db.get_config()
+                    while not SCHEDULER.db.is_first_config_saved() or not env:
+                        logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
+                        sleep(5)
+                        env = SCHEDULER.db.get_config()
 
         env = SCHEDULER.db.get_config()
 
@@ -580,23 +587,26 @@ if __name__ == "__main__":
             for thread in threads:
                 thread.join()
 
-            # run the config saver to save potential ignored external plugins settings
-            logger.info("Running config saver to save potential ignored external plugins settings ...")
-            proc = subprocess_run(
-                [
-                    "python3",
-                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                    "--settings",
-                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                ],
-                stdin=DEVNULL,
-                stderr=STDOUT,
-                check=False,
-            )
-            if proc.returncode != 0:
-                logger.error(
-                    "Config saver failed, configuration will not work as expected...",
+            if SCHEDULER.db.readonly:
+                logger.warning("The database is read-only, no need to look for changes in the plugins settings as they will not be saved")
+            else:
+                # run the config saver to save potential ignored external plugins settings
+                logger.info("Running config saver to save potential ignored external plugins settings ...")
+                proc = subprocess_run(
+                    [
+                        "python3",
+                        join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                        "--settings",
+                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    ],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                    check=False,
                 )
+                if proc.returncode != 0:
+                    logger.error(
+                        "Config saver failed, configuration will not work as expected...",
+                    )
 
             SCHEDULER.update_jobs()
             env = SCHEDULER.db.get_config()
@@ -648,12 +658,14 @@ if __name__ == "__main__":
         if INTEGRATION == "Docker" and not override_instances:
             Thread(target=listen_for_instances_reload, name="listen_for_instances_reload").start()
 
+        changed_plugins = []
+
         while True:
             threads.clear()
 
             if RUN_JOBS_ONCE:
                 # Only run jobs once
-                if not SCHEDULER.reload(env | environ):
+                if not SCHEDULER.reload(env | environ, changed_plugins=changed_plugins):
                     logger.error("At least one job in run_once() failed")
                 else:
                     logger.info("All jobs in run_once() were successful")
@@ -666,22 +678,20 @@ if __name__ == "__main__":
                     content += f"{k}={v}\n"
                 SCHEDULER_TMP_ENV_PATH.write_text(content)
                 # run the generator
-                args = [
-                    "python3",
-                    join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
-                    "--settings",
-                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                    "--templates",
-                    join(sep, "usr", "share", "bunkerweb", "confs"),
-                    "--output",
-                    join(sep, "etc", "nginx"),
-                    "--variables",
-                    str(SCHEDULER_TMP_ENV_PATH),
-                ]
-                if MASTER_MODE:
-                    args.append("--no-linux-reload")
                 proc = subprocess_run(
-                    args,
+                    [
+                        "python3",
+                        join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
+                        "--settings",
+                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                        "--templates",
+                        join(sep, "usr", "share", "bunkerweb", "confs"),
+                        "--output",
+                        join(sep, "etc", "nginx"),
+                        "--variables",
+                        str(SCHEDULER_TMP_ENV_PATH),
+                    ]
+                    + (["--no-linux-reload"] if MASTER_MODE else []),
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -740,6 +750,9 @@ if __name__ == "__main__":
                 ret = SCHEDULER.db.checked_changes(CHANGES)
                 if ret:
                     logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+                ret = SCHEDULER.db.checked_plugins_changes(changed_plugins)
+                if ret:
+                    logger.error(f"An error occurred when setting the plugins changes to checked in the database : {ret}")
             except BaseException as e:
                 logger.error(f"Error while setting changes to checked in the database: {e}")
 
@@ -750,6 +763,7 @@ if __name__ == "__main__":
             PLUGINS_NEED_GENERATION = False
             PRO_PLUGINS_NEED_GENERATION = False
             INSTANCES_NEED_GENERATION = False
+            changed_plugins.clear()
 
             if scheduler_first_start:
                 try:
@@ -810,11 +824,12 @@ if __name__ == "__main__":
                         NEED_RELOAD = True
 
                     # check if the config have changed since last time
-                    if changes["config_changed"]:
-                        logger.info("Config changed, generating ...")
+                    if changes["plugins_config_changed"]:
+                        logger.info("Plugins config changed, generating ...")
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
+                        changed_plugins = changes["plugins_config_changed"]
 
                     # check if the instances have changed since last time
                     if changes["instances_changed"]:
