@@ -20,6 +20,13 @@
     executable: pip3
     version: "7.1.0"
 
+- name: Install requests for py3
+  pip:
+    name: requests
+    state: forcereinstall
+    executable: pip3
+    version: "2.31.0"
+
 - name: Add IP address of all hosts to all hosts
   lineinfile:
     dest: /etc/hosts
