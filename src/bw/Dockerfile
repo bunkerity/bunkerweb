@@ -1,4 +1,4 @@
-FROM nginx:1.24.0-alpine-slim@sha256:927eec798eb41b53f9e446aef26482ce4ade9008645ff13608c682cfe66b9503 AS builder
+FROM nginx:1.26.0-alpine-slim@sha256:be13c98f606eef87521627d5c794a98ac1e5a8fcb085e75acdc0c9d66a28666c AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
@@ -22,8 +22,8 @@ COPY src/common/gen/requirements.txt deps/requirements-gen.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-	pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-	pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements-gen.txt
+	pip install --break-system-packages --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+	pip install --break-system-packages --no-cache-dir --require-hashes --target deps/python -r deps/requirements-gen.txt
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
@@ -42,7 +42,7 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-FROM nginx:1.24.0-alpine-slim@sha256:927eec798eb41b53f9e446aef26482ce4ade9008645ff13608c682cfe66b9503
+FROM nginx:1.26.0-alpine-slim@sha256:be13c98f606eef87521627d5c794a98ac1e5a8fcb085e75acdc0c9d66a28666c
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -68,7 +68,7 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
-RUN apk add --no-cache "busybox>=1.35.0-r30" "busybox-binsh>=1.35.0-r30" "ssl_client>=1.35.0-r30" # CVE-2023-42366
+RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42366
 
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
 LABEL version "1.5.8"
@@ -76,7 +76,7 @@ LABEL url "https://www.bunkerweb.io"
 LABEL bunkerweb.type "bunkerweb"
 LABEL bunkerweb.INSTANCE "bunkerweb"
 
-EXPOSE 8080/tcp 8443/tcp
+EXPOSE 8080/tcp 8443/tcp 8443/udp
 
 USER nginx:nginx
 

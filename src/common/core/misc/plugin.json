@@ -95,6 +95,24 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "HTTP3": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Support HTTP3 protocol when HTTPS is enabled.",
+      "id": "http3",
+      "label": "HTTP3",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "HTTP3_ALT_SVC_PORT": {
+      "context": "multisite",
+      "default": "443",
+      "help": "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.",
+      "id": "http3-alt-svc-port",
+      "label": "HTTP3 Alt-Svc port",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
     "LISTEN_HTTP": {
       "context": "multisite",
       "default": "yes",

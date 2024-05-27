@@ -220,6 +220,7 @@ class Database:
 
     def test_write(self):
         """Test the write access to the database"""
+        self.logger.debug("Testing write access to the database ...")
         with self.__db_session() as session:
             table_name = uuid4().hex
             session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
@@ -228,6 +229,8 @@ class Database:
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
         """Retry the connection to the database"""
+
+        self.logger.debug(f"Retrying the connection to the database {'in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
 
         assert self.sql_engine is not None
 

@@ -100,6 +100,10 @@ signal(SIGTERM, handle_stop)
 def handle_reload(signum, frame):
     try:
         if SCHEDULER is not None and RUN:
+            if SCHEDULER.db.readonly:
+                LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
+                return
+
             # run the config saver
             proc = subprocess_run(
                 [
@@ -468,21 +472,24 @@ if __name__ == "__main__":
             or not nginx_variables_path.exists()
             or (tmp_variables_path.read_text(encoding="utf-8") != nginx_variables_path.read_text(encoding="utf-8"))
         ):
-            # run the config saver
-            proc = subprocess_run(
-                [
-                    "python3",
-                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                    "--settings",
-                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                ]
-                + (["--variables", str(tmp_variables_path)] if args.variables else []),
-                stdin=DEVNULL,
-                stderr=STDOUT,
-                check=False,
-            )
-            if proc.returncode != 0:
-                LOGGER.error("Config saver failed, configuration will not work as expected...")
+            if SCHEDULER.db.readonly:
+                LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
+            else:
+                # run the config saver
+                proc = subprocess_run(
+                    [
+                        "python3",
+                        join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                        "--settings",
+                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    ]
+                    + (["--variables", str(tmp_variables_path)] if args.variables else []),
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                    check=False,
+                )
+                if proc.returncode != 0:
+                    LOGGER.error("Config saver failed, configuration will not work as expected...")
 
         ready = False
         while not ready:
@@ -637,21 +644,24 @@ if __name__ == "__main__":
             for thread in threads:
                 thread.join()
 
-            # run the config saver to save potential ignored external plugins settings
-            LOGGER.info("Running config saver to save potential ignored external plugins settings ...")
-            proc = subprocess_run(
-                [
-                    "python3",
-                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                    "--settings",
-                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                ],
-                stdin=DEVNULL,
-                stderr=STDOUT,
-                check=False,
-            )
-            if proc.returncode != 0:
-                LOGGER.error("Config saver failed, configuration will not work as expected...")
+            if SCHEDULER.db.readonly:
+                LOGGER.warning("The database is read-only, no need to look for changes in the plugins settings as they will not be saved")
+            else:
+                # run the config saver to save potential ignored external plugins settings
+                LOGGER.info("Running config saver to save potential ignored external plugins settings ...")
+                proc = subprocess_run(
+                    [
+                        "python3",
+                        join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                        "--settings",
+                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    ],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                    check=False,
+                )
+                if proc.returncode != 0:
+                    LOGGER.error("Config saver failed, configuration will not work as expected...")
 
             SCHEDULER.update_jobs()
             env = SCHEDULER.db.get_config()
@@ -696,21 +706,23 @@ if __name__ == "__main__":
                     content += f"{k}={v}\n"
                 SCHEDULER_TMP_ENV_PATH.write_text(content)
                 # run the generator
-                args = [
-                    "python3",
-                    join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
-                    "--settings",
-                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                    "--templates",
-                    join(sep, "usr", "share", "bunkerweb", "confs"),
-                    "--output",
-                    join(sep, "etc", "nginx"),
-                    "--variables",
-                    str(SCHEDULER_TMP_ENV_PATH),
-                ]
-                if MASTER_MODE:
-                    args.append("--no-linux-reload")
-                proc = subprocess_run(args, stdin=DEVNULL, stderr=STDOUT, check=False)
+                proc = subprocess_run(
+                    [
+                        "python3",
+                        join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
+                        "--settings",
+                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                        "--templates",
+                        join(sep, "usr", "share", "bunkerweb", "confs"),
+                        "--output",
+                        join(sep, "etc", "nginx"),
+                        "--variables",
+                        str(SCHEDULER_TMP_ENV_PATH),
+                    ],
+                    stdin=DEVNULL,
+                    stderr=STDOUT,
+                    check=False,
+                )
 
                 if proc.returncode != 0:
                     LOGGER.error("Config generator failed, configuration will not work as expected...")
@@ -739,7 +751,7 @@ if __name__ == "__main__":
                         LOGGER.info("Successfully reloaded nginx")
                     else:
                         LOGGER.error("Error while reloading nginx")
-                elif INTEGRATION == "Linux":
+                elif INTEGRATION == "Linux" and not MASTER_MODE:
                     # Reload nginx
                     LOGGER.info("Reloading nginx ...")
                     proc = subprocess_run(

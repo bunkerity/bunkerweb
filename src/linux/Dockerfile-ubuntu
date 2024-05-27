@@ -1,7 +1,7 @@
 FROM ubuntu:22.04@sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da as builder
 
 ENV OS=ubuntu
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.0
 
 # Install Nginx and dependencies
 RUN apt update && \

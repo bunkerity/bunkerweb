@@ -320,7 +320,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Red Hat Enterprise Linux (RHEL) 8.9
 - Red Hat Enterprise Linux (RHEL) 9.4
 
-Please ensure that you have **NGINX 1.24.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.26.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 To simplify the installation process, Linux package repositories for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb). They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer.
 
@@ -337,11 +337,11 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.24.0 :
+    You should now be able to install NGINX 1.26.0 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
+    sudo apt install -y nginx=1.26.0-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -373,11 +373,6 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
 
 === "Ubuntu"
 
-    !!! example "Specifications for Ubuntu 24.04"
-        As of Ubuntu 24.04, the `nginx` package is not available in the official repository. You will need to use the `jammy` repository to install NGINX 1.24.0.
-
-        Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.
-
     The first step is to add NGINX official repository :
 
     ```shell
@@ -385,15 +380,15 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
     | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-    http://nginx.org/packages/ubuntu jammy nginx" \
+    http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.24.0 :
+    You should now be able to install NGINX 1.26.0 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.24.0-1~jammy
+    sudo apt install -y nginx=1.26.0-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -425,10 +420,10 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
 
 === "Fedora"
 
-    Fedora already provides NGINX 1.24.0 that we support :
+    Fedora already provides NGINX 1.26.0 that we support :
 
     ```shell
-    sudo dnf install -y nginx-1.24.0
+    sudo dnf install -y nginx-1.26.0
     ```
 
     Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
@@ -476,10 +471,10 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.24.0 :
+    You should now be able to install NGINX 1.26.0 :
 
     ```shell
-    sudo dnf install nginx-1.24.0
+    sudo dnf install nginx-1.26.0
     ```
 
     Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
