@@ -688,7 +688,8 @@ if __name__ == "__main__":
                         join(sep, "etc", "nginx"),
                         "--variables",
                         str(SCHEDULER_TMP_ENV_PATH),
-                    ],
+                    ]
+                    + (["--no-linux-reload"] if MASTER_MODE else []),
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -721,7 +722,7 @@ if __name__ == "__main__":
                         logger.info("Successfully reloaded nginx")
                     else:
                         logger.error("Error while reloading nginx")
-                elif INTEGRATION == "Linux" and not MASTER_MODE:
+                elif INTEGRATION == "Linux":
                     # Reload nginx
                     logger.info("Reloading nginx ...")
                     proc = subprocess_run(
