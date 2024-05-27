@@ -33,8 +33,6 @@
   community.docker.docker_swarm:
     advertise_addr: "{{ local_ip }}"
     listen_addr: "{{ local_ip }}"
-    ssl_version: "1.3"
-    validate_certs: yes
     state: present
   register: result
   when: inventory_hostname == groups['managers'][0]
@@ -64,8 +62,6 @@
   community.docker.docker_swarm:
     advertise_addr: "{{ local_ip }}"
     listen_addr: "{{ local_ip }}"
-    ssl_version: 1.3
-    validate_certs: yes
     state: join
     join_token: "{{ join_token_worker }}"
     remote_addrs: ["{{ hostvars[groups['managers'][0]].local_ip }}:2377"]
