@@ -658,12 +658,14 @@ if __name__ == "__main__":
         if INTEGRATION == "Docker" and not override_instances:
             Thread(target=listen_for_instances_reload, name="listen_for_instances_reload").start()
 
+        changed_plugins = []
+
         while True:
             threads.clear()
 
             if RUN_JOBS_ONCE:
                 # Only run jobs once
-                if not SCHEDULER.reload(env | environ):
+                if not SCHEDULER.reload(env | environ, changed_plugins=changed_plugins):
                     logger.error("At least one job in run_once() failed")
                 else:
                     logger.info("All jobs in run_once() were successful")
@@ -748,6 +750,9 @@ if __name__ == "__main__":
                 ret = SCHEDULER.db.checked_changes(CHANGES)
                 if ret:
                     logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+                ret = SCHEDULER.db.checked_plugins_changes(changed_plugins)
+                if ret:
+                    logger.error(f"An error occurred when setting the plugins changes to checked in the database : {ret}")
             except BaseException as e:
                 logger.error(f"Error while setting changes to checked in the database: {e}")
 
@@ -758,6 +763,7 @@ if __name__ == "__main__":
             PLUGINS_NEED_GENERATION = False
             PRO_PLUGINS_NEED_GENERATION = False
             INSTANCES_NEED_GENERATION = False
+            changed_plugins.clear()
 
             if scheduler_first_start:
                 try:
@@ -818,11 +824,12 @@ if __name__ == "__main__":
                         NEED_RELOAD = True
 
                     # check if the config have changed since last time
-                    if changes["config_changed"]:
-                        logger.info("Config changed, generating ...")
+                    if changes["plugins_config_changed"]:
+                        logger.info("Plugins config changed, generating ...")
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
+                        changed_plugins = changes["plugins_config_changed"]
 
                     # check if the instances have changed since last time
                     if changes["instances_changed"]:

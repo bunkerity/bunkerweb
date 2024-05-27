@@ -125,7 +125,8 @@ else
     } ngx_connection_s;
     ]]
   else
-    error("resty.openssl.auxiliary.nginx doesn't support Nginx version " .. ngx_version, 2)
+    error("resty.openssl.auxiliary.nginx development mode doesn't support Nginx version " .. ngx_version ..
+          ", please compile nginx with lua-resty-openssl-aux-module or lua-kong-nginx-module.", 2)
   end
 
   ffi.cdef [[
@@ -167,7 +168,8 @@ else
   local NO_C_MODULE_WARNING_MSG_SHOWN = false
   local NO_C_MODULE_WARNING_MSG = "note resty.openssl.auxiliary.nginx is using plain FFI " ..
                                   "and it's only intended to be used in development, " ..
-                                  "consider using lua-resty-openssl.aux-module in production."
+                                  "consider using lua-resty-openssl-aux-module or " .. 
+                                  "lua-kong-nginx-module in production."
 
   local function get_ngx_ssl_from_req()
     if not NO_C_MODULE_WARNING_MSG_SHOWN then

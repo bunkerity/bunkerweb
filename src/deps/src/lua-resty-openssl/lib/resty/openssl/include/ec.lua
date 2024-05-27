@@ -34,6 +34,7 @@ ffi.cdef [[
     BIGNUM *x, BIGNUM *y, BN_CTX *ctx);
   EC_POINT *EC_POINT_bn2point(const EC_GROUP *group, const BIGNUM *bn,
     EC_POINT *p, BN_CTX *ctx);
+  void EC_POINT_free(EC_POINT *point);
 
   point_conversion_form_t EC_KEY_get_conv_form(const EC_KEY *key);
 

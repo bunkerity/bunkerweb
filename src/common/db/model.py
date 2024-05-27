@@ -58,6 +58,7 @@ class Plugins(Base):
     method = Column(METHODS_ENUM, default="manual", nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     checksum = Column(String(128), nullable=True)
+    config_changed = Column(Boolean, default=False, nullable=True)
 
     settings = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
     jobs = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
@@ -243,7 +244,6 @@ class Metadata(Base):
     custom_configs_changed = Column(Boolean, default=False, nullable=True)
     external_plugins_changed = Column(Boolean, default=False, nullable=True)
     pro_plugins_changed = Column(Boolean, default=False, nullable=True)
-    config_changed = Column(Boolean, default=False, nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
     version = Column(String(32), default="1.5.8", nullable=False)
