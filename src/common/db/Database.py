@@ -10,7 +10,7 @@ from os.path import join
 from pathlib import Path
 from re import compile as re_compile
 from sys import argv, path as sys_path
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 from time import sleep
 from uuid import uuid4
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -512,9 +512,12 @@ class Database:
             except BaseException as e:
                 return str(e)
 
-    def checked_changes(self, changes: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
+    def checked_changes(
+        self, changes: Optional[List[str]] = None, plugins_changes: Optional[Union[Set[str], List[str], Tuple[str]]] = None, value: Optional[bool] = False
+    ) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
         changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"]
+        plugins_changes = plugins_changes or set()
         with self.__db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -536,25 +539,10 @@ class Database:
                     metadata.pro_plugins_changed = value
                 if "instances" in changes:
                     metadata.instances_changed = value
-                session.commit()
-            except BaseException as e:
-                return str(e)
 
-        return ""
+                if plugins_changes:
+                    session.query(Plugins).filter(Plugins.id.in_(plugins_changes)).update({Plugins.config_changed: value})
 
-    def checked_plugins_changes(self, plugins: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
-        """Set changed bit for plugins"""
-        with self.__db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
-
-            plugins = plugins or []
-
-            try:
-                query = session.query(Plugins)
-                if plugins:
-                    query = query.filter(Plugins.id.in_(plugins))
-                query.update({Plugins.config_changed: value})
                 session.commit()
             except BaseException as e:
                 return str(e)
@@ -1130,7 +1118,7 @@ class Database:
 
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> str:
+    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> Union[str, Set[str]]:
         """Save the config in the database"""
         to_put = []
         with self.__db_session() as session:
@@ -1331,6 +1319,9 @@ class Database:
                                 continue
                             query.update({Global_values.value: value})
 
+            if changed_services:
+                changed_plugins = set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all())
+
             if changed:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
@@ -1338,9 +1329,7 @@ class Database:
                         if not metadata.first_config_saved:
                             metadata.first_config_saved = True
 
-                    if changed_services:
-                        session.query(Plugins).update({Plugins.config_changed: True})
-                    elif changed_plugins:
+                    if changed_plugins:
                         session.query(Plugins).filter(Plugins.id.in_(changed_plugins)).update({Plugins.config_changed: True})
 
             try:
@@ -1349,7 +1338,7 @@ class Database:
             except BaseException as e:
                 return str(e)
 
-        return ""
+        return changed_plugins
 
     def save_custom_configs(
         self,

@@ -140,6 +140,15 @@ class Config(ConfigCaller):
             if err:
                 self.__logger.error(f"Failed to update instances: {err}")
 
+        # save config to database
+        changed_plugins = []
+        if "config" in changes:
+            err = self._db.save_config(self.__config, "autoconf", changed=False)
+            if isinstance(err, str):
+                success = False
+                self.__logger.error(f"Can't save config in database: {err}, config may not work as expected")
+            changed_plugins = err
+
         # save custom configs to database
         if "custom_configs" in changes:
             err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False)
@@ -147,16 +156,9 @@ class Config(ConfigCaller):
                 success = False
                 self.__logger.error(f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected")
 
-        # save config to database
-        if "config" in changes:
-            err = self._db.save_config(self.__config, "autoconf")
-            if err:
-                success = False
-                self.__logger.error(f"Can't save config in database: {err}, config may not work as expected")
-        else:
-            # update changes in db
-            ret = self._db.checked_changes(changes, value=True)
-            if ret:
-                self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+        # update changes in db
+        ret = self._db.checked_changes(changes, plugins_changes=changed_plugins, value=True)
+        if ret:
+            self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
 
         return success
