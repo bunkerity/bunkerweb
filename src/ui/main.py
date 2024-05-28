@@ -407,8 +407,6 @@ def set_csp_header(response):
         + " base-uri 'self';"
         + (" connect-src *;" if request.path.startswith(("/check", "/setup")) else "")
     )
-    if app.config["DB"].readonly:
-        flash("Database connection is in read-only mode : no modification possible.", "error")
 
     return response
 
@@ -457,8 +455,7 @@ def before_request():
                         with suppress(BaseException):
                             app.config["DB"].retry_connection(fallback=True, pool_timeout=1)
                 app.config["DB"].readonly = True
-
-        if not app.config["DB"].readonly and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
+        elif not app.config["DB"].readonly and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
                 app.config["DB"].test_write()
             except BaseException:
@@ -480,6 +477,9 @@ def before_request():
             if not passed:
                 logout_user()
                 session.clear()
+
+        if app.config["DB"].readonly:
+            flash("Database connection is in read-only mode : no modification possible.", "error")
 
 
 @app.route("/", strict_slashes=False)

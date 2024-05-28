@@ -75,7 +75,6 @@ class Database:
         """Initialize the database"""
         self.logger = logger
         self.readonly = False
-        self.last_fallback = None
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -180,7 +179,6 @@ class Database:
                         self.sql_engine.dispose(close=True)
                         self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
                         self.readonly = True
-                        self.last_fallback = datetime.now()
                         fallback = True
                         continue
                     self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
@@ -192,7 +190,6 @@ class Database:
                     self.sql_engine.dispose(close=True)
                     self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
                     self.readonly = True
-                    self.last_fallback = datetime.now()
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
@@ -254,21 +251,6 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        if self.database_uri and self.readonly and self.last_fallback and (datetime.now() - self.last_fallback).total_seconds() > 30:
-            # ? If the database is forced to be read-only, we try to connect as a non read-only user every time until the database is writable
-            try:
-                self.retry_connection(pool_timeout=1)
-                self.readonly = False
-                self.logger.info("The database is no longer read-only, defaulting to read-write mode")
-            except (OperationalError, DatabaseError):
-                try:
-                    self.retry_connection(readonly=True, pool_timeout=1)
-                except (OperationalError, DatabaseError):
-                    if self.database_uri_readonly:
-                        with suppress(OperationalError, DatabaseError):
-                            self.retry_connection(fallback=True, pool_timeout=1)
-                self.readonly = True
-
         session = None
         try:
             with self.sql_engine.connect() as conn:
@@ -289,13 +271,11 @@ class Database:
                         with suppress(OperationalError, DatabaseError):
                             self.retry_connection(fallback=True, pool_timeout=1)
                 self.readonly = True
-                self.last_fallback = datetime.now()
             elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
                 self.logger.warning("Can't connect to the database, falling back to read-only one ...")
                 with suppress(OperationalError, DatabaseError):
                     self.retry_connection(fallback=True, pool_timeout=1)
                     self.readonly = True
-                    self.last_fallback = datetime.now()
             raise
         finally:
             if session:
@@ -513,7 +493,10 @@ class Database:
                 return str(e)
 
     def checked_changes(
-        self, changes: Optional[List[str]] = None, plugins_changes: Optional[Union[Set[str], List[str], Tuple[str]]] = None, value: Optional[bool] = False
+        self,
+        changes: Optional[List[str]] = None,
+        plugins_changes: Optional[Union[Literal["all"], Set[str], List[str], Tuple[str]]] = None,
+        value: Optional[bool] = False,
     ) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
         changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"]
@@ -541,7 +524,10 @@ class Database:
                     metadata.instances_changed = value
 
                 if plugins_changes:
-                    session.query(Plugins).filter(Plugins.id.in_(plugins_changes)).update({Plugins.config_changed: value})
+                    if plugins_changes == "all":
+                        session.query(Plugins).update({Plugins.config_changed: value})
+                    else:
+                        session.query(Plugins).filter(Plugins.id.in_(plugins_changes)).update({Plugins.config_changed: value})
 
                 session.commit()
             except BaseException as e:
