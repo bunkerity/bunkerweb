@@ -389,7 +389,7 @@ def inject_variables():
         plugins=app.config["CONFIG"].get_plugins(),
         pro_loading=ui_data.get("PRO_LOADING", False),
         bw_version=metadata["version"],
-        is_readonly=app.config["DB"].readonly,
+        is_readonly=ui_data.get("READONLY_MODE", False),
     )
 
 
@@ -442,11 +442,20 @@ def before_request():
     app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
 
     if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
-        if app.config["DB"].database_uri and app.config["DB"].readonly:
+        ui_data = get_ui_data()
+
+        if (
+            app.config["DB"].database_uri
+            and app.config["DB"].readonly
+            and (
+                datetime.now(timezone.utc) - datetime.fromisoformat(ui_data.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).replace(tzinfo=timezone.utc)
+                > timedelta(minutes=1)
+            )
+        ):
             try:
                 app.config["DB"].retry_connection(pool_timeout=1)
                 app.config["DB"].retry_connection(log=False)
-                app.config["DB"].readonly = False
+                ui_data["READONLY_MODE"] = False
                 app.logger.info("The database is no longer read-only, defaulting to read-write mode")
             except BaseException:
                 try:
@@ -457,12 +466,22 @@ def before_request():
                         with suppress(BaseException):
                             app.config["DB"].retry_connection(fallback=True, pool_timeout=1)
                             app.config["DB"].retry_connection(fallback=True, log=False)
-                app.config["DB"].readonly = True
-        elif not app.config["DB"].readonly and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
+                ui_data["READONLY_MODE"] = True
+            ui_data["LAST_DATABASE_RETRY"] = app.config["DB"].last_connection_retry.isoformat()
+        elif not ui_data.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
                 app.config["DB"].test_write()
+                ui_data["READONLY_MODE"] = False
             except BaseException:
-                app.config["DB"].readonly = True
+                ui_data["READONLY_MODE"] = True
+                ui_data["LAST_DATABASE_RETRY"] = app.config["DB"].last_connection_retry.isoformat()
+
+        app.config["DB"].readonly = ui_data.get("READONLY_MODE", False)
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+        if app.config["DB"].readonly:
+            flash("Database connection is in read-only mode : no modification possible.", "error")
 
         if current_user.is_authenticated:
             passed = True
@@ -478,11 +497,7 @@ def before_request():
                 passed = False
 
             if not passed:
-                logout_user()
-                session.clear()
-
-        if app.config["DB"].readonly:
-            flash("Database connection is in read-only mode : no modification possible.", "error")
+                return logout()
 
 
 @app.route("/", strict_slashes=False)
@@ -887,7 +902,7 @@ def instances():
         )
 
     # Display instances
-    config = app.config["CONFIG"].get_config()
+    config = app.config["CONFIG"].get_config(global_only=True)
     override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
     return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id())
@@ -938,21 +953,21 @@ def services():
                 custom_configs.append(variable)
                 del variables[variable]
 
-        # config variable format is custom_config_<type>_<filename>
+        # custom_config variable format is custom_config_<type>_<filename>
         # we want a list of dict with each dict containing type, filename, action and server name
         # after getting all configs, we want to save them after the end of current service action
         # to avoid create config for none existing service or in case editing server name
         format_configs = []
-        for config in custom_configs:
+        for custom_config in custom_configs:
             # first remove custom_config_ prefix
-            config = config.split("custom_config_")[1]
+            custom_config = custom_config.split("custom_config_")[1]
             # then split the config into type, filename, action
-            config = config.split("_")
+            custom_config = custom_config.split("_")
             # check if the config is valid
-            if len(config) == 2 and config[0] in config_types:
-                format_configs.append({"type": config[0], "filename": config[1], "action": operation, "server_name": server_name})
+            if len(custom_config) == 2 and custom_config[0] in config_types:
+                format_configs.append({"type": custom_config[0], "filename": custom_config[1], "action": operation, "server_name": server_name})
             else:
-                return redirect_flash_error("Invalid custom config {config}", "services", True)
+                return redirect_flash_error(f"Invalid custom config {custom_config}", "services", True)
 
         if request.form["operation"] in ("new", "edit"):
             del variables["operation"]
@@ -1108,7 +1123,7 @@ def global_config():
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
+        config = app.config["CONFIG"].get_config(global_only=True, methods=True, with_drafts=True)
         services = config["SERVER_NAME"]["value"].split(" ")
         for variable, value in variables.copy().items():
             if variable in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "SERVER_NAME", "IS_LOADING", "IS_DRAFT") or variable.endswith("SCHEMA"):
@@ -1172,13 +1187,8 @@ def global_config():
             )
         )
 
-    global_config = app.config["CONFIG"].get_config()
-    for service in global_config["SERVER_NAME"]["value"].split(" "):
-        for key in global_config.copy():
-            if key.startswith(f"{service}_"):
-                global_config.pop(key)
-
     # Display global config
+    global_config = app.config["CONFIG"].get_config(global_only=True)
     return render_template("global_config.html", username=current_user.get_id(), global_config=global_config, dumped_global_config=dumps(global_config))
 
 

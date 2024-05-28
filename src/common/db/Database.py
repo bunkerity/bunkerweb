@@ -68,6 +68,7 @@ def set_sqlite_pragma(dbapi_connection, _):
 
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
+    READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
 
     def __init__(
         self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
@@ -75,6 +76,7 @@ class Database:
         """Initialize the database"""
         self.logger = logger
         self.readonly = False
+        self.last_connection_retry = None
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -185,7 +187,7 @@ class Database:
                     self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
                     _exit(1)
 
-                if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
+                if any(error in str(e) for error in self.READONLY_ERROR):
                     if log:
                         self.logger.warning("The database is read-only. Retrying in read-only mode in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
@@ -226,6 +228,7 @@ class Database:
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, log: bool = True, **kwargs) -> None:
         """Retry the connection to the database"""
+        self.last_connection_retry = datetime.now()
 
         if log:
             self.logger.debug(f"Retrying the connection to the database{' in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
@@ -243,9 +246,10 @@ class Database:
                 conn.execute(text("SELECT 1"))
             return
 
+        table_name = uuid4().hex
         with self.sql_engine.connect() as conn:
-            conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
-            conn.execute(text("DROP TABLE test"))
+            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
     @contextmanager
     def __db_session(self) -> Any:
@@ -265,7 +269,7 @@ class Database:
             if session:
                 session.rollback()
 
-            if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
+            if any(error in str(e) for error in self.READONLY_ERROR):
                 self.logger.warning("The database is read-only, retrying in read-only mode ...")
                 try:
                     self.retry_connection(readonly=True, pool_timeout=1)
@@ -1426,7 +1430,7 @@ class Database:
 
         return message
 
-    def get_config(self, methods: bool = False, with_drafts: bool = False) -> Dict[str, Any]:
+    def get_config(self, global_only: bool = False, methods: bool = False, with_drafts: bool = False) -> Dict[str, Any]:
         """Get the config from the database"""
         with self.__db_session() as session:
             config = {}
@@ -1466,7 +1470,7 @@ class Database:
             if not with_drafts:
                 services = services.filter_by(is_draft=False)
 
-            if is_multisite:
+            if not global_only and is_multisite:
                 for service in services:
                     config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
                     if methods:
