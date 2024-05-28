@@ -223,7 +223,7 @@ if __name__ == "__main__":
         # Compute the config
         if not config_files:
             logger.info("Computing config ...")
-            config = Configurator(args.settings, args.core, external_plugins, pro_plugins, str(Path(args.variables)), logger)
+            config = Configurator(args.settings, args.core, external_plugins, pro_plugins, tmp_config, logger)
             config_files = config.get_config()
 
         bunkerweb_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
