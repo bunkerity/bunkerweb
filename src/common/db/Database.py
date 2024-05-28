@@ -129,6 +129,7 @@ class Database:
             "pool_recycle": 1800,
             "pool_size": 40,
             "max_overflow": 20,
+            "pool_timeout": 5,
         } | kwargs
 
         try:
@@ -215,16 +216,19 @@ class Database:
     def test_write(self):
         """Test the write access to the database"""
         self.logger.debug("Testing write access to the database ...")
+        self.retry_connection(pool_timeout=1)
         with self.__db_session() as session:
             table_name = uuid4().hex
             session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
             session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
             session.commit()
+        self.retry_connection()
 
-    def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
+    def retry_connection(self, *, readonly: bool = False, fallback: bool = False, log: bool = True, **kwargs) -> None:
         """Retry the connection to the database"""
 
-        self.logger.debug(f"Retrying the connection to the database {'in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
+        if log:
+            self.logger.debug(f"Retrying the connection to the database{' in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
 
         assert self.sql_engine is not None
 
@@ -265,16 +269,19 @@ class Database:
                 self.logger.warning("The database is read-only, retrying in read-only mode ...")
                 try:
                     self.retry_connection(readonly=True, pool_timeout=1)
+                    self.retry_connection(readonly=True, log=False)
                 except (OperationalError, DatabaseError):
                     if self.database_uri_readonly:
                         self.logger.warning("Can't connect to the database in read-only mode, falling back to read-only one")
                         with suppress(OperationalError, DatabaseError):
                             self.retry_connection(fallback=True, pool_timeout=1)
+                            self.retry_connection(fallback=True, log=False)
                 self.readonly = True
             elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
                 self.logger.warning("Can't connect to the database, falling back to read-only one ...")
                 with suppress(OperationalError, DatabaseError):
                     self.retry_connection(fallback=True, pool_timeout=1)
+                    self.retry_connection(fallback=True, log=False)
                     self.readonly = True
             raise
         finally:

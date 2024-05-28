@@ -445,15 +445,18 @@ def before_request():
         if app.config["DB"].database_uri and app.config["DB"].readonly:
             try:
                 app.config["DB"].retry_connection(pool_timeout=1)
+                app.config["DB"].retry_connection(log=False)
                 app.config["DB"].readonly = False
                 app.logger.info("The database is no longer read-only, defaulting to read-write mode")
             except BaseException:
                 try:
                     app.config["DB"].retry_connection(readonly=True, pool_timeout=1)
+                    app.config["DB"].retry_connection(readonly=True, log=False)
                 except BaseException:
                     if app.config["DB"].database_uri_readonly:
                         with suppress(BaseException):
                             app.config["DB"].retry_connection(fallback=True, pool_timeout=1)
+                            app.config["DB"].retry_connection(fallback=True, log=False)
                 app.config["DB"].readonly = True
         elif not app.config["DB"].readonly and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
