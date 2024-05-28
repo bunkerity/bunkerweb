@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from copy import deepcopy
+from datetime import datetime
 from functools import partial
 from glob import glob
 from json import loads
@@ -363,6 +364,8 @@ class JobScheduler(ApiCaller):
             except BaseException:
                 self.db.readonly = True
                 return True
+        elif self.db.last_connection_retry and (datetime.now() - self.db.last_connection_retry).total_seconds() > 30:
+            return True
 
         if self.db.database_uri and self.db.readonly:
             try:
