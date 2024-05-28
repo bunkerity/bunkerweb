@@ -67,7 +67,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
 
         db_user = db.database_uri.split("://")[1].split(":")[0]
         db_password = db.database_uri.split("://")[1].split(":")[1].rsplit("@", 1)[0]
-        db_database_name = db.database_uri.split("/")[-1]
+        db_database_name = db.database_uri.split("/")[-1].split("?")[0]
 
         if database in ("mariadb", "mysql"):
             LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
@@ -142,7 +142,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
 
         db_user = db.database_uri.split("://")[1].split(":")[0]
         db_password = db.database_uri.split("://")[1].split(":")[1].rsplit("@", 1)[0]
-        db_database_name = db.database_uri.split("/")[-1]
+        db_database_name = db.database_uri.split("/")[-1].split("?")[0]
 
         if database in ("mariadb", "mysql"):
             LOGGER.info("Restoring the MariaDB/MySQL database ...")

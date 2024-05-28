@@ -215,6 +215,12 @@ class Database:
         if self.sql_engine:
             self.sql_engine.dispose()
 
+    def test_read(self):
+        """Test the read access to the database"""
+        self.logger.debug("Testing read access to the database ...")
+        with self.__db_session() as session:
+            session.execute(text("SELECT 1"))
+
     def test_write(self):
         """Test the write access to the database"""
         self.logger.debug("Testing write access to the database ...")
@@ -489,7 +495,7 @@ class Database:
                     external_plugins_changed=metadata is not None and metadata.external_plugins_changed,
                     pro_plugins_changed=metadata is not None and metadata.pro_plugins_changed,
                     instances_changed=metadata is not None and metadata.instances_changed,
-                    plugins_config_changed=self.check_plugin_changes(),
+                    plugins_config_changed=[plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).filter_by(config_changed=True).all()],
                 )
             except BaseException as e:
                 return str(e)
