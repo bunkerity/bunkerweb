@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from os import getenv
 from time import sleep
 from copy import deepcopy
@@ -119,6 +120,10 @@ class Config(ConfigCaller):
                         }
                     )
 
+        err = self.try_database_readonly()
+        if err:
+            return False
+
         while not self._db.is_initialized():
             self.__logger.warning("Database is not initialized, retrying in 5 seconds ...")
             sleep(5)
@@ -162,3 +167,33 @@ class Config(ConfigCaller):
             self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
 
         return success
+
+    def _try_database_readonly(self) -> bool:
+        if not self.db.readonly:
+            try:
+                self.db.test_write()
+            except BaseException:
+                self.db.readonly = True
+                return True
+
+        if self.db.database_uri and self.db.readonly:
+            try:
+                self.db.retry_connection(pool_timeout=1)
+                self.db.retry_connection(log=False)
+                self.db.readonly = False
+                self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
+            except BaseException:
+                try:
+                    self.db.retry_connection(readonly=True, pool_timeout=1)
+                    self.db.retry_connection(readonly=True, log=False)
+                except BaseException:
+                    if self.db.database_uri_readonly:
+                        with suppress(BaseException):
+                            self.db.retry_connection(fallback=True, pool_timeout=1)
+                            self.db.retry_connection(fallback=True, log=False)
+                self.db.readonly = True
+
+            if self.db.readonly:
+                self.__logger.error("Database is in read-only mode, configuration will not be saved")
+
+        return self.db.readonly
