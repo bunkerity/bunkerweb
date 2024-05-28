@@ -475,6 +475,11 @@ def before_request():
             except BaseException:
                 ui_data["READONLY_MODE"] = True
                 ui_data["LAST_DATABASE_RETRY"] = app.config["DB"].last_connection_retry.isoformat()
+        else:
+            try:
+                app.config["DB"].test_read()
+            except BaseException:
+                ui_data["LAST_DATABASE_RETRY"] = app.config["DB"].last_connection_retry.isoformat()
 
         app.config["DB"].readonly = ui_data.get("READONLY_MODE", False)
         with LOCK:

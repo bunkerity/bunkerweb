@@ -215,6 +215,12 @@ class Database:
         if self.sql_engine:
             self.sql_engine.dispose()
 
+    def test_read(self):
+        """Test the read access to the database"""
+        self.logger.debug("Testing read access to the database ...")
+        with self.__db_session() as session:
+            session.execute(text("SELECT 1"))
+
     def test_write(self):
         """Test the write access to the database"""
         self.logger.debug("Testing write access to the database ...")
