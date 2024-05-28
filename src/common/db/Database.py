@@ -132,11 +132,6 @@ class Database:
             "pool_size": 40,
             "max_overflow": 20,
             "pool_timeout": 5,
-            "connect_args": {
-                "connect_timeout": 5,
-                "read_timeout": 5,
-                "write_timeout": 5,
-            },
         } | kwargs
 
         try:
