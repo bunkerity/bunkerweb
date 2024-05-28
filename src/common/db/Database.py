@@ -10,7 +10,7 @@ from os.path import join
 from pathlib import Path
 from re import compile as re_compile
 from sys import argv, path as sys_path
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 from time import sleep
 from uuid import uuid4
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -75,7 +75,6 @@ class Database:
         """Initialize the database"""
         self.logger = logger
         self.readonly = False
-        self.last_fallback = None
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -130,6 +129,7 @@ class Database:
             "pool_recycle": 1800,
             "pool_size": 40,
             "max_overflow": 20,
+            "pool_timeout": 5,
         } | kwargs
 
         try:
@@ -180,7 +180,6 @@ class Database:
                         self.sql_engine.dispose(close=True)
                         self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
                         self.readonly = True
-                        self.last_fallback = datetime.now()
                         fallback = True
                         continue
                     self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
@@ -192,7 +191,6 @@ class Database:
                     self.sql_engine.dispose(close=True)
                     self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
                     self.readonly = True
-                    self.last_fallback = datetime.now()
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
@@ -218,16 +216,19 @@ class Database:
     def test_write(self):
         """Test the write access to the database"""
         self.logger.debug("Testing write access to the database ...")
+        self.retry_connection(pool_timeout=1)
         with self.__db_session() as session:
             table_name = uuid4().hex
             session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
             session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
             session.commit()
+        self.retry_connection()
 
-    def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
+    def retry_connection(self, *, readonly: bool = False, fallback: bool = False, log: bool = True, **kwargs) -> None:
         """Retry the connection to the database"""
 
-        self.logger.debug(f"Retrying the connection to the database {'in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
+        if log:
+            self.logger.debug(f"Retrying the connection to the database{' in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
 
         assert self.sql_engine is not None
 
@@ -254,21 +255,6 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        if self.database_uri and self.readonly and self.last_fallback and (datetime.now() - self.last_fallback).total_seconds() > 30:
-            # ? If the database is forced to be read-only, we try to connect as a non read-only user every time until the database is writable
-            try:
-                self.retry_connection(pool_timeout=1)
-                self.readonly = False
-                self.logger.info("The database is no longer read-only, defaulting to read-write mode")
-            except (OperationalError, DatabaseError):
-                try:
-                    self.retry_connection(readonly=True, pool_timeout=1)
-                except (OperationalError, DatabaseError):
-                    if self.database_uri_readonly:
-                        with suppress(OperationalError, DatabaseError):
-                            self.retry_connection(fallback=True, pool_timeout=1)
-                self.readonly = True
-
         session = None
         try:
             with self.sql_engine.connect() as conn:
@@ -283,19 +269,20 @@ class Database:
                 self.logger.warning("The database is read-only, retrying in read-only mode ...")
                 try:
                     self.retry_connection(readonly=True, pool_timeout=1)
+                    self.retry_connection(readonly=True, log=False)
                 except (OperationalError, DatabaseError):
                     if self.database_uri_readonly:
                         self.logger.warning("Can't connect to the database in read-only mode, falling back to read-only one")
                         with suppress(OperationalError, DatabaseError):
                             self.retry_connection(fallback=True, pool_timeout=1)
+                            self.retry_connection(fallback=True, log=False)
                 self.readonly = True
-                self.last_fallback = datetime.now()
             elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
                 self.logger.warning("Can't connect to the database, falling back to read-only one ...")
                 with suppress(OperationalError, DatabaseError):
                     self.retry_connection(fallback=True, pool_timeout=1)
+                    self.retry_connection(fallback=True, log=False)
                     self.readonly = True
-                    self.last_fallback = datetime.now()
             raise
         finally:
             if session:
@@ -512,9 +499,15 @@ class Database:
             except BaseException as e:
                 return str(e)
 
-    def checked_changes(self, changes: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
+    def checked_changes(
+        self,
+        changes: Optional[List[str]] = None,
+        plugins_changes: Optional[Union[Literal["all"], Set[str], List[str], Tuple[str]]] = None,
+        value: Optional[bool] = False,
+    ) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
         changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"]
+        plugins_changes = plugins_changes or set()
         with self.__db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -536,25 +529,13 @@ class Database:
                     metadata.pro_plugins_changed = value
                 if "instances" in changes:
                     metadata.instances_changed = value
-                session.commit()
-            except BaseException as e:
-                return str(e)
 
-        return ""
+                if plugins_changes:
+                    if plugins_changes == "all":
+                        session.query(Plugins).update({Plugins.config_changed: value})
+                    else:
+                        session.query(Plugins).filter(Plugins.id.in_(plugins_changes)).update({Plugins.config_changed: value})
 
-    def checked_plugins_changes(self, plugins: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
-        """Set changed bit for plugins"""
-        with self.__db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
-
-            plugins = plugins or []
-
-            try:
-                query = session.query(Plugins)
-                if plugins:
-                    query = query.filter(Plugins.id.in_(plugins))
-                query.update({Plugins.config_changed: value})
                 session.commit()
             except BaseException as e:
                 return str(e)
@@ -1130,7 +1111,7 @@ class Database:
 
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> str:
+    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> Union[str, Set[str]]:
         """Save the config in the database"""
         to_put = []
         with self.__db_session() as session:
@@ -1331,6 +1312,9 @@ class Database:
                                 continue
                             query.update({Global_values.value: value})
 
+            if changed_services:
+                changed_plugins = set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all())
+
             if changed:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
@@ -1338,9 +1322,7 @@ class Database:
                         if not metadata.first_config_saved:
                             metadata.first_config_saved = True
 
-                    if changed_services:
-                        session.query(Plugins).update({Plugins.config_changed: True})
-                    elif changed_plugins:
+                    if changed_plugins:
                         session.query(Plugins).filter(Plugins.id.in_(changed_plugins)).update({Plugins.config_changed: True})
 
             try:
@@ -1349,7 +1331,7 @@ class Database:
             except BaseException as e:
                 return str(e)
 
-        return ""
+        return changed_plugins
 
     def save_custom_configs(
         self,

@@ -747,12 +747,9 @@ if __name__ == "__main__":
                 logger.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
             try:
-                ret = SCHEDULER.db.checked_changes(CHANGES)
+                ret = SCHEDULER.db.checked_changes(CHANGES, plugins_changes="all")
                 if ret:
                     logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-                ret = SCHEDULER.db.checked_plugins_changes(changed_plugins)
-                if ret:
-                    logger.error(f"An error occurred when setting the plugins changes to checked in the database : {ret}")
             except BaseException as e:
                 logger.error(f"Error while setting changes to checked in the database: {e}")
 

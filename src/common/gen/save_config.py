@@ -15,6 +15,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from docker import DockerClient
+from kubernetes import client as kube_client
+from kubernetes import config as kube_config
 
 from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -142,6 +144,8 @@ if __name__ == "__main__":
                 logger.error(f"Missing RX rights on directory : {path}")
                 sys_exit(1)
 
+        tmp_config = {}
+
         if args.variables:
             variables_path = Path(args.variables)
             logger.info(f"Variables : {variables_path}")
@@ -178,7 +182,6 @@ if __name__ == "__main__":
 
             api_http_port = None
             api_server_name = None
-            tmp_config = {}
             custom_confs = []
             apis = []
 
@@ -216,6 +219,49 @@ if __name__ == "__main__":
                         host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                     )
                 )
+        else:
+            kube_config.load_incluster_config()
+            kubernetes_client = kube_client.CoreV1Api()
+
+            api_http_port = None
+            api_server_name = None
+            custom_confs = []
+            apis = []
+
+            for pod in kubernetes_client.list_pod_for_all_namespaces(watch=False).items:
+                if pod.metadata.annotations is not None and "bunkerweb.io/INSTANCE" in pod.metadata.annotations:
+                    for env in pod.env:
+                        if custom_confs_rx.match(env.name):
+                            custom_conf = custom_confs_rx.search(env.name).groups()
+                            custom_confs.append(
+                                {
+                                    "value": f"# CREATED BY ENV\n{env.value}",
+                                    "exploded": (
+                                        custom_conf[0],
+                                        custom_conf[1],
+                                        custom_conf[2].replace(".conf", ""),
+                                    ),
+                                }
+                            )
+                            logger.info(
+                                f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
+                            )
+                        else:
+                            tmp_config[env.name] = env.value
+
+                            if not db and env.name == "DATABASE_URI":
+                                db = Database(logger, sqlalchemy_string=env.value)
+                            elif env.name == "API_HTTP_PORT":
+                                api_http_port = env.value
+                            elif env.name == "API_SERVER_NAME":
+                                api_server_name = env.value
+
+                    apis.append(
+                        API(
+                            f"http://{pod.status.pod_ip or pod.metadata.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                            host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                        )
+                    )
 
         if not db:
             db = Database(logger)
@@ -278,11 +324,13 @@ if __name__ == "__main__":
             sys_exit(0)
 
         changes = []
+        changed_plugins = set()
         err = db.save_config(config_files, args.method, changed=False)
 
-        if err:
+        if isinstance(err, str):
             logger.warning(f"Couldn't save config to database : {err}, config may not work as expected")
         else:
+            changed_plugins = err
             changes.append("config")
             logger.info("Config successfully saved to database")
 
@@ -327,7 +375,7 @@ if __name__ == "__main__":
 
         if not args.no_check_changes:
             # update changes in db
-            ret = db.checked_changes(changes, value=True)
+            ret = db.checked_changes(changes, plugins_changes=changed_plugins, value=True)
             if ret:
                 logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
     except SystemExit as e:

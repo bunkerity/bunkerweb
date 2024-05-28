@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from os import getenv
 from time import sleep
 from copy import deepcopy
@@ -119,6 +120,10 @@ class Config(ConfigCaller):
                         }
                     )
 
+        err = self.try_database_readonly()
+        if err:
+            return False
+
         while not self._db.is_initialized():
             self.__logger.warning("Database is not initialized, retrying in 5 seconds ...")
             sleep(5)
@@ -140,6 +145,15 @@ class Config(ConfigCaller):
             if err:
                 self.__logger.error(f"Failed to update instances: {err}")
 
+        # save config to database
+        changed_plugins = []
+        if "config" in changes:
+            err = self._db.save_config(self.__config, "autoconf", changed=False)
+            if isinstance(err, str):
+                success = False
+                self.__logger.error(f"Can't save config in database: {err}, config may not work as expected")
+            changed_plugins = err
+
         # save custom configs to database
         if "custom_configs" in changes:
             err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False)
@@ -147,16 +161,39 @@ class Config(ConfigCaller):
                 success = False
                 self.__logger.error(f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected")
 
-        # save config to database
-        if "config" in changes:
-            err = self._db.save_config(self.__config, "autoconf")
-            if err:
-                success = False
-                self.__logger.error(f"Can't save config in database: {err}, config may not work as expected")
-        else:
-            # update changes in db
-            ret = self._db.checked_changes(changes, value=True)
-            if ret:
-                self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+        # update changes in db
+        ret = self._db.checked_changes(changes, plugins_changes=changed_plugins, value=True)
+        if ret:
+            self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
 
         return success
+
+    def _try_database_readonly(self) -> bool:
+        if not self.db.readonly:
+            try:
+                self.db.test_write()
+            except BaseException:
+                self.db.readonly = True
+                return True
+
+        if self.db.database_uri and self.db.readonly:
+            try:
+                self.db.retry_connection(pool_timeout=1)
+                self.db.retry_connection(log=False)
+                self.db.readonly = False
+                self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
+            except BaseException:
+                try:
+                    self.db.retry_connection(readonly=True, pool_timeout=1)
+                    self.db.retry_connection(readonly=True, log=False)
+                except BaseException:
+                    if self.db.database_uri_readonly:
+                        with suppress(BaseException):
+                            self.db.retry_connection(fallback=True, pool_timeout=1)
+                            self.db.retry_connection(fallback=True, log=False)
+                self.db.readonly = True
+
+            if self.db.readonly:
+                self.__logger.error("Database is in read-only mode, configuration will not be saved")
+
+        return self.db.readonly
