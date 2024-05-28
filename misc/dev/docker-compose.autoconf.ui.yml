@@ -29,6 +29,7 @@ services:
       - DISABLE_DEFAULT_SERVER=yes
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -46,6 +47,7 @@ services:
       - bw-docker
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -65,6 +67,7 @@ services:
       - bw-data:/data
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -80,6 +83,7 @@ services:
     environment:
       - CONTAINERS=1
       - LOG_LEVEL=warning
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -103,6 +107,7 @@ services:
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
       DEBUG: "1"
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -127,6 +132,7 @@ services:
       - MYSQL_PASSWORD=secret
     volumes:
       - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -134,6 +140,7 @@ services:
 
   app1:
     image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
     networks:
       bw-services:
         aliases:

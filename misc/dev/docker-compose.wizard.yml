@@ -30,6 +30,7 @@ services:
       - app1.example.com_USE_REVERSE_PROXY=yes
       - app1.example.com_REVERSE_PROXY_URL=/
       - app1.example.com_REVERSE_PROXY_HOST=http://app1:8080
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -49,6 +50,7 @@ services:
       - bw-data:/data
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -64,6 +66,7 @@ services:
     environment:
       - CONTAINERS=1
       - LOG_LEVEL=warning
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -85,6 +88,7 @@ services:
     environment:
       <<: *env
       DEBUG: "1"
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -102,6 +106,7 @@ services:
       - MYSQL_PASSWORD=secret
     volumes:
       - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -109,6 +114,7 @@ services:
 
   app1:
     image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
     networks:
       bw-services:
         aliases:
