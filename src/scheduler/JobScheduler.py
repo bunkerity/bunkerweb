@@ -238,6 +238,7 @@ class JobScheduler(ApiCaller):
 
         err = self.try_database_readonly()
         if err:
+            self.__logger.error("Database is in read-only mode, pending jobs will not be executed")
             return True
 
         self.__job_success = True
@@ -278,6 +279,7 @@ class JobScheduler(ApiCaller):
     def run_once(self, plugins: Optional[List[str]] = None) -> bool:
         err = self.try_database_readonly()
         if err:
+            self.__logger.error("Database is in read-only mode, jobs will not be executed")
             return True
 
         threads = []
@@ -310,6 +312,7 @@ class JobScheduler(ApiCaller):
     def run_single(self, job_name: str) -> bool:
         err = self.try_database_readonly()
         if err:
+            self.__logger.error(f"Database is in read-only mode, single job {job_name} will not be executed")
             return True
 
         if self.__lock:
@@ -383,8 +386,5 @@ class JobScheduler(ApiCaller):
                             self.db.retry_connection(fallback=True, pool_timeout=1)
                             self.db.retry_connection(fallback=True, log=False)
                 self.db.readonly = True
-
-            if self.db.readonly:
-                self.__logger.error("Database is in read-only mode, jobs will not be executed")
 
         return self.db.readonly
