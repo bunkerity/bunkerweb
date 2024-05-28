@@ -24,6 +24,7 @@ services:
       - USE_REVERSE_PROXY=yes
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://app1:8080
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -44,6 +45,7 @@ services:
     environment:
       - DOCKER_HOST=tcp://bw-docker:2375
       - LOG_LEVEL=debug
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -59,6 +61,7 @@ services:
     environment:
       - CONTAINERS=1
       - LOG_LEVEL=warning
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -66,6 +69,7 @@ services:
 
   app1:
     image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
     networks:
       bw-services:
         aliases:
