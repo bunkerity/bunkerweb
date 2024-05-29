@@ -109,6 +109,7 @@ if not FLASK_SECRET:
 app.config["SECRET_KEY"] = FLASK_SECRET
 
 login_manager = LoginManager()
+login_manager.session_protection = "strong"
 login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.anonymous_user = AnonymousUser
@@ -945,9 +946,9 @@ def services():
         if "SERVER_NAME" not in variables:
             variables["SERVER_NAME"] = variables["OLD_SERVER_NAME"]
 
-        config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
+        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
         server_name = variables["SERVER_NAME"].split(" ")[0]
-        was_draft = config.get(f"{server_name}_IS_DRAFT", "no") == "yes"
+        was_draft = config.get(f"{server_name}_IS_DRAFT", {"value": "no"})["value"] == "yes"
         operation = request.form["operation"]
         # Get all variables starting with custom_config and delete them from variables
         custom_configs = []
@@ -992,7 +993,7 @@ def services():
                 if (
                     variable in variables
                     and variable != "SERVER_NAME"
-                    and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, None)
+                    and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, {"value": None})["value"]
                 ):
                     del variables[variable]
 
@@ -1022,6 +1023,9 @@ def services():
 
             if error:
                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
+
+            if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
+                return redirect_flash_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
 
         error = 0
 
