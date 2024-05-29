@@ -109,6 +109,7 @@ if not FLASK_SECRET:
 app.config["SECRET_KEY"] = FLASK_SECRET
 
 login_manager = LoginManager()
+login_manager.session_protection = "strong"
 login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.anonymous_user = AnonymousUser
