@@ -224,13 +224,11 @@ class Database:
     def test_write(self):
         """Test the write access to the database"""
         self.logger.debug("Testing write access to the database ...")
-        self.retry_connection(pool_timeout=1)
         with self.__db_session() as session:
             table_name = uuid4().hex
             session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
             session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
             session.commit()
-        self.retry_connection()
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, log: bool = True, **kwargs) -> None:
         """Retry the connection to the database"""
