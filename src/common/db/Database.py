@@ -1086,7 +1086,7 @@ class Database:
 
         if db_version and db_version != bunkerweb_version:
             for table_name, data in old_data.items():
-                if table_name == "bw_metadata" or not data:
+                if not data:
                     continue
 
                 self.logger.warning(f'Restoring data for table "{table_name}"')
@@ -1105,6 +1105,15 @@ class Database:
 
                     with self.__db_session() as session:
                         try:
+                            if table_name == "bw_metadata":
+                                existing_row = session.query(Metadata).filter_by(id=1).first()
+                                if not existing_row:
+                                    session.add(Metadata(**row))
+                                    session.commit()
+                                    continue
+                                session.query(Metadata).filter_by(id=1).update(row)
+                                continue
+
                             # Check if the row already exists in the table
                             existing_row = session.query(Base.metadata.tables[table_name]).filter_by(**row).first()
                             if not existing_row:
