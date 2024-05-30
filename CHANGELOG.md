@@ -5,6 +5,8 @@
 - [BUGFIX] Fix potential errors when upgrading from a previous version
 - [BUGFIX] Fix rare bug on the web UI when editing the SERVER_NAME setting of a service
 - [BUGFIX] Fix potential race conditions between the autoconf and the scheduler waiting for each other indefinitely
+- [BUGFIX] Fix Let's Encrypt certificate renewal when a certificate date changes by forcing the renewal
+- [BUGFIX] Fix issues with k8s integration and the save_config.py script
 - [FEATURE] Add nightly build of the OWASP coreruleset that are automatically downloaded and updated
 - [FEATURE] Enhance security on error pages, default server page and loading page by adding a custom `Content-Security-Policy` header with nonces and removing the `Server` header
 - [FEATURE] Add new DATABASE_URI_READONLY setting to allow setting up a fallback read-only database URI in case the main database URI is not available
@@ -15,6 +17,8 @@
 - [UI] Force HTTPS on setup wizard
 - [UI] Fallback to self-signed certificate when UI is installed with setup wizard and let's encrypt is not used
 - [UI] Add OVERRIDE_ADMIN_CREDS environment variable to allow overriding the default admin credentials even if an admin user already exists
+- [UI] Optimize the way the UI handles the requests and the responses
+- [MISC] Update logger format and datefmt for better readability
 - [DEPS] Updated NGINX version to v1.26.0
 - [DEPS] Updated stream-lua-nginx-module version to the latest commit to incorporate the latest changes and fixes for NGINX v1.26.0
 - [DEPS] Updated coreruleset-v4 version to v4.3.0
