@@ -120,7 +120,7 @@ class Config(ConfigCaller):
                         }
                     )
 
-        err = self.try_database_readonly()
+        err = self._try_database_readonly()
         if err:
             return False
 
@@ -169,31 +169,31 @@ class Config(ConfigCaller):
         return success
 
     def _try_database_readonly(self) -> bool:
-        if not self.db.readonly:
+        if not self._db.readonly:
             try:
-                self.db.test_write()
+                self._db.test_write()
             except BaseException:
-                self.db.readonly = True
+                self._db.readonly = True
                 return True
 
-        if self.db.database_uri and self.db.readonly:
+        if self._db.database_uri and self._db.readonly:
             try:
-                self.db.retry_connection(pool_timeout=1)
-                self.db.retry_connection(log=False)
-                self.db.readonly = False
+                self._db.retry_connection(pool_timeout=1)
+                self._db.retry_connection(log=False)
+                self._db.readonly = False
                 self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
             except BaseException:
                 try:
-                    self.db.retry_connection(readonly=True, pool_timeout=1)
-                    self.db.retry_connection(readonly=True, log=False)
+                    self._db.retry_connection(readonly=True, pool_timeout=1)
+                    self._db.retry_connection(readonly=True, log=False)
                 except BaseException:
-                    if self.db.database_uri_readonly:
+                    if self._db.database_uri_readonly:
                         with suppress(BaseException):
-                            self.db.retry_connection(fallback=True, pool_timeout=1)
-                            self.db.retry_connection(fallback=True, log=False)
-                self.db.readonly = True
+                            self._db.retry_connection(fallback=True, pool_timeout=1)
+                            self._db.retry_connection(fallback=True, log=False)
+                self._db.readonly = True
 
-            if self.db.readonly:
+            if self._db.readonly:
                 self.__logger.error("Database is in read-only mode, configuration will not be saved")
 
-        return self.db.readonly
+        return self._db.readonly
