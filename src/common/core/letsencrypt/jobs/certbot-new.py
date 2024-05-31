@@ -74,7 +74,7 @@ try:
     # Check if we're using let's encrypt
     use_letsencrypt = False
     is_multisite = getenv("MULTISITE", "no") == "yes"
-    all_domains = getenv("SERVER_NAME", "")
+    all_domains = getenv("SERVER_NAME", "").lower()
     server_names = all_domains.split(" ")
 
     if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
@@ -88,7 +88,7 @@ try:
     if not use_letsencrypt:
         LOGGER.info("Let's Encrypt is not activated, skipping generation...")
         sys_exit(0)
-    elif not getenv("SERVER_NAME"):
+    elif not all_domains:
         LOGGER.warning("There are no server names, skipping generation...")
         sys_exit(0)
 
@@ -105,7 +105,7 @@ try:
         for first_server in server_names:
             if not first_server or getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
                 continue
-            domains_server_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server)
+            domains_server_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server).lower()
     # Singlesite case
     else:
         domains_server_names = {server_names[0]: all_domains}
