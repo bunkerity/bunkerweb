@@ -230,12 +230,12 @@ if __name__ == "__main__":
 
             for pod in kubernetes_client.list_pod_for_all_namespaces(watch=False).items:
                 if pod.metadata.annotations is not None and "bunkerweb.io/INSTANCE" in pod.metadata.annotations:
-                    for env in pod.env:
+                    for env in pod.spec.containers[0].env:
                         if custom_confs_rx.match(env.name):
                             custom_conf = custom_confs_rx.search(env.name).groups()
                             custom_confs.append(
                                 {
-                                    "value": f"# CREATED BY ENV\n{env.value}",
+                                    "value": f"# CREATED BY ENV\n{env.value or ''}",
                                     "exploded": (
                                         custom_conf[0],
                                         custom_conf[1],
@@ -247,14 +247,14 @@ if __name__ == "__main__":
                                 f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
                             )
                         else:
-                            tmp_config[env.name] = env.value
+                            tmp_config[env.name] = env.value or ""
 
                             if not db and env.name == "DATABASE_URI":
-                                db = Database(logger, sqlalchemy_string=env.value)
+                                db = Database(logger, sqlalchemy_string=env.value or "")
                             elif env.name == "API_HTTP_PORT":
-                                api_http_port = env.value
+                                api_http_port = env.value or ""
                             elif env.name == "API_SERVER_NAME":
-                                api_server_name = env.value
+                                api_server_name = env.value or ""
 
                     apis.append(
                         API(
