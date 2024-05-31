@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
     {% set attribute_name = "instances" %}
-
     {% if instances|length == 0 %}
         <div class="col-span-12 sm:col-span-4 sm:col-start-5">
             <div class="text-center relative w-full p-4 text-white bg-blue-500 rounded-lg">No instance to show</div>
@@ -19,9 +18,7 @@
                         <div class="flex justify-start items-start overflow-hidden">
                             {% if instance.health %}<div class="min-w-4 mr-2 mt-2 h-4 w-4 rounded-full bg-green-500"></div>{% endif %}
                             {% if not instance.health %}<div class="min-w-4 mr-2 mt-2 h-4 w-4 rounded-full bg-red-500"></div>{% endif %}
-                            <h5 class="break-words font-bold dark:text-white/90 transition duration-300 ease-in-out">
-                                {{ instance.name }}
-                            </h5>
+                            <h5 class="break-words font-bold dark:text-white/90 transition duration-300 ease-in-out">{{ instance.name }}</h5>
                         </div>
                         <!-- end state and title-->
                         <!-- detail list -->

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
     {% set attribute_name = "global-config" %}
-
     <div data-global-config-tabs-select-container
          class="z-100 w-full  grid grid-cols-12 h-fit max-h-100 sm:max-h-125 col-span-12 md:col-span-6 lg:col-span-4 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div data-{{ current_endpoint }}-tabs-select-header class="col-span-12">
@@ -46,7 +45,6 @@
         }
     ] %}
     {% include "card_filter.html" %}
-
     <!-- end filter -->
     <div data-global-config-plugins-container
          class="col-span-12 gap-y-4 grid grid-cols-12">
@@ -64,11 +62,13 @@
             <!-- end plugin item -->
             <!-- submit -->
             <div class="flex w-full justify-center mt-8 mb-2">
-                <button  {% if is_readonly%}disabled{% endif %} type="submit" class="valid-btn">SAVE</button>
+                <button {% if is_readonly %}disabled{% endif %}
+                        type="submit"
+                        class="valid-btn">SAVE</button>
             </div>
             <!-- end submit -->
         </form>
         <!--end form global conf -->
-    {% include "filter_nomatch.html" %}
+        {% include "filter_nomatch.html" %}
     </div>
 {% endblock content %}

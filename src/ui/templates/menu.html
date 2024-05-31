@@ -47,7 +47,7 @@
         </div>
         <div class="mt-2 w-full px-1">
             <h1 class="mb-0.5 tracking-normal text-primary text-center text-lg break-words whitespace-normal dark:text-gray-300">
-                {{ username|truncate(10, True, '...')}}
+                {{ username|truncate(10, True, '...') }}
             </h1>
             <a class="block underline mb-2 text-gray-600 dark:text-gray-400 text-sm text-center hover:brightness-90"
                href="{% if current_endpoint == 'account' %}#{% else %}{{ url_for("account") }}{% endif %}">manage account
@@ -241,15 +241,14 @@
     <div class="flex flex-col justify-end mx-4 mt-2 mb-4">
         <!-- dark/light mode -->
         <div class="min-h-6 ml-12 my-4 flex justify-start">
-            <input
-                   id="darkMode"
+            <input id="darkMode"
                    data-dark-toggle
                    class="dark:brightness-125 hover:brightness-75 rounded-10 duration-300 ease-in-out after:rounded-circle after:shadow-2xl after:duration-300 checked:after:translate-x-5.3 h-5 mt-0.5 relative float-left w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-primary checked:bg-primary checked:bg-none checked:bg-right"
                    type="checkbox" />
             <label for="darkMode"
                    data-dark-toggle-label
                    class="dark:text-gray-200 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700">
-                    light mode
+                light mode
             </label>
         </div>
         <!-- end dark/light mode -->
