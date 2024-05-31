@@ -12,15 +12,15 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
-      - name: Set up Python 3.9
+      - name: Set up Python 3.12
         uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
         with:
-          python-version: "3.9"
+          python-version: "3.12"
       - name: Install Firefox manually and dependencies
         run: |
           sudo add-apt-repository ppa:mozillateam/ppa -y
@@ -65,7 +65,7 @@ jobs:
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
           sudo apt update
-          sudo apt install -y nginx=1.26.0-1~jammy
+          sudo apt install -y nginx=1.26.0-1~noble
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
@@ -75,9 +75,9 @@ jobs:
           echo "127.0.0.1 www.example.com" | sudo tee -a /etc/hosts
           echo "127.0.0.1 app1.example.com" | sudo tee -a /etc/hosts
           echo "127.0.0.1 bwadm.example.com" | sudo tee -a /etc/hosts
-          sudo cp ./tests/www-deb.conf /etc/php/8.1/fpm/pool.d/www.conf
-          sudo systemctl stop php8.1-fpm
-          sudo systemctl start php8.1-fpm
+          sudo cp ./tests/www-deb.conf /etc/php/8.3/fpm/pool.d/www.conf
+          sudo systemctl stop php8.3-fpm
+          sudo systemctl start php8.3-fpm
           # BunkerWeb
           sudo mkdir -p /etc/bunkerweb
           echo "SERVER_NAME=www.example.com" | sudo tee /etc/bunkerweb/variables.env
