@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
     {% set attribute_name = "configs" %}
-
     {% set infos = [
         {
             "id": "total-conf",
@@ -14,7 +13,6 @@
             "data": "unknown"
         }
     ] %}
-
     {% include "card_info.html" %}
     <!-- end info -->
     <!-- filter -->
@@ -39,9 +37,8 @@
                 "true"
             ]
         }
-    ]
-    %}
-    {% include "card_filter.html" %}
-    <!-- end filter -->
-    {% include "file_manager.html" %}
+    ] %}
+{% include "card_filter.html" %}
+<!-- end filter -->
+{% include "file_manager.html" %}
 {% endblock content %}

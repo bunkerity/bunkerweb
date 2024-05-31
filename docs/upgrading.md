@@ -229,7 +229,7 @@
 
     Get support and more information :
 
-    - [Order professionnal support](https://panel.bunkerweb.io/?utm_source=doc&utm_campaign=self)
+    - [Order professional support](https://panel.bunkerweb.io/?utm_source=doc&utm_campaign=self)
     - [Create an issue on GitHub](https://github.com/bunkerity/bunkerweb/issues)
     - [Join the BunkerWeb Discord server](https://discord.bunkerity.com)
 

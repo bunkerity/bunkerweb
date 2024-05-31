@@ -10,7 +10,7 @@ But dedicating time to a specific technology may not be easy depending on your b
 
 Getting professional services in addition to the open-source or PRO version is the ideal solution to cover your business needs. You can focus on your top priorities and rely on a trusted partner when it comes to web security.
 
-Please note that professionnal services are directly offered by [Bunkerity](https://www.bunkerity.com/?utm_campaign=self&utm_source=doc), the company maintaining the BunkerWeb project, through our [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) online platform.
+Please note that professional services are directly offered by [Bunkerity](https://www.bunkerity.com/?utm_campaign=self&utm_source=doc), the company maintaining the BunkerWeb project, through our [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) online platform.
 
 ## Which professional services do you offer ?
 
