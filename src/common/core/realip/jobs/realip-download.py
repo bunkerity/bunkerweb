@@ -20,11 +20,11 @@ from jobs import Job  # type: ignore
 
 def check_line(line):
     with suppress(ValueError):
-        if "/" in line:
-            ip_network(line)
+        if b"/" in line:
+            ip_network(line.decode())
             return True, line
         else:
-            ip_address(line)
+            ip_address(line.decode())
             return True, line
     return False, b""
 
