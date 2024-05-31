@@ -28,7 +28,7 @@ if [ "$integration" == "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
-    MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes --no-deps -r requirements.txt
+    MAKEFLAGS="-j $(nproc)" sudo pip install --break-system-packages --no-cache-dir --require-hashes --no-deps -r requirements.txt
     echo "USE_BAD_BEHAVIOR=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "BAD_BEHAVIOR_STATUS_CODES=400 401 403 404 405 429 444" | sudo tee -a /etc/bunkerweb/variables.env
     echo "BAD_BEHAVIOR_BAN_TIME=86400" | sudo tee -a /etc/bunkerweb/variables.env
