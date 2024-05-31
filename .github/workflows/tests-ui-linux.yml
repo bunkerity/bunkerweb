@@ -63,11 +63,13 @@ jobs:
           docker rm "$container_id"
       - name: Install NGINX
         run: |
-          sudo apt install -y gnupg2 ca-certificates lsb-release ubuntu-keyring
+          export NEEDRESTART_SUSPEND=1
+          export DEBIAN_FRONTEND=noninteractive
+          sudo -E apt install -y gnupg2 ca-certificates lsb-release ubuntu-keyring
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
           sudo apt update
-          sudo apt install -y nginx=1.26.0-1~noble
+          sudo apt -E install -y nginx=1.26.0-1~noble
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
@@ -100,7 +102,10 @@ jobs:
           sudo chown nginx:nginx /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
           sudo chmod 777 /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
       - name: Install BunkerWeb
-        run: sudo apt install -fy /tmp/bunkerweb.deb
+        run: |
+          export NEEDRESTART_SUSPEND=1
+          export DEBIAN_FRONTEND=noninteractive
+          sudo -E apt install -fy /tmp/bunkerweb.deb
       - name: Run tests
         run: |
           export MAKEFLAGS="-j $(nproc)"
