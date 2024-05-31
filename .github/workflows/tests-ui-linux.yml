@@ -69,7 +69,7 @@ jobs:
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
           sudo apt update
-          sudo apt -E install -y nginx=1.26.0-1~noble
+          sudo -E apt install -y nginx=1.26.0-1~noble
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
@@ -109,8 +109,8 @@ jobs:
       - name: Run tests
         run: |
           export MAKEFLAGS="-j $(nproc)"
-          pip install --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements-deps.txt
-          pip install --no-cache-dir --require-hashes -r tests/ui/requirements.txt
+          pip install --break-system-packages --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements-deps.txt
+          pip install --break-system-packages --no-cache-dir --require-hashes -r tests/ui/requirements.txt
           cd ./tests/ui
           touch test.txt
           zip test.zip test.txt
