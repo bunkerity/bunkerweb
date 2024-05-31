@@ -273,7 +273,6 @@ You will find more information in the [Kubernetes section](https://docs.bunkerwe
 List of supported Linux distros :
 
 - Debian 12 "Bookworm"
-- Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
 - Fedora 39
 - RHEL 8.9

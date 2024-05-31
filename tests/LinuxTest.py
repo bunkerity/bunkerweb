@@ -11,7 +11,7 @@ class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro, domains={}):
         super().__init__(name, "linux", timeout, tests, delay=20)
         self._domains = domains
-        if distro not in ("ubuntu", "ubuntu-noble", "debian", "fedora", "centos") and not distro.startswith("rhel"):
+        if distro not in ("ubuntu", "debian", "fedora", "centos") and not distro.startswith("rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
 
@@ -24,7 +24,7 @@ class LinuxTest(Test):
             proc = run(cmd, shell=True)
             if proc.returncode != 0:
                 raise Exception("docker run failed (linux stack)")
-            if distro in ("ubuntu", "ubuntu-noble", "debian"):
+            if distro in ("ubuntu", "debian"):
                 cmd = "echo force-bad-version >> /etc/dpkg/dpkg.cfg ; apt install -y /opt/\\$(ls /opt | grep deb)"
             elif distro in ("centos", "fedora") or distro.startswith("rhel"):
                 cmd = "dnf install -y /opt/\\$(ls /opt | grep rpm)"
@@ -34,19 +34,12 @@ class LinuxTest(Test):
             proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl start failed (linux stack)")
-            if distro in ("ubuntu", "ubuntu-noble", "debian"):
+            if distro in ("ubuntu", "debian"):
                 LinuxTest.docker_exec(
                     distro,
                     "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip",
                 )
                 if distro == "ubuntu":
-                    LinuxTest.docker_cp(
-                        distro,
-                        "./tests/www-deb.conf",
-                        "/etc/php/8.1/fpm/pool.d/www.conf",
-                    )
-                    LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
-                elif distro == "ubuntu-noble":
                     LinuxTest.docker_cp(
                         distro,
                         "./tests/www-deb.conf",

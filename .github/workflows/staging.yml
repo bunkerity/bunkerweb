@@ -43,11 +43,9 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu, ubuntu-noble, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, debian, fedora, rhel, rhel9]
         include:
           - linux: ubuntu
-            package: deb
-          - linux: ubuntu-noble
             package: deb
           - linux: debian
             package: deb
@@ -223,18 +221,12 @@ jobs:
     needs: [staging-tests, tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
-        linux: [ubuntu, ubuntu-noble, debian, fedora, el, el9]
+        linux: [ubuntu, debian, fedora, el, el9]
         arch: [amd64]
         include:
           - release: testing
             repo: bunkerweb
           - linux: ubuntu
-            package_arch: amd64
-            separator: _
-            suffix: ""
-            version: jammy
-            package: deb
-          - linux: ubuntu-noble
             package_arch: amd64
             separator: _
             suffix: ""
