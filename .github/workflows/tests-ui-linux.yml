@@ -31,7 +31,7 @@ jobs:
           Pin-Priority: 1001
 
           Package: firefox
-          Pin: version 1:1snap1-0ubuntu2
+          Pin: version 1:1snap1-0ubuntu5
           Pin-Priority: -1
           ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
           sudo apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 liboss4-salsa-asound2 libasound2t64 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip firefox
