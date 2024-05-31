@@ -172,7 +172,7 @@ try:
     if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
         LOGGER.info("Clear old certificates is activated, removing old / no longer used certificates...")
         for elem in chain(DATA_PATH.glob("archive/*"), DATA_PATH.glob("live/*"), DATA_PATH.glob("renewal/*")):
-            if elem.stem not in generated_domains and elem.stem != "README":
+            if elem.name.replace(".conf", "") not in generated_domains and elem.name != "README":
                 LOGGER.warning(f"Removing old certificate {elem}")
                 if elem.is_dir():
                     rmtree(elem, ignore_errors=True)
