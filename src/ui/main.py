@@ -1132,7 +1132,7 @@ def global_config():
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(global_only=True, methods=True, with_drafts=True)
+        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
         services = config["SERVER_NAME"]["value"].split(" ")
         for variable, value in variables.copy().items():
             if variable in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "SERVER_NAME", "IS_LOADING", "IS_DRAFT") or variable.endswith("SCHEMA"):
