@@ -43,7 +43,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, debian, fedora, rhel, rhel9, ubuntu-jammy]
         include:
           - linux: ubuntu
             package: deb
@@ -55,6 +55,8 @@ jobs:
             package: rpm
           - linux: rhel9
             package: rpm
+          - linux: ubuntu-jammy
+            package: deb
     uses: ./.github/workflows/linux-build.yml
     with:
       RELEASE: testing
@@ -221,7 +223,7 @@ jobs:
     needs: [staging-tests, tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, el9]
+        linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
         arch: [amd64]
         include:
           - release: testing
@@ -256,6 +258,12 @@ jobs:
             suffix: "1."
             version: 9
             package: rpm
+          - linux: ubuntu-jammy
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: jammy
+            package: deb
     uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: ${{ matrix.separator }}

@@ -37,6 +37,9 @@ function buildPackage() {
     if [ "$DISTRO" = "rhel9" ]; then
       sudo docker build -t linux-rhel9 -f src/linux/Dockerfile-rhel9 .
     fi
+    if [ "$DISTRO" = "ubuntu-jammy" ]; then
+      sudo docker build -t linux-ubuntu-jammy -f src/linux/Dockerfile-ubuntu-jammy .
+    fi
   fi
 }
 
@@ -61,6 +64,9 @@ function createContainer() {
     fi
     if [ "$DISTRO" = "rhel9" ]; then
       sudo docker run -v /tmp/rhel9:/data linux-rhel9
+    fi
+    if [ "$DISTRO" = "ubuntu-jammy" ]; then
+      sudo docker run -v /tmp/ubuntu-jammy:/data linux-ubuntu-jammy
     fi
   fi
 }

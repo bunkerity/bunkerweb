@@ -60,7 +60,7 @@ jobs:
           path: /tmp/${{ inputs.LINUX }}
       # Remove existing packages
       - name: Remove existing package
-        if: inputs.LINUX != 'el9'
+        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'
         run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
@@ -71,13 +71,19 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Remove existing package ubuntu-jammy
+        if: inputs.LINUX == 'ubuntu-jammy'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/ubuntu/jammy bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
       # Update name
       # - name: Rename package
       #   if: inputs.BW_VERSION == 'testing'
       #   run: sudo apt install -y rename && rename 's/[0-9]\.[0-9]\.[0-9]/testing/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package
       - name: Push package to packagecloud
-        if: inputs.LINUX != 'el9'
+        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
         with:
           PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
@@ -93,4 +99,13 @@ jobs:
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: el/9
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push package to packagecloud for ubuntu-jammy
+        if: inputs.LINUX == 'ubuntu-jammy'
+        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
+        with:
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: ubuntu/jammy
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

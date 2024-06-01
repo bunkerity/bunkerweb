@@ -145,3 +145,9 @@ jobs:
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux ubuntu-jammy tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu-jammy"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
