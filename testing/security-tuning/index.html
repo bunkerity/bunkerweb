@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.25">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
       
       
 
@@ -1658,12 +1658,27 @@
 <td style="text-align: left;">When set to <code>yes</code>, will enable HTTP2 protocol support when using HTTPS.</td>
 </tr>
 <tr>
+<td style="text-align: center;"><code>HTTP3</code></td>
+<td style="text-align: center;"><code>yes</code></td>
+<td style="text-align: left;">When set to <code>yes</code>, will enable HTTP3 protocol support when using HTTPS.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>HTTP3_ALT_SVC_PORT</code></td>
+<td style="text-align: center;"><code>443</code></td>
+<td style="text-align: left;">HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.</td>
+</tr>
+<tr>
 <td style="text-align: center;"><code>LISTEN_HTTP</code></td>
 <td style="text-align: center;"><code>yes</code></td>
 <td style="text-align: left;">When set to <code>no</code>, BunkerWeb will not listen for HTTP requests. Useful if you want HTTPS only for example.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition example">
+<p class="admonition-title">About HTTP3</p>
+<p>HTTP/3 is the next version of the HTTP protocol. It is based on Google's QUIC protocol which is a transport layer protocol that provides security and reliability features. HTTP/3 is designed to improve the performance of websites and web applications.</p>
+<p><strong>Remember that NGINX's support for HTTP/3 is still experimental and may not be suitable for all use cases.</strong></p>
+</div>
 <h3 id="lets-encrypt">Let's Encrypt</h3>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>BunkerWeb comes with automatic Let's Encrypt certificate generation and renewal. This is the easiest way of getting HTTPS / SSL/TLS working out of the box for public-facing web applications. Please note that you will need to set up proper DNS A record(s) for each of your domains pointing to your public IP(s) where BunkerWeb is accessible.</p>
@@ -1942,7 +1957,7 @@
 <tr>
 <td style="text-align: center;"><code>MODSECURITY_CRS_VERSION</code></td>
 <td style="text-align: center;"><code>3</code></td>
-<td style="text-align: left;">Version of the OWASP Core Rule Set to use.</td>
+<td style="text-align: left;">Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).</td>
 </tr>
 </tbody>
 </table>
@@ -1954,7 +1969,12 @@
 <ul>
 <li><strong>3</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.5">v3.3.5</a> of the OWASP Core Rule Set (<strong><em>default</em></strong>)</li>
 <li><strong>4</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.2.0">v4.2.0</a> of the OWASP Core Rule Set</li>
+<li><strong>nightly</strong> : The latest <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">nightly</a> build of the OWASP Core Rule Set which is updated every day</li>
 </ul>
+<div class="admonition example">
+<p class="admonition-title">OWASP Core Rule Set's nightly build</p>
+<p>The nightly build of the OWASP Core Rule Set is updated every day and contains the latest rules. It is recommended to use it in a staging environment before using it in production.</p>
+</div>
 <h3 id="custom-configurations">Custom configurations</h3>
 <p>Tuning ModSecurity and the CRS can be done using <a href="../quickstart-guide/#custom-configurations">custom configurations</a> :</p>
 <ul>
@@ -2924,68 +2944,74 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <tr>
 <td><code>USE_REPORTING_SMTP</code></td>
 <td><code>no</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>Enable sending the report via email.</td>
 </tr>
 <tr>
 <td><code>USE_REPORTING_WEBHOOK</code></td>
 <td><code>no</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>Enable sending the report via webhook.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SCHEDULE</code></td>
 <td><code>weekly</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The frequency at which reports are sent.</td>
 </tr>
 <tr>
 <td><code>REPORTING_WEBHOOK_URLS</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>List of webhook URLs to receive the report in Markdown (separated by spaces).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_EMAILS</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>List of email addresses to receive the report in HTML format (separated by spaces).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_HOST</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The host server used for SMTP sending.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_PORT</code></td>
 <td><code>465</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The email address used as the sender. Note that 2FA must be disabled for this email address.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_USER</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The user authentication value for sending via the from email address.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The password authentication value for sending via the from email address.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SSL</code></td>
 <td><code>SSL</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>Determine whether or not to use a secure connection for SMTP.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_SUBJECT</code></td>
+<td><code>BunkerWeb Report</code></td>
+<td>global</td>
+<td>The subject line of the email.</td>
 </tr>
 </tbody>
 </table>
@@ -3270,49 +3296,55 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td><code>BACKUP_S3_SCHEDULE</code></td>
 <td><code>daily</code></td>
 <td>global</td>
-<td>Frequency of the backup (daily, weekly, monthly)</td>
+<td>The frequency of the backup</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_ROTATION</code></td>
 <td><code>7</code></td>
 <td>global</td>
-<td>Number of backups to keep</td>
+<td>The number of backups to keep</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_ENDPOINT</code></td>
 <td></td>
 <td>global</td>
-<td>S3 endpoint</td>
+<td>The S3 endpoint</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_BUCKET</code></td>
 <td></td>
 <td>global</td>
-<td>S3 bucket name</td>
+<td>The S3 bucket</td>
+</tr>
+<tr>
+<td><code>BACKUP_S3_DIR</code></td>
+<td></td>
+<td>global</td>
+<td>The S3 directory</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_REGION</code></td>
 <td></td>
 <td>global</td>
-<td>S3 region</td>
+<td>The S3 region</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_ACCESS_KEY_ID</code></td>
 <td></td>
 <td>global</td>
-<td>S3 access key ID</td>
+<td>The S3 access key ID</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_ACCESS_KEY_SECRET</code></td>
 <td></td>
 <td>global</td>
-<td>S3 access key secret</td>
+<td>The S3 access key secret</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_COMP_LEVEL</code></td>
 <td><code>6</code></td>
 <td>global</td>
-<td>Compression level of the backup zip file (1-9)</td>
+<td>The compression level of the backup zip file</td>
 </tr>
 </tbody>
 </table>
@@ -3608,7 +3640,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.a7c05c9e.min.js"></script>
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

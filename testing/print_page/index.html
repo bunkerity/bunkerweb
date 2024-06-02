@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.25">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
       
       
 
@@ -1337,7 +1337,7 @@ chmod -R 770 bw-data</code></p>
 <li>Red Hat Enterprise Linux (RHEL) 8.9</li>
 <li>Red Hat Enterprise Linux (RHEL) 9.4</li>
 </ul>
-<p>Please ensure that you have <strong>NGINX 1.24.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<p>Please ensure that you have <strong>NGINX 1.26.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <p>To simplify the installation process, Linux package repositories for BunkerWeb are available on <a href="https://packagecloud.io/bunkerity/bunkerweb">PackageCloud</a>. They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for <a href="https://packagecloud.io/bunkerity/bunkerweb/install">manual installation</a> instructions if you prefer.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="integrations-__tabbed_1_1" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_2" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_3" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_4" name="integrations-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="integrations-__tabbed_1_1">Debian</label><label for="integrations-__tabbed_1_2">Ubuntu</label><label for="integrations-__tabbed_1_3">Fedora</label><label for="integrations-__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
@@ -1350,9 +1350,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>You should now be able to install NGINX 1.24.0 :</p>
+<p>You should now be able to install NGINX 1.26.0 :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.24.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.26.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Testing/dev version</p>
@@ -1373,22 +1373,17 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="admonition example">
-<p class="admonition-title">Specifications for Ubuntu 24.04</p>
-<p>As of Ubuntu 24.04, the <code>nginx</code> package is not available in the official repository. You will need to use the <code>jammy</code> repository to install NGINX 1.24.0.</p>
-<p>Also we do not yet run automated tests on Ubuntu 24.04, so please consider this version as experimental.</p>
-</div>
 <p>The first step is to add NGINX official repository :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gnupg2<span class="w"> </span>ca-certificates<span class="w"> </span>lsb-release<span class="w"> </span>ubuntu-keyring<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/usr/share/keyrings/nginx-archive-keyring.gpg<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
-<span class="s2">http://nginx.org/packages/ubuntu jammy nginx&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>You should now be able to install NGINX 1.24.0 :</p>
+<p>You should now be able to install NGINX 1.26.0 :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.24.0-1~jammy
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.26.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Testing/dev version</p>
@@ -1409,8 +1404,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>Fedora already provides NGINX 1.24.0 that we support :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.24.0
+<p>Fedora already provides NGINX 1.26.0 that we support :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.26.0
 </code></pre></div>
 <p>Optional step : if you want to automatically enable the <a href="#web-ui-setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
@@ -1445,8 +1440,8 @@ enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
-<p>You should now be able to install NGINX 1.24.0 :</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.24.0
+<p>You should now be able to install NGINX 1.26.0 :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.26.0
 </code></pre></div>
 <p>Optional step : if you want to automatically enable the <a href="#web-ui-setup-wizard">setup wizard</a> when BunkerWeb is installed, export the following variable :</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
@@ -2121,11 +2116,12 @@ To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write an
 </div>
 <div class="tabbed-block">
 <p>Login in <a href="https://portal.azure.com" target="_blank">Azure portal</a>.</p>
-<p>Get BunkerWeb from the <a href="https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb" target="_blank">Create ressource menu</a>.</p>
+<p>Get BunkerWeb from the <a href="https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/bunkerity.bunkerweb" target="_blank">Create resource menu</a>.</p>
 <p>You can also go through the <a href="https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview" target="_blank">Marketplace</a>.</p>
 </div>
 </div>
-</div></section><section class="print-page" id="quickstart-guide"><h1 id="quickstart-guide-quickstart-guide">Quickstart guide</h1>
+</div>
+<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your virtual machine.</p></section><section class="print-page" id="quickstart-guide"><h1 id="quickstart-guide-quickstart-guide">Quickstart guide</h1>
 <div class="admonition info">
 <p class="admonition-title">Prerequisites</p>
 <p>We assume that you're already familiar with the <a href="#concepts">core concepts</a> and you have followed the <a href="#integrations">integrations instructions</a> for your environment.</p>
@@ -4029,12 +4025,27 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <td style="text-align: left;">When set to <code>yes</code>, will enable HTTP2 protocol support when using HTTPS.</td>
 </tr>
 <tr>
+<td style="text-align: center;"><code>HTTP3</code></td>
+<td style="text-align: center;"><code>yes</code></td>
+<td style="text-align: left;">When set to <code>yes</code>, will enable HTTP3 protocol support when using HTTPS.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>HTTP3_ALT_SVC_PORT</code></td>
+<td style="text-align: center;"><code>443</code></td>
+<td style="text-align: left;">HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.</td>
+</tr>
+<tr>
 <td style="text-align: center;"><code>LISTEN_HTTP</code></td>
 <td style="text-align: center;"><code>yes</code></td>
 <td style="text-align: left;">When set to <code>no</code>, BunkerWeb will not listen for HTTP requests. Useful if you want HTTPS only for example.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition example">
+<p class="admonition-title">About HTTP3</p>
+<p>HTTP/3 is the next version of the HTTP protocol. It is based on Google's QUIC protocol which is a transport layer protocol that provides security and reliability features. HTTP/3 is designed to improve the performance of websites and web applications.</p>
+<p><strong>Remember that NGINX's support for HTTP/3 is still experimental and may not be suitable for all use cases.</strong></p>
+</div>
 <h3 id="security-tuning-lets-encrypt">Let's Encrypt</h3>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>BunkerWeb comes with automatic Let's Encrypt certificate generation and renewal. This is the easiest way of getting HTTPS / SSL/TLS working out of the box for public-facing web applications. Please note that you will need to set up proper DNS A record(s) for each of your domains pointing to your public IP(s) where BunkerWeb is accessible.</p>
@@ -4313,7 +4324,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <tr>
 <td style="text-align: center;"><code>MODSECURITY_CRS_VERSION</code></td>
 <td style="text-align: center;"><code>3</code></td>
-<td style="text-align: left;">Version of the OWASP Core Rule Set to use.</td>
+<td style="text-align: left;">Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).</td>
 </tr>
 </tbody>
 </table>
@@ -4325,7 +4336,12 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <ul>
 <li><strong>3</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.5">v3.3.5</a> of the OWASP Core Rule Set (<strong><em>default</em></strong>)</li>
 <li><strong>4</strong> : The version <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.2.0">v4.2.0</a> of the OWASP Core Rule Set</li>
+<li><strong>nightly</strong> : The latest <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">nightly</a> build of the OWASP Core Rule Set which is updated every day</li>
 </ul>
+<div class="admonition example">
+<p class="admonition-title">OWASP Core Rule Set's nightly build</p>
+<p>The nightly build of the OWASP Core Rule Set is updated every day and contains the latest rules. It is recommended to use it in a staging environment before using it in production.</p>
+</div>
 <h3 id="security-tuning-custom-configurations">Custom configurations</h3>
 <p>Tuning ModSecurity and the CRS can be done using <a href="#quickstart-guide-custom-configurations">custom configurations</a> :</p>
 <ul>
@@ -5295,68 +5311,74 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <tr>
 <td><code>USE_REPORTING_SMTP</code></td>
 <td><code>no</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>Enable sending the report via email.</td>
 </tr>
 <tr>
 <td><code>USE_REPORTING_WEBHOOK</code></td>
 <td><code>no</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>Enable sending the report via webhook.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SCHEDULE</code></td>
 <td><code>weekly</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The frequency at which reports are sent.</td>
 </tr>
 <tr>
 <td><code>REPORTING_WEBHOOK_URLS</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>List of webhook URLs to receive the report in Markdown (separated by spaces).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_EMAILS</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>List of email addresses to receive the report in HTML format (separated by spaces).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_HOST</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The host server used for SMTP sending.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_PORT</code></td>
 <td><code>465</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_EMAIL</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The email address used as the sender. Note that 2FA must be disabled for this email address.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_USER</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The user authentication value for sending via the from email address.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
 <td></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>The password authentication value for sending via the from email address.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SSL</code></td>
 <td><code>SSL</code></td>
-<td><code>global</code></td>
+<td>global</td>
 <td>Determine whether or not to use a secure connection for SMTP.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_SUBJECT</code></td>
+<td><code>BunkerWeb Report</code></td>
+<td>global</td>
+<td>The subject line of the email.</td>
 </tr>
 </tbody>
 </table>
@@ -5641,49 +5663,55 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td><code>BACKUP_S3_SCHEDULE</code></td>
 <td><code>daily</code></td>
 <td>global</td>
-<td>Frequency of the backup (daily, weekly, monthly)</td>
+<td>The frequency of the backup</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_ROTATION</code></td>
 <td><code>7</code></td>
 <td>global</td>
-<td>Number of backups to keep</td>
+<td>The number of backups to keep</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_ENDPOINT</code></td>
 <td></td>
 <td>global</td>
-<td>S3 endpoint</td>
+<td>The S3 endpoint</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_BUCKET</code></td>
 <td></td>
 <td>global</td>
-<td>S3 bucket name</td>
+<td>The S3 bucket</td>
+</tr>
+<tr>
+<td><code>BACKUP_S3_DIR</code></td>
+<td></td>
+<td>global</td>
+<td>The S3 directory</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_REGION</code></td>
 <td></td>
 <td>global</td>
-<td>S3 region</td>
+<td>The S3 region</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_ACCESS_KEY_ID</code></td>
 <td></td>
 <td>global</td>
-<td>S3 access key ID</td>
+<td>The S3 access key ID</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_ACCESS_KEY_SECRET</code></td>
 <td></td>
 <td>global</td>
-<td>S3 access key secret</td>
+<td>The S3 access key secret</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_COMP_LEVEL</code></td>
 <td><code>6</code></td>
 <td>global</td>
-<td>Compression level of the backup zip file (1-9)</td>
+<td>The compression level of the backup zip file</td>
 </tr>
 </tbody>
 </table>
@@ -6378,6 +6406,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>The S3 bucket</td>
 </tr>
 <tr>
+<td><code>BACKUP_S3_DIR</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>The S3 directory</td>
+</tr>
+<tr>
 <td><code>BACKUP_S3_REGION</code></td>
 <td></td>
 <td>global</td>
@@ -6942,6 +6977,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>The database URI, following the sqlalchemy format.</td>
 </tr>
 <tr>
+<td><code>DATABASE_URI_READONLY</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.</td>
+</tr>
+<tr>
 <td><code>DATABASE_LOG_LEVEL</code></td>
 <td><code>warning</code></td>
 <td>global</td>
@@ -7403,7 +7445,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td></td>
 <td>multisite</td>
 <td>yes</td>
-<td>Configuration item that will be added to the credentials.ini file for the DNS provider.</td>
+<td>Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456').</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS</code></td>
@@ -7604,6 +7646,20 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>Support HTTP2 protocol when HTTPS is enabled.</td>
 </tr>
 <tr>
+<td><code>HTTP3</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Support HTTP3 protocol when HTTPS is enabled.</td>
+</tr>
+<tr>
+<td><code>HTTP3_ALT_SVC_PORT</code></td>
+<td><code>443</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.</td>
+</tr>
+<tr>
 <td><code>LISTEN_HTTP</code></td>
 <td><code>yes</code></td>
 <td>multisite</td>
@@ -7701,7 +7757,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td><code>3</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Version of the OWASP Core Rule Set to use.</td>
+<td>Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).</td>
 </tr>
 <tr>
 <td><code>MODSECURITY_SEC_AUDIT_ENGINE</code></td>
@@ -8181,6 +8237,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <td>no</td>
 <td>Determine whether or not to use a secure connection for SMTP.</td>
 </tr>
+<tr>
+<td><code>REPORTING_SMTP_SUBJECT</code></td>
+<td><code>BunkerWeb Report</code></td>
+<td>global</td>
+<td>no</td>
+<td>The subject line of the email.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="settings-reverse-proxy">Reverse proxy</h2>
@@ -8227,7 +8290,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_URL</code></td>
-<td></td>
+<td><code>/</code></td>
 <td>multisite</td>
 <td>yes</td>
 <td>Location URL that will be proxied.</td>
@@ -8692,7 +8755,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <h2 id="web-ui-setup-wizard">Setup wizard</h2>
 <div class="admonition info">
 <p class="admonition-title">Wizard</p>
-<p>The setup wizard is a feature that helps you to <strong>configure</strong> and <strong>install the web UI</strong> using a <strong>user-friendly interface</strong>. You will need to set the <code>UI_HOST</code> setting (<code>http://hostname-of-web-ui:7000</code>) and browse the <code>/setup</code> URI of your server to access the setup wizard.</p>
+<p>The setup wizard is a feature that helps you to <strong>configure</strong> and <strong>install the web UI</strong> using a <strong>user-friendly interface</strong>. You will need to set the <code>UI_HOST</code> setting (<code>https://hostname-of-web-ui:7000</code>) and browse the <code>/setup</code> URI of your server to access the setup wizard.</p>
 </div>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/ui-wizard-account.webp" width="350" />
@@ -8720,7 +8783,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your server.</p>
 </div>
 <p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.5&quot;</span>
@@ -8807,7 +8870,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your server.</p>
 </div>
 <p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.5&quot;</span>
@@ -8910,7 +8973,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named <code>bw-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://bw-ui:7000</code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your server.</p>
 </div>
 <p>Here is the stack boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.5&quot;</span>
@@ -9036,7 +9099,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <p>If you want to use the setup wizard, you will need to set the <code>UI_HOST</code> setting to the HTTP endpoint of your web UI SERVICE. For example, if your web UI service is named <code>svc-bunkerweb-ui</code> and is listening on the <code>7000</code> port, you will need to set the <code>UI_HOST</code> setting to <code>http://svc-bunkerweb-ui:7000</code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your server.</p>
 </div>
 <p>Here is the yaml boilerplate that you can use (don't forget to edit the <code>changeme</code> data) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
@@ -9350,7 +9413,7 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <p>If you want to use the setup wizard, you will need to run the following command <code>export UI_WIZARD=1</code> before installing BunkerWeb as described in <a href="#integrations-linux">integrations section</a> of the documentation (this is an optional step).</p>
 <div class="admonition tip">
 <p class="admonition-title">Accessing the setup wizard</p>
-<p>You can access the setup wizard by browsing the <code>http://your-ip-address/setup</code> URI of your server.</p>
+<p>You can access the setup wizard by browsing the <code>https://your-ip-address/setup</code> URI of your server.</p>
 </div>
 </div>
 </div>
@@ -9384,6 +9447,16 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <figcaption>PRO license information</figcaption>
 </figure>
 <h3 id="web-ui-username-password">Username / Password</h3>
+<div class="admonition tip">
+<p class="admonition-title">Overriding admin credentials from environment variables</p>
+<p>If you want to override the admin credentials from environment variables, you can set the following variables :</p>
+<ul>
+<li><code>OVERRIDE_ADMIN_CREDS</code> : set it to <code>yes</code> to enable the override even if the admin credentials are already set (default is <code>no</code>)</li>
+<li><code>ADMIN_USERNAME</code> : username to access the web UI</li>
+<li><code>ADMIN_PASSWORD</code> : password to access the web UI</li>
+</ul>
+<p>The web UI will use these variables to authenticate you.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Lost password/username</p>
 <p>In case you forgot your UI credentials, you can reset them from the CLI following <a href="#troubleshooting-web-ui">the steps described in the troubleshooting section</a>.</p>
@@ -10319,8 +10392,8 @@ www.example.com_MAX_CLIENT_SIZE=50m
 <li>
 <p><strong>Upgrade BunkerWeb</strong>:</p>
 <ul>
-<li>Upgrade BunkerWeb to the latest version.</li>
-</ul>
+<li>
+<p>Upgrade BunkerWeb to the latest version.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="upgrading-__tabbed_8_1" name="upgrading-__tabbed_8" type="radio" /><input id="upgrading-__tabbed_8_2" name="upgrading-__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_8_1">Docker</label><label for="upgrading-__tabbed_8_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -10360,18 +10433,47 @@ systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 </li>
 <li>
 <p><strong>Update BunkerWeb</strong>:</p>
-<ul>
-<li>Update BunkerWeb to the latest version by following the instructions in the <a href="#integrations-linux">integration Linux page</a>.</li>
-</ul>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="upgrading-__tabbed_9_1" name="upgrading-__tabbed_9" type="radio" /><input id="upgrading-__tabbed_9_2" name="upgrading-__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_9_1">Debian/Ubuntu</label><label for="upgrading-__tabbed_9_2">Fedora/RedHat</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
+<p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb
+</code></pre></div>
+<p>Them, you can update BunkerWeb package :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+</code></pre></div>
+<p>To prevent upgrading BunkerWeb package when executing <code>apt upgrade</code>, you can use the following command :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb
+</code></pre></div>
+<p>More details in the <a href="#integrations-__tabbed_1_1">integration Linux page</a>.</p>
+</div>
+<div class="tabbed-block">
+<p>First, if you have previously hold the BunkerWeb package, unhold it :</p>
+<p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb
+</code></pre></div>
+<p>Them, you can update BunkerWeb package :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
+</code></pre></div>
+<p>To prevent upgrading BunkerWeb package when executing <code>dnf upgrade</code>, you can use the following command :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+</code></pre></div>
+<p>More details in the <a href="#integrations-__tabbed_1_3">integration Linux page</a>.</p>
+</div>
+</div>
+</div>
 </li>
 </ol>
 </div>
 </div>
 </div>
 </li>
+</ul>
+</li>
 <li>
 <p><strong>Check the logs</strong>: Check the logs of the scheduler service to ensure that the migration was successful.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="upgrading-__tabbed_9_1" name="upgrading-__tabbed_9" type="radio" /><input id="upgrading-__tabbed_9_2" name="upgrading-__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_9_1">Docker</label><label for="upgrading-__tabbed_9_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="upgrading-__tabbed_10_1" name="upgrading-__tabbed_10" type="radio" /><input id="upgrading-__tabbed_10_2" name="upgrading-__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_10_1">Docker</label><label for="upgrading-__tabbed_10_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>&lt;scheduler_container&gt;
@@ -10394,18 +10496,18 @@ systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 <p>If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in <a href="#upgrading-__tabbed_1_1">step 1</a>.</p>
 <p>Get support and more information :</p>
 <ul>
-<li><a href="https://panel.bunkerweb.io/?utm_source=doc&amp;utm_campaign=self">Order professionnal support</a></li>
+<li><a href="https://panel.bunkerweb.io/?utm_source=doc&amp;utm_campaign=self">Order professional support</a></li>
 <li><a href="https://github.com/bunkerity/bunkerweb/issues">Create an issue on GitHub</a></li>
 <li><a href="https://discord.bunkerity.com">Join the BunkerWeb Discord server</a></li>
 </ul>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="upgrading-__tabbed_10_1" name="upgrading-__tabbed_10" type="radio" /><input id="upgrading-__tabbed_10_2" name="upgrading-__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_10_1">Docker</label><label for="upgrading-__tabbed_10_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="upgrading-__tabbed_11_1" name="upgrading-__tabbed_11" type="radio" /><input id="upgrading-__tabbed_11_2" name="upgrading-__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_11_1">Docker</label><label for="upgrading-__tabbed_11_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
 <li>
 <p><strong>Restore the backup</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="upgrading-__tabbed_11_1" name="upgrading-__tabbed_11" type="radio" /><input id="upgrading-__tabbed_11_2" name="upgrading-__tabbed_11" type="radio" /><input id="upgrading-__tabbed_11_3" name="upgrading-__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_11_1">SQLite</label><label for="upgrading-__tabbed_11_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_11_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="upgrading-__tabbed_12_1" name="upgrading-__tabbed_12" type="radio" /><input id="upgrading-__tabbed_12_2" name="upgrading-__tabbed_12" type="radio" /><input id="upgrading-__tabbed_12_3" name="upgrading-__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_12_1">SQLite</label><label for="upgrading-__tabbed_12_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_12_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -10497,7 +10599,7 @@ systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
 </li>
 <li>
 <p><strong>Restore the backup</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="upgrading-__tabbed_12_1" name="upgrading-__tabbed_12" type="radio" /><input id="upgrading-__tabbed_12_2" name="upgrading-__tabbed_12" type="radio" /><input id="upgrading-__tabbed_12_3" name="upgrading-__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_12_1">SQLite</label><label for="upgrading-__tabbed_12_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_12_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="upgrading-__tabbed_13_1" name="upgrading-__tabbed_13" type="radio" /><input id="upgrading-__tabbed_13_2" name="upgrading-__tabbed_13" type="radio" /><input id="upgrading-__tabbed_13_3" name="upgrading-__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_13_1">SQLite</label><label for="upgrading-__tabbed_13_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_13_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
@@ -11642,7 +11744,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p>You can also upgrade BunkerWeb to the PRO version at any time. By doing so, you will get an enhanced experience to assist you in the security of your web services. Our goal is to help you focus on your business needs. The PRO version is updated regularly and we try our best to gather feedbacks from enterprises to include the needed features.</p>
 <p>But dedicating time to a specific technology may not be easy depending on your business priorities. Not mentioning that cybersecurity is complex domain where being both judge and jury is not recommended.</p>
 <p>Getting professional services in addition to the open-source or PRO version is the ideal solution to cover your business needs. You can focus on your top priorities and rely on a trusted partner when it comes to web security.</p>
-<p>Please note that professionnal services are directly offered by <a href="https://www.bunkerity.com/?utm_campaign=self&amp;utm_source=doc">Bunkerity</a>, the company maintaining the BunkerWeb project, through our <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> online platform.</p>
+<p>Please note that professional services are directly offered by <a href="https://www.bunkerity.com/?utm_campaign=self&amp;utm_source=doc">Bunkerity</a>, the company maintaining the BunkerWeb project, through our <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> online platform.</p>
 <h2 id="professional-services-which-professional-services-do-you-offer">Which professional services do you offer ?</h2>
 <p>We offer technical support around the BunkerWeb solution. By using this service, we will assist you on the technical issues (installation, configuration, false positive, ...).</p>
 <p>According to your needs you have the choice between "one time" and subscriptions offers.</p>
@@ -11849,7 +11951,7 @@ JvbFAfI3qteepvnjBQ==
     <script id="__config" type="application/json">{"base": "/latest", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.a7c05c9e.min.js"></script>
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

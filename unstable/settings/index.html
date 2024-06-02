@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.25">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
       
       
 
@@ -1769,6 +1769,13 @@
 <td>The S3 bucket</td>
 </tr>
 <tr>
+<td><code>BACKUP_S3_DIR</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>The S3 directory</td>
+</tr>
+<tr>
 <td><code>BACKUP_S3_REGION</code></td>
 <td></td>
 <td>global</td>
@@ -2333,6 +2340,13 @@
 <td>The database URI, following the sqlalchemy format.</td>
 </tr>
 <tr>
+<td><code>DATABASE_URI_READONLY</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.</td>
+</tr>
+<tr>
 <td><code>DATABASE_LOG_LEVEL</code></td>
 <td><code>warning</code></td>
 <td>global</td>
@@ -2794,7 +2808,7 @@
 <td></td>
 <td>multisite</td>
 <td>yes</td>
-<td>Configuration item that will be added to the credentials.ini file for the DNS provider.</td>
+<td>Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456').</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS</code></td>
@@ -2995,6 +3009,20 @@
 <td>Support HTTP2 protocol when HTTPS is enabled.</td>
 </tr>
 <tr>
+<td><code>HTTP3</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Support HTTP3 protocol when HTTPS is enabled.</td>
+</tr>
+<tr>
+<td><code>HTTP3_ALT_SVC_PORT</code></td>
+<td><code>443</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.</td>
+</tr>
+<tr>
 <td><code>LISTEN_HTTP</code></td>
 <td><code>yes</code></td>
 <td>multisite</td>
@@ -3092,7 +3120,7 @@
 <td><code>3</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Version of the OWASP Core Rule Set to use.</td>
+<td>Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).</td>
 </tr>
 <tr>
 <td><code>MODSECURITY_SEC_AUDIT_ENGINE</code></td>
@@ -3572,6 +3600,13 @@
 <td>no</td>
 <td>Determine whether or not to use a secure connection for SMTP.</td>
 </tr>
+<tr>
+<td><code>REPORTING_SMTP_SUBJECT</code></td>
+<td><code>BunkerWeb Report</code></td>
+<td>global</td>
+<td>no</td>
+<td>The subject line of the email.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="reverse-proxy">Reverse proxy</h2>
@@ -3618,7 +3653,7 @@
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_URL</code></td>
-<td></td>
+<td><code>/</code></td>
 <td>multisite</td>
 <td>yes</td>
 <td>Location URL that will be proxied.</td>
@@ -4147,7 +4182,7 @@
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.a7c05c9e.min.js"></script>
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
