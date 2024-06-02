@@ -222,7 +222,7 @@ jobs:
             suffix: "1."
             version: 9
             package: rpm
-          - linux: ubuntu
+          - linux: ubuntu-jammy
             package_arch: amd64
             separator: _
             suffix: ""
