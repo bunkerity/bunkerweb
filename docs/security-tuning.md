@@ -137,7 +137,7 @@ Besides the HTTPS / SSL/TLS configuration, the following settings related to HTT
 | `AUTO_REDIRECT_HTTP_TO_HTTPS` |       `yes`       | When set to `yes`, will redirect every HTTP request to HTTPS only if BunkerWeb is configured with HTTPS.     |
 |        `SSL_PROTOCOLS`        | `TLSv1.2 TLSv1.3` | List of supported SSL/TLS protocols when SSL is enabled.                                                     |
 |            `HTTP2`            |       `yes`       | When set to `yes`, will enable HTTP2 protocol support when using HTTPS.                                      |
-|            `HTTP3`            |       `yes`       | When set to `yes`, will enable HTTP3 protocol support when using HTTPS.                                      |
+|            `HTTP3`            |       `no`       | When set to `yes`, will enable HTTP3 protocol support when using HTTPS.                                      |
 |     `HTTP3_ALT_SVC_PORT`      |       `443`       | HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.                         |
 |         `LISTEN_HTTP`         |       `yes`       | When set to `no`, BunkerWeb will not listen for HTTP requests. Useful if you want HTTPS only for example.    |
 
