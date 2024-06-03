@@ -19,7 +19,7 @@
 - [UI] Add OVERRIDE_ADMIN_CREDS environment variable to allow overriding the default admin credentials even if an admin user already exists
 - [UI] Optimize the way the UI handles the requests and the responses
 - [MISC] Update logger format and datefmt for better readability
-- [DEPS] Updated NGINX version to v1.26.1 (except fedora as it is not available yet, so it is v1.26.0)
+- [DEPS] Updated NGINX version to v1.26.1
 - [DEPS] Updated stream-lua-nginx-module version to the latest commit to incorporate the latest changes and fixes for NGINX v1.26
 - [DEPS] Updated coreruleset-v4 version to v4.3.0
 - [DEPS] Updated lua-resty-openssl version to v1.4.0
