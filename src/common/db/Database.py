@@ -390,6 +390,16 @@ class Database:
             except (ProgrammingError, OperationalError, DatabaseError):
                 return False
 
+    def is_setting(self, setting: str, *, multisite: bool = False) -> bool:
+        """Check if the setting exists in the database and optionally if it's multisite"""
+        with self.__db_session() as session:
+            try:
+                if multisite:
+                    return session.query(Settings).filter_by(id=setting, context="multisite").first() is not None
+                return session.query(Settings).filter_by(name=setting).first() is not None
+            except (ProgrammingError, OperationalError):
+                return False
+
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
         with self.__db_session() as session:
@@ -1167,7 +1177,11 @@ class Database:
                 services = config.get("SERVER_NAME", [])
 
                 if isinstance(services, str):
-                    services = services.split(" ")
+                    services = services.strip().split(" ")
+
+                for i, service in enumerate(services):
+                    if not service:
+                        services.pop(i)
 
                 if db_services:
                     missing_ids = [service.id for service in db_services if service.method == method and service.id not in services]
@@ -1247,7 +1261,10 @@ class Database:
 
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
-                            elif method in (service_setting.method, "autoconf") and service_setting.value != value:
+                            elif (
+                                method == service_setting.method
+                                or (service_setting.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                            ) and service_setting.value != value:
                                 changed_plugins.add(setting.plugin_id)
                                 query = session.query(Services_settings).filter(
                                     Services_settings.service_id == server_name,
@@ -1277,7 +1294,9 @@ class Database:
 
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                            elif method in (global_value.method, "autoconf") and global_value.value != value:
+                            elif (
+                                method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                            ) and global_value.value != value:
                                 changed_plugins.add(setting.plugin_id)
                                 query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
@@ -1320,14 +1339,16 @@ class Database:
 
                             changed_plugins.add(setting.plugin_id)
                             to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                        elif global_value.method == method and value != global_value.value:
+                        elif (
+                            method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                        ) and value != global_value.value:
                             changed_plugins.add(setting.plugin_id)
                             query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
                             if value == setting.default:
                                 query.delete()
                                 continue
-                            query.update({Global_values.value: value})
+                            query.update({Global_values.value: value, Global_values.method: method})
 
             if changed_services:
                 changed_plugins = set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all())
@@ -1423,12 +1444,12 @@ class Database:
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
-                elif custom_config["checksum"] != custom_conf.checksum and method in (custom_conf.method, "autoconf"):
+                elif custom_config["checksum"] != custom_conf.checksum and (
+                    method == custom_conf.method or (custom_conf.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                ):
                     custom_conf.data = custom_config["data"]
                     custom_conf.checksum = custom_config["checksum"]
-
-                    if method == "autoconf":
-                        custom_conf.method = method
+                    custom_conf.method = method
             if changed:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)

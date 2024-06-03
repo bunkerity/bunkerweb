@@ -35,8 +35,7 @@ class SwarmController(Controller):
         for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
             variable = env.split("=")[0]
             value = env.replace(f"{variable}=", "", 1)
-            if self._is_setting(variable):
-                instance_env[variable] = value
+            instance_env[variable] = value
 
         for task in controller_instance.tasks():
             if task["DesiredState"] != "running":
@@ -57,34 +56,8 @@ class SwarmController(Controller):
         for variable, value in controller_service.attrs["Spec"]["Labels"].items():
             if not variable.startswith("bunkerweb."):
                 continue
-            real_variable = variable.replace("bunkerweb.", "", 1)
-            if not self._is_setting_context(real_variable, "multisite"):
-                continue
-            service[real_variable] = value
+            service[variable.replace("bunkerweb.", "", 1)] = value
         return [service]
-
-    def _get_static_services(self) -> List[dict]:
-        services = []
-        variables = {}
-        for instance in self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"}):
-            if not instance.attrs or not instance.attrs.get("Spec", {}).get("TaskTemplate", {}).get("ContainerSpec", {}).get("Env"):
-                continue
-
-            for env in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
-                variable = env.split("=")[0]
-                value = env.replace(f"{variable}=", "", 1)
-                variables[variable] = value
-        if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
-            for server_name in variables["SERVER_NAME"].strip().split(" "):
-                service = {}
-                service["SERVER_NAME"] = server_name
-                for variable, value in variables.items():
-                    prefix = variable.split("_")[0]
-                    real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_setting_context(real_variable, "multisite"):
-                        service[real_variable] = value
-                services.append(service)
-        return services
 
     def get_configs(self) -> Dict[str, Dict[str, Any]]:
         self.__swarm_configs = []
@@ -148,36 +121,51 @@ class SwarmController(Controller):
         while True:
             locked = False
             error = False
+            applied = False
             try:
                 for event in self.__client.events(decode=True, filters={"type": event_type}):
+                    applied = False
                     self.__internal_lock.acquire()
                     locked = True
                     if not self.__process_event(event):
                         self.__internal_lock.release()
                         locked = False
                         continue
+
                     try:
-                        self.wait_applying()
-                        self._update_settings()
-                        self._instances = self.get_instances()
-                        self._services = self.get_services()
-                        self._configs = self.get_configs()
-                        if not self.update_needed(self._instances, self._services, configs=self._configs):
-                            self.__internal_lock.release()
-                            locked = False
-                            continue
-                        self._logger.info(f"Caught Swarm event ({event_type}), deploying new configuration ...")
-                        if not self.apply_config():
-                            self._logger.error("Error while deploying new configuration")
-                        else:
-                            self._logger.info(
-                                "Successfully deployed new configuration 🚀",
-                            )
-                            self._set_autoconf_load_db()
-                    except:
+                        to_apply = False
+                        while not applied:
+                            waiting = self.have_to_wait()
+                            self._update_settings()
+                            self._instances = self.get_instances()
+                            self._services = self.get_services()
+                            self._configs = self.get_configs()
+
+                            if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                                self.__internal_lock.release()
+                                locked = False
+                                applied = True
+                                continue
+
+                            to_apply = True
+                            if waiting:
+                                sleep(1)
+                                continue
+
+                            self._logger.info(f"Caught Swarm event ({event_type}), deploying new configuration ...")
+                            if not self.apply_config():
+                                self._logger.error("Error while deploying new configuration")
+                            else:
+                                self._logger.info(
+                                    "Successfully deployed new configuration 🚀",
+                                )
+                                self._set_autoconf_load_db()
+                            applied = True
+                    except BaseException:
                         self._logger.error(f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}")
-                    self.__internal_lock.release()
-                    locked = False
+                    finally:
+                        self.__internal_lock.release()
+                        locked = False
             except:
                 self._logger.error(
                     f"Exception while reading Swarm event ({event_type}) :\n{format_exc()}",

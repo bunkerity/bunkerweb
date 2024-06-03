@@ -29,9 +29,9 @@
     },
     {
       "id": "nginx",
-      "name": "Nginx v1.26.0",
+      "name": "Nginx v1.26.1",
       "url": "https://github.com/nginx/nginx.git",
-      "commit": "361f6bf4b1cd5057d8f6365d1c0a94f3d72824e4"
+      "commit": "02725ce722bc7b34fa307d611eac3956ef744efa"
     },
     {
       "id": "ngx_brotli",

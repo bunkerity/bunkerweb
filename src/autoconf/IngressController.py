@@ -55,9 +55,7 @@ class IngressController(Controller):
                 ) in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
-                    variable = annotation.replace("bunkerweb.io/", "", 1)
-                    if self._is_setting(variable):
-                        instance["env"][variable] = value
+                    instance["env"][annotation.replace("bunkerweb.io/", "", 1)] = value
         return [instance]
 
     def _get_controller_services(self) -> list:
@@ -139,9 +137,7 @@ class IngressController(Controller):
                     server_name = service["SERVER_NAME"].strip().split(" ")[0]
                     if not variable.startswith(f"{server_name}_"):
                         continue
-                    variable = variable.replace(f"{server_name}_", "", 1)
-                    if self._is_setting_context(variable, "multisite"):
-                        service[variable] = value
+                    service[variable.replace(f"{server_name}_", "", 1)] = value
 
         # parse tls
         if controller_service.spec.tls:
@@ -173,34 +169,6 @@ class IngressController(Controller):
                                 service["USE_CUSTOM_SSL"] = "yes"
                                 service["CUSTOM_SSL_CERT_DATA"] = secret_tls.data["tls.crt"]
                                 service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
-        return services
-
-    def _get_static_services(self) -> List[dict]:
-        services = []
-        variables = {}
-        for instance in self.__corev1.list_pod_for_all_namespaces(watch=False).items:
-            if not instance.metadata.annotations or "bunkerweb.io/INSTANCE" not in instance.metadata.annotations:
-                continue
-
-            pod = None
-            for container in instance.spec.containers:
-                if container.name == "bunkerweb":
-                    pod = container
-                    break
-            if not pod:
-                continue
-
-            variables = {env.name: env.value or "" for env in pod.env}
-
-        if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
-            for server_name in variables["SERVER_NAME"].strip().split(" "):
-                service = {"SERVER_NAME": server_name}
-                for variable, value in variables.items():
-                    prefix = variable.split("_")[0]
-                    real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_setting_context(real_variable, "multisite"):
-                        service[real_variable] = value
-                services.append(service)
         return services
 
     def get_configs(self) -> dict:
@@ -270,42 +238,49 @@ class IngressController(Controller):
         while True:
             locked = False
             error = False
+            applied = False
             try:
                 for event in w.stream(what):
+                    applied = False
                     self.__internal_lock.acquire()
                     locked = True
                     if not self.__process_event(event):
                         self.__internal_lock.release()
                         locked = False
                         continue
-                    self.wait_applying()
-                    self._update_settings()
-                    self._instances = self.get_instances()
-                    self._services = self.get_services()
-                    self._configs = self.get_configs()
-                    if not self.update_needed(self._instances, self._services, configs=self._configs):
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-                    self._logger.info(
-                        f"Caught kubernetes event ({watch_type}), deploying new configuration ...",
-                    )
-                    try:
-                        ret = self.apply_config()
-                        if not ret:
-                            self._logger.error(
-                                "Error while deploying new configuration ...",
-                            )
-                        else:
-                            self._logger.info(
-                                "Successfully deployed new configuration 🚀",
-                            )
 
-                            self._set_autoconf_load_db()
-                    except:
-                        self._logger.error(
-                            f"Exception while deploying new configuration :\n{format_exc()}",
-                        )
+                    to_apply = False
+                    while not applied:
+                        waiting = self.have_to_wait()
+                        self._update_settings()
+                        self._instances = self.get_instances()
+                        self._services = self.get_services()
+                        self._configs = self.get_configs()
+
+                        if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                            self.__internal_lock.release()
+                            locked = False
+                            applied = True
+                            continue
+
+                        to_apply = True
+                        if waiting:
+                            sleep(1)
+                            continue
+
+                        self._logger.info(f"Caught kubernetes event ({watch_type}), deploying new configuration ...")
+                        try:
+                            ret = self.apply_config()
+                            if not ret:
+                                self._logger.error("Error while deploying new configuration ...")
+                            else:
+                                self._logger.info("Successfully deployed new configuration 🚀")
+
+                                self._set_autoconf_load_db()
+                        except:
+                            self._logger.error(f"Exception while deploying new configuration :\n{format_exc()}")
+                        applied = True
+
                     self.__internal_lock.release()
                     locked = False
             except ApiException as e:

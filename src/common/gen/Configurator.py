@@ -86,6 +86,9 @@ class Configurator:
             return {}
         servers = {}
         for server_name in self.__variables["SERVER_NAME"].strip().split(" "):
+            if not server_name:
+                continue
+
             if not re_search(self.__settings["SERVER_NAME"]["regex"], server_name):
                 self.__logger.warning(f"Ignoring server name {server_name} because regex is not valid")
                 continue

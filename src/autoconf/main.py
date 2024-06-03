@@ -59,11 +59,7 @@ try:
         logger.info(f"Instance #{i} : {instance['name']}")
         i += 1
 
-    # Run first configuration
-    ret = controller.apply_config()
-    if not ret:
-        logger.error("Error while applying initial configuration")
-        _exit(1)
+    controller.wait_applying(True)
 
     # Process events
     Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy").write_text("ok")
