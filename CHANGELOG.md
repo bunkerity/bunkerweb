@@ -2,6 +2,7 @@
 
 ## v1.5.8 - ????/??/??
 
+- [LINUX] Support Fedora 40 and drop support of Fedora 39
 - [BUGFIX] Fix potential errors when upgrading from a previous version
 - [BUGFIX] Fix rare bug on the web UI when editing the SERVER_NAME setting of a service
 - [BUGFIX] Fix potential race conditions between the autoconf and the scheduler waiting for each other indefinitely

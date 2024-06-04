@@ -197,7 +197,7 @@ jobs:
           - linux: fedora
             separator: "-"
             suffix: "1."
-            version: 39
+            version: 40
             package: rpm
           - linux: el
             separator: "-"
