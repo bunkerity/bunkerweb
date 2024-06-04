@@ -169,8 +169,7 @@ do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bu
 # Installing lua-resty-openssl
 echo "ℹ️ Installing lua-resty-openssl"
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-openssl"
-do_and_check_cmd make LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
-do_and_check_cmd bash -c "mv lib/resty/openssl.lua /usr/share/bunkerweb/deps/lib/lua/resty/"
+do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
 
 # Installing lua-ffi-zlib
 echo "ℹ️ Installing lua-ffi-zlib"

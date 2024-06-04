@@ -244,7 +244,7 @@ jobs:
             package_arch: x86_64
             separator: "-"
             suffix: "1."
-            version: 39
+            version: 40
             package: rpm
           - linux: el
             package_arch: x86_64

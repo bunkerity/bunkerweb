@@ -2,6 +2,7 @@
 
 ## v1.5.8 - ????/??/??
 
+- [LINUX] Support Fedora 40 and drop support of Fedora 39
 - [BUGFIX] Fix potential errors when upgrading from a previous version
 - [BUGFIX] Fix rare bug on the web UI when editing the SERVER_NAME setting of a service
 - [BUGFIX] Fix potential race conditions between the autoconf and the scheduler waiting for each other indefinitely
@@ -19,7 +20,7 @@
 - [UI] Add OVERRIDE_ADMIN_CREDS environment variable to allow overriding the default admin credentials even if an admin user already exists
 - [UI] Optimize the way the UI handles the requests and the responses
 - [MISC] Update logger format and datefmt for better readability
-- [DEPS] Updated NGINX version to v1.26.1 (except fedora as it is not available yet, so it is v1.26.0)
+- [DEPS] Updated NGINX version to v1.26.1
 - [DEPS] Updated stream-lua-nginx-module version to the latest commit to incorporate the latest changes and fixes for NGINX v1.26
 - [DEPS] Updated coreruleset-v4 version to v4.3.0
 - [DEPS] Updated lua-resty-openssl version to v1.4.0

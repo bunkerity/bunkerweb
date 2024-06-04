@@ -12,7 +12,7 @@ ngx_feature_name=
 ngx_feature_run=no
 ngx_feature_incs="#include <modsecurity/modsecurity.h>"
 ngx_feature_libs="-lmodsecurity"
-ngx_feature_test='printf("hello");'
+ngx_feature_test='msc_init();'
 ngx_modsecurity_opt_I=
 ngx_modsecurity_opt_L=
 
