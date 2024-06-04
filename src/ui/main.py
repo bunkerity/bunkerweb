@@ -2151,7 +2151,7 @@ def bans():
         sentinel_hosts = db_config.get("REDIS_SENTINEL_HOSTS", [])
 
         if isinstance(sentinel_hosts, str):
-            sentinel_hosts = [host.split(":") if ":" in host else host for host in sentinel_hosts.split(" ") if host]
+            sentinel_hosts = [host.split(":") if ":" in host else (host, "26379") for host in sentinel_hosts.split(" ") if host]
 
         if sentinel_hosts:
             sentinel_username = db_config.get("REDIS_SENTINEL_USERNAME", None) or None
