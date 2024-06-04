@@ -180,8 +180,8 @@ class CLI(ApiCaller):
                 self.__logger.error("USE_REDIS is set to yes but REDIS_HOST or REDIS_SENTINEL_HOSTS is not set, disabling redis")
                 self.__use_redis = False
 
-        if self.__integration == "Linux":
-            super().__init__(
+        if Path(sep, "usr", "sbin", "nginx").exists() or self.__integration == "Linux":
+            return super().__init__(
                 [
                     API(
                         f"http://127.0.0.1:{self.__get_variable('API_HTTP_PORT', '5000')}",
@@ -189,9 +189,8 @@ class CLI(ApiCaller):
                     )
                 ]
             )
-        else:
-            super().__init__()
-            self.auto_setup(self.__integration)
+        super().__init__()
+        self.auto_setup(self.__integration)
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
