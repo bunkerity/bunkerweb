@@ -4,14 +4,16 @@ import { contentIndex } from "@utils/tabindex.js";
 import { useEventStore } from "@store/event.js";
 import Container from "@components/Widget/Container.vue";
 import Icons from "@components/Widget/Icons.vue";
+import { v4 as uuidv4 } from "uuid";
 
 /** 
   @name Widget/Button.vue
   @description This component is a standard button.
-  You can link this button to the event store on click with eventAttr.
+  You can link this button to the event store with the clickAttr object.
   This will allow you to share a value with other components, for example switching form on a click.
-  The eventAttr object must contain the store name and the value to send on click at least.
-  It can also contain the target id element and the expanded value, this will add additionnal accessibility attributs to the button.
+  The clickAttr object must contain at least the key, defaultValue and value to work with the event store.
+  It can also contain the targetId element in case the button is linked to another element, like a modal or a sidebar.
+  We can specify a valueExpanded value, we will check the current value in the store and the valueExpanded, this will update the aria-expanded attribute of the button.
   @example
   {
     id: "open-modal-btn",
@@ -22,9 +24,9 @@ import Icons from "@components/Widget/Icons.vue";
     size: "normal",
     iconName: "modal",
     iconColor: "white",
-    eventAttr: {"store" : "modal", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},7
+    clickAttr: {"key" : "modal-config", "defaultValue" : "close", "clickValue" : "open", "targetId" : "modal_id", "valueExpanded" : "open"},
   }
-  @param {string} id
+  @param {string} [id=uuid()] - Unique id of the button
   @param {string} text - Content of the button. Can be a translation key or by default raw text.
   @param {string} [type="button"] - Can be of type button || submit
   @param {boolean} [disabled=false]
@@ -33,7 +35,8 @@ import Icons from "@components/Widget/Icons.vue";
   @param {string} [size="normal"] - Can be of size sm || normal || lg || xl
   @param {string} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
   @param {string} [iconColor=""]
-  @param {object} [eventAttr={}] - Store event on click {"store" : <store_name>, "default" : <default_value>,  "value" : <value_stored_on_click>, "target"<optional> : <target_id_element>, "valueExpanded" : "expanded_value"}
+  @param {object} [clickAttr={}] - Click event manage with event store {"key" : <key_name>, "defaultValue" : <defaultValue = "set this value to store if not done">,  "clickValue" : <value_set_on_click>, "targetId"<optional> : <targetId_element="id of element link to the button event">, "valueExpanded<optional>" : <expanded_value="check current value in store and this value to determine a expanded true or false">}
+  @param {array} [staticAttr=[]] - Static attributes that can be useful to do some check with script (for example {"data-attr" : "value"} will add data-attr="value" to the button)
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
 
@@ -42,8 +45,8 @@ const eventStore = useEventStore();
 const props = defineProps({
   id: {
     type: String,
-    required: true,
-    default: "",
+    required: false,
+    default: uuidv4(),
   },
   // valid || delete || info
   text: {
@@ -91,10 +94,13 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  // {"store" : <store_name>, "default" : <default_value>,  "value" : <value_stored_on_click>, "target"<optional> : <target_id_element>, "valueExpanded" : "expanded_value"}
-  // type will add additionnal accessibility attributs to the button
-  // for example, if button open a modal : {"store" : "modal", "default" : "close", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"}
-  eventAttr: {
+  // Example of button opening a modal : {"key" : "modal", "defaultValue" : "close", "clickValue" : "open", "targetId" : "modal_id", "valueExpanded" : "open"}
+  clickAttr: {
+    type: Object,
+    required: false,
+    default: {},
+  },
+  staticAttr: {
     type: Object,
     required: false,
     default: {},
@@ -118,6 +124,7 @@ const buttonClass = computed(() => {
 });
 
 onMounted(() => {
+  setStaticAttr();
   updateData();
 });
 
@@ -125,20 +132,26 @@ watch(eventStore, () => {
   updateData();
 });
 
+function setStaticAttr() {
+  for (const [key, value] of Object.entries(props.staticAttr)) {
+    btnEl.value.setAttribute(key, value);
+  }
+}
+
 function updateData(isClick = false) {
-  const isStore = props.eventAttr?.store ? true : false;
-  const isValue = props.eventAttr?.value ? true : false;
-  const isDefault = props.eventAttr?.default ? true : false;
-  if (!isStore || !isValue || !isDefault) return;
+  const isKey = props.clickAttr?.key ? true : false;
+  const isValue = props.clickAttr?.clickValue ? true : false;
+  const isDefault = props.clickAttr?.defaultValue ? true : false;
+  if (!isKey || !isValue || !isDefault) return;
 
   isClick
-    ? eventStore.updateEvent(props.eventAttr.store, props.eventAttr.value)
-    : eventStore.addEvent(props.eventAttr.store, props.eventAttr.default);
+    ? eventStore.updateEvent(props.clickAttr.key, props.clickAttr.clickValue)
+    : eventStore.addEvent(props.clickAttr.key, props.clickAttr.defaultValue);
 
   try {
-    const expanded = props.eventAttr?.valueExpanded
-      ? props.eventAttr.valueExpanded ===
-        eventStore.getEvent(props.eventAttr.store)
+    const expanded = props.clickAttr?.valueExpanded
+      ? props.clickAttr.valueExpanded ===
+        eventStore.getEvent(props.clickAttr.key)
         ? "true"
         : "false"
       : false;
@@ -152,7 +165,9 @@ function updateData(isClick = false) {
   } catch (e) {}
 
   try {
-    const controls = props.eventAttr?.target ? props.eventAttr.target : false;
+    const controls = props.clickAttr?.targetId
+      ? props.clickAttr.targetId
+      : false;
     if (controls) {
       btnEl.value.setAttribute("aria-controls", controls);
     }

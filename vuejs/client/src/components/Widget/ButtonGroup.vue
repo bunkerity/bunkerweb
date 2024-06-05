@@ -1,8 +1,7 @@
 <script setup>
-import { computed, ref, watch, onBeforeMount, onMounted } from "vue";
-import { contentIndex } from "@utils/tabindex.js";
 import Flex from "@components/Widget/Flex.vue";
 import Button from "@components/Widget/Button.vue";
+import { v4 as uuidv4 } from "uuid";
 
 /** 
   @name Widget/ButtonGroup.vue
@@ -38,7 +37,7 @@ import Button from "@components/Widget/Button.vue";
       },
     ],
   }
-  @param {string} id
+  @param {string} [id=uuidv4()] - Unique id of the button group
   @param {string} [groupClass="justify-center align-center"] - Additional class for the flex container
   @param {array} buttons - List of buttons to display. Button component is used.
 */
@@ -47,7 +46,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: "group-btn",
+    default: uuidv4(),
   },
   groupClass: {
     type: String,

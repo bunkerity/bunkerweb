@@ -3,7 +3,7 @@ import { reactive, onBeforeMount } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import Builder from "@components/Builder.vue";
 
-/** 
+/**
   @name Page/Home.vue
   @description This component is the home page.
   This page displays an overview of multiple stats related to BunkerWeb.

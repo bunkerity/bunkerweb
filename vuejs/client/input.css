@@ -848,7 +848,7 @@ body {
 }
 
 .content-detail-list-subtitle {
-  @apply min-w-[2rem] break-all transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
+  @apply min-w-[2rem] break-all transition duration-300 ease-in-out pl-3 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
 }
 
 /* STAT COMPONENT */
