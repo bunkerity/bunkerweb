@@ -142,8 +142,9 @@ class SwarmController(Controller):
                             self._configs = self.get_configs()
 
                             if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
-                                self.__internal_lock.release()
-                                locked = False
+                                if locked:
+                                    self.__internal_lock.release()
+                                    locked = False
                                 applied = True
                                 continue
 
@@ -163,7 +164,8 @@ class SwarmController(Controller):
                             applied = True
                     except BaseException:
                         self._logger.error(f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}")
-                    finally:
+
+                    if locked:
                         self.__internal_lock.release()
                         locked = False
             except:
