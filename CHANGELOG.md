@@ -19,6 +19,7 @@
 - [UI] Fallback to self-signed certificate when UI is installed with setup wizard and let's encrypt is not used
 - [UI] Add OVERRIDE_ADMIN_CREDS environment variable to allow overriding the default admin credentials even if an admin user already exists
 - [UI] Optimize the way the UI handles the requests and the responses
+- [AUTOCONF] Refactor Autoconf config parsing and saving logic so that it doesn't override the scheduler or UI config every time
 - [MISC] Update logger format and datefmt for better readability
 - [DEPS] Updated NGINX version to v1.26.1
 - [DEPS] Updated stream-lua-nginx-module version to the latest commit to incorporate the latest changes and fixes for NGINX v1.26
