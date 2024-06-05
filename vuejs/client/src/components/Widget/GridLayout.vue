@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, onMounted } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 /** 
   @name Widget/GridLayout.vue
@@ -19,6 +20,7 @@ import { computed, ref, onMounted } from "vue";
   @param {string} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
   @param {object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
   @param {string} [gridLayoutClass="items-start"] - Additional class
+  @param {string} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
 */
 
 const props = defineProps({
@@ -36,6 +38,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  tabId: {
+    type: String,
+    required: false,
+    default: contentIndex,
   },
   columns: {
     type: Object,
@@ -68,6 +75,7 @@ onMounted(() => {
   if (props.link) {
     gridLayoutEl.value.setAttribute("href", props.link);
     gridLayoutEl.value.setAttribute("rel", "noopener");
+    gridLayoutEl.value.setAttribute("tabindex", props.tabId);
   }
 
   if (props.link && props.link.startsWith("http")) {

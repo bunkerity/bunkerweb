@@ -34,7 +34,7 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  value: {
+  stat: {
     type: [String, Number],
     required: true,
   },
@@ -75,7 +75,7 @@ const props = defineProps({
       ]"
     >
       <TitleStat :title="props.title" />
-      <ContentStat :value="props.value" />
+      <ContentStat :stat="props.stat" />
       <SubtitleStat
         v-if="props.subtitle"
         :subtitle="props.subtitle"

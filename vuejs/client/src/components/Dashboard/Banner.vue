@@ -14,14 +14,16 @@ const bannerStore = useBannerStore();
 
 const banner = reactive({
   visibleId: 1,
-  default : [
+  default: [
     {
-      title: "Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial",
+      title:
+        "Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial",
       link: "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro",
       linkText: "here",
     },
     {
-      title: "Need premium support or tailored consulting around BunkerWeb ? Check out our",
+      title:
+        "Need premium support or tailored consulting around BunkerWeb ? Check out our",
       link: "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#services",
       linkText: "professional services.",
     },
@@ -33,15 +35,18 @@ const banner = reactive({
   ],
   isTabIndex: false,
   api: [],
-  apiFormat : computed(() => {
-    if(banner.api.length === 0) return [];
+  apiFormat: computed(() => {
+    if (banner.api.length === 0) return [];
     // deep copy
     const data = JSON.parse(JSON.stringify(banner.api));
-      data.forEach((item, index) => {
+    data.forEach((item, index) => {
       // I want to match everything inside class and replace it
-      data[index].content = item.content.replace(/class='(.+?)'|class="(.+?)"/g, 'class="banner-item-text"');
+      data[index].content = item.content.replace(
+        /class='(.+?)'|class="(.+?)"/g,
+        'class="banner-item-text"'
+      );
     });
-    return data
+    return data;
   }),
 });
 
@@ -50,45 +55,44 @@ const banner = reactive({
 function setupBanner() {
   // Check if data, and if case, that data is not older than one hour
   // Case it is, refetch
-    if (sessionStorage.getItem("bannerRefetch") !== null) {
-      const storeStamp = sessionStorage.getItem("bannerRefetch");
-      const nowStamp = Math.round(new Date().getTime() / 1000);
-      if (+nowStamp > storeStamp) {
-        sessionStorage.removeItem("bannerRefetch");
-        sessionStorage.removeItem("bannerNews");
-      }
+  if (sessionStorage.getItem("bannerRefetch") !== null) {
+    const storeStamp = sessionStorage.getItem("bannerRefetch");
+    const nowStamp = Math.round(new Date().getTime() / 1000);
+    if (+nowStamp > storeStamp) {
+      sessionStorage.removeItem("bannerRefetch");
+      sessionStorage.removeItem("bannerNews");
     }
-    // Case we already have the data
-    if (sessionStorage.getItem("bannerNews") !== null) {
-      banner.api =
-        JSON.parse(sessionStorage.getItem("bannerNews"))
-        banner.default = [];
-        runBanner();
-        return;
-    }
-    // Try to fetch api data
-    fetch("https://www.bunkerweb.io/api/bw-ui-news")
-      .then((res) => {
-        return res.json();
-      })
-      .then((res) => {
-        sessionStorage.setItem("bannerNews", JSON.stringify(res.data[0].data));
-        // Refetch after one hour
-        sessionStorage.setItem(
-          "bannerRefetch",
-          Math.round(new Date().getTime() / 1000) + 3600,
-        );
-        banner.api = res.data[0].data;
-        if(banner.api.length > 0) {
-          banner.default = [];
-        }
-        runBanner();
-      })
-      .catch((e) => {
-        console.error(e);
-        runBanner();
-      });
   }
+  // Case we already have the data
+  if (sessionStorage.getItem("bannerNews") !== null) {
+    banner.api = JSON.parse(sessionStorage.getItem("bannerNews"));
+    banner.default = [];
+    runBanner();
+    return;
+  }
+  // Try to fetch api data
+  fetch("https://www.bunkerweb.io/api/bw-ui-news")
+    .then((res) => {
+      return res.json();
+    })
+    .then((res) => {
+      sessionStorage.setItem("bannerNews", JSON.stringify(res.data[0].data));
+      // Refetch after one hour
+      sessionStorage.setItem(
+        "bannerRefetch",
+        Math.round(new Date().getTime() / 1000) + 3600
+      );
+      banner.api = res.data[0].data;
+      if (banner.api.length > 0) {
+        banner.default = [];
+      }
+      runBanner();
+    })
+    .catch((e) => {
+      console.error(e);
+      runBanner();
+    });
+}
 
 // Banner animation effect
 function runBanner() {
@@ -97,7 +101,7 @@ function runBanner() {
   // Switch item every interval and
   setTimeout(() => {
     const prev = banner.visibleId;
-    banner.visibleId = banner.visibleId === 3 ? 1 : banner.visibleId + 1;
+    banner.visibleId = banner.visibleId === 2 ? 0 : banner.visibleId + 1;
     const next = banner.visibleId;
 
     // Hide previous one
@@ -124,10 +128,9 @@ function runBanner() {
 
     runBanner();
   }, nextDelay);
-
 }
-  // Observe banner and set is visible or not to
-  // Update float button and menu position
+// Observe banner and set is visible or not to
+// Update float button and menu position
 function observeBanner() {
   const options = {
     root: null,
@@ -148,22 +151,25 @@ function observeBanner() {
 function noTabindex() {
   const bannerItems = document.querySelectorAll(".banner-item");
   bannerItems.forEach((item) => {
-    item.classList.remove("banner-tabindex-highlight", 'banner-tabindex-hide');
+    item.classList.remove("banner-tabindex-highlight", "banner-tabindex-hide");
   });
 }
 
 function isTabindex() {
   const activeElement = document.activeElement;
-    const bannerItems = document.querySelectorAll(".banner-item");
-    bannerItems.forEach((item) => {
-      item.classList.add("banner-tabindex-hide");
-      item.classList.remove("banner-tabindex-highlight");
-  }); 
-    // Higher z-index for the focused element
-    activeElement.closest('.banner-item').classList.add("banner-tabindex-highlight");
-    activeElement.closest('.banner-item').classList.remove("banner-tabindex-hide");
+  const bannerItems = document.querySelectorAll(".banner-item");
+  bannerItems.forEach((item) => {
+    item.classList.add("banner-tabindex-hide");
+    item.classList.remove("banner-tabindex-highlight");
+  });
+  // Higher z-index for the focused element
+  activeElement
+    .closest(".banner-item")
+    .classList.add("banner-tabindex-highlight");
+  activeElement
+    .closest(".banner-item")
+    .classList.remove("banner-tabindex-hide");
 }
-
 
 // Focus with tabindex break banner animation
 // When a banner is focused, we need to add in front of the current banner the focus element
@@ -171,8 +177,12 @@ function isTabindex() {
 function handleTabIndex() {
   // Get the active element after tabindex click
   document.addEventListener("keyup", (e) => {
-    if(e.key !== "Tab" && !document.activeElement.classList.contains("banner-item-text")) return;
-    if(document.activeElement.classList.contains("banner-item-text")) {
+    if (
+      e.key !== "Tab" &&
+      !document.activeElement.classList.contains("banner-item-text")
+    )
+      return;
+    if (document.activeElement.classList.contains("banner-item-text")) {
       isTabindex();
       return;
     } else {
@@ -180,7 +190,6 @@ function handleTabIndex() {
     }
   });
 }
-
 
 onMounted(() => {
   observeBanner();
@@ -200,7 +209,7 @@ onMounted(() => {
       :class="[index === 1 ? 'left-0' : 'left-full opacity-0']"
     >
       <p class="banner-item-text">
-        {{  bannerEl.title }}
+        {{ bannerEl.title }}
         <a
           :tabindex="bannerIndex"
           class="banner-item-link"
@@ -217,8 +226,7 @@ onMounted(() => {
       class="banner-item"
       :class="[index === 1 ? 'left-0' : 'left-full opacity-0']"
     >
-      <div
-        v-html="bannerEl.content"></div>
+      <div v-html="bannerEl.content"></div>
     </div>
   </div>
 </template>

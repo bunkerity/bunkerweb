@@ -1,4 +1,6 @@
 import { createI18n } from "vue-i18n";
+import en from "@lang/en.json" assert { type: "json" };
+import fr from "@lang/fr.json" assert { type: "json" };
 
 /**
   @name lang.js
@@ -7,9 +9,6 @@ import { createI18n } from "vue-i18n";
   This lang.js works with vue-i18n.
   We need to instanciate the i18n object in the main file of the application inside /pages.
 */
-
-import en from "@lang/en.json" assert { type: "json" };
-import fr from "@lang/fr.json" assert { type: "json" };
 
 const availablesLangs = ["en", "fr"];
 

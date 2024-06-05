@@ -40,56 +40,56 @@ import "@assets/css/flatpickr.dark.css";
   @param {boolean} [required=false]
   @param {string} [headerClass=""]
   @param {string} [containerClass=""]
-  @param {string|number} [tabId=""]
+  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
 
 const props = defineProps({
   // id && type && disabled && required && value
-    id: {
-        type: String,
-        required: true,
-    },
-    name : {
-        type: String,
-        required: false,
-    },
-    label: {
-        type: String,
-        required: false,
-    },
-    hideLabel: {
-        type: Boolean,
-        required: false,
-    },
-    headerClass: {
-        type: String,
-        required: false,
-        default: "",
-    },
-    containerClass: {
-        type: String,
-        required: false,
-        default: "",
-    },
-    inpClass: {
+  id: {
+    type: String,
+    required: true,
+  },
+  name: {
     type: String,
     required: false,
-        default: "",
-    },
+  },
+  label: {
+    type: String,
+    required: false,
+  },
+  hideLabel: {
+    type: Boolean,
+    required: false,
+  },
+  headerClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  containerClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  inpClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
 
-    columns: {
-        type: [Object, Boolean],
-        required: false,
-        default : false
-    },
-    disabled: {
-        type: Boolean,
-        required: false,
-    },
-    required: {
-        type: Boolean,
-        required: false,
-    },
+  columns: {
+    type: [Object, Boolean],
+    required: false,
+    default: false,
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+  },
+  required: {
+    type: Boolean,
+    required: false,
+  },
   defaultDate: {
     type: [String, Number, Date],
     required: false,
@@ -110,7 +110,7 @@ const props = defineProps({
   tabId: {
     type: [String, Number],
     required: false,
-    default: ""
+    default: contentIndex,
   },
 });
 
@@ -134,7 +134,7 @@ onMounted(() => {
     time_24hr: true,
     minuteIncrement: 1,
     onChange(selectedDates, dateStr, instance) {
-      if(!dateStr && props.required) return date.isValid = false;
+      if (!dateStr && props.required) return (date.isValid = false);
       //Check if date is in interval
       try {
         const currStamp = Date.parse(dateStr);
@@ -193,7 +193,7 @@ onMounted(() => {
 function setMonthSelect(calendar, id) {
   // Hide default select and optionss
   const defaultSelect = calendar.querySelector(
-    ".flatpickr-monthDropdown-months",
+    ".flatpickr-monthDropdown-months"
   );
   defaultSelect.classList.add("hidden");
   defaultSelect.setAttribute("aria-hidden", "true");
@@ -210,7 +210,7 @@ function setMonthSelect(calendar, id) {
   container.classList.add(
     "flatpickr-monthDropdown-months",
     "inline",
-    "relative",
+    "relative"
   );
   // Select-like
   const selectCustom = document.createElement("button");
@@ -239,7 +239,7 @@ function setMonthSelect(calendar, id) {
         "text-white",
         "py-1",
         "hover:brightness-125",
-        "focus:brightness-125",
+        "focus:brightness-125"
       );
       opt.setAttribute("data-month", option.value);
       opt.setAttribute("data-value", option.value);
@@ -268,7 +268,7 @@ function setPickerAtt(calendarEl, id = false) {
   }
 
   const inps = calendarEl.querySelectorAll(
-    'input.numInput[type="number"][maxlength]',
+    'input.numInput[type="number"][maxlength]'
   );
   inps.forEach((inp) => {
     inp.setAttribute("data-maxlength", inp.getAttribute("maxlength"));
@@ -315,7 +315,7 @@ function handleEvents(calendarEl, id, datepicker) {
     ) {
       // Get update value
       const selectDefault = calendarEl.querySelector(
-        "select.flatpickr-monthDropdown-months",
+        "select.flatpickr-monthDropdown-months"
       );
 
       let monthValue;
@@ -379,7 +379,7 @@ function handleEvents(calendarEl, id, datepicker) {
     if (e.key === "Tab" && e.shiftKey) {
       e.preventDefault();
       const currActive = calendarEl.querySelector(
-        '[data-tabindex-active="true"]',
+        '[data-tabindex-active="true"]'
       );
       if (!currActive) return;
 
@@ -432,7 +432,7 @@ function handleEvents(calendarEl, id, datepicker) {
           //Focus previous element with a tabindex
           const currIndex = datepicker.input.getAttribute("tabindex");
           const elements = document.querySelectorAll(
-            `input[tabindex="${currIndex}"]`,
+            `input[tabindex="${currIndex}"]`
           );
           // Remove disabled elements
           const filtered = [];
@@ -472,7 +472,7 @@ function handleEvents(calendarEl, id, datepicker) {
         //Focus next element with a tabindex
         const currIndex = datepicker.input.getAttribute("tabindex");
         const elements = document.querySelectorAll(
-          `input[tabindex="${currIndex}"]`,
+          `input[tabindex="${currIndex}"]`
         );
         // Remove disabled elements
         const filtered = [];
@@ -509,7 +509,7 @@ function toggleSelect(calendar, id, e) {
     optCtnr.classList.toggle("hidden");
     optCtnr.setAttribute(
       "aria-hidden",
-      optCtnr.classList.contains("hidden") ? "true" : "false",
+      optCtnr.classList.contains("hidden") ? "true" : "false"
     );
   }
 }
@@ -544,7 +544,7 @@ function updateMonth(calendar, id, e, datepicker) {
     selectCustom.focus();
     // Click on default select to update
     const selectDefault = calendar.querySelector(
-      "select.flatpickr-monthDropdown-months",
+      "select.flatpickr-monthDropdown-months"
     );
     selectDefault.querySelectorAll("option").forEach((option) => {
       if (option.value === e.target.getAttribute("data-month")) {
@@ -586,14 +586,14 @@ function setIndex(calendarEl, tabindex) {
     const prevMonth = calendarEl.querySelector(".flatpickr-prev-month");
     const year = calendarEl.querySelector(".cur-year");
     const monthSelect = calendarEl.querySelector(
-      ".flatpickr-monthDropdown-months",
+      ".flatpickr-monthDropdown-months"
     );
     prevMonth.setAttribute("tabindex", tabindex);
     nextMonth.setAttribute("tabindex", tabindex);
     year.setAttribute("tabindex", tabindex);
     monthSelect.setAttribute("tabindex", tabindex);
     const months = calendarEl.querySelectorAll(
-      ".flatpickr-monthDropdown-month",
+      ".flatpickr-monthDropdown-month"
     );
     months.forEach((month) => {
       month.setAttribute("tabindex", tabindex);
@@ -613,45 +613,54 @@ function setIndex(calendarEl, tabindex) {
 </script>
 
 <template>
-  <Container :containerClass="`w-full m-1 p-1 ${props.containerClass}`" :columns="props.columns">
-    <Header :required="props.required" :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
-
-  <div class="relative flex flex-col items-start">
-    <input
-      :tabindex="props.tabId || contentIndex"
-      :aria-controls="props.id"
-      :aria-selected="picker.isOpen ? 'true' : 'false'"
-      type="text"
-      :class="[
-        date.isValid ? 'valid' : 'invalid',
-        'input-regular',
-        props.inpClass,
-        props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
-      ]"
-      :id="props.id"
-      :required="props.required || false"
-      :disabled="props.disabled || false"
+  <Container
+    :containerClass="`w-full m-1 p-1 ${props.containerClass}`"
+    :columns="props.columns"
+  >
+    <Header
+      :required="props.required"
       :name="props.name"
-      :placeholder="'mm/dd/yyyy h:m:s'"
-      pattern="/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/g"
+      :label="props.label"
+      :hideLabel="props.hideLabel"
+      :headerClass="props.headerClass"
     />
-    <svg
-      aria-hidden="true"
-      role="img"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-      class="w-6 h-6 stroke-gray-600 opacity-50 pointer-events-none absolute top-1 md:top-1.5 right-2"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+
+    <div class="relative flex flex-col items-start">
+      <input
+        :tabindex="props.tabId"
+        :aria-controls="props.id"
+        :aria-selected="picker.isOpen ? 'true' : 'false'"
+        type="text"
+        :class="[
+          date.isValid ? 'valid' : 'invalid',
+          'input-regular',
+          props.inpClass,
+          props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+        ]"
+        :id="props.id"
+        :required="props.required || false"
+        :disabled="props.disabled || false"
+        :name="props.name"
+        :placeholder="'mm/dd/yyyy h:m:s'"
+        pattern="/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/g"
       />
-    </svg>
-    <ErrorField :isValid="date.isValid" :isValue="!!date.value" />
-  </div>
+      <svg
+        aria-hidden="true"
+        role="img"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-6 h-6 stroke-gray-600 opacity-50 pointer-events-none absolute top-1 md:top-1.5 right-2"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+        />
+      </svg>
+      <ErrorField :isValid="date.isValid" :isValue="!!date.value" />
+    </div>
   </Container>
 </template>

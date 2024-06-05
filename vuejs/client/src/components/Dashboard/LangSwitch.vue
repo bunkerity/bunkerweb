@@ -20,12 +20,12 @@ function updateLangStorage(lang) {
 </script>
 
 <template>
-  <div class="fixed bottom-0 left-1 z-[800]">
+  <div class="lang-switch-container">
     <ul
       id="switch-lang"
       role="radiogroup"
       v-show="lang.isOpen"
-      class="max-h-[300px] overflow-auto"
+      class="lang-switch-list"
     >
       <li
         v-for="(locale, id) in $i18n.availableLocales"

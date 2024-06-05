@@ -5,7 +5,6 @@ import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 
-
 /** 
   @name Forms/Field/Select.vue
   @description This component is used to create a complete select field input with error handling and label.
@@ -36,81 +35,79 @@ import ErrorField from "@components/Forms/Error/Field.vue";
   @param {string} [containerClass=""]
   @param {string} [inpClass=""]
   @param {string} [headerClass=""]
-  @param {string|number} [tabId=""]
+  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
-
 
 const props = defineProps({
   // id && value && method
-    id: {
-        type: String,
-        required: true,
-    },
-    columns: {
-      type: [Object, Boolean],
-      required: false,
-      default: false
-    },
-    value: {
-        type: String,
-        required: true,
-    },
-    values: {
-        type: Array,
-        required: true,
-    },
-    disabled: {
-        type: Boolean,
-        required: false,
-    },
-    required: {
-        type: Boolean,
-        required: false,
-    },
-    requiredValues : {
-      type: Array,
-      required: false,
-      default : []
-    },
-    label: {
-        type: String,
-        required: true,
-    },
-    name: {
-        type: String,
-        required: true,
-    },
-    version: {
-        type: String,
-        required: false,
-        default : ""
-    },
-    hideLabel: {
-        type: Boolean,
-        required: false,
-    },
-    containerClass : {
-      type: String,
-      required: false,
-      default : ""
-    },
-    headerClass: {
-        type: String,
-        required: false,
-        default : ""
-    },
-    inpClass: {
-        type: String,
-        required: false,
-        default : ""
-    },
-    tabId: {
-        type: [String, Number],
-        required: false,
-        default: ""
-    },
+  id: {
+    type: String,
+    required: true,
+  },
+  columns: {
+    type: [Object, Boolean],
+    required: false,
+    default: false,
+  },
+  value: {
+    type: String,
+    required: true,
+  },
+  values: {
+    type: Array,
+    required: true,
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+  },
+  required: {
+    type: Boolean,
+    required: false,
+  },
+  requiredValues: {
+    type: Array,
+    required: false,
+    default: [],
+  },
+  label: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  version: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  hideLabel: {
+    type: Boolean,
+    required: false,
+  },
+  containerClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  headerClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  inpClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  tabId: {
+    type: [String, Number],
+    required: false,
+    default: contentIndex,
+  },
 });
-
 
 // When mounted or when props changed, we want select to display new props values
 // When component value change itself, we want to switch to select.value
@@ -129,7 +126,13 @@ const select = reactive({
   // If we use select.value : props.value
   // Component will not re-render after props.value change
   value: "",
-  isValid: !props.required ? true : props.requiredValues.length <= 0 ? true : props.requiredValues.includes(props.value) ? true : false,
+  isValid: !props.required
+    ? true
+    : props.requiredValues.length <= 0
+    ? true
+    : props.requiredValues.includes(props.value)
+    ? true
+    : false,
 });
 
 const selectBtn = ref();
@@ -149,7 +152,13 @@ function changeValue(newValue) {
   // Then send the new value to parent
   select.value = newValue;
   // Check if value is required and if it is in requiredValues
-  select.isValid = !props.required ? true : props.requiredValues.length <= 0 ? true : props.requiredValues.includes(newValue) ? true : false;
+  select.isValid = !props.required
+    ? true
+    : props.requiredValues.length <= 0
+    ? true
+    : props.requiredValues.includes(newValue)
+    ? true
+    : false;
   closeSelect();
   return newValue;
 }
@@ -187,86 +196,110 @@ const emits = defineEmits(["inp"]);
 </script>
 
 <template>
-  <Container :containerClass="`w-full m-1 p-1 ${props.containerClass}`" :columns="props.columns">
-    <Header :required="props.required" :name="props.name" :label="props.label" :hideLabel="props.hideLabel" :headerClass="props.headerClass" />
-
-<select :name="props.name" class="hidden">
-  <option
-    v-for="(value, id) in props.values"
-    :key="id"
-    :value="value"
-    @click="$emit('inp', changeValue(value))"
-    :selected="select.value && select.value === value || !select.value && value === props.value ? true : false"
+  <Container
+    :containerClass="`w-full m-1 p-1 ${props.containerClass}`"
+    :columns="props.columns"
   >
-    {{ value }}
-  </option>
-</select>
-<!-- end default select -->
+    <Header
+      :required="props.required"
+      :name="props.name"
+      :label="props.label"
+      :hideLabel="props.hideLabel"
+      :headerClass="props.headerClass"
+    />
 
-<!--custom-->
-<div class="relative">
-  <button
-    :name="`${props.name}-custom`"	
-    :tabindex="props.tabId || contentIndex"
-    ref="selectBtn"
-    :aria-controls="`${props.id}-custom`"
-    :aria-expanded="select.isOpen ? 'true' : 'false'"
-    :aria-description="$t('inp_select_dropdown_button_desc')"
-    data-select-dropdown
-    :disabled="props.disabled || false"
-    @click="toggleSelect()"
-    :class="['select-btn',         select.isValid ? 'valid' : 'invalid',
-     props.inpClass]"
-  >
-    <span :id="`${props.id}-text`" class="select-btn-name">
-      {{ select.value || props.value }}
-    </span>
-    <!-- chevron -->
-    <svg
-      role="img"
-      aria-hidden="true"
-      :class="[select.isOpen ? '-rotate-180' : '']"
-      class="select-btn-svg"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-    >
-      <path
-        d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-      />
-    </svg>
-    <!-- end chevron -->
-  </button>
-  <!-- dropdown-->
-  <div
-    role="radiogroup"
-    :style="{ width: selectWidth }"
-    :id="`${props.id}-custom`"
-    :class="[select.isOpen ? 'flex' : 'hidden']"
-    class="select-dropdown-container"
-    :aria-description="$t('inp_select_dropdown_desc')"
-  >
-    <button
-      :tabindex="contentIndex"
-      v-for="(value, id) in props.values"
-      role="radio"
-      @click="$emit('inp', changeValue(value))"
-      :class="[
-        id === 0 ? 'first' : '',
-        id === props.values.length - 1 ? 'last' : '',
-        value === select.value && select.value === value || !select.value && value === props.value ? 'active' : '',
-        'select-dropdown-btn',
-      ]"
-      :aria-controls="`${props.id}-text`"
-      :aria-checked="select.value && select.value === value || !select.value && value === props.value ? 'true' : 'false'"
-    >
-      {{ value }}
-    </button>
-  </div>
-  <ErrorField :isValid="select.isValid" :isValue="true" />
+    <select :name="props.name" class="hidden">
+      <option
+        v-for="(value, id) in props.values"
+        :key="id"
+        :value="value"
+        @click="$emit('inp', changeValue(value))"
+        :selected="
+          (select.value && select.value === value) ||
+          (!select.value && value === props.value)
+            ? true
+            : false
+        "
+      >
+        {{ value }}
+      </option>
+    </select>
+    <!-- end default select -->
 
-  <!-- end dropdown-->
-</div>
-<!-- end custom-->
-</Container>
- 
+    <!--custom-->
+    <div class="relative">
+      <button
+        :name="`${props.name}-custom`"
+        :tabindex="props.tabId"
+        ref="selectBtn"
+        :aria-controls="`${props.id}-custom`"
+        :aria-expanded="select.isOpen ? 'true' : 'false'"
+        :aria-description="$t('inp_select_dropdown_button_desc')"
+        data-select-dropdown
+        :disabled="props.disabled || false"
+        @click="toggleSelect()"
+        :class="[
+          'select-btn',
+          select.isValid ? 'valid' : 'invalid',
+          props.inpClass,
+        ]"
+      >
+        <span :id="`${props.id}-text`" class="select-btn-name">
+          {{ select.value || props.value }}
+        </span>
+        <!-- chevron -->
+        <svg
+          role="img"
+          aria-hidden="true"
+          :class="[select.isOpen ? '-rotate-180' : '']"
+          class="select-btn-svg"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+          />
+        </svg>
+        <!-- end chevron -->
+      </button>
+      <!-- dropdown-->
+      <div
+        role="radiogroup"
+        :style="{ width: selectWidth }"
+        :id="`${props.id}-custom`"
+        :class="[select.isOpen ? 'flex' : 'hidden']"
+        class="select-dropdown-container"
+        :aria-description="$t('inp_select_dropdown_desc')"
+      >
+        <button
+          :tabindex="contentIndex"
+          v-for="(value, id) in props.values"
+          role="radio"
+          @click="$emit('inp', changeValue(value))"
+          :class="[
+            id === 0 ? 'first' : '',
+            id === props.values.length - 1 ? 'last' : '',
+            (value === select.value && select.value === value) ||
+            (!select.value && value === props.value)
+              ? 'active'
+              : '',
+            'select-dropdown-btn',
+          ]"
+          :aria-controls="`${props.id}-text`"
+          :aria-checked="
+            (select.value && select.value === value) ||
+            (!select.value && value === props.value)
+              ? 'true'
+              : 'false'
+          "
+        >
+          {{ value }}
+        </button>
+      </div>
+      <ErrorField :isValid="select.isValid" :isValue="true" />
+
+      <!-- end dropdown-->
+    </div>
+    <!-- end custom-->
+  </Container>
 </template>

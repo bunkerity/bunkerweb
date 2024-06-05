@@ -34,7 +34,7 @@ import Icons from "@components/Widget/Icons.vue";
   @param {string} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
   @param {string} [iconColor=""]
   @param {object} [eventAttr={}] - Store event on click {"store" : <store_name>, "default" : <default_value>,  "value" : <value_stored_on_click>, "target"<optional> : <target_id_element>, "valueExpanded" : "expanded_value"}
-  @param {string|number} [tabId=""]
+  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
 
 const eventStore = useEventStore();
@@ -99,15 +99,15 @@ const props = defineProps({
     required: false,
     default: {},
   },
-  tabId: {
-    type: [String, Number],
-    required: false,
-    default: "",
-  },
   containerClass: {
     type: String,
     required: false,
     default: "",
+  },
+  tabId: {
+    type: [String, Number],
+    required: false,
+    default: contentIndex,
   },
 });
 
@@ -174,7 +174,7 @@ function updateData(isClick = false) {
       ref="btnEl"
       @click="updateData(true)"
       :id="props.id"
-      :tabindex="props.tabId || contentIndex"
+      :tabindex="props.tabId"
       :class="[buttonClass]"
       :disabled="props.disabled || false"
       :aria-describedby="`text-${props.id}`"
