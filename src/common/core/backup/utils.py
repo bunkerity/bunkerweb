@@ -179,7 +179,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         LOGGER.error(f"Failed to restore the database: {proc.stderr.decode()}")
         sys_exit(1)
 
-    err = db.checked_changes(value=True)
+    err = db.checked_changes(plugins_changes="all", value=True)
     if err:
         LOGGER.error(f"Error while applying changes to the database: {err}, you may need to reload the application")
 
