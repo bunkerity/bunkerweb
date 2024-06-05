@@ -1,7 +1,8 @@
 <script setup>
-import { reactive, onBeforeMount } from "vue";
+import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import Builder from "@components/Builder.vue";
+import { useGlobal } from "@utils/global.js";
 
 /**
   @name Page/Home.vue
@@ -22,6 +23,10 @@ onBeforeMount(() => {
       ? JSON.parse(dataEl.getAttribute(dataAtt))
       : {};
   home.builder = data;
+});
+
+onMounted(() => {
+  useGlobal();
 });
 
 // const data = [
@@ -51,5 +56,6 @@ onBeforeMount(() => {
 <template>
   <DashboardLayout>
     <Builder v-if="home.builder" :builder="home.builder" />
+    <div id="test-el"></div>
   </DashboardLayout>
 </template>

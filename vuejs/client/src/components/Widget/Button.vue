@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch, onBeforeMount, onMounted } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
-import { useEventStore } from "@store/event.js";
 import Container from "@components/Widget/Container.vue";
 import Icons from "@components/Widget/Icons.vue";
 import { v4 as uuidv4 } from "uuid";
@@ -11,9 +10,7 @@ import { v4 as uuidv4 } from "uuid";
   @description This component is a standard button.
   You can link this button to the event store with the clickAttr object.
   This will allow you to share a value with other components, for example switching form on a click.
-  The clickAttr object must contain at least the key, defaultValue and value to work with the event store.
-  It can also contain the targetId element in case the button is linked to another element, like a modal or a sidebar.
-  We can specify a valueExpanded value, we will check the current value in the store and the valueExpanded, this will update the aria-expanded attribute of the button.
+  The prop attrs is an object that can contain multiple attributes to add to the button.
   @example
   {
     id: "open-modal-btn",
@@ -24,7 +21,9 @@ import { v4 as uuidv4 } from "uuid";
     size: "normal",
     iconName: "modal",
     iconColor: "white",
-    clickAttr: {"key" : "modal-config", "defaultValue" : "close", "clickValue" : "open", "targetId" : "modal_id", "valueExpanded" : "open"},
+    attrs: [
+      { key: "modal", defaultValue: "close", clickValue: "open", targetId: "modal_id", valueExpanded: "open" },
+    ],
   }
   @param {string} [id=uuid()] - Unique id of the button
   @param {string} text - Content of the button. Can be a translation key or by default raw text.
@@ -35,12 +34,9 @@ import { v4 as uuidv4 } from "uuid";
   @param {string} [size="normal"] - Can be of size sm || normal || lg || xl
   @param {string} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
   @param {string} [iconColor=""]
-  @param {object} [clickAttr={}] - Click event manage with event store {"key" : <key_name>, "defaultValue" : <defaultValue = "set this value to store if not done">,  "clickValue" : <value_set_on_click>, "targetId"<optional> : <targetId_element="id of element link to the button event">, "valueExpanded<optional>" : <expanded_value="check current value in store and this value to determine a expanded true or false">}
-  @param {array} [staticAttr=[]] - Static attributes that can be useful to do some check with script (for example {"data-attr" : "value"} will add data-attr="value" to the button)
+  @param {Object} [attrs={}] - List of attributs to add to the button. Some attributs will conduct to additionnal script
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
-
-const eventStore = useEventStore();
 
 const props = defineProps({
   id: {
@@ -94,13 +90,7 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  // Example of button opening a modal : {"key" : "modal", "defaultValue" : "close", "clickValue" : "open", "targetId" : "modal_id", "valueExpanded" : "open"}
-  clickAttr: {
-    type: Object,
-    required: false,
-    default: {},
-  },
-  staticAttr: {
+  attrs: {
     type: Object,
     required: false,
     default: {},
@@ -124,58 +114,13 @@ const buttonClass = computed(() => {
 });
 
 onMounted(() => {
-  setStaticAttr();
-  updateData();
+  setAttrs();
 });
 
-watch(eventStore, () => {
-  updateData();
-});
-
-function setStaticAttr() {
-  for (const [key, value] of Object.entries(props.staticAttr)) {
+function setAttrs() {
+  for (const [key, value] of Object.entries(props.attrs)) {
     btnEl.value.setAttribute(key, value);
   }
-}
-
-function updateData(isClick = false) {
-  const isKey = props.clickAttr?.key ? true : false;
-  const isValue = props.clickAttr?.clickValue ? true : false;
-  const isDefault = props.clickAttr?.defaultValue ? true : false;
-  if (!isKey || !isValue || !isDefault) return;
-
-  isClick
-    ? eventStore.updateEvent(props.clickAttr.key, props.clickAttr.clickValue)
-    : eventStore.addEvent(props.clickAttr.key, props.clickAttr.defaultValue);
-
-  try {
-    const expanded = props.clickAttr?.valueExpanded
-      ? props.clickAttr.valueExpanded ===
-        eventStore.getEvent(props.clickAttr.key)
-        ? "true"
-        : "false"
-      : false;
-    if (expanded) {
-      btnEl.value.setAttribute("aria-expanded", expanded);
-    }
-
-    if (!expanded) {
-      btnEl.value.removeAttribute("aria-expanded");
-    }
-  } catch (e) {}
-
-  try {
-    const controls = props.clickAttr?.targetId
-      ? props.clickAttr.targetId
-      : false;
-    if (controls) {
-      btnEl.value.setAttribute("aria-controls", controls);
-    }
-
-    if (!controls) {
-      btnEl.value.removeAttribute("aria-controls");
-    }
-  } catch (e) {}
 }
 </script>
 
@@ -187,15 +132,19 @@ function updateData(isClick = false) {
     <button
       :type="props.type"
       ref="btnEl"
-      @click="updateData(true)"
       :id="props.id"
+      @click.prevent=""
       :tabindex="props.tabId"
       :class="[buttonClass]"
       :disabled="props.disabled || false"
       :aria-describedby="`text-${props.id}`"
     >
       <span
-        :class="[props.hideText ? 'sr-only' : '', props.iconName ? 'mr-2' : '']"
+        :class="[
+          props.hideText ? 'sr-only' : '',
+          props.iconName ? 'mr-2' : '',
+          'pointer-events-none',
+        ]"
         :id="`text-${props.id}`"
         >{{ $t(props.text, props.text) }}</span
       >
