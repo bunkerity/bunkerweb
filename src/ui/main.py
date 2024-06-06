@@ -614,6 +614,139 @@ def totp():
     return render_template("totp.html")
 
 
+def home_builder(data):
+    """
+    It returns the home page in JSON format for the Vue.js builder
+    """
+
+    version_card = {
+        "type": "card",
+        "link": "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro",
+        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "widgets": [
+            {
+                "type": "Stat",
+                "data": {
+                    "title": "home_version",
+                    "subtitle": (
+                        "home_all_features_available"
+                        if data.get("is_pro_version")
+                        else (
+                            "home_awaiting_compliance"
+                            if data.get("pro_status") == "active" and data.get("pro_overlapped")
+                            else (
+                                "home_renew_license"
+                                if data.get("pro_status") == "expired"
+                                else "home_talk_to_team" if data.get("pro_status") == "suspended" else "home_upgrade_to_pro"
+                            )
+                        )
+                    ),
+                    "subtitleColor": "success" if data.get("is_pro_version") else "warning",
+                    "stat": (
+                        "home_pro"
+                        if data.get("is_pro_version")
+                        else (
+                            "home_pro_locked"
+                            if data.get("pro_status") == "active" and data.get("pro_overlapped")
+                            else (
+                                "home_expired"
+                                if data.get("pro_status") == "expired"
+                                else "home_suspended" if data.get("pro_status") == "suspended" else "home_free"
+                            )
+                        )
+                    ),
+                    "iconName": "crown" if data.get("is_pro_version") else "key",
+                    "iconColor": "amber" if data.get("is_pro_version") else "green",
+                },
+            }
+        ],
+    }
+
+    version_num_card = {
+        "type": "card",
+        "link": "https://github.com/bunkerity/bunkerweb",
+        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "widgets": [
+            {
+                "type": "Stat",
+                "data": {
+                    "title": "home_version_number",
+                    "subtitle": (
+                        "home_couldnt_find_remote"
+                        if not data.get("remote_version")
+                        else "home_latest_version" if data.get("remote_version") and data.get("check_version") else "home_update_available"
+                    ),
+                    "subtitleColor": (
+                        "error" if not data.get("remote_version") else "success" if data.get("remote_version") and data.get("check_version") else "warning"
+                    ),
+                    "stat": data.get("version"),
+                    "iconName": "wire",
+                    "iconColor": "teal",
+                },
+            }
+        ],
+    }
+
+    instances_card = {
+        "type": "card",
+        "link": "/instances",
+        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "widgets": [
+            {
+                "type": "Stat",
+                "data": {
+                    "title": "home_instances",
+                    "subtitle": "home_total_number",
+                    "subtitleColor": "info",
+                    "stat": data.get("instances_number"),
+                    "iconName": "box",
+                    "iconColor": "dark",
+                },
+            }
+        ],
+    }
+
+    services_card = {
+        "type": "card",
+        "link": "/services",
+        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "widgets": [
+            {
+                "type": "Stat",
+                "data": {
+                    "title": "home_services",
+                    "subtitle": "home_all_methods_included",
+                    "subtitleColor": "info",
+                    "stat": data.get("services_number"),
+                    "iconName": "disk",
+                    "iconColor": "orange",
+                },
+            }
+        ],
+    }
+
+    plugins_card = {
+        "type": "card",
+        "link": "/plugins",
+        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "widgets": [
+            {
+                "type": "Stat",
+                "data": {
+                    "title": "home_plugins",
+                    "subtitle": "home_errors_found" if data.get("plugins_errors") > 0 else "home_no_error",
+                    "subtitleColor": "error" if data.get("plugins_errors") > 0 else "success",
+                    "stat": "42",
+                    "iconName": "puzzle",
+                    "iconColor": "yellow",
+                },
+            }
+        ],
+    }
+    builder = [version_card, version_num_card, instances_card, services_card, plugins_card]
+    return builder
+
+
 @app.route("/home")
 @login_required
 def home():
@@ -638,7 +771,8 @@ def home():
         remote_version = basename(r.url).strip().replace("v", "")
 
     config = app.config["CONFIG"].get_config(with_drafts=True)
-    instances = app.config["INSTANCES"].get_instances()
+    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
 
     instance_health_count = 0
 
@@ -661,6 +795,34 @@ def home():
         elif service_method == "autoconf":
             services_autoconf_count += 1
         services += 1
+
+    metadata = app.config["DB"].get_metadata()
+
+    is_pro_version = metadata["is_pro"]
+    pro_status = metadata["pro_status"]
+    pro_services = metadata["pro_services"]
+    pro_overlapped = metadata["pro_overlapped"]
+    bw_version = metadata["version"]
+
+    data = {
+        "check_version": not remote_version or bw_version == remote_version,
+        "remote_version": remote_version,
+        "version": bw_version,
+        "instances_number": len(instances),
+        "services_number": services,
+        "instance_health_count": instance_health_count,
+        "services_scheduler_count": services_scheduler_count,
+        "services_ui_count": services_ui_count,
+        "services_autoconf_count": services_autoconf_count,
+        "is_pro_version": is_pro_version,
+        "pro_status": pro_status,
+        "pro_services": pro_services,
+        "pro_overlapped": pro_overlapped,
+        "plugins_number": len(app.config["CONFIG"].get_plugins()),
+        "plugins_errors": app.config["DB"].get_plugins_errors(),
+    }
+
+    data_server_builder = home_builder(data)
 
     return render_template(
         "home.html",
