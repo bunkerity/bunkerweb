@@ -15,7 +15,7 @@
 
 const props = defineProps({
   stat: {
-    type: String,
+    type: [String, Number],
     required: true,
   },
   statClass: {
