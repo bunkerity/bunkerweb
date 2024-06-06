@@ -1,11 +1,11 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { getI18n } from "@utils/lang.js";
-import Home from "./Home.vue";
+import GlobalConfig from "./GlobalConfig.vue";
 
 const pinia = createPinia();
 
-createApp(Home)
+createApp(GlobalConfig)
   .use(pinia)
-  .use(getI18n(["dashboard", "action", "inp", "home"]))
+  .use(getI18n(["dashboard", "action", "inp", "global_config"]))
   .mount("#app");

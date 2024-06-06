@@ -19,12 +19,14 @@ import ErrorField from "@components/Forms/Error/Field.vue";
   name: "checkbox", 
   required: true, 
   hideLabel: false, 
+  inpType: "checkbox",
   headerClass: "text-red-500" 
   }
   @param {string} id
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
+  @param {string} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
   @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
@@ -49,6 +51,11 @@ const props = defineProps({
   value: {
     type: String,
     required: true,
+  },
+  inpType: {
+    type: String,
+    required: false,
+    default: "checkbox",
   },
   disabled: {
     type: Boolean,
@@ -119,7 +126,7 @@ onMounted(() => {
 
 <template>
   <Container
-    :containerClass="`w-full m-1 p-1 ${props.containerClass}`"
+    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

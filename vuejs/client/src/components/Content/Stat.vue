@@ -27,7 +27,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <h5 :class="['stat-value', props.statClass]">
+  <h5 :class="['content-stat', props.statClass]">
     {{ $t(props.stat, props.stat) }}
   </h5>
 </template>

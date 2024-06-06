@@ -21,12 +21,14 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     required: true,
     requiredValues : ['no'], // need required to be checked
     label: 'Test select',
+    inpType: "select",
   }
   @param {string} id
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
   @param {array} values
+    @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
   @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
@@ -56,6 +58,11 @@ const props = defineProps({
   values: {
     type: Array,
     required: true,
+  },
+  inpType: {
+    type: String,
+    required: false,
+    default: "select",
   },
   disabled: {
     type: Boolean,
@@ -197,7 +204,7 @@ const emits = defineEmits(["inp"]);
 
 <template>
   <Container
-    :containerClass="`w-full m-1 p-1 ${props.containerClass}`"
+    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

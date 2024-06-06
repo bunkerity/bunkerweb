@@ -14,6 +14,7 @@ import { computed } from "vue";
   }
   @param {string} [containerClass=""] - Additional class
   @param {object|boolean} [columns=false] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
+  @param {string} [tag="div"] - The tag for the container
 */
 
 const props = defineProps({
@@ -27,6 +28,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  tag: {
+    type: String,
+    required: false,
+    default: "div",
+  },
 });
 
 const gridClass = computed(() => {
@@ -37,10 +43,11 @@ const gridClass = computed(() => {
 </script>
 
 <template>
-  <div
+  <component
+    :is="props.tag"
     data-container
     :class="[props.containerClass ? props.containerClass : '', gridClass]"
   >
     <slot></slot>
-  </div>
+  </component>
 </template>

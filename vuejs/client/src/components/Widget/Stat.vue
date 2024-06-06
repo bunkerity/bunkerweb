@@ -1,8 +1,8 @@
 <script setup>
 import Container from "@components/Widget/Container.vue";
-import TitleStat from "@components/Title/Stat.vue";
+import Title from "@components/Widget/Title.vue";
+import Subtitle from "@components/Widget/Subtitle.vue";
 import ContentStat from "@components/Content/Stat.vue";
-import SubtitleStat from "@components/Subtitle/Stat.vue";
 import IconStat from "@components/Icon/Stat.vue";
 
 /** 
@@ -74,9 +74,10 @@ const props = defineProps({
         props.iconName ? 'is-icon' : 'no-icon',
       ]"
     >
-      <TitleStat :title="props.title" />
+      <Title type="stat" :title="props.title" />
       <ContentStat :stat="props.stat" />
-      <SubtitleStat
+      <Subtitle
+        type="stat"
         v-if="props.subtitle"
         :subtitle="props.subtitle"
         :subtitleColor="props.subtitleColor"

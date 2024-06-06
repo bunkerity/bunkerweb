@@ -31,6 +31,10 @@ export default defineConfig({
         test: resolve(__dirname, "./src/pages/test/index.html"),
         home: resolve(__dirname, "./src/pages/home/index.html"),
         instances: resolve(__dirname, "./src/pages/instances/index.html"),
+        "global-config": resolve(
+          __dirname,
+          "./src/pages/global-config/index.html"
+        ),
       },
     },
   },

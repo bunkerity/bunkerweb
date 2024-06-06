@@ -184,7 +184,7 @@ body {
 }
 
 .select-btn {
-  @apply relative dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6 w-full rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500;
+  @apply relative dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6 w-full md:max-w-[350px] rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
 .select-btn-name {
@@ -220,7 +220,7 @@ body {
 }
 
 .input-regular {
-  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
+  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full md:max-w-[350px] appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
 .invalid.input-regular,
@@ -829,10 +829,9 @@ body {
 
 /* CONTENT COMPONENT */
 
-.content-title {
-  @apply text-lg font-bold mb-2 col-span-12;
+.content-text {
+  @apply leading-normal text-base mb-0 lowercase;
 }
-
 /* CONTENT DETAIL LSIT COMPONENT */
 
 .content-detail-list-container {
@@ -851,6 +850,38 @@ body {
   @apply min-w-[2rem] break-all transition duration-300 ease-in-out pl-3 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
 }
 
+.content-stat {
+  @apply my-1 font-bold dark:text-white/90 uppercase;
+}
+
+/* TITLE */
+
+.title-container {
+  @apply break-words max-w-[80%] font-bold mb-2 col-span-12 dark:text-white/90 transition duration-300 ease-in-out text-2xl;
+}
+
+.title-card {
+  @apply break-words max-w-[80%] mb-2 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl;
+}
+
+.title-stat {
+  @apply mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-400;
+}
+
+/* SUBTITLE */
+
+.subtitle-container {
+  @apply leading-normal text-xl mb-0 lowercase;
+}
+
+.subtitle-card {
+  @apply leading-normal text-base mb-0 lowercase;
+}
+
+.subtitle-stat {
+  @apply font-bold leading-normal text-sm mb-0 lowercase;
+}
+
 /* STAT COMPONENT */
 
 .stat-content-container.no-icon {
@@ -859,18 +890,6 @@ body {
 
 .stat-content-container.is-icon {
   @apply mr-12;
-}
-
-.stat-title {
-  @apply mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-400;
-}
-
-.stat-value {
-  @apply my-1 font-bold dark:text-white/90 uppercase;
-}
-
-.stat-subtitle {
-  @apply font-bold leading-normal text-sm mb-0 lowercase;
 }
 
 .stat-svg {
@@ -885,14 +904,6 @@ body {
 
 .card {
   @apply relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
-}
-
-.card-title {
-  @apply break-words max-w-[80%] font-bold mb-2 col-span-12 dark:text-white/90 transition duration-300 ease-in-out text-2xl;
-}
-
-.card-content-title {
-  @apply break-words max-w-[80%] mb-2 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl;
 }
 
 /* CARD INFO */
@@ -1284,147 +1295,291 @@ body {
 
 /* TEXT COLOR MODIFIER */
 
-.success.stat-subtitle {
+.success.subtitle-stat,
+.success.subtitle-card,
+.success.title-card,
+.success.title-container,
+.success.title-stat {
   @apply text-green-500;
 }
 
-.error.stat-subtitle {
+.error.subtitle-stat,
+.error.subtitle-card,
+.error.title-card,
+.error.title-container,
+.error.title-stat {
   @apply text-red-500;
 }
 
-.warning.stat-subtitle {
+.warning.subtitle-stat,
+.warning.subtitle-card,
+.warning.title-card,
+.warning.title-container,
+.warning.title-stat {
   @apply text-yellow-500;
 }
 
-.info.stat-subtitle {
+.info.subtitle-stat,
+.info.subtitle-card,
+.info.title-card,
+.info.title-container,
+.info.title-stat {
   @apply text-sky-500;
 }
 
-.purple.stat-subtitle {
+.purple.subtitle-stat,
+.purple.subtitle-card,
+.purple.title-card,
+.purple.title-container,
+.purple.title-stat {
   @apply text-purple-500;
 }
 
-.green.stat-subtitle {
+.green.subtitle-stat,
+.green.subtitle-card,
+.green.title-card,
+.green.title-container,
+.green.title-stat {
   @apply text-green-500;
 }
 
-.red.stat-subtitle {
+.red.subtitle-stat,
+.red.subtitle-card,
+.red.title-card,
+.red.title-container,
+.red.title-stat {
   @apply text-red-500;
 }
 
-.orange.stat-subtitle {
+.orange.subtitle-stat,
+.orange.subtitle-card,
+.orange.title-card,
+.orange.title-container,
+.orange.title-stat {
   @apply text-orange-500;
 }
 
-.blue.stat-subtitle {
+.blue.subtitle-stat,
+.blue.subtitle-card,
+.blue.title-card,
+.blue.title-container,
+.blue.title-stat {
   @apply text-blue-500;
 }
 
-.yellow.stat-subtitle {
+.yellow.subtitle-stat,
+.yellow.subtitle-card,
+.yellow.title-card,
+.yellow.title-container,
+.yellow.title-stat {
   @apply text-yellow-500;
 }
 
-.gray.stat-subtitle {
+.gray.subtitle-stat,
+.gray.subtitle-card,
+.gray.title-card,
+.gray.title-container,
+.gray.title-stat {
   @apply text-gray-500;
 }
 
-.dark.stat-subtitle {
+.dark.subtitle-stat,
+.dark.subtitle-card,
+.dark.title-card,
+.dark.title-container,
+.dark.title-stat {
   @apply text-slate-500;
 }
 
-.amber.stat-subtitle {
+.amber.subtitle-stat,
+.amber.subtitle-card,
+.amber.title-card,
+.amber.title-container,
+.amber.title-stat {
   @apply text-amber-500;
 }
 
-.emerald.stat-subtitle {
+.emerald.subtitle-stat,
+.emerald.subtitle-card,
+.emerald.title-card,
+.emerald.title-container,
+.emerald.title-stat {
   @apply text-emerald-500;
 }
 
-.teal.stat-subtitle {
+.teal.subtitle-stat,
+.teal.subtitle-card,
+.teal.title-card,
+.teal.title-container,
+.teal.title-stat {
   @apply text-teal-500;
 }
 
-.indigo.stat-subtitle {
+.indigo.subtitle-stat,
+.indigo.subtitle-card,
+.indigo.title-card,
+.indigo.title-container,
+.indigo.title-stat {
   @apply text-indigo-500;
 }
 
-.cyan.stat-subtitle {
+.cyan.subtitle-stat,
+.cyan.subtitle-card,
+.cyan.title-card,
+.cyan.title-container,
+.cyan.title-stat {
   @apply text-cyan-500;
 }
 
-.sky.stat-subtitle {
+.sky.subtitle-stat,
+.sky.subtitle-card,
+.sky.title-card,
+.sky.title-container,
+.sky.title-stat {
   @apply text-sky-500;
 }
 
-.pink.stat-subtitle {
+.pink.subtitle-stat,
+.pink.subtitle-card,
+.pink.title-card,
+.pink.title-container,
+.pink.title-stat {
   @apply text-pink-500;
 }
 
-.lime.stat-subtitle {
+.lime.subtitle-stat,
+.lime.subtitle-card,
+.lime.title-card,
+.lime.title-container,
+.lime.title-stat {
   @apply text-lime-500;
 }
 
-.purple-darker.stat-subtitle {
+.purple-darker.subtitle-stat,
+.purple.subtitle-card,
+.purple.title-card,
+.purple.title-container,
+.purple.title-stat {
   @apply text-purple-600;
 }
 
-.green-darker.stat-subtitle {
+.green-darker.subtitle-stat,
+.green-dark.subtitle-card,
+.green-dark.title-card,
+.green-dark.title-container,
+.green-dark.title-stat {
   @apply text-green-700;
 }
 
-.red-darker.stat-subtitle {
+.red-darker.subtitle-stat,
+.red-darker.subtitle-card,
+.red-darker.title-card,
+.red-darker.title-container,
+.red-darker.title-stat {
   @apply text-red-700;
 }
 
-.orange-darker.stat-subtitle {
+.orange-darker.subtitle-stat,
+.orange-darker.subtitle-card,
+.orange-darker.title-card,
+.orange-darker.title-container,
+.orange-darker.title-stat {
   @apply text-orange-600;
 }
 
-.blue-darker.stat-subtitle {
+.blue-darker.subtitle-stat,
+.blue-darker.subtitle-card,
+.blue-darker.title-card,
+.blue-darker.title-container,
+.blue-darker.title-stat {
   @apply text-blue-600;
 }
 
-.yellow-darker.stat-subtitle {
+.yellow-darker.subtitle-stat,
+.yellow-darker.subtitle-card,
+.yellow-darker.title-card,
+.yellow-darker.title-container,
+.yellow-darker.title-stat {
   @apply text-yellow-600;
 }
 
-.gray-darker.stat-subtitle {
+.gray-darker.subtitle-stat,
+.gray-darker.subtitle-card,
+.gray-darker.title-card,
+.gray-darker.title-container,
+.gray-darker.title-stat {
   @apply text-gray-600;
 }
 
-.dark-darker.stat-subtitle {
+.dark-darker.subtitle-stat,
+.dark-darker.subtitle-card,
+.dark-darker.title-card,
+.dark-darker.title-container,
+.dark-darker.title-stat {
   @apply text-slate-600;
 }
 
-.amber-darker.stat-subtitle {
+.amber-darker.subtitle-stat,
+.amber-darker.subtitle-card,
+.amber-darker.title-card,
+.amber-darker.title-container,
+.amber-darker.title-stat {
   @apply text-amber-600;
 }
 
-.emerald-darker.stat-subtitle {
+.emerald-darker.subtitle-stat,
+.emerald-darker.subtitle-card,
+.emerald-darker.title-card,
+.emerald-darker.title-container,
+.emerald-darker.title-stat {
   @apply text-emerald-600;
 }
 
-.teal-darker.stat-subtitle {
+.teal-darker.subtitle-stat,
+.teal-darker.subtitle-card,
+.teal-darker.title-card,
+.teal-darker.title-container,
+.teal-darker.title-stat {
   @apply text-teal-600;
 }
 
-.indigo-darker.stat-subtitle {
+.indigo-darker.subtitle-stat,
+.indigo-darker.subtitle-card,
+.indigo-darker.title-card,
+.indigo-darker.title-container,
+.indigo-darker.title-stat {
   @apply text-indigo-600;
 }
 
-.cyan-darker.stat-subtitle {
+.cyan-darker.subtitle-stat,
+.cyan-darker.subtitle-card,
+.cyan-darker.title-card,
+.cyan-darker.title-container,
+.cyan-darker.title-stat {
   @apply text-cyan-600;
 }
 
-.sky-darker.stat-subtitle {
+.sky-darker.subtitle-stat,
+.sky-darker.subtitle-card,
+.sky-darker.title-card,
+.sky-darker.title-container,
+.sky-darker.title-stat {
   @apply text-sky-700;
 }
 
-.pink-darker.stat-subtitle {
+.pink-darker.subtitle-stat,
+.pink-darker.subtitle-card,
+.pink-darker.title-card,
+.pink-darker.title-container,
+.pink-darker.title-stat {
   @apply text-pink-600;
 }
 
-.lime-darker.stat-subtitle {
+.lime-darker.subtitle-stat,
+.lime-darker.subtitle-card,
+.lime-darker.title-card,
+.lime-darker.title-container,
+.lime-darker.title-stat {
   @apply text-lime-600;
 }
 

@@ -3,12 +3,9 @@ import { reactive, onBeforeMount } from "vue";
 // Containers
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
-// Title
-import TitleCard from "@components/Title/Card.vue";
-import TitleCardContent from "@components/Title/CardContent.vue";
-import TitleStat from "@components/Title/Stat.vue";
-// Subtitle
-import SubtitleStat from "@components/Subtitle/Stat.vue";
+// Headings
+import Title from "@components/Widget/Title.vue";
+import Subtitle from "@components/Widget/Subtitle.vue";
 // Content
 import ContentStat from "@components/Content/Stat.vue";
 import ContentDetailList from "@components/Content/DetailList.vue";
@@ -85,22 +82,14 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <TitleCard v-if="widget.type === 'TitleCard'" v-bind="widget.data" />
-        <TitleCardContent
-          v-if="widget.type === 'TitleCardContent'"
-          v-bind="widget.data"
-        />
+        <Title v-if="widget.type === 'Title'" v-bind="widget.data" />
+        <Subtitle v-if="widget.type === 'Subtitle'" v-bind="widget.data" />
         <Checkbox v-if="widget.type === 'Checkbox'" v-bind="widget.data" />
         <Select v-if="widget.type === 'Select'" v-bind="widget.data" />
         <Input v-if="widget.type === 'Input'" v-bind="widget.data" />
         <Datepicker v-if="widget.type === 'Datepicker'" v-bind="widget.data" />
         <Button v-if="widget.type === 'Button'" v-bind="widget.data" />
         <Stat v-if="widget.type === 'Stat'" v-bind="widget.data" />
-        <TitleStat v-if="widget.type === 'TitleStat'" v-bind="widget.data" />
-        <SubtitleStat
-          v-if="widget.type === 'SubtitleStat'"
-          v-bind="widget.data"
-        />
         <ContentStat
           v-if="widget.type === 'ContentStat'"
           v-bind="widget.data"

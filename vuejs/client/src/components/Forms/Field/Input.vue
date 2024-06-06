@@ -22,12 +22,14 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     required: true,
     label: 'Test input',
     pattern : "(test)",
+    inpType: "input",
   }
   @param {string} id
   @param {string} type - text, email, password, number, tel, url
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.  @param {string} label
   @param {string} value
+    @param {string} [inpType="input"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
@@ -60,6 +62,11 @@ const props = defineProps({
   type: {
     type: String,
     required: true,
+  },
+  inpType: {
+    type: String,
+    required: false,
+    default: "input",
   },
   required: {
     type: Boolean,
@@ -167,7 +174,7 @@ onMounted(() => {
 
 <template>
   <Container
-    :containerClass="`w-full m-1 p-1 ${props.containerClass}`"
+    :containerClass="`w-full p-2 md:p-3  ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header
