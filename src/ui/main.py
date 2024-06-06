@@ -372,6 +372,7 @@ def inject_variables():
 
     # check that is value is in tuple
     return dict(
+        data_server_global={"username": current_user.get_id() if current_user.is_authenticated else ""},
         script_nonce=app.config["SCRIPT_NONCE"],
         is_pro_version=metadata["is_pro"],
         pro_status=metadata["pro_status"],
@@ -382,6 +383,7 @@ def inject_variables():
         pro_loading=ui_data.get("PRO_LOADING", False),
         bw_version=metadata["version"],
         is_readonly=app.config["DB"].readonly,
+        username=current_user.get_id() if current_user.is_authenticated else "",
     )
 
 
@@ -836,7 +838,6 @@ def home():
         services_scheduler_count=services_scheduler_count,
         services_ui_count=services_ui_count,
         services_autoconf_count=services_autoconf_count,
-        username=current_user.get_id(),
     )
 
 
@@ -993,11 +994,63 @@ def account():
 
     return render_template(
         "account.html",
-        username=current_user.get_id(),
         is_totp=current_user.is_two_factor_enabled,
         secret_token=secret_token,
         totp_qr_image=totp_qr_image,
     )
+
+
+def instances_builder(instances: list):
+    """
+    It returns the home page in JSON format for the Vue.js builder
+    """
+    builder = []
+
+    for instance in instances:
+        # setup actions buttons
+        actions = (
+            ["restart", "stop"]
+            if instance._type == "local" and instance.health
+            else (
+                ["reload", "stop"]
+                if not instance._type == "local" and instance.health
+                else ["start"] if instance._type == "local" and not instance.health else []
+            )
+        )
+        buttons = []
+        for action in actions:
+            buttons.append(
+                {
+                    "attrs": {"data-form-INSTANCE_ID": instance._id, "data-form-operation": action, "data-submit-form": "true"},
+                    "text": f"action_{action}",
+                    "color": "success" if action == "start" else "error" if action == "stop" else "warning",
+                    "size": "normal",
+                }
+            )
+
+        component = {
+            "type": "card",
+            "containerColumns": {"pc": 6, "tablet": 6, "mobile": 12},
+            "widgets": [
+                {
+                    "type": "Instance",
+                    "data": {
+                        "details": [
+                            {"key": "instances_hostname", "value": instance.hostname},
+                            {"key": "instances_type", "value": instance._type},
+                            {"key": "instances_status", "value": "instances_active" if instance.health else "instances_inactive"},
+                        ],
+                        "status": "success" if instance.health else "error",
+                        "title": instance.name,
+                        "buttons": buttons,
+                    },
+                }
+            ],
+        }
+
+        builder.append(component)
+
+    return builder
 
 
 @app.route("/instances", methods=["GET", "POST"])
@@ -1040,7 +1093,10 @@ def instances():
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
-    return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id())
+
+    data_server_builder = instances_builder(instances)
+
+    return render_template("instances.html", title="Instances", data_server_builder=data_server_builder, instances=instances, username=current_user.get_id())
 
 
 @app.route("/services", methods=["GET", "POST"])
@@ -1246,7 +1302,6 @@ def services():
         "services.html",
         services=services,
         global_config=global_config,
-        username=current_user.get_id(),
     )
 
 
@@ -1337,7 +1392,7 @@ def global_config():
                 global_config.pop(key)
 
     # Display global config
-    return render_template("global_config.html", username=current_user.get_id(), global_config=global_config, dumped_global_config=dumps(global_config))
+    return render_template("global_config.html", global_config=global_config, dumped_global_config=dumps(global_config))
 
 
 @app.route("/configs", methods=["GET", "POST"])
@@ -1456,7 +1511,6 @@ def configs():
                 services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
             )
         ],
-        username=current_user.get_id(),
     )
 
 
@@ -1765,7 +1819,6 @@ def plugins():
         plugins_count_internal=plugins_internal,
         plugins_count_external=plugins_external,
         plugins_count_pro=plugins_pro,
-        username=current_user.get_id(),
     )
 
 
@@ -1950,7 +2003,6 @@ def custom_plugin(plugin: str):
             Environment(
                 loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/"), autoescape=select_autoescape(["html"])
             ).from_string(page.decode("utf-8")),
-            username=current_user.get_id(),
             current_endpoint=plugin,
             plugin=curr_plugin,
             pre_render=pre_render,
@@ -1989,7 +2041,6 @@ def cache():
                 services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
             )
         ],
-        username=current_user.get_id(),
     )
 
 
@@ -2257,7 +2308,6 @@ def reports():
         total_reports=total_reports,
         top_code=top_code,
         top_reason=top_reason,
-        username=current_user.get_id(),
     )
 
 
