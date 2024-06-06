@@ -1,5 +1,19 @@
 # Integrations
 
+## BunkerWeb Cloud
+
+<figure markdown>
+  ![Overview](assets/img/bunkerweb-cloud.svg){ align=center, width="600" }
+  <figcaption>BunkerWeb Cloud</figcaption>
+</figure>
+
+!!! example "Beta phase"
+    BunkerWeb Cloud offer is in beta phase. We are actively getting feedbacks from our precious beta tester to improve the offer.
+
+BunkerWeb Cloud is the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of a like a BunkerWeb-as-a-Service !
+
+You will find more information about BunkerWeb Cloud beta [here](https://www.bunkerweb.io/cloud?utm_campaign=self&utm_source=docs) and you can apply for free [in the BunkerWeb panel](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_campaign=self&utm_source=docs).
+
 ## Docker
 
 <figure markdown>
