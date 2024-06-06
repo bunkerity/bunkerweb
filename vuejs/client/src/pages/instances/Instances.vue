@@ -3,6 +3,7 @@ import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import Builder from "@components/Builder.vue";
 import { useGlobal } from "@utils/global.js";
+import { useForm } from "@utils/form.js";
 
 /**
   @name Page/Home.vue
@@ -27,6 +28,7 @@ onBeforeMount(() => {
 
 onMounted(() => {
   useGlobal();
+  useForm();
 });
 
 // const data = [

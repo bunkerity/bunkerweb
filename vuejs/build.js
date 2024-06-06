@@ -109,12 +109,16 @@ function setFlaskData() {
         let attributs = "";
         matches.forEach((match) => {
           const matchFormat = match.replace('="', "").replace("='", "");
-          attributs += `<div class="hidden" ${matchFormat}={{${matchFormat}}}></div>\n`;
+          attributs += `<div class="hidden" ${matchFormat}={{${matchFormat.replaceAll(
+            "-",
+            "_"
+          )}}}></div>\n`;
         });
         // insert the new content
         updateData =
           data.slice(0, bodyIndex) +
           `\n<body>\n` +
+          `<div class="hidden" data-csrf-token={{ csrf_token() }}></div>\n` +
           attributs +
           `<div id="app"></div>\n</body>\n</html>`;
       } catch (e) {

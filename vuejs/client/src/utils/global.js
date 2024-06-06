@@ -1,17 +1,24 @@
 /**
-  @name global.js
+  @name utils/global.js
   @description This file contains global utils that will be used in the application by default.
   This file contains functions related to accessibilities, cookies, and other global utils.
 */
 
-// This function is a wrapper that contains all the global utils functions.
+/**
+  @name useGlobal
+  @description   This function is a wrapper that contains all the global utils functions.
+  This function will for example update the aria-expanded attribute of an element in case we have an aria-controls attribute.
+*/
 function useGlobal() {
   window.addEventListener("click", (e) => {
     updateExpanded();
   });
 }
 
-// This function updates the aria-expanded attribute of an element in case we have an aria-controls attribute.
+/**
+  @name useGlobal
+  @description   This function updates the aria-expanded attribute of an element in case we have an aria-controls attribute.
+*/
 function updateExpanded() {
   // Wait for previous event and element visibility update
   setTimeout(() => {
@@ -35,7 +42,11 @@ function updateExpanded() {
   }, 50);
 }
 
-// Check all the possible ways to hide an element
+/**
+  @name isElHidden
+  @description   This function is a util that checks if an element is hidden.
+  This will check for multiple ways to hide an element like aria-hidden, hidden class, display none, visibility hidden, and !hidden class.
+*/
 function isElHidden(el) {
   return el.hasAttribute("aria-hidden")
     ? el.getAttribute("aria-hidden") === "true"

@@ -17,14 +17,3 @@ export const useBannerStore = defineStore("banner", () => {
 
   return { isBanner, bannerClass, setBannerVisible };
 });
-
-/**
-  @name useBackdropStore
-  @description Store to share the current backdrop state (visible or not).
-  This backdrop avoid to click on the main content when we want to show a modal or a dialog.
-*/
-export const useBackdropStore = defineStore("backdrop", () => {
-  const clickCount = ref(0);
-
-  return { clickCount };
-});

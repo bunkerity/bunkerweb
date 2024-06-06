@@ -3,7 +3,7 @@ import en from "@lang/en.json" assert { type: "json" };
 import fr from "@lang/fr.json" assert { type: "json" };
 
 /**
-  @name lang.js
+  @name utils/lang.js
   @description This file contains utils to manage the language of the application.
   This is here that we retrieve json files to add translations.
   This lang.js works with vue-i18n.
@@ -12,10 +12,20 @@ import fr from "@lang/fr.json" assert { type: "json" };
 
 const availablesLangs = ["en", "fr"];
 
+/**
+  @name getAllLang
+  @description  Return all the languages json data available in the application.
+*/
 function getAllLang() {
   return { en: en, fr: fr };
 }
 
+/**
+  @name getAllLangCurrPage
+  @description   Filter the needed translations for the current page in order to reduce the size of the i18n object.
+  @example ["dashboard", "settings", "profile"]
+  @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
+*/
 function getAllLangCurrPage(pagesArr) {
   const langs = getAllLang();
   // for each lang
@@ -31,7 +41,13 @@ function getAllLangCurrPage(pagesArr) {
   return langs;
 }
 
-export function getI18n(pagesArr = []) {
+/**
+  @name getI18n
+  @description  Return the i18n object with the translations needed for the current page for all available languages.
+  @example ["dashboard", "settings", "profile"]
+  @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
+*/
+function getI18n(pagesArr = []) {
   const messages =
     pagesArr.length > 0 ? getAllLangCurrPage(pagesArr) : getAllLang();
 
@@ -48,7 +64,11 @@ export function getI18n(pagesArr = []) {
   return i18n;
 }
 
-export function getLocalLang() {
+/**
+  @name getLocalLang
+  @description  This will return the user langage checking the store, the browser, or the default lang.
+*/
+function getLocalLang() {
   // get store lang, or local, or default
   if (
     sessionStorage.getItem("lang") &&
@@ -77,3 +97,5 @@ export function getLocalLang() {
 
   return "en";
 }
+
+export { getI18n, getLocalLang };
