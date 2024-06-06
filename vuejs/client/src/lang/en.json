@@ -96,6 +96,7 @@
   "action_stop": "stop {name}",
   "action_ping": "ping {name}",
   "action_reload": "reload {name}",
+  "action_restart": "restart {name}",
   "action_upload": "upload {name}",
   "action_delete_all": "delete all {name}",
   "home_version": "version",
@@ -121,8 +122,7 @@
   "home_no_error": "no error",
   "home_errors_found": "errors found",
   "instances_hostname": "hostname",
-  "instances_method": "method",
-  "instances_port": "port",
+  "instances_type": "type",
   "instances_status": "status",
   "instances_active": "active",
   "instances_inactive": "inactive"
