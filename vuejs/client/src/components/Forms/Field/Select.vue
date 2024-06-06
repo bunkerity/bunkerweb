@@ -244,7 +244,7 @@ const emits = defineEmits(["inp"]);
         :aria-description="$t('inp_select_dropdown_button_desc')"
         data-select-dropdown
         :disabled="props.disabled || false"
-        @click="toggleSelect()"
+        @click.prevent="toggleSelect()"
         :class="[
           'select-btn',
           select.isValid ? 'valid' : 'invalid',
@@ -282,7 +282,7 @@ const emits = defineEmits(["inp"]);
           :tabindex="contentIndex"
           v-for="(value, id) in props.values"
           role="radio"
-          @click="$emit('inp', changeValue(value))"
+          @click.prevent="$emit('inp', changeValue(value))"
           :class="[
             id === 0 ? 'first' : '',
             id === props.values.length - 1 ? 'last' : '',

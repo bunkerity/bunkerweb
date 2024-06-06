@@ -45,16 +45,16 @@ import Subtitle from "@components/Widget/Subtitle.vue";
       ],
     },
   ];
-  @param {array} settings - List of settings that must fit Field components format.
+  @param {object} forms - List of advanced forms that contains settings.
   @param {boolean} [isActive=true] - Check if the form is active, it will display the form if true
 */
 
 const props = defineProps({
   // id && value && method
-  plugins: {
-    type: Array,
+  forms: {
+    type: Object,
     required: true,
-    default: [],
+    default: {},
   },
   isActive: {
     type: Boolean,

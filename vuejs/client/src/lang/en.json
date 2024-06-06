@@ -83,6 +83,8 @@
   "inp_input_valid": "input valid",
   "inp_input_error_required": "input is required",
   "inp_input_error": "input is invalid",
+  "inp_popover_multisite": "This setting is multisite.",
+  "inp_popover_global": "This setting is global.",
   "action_send": "send {name}",
   "action_start": "start {name}",
   "action_disable": "disable {name}",
