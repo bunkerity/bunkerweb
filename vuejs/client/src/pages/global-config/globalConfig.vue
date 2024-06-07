@@ -77,6 +77,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-33",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "internal use loading",
             columns: {
@@ -108,6 +109,7 @@ const data = {
             regex: "^(\\/[\\-\\w.\\s]+)*\\/$",
             type: "text",
             containerClass: "z-32",
+            pattern: "^(\\/[\\-\\w.\\s]+)*\\/$",
             inpType: "input",
             name: "nginx prefix",
             columns: {
@@ -139,6 +141,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-31",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "HTTP port",
             columns: {
@@ -170,6 +173,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-30",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "HTTPS port",
             columns: {
@@ -201,6 +205,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-29",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Multisite",
             columns: {
@@ -233,6 +238,8 @@ const data = {
               "^((\\S{1,255})(?!.*\\s\\2(\\s|$)))?(\\s(\\S{1,255})(?!.*\\s\\5(\\s|$)))*$",
             type: "text",
             containerClass: "z-28",
+            pattern:
+              "^((\\S{1,255})(?!.*\\s\\2(\\s|$)))?(\\s(\\S{1,255})(?!.*\\s\\5(\\s|$)))*$",
             inpType: "input",
             name: "Server name",
             columns: {
@@ -264,6 +271,7 @@ const data = {
             regex: "^(auto|\\d+)$",
             type: "text",
             containerClass: "z-27",
+            pattern: "^(auto|\\d+)$",
             inpType: "input",
             name: "Worker processes",
             columns: {
@@ -295,6 +303,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-26",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Open files per worker",
             columns: {
@@ -326,6 +335,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-25",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Connections per worker",
             columns: {
@@ -358,6 +368,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-24",
+            pattern: "^.*$",
             inpType: "input",
             name: "Log format",
             columns: {
@@ -390,6 +401,7 @@ const data = {
             regex: "^(debug|info|notice|warn|error|crit|alert|emerg)$",
             type: "select",
             containerClass: "z-23",
+            pattern: "^(debug|info|notice|warn|error|crit|alert|emerg)$",
             inpType: "select",
             name: "Log level",
             values: [
@@ -431,6 +443,7 @@ const data = {
             regex: "^(?! )(( *[^ ]+)(?!.*\\2))*$",
             type: "text",
             containerClass: "z-22",
+            pattern: "^(?! )(( *[^ ]+)(?!.*\\2))*$",
             inpType: "input",
             name: "DNS resolvers",
             columns: {
@@ -462,6 +475,7 @@ const data = {
             regex: "^\\d+[kKmMgG]?$",
             type: "text",
             containerClass: "z-21",
+            pattern: "^\\d+[kKmMgG]?$",
             inpType: "input",
             name: "Datastore memory size",
             columns: {
@@ -493,6 +507,7 @@ const data = {
             regex: "^\\d+[kKmMgG]?$",
             type: "text",
             containerClass: "z-20",
+            pattern: "^\\d+[kKmMgG]?$",
             inpType: "input",
             name: "Cachestore memory size",
             columns: {
@@ -524,6 +539,7 @@ const data = {
             regex: "^\\d+[kKmMgG]?$",
             type: "text",
             containerClass: "z-19",
+            pattern: "^\\d+[kKmMgG]?$",
             inpType: "input",
             name: "Cachestore ipc memory size",
             columns: {
@@ -555,6 +571,7 @@ const data = {
             regex: "^\\d+[kKmMgG]?$",
             type: "text",
             containerClass: "z-18",
+            pattern: "^\\d+[kKmMgG]?$",
             inpType: "input",
             name: "Cachestore miss memory size",
             columns: {
@@ -586,6 +603,7 @@ const data = {
             regex: "^\\d+[kKmMgG]?$",
             type: "text",
             containerClass: "z-17",
+            pattern: "^\\d+[kKmMgG]?$",
             inpType: "input",
             name: "Cachestore locks memory size",
             columns: {
@@ -617,6 +635,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-16",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate API",
             columns: {
@@ -648,6 +667,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-15",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "API port number",
             columns: {
@@ -679,6 +699,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-14",
+            pattern: "^.*$",
             inpType: "input",
             name: "API listen IP",
             columns: {
@@ -710,6 +731,7 @@ const data = {
             regex: "^[^ ]{1,255}$",
             type: "text",
             containerClass: "z-13",
+            pattern: "^[^ ]{1,255}$",
             inpType: "input",
             name: "API server name",
             columns: {
@@ -742,6 +764,8 @@ const data = {
               "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             type: "text",
             containerClass: "z-12",
+            pattern:
+              "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             inpType: "input",
             name: "API whitelist IP",
             columns: {
@@ -773,6 +797,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-11",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Autoconf mode",
             columns: {
@@ -804,6 +829,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-10",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Swarm mode",
             columns: {
@@ -835,6 +861,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-9",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Kubernetes mode",
             columns: {
@@ -866,6 +893,7 @@ const data = {
             regex: "^(http|stream)$",
             type: "select",
             containerClass: "z-8",
+            pattern: "^(http|stream)$",
             inpType: "select",
             name: "Server type",
             values: ["http", "stream"],
@@ -898,6 +926,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-7",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Listen stream",
             columns: {
@@ -929,6 +958,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-6",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Listen stream port",
             columns: {
@@ -960,6 +990,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-5",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Listen stream port ssl",
             columns: {
@@ -991,6 +1022,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-4",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Listen UDP",
             columns: {
@@ -1022,6 +1054,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-3",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use IPv6",
             columns: {
@@ -1053,6 +1086,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-2",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "internal use draft",
             columns: {
@@ -1084,6 +1118,7 @@ const data = {
             regex: "^(debug|info|notice|warn|err|crit|alert|emerg)$",
             type: "select",
             containerClass: "z-1",
+            pattern: "^(debug|info|notice|warn|err|crit|alert|emerg)$",
             inpType: "select",
             name: "Timers log level",
             values: [
@@ -1125,6 +1160,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "BunkerWeb instances",
             columns: {
@@ -1170,6 +1206,8 @@ const data = {
               "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile)$",
             type: "select",
             containerClass: "z-10",
+            pattern:
+              "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile)$",
             inpType: "select",
             name: "Antibot challenge",
             values: [
@@ -1210,6 +1248,7 @@ const data = {
             regex: "^\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*$",
             type: "text",
             containerClass: "z-9",
+            pattern: "^\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*$",
             inpType: "input",
             name: "Antibot URL",
             columns: {
@@ -1241,6 +1280,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-8",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Time to resolve",
             columns: {
@@ -1272,6 +1312,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-7",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Time valid",
             columns: {
@@ -1303,6 +1344,7 @@ const data = {
             regex: "^(0\\.[1-9]|1\\.0)$",
             type: "text",
             containerClass: "z-6",
+            pattern: "^(0\\.[1-9]|1\\.0)$",
             inpType: "input",
             name: "reCAPTCHA score",
             columns: {
@@ -1334,6 +1376,7 @@ const data = {
             regex: "^[\\w\\-]*$",
             type: "text",
             containerClass: "z-5",
+            pattern: "^[\\w\\-]*$",
             inpType: "input",
             name: "reCAPTCHA sitekey",
             columns: {
@@ -1365,6 +1408,7 @@ const data = {
             regex: "^[\\w\\-]*$",
             type: "password",
             containerClass: "z-4",
+            pattern: "^[\\w\\-]*$",
             inpType: "input",
             name: "reCAPTCHA secret",
             columns: {
@@ -1396,6 +1440,7 @@ const data = {
             regex: "^[a-zA-Z0-9\\-]*$",
             type: "text",
             containerClass: "z-3",
+            pattern: "^[a-zA-Z0-9\\-]*$",
             inpType: "input",
             name: "hCaptcha sitekey",
             columns: {
@@ -1427,6 +1472,7 @@ const data = {
             regex: "^\\w*$",
             type: "password",
             containerClass: "z-2",
+            pattern: "^\\w*$",
             inpType: "input",
             name: "hCaptcha secret",
             columns: {
@@ -1458,6 +1504,7 @@ const data = {
             regex: "^(0x[\\w\\-]+)?$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^(0x[\\w\\-]+)?$",
             inpType: "input",
             name: "Turnstile sitekey",
             columns: {
@@ -1489,6 +1536,7 @@ const data = {
             regex: "^(0x[\\w\\-]+)?$",
             type: "password",
             containerClass: "z-0",
+            pattern: "^(0x[\\w\\-]+)?$",
             inpType: "input",
             name: "Turnstile secret",
             columns: {
@@ -1534,6 +1582,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-4",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use HTTP basic auth",
             columns: {
@@ -1565,6 +1614,7 @@ const data = {
             regex: "^(sitewide|/[a-zA-Z0-9.\\/\\-]*)$",
             type: "text",
             containerClass: "z-3",
+            pattern: "^(sitewide|/[a-zA-Z0-9.\\/\\-]*)$",
             inpType: "input",
             name: "Auth basic Location",
             columns: {
@@ -1596,6 +1646,7 @@ const data = {
             regex: "^[\\w\\-]+",
             type: "text",
             containerClass: "z-2",
+            pattern: "^[\\w\\-]+",
             inpType: "input",
             name: "Auth basic Username",
             columns: {
@@ -1627,6 +1678,7 @@ const data = {
             regex: "^.+",
             type: "password",
             containerClass: "z-1",
+            pattern: "^.+",
             inpType: "input",
             name: "Password",
             columns: {
@@ -1658,6 +1710,7 @@ const data = {
             regex: "^.+",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.+",
             inpType: "input",
             name: "Text",
             columns: {
@@ -1703,6 +1756,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-3",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate automatic backup",
             columns: {
@@ -1734,6 +1788,7 @@ const data = {
             regex: "^(daily|weekly|monthly)$",
             type: "select",
             containerClass: "z-2",
+            pattern: "^(daily|weekly|monthly)$",
             inpType: "select",
             name: "Backup schedule",
             values: ["daily", "monthly", "weekly"],
@@ -1766,6 +1821,7 @@ const data = {
             regex: "^[1-9][0-9]*$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^[1-9][0-9]*$",
             inpType: "input",
             name: "Backup rotation",
             columns: {
@@ -1797,6 +1853,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "Backup directory",
             columns: {
@@ -1847,6 +1904,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-4",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate bad behavior",
             columns: {
@@ -1878,6 +1936,7 @@ const data = {
             regex: "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
             type: "text",
             containerClass: "z-3",
+            pattern: "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
             inpType: "input",
             name: "Bad status codes",
             columns: {
@@ -1909,6 +1968,7 @@ const data = {
             regex: "^[1-9][0-9]*",
             type: "text",
             containerClass: "z-2",
+            pattern: "^[1-9][0-9]*",
             inpType: "input",
             name: "Threshold",
             columns: {
@@ -1940,6 +2000,7 @@ const data = {
             regex: "^\\d+",
             type: "text",
             containerClass: "z-1",
+            pattern: "^\\d+",
             inpType: "input",
             name: "Period (in seconds)",
             columns: {
@@ -1971,6 +2032,7 @@ const data = {
             regex: "^\\d+",
             type: "text",
             containerClass: "z-0",
+            pattern: "^\\d+",
             inpType: "input",
             name: "Ban duration (in seconds)",
             columns: {
@@ -2016,6 +2078,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-21",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate blacklisting",
             columns: {
@@ -2048,6 +2111,8 @@ const data = {
               "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             type: "text",
             containerClass: "z-20",
+            pattern:
+              "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             inpType: "input",
             name: "Blacklist IP/network",
             columns: {
@@ -2079,6 +2144,7 @@ const data = {
             regex: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
             type: "text",
             containerClass: "z-19",
+            pattern: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
             inpType: "input",
             name: "Blacklist reverse DNS",
             columns: {
@@ -2110,6 +2176,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-18",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Blacklist reverse DNS global IPs",
             columns: {
@@ -2141,6 +2208,7 @@ const data = {
             regex: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
             type: "text",
             containerClass: "z-17",
+            pattern: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
             inpType: "input",
             name: "Blacklist ASN",
             columns: {
@@ -2172,6 +2240,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-16",
+            pattern: "^.*$",
             inpType: "input",
             name: "Blacklist User-Agent",
             columns: {
@@ -2203,6 +2272,7 @@ const data = {
             regex: "^( *(.*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-15",
+            pattern: "^( *(.*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist URI",
             columns: {
@@ -2235,6 +2305,8 @@ const data = {
               "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             type: "text",
             containerClass: "z-14",
+            pattern:
+              "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             inpType: "input",
             name: "Blacklist ignore IP/network",
             columns: {
@@ -2266,6 +2338,7 @@ const data = {
             regex: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
             type: "text",
             containerClass: "z-13",
+            pattern: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
             inpType: "input",
             name: "Blacklist ignore reverse DNS",
             columns: {
@@ -2297,6 +2370,7 @@ const data = {
             regex: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
             type: "text",
             containerClass: "z-12",
+            pattern: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
             inpType: "input",
             name: "Blacklist ignore ASN",
             columns: {
@@ -2328,6 +2402,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-11",
+            pattern: "^.*$",
             inpType: "input",
             name: "Blacklist ignore User-Agent",
             columns: {
@@ -2359,6 +2434,7 @@ const data = {
             regex: "^( *(.*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-10",
+            pattern: "^( *(.*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist ignore URI",
             columns: {
@@ -2391,6 +2467,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-9",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist IP/network URLs",
             columns: {
@@ -2423,6 +2501,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-8",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist reverse DNS URLs",
             columns: {
@@ -2455,6 +2535,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-7",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist ASN URLs",
             columns: {
@@ -2488,6 +2570,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-6",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist User-Agent URLs",
             columns: {
@@ -2521,6 +2605,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-5",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist URI URLs",
             columns: {
@@ -2553,6 +2639,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-4",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist ignore IP/network URLs",
             columns: {
@@ -2585,6 +2673,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-3",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist ignore reverse DNS URLs",
             columns: {
@@ -2617,6 +2707,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-2",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist ignore ASN URLs",
             columns: {
@@ -2649,6 +2741,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-1",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist ignore User-Agent URLs",
             columns: {
@@ -2681,6 +2775,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-0",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Blacklist ignore URI URLs",
             columns: {
@@ -2725,6 +2821,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-3",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use brotli",
             columns: {
@@ -2757,6 +2854,7 @@ const data = {
             regex: "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
             inpType: "input",
             name: "MIME types",
             columns: {
@@ -2789,6 +2887,7 @@ const data = {
             regex: "^\\d+",
             type: "text",
             containerClass: "z-1",
+            pattern: "^\\d+",
             inpType: "input",
             name: "Minimum length",
             columns: {
@@ -2820,6 +2919,7 @@ const data = {
             regex: "^([02-9]|1[01]?)$",
             type: "select",
             containerClass: "z-0",
+            pattern: "^([02-9]|1[01]?)$",
             inpType: "select",
             name: "Compression level",
             values: [
@@ -2879,6 +2979,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-1",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate BunkerNet",
             columns: {
@@ -2911,6 +3012,8 @@ const data = {
               "^https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*$",
             type: "text",
             containerClass: "z-0",
+            pattern:
+              "^https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*$",
             inpType: "input",
             name: "BunkerNet server",
             columns: {
@@ -2955,6 +3058,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-10",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use CORS",
             columns: {
@@ -2986,6 +3090,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-9",
+            pattern: "^.*$",
             inpType: "input",
             name: "Allowed origins",
             columns: {
@@ -3018,6 +3123,8 @@ const data = {
               "^(\\*|(?![, ])(,? ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\3))*)?$",
             type: "text",
             containerClass: "z-8",
+            pattern:
+              "^(\\*|(?![, ])(,? ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\3))*)?$",
             inpType: "input",
             name: "Access-Control-Allow-Methods value",
             columns: {
@@ -3050,6 +3157,7 @@ const data = {
             regex: "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
             type: "text",
             containerClass: "z-7",
+            pattern: "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
             inpType: "input",
             name: "Access-Control-Allow-Headers value",
             columns: {
@@ -3082,6 +3190,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-6",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Send Access-Control-Allow-Credentials",
             columns: {
@@ -3113,6 +3222,7 @@ const data = {
             regex: "^(\\*|(?![, ]+)(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
             type: "text",
             containerClass: "z-5",
+            pattern: "^(\\*|(?![, ]+)(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
             inpType: "input",
             name: "Access-Control-Expose-Headers value",
             columns: {
@@ -3144,6 +3254,7 @@ const data = {
             regex: "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
             type: "select",
             containerClass: "z-4",
+            pattern: "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
             inpType: "select",
             name: "Cross-Origin-Opener-Policy",
             values: [
@@ -3181,6 +3292,7 @@ const data = {
             regex: "^(unsafe-none|require-corp|credentialless)?$",
             type: "select",
             containerClass: "z-3",
+            pattern: "^(unsafe-none|require-corp|credentialless)?$",
             inpType: "select",
             name: "Cross-Origin-Embedder-Policy",
             values: ["", "credentialless", "require-corp", "unsafe-none"],
@@ -3213,6 +3325,7 @@ const data = {
             regex: "^(same-site|same-origin|cross-origin)?$",
             type: "select",
             containerClass: "z-2",
+            pattern: "^(same-site|same-origin|cross-origin)?$",
             inpType: "select",
             name: "Cross-Origin-Resource-Policy",
             values: ["", "cross-origin", "same-origin", "same-site"],
@@ -3245,6 +3358,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Access-Control-Max-Age value",
             columns: {
@@ -3276,6 +3390,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-0",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Deny request",
             columns: {
@@ -3320,6 +3435,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-3",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use client cache",
             columns: {
@@ -3352,6 +3468,7 @@ const data = {
             regex: "^(?!\\|)(\\|?([a-z0-9]+)(?!.*\\2(?!.)))+$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^(?!\\|)(\\|?([a-z0-9]+)(?!.*\\2(?!.)))+$",
             inpType: "input",
             name: "Extensions that should be cached by the client",
             columns: {
@@ -3383,6 +3500,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-1",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "ETag",
             columns: {
@@ -3415,6 +3533,8 @@ const data = {
               "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+(?!.*\\6))|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform))(?!.*\\4))+$",
             type: "text",
             containerClass: "z-0",
+            pattern:
+              "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+(?!.*\\6))|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform))(?!.*\\4))+$",
             inpType: "input",
             name: "Cache-Control header",
             columns: {
@@ -3459,6 +3579,7 @@ const data = {
             regex: "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
             inpType: "input",
             name: "Country blacklist",
             columns: {
@@ -3490,6 +3611,7 @@ const data = {
             regex: "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
             inpType: "input",
             name: "Country whitelist",
             columns: {
@@ -3534,6 +3656,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-4",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use custom certificate",
             columns: {
@@ -3565,6 +3688,7 @@ const data = {
             regex: "^(/[\\w. \\-]+)*/?$",
             type: "text",
             containerClass: "z-3",
+            pattern: "^(/[\\w. \\-]+)*/?$",
             inpType: "input",
             name: "Certificate path",
             columns: {
@@ -3596,6 +3720,7 @@ const data = {
             regex: "^(/[\\w. \\-]+)*/?$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^(/[\\w. \\-]+)*/?$",
             inpType: "input",
             name: "Key path",
             columns: {
@@ -3627,6 +3752,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^.*$",
             inpType: "input",
             name: "Certificate data (base64)",
             columns: {
@@ -3658,6 +3784,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "Key data (base64)",
             columns: {
@@ -3702,6 +3829,7 @@ const data = {
             regex: "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
             inpType: "input",
             name: "The database URI",
             columns: {
@@ -3733,6 +3861,7 @@ const data = {
             regex: "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
             inpType: "input",
             name: "The database URI for read-only operations",
             columns: {
@@ -3764,6 +3893,7 @@ const data = {
             regex: "^(debug|info|warn|warning|error)$",
             type: "select",
             containerClass: "z-0",
+            pattern: "^(debug|info|warn|warning|error)$",
             inpType: "select",
             name: "Database log level",
             values: ["debug", "error", "info", "warn", "warning"],
@@ -3809,6 +3939,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-1",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate DNSBL",
             columns: {
@@ -3841,6 +3972,7 @@ const data = {
             regex: "^(?! )( ?((?!\\.)[\\w.]+)(?!.*\\2(?!.)))*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^(?! )( ?((?!\\.)[\\w.]+)(?!.*\\2(?!.)))*$",
             inpType: "input",
             name: "DNSBL list",
             columns: {
@@ -3887,6 +4019,8 @@ const data = {
               "^(?! )( ?([1-5]\\d{2})(?!.*\\2(?![^=]))=(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*)(?!.*\\3(?!.)))*$",
             type: "text",
             containerClass: "z-1",
+            pattern:
+              "^(?! )( ?([1-5]\\d{2})(?!.*\\2(?![^=]))=(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*)(?!.*\\3(?!.)))*$",
             inpType: "input",
             name: "Errors",
             columns: {
@@ -3918,6 +4052,7 @@ const data = {
             regex: "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
             inpType: "input",
             name: "Intercepted error codes",
             columns: {
@@ -3963,6 +4098,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-11",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate greylisting",
             columns: {
@@ -3995,6 +4131,8 @@ const data = {
               "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             type: "text",
             containerClass: "z-10",
+            pattern:
+              "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             inpType: "input",
             name: "Greylist IP/network",
             columns: {
@@ -4026,6 +4164,7 @@ const data = {
             regex: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
             type: "text",
             containerClass: "z-9",
+            pattern: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
             inpType: "input",
             name: "Greylist reverse DNS",
             columns: {
@@ -4057,6 +4196,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-8",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Greylist reverse DNS global IPs",
             columns: {
@@ -4088,6 +4228,7 @@ const data = {
             regex: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
             type: "text",
             containerClass: "z-7",
+            pattern: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
             inpType: "input",
             name: "Greylist ASN",
             columns: {
@@ -4119,6 +4260,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-6",
+            pattern: "^.*$",
             inpType: "input",
             name: "Greylist User-Agent",
             columns: {
@@ -4150,6 +4292,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-5",
+            pattern: "^.*$",
             inpType: "input",
             name: "Greylist URI",
             columns: {
@@ -4182,6 +4325,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-4",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Greylist IP/network URLs",
             columns: {
@@ -4214,6 +4359,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-3",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Greylist reverse DNS URLs",
             columns: {
@@ -4246,6 +4393,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-2",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Greylist ASN URLs",
             columns: {
@@ -4278,6 +4427,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-1",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Greylist User-Agent URLs",
             columns: {
@@ -4310,6 +4461,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-0",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Greylist URI URLs",
             columns: {
@@ -4354,6 +4507,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-4",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use gzip",
             columns: {
@@ -4386,6 +4540,7 @@ const data = {
             regex: "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
             type: "text",
             containerClass: "z-3",
+            pattern: "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
             inpType: "input",
             name: "MIME types",
             columns: {
@@ -4418,6 +4573,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Minimum length",
             columns: {
@@ -4449,6 +4605,7 @@ const data = {
             regex: "^[1-9]$",
             type: "select",
             containerClass: "z-1",
+            pattern: "^[1-9]$",
             inpType: "select",
             name: "Compression level",
             values: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
@@ -4481,6 +4638,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "Proxied requests",
             columns: {
@@ -4525,6 +4683,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "HTML code",
             columns: {
@@ -4570,6 +4729,7 @@ const data = {
             type: "text",
             multiple: "custom-headers",
             containerClass: "z-13",
+            pattern: "^([\\w\\-]+: .+)?$",
             inpType: "input",
             name: "Custom header (HeaderName: HeaderValue)",
             columns: {
@@ -4602,6 +4762,7 @@ const data = {
             regex: "^(?! )( ?[\\w\\-]+)*$",
             type: "text",
             containerClass: "z-12",
+            pattern: "^(?! )( ?[\\w\\-]+)*$",
             inpType: "input",
             name: "Remove headers",
             columns: {
@@ -4635,6 +4796,7 @@ const data = {
             regex: "^((?! )( ?[\\w\\-]+)+|\\*)?$",
             type: "text",
             containerClass: "z-11",
+            pattern: "^((?! )( ?[\\w\\-]+)+|\\*)?$",
             inpType: "input",
             name: "Keep upstream headers",
             columns: {
@@ -4667,6 +4829,7 @@ const data = {
             regex: "^max-age=\\d+(; includeSubDomains(; preload)?)?$",
             type: "text",
             containerClass: "z-10",
+            pattern: "^max-age=\\d+(; includeSubDomains(; preload)?)?$",
             inpType: "input",
             name: "Strict-Transport-Security",
             columns: {
@@ -4700,6 +4863,8 @@ const data = {
             type: "text",
             multiple: "cookie-flags",
             containerClass: "z-9",
+            pattern:
+              "^(\\*|[^;]+)( (HttpOnly|(SameSite)(?!.*\\4)(=(Lax|Strict))?)(?!.*\\3))*$",
             inpType: "input",
             name: "Cookie flags",
             columns: {
@@ -4731,6 +4896,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-8",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Cookie auto Secure flag",
             columns: {
@@ -4763,6 +4929,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-7",
+            pattern: "^.*$",
             inpType: "input",
             name: "Content-Security-Policy",
             columns: {
@@ -4795,6 +4962,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-6",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Content-Security-Policy-Report-Only",
             columns: {
@@ -4827,6 +4995,8 @@ const data = {
               "^(?!^(,| ))((, )?(no-referrer-when-downgrade|no-referrer|origin-when-cross-origin|same-origin|strict-origin-when-cross-origin|strict-origin|origin|unsafe-url)(?!\\b.*, \\4\\b))*$",
             type: "text",
             containerClass: "z-5",
+            pattern:
+              "^(?!^(,| ))((, )?(no-referrer-when-downgrade|no-referrer|origin-when-cross-origin|same-origin|strict-origin-when-cross-origin|strict-origin|origin|unsafe-url)(?!\\b.*, \\4\\b))*$",
             inpType: "input",
             name: "Referrer-Policy",
             columns: {
@@ -4860,6 +5030,8 @@ const data = {
               "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
             type: "text",
             containerClass: "z-4",
+            pattern:
+              "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
             inpType: "input",
             name: "Permissions-Policy",
             columns: {
@@ -4894,6 +5066,8 @@ const data = {
               "^(?![; ])( ?([\\w\\-]+)(?!.*[^\\-]\\2 )( ('(none|self|strict-dynamic|report-sample|unsafe-inline|unsafe-eval|unsafe-hashes|unsafe-allow-redirects)'|https?:\\/\\/[\\w@:%.+~#=\\-]+[\\w\\(\\)!@:%+.~#?&\\/=$\\-]*))+;)*$",
             type: "text",
             containerClass: "z-3",
+            pattern:
+              "^(?![; ])( ?([\\w\\-]+)(?!.*[^\\-]\\2 )( ('(none|self|strict-dynamic|report-sample|unsafe-inline|unsafe-eval|unsafe-hashes|unsafe-allow-redirects)'|https?:\\/\\/[\\w@:%.+~#=\\-]+[\\w\\(\\)!@:%+.~#?&\\/=$\\-]*))+;)*$",
             inpType: "input",
             name: "Feature-Policy",
             columns: {
@@ -4926,6 +5100,7 @@ const data = {
             regex: "^(DENY|SAMEORIGIN)?$",
             type: "select",
             containerClass: "z-2",
+            pattern: "^(DENY|SAMEORIGIN)?$",
             inpType: "select",
             name: "X-Frame-Options",
             values: ["", "DENY", "SAMEORIGIN"],
@@ -4958,6 +5133,7 @@ const data = {
             regex: "^(nosniff)?$",
             type: "select",
             containerClass: "z-1",
+            pattern: "^(nosniff)?$",
             inpType: "select",
             name: "X-Content-Type-Options",
             values: ["", "nosniff"],
@@ -4991,6 +5167,8 @@ const data = {
               "^0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?$",
             type: "text",
             containerClass: "z-0",
+            pattern:
+              "^0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?$",
             inpType: "input",
             name: "X-XSS-Protection",
             columns: {
@@ -5048,6 +5226,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-3",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Automatic Let's Encrypt",
             columns: {
@@ -5079,6 +5258,7 @@ const data = {
             regex: "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
             inpType: "input",
             name: "Email Let's Encrypt",
             columns: {
@@ -5110,6 +5290,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-1",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use Let's Encrypt Staging",
             columns: {
@@ -5141,6 +5322,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-0",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Clear old certificates when they are no longer needed",
             columns: {
@@ -5185,6 +5367,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-6",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate limit requests",
             columns: {
@@ -5217,6 +5400,7 @@ const data = {
             type: "text",
             multiple: "limit-req",
             containerClass: "z-5",
+            pattern: "^.+$",
             inpType: "input",
             name: "Limit request URL",
             columns: {
@@ -5249,6 +5433,7 @@ const data = {
             type: "text",
             multiple: "limit-req",
             containerClass: "z-4",
+            pattern: "^\\d+r/[smhd]$",
             inpType: "input",
             name: "Limit request Rate",
             columns: {
@@ -5280,6 +5465,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-3",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate limit connections",
             columns: {
@@ -5311,6 +5497,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Maximum number of HTTP/1.X connections",
             columns: {
@@ -5342,6 +5529,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Maximum number of HTTP/2 streams",
             columns: {
@@ -5373,6 +5561,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Maximum number of stream connections",
             columns: {
@@ -5417,6 +5606,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-2",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use metrics",
             columns: {
@@ -5448,6 +5638,7 @@ const data = {
             regex: "^\\d+[kKmMgG]?$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^\\d+[kKmMgG]?$",
             inpType: "input",
             name: "Metrics memory size",
             columns: {
@@ -5479,6 +5670,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Metrics max blocked requests",
             columns: {
@@ -5523,6 +5715,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-20",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Disable default server",
             columns: {
@@ -5554,6 +5747,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-19",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Disable default server strict SNI",
             columns: {
@@ -5585,6 +5779,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-18",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Redirect HTTP to HTTPS",
             columns: {
@@ -5616,6 +5811,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-17",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Auto redirect HTTP to HTTPS",
             columns: {
@@ -5647,6 +5843,7 @@ const data = {
             regex: "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
             type: "text",
             containerClass: "z-16",
+            pattern: "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
             inpType: "input",
             name: "Allowed methods",
             columns: {
@@ -5678,6 +5875,7 @@ const data = {
             regex: "^\\d+[kKmMgG]?$",
             type: "text",
             containerClass: "z-15",
+            pattern: "^\\d+[kKmMgG]?$",
             inpType: "input",
             name: "Maximum body size",
             columns: {
@@ -5709,6 +5907,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-14",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Serve files",
             columns: {
@@ -5740,6 +5939,7 @@ const data = {
             regex: "^(/[\\w. \\-]+)*/?$",
             type: "text",
             containerClass: "z-13",
+            pattern: "^(/[\\w. \\-]+)*/?$",
             inpType: "input",
             name: "Root folder",
             columns: {
@@ -5771,6 +5971,7 @@ const data = {
             regex: "^(?! )( ?TLSv1\\.[0-3])*$",
             type: "text",
             containerClass: "z-12",
+            pattern: "^(?! )( ?TLSv1\\.[0-3])*$",
             inpType: "input",
             name: "HTTPS protocols",
             columns: {
@@ -5802,6 +6003,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-11",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "HTTP2",
             columns: {
@@ -5833,6 +6035,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-10",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "HTTP3",
             columns: {
@@ -5864,6 +6067,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-9",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "HTTP3 Alt-Svc port",
             columns: {
@@ -5895,6 +6099,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-8",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "HTTP listen",
             columns: {
@@ -5926,6 +6131,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-7",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use open file cache",
             columns: {
@@ -5957,6 +6163,7 @@ const data = {
             regex: "^(off|max=\\d+( inactive=\\d+(ms?|[shdwMy]))?)$",
             type: "text",
             containerClass: "z-6",
+            pattern: "^(off|max=\\d+( inactive=\\d+(ms?|[shdwMy]))?)$",
             inpType: "input",
             name: "Use open file cache",
             columns: {
@@ -5988,6 +6195,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-5",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Open file cache errors",
             columns: {
@@ -6019,6 +6227,7 @@ const data = {
             regex: "^[1-9]\\d*$",
             type: "text",
             containerClass: "z-4",
+            pattern: "^[1-9]\\d*$",
             inpType: "input",
             name: "Open file cache min uses",
             columns: {
@@ -6050,6 +6259,7 @@ const data = {
             regex: "^\\d+(ms?|[shdwMy])$",
             type: "text",
             containerClass: "z-3",
+            pattern: "^\\d+(ms?|[shdwMy])$",
             inpType: "input",
             name: "Open file cache valid time",
             columns: {
@@ -6082,6 +6292,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-2",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "External plugin URLs",
             columns: {
@@ -6113,6 +6325,7 @@ const data = {
             regex: "^(403|444)$",
             type: "select",
             containerClass: "z-1",
+            pattern: "^(403|444)$",
             inpType: "select",
             name: "Deny HTTP status",
             values: ["403", "444"],
@@ -6145,6 +6358,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-0",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Send anonymous report",
             columns: {
@@ -6189,6 +6403,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-5",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use ModSecurity",
             columns: {
@@ -6220,6 +6435,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-4",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use Core Rule Set",
             columns: {
@@ -6251,6 +6467,7 @@ const data = {
             regex: "^(3|4|nightly)$",
             type: "select",
             containerClass: "z-3",
+            pattern: "^(3|4|nightly)$",
             inpType: "select",
             name: "Core Rule Set Version",
             values: ["3", "4", "nightly"],
@@ -6283,6 +6500,7 @@ const data = {
             regex: "^(On|RelevantOnly|Off)$",
             type: "select",
             containerClass: "z-2",
+            pattern: "^(On|RelevantOnly|Off)$",
             inpType: "select",
             name: "SecAuditEngine",
             values: ["Off", "On", "RelevantOnly"],
@@ -6315,6 +6533,7 @@ const data = {
             regex: "^(On|DetectionOnly|Off)$",
             type: "select",
             containerClass: "z-1",
+            pattern: "^(On|DetectionOnly|Off)$",
             inpType: "select",
             name: "SecRuleEngine",
             values: ["DetectionOnly", "Off", "On"],
@@ -6347,6 +6566,7 @@ const data = {
             regex: "^A(([B-K])(?!.*\\2))+Z$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^A(([B-K])(?!.*\\2))+Z$",
             inpType: "input",
             name: "SecAuditLogParts",
             columns: {
@@ -6392,6 +6612,8 @@ const data = {
               "^((?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?)?$",
             type: "text",
             containerClass: "z-3",
+            pattern:
+              "^((?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?)?$",
             inpType: "input",
             name: "Remote PHP",
             columns: {
@@ -6423,6 +6645,7 @@ const data = {
             regex: "^(/[\\w. \\-]+)*/?$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^(/[\\w. \\-]+)*/?$",
             inpType: "input",
             name: "Remote PHP path",
             columns: {
@@ -6454,6 +6677,7 @@ const data = {
             regex: "^(/[\\w. \\-]+)*/?$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^(/[\\w. \\-]+)*/?$",
             inpType: "input",
             name: "Local PHP",
             columns: {
@@ -6485,6 +6709,7 @@ const data = {
             regex: "^(/[\\w. \\-]+)*/?$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^(/[\\w. \\-]+)*/?$",
             inpType: "input",
             name: "Local PHP path",
             columns: {
@@ -6529,6 +6754,7 @@ const data = {
             regex: "^.*$",
             type: "password",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "Pro License Key",
             columns: {
@@ -6574,6 +6800,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-5",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use real ip",
             columns: {
@@ -6605,6 +6832,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-4",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use PROXY protocol",
             columns: {
@@ -6637,6 +6865,8 @@ const data = {
               "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             type: "text",
             containerClass: "z-3",
+            pattern:
+              "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             inpType: "input",
             name: "Real IP from",
             columns: {
@@ -6668,6 +6898,7 @@ const data = {
             regex: "^(?! )(( ?(?!proxy_protocol)[\\w\\-]+)*|proxy_protocol)$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^(?! )(( ?(?!proxy_protocol)[\\w\\-]+)*|proxy_protocol)$",
             inpType: "input",
             name: "Real IP header",
             columns: {
@@ -6699,6 +6930,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-1",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Real IP recursive",
             columns: {
@@ -6731,6 +6963,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-0",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Real IP from URLs",
             columns: {
@@ -6776,6 +7010,8 @@ const data = {
               "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
             type: "text",
             containerClass: "z-2",
+            pattern:
+              "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
             inpType: "input",
             name: "Redirect to",
             columns: {
@@ -6807,6 +7043,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-1",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Append request URI",
             columns: {
@@ -6838,6 +7075,7 @@ const data = {
             regex: "^(301|302)$",
             type: "select",
             containerClass: "z-0",
+            pattern: "^(301|302)$",
             inpType: "select",
             name: "Append request URI",
             values: ["301", "302"],
@@ -6884,6 +7122,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-14",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate Redis",
             columns: {
@@ -6916,6 +7155,8 @@ const data = {
               "^((?!-)[a-zA-Z0-9\\-]{1,63}(.[a-zA-Z]{2,})+|(\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3}|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)))?$",
             type: "text",
             containerClass: "z-13",
+            pattern:
+              "^((?!-)[a-zA-Z0-9\\-]{1,63}(.[a-zA-Z]{2,})+|(\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3}|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)))?$",
             inpType: "input",
             name: "Redis server",
             columns: {
@@ -6947,6 +7188,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-12",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Redis port",
             columns: {
@@ -6978,6 +7220,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-11",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Redis database",
             columns: {
@@ -7009,6 +7252,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-10",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Redis SSL/TLS",
             columns: {
@@ -7040,6 +7284,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-9",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Redis SSL/TLS verify",
             columns: {
@@ -7071,6 +7316,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-8",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Redis timeout (ms)",
             columns: {
@@ -7102,6 +7348,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-7",
+            pattern: "^.*$",
             inpType: "input",
             name: "Redis username",
             columns: {
@@ -7133,6 +7380,7 @@ const data = {
             regex: "^.*$",
             type: "password",
             containerClass: "z-6",
+            pattern: "^.*$",
             inpType: "input",
             name: "Redis password",
             columns: {
@@ -7164,6 +7412,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-5",
+            pattern: "^.*$",
             inpType: "input",
             name: "Redis sentinel hosts",
             columns: {
@@ -7195,6 +7444,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-4",
+            pattern: "^.*$",
             inpType: "input",
             name: "Redis sentinel username",
             columns: {
@@ -7226,6 +7476,7 @@ const data = {
             regex: "^.*$",
             type: "password",
             containerClass: "z-3",
+            pattern: "^.*$",
             inpType: "input",
             name: "Redis sentinel password",
             columns: {
@@ -7257,6 +7508,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^.*$",
             inpType: "input",
             name: "Redis sentinel master",
             columns: {
@@ -7288,6 +7540,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Redis keepalive idle (ms)",
             columns: {
@@ -7319,6 +7572,7 @@ const data = {
             regex: "^[0-9]+$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^[0-9]+$",
             inpType: "input",
             name: "Redis keepalive pool",
             columns: {
@@ -7363,6 +7617,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-26",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use reverse proxy",
             columns: {
@@ -7394,6 +7649,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-25",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Intercept errors",
             columns: {
@@ -7425,6 +7681,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-24",
+            pattern: "^.*$",
             inpType: "input",
             name: "Reverse proxy custom host",
             columns: {
@@ -7457,6 +7714,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-23",
+            pattern: "^.*$",
             inpType: "input",
             name: "Reverse proxy host",
             columns: {
@@ -7489,6 +7747,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-22",
+            pattern: "^.*$",
             inpType: "input",
             name: "Reverse proxy url",
             columns: {
@@ -7521,6 +7780,7 @@ const data = {
             type: "check",
             multiple: "reverse-proxy",
             containerClass: "z-21",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Reverse proxy WS",
             columns: {
@@ -7553,6 +7813,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-20",
+            pattern: "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
             inpType: "input",
             name: "Reverse proxy headers",
             columns: {
@@ -7585,6 +7846,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-19",
+            pattern: "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
             inpType: "input",
             name: "Reverse proxy headers-client",
             columns: {
@@ -7617,6 +7879,7 @@ const data = {
             type: "check",
             multiple: "reverse-proxy",
             containerClass: "z-18",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Reverse proxy buffering",
             columns: {
@@ -7649,6 +7912,7 @@ const data = {
             type: "check",
             multiple: "reverse-proxy",
             containerClass: "z-17",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Reverse proxy keepalive",
             columns: {
@@ -7681,6 +7945,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-16",
+            pattern: "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
             inpType: "input",
             name: "Reverse proxy auth request",
             columns: {
@@ -7714,6 +7979,8 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-15",
+            pattern:
+              "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
             inpType: "input",
             name: "Auth request signin URL",
             columns: {
@@ -7746,6 +8013,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-14",
+            pattern: "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
             inpType: "input",
             name: "Reverse proxy auth request set",
             columns: {
@@ -7778,6 +8046,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-13",
+            pattern: "^\\d+(ms?|[shdwMy])$",
             inpType: "input",
             name: "Reverse proxy connect timeout",
             columns: {
@@ -7810,6 +8079,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-12",
+            pattern: "^\\d+(ms?|[shdwMy])$",
             inpType: "input",
             name: "Reverse proxy read timeout",
             columns: {
@@ -7842,6 +8112,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-11",
+            pattern: "^\\d+(ms?|[shdwMy])$",
             inpType: "input",
             name: "Reverse proxy send timeout",
             columns: {
@@ -7874,6 +8145,7 @@ const data = {
             type: "text",
             multiple: "reverse-proxy",
             containerClass: "z-10",
+            pattern: "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
             inpType: "input",
             name: "Reverse proxy includes",
             columns: {
@@ -7905,6 +8177,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-9",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Reverse proxy cache",
             columns: {
@@ -7936,6 +8209,7 @@ const data = {
             regex: "^(:?[12]){1,3}$",
             type: "text",
             containerClass: "z-8",
+            pattern: "^(:?[12]){1,3}$",
             inpType: "input",
             name: "Hierarchy levels",
             columns: {
@@ -7967,6 +8241,7 @@ const data = {
             regex: "^\\d+[kKmMgG]?$",
             type: "text",
             containerClass: "z-7",
+            pattern: "^\\d+[kKmMgG]?$",
             inpType: "input",
             name: "Reverse proxy cache zone size",
             columns: {
@@ -7998,6 +8273,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-6",
+            pattern: "^.*$",
             inpType: "input",
             name: "Reverse proxy cache params",
             columns: {
@@ -8030,6 +8306,8 @@ const data = {
               "^(?! )( ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
             type: "text",
             containerClass: "z-5",
+            pattern:
+              "^(?! )( ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
             inpType: "input",
             name: "Reverse proxy cache methods",
             columns: {
@@ -8061,6 +8339,7 @@ const data = {
             regex: "^[1-9]\\d*$",
             type: "text",
             containerClass: "z-4",
+            pattern: "^[1-9]\\d*$",
             inpType: "input",
             name: "Reverse proxy cache minimum uses",
             columns: {
@@ -8092,6 +8371,7 @@ const data = {
             regex: "^(?! )( ?(\\$[a-z_]+)(?!.*\\2))+$",
             type: "text",
             containerClass: "z-3",
+            pattern: "^(?! )( ?(\\$[a-z_]+)(?!.*\\2))+$",
             inpType: "input",
             name: "Reverse proxy cache key",
             columns: {
@@ -8123,6 +8403,7 @@ const data = {
             regex: "^(?! )( ?([1-5]\\d{2})(?!.*\\2=)=\\d+(ms?|[shdwMy]))*$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^(?! )( ?([1-5]\\d{2})(?!.*\\2=)=\\d+(ms?|[shdwMy]))*$",
             inpType: "input",
             name: "Reverse proxy cache valid",
             columns: {
@@ -8154,6 +8435,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^.*$",
             inpType: "input",
             name: "Reverse proxy no cache",
             columns: {
@@ -8185,6 +8467,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "Reverse proxy bypass",
             columns: {
@@ -8229,6 +8512,7 @@ const data = {
             regex: "^(no|yes)$",
             type: "check",
             containerClass: "z-2",
+            pattern: "^(no|yes)$",
             inpType: "checkbox",
             name: "Reverse scan",
             columns: {
@@ -8260,6 +8544,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^.*$",
             inpType: "input",
             name: "Reverse scan ports",
             columns: {
@@ -8291,6 +8576,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "Reverse scan timeout",
             columns: {
@@ -8335,6 +8621,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-2",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate self-signed certificate",
             columns: {
@@ -8366,6 +8653,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-1",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Certificate expiry",
             columns: {
@@ -8397,6 +8685,7 @@ const data = {
             regex: "^/CN=[^,]+$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^/CN=[^,]+$",
             inpType: "input",
             name: "Certificate subject",
             columns: {
@@ -8441,6 +8730,7 @@ const data = {
             regex: "^\\w+$",
             type: "password",
             containerClass: "z-6",
+            pattern: "^\\w+$",
             inpType: "input",
             name: "Sessions secret",
             columns: {
@@ -8472,6 +8762,7 @@ const data = {
             regex: "^\\w+$",
             type: "text",
             containerClass: "z-5",
+            pattern: "^\\w+$",
             inpType: "input",
             name: "Sessions name",
             columns: {
@@ -8503,6 +8794,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-4",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Sessions idling timeout",
             columns: {
@@ -8534,6 +8826,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-3",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Sessions rolling timeout",
             columns: {
@@ -8565,6 +8858,7 @@ const data = {
             regex: "^\\d+$",
             type: "text",
             containerClass: "z-2",
+            pattern: "^\\d+$",
             inpType: "input",
             name: "Sessions absolute timeout",
             columns: {
@@ -8596,6 +8890,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-1",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Sessions check IP",
             columns: {
@@ -8627,6 +8922,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-0",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Sessions check User-Agent",
             columns: {
@@ -8671,6 +8967,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-1",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Use UI",
             columns: {
@@ -8702,6 +8999,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-0",
+            pattern: "^.*$",
             inpType: "input",
             name: "UI host",
             columns: {
@@ -8747,6 +9045,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-11",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Activate whitelisting",
             columns: {
@@ -8780,6 +9079,8 @@ const data = {
               "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             type: "text",
             containerClass: "z-10",
+            pattern:
+              "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
             inpType: "input",
             name: "Whitelist IP/network",
             columns: {
@@ -8813,6 +9114,7 @@ const data = {
             regex: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
             type: "text",
             containerClass: "z-9",
+            pattern: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
             inpType: "input",
             name: "Whitelist reverse DNS",
             columns: {
@@ -8845,6 +9147,7 @@ const data = {
             regex: "^(yes|no)$",
             type: "check",
             containerClass: "z-8",
+            pattern: "^(yes|no)$",
             inpType: "checkbox",
             name: "Whitelist reverse DNS global IPs",
             columns: {
@@ -8876,6 +9179,7 @@ const data = {
             regex: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
             type: "text",
             containerClass: "z-7",
+            pattern: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
             inpType: "input",
             name: "Whitelist ASN",
             columns: {
@@ -8907,6 +9211,7 @@ const data = {
             regex: "^.*$",
             type: "text",
             containerClass: "z-6",
+            pattern: "^.*$",
             inpType: "input",
             name: "Whitelist User-Agent",
             columns: {
@@ -8938,6 +9243,7 @@ const data = {
             regex: "^( *(.*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-5",
+            pattern: "^( *(.*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Whitelist URI",
             columns: {
@@ -8970,6 +9276,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-4",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Whitelist IP/network URLs",
             columns: {
@@ -9002,6 +9310,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-3",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Whitelist reverse DNS URLs",
             columns: {
@@ -9034,6 +9344,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-2",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Whitelist ASN URLs",
             columns: {
@@ -9066,6 +9378,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-1",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Whitelist User-Agent URLs",
             columns: {
@@ -9098,6 +9412,8 @@ const data = {
               "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             type: "text",
             containerClass: "z-0",
+            pattern:
+              "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
             inpType: "input",
             name: "Whitelist URI URLs",
             columns: {
@@ -9130,7 +9446,7 @@ const data = {
 
 <template>
   <DashboardLayout>
-    <div class="bg-white col-span-12 grid grid-cols-12 card">
+    <div class="col-span-12 grid grid-cols-12 card">
       <Advanced :forms="data.advanced" />
     </div>
   </DashboardLayout>

@@ -1,5 +1,4 @@
 <script setup>
-
 /** 
   @name Forms/Error/Field.vue
   @description This component is used to display a feedback message to user when a field is invalid.
@@ -14,30 +13,30 @@
 */
 
 const props = defineProps({
-    isValid: {
-        type: Boolean,
-        required: false,
-    },
-    isValue : {
-        type: Boolean,
-        required: false,
-    }
-})
+  isValid: {
+    type: Boolean,
+    required: false,
+  },
+  isValue: {
+    type: Boolean,
+    required: false,
+  },
+});
 </script>
 
 <template>
-        <p
-      :aria-hidden="props.isValid ? 'true' : 'false'"
-      role="alert"
-      :class="[props.isValid ? 'hidden' : '']"
-      class="input-error-msg"
-    >
+  <p
+    :aria-hidden="props.isValid ? 'true' : 'false'"
+    role="alert"
+    :class="[props.isValid ? 'valid' : '']"
+    class="input-error-msg"
+  >
     {{
-        props.isValid
-          ? $t("inp_input_valid")
-          : !props.isValue
-            ? $t("inp_input_error_required")
-            : $t("inp_input_error")
-      }}
-    </p>
+      props.isValid
+        ? $t("inp_input_valid")
+        : !props.isValue
+        ? $t("inp_input_error_required")
+        : $t("inp_input_error")
+    }}
+  </p>
 </template>

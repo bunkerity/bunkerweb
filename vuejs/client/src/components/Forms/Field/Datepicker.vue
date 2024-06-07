@@ -635,7 +635,7 @@ function setIndex(calendarEl, tabindex) {
 <template>
   <Container
     v-if="props.inpType === 'datepicker'"
-    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
+    :containerClass="`field-container ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

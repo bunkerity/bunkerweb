@@ -32,6 +32,9 @@ def set_advanced():
                 loop_id += 1
                 # add zindex for container
                 value["containerClass"] = f"z-{total_settings - loop_id}"
+                # regex by pattern
+                value["pattern"] = value.get("regex", "")
+
                 # set id base on template name
                 value["id"] = f"{value["id"]}-{template_name}"
                 # set inpType based on type define for each settings

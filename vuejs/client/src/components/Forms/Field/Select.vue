@@ -282,7 +282,7 @@ const emits = defineEmits(["inp"]);
 
 <template>
   <Container
-    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
+    :containerClass="`field-container ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

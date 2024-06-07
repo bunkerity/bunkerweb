@@ -159,6 +159,11 @@ body {
 }
 
 /* INPUT */
+
+.field-container {
+  @apply relative w-full px-3 md:px-4 pt-2 md:pt-3 pb-0.5 md:pb-1;
+}
+
 .input-header-container {
   @apply z-20;
 }
@@ -180,7 +185,11 @@ body {
 }
 
 .input-error-msg {
-  @apply text-red-500 dark:text-red-300 text-[0.75rem] font-semibold mb-0 mt-0.5;
+  @apply text-red-500 text-[0.75rem] font-semibold mb-0 mt-0.5;
+}
+
+.valid.input-error-msg {
+  @apply pointer-events-none -z-10 opacity-0;
 }
 
 .checkbox-container {
