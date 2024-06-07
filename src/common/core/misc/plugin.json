@@ -214,6 +214,12 @@
       "file": "anonymous-report.py",
       "every": "day",
       "reload": false
+    },
+    {
+      "name": "download-plugins",
+      "file": "download-plugins.py",
+      "every": "once",
+      "reload": false
     }
   ]
 }
