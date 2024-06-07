@@ -27,6 +27,8 @@ def set_advanced():
         # Update settings with global config data
         for plugin in plugins :
             for setting, value in plugin["settings"].items() :
+                # set id base on template name
+                value["id"] = f"{value["id"]}-{template_name}"
                 # set inpType based on type define for each settings
                 inpType = "checkbox" if value.get("type") == "check" else "select" if value.get("type") == "select" else "datepicker" if value.get("type") == "date" else "input"
                 value["inpType"] =  inpType
@@ -56,13 +58,16 @@ def set_advanced():
                 popovers = []
 
                 if(value.get("help")):
-                    popovers.append({"color": "info", "svg": "help", "text" : value.get("help")})
+                    popovers.append({"iconColor": "info", "iconName": "info", "text" : value.get("help")})
 
                 if(value.get("context")):
-                    popovers.append({"color": "orange" if value.get("context") == "multisite" else "blue", 
-                                    "svg": "disk" if value.get("context") == "multisite" else "globe", 
+                    popovers.append({"iconColor": "orange" if value.get("context") == "multisite" else "blue", 
+                                    "iconName": "disk" if value.get("context") == "multisite" else "globe", 
                                     "text" : "inp_popover_multisite" if value.get("context") == "multisite" else "inp_popover_global"
                                     })
+                    print(popovers)
+            
+                value["popovers"] = popovers
                     
         advanced_forms[template_name] = plugins
     

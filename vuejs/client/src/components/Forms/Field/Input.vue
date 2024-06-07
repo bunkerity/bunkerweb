@@ -23,13 +23,21 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     label: 'Test input',
     pattern : "(test)",
     inpType: "input",
+    popovers : [
+      {
+        text: "This is a popover text",
+        iconName: "info",
+        iconColor: "info",
+      },
+    ],
   }
   @param {string} id
   @param {string} type - text, email, password, number, tel, url
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.  @param {string} label
   @param {string} value
-    @param {string} [inpType="input"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+  @param {array} [popovers] - List of popovers to display more information
+  @param {string} [inpType="input"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
@@ -100,9 +108,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  version: {
-    type: String,
+  popovers: {
+    type: Array,
     required: false,
+    default: [],
   },
   hideLabel: {
     type: Boolean,
@@ -178,6 +187,7 @@ onMounted(() => {
     :columns="props.columns"
   >
     <Header
+      :popovers="props.popovers"
       :required="props.required"
       :name="props.name"
       :label="props.label"

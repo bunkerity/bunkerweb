@@ -8,9 +8,6 @@ import { v4 as uuidv4 } from "uuid";
 /** 
   @name Widget/Button.vue
   @description This component is a standard button.
-  You can link this button to the event store with the clickAttr object.
-  This will allow you to share a value with other components, for example switching form on a click.
-  The prop attrs is an object that can contain multiple attributes to add to the button.
   @example
   {
     id: "open-modal-btn",
@@ -25,7 +22,7 @@ import { v4 as uuidv4 } from "uuid";
       { key: "modal", defaultValue: "close", clickValue: "open", targetId: "modal_id", valueExpanded: "open" },
     ],
   }
-  @param {string} [id=uuid()] - Unique id of the button
+  @param {string} [id=uuidv4()] - Unique id of the button
   @param {string} text - Content of the button. Can be a translation key or by default raw text.
   @param {string} [type="button"] - Can be of type button || submit
   @param {boolean} [disabled=false]

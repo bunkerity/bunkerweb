@@ -65,7 +65,7 @@ const props = defineProps({
   <Flex v-if="props.buttons.length > 0" :flexClass="props.groupClass">
     <Button
       v-for="(button, id) in props.buttons"
-      :key="button.id"
+      :key="button"
       v-bind="button"
       :class="[id === props.buttons.length - 1 ? '' : 'mr-2']"
     />

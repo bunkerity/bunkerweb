@@ -10,8 +10,7 @@ import Subtitle from "@components/Widget/Subtitle.vue";
 import ContentStat from "@components/Content/Stat.vue";
 import ContentDetailList from "@components/Content/DetailList.vue";
 // Icon
-import IconStat from "@components/Icon/Stat.vue";
-import IconStatus from "@components/Icon/Status.vue";
+import IconStatus from "@components/Widget/Status.vue";
 // Form
 import Checkbox from "@components/Forms/Field/Checkbox.vue";
 import Select from "@components/Forms/Field/Select.vue";

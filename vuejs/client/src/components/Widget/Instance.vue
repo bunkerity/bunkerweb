@@ -2,7 +2,7 @@
 import { defineProps } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Title from "@components/Widget/Title.vue";
-import IconStatus from "@components/Icon/Status.vue";
+import Status from "@components/Widget/Status.vue";
 import ContentDetailList from "@components/Content/DetailList.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import { v4 as uuidv4 } from "uuid";
@@ -71,7 +71,7 @@ const props = defineProps({
 
 <template>
   <Container :columns="{ pc: 12, tablet: 12, mobile: 12 }">
-    <IconStatus :id="props.title" :status="props.status" />
+    <Status :id="props.title" :status="props.status" />
     <Title type="card" :title="props.title" />
     <ContentDetailList :details="props.details" />
     <ButtonGroup

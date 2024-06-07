@@ -21,11 +21,19 @@ import ErrorField from "@components/Forms/Error/Field.vue";
   hideLabel: false, 
   inpType: "checkbox",
   headerClass: "text-red-500" 
+  popovers : [
+    {
+      text: "This is a popover text",
+      iconName: "info",
+      iconColor: "info",
+    },
+  ]
   }
   @param {string} id
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
+  @param {array} [popovers] - List of popovers to display more information
   @param {string} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
@@ -52,6 +60,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  popovers: {
+    type: Array,
+    required: false,
+    default: [],
+  },
   inpType: {
     type: String,
     required: false,
@@ -72,11 +85,6 @@ const props = defineProps({
   name: {
     type: String,
     required: true,
-  },
-  version: {
-    type: String,
-    required: false,
-    default: "",
   },
   hideLabel: {
     type: Boolean,
@@ -130,6 +138,7 @@ onMounted(() => {
     :columns="props.columns"
   >
     <Header
+      :popovers="props.popovers"
       :required="props.required"
       :name="props.name"
       :label="props.label"
@@ -137,7 +146,7 @@ onMounted(() => {
       :headerClass="props.headerClass"
     />
 
-    <div class="relative z-10 flex flex-col items-start">
+    <div class="checkbox-container">
       <input
         ref="checkboxEl"
         :tabindex="props.tabId"

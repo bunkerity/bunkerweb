@@ -72,20 +72,22 @@ const props = defineProps({
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >
-    <Container class="col-span-12 w-full" v-for="plugin in plugins">
-      <Title type="card" :title="plugin.name" />
-      <Subtitle type="card" :subtitle="plugin.description" />
+    <Container v-for="form in props.forms">
+      <Container class="col-span-12 w-full" v-for="plugin in form">
+        <Title type="card" :title="plugin.name" />
+        <Subtitle type="card" :subtitle="plugin.description" />
 
-      <Container class="grid grid-cols-12 w-full">
-        <template v-for="(setting, index) in plugin.settings" :key="index">
-          <Checkbox v-if="setting.inpType === 'checkbox'" v-bind="setting" />
-          <Select v-if="setting.inpType === 'select'" v-bind="setting" />
-          <Datepicker
-            v-if="setting.inpType === 'datepicker'"
-            v-bind="setting"
-          />
-          <Input v-if="setting.inpType === 'input'" v-bind="setting" />
-        </template>
+        <Container class="grid grid-cols-12 w-full">
+          <template v-for="(setting, index) in plugin.settings" :key="index">
+            <Checkbox v-if="setting.inpType === 'checkbox'" v-bind="setting" />
+            <Select v-if="setting.inpType === 'select'" v-bind="setting" />
+            <Datepicker
+              v-if="setting.inpType === 'datepicker'"
+              v-bind="setting"
+            />
+            <Input v-if="setting.inpType === 'input'" v-bind="setting" />
+          </template>
+        </Container>
       </Container>
     </Container>
   </Container>

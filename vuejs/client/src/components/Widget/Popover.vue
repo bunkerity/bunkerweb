@@ -1,17 +1,38 @@
 <script setup>
-import { reactive, onMounted, defineProps } from "vue";
+import { reactive, ref, onMounted, defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
+import { v4 as uuidv4 } from "uuid";
+import Icons from "@components/Widget/Icons.vue";
+
+/**
+  @name Widget/Popover.vue
+  @description This component is a standard popover.
+  @example
+  {
+    text: "This is a popover text",
+    iconName: "info",
+    iconColor: "info",
+  }
+  @param {string} [id=uuidv4()] - Unique id of the button
+  @param {string} text - Content of the button. Can be a translation key or by default raw text.
+  @param {string} iconName - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
+  @param {string} iconColor - Color of the icon between tailwind colors
+  @param {string} [tag="button"] - By default it is a button tag, but we can use other tag like div in case of popover on another button
+  @param {string} [popoverClass=""] - Additional class for the popover container
+  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+*/
 
 const props = defineProps({
   id: {
     type: String,
-    required: true,
+    required: false,
+    default: uuidv4(),
   },
-  content: {
+  text: {
     type: String,
     required: false,
   },
-  icon : {
+  iconName: {
     type: String,
     required: false,
   },
@@ -25,6 +46,16 @@ const props = defineProps({
     required: false,
     default: "button",
   },
+  popoverClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  tabId: {
+    type: String,
+    required: false,
+    default: contentIndex,
+  },
 });
 
 // Determine popover need to be display
@@ -33,8 +64,22 @@ const popover = reactive({
   isHover: false,
 });
 
+const popoverContainer = ref();
+const popoverBtn = ref();
+
 function showPopover() {
   popover.isHover = true;
+
+  // Position popover relative to btn
+  const popoverBtnRect = popoverBtn.value.getBoundingClientRect();
+  const popoverContainerRect = popoverContainer.value.getBoundingClientRect();
+
+  // Get current window scroll positio
+  popoverContainer.value.style.right = `${
+    window.innerWidth - popoverBtnRect.left - popoverBtnRect.width
+  }px`;
+
+  // Show popover
   setTimeout(() => {
     popover.isOpen = popover.isHover ? true : false;
   }, 450);
@@ -48,38 +93,40 @@ function hidePopover() {
 
 <template>
   <component
-    :tabindex="contentIndex"
+    ref="popoverBtn"
+    :tabindex="props.tabId"
     :aria-controls="`${props.id}-popover-text`"
     :aria-expanded="popover.isOpen ? 'true' : 'false'"
     :aria-describedby="`${props.id}-popover-text`"
     :is="props.tag"
     role="button"
+    @click.prevent
     @focusin="showPopover()"
     @focusout="hidePopover()"
     @pointerover="showPopover()"
     @pointerleave="hidePopover()"
-    class="cursor-pointer flex justify-start w-full"
+    :class="['popover-btn', props.popoverClass]"
   >
-    <svg
-      role="img"
-      aria-hidden="true"
-      class="popover-settings-svg"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-    >
-      <path
-        d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
-      />
-    </svg>
+    <Icons
+      :iconClass="'popover-svg'"
+      :iconName="props.iconName"
+      :iconColor="props.iconColor"
+    />
   </component>
   <div
+    ref="popoverContainer"
     :id="`${props.id}-popover-container`"
     role="status"
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
-    v-show="popover.isOpen"
-    :class="['popover-settings-container']"
+    :class="[
+      'popover-container',
+      props.iconColor,
+      popover.isOpen ? 'open' : 'close',
+    ]"
     :aria-description="$t('dashboard_popover_detail_desc')"
   >
-    <p :id="`${props.id}-popover-text`" class="popover-settings-text"><slot></slot></p>
+    <p :id="`${props.id}-popover-text`" class="popover-text">
+      {{ $t(props.text, props.text) }}
+    </p>
   </div>
 </template>

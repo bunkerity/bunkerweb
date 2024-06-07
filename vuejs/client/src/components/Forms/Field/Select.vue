@@ -22,13 +22,20 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     requiredValues : ['no'], // need required to be checked
     label: 'Test select',
     inpType: "select",
+    popovers : [
+      {
+        text: "This is a popover text",
+        iconName: "info",
+        iconColor: "info",
+      },]
   }
   @param {string} id
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
   @param {array} values
-    @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+  @param {array} [popovers] - List of popovers to display more information
+  @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
   @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
@@ -85,10 +92,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  version: {
-    type: String,
+  popovers: {
+    type: Array,
     required: false,
-    default: "",
+    default: [],
   },
   hideLabel: {
     type: Boolean,
@@ -208,6 +215,7 @@ const emits = defineEmits(["inp"]);
     :columns="props.columns"
   >
     <Header
+      :popovers="props.popovers"
       :required="props.required"
       :name="props.name"
       :label="props.label"

@@ -3,7 +3,7 @@ import Container from "@components/Widget/Container.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import ContentStat from "@components/Content/Stat.vue";
-import IconStat from "@components/Icon/Stat.vue";
+import Icon from "@components/Widget/Icons.vue";
 
 /** 
   @name Widget/Stat.vue
@@ -83,10 +83,11 @@ const props = defineProps({
         :subtitleColor="props.subtitleColor"
       />
     </div>
-    <IconStat
+    <Icon
       v-if="props.iconName"
       :iconName="props.iconName"
       :iconColor="props.iconColor"
+      :iconType="'stat'"
     />
   </Container>
 </template>

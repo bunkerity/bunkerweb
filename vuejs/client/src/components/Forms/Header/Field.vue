@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps } from "vue";
+import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 
 /** 
   @name Forms/Header/Field.vue
@@ -12,9 +13,17 @@ import { defineProps } from "vue";
     version : "0.1.0",
     name: 'test-input',
     required: true,
+    popovers : [
+      {
+        text: "This is a popover text",
+        iconName: "info",
+        iconColor: "info",
+      },
+    ],
   }
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+  @param {array} [popovers] - List of popovers to display more information
   @param {boolean} [required=false]
   @param {boolean} [hideLabel=false]
   @param {string} [headerClass=""]
@@ -29,13 +38,14 @@ const props = defineProps({
     type: String,
     required: true,
   },
-    required: {
-        type: Boolean,
-        required: false,
-    },
-  version: {
-    type: String,
+  required: {
+    type: Boolean,
     required: false,
+  },
+  popovers: {
+    type: Array,
+    required: false,
+    default: [],
   },
   hideLabel: {
     type: Boolean,
@@ -49,18 +59,31 @@ const props = defineProps({
 </script>
 
 <template>
-  <div :class="['relative', props.hideLabel ? 'hidden' : '', props.headerClass]">
-    <label
-      :class="[props.label ? '' : 'sr-only']"
-      :for="props.name"
-      class="relative lowercase capitalize-first my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-300"
-    >
-    {{ props.label ? $t(props.label, props.label) : $t(props.name, props.name) }} <span v-if="props.version">{{ props.version }}</span>
-  </label>
-  <span
-    v-if="props.required"
-    class="font-bold text-red-500 absolute ml-1"
-    >*
-  </span>
+  <div
+    :class="[
+      'relative',
+      props.hideLabel ? 'hidden' : '',
+      props.headerClass,
+      'input-header-container',
+      props.popovers.length ? 'popover' : 'no-popover',
+    ]"
+  >
+    <div>
+      <label
+        :class="[props.label ? '' : 'sr-only']"
+        :for="props.name"
+        class="input-header-label"
+      >
+        {{
+          props.label
+            ? $t(props.label, props.label)
+            : $t(props.name, props.name)
+        }}
+      </label>
+      <span v-if="props.required" class="input-header-required-sign">*</span>
+    </div>
+    <div v-if="props.popovers.length">
+      <PopoverGroup :popovers="props.popovers"></PopoverGroup>
+    </div>
   </div>
 </template>

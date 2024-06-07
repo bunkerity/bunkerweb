@@ -159,17 +159,40 @@ body {
 }
 
 /* INPUT */
+.input-header-container {
+  @apply z-10;
+}
+
+.no-popover.input-header-container {
+  @apply flex justify-start;
+}
+
+.popover.input-header-container {
+  @apply flex justify-between;
+}
+
+.input-header-label {
+  @apply relative lowercase capitalize-first mb-1 transition duration-300 ease-in-out text-sm  font-bold m-0 dark:text-gray-300 mr-2;
+}
+
+.input-header-required-sign {
+  @apply font-bold text-red-500 absolute ml-1;
+}
 
 .input-error-msg {
   @apply text-red-500 dark:text-red-300 text-[0.75rem] font-semibold mb-0 mt-0.5;
+}
+
+.checkbox-container {
+  @apply relative z-10 flex flex-col items-start mt-1;
 }
 
 .checkbox {
   @apply hover:border-gray-600 cursor-pointer disabled:cursor-default
     relative dark:border-slate-600 dark:bg-slate-700 z-10 w-5 h-5
     text-base rounded-1.4 duration-150 float-left
-    mt-1 appearance-none border border-gray-300 bg-white bg-contain bg-center
-    bg-no-repeat align-top transition-all disabled:bg-gray-400
+    appearance-none border border-gray-300 bg-white bg-contain bg-center
+    mt-1 bg-no-repeat align-top transition-all disabled:bg-gray-400
     disabled:border-gray-400/0 dark:disabled:bg-gray-800
     dark:disabled:border-gray-800/0 disabled:text-gray-700
     dark:disabled:text-gray-300;
@@ -184,7 +207,7 @@ body {
 }
 
 .select-btn {
-  @apply relative dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6 w-full md:max-w-[350px] rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500;
+  @apply relative dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6 w-full  rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
 .select-btn-name {
@@ -220,7 +243,7 @@ body {
 }
 
 .input-regular {
-  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full md:max-w-[350px] appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
+  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full  appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
 .invalid.input-regular,
@@ -340,40 +363,28 @@ body {
 
 /* POPOVER */
 
-.popover-settings-container {
-  @apply z-10 absolute h-fit w-full bottom-6 -left-20 min-w-[225px] opacity-100 justify-center items-center dark:brightness-90 transition z-50 rounded-md p-3 bg-blue-500;
+.popover-btn {
+  @apply cursor-pointer flex justify-start w-full;
 }
 
-.popover-background {
-  @apply bg-white w-3 h-3 rounded -z-0 translate-x-3 translate-y-1 absolute;
+.popover-container {
+  @apply pointer-events-none z-10 fixed max-w-[80vw] sm:max-w-[350px] opacity-100 justify-center items-center dark:brightness-90 transition z-50 rounded-md py-3 px-5;
 }
 
-.popover-settings-text {
+.open.popover-container {
+  @apply z-10 opacity-100;
+}
+
+.close.popover-container {
+  @apply -z-10 opacity-0;
+}
+
+.popover-text {
   @apply whitespace-normal pointer-events-none text-center transition duration-300 ease-in-out font-semibold text-sm text-white dark:text-white m-0;
 }
 
-.popover-settings-svg {
-  @apply z-0 hover:brightness-95 fill-blue-500 h-5 w-5 ml-2;
-}
-
-.popover-tab-container {
-  @apply z-10 fixed md:absolute bottom-0 h-fit w-full md:min-w-[200px] opacity-100 justify-center items-center dark:brightness-90 transition z-50 rounded-md p-3 bg-blue-500;
-}
-
-.mobile.popover-tab-container {
-  @apply max-w-[200px];
-}
-
-.desktop.popover-tab-container {
-  @apply top-6 -left-20;
-}
-
-.popover-tab-text {
-  @apply whitespace-normal pointer-events-none text-center transition duration-300 ease-in-out font-semibold text-sm text-white dark:text-white m-0;
-}
-
-.popover-tab-svg {
-  @apply z-0 hover:brightness-95 fill-blue-500 h-5 w-5 ml-2;
+.popover-svg {
+  @apply pointer-events-none z-0 hover:brightness-95 fill-blue-500 h-5 w-5;
 }
 
 /* TABS */
@@ -1587,185 +1598,221 @@ body {
 
 .success.status-icon,
 .success.stat-svg-container,
-.success.feedback-alert-wrap {
+.success.feedback-alert-wrap,
+.success.popover-container {
   @apply bg-green-500;
 }
 
 .error.status-icon,
 .error.stat-svg-container,
-.error.feedback-alert-wrap {
+.error.feedback-alert-wrap,
+.error.popover-container {
   @apply bg-red-500;
 }
 
 .warning.status-icon,
 .warning.stat-svg-container,
-.warning.feedback-alert-wrap {
+.warning.feedback-alert-wrap,
+.warning.popover-container {
   @apply bg-yellow-500;
 }
 
 .info.status-icon,
 .info.stat-svg-container,
-.info.feedback-alert-wrap {
+.info.feedback-alert-wrap,
+.info.popover-container {
   @apply bg-sky-500;
 }
 
 .purple.stat-svg-container,
-.purple.feedback-alert-wrap {
+.purple.feedback-alert-wrap,
+.purple.popover-container {
   @apply bg-purple-500;
 }
 
 .green.stat-svg-container,
-.green.feedback-alert-wrap {
+.green.feedback-alert-wrap,
+.green.popover-container {
   @apply bg-green-500;
 }
 
 .red.stat-svg-container,
-.red.feedback-alert-wrap {
+.red.feedback-alert-wrap,
+.red.popover-container {
   @apply bg-red-500;
 }
 
 .orange.stat-svg-container,
-.orange.feedback-alert-wrap {
+.orange.feedback-alert-wrap,
+.orange.popover-container {
   @apply bg-orange-500;
 }
 
 .blue.stat-svg-container,
-.blue.feedback-alert-wrap {
+.blue.feedback-alert-wrap,
+.blue.popover-container {
   @apply bg-blue-500;
 }
 
 .yellow.stat-svg-container,
-.yellow.feedback-alert-wrap {
+.yellow.feedback-alert-wrap,
+.yellow.popover-container {
   @apply bg-yellow-500;
 }
 
 .gray.stat-svg-container,
-.gray.feedback-alert-wrap {
+.gray.feedback-alert-wrap,
+.gray.popover-container {
   @apply bg-gray-500;
 }
 
 .dark.stat-svg-container,
-.dark.feedback-alert-wrap {
+.dark.feedback-alert-wrap,
+.dark.popover-container {
   @apply bg-slate-500;
 }
 
 .amber.stat-svg-container,
-.amber.feedback-alert-wrap {
+.amber.feedback-alert-wrap,
+.amber.popover-container {
   @apply bg-amber-500;
 }
 
 .emerald.stat-svg-container,
-.emerald.feedback-alert-wrap {
+.emerald.feedback-alert-wrap,
+.emerald.popover-container {
   @apply bg-emerald-500;
 }
 
 .teal.stat-svg-container,
-.teal.feedback-alert-wrap {
+.teal.feedback-alert-wrap,
+.teal.popover-container {
   @apply bg-teal-500;
 }
 
 .indigo.stat-svg-container,
-.indigo.feedback-alert-wrap {
+.indigo.feedback-alert-wrap,
+.indigo.popover-container {
   @apply bg-indigo-500;
 }
 
 .cyan.stat-svg-container,
-.cyan.feedback-alert-wrap {
+.cyan.feedback-alert-wrap,
+.cyan.popover-container {
   @apply bg-cyan-500;
 }
 
 .sky.stat-svg-container,
-.sky.feedback-alert-wrap {
+.sky.feedback-alert-wrap,
+.sky.popover-container {
   @apply bg-sky-500;
 }
 
 .pink.stat-svg-container,
-.pink.feedback-alert-wrap {
+.pink.feedback-alert-wrap,
+.pink.popover-container {
   @apply bg-pink-500;
 }
 
 .lime.stat-svg-container,
-.lime.feedback-alert-wrap {
+.lime.feedback-alert-wrap,
+.lime.popover-container {
   @apply bg-lime-500;
 }
 
 .purple-darker.stat-svg-container,
-.purle-darker.feedback-alert-wrap {
+.purle-darker.feedback-alert-wrap,
+.purple-darker.popover-container {
   @apply bg-purple-600;
 }
 
 .green-darker.stat-svg-container,
-.green-darker.feedback-alert-wrap {
+.green-darker.feedback-alert-wrap,
+.green-darker.popover-container {
   @apply bg-green-700;
 }
 
 .red-darker.stat-svg-container,
-.red-darker.feedback-alert-wrap {
+.red-darker.feedback-alert-wrap,
+.red-darker.popover-container {
   @apply bg-red-700;
 }
 
 .orange-darker.stat-svg-container,
-.orange-darker.feedback-alert-wrap {
+.orange-darker.feedback-alert-wrap,
+.orange-darker.popover-container {
   @apply bg-orange-600;
 }
 
 .blue-darker.stat-svg-container,
-.blue-darker.feedback-alert-wrap {
+.blue-darker.feedback-alert-wrap,
+.blue-darker.popover-container {
   @apply bg-blue-600;
 }
 
 .yellow-darker.stat-svg-container,
-.yellow-darker.feedback-alert-wrap {
+.yellow-darker.feedback-alert-wrap,
+.yellow-darker.popover-container {
   @apply bg-yellow-600;
 }
 
 .gray-darker.stat-svg-container,
-.gray-darker.feedback-alert-wrap {
+.gray-darker.feedback-alert-wrap,
+.gray-darker.popover-container {
   @apply bg-gray-600;
 }
 
 .dark-darker.stat-svg-container,
-.dark-darker.feedback-alert-wrap {
+.dark-darker.feedback-alert-wrap,
+.dark-darker.popover-container {
   @apply bg-slate-600;
 }
 
 .amber-darker.stat-svg-container,
-.amber-darker.feedback-alert-wrap {
+.amber-darker.feedback-alert-wrap,
+.amber-darker.popover-container {
   @apply bg-amber-600;
 }
 
 .emerald-darker.stat-svg-container,
-.emerald-darker.feedback-alert-wrap {
+.emerald-darker.feedback-alert-wrap,
+.emerald-darker.popover-container {
   @apply bg-emerald-600;
 }
 
 .teal-darker.stat-svg-container,
-.teal-darker.feedback-alert-wrap {
+.teal-darker.feedback-alert-wrap,
+.teal-darker.popover-container {
   @apply bg-teal-600;
 }
 
 .indigo-darker.stat-svg-container,
-.indigo-darker.feedback-alert-wrap {
+.indigo-darker.feedback-alert-wrap,
+.indigo-darker.popover-container {
   @apply bg-indigo-600;
 }
 
 .cyan-darker.stat-svg-container,
-.cyan-darker.feedback-alert-wrap {
+.cyan-darker.feedback-alert-wrap,
+.cyan-darker.popover-container {
   @apply bg-cyan-600;
 }
 
 .sky-darker.stat-svg-container,
-.sky-darker.feedback-alert-wrap {
+.sky-darker.feedback-alert-wrap,
+.sky-darker.popover-container {
   @apply bg-sky-700;
 }
 
 .pink-darker.stat-svg-container,
-.pink-darker.feedback-alert-wrap {
+.pink-darker.feedback-alert-wrap,
+.pink-darker.popover-container {
   @apply bg-pink-600;
 }
 
 .lime-darker.stat-svg-container,
-.lime-darker.feedback-alert-wrap {
+.lime-darker.feedback-alert-wrap,
+.lime-darker.popover-container {
   @apply bg-lime-600;
 }
 
@@ -1775,7 +1822,8 @@ body {
 .success.btn-svg,
 .success.menu-svg,
 .success.social-svg,
-.success.stat-svg {
+.success.stat-svg,
+.success.popover-svg {
   @apply fill-green-500;
 }
 
@@ -1783,7 +1831,8 @@ body {
 .error.btn-svg,
 .error.menu-svg,
 .error.social-svg,
-.error.stat-svg {
+.error.stat-svg,
+.error.popover-svg {
   @apply fill-red-500;
 }
 
@@ -1791,7 +1840,8 @@ body {
 .warning.btn-svg,
 .warning.menu-svg,
 .warning.social-svg,
-.warning.stat-svg {
+.warning.stat-svg,
+.warning.popover-svg {
   @apply fill-yellow-500;
 }
 
@@ -1799,7 +1849,8 @@ body {
 .info.btn-svg,
 .info.menu-svg,
 .info.social-svg,
-.info.stat-svg {
+.info.stat-svg,
+.info.popover-svg {
   @apply fill-sky-500;
 }
 
@@ -1807,7 +1858,8 @@ body {
 .white.btn-svg,
 .white.menu-svg,
 .white.social-svg,
-.white.stat-svg {
+.white.stat-svg,
+.white.popover-svg {
   @apply fill-white;
 }
 
@@ -1815,7 +1867,8 @@ body {
 .purple.btn-svg,
 .purple.menu-svg,
 .purple.social-svg,
-.purple.stat-svg {
+.purple.stat-svg,
+.purple.popover-svg {
   @apply fill-purple-500;
 }
 
@@ -1823,7 +1876,8 @@ body {
 .green.btn-svg,
 .green.menu-svg,
 .green.social-svg,
-.green.stat-svg {
+.green.stat-svg,
+.green.popover-svg {
   @apply fill-green-500;
 }
 
@@ -1831,7 +1885,8 @@ body {
 .red.btn-svg,
 .red.menu-svg,
 .red.social-svg,
-.red.stat-svg {
+.red.stat-svg,
+.red.popover-svg {
   @apply fill-red-500;
 }
 
@@ -1839,7 +1894,8 @@ body {
 .orange.btn-svg,
 .orange.menu-svg,
 .orange.social-svg,
-.orange.stat-svg {
+.orange.stat-svg,
+.orange.popover-svg {
   @apply fill-orange-500;
 }
 
@@ -1847,7 +1903,8 @@ body {
 .blue.btn-svg,
 .blue.menu-svg,
 .blue.social-svg,
-.blue.stat-svg {
+.blue.stat-svg,
+.blue.popover-svg {
   @apply fill-blue-500;
 }
 
@@ -1855,7 +1912,8 @@ body {
 .yellow.btn-svg,
 .yellow.menu-svg,
 .yellow.social-svg,
-.yellow.stat-svg {
+.yellow.stat-svg,
+.yellow.popover-svg {
   @apply fill-yellow-500;
 }
 
@@ -1863,7 +1921,8 @@ body {
 .gray.btn-svg,
 .gray.menu-svg,
 .gray.social-svg,
-.gray.stat-svg {
+.gray.stat-svg,
+.gray.popover-svg {
   @apply fill-gray-500;
 }
 
@@ -1871,7 +1930,8 @@ body {
 .dark.btn-svg,
 .dark.menu-svg,
 .dark.social-svg,
-.dark.stat-svg {
+.dark.stat-svg,
+.dark.popover-svg {
   @apply fill-slate-500;
 }
 
@@ -1879,7 +1939,8 @@ body {
 .amber.btn-svg,
 .amber.menu-svg,
 .amber.social-svg,
-.amber.stat-svg {
+.amber.stat-svg,
+.amber.popover-svg {
   @apply fill-amber-500;
 }
 
@@ -1887,7 +1948,8 @@ body {
 .emerald.btn-svg,
 .emerald.menu-svg,
 .emerald.social-svg,
-.emerald.stat-svg {
+.emerald.stat-svg,
+.emerald.popover-svg {
   @apply fill-emerald-500;
 }
 
@@ -1895,7 +1957,8 @@ body {
 .teal.btn-svg,
 .teal.menu-svg,
 .teal.social-svg,
-.teal.stat-svg {
+.teal.stat-svg,
+.teal.popover-svg {
   @apply fill-teal-500;
 }
 
@@ -1903,7 +1966,8 @@ body {
 .indigo.btn-svg,
 .indigo.menu-svg,
 .indigo.social-svg,
-.indigo.stat-svg {
+.indigo.stat-svg,
+.indigo.popover-svg {
   @apply fill-indigo-500;
 }
 
@@ -1911,7 +1975,8 @@ body {
 .cyan.btn-svg,
 .cyan.menu-svg,
 .cyan.social-svg,
-.cyan.stat-svg {
+.cyan.stat-svg,
+.cyan.popover-svg {
   @apply fill-cyan-500;
 }
 
@@ -1919,7 +1984,8 @@ body {
 .sky.btn-svg,
 .sky.menu-svg,
 .sky.social-svg,
-.sky.stat-svg {
+.sky.stat-svg,
+.sky.popover-svg {
   @apply fill-sky-500;
 }
 
@@ -1927,7 +1993,8 @@ body {
 .pink.btn-svg,
 .pink.menu-svg,
 .pink.social-svg,
-.pink.stat-svg {
+.pink.stat-svg,
+.pink.popover-svg {
   @apply fill-pink-500;
 }
 
@@ -1935,7 +2002,8 @@ body {
 .lime.btn-svg,
 .lime.menu-svg,
 .lime.social-svg,
-.lime.stat-svg {
+.lime.stat-svg,
+.lime.popover-svg {
   @apply fill-lime-500;
 }
 
@@ -1943,7 +2011,8 @@ body {
 .twitter.btn-svg,
 .twitter.menu-svg,
 .twitter.social-svg,
-.twitter.stat-svg {
+.twitter.stat-svg,
+.twitter.popover-svg {
   @apply fill-[#1DA1F2];
 }
 
@@ -1951,7 +2020,8 @@ body {
 .linkedin.btn-svg,
 .linkedin.menu-svg,
 .linkedin.social-svg,
-.linkedin.stat-svg {
+.linkedin.stat-svg,
+.linkedin.popover-svg {
   @apply fill-[#0A63BC];
 }
 
@@ -1959,7 +2029,8 @@ body {
 .discord.btn-svg,
 .discord.menu-svg,
 .discord.social-svg,
-.discord.stat-svg {
+.discord.stat-svg,
+.discord.popover-svg {
   @apply fill-[#5562EA];
 }
 
@@ -1967,7 +2038,8 @@ body {
 .github.btn-svg,
 .github.menu-svg,
 .github.social-svg,
-.github.stat-svg {
+.github.stat-svg,
+.github.popover-svg {
   @apply fill-[#171A1F] dark:fill-gray-300;
 }
 
@@ -1975,7 +2047,8 @@ body {
 .purle-darker.btn-svg,
 .purple-darker.menu-svg,
 .purple-darker.social-svg,
-.purple-darker.stat-svg {
+.purple-darker.stat-svg,
+.purple-darker.popover-svg {
   @apply fill-purple-600;
 }
 
@@ -1983,7 +2056,8 @@ body {
 .green-darker.btn-svg,
 .green-darker.menu-svg,
 .green-darker.social-svg,
-.green-darker.stat-svg {
+.green-darker.stat-svg,
+.green-darker.popover-svg {
   @apply fill-green-700;
 }
 
@@ -1991,7 +2065,8 @@ body {
 .red-darker.btn-svg,
 .red-darker.menu-svg,
 .red-darker.social-svg,
-.red-darker.stat-svg {
+.red-darker.stat-svg,
+.red-darker.popover-svg {
   @apply fill-red-700;
 }
 
@@ -1999,7 +2074,8 @@ body {
 .orange-darker.btn-svg,
 .orange-darker.menu-svg,
 .orange-darker.social-svg,
-.orange-darker.stat-svg {
+.orange-darker.stat-svg,
+.orange-darker.popover-svg {
   @apply fill-orange-600;
 }
 
@@ -2007,7 +2083,8 @@ body {
 .blue-darker.btn-svg,
 .blue-darker.menu-svg,
 .blue-darker.social-svg,
-.blue-darker.stat-svg {
+.blue-darker.stat-svg,
+.blue-darker.popover-svg {
   @apply fill-blue-600;
 }
 
@@ -2015,7 +2092,8 @@ body {
 .yellow-darker.btn-svg,
 .yellow-darker.menu-svg,
 .yellow-darker.social-svg,
-.yellow-darker.stat-svg {
+.yellow-darker.stat-svg,
+.yellow-darker.popover-svg {
   @apply fill-yellow-600;
 }
 
@@ -2023,7 +2101,8 @@ body {
 .gray-darker.btn-svg,
 .gray-darker.menu-svg,
 .gray-darker.social-svg,
-.gray-darker.stat-svg {
+.gray-darker.stat-svg,
+.gray-darker.popover-svg {
   @apply fill-gray-600;
 }
 
@@ -2031,7 +2110,8 @@ body {
 .dark-darker.btn-svg,
 .dark-darker.menu-svg,
 .dark-darker.social-svg,
-.dark-darker.stat-svg {
+.dark-darker.stat-svg,
+.dark-darker.popover-svg {
   @apply fill-slate-600;
 }
 
@@ -2039,7 +2119,8 @@ body {
 .amber-darker.btn-svg,
 .amber-darker.menu-svg,
 .amber-darker.social-svg,
-.amber-darker.stat-svg {
+.amber-darker.stat-svg,
+.amber-darker.popover-svg {
   @apply fill-amber-600;
 }
 
@@ -2047,7 +2128,8 @@ body {
 .emerald-darker.btn-svg,
 .emerald-darker.menu-svg,
 .emerald-darker.social-svg,
-.emerald-darker.stat-svg {
+.emerald-darker.stat-svg,
+.emerald-darker.popover-svg {
   @apply fill-emerald-600;
 }
 
@@ -2055,7 +2137,8 @@ body {
 .teal-darker.btn-svg,
 .teal-darker.menu-svg,
 .teal-darker.social-svg,
-.teal-darker.stat-svg {
+.teal-darker.stat-svg,
+.teal-darker.popover-svg {
   @apply fill-teal-600;
 }
 
@@ -2063,7 +2146,8 @@ body {
 .indigo-darker.btn-svg,
 .indigo-darker.menu-svg,
 .indigo-darker.social-svg,
-.indigo-darker.stat-svg {
+.indigo-darker.stat-svg,
+.indigo-darker.popover-svg {
   @apply fill-indigo-600;
 }
 
@@ -2071,7 +2155,8 @@ body {
 .cyan-darker.btn-svg,
 .cyan-darker.menu-svg,
 .cyan-darker.social-svg,
-.cyan-darker.stat-svg {
+.cyan-darker.stat-svg,
+.cyan-darker.popover-svg {
   @apply fill-cyan-600;
 }
 
@@ -2079,7 +2164,8 @@ body {
 .sky-darker.btn-svg,
 .sky-darker.menu-svg,
 .sky-darker.social-svg,
-.sky-darker.stat-svg {
+.sky-darker.stat-svg,
+.sky-darker.popover-svg {
   @apply fill-sky-700;
 }
 
@@ -2087,7 +2173,8 @@ body {
 .pink-darker.btn-svg,
 .pink-darker.menu-svg,
 .pink-darker.social-svg,
-.pink-darker.stat-svg {
+.pink-darker.stat-svg,
+.pink-darker.popover-svg {
   @apply fill-pink-600;
 }
 
@@ -2095,6 +2182,7 @@ body {
 .lime-darker.btn-svg,
 .lime-darker.menu-svg,
 .lime-darker.social-svg,
-.lime-darker.stat-svg {
+.lime-darker.stat-svg,
+.lime-darker.popover-svg {
   @apply fill-lime-600;
 }

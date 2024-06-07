@@ -28,10 +28,18 @@ import "@assets/css/flatpickr.dark.css";
     noPickAfterStamp: 1735689600000,
     inpClass: "text-center",
     inpType : ""
+    popovers : [
+      {
+        text: "This is a popover text",
+        iconName: "info",
+        iconColor: "info",
+      },
+    ],
   }
   @param {string} id
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+  @param {array} popovers - List of popovers to display more information
   @param {string} [inpType="datepicker"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {string|number|date} [defaultDate=null] - Default date when instanciate
   @param {string|number} [noPickBeforeStamp=""] - Impossible to pick a date before this date
@@ -58,6 +66,11 @@ const props = defineProps({
   label: {
     type: String,
     required: false,
+  },
+  popovers: {
+    type: Array,
+    required: false,
+    default: [],
   },
   inpType: {
     type: String,
@@ -626,6 +639,7 @@ function setIndex(calendarEl, tabindex) {
     :columns="props.columns"
   >
     <Header
+      :popovers="props.popovers"
       :required="props.required"
       :name="props.name"
       :label="props.label"
