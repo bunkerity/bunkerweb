@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted, defineProps } from "vue";
+import { reactive, ref, watch, defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { v4 as uuidv4 } from "uuid";
 import Icons from "@components/Widget/Icons.vue";
@@ -121,6 +121,15 @@ function hidePopover() {
   popover.isHover = false;
   popover.isOpen = false;
 }
+
+// Close select dropdown when clicked outside element
+watch(popover, () => {
+  if (popover.isOpen) {
+    window.addEventListener("scroll", hidePopover, true);
+  } else {
+    window.removeEventListener("scroll", hidePopover, true);
+  }
+});
 </script>
 
 <template>
