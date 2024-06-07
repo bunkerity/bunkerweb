@@ -5,7 +5,7 @@ import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 
-/** 
+/**
   @name Forms/Field/Select.vue
   @description This component is used to create a complete select field input with error handling and label.
   We can be more precise by adding values that need to be selected to be valid.
@@ -151,10 +151,69 @@ const select = reactive({
 
 const selectBtn = ref();
 const selectWidth = ref("");
+const selectDropdown = ref();
 
 // EVENTS
 function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
+  // Position dropdown relative to btn on open on fixed position
+  if (select.isOpen) {
+    const selectBtnRect = selectBtn.value.getBoundingClientRect();
+    const selectDropdownRect = selectDropdown.value.getBoundingClientRect();
+
+    // We need to take care of parent padding and margin that will affect dropdown position but aren't calculate in rect
+    const parents = [selectBtn.value.parentElement];
+    let isParent = selectBtn.value.parentElement ? true : false;
+    while (isParent) {
+      parents.push(parents[parents.length - 1].parentElement);
+      isParent = parents[parents.length - 1].parentElement ? true : false;
+    }
+
+    let noRectParentHeight = 0;
+    for (let i = 0; i < parents.length; i++) {
+      try {
+        noRectParentHeight += +window
+          .getComputedStyle(parents[i], null)
+          .getPropertyValue("padding-top")
+          .replace("px", "");
+      } catch (e) {}
+
+      try {
+        noRectParentHeight += +window
+          .getComputedStyle(parents[i], null)
+          .getPropertyValue("margin-top")
+          .replace("px", "");
+      } catch (e) {}
+    }
+
+    // If dropdown is too close to bottom, we need to drop it up
+    const canDropBeDown =
+      selectBtnRect.top + selectDropdownRect.height + 20 < window.innerHeight
+        ? true
+        : false;
+
+    if (canDropBeDown) {
+      selectDropdown.value.style.top = `${
+        window.scrollY +
+        selectBtnRect.bottom +
+        selectBtnRect.height * 2 -
+        selectDropdownRect.height -
+        noRectParentHeight +
+        16
+      }px`;
+    }
+
+    if (!canDropBeDown) {
+      selectDropdown.value.style.top = `${
+        window.scrollY +
+        selectBtnRect.top +
+        selectBtnRect.height * 2 -
+        selectDropdownRect.height * 2 -
+        noRectParentHeight -
+        24
+      }px`;
+    }
+  }
 }
 
 function closeSelect() {
@@ -177,15 +236,6 @@ function changeValue(newValue) {
   return newValue;
 }
 
-// Close select dropdown when clicked outside element
-watch(select, () => {
-  if (select.isOpen) {
-    document.querySelector("body").addEventListener("click", closeOutside);
-  } else {
-    document.querySelector("body").removeEventListener("click", closeOutside);
-  }
-});
-
 // Close select when clicked outside logic
 function closeOutside(e) {
   try {
@@ -196,6 +246,17 @@ function closeOutside(e) {
     select.isOpen = false;
   }
 }
+
+// Close select dropdown when clicked outside element
+watch(select, () => {
+  if (select.isOpen) {
+    window.addEventListener("click", closeOutside);
+    window.addEventListener("scroll", closeSelect, true);
+  } else {
+    window.removeEventListener("click", closeOutside);
+    window.removeEventListener("scroll", closeSelect, true);
+  }
+});
 
 onMounted(() => {
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
@@ -279,15 +340,17 @@ const emits = defineEmits(["inp"]);
       </button>
       <!-- dropdown-->
       <div
+        :aria-hidden="select.isOpen ? 'false' : 'true'"
+        ref="selectDropdown"
         role="radiogroup"
         :style="{ width: selectWidth }"
         :id="`${props.id}-custom`"
-        :class="[select.isOpen ? 'flex' : 'hidden']"
+        :class="[select.isOpen ? 'open' : 'close']"
         class="select-dropdown-container"
         :aria-description="$t('inp_select_dropdown_desc')"
       >
         <button
-          :tabindex="contentIndex"
+          :tabindex="select.isOpen ? props.tabId : '-1'"
           v-for="(value, id) in props.values"
           role="radio"
           @click.prevent="$emit('inp', changeValue(value))"
@@ -312,7 +375,6 @@ const emits = defineEmits(["inp"]);
         </button>
       </div>
       <ErrorField :isValid="select.isValid" :isValue="true" />
-
       <!-- end dropdown-->
     </div>
     <!-- end custom-->

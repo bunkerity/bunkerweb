@@ -72,9 +72,7 @@ function showPopover() {
 
   // Position popover relative to btn
   const popoverBtnRect = popoverBtn.value.getBoundingClientRect();
-  const popoverContainerRect = popoverContainer.value.getBoundingClientRect();
 
-  // Get current window scroll positio
   popoverContainer.value.style.right = `${
     window.innerWidth - popoverBtnRect.left - popoverBtnRect.width
   }px`;
