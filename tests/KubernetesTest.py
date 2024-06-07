@@ -33,6 +33,9 @@ class KubernetesTest(Test):
                 "REAL_IP_FROM": "100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
                 "REAL_IP_HEADER": "proxy_protocol",
                 "LOG_LEVEL": "info",
+                "USE_BUNKERNET": "no",
+                "SEND_ANONYMOUS_REPORT": "no",
+                "USE_DNSBL": "no",
             }
             replace_env = {"API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"}
             for yaml in data:

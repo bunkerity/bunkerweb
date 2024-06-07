@@ -54,7 +54,7 @@ class DockerTest(Test):
             Test.replace_in_file(
                 compose,
                 r"AUTO_LETS_ENCRYPT=yes",
-                "AUTO_LETS_ENCRYPT=yes\n      - USE_LETS_ENCRYPT_STAGING=yes\n      - LOG_LEVEL=info",
+                "AUTO_LETS_ENCRYPT=yes\n      - USE_LETS_ENCRYPT_STAGING=yes\n      - LOG_LEVEL=info\n      - USE_BUNKERNET=no\n      - SEND_ANONYMOUS_REPORT=no\n      - USE_DNSBL=no",
             )
             Test.replace_in_file(compose, r"DISABLE_DEFAULT_SERVER=yes", "DISABLE_DEFAULT_SERVER=no")
             for ex_domain, test_domain in self._domains.items():
