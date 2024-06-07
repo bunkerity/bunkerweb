@@ -141,16 +141,7 @@ const date = reactive({
 
 const picker = reactive({
   isOpen: false,
-  isIndexUp: false,
 });
-
-function indexUp() {
-  picker.isIndexUp = true;
-}
-
-function indexDown() {
-  picker.isIndexUp = false;
-}
 
 let datepicker;
 onMounted(() => {
@@ -644,12 +635,7 @@ function setIndex(calendarEl, tabindex) {
 <template>
   <Container
     v-if="props.inpType === 'datepicker'"
-    @focusin="indexUp()"
-    @focusout="indexDown()"
-    @pointerover="indexUp()"
-    @pointerleave="indexDown()"
-    :class="[picker.isIndexUp ? 'z-10' : 'z-0']"
-    :containerClass="`z-0 w-full p-2 md:p-3 ${props.containerClass}`"
+    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

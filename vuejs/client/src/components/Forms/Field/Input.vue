@@ -149,14 +149,6 @@ const inp = reactive({
   isIndexUp: false,
 });
 
-function indexUp() {
-  inp.isIndexUp = true;
-}
-
-function indexDown() {
-  inp.isIndexUp = false;
-}
-
 const emits = defineEmits(["inp"]);
 
 function copyClipboard() {
@@ -192,11 +184,6 @@ onMounted(() => {
 
 <template>
   <Container
-    @focusin="indexUp()"
-    @focusout="indexDown()"
-    @pointerover="indexUp()"
-    @pointerleave="indexDown()"
-    :class="[inp.isIndexUp ? 'z-10' : 'z-0']"
     :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
     :columns="props.columns"
   >

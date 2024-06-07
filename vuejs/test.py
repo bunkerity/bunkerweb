@@ -26,7 +26,12 @@ def set_advanced():
         plugins = copy.deepcopy(plugins_base)
         # Update settings with global config data
         for plugin in plugins :
+            loop_id = 0
+            total_settings = len(plugin["settings"])            
             for setting, value in plugin["settings"].items() :
+                loop_id += 1
+                # add zindex for container
+                value["containerClass"] = f"z-{total_settings - loop_id}"
                 # set id base on template name
                 value["id"] = f"{value["id"]}-{template_name}"
                 # set inpType based on type define for each settings
@@ -65,7 +70,6 @@ def set_advanced():
                                     "iconName": "disk" if value.get("context") == "multisite" else "globe", 
                                     "text" : "inp_popover_multisite" if value.get("context") == "multisite" else "inp_popover_global"
                                     })
-                    print(popovers)
             
                 value["popovers"] = popovers
                     

@@ -81,7 +81,10 @@ const props = defineProps({
           style="max-height: 300px; overflow: auto"
           class="grid grid-cols-12 w-full relative"
         >
-          <template v-for="(setting, index) in plugin.settings" :key="index">
+          <template
+            v-for="(setting, name, index) in plugin.settings"
+            :key="index"
+          >
             <Checkbox v-if="setting.inpType === 'checkbox'" v-bind="setting" />
             <Select v-if="setting.inpType === 'select'" v-bind="setting" />
             <Datepicker

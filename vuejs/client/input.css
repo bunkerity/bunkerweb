@@ -160,7 +160,7 @@ body {
 
 /* INPUT */
 .input-header-container {
-  @apply z-10;
+  @apply z-20;
 }
 
 .no-popover.input-header-container {
@@ -382,7 +382,7 @@ body {
 }
 
 .open.popover-container {
-  @apply z-10 opacity-100;
+  @apply z-20 opacity-100;
 }
 
 .close.popover-container {
@@ -2195,4 +2195,403 @@ body {
 .lime-darker.stat-svg,
 .lime-darker.popover-svg {
   @apply fill-lime-600;
+}
+
+/* UTILS */
+
+.-z-0 {
+  @apply -z-[0];
+}
+.-z-1 {
+  @apply -z-[1];
+}
+.-z-2 {
+  @apply -z-[2];
+}
+.-z-3 {
+  @apply -z-[3];
+}
+.-z-4 {
+  @apply -z-[4];
+}
+.-z-5 {
+  @apply -z-[5];
+}
+.-z-6 {
+  @apply -z-[6];
+}
+.-z-7 {
+  @apply -z-[7];
+}
+.-z-8 {
+  @apply -z-[8];
+}
+.-z-9 {
+  @apply -z-[9];
+}
+.-z-10 {
+  @apply -z-[10];
+}
+.-z-11 {
+  @apply -z-[11];
+}
+.-z-12 {
+  @apply -z-[12];
+}
+.-z-13 {
+  @apply -z-[13];
+}
+.-z-14 {
+  @apply -z-[14];
+}
+.-z-15 {
+  @apply -z-[15];
+}
+.-z-16 {
+  @apply -z-[16];
+}
+.-z-17 {
+  @apply -z-[17];
+}
+.-z-18 {
+  @apply -z-[18];
+}
+.-z-19 {
+  @apply -z-[19];
+}
+.-z-20 {
+  @apply -z-[20];
+}
+.-z-21 {
+  @apply -z-[21];
+}
+.-z-22 {
+  @apply -z-[22];
+}
+.-z-23 {
+  @apply -z-[23];
+}
+.-z-24 {
+  @apply -z-[24];
+}
+.-z-25 {
+  @apply -z-[25];
+}
+.-z-26 {
+  @apply -z-[26];
+}
+.-z-27 {
+  @apply -z-[27];
+}
+.-z-28 {
+  @apply -z-[28];
+}
+.-z-29 {
+  @apply -z-[29];
+}
+.-z-30 {
+  @apply -z-[30];
+}
+.-z-31 {
+  @apply -z-[31];
+}
+.-z-32 {
+  @apply -z-[32];
+}
+.-z-33 {
+  @apply -z-[33];
+}
+.-z-34 {
+  @apply -z-[34];
+}
+.-z-35 {
+  @apply -z-[35];
+}
+.-z-36 {
+  @apply -z-[36];
+}
+.-z-37 {
+  @apply -z-[37];
+}
+.-z-38 {
+  @apply -z-[38];
+}
+.-z-39 {
+  @apply -z-[39];
+}
+.-z-40 {
+  @apply -z-[40];
+}
+.-z-41 {
+  @apply -z-[41];
+}
+.-z-42 {
+  @apply -z-[42];
+}
+.-z-43 {
+  @apply -z-[43];
+}
+.-z-44 {
+  @apply -z-[44];
+}
+.-z-45 {
+  @apply -z-[45];
+}
+.-z-46 {
+  @apply -z-[46];
+}
+.-z-47 {
+  @apply -z-[47];
+}
+.-z-48 {
+  @apply -z-[48];
+}
+.-z-49 {
+  @apply -z-[49];
+}
+.-z-50 {
+  @apply -z-[50];
+}
+.z-0 {
+  @apply z-[0];
+}
+.z-1 {
+  @apply z-[1];
+}
+.z-2 {
+  @apply z-[2];
+}
+.z-3 {
+  @apply z-[3];
+}
+.z-4 {
+  @apply z-[4];
+}
+.z-5 {
+  @apply z-[5];
+}
+.z-6 {
+  @apply z-[6];
+}
+.z-7 {
+  @apply z-[7];
+}
+.z-8 {
+  @apply z-[8];
+}
+.z-9 {
+  @apply z-[9];
+}
+.z-10 {
+  @apply z-[10];
+}
+.z-11 {
+  @apply z-[11];
+}
+.z-12 {
+  @apply z-[12];
+}
+.z-13 {
+  @apply z-[13];
+}
+.z-14 {
+  @apply z-[14];
+}
+.z-15 {
+  @apply z-[15];
+}
+.z-16 {
+  @apply z-[16];
+}
+.z-17 {
+  @apply z-[17];
+}
+.z-18 {
+  @apply z-[18];
+}
+.z-19 {
+  @apply z-[19];
+}
+.z-20 {
+  @apply z-[20];
+}
+.z-21 {
+  @apply z-[21];
+}
+.z-22 {
+  @apply z-[22];
+}
+.z-23 {
+  @apply z-[23];
+}
+.z-24 {
+  @apply z-[24];
+}
+.z-25 {
+  @apply z-[25];
+}
+.z-26 {
+  @apply z-[26];
+}
+.z-27 {
+  @apply z-[27];
+}
+.z-28 {
+  @apply z-[28];
+}
+.z-29 {
+  @apply z-[29];
+}
+.z-30 {
+  @apply z-[30];
+}
+.z-31 {
+  @apply z-[31];
+}
+.z-32 {
+  @apply z-[32];
+}
+.z-33 {
+  @apply z-[33];
+}
+.z-34 {
+  @apply z-[34];
+}
+.z-35 {
+  @apply z-[35];
+}
+.z-36 {
+  @apply z-[36];
+}
+.z-37 {
+  @apply z-[37];
+}
+.z-38 {
+  @apply z-[38];
+}
+.z-39 {
+  @apply z-[39];
+}
+.z-40 {
+  @apply z-[40];
+}
+.z-41 {
+  @apply z-[41];
+}
+.z-42 {
+  @apply z-[42];
+}
+.z-43 {
+  @apply z-[43];
+}
+.z-44 {
+  @apply z-[44];
+}
+.z-45 {
+  @apply z-[45];
+}
+.z-46 {
+  @apply z-[46];
+}
+.z-47 {
+  @apply z-[47];
+}
+.z-48 {
+  @apply z-[48];
+}
+.z-49 {
+  @apply z-[49];
+}
+.z-50 {
+  @apply z-[50];
+}
+.z-51 {
+  @apply z-[51];
+}
+.z-52 {
+  @apply z-[52];
+}
+.z-53 {
+  @apply z-[53];
+}
+.z-54 {
+  @apply z-[54];
+}
+.z-55 {
+  @apply z-[55];
+}
+.z-56 {
+  @apply z-[56];
+}
+.z-57 {
+  @apply z-[57];
+}
+.z-58 {
+  @apply z-[58];
+}
+.z-59 {
+  @apply z-[59];
+}
+.z-60 {
+  @apply z-[60];
+}
+.z-61 {
+  @apply z-[61];
+}
+.z-62 {
+  @apply z-[62];
+}
+.z-63 {
+  @apply z-[63];
+}
+.z-64 {
+  @apply z-[64];
+}
+.z-65 {
+  @apply z-[65];
+}
+.z-66 {
+  @apply z-[66];
+}
+.z-67 {
+  @apply z-[67];
+}
+.z-68 {
+  @apply z-[68];
+}
+.z-69 {
+  @apply z-[69];
+}
+.z-70 {
+  @apply z-[70];
+}
+.z-71 {
+  @apply z-[71];
+}
+.z-72 {
+  @apply z-[72];
+}
+.z-73 {
+  @apply z-[73];
+}
+.z-74 {
+  @apply z-[74];
+}
+.z-75 {
+  @apply z-[75];
+}
+.z-76 {
+  @apply z-[76];
+}
+.z-77 {
+  @apply z-[77];
+}
+.z-78 {
+  @apply z-[78];
+}
+.z-79 {
+  @apply z-[79];
+}
+.z-80 {
+  @apply z-[80];
 }

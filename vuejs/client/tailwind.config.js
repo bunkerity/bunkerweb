@@ -7,7 +7,7 @@ export default {
     "./src/components/**/*.{js,vue,ts,jsx,tsx,mdx}",
     "../setup/src/*.{js,vue,ts,jsx,tsx,mdx}",
   ],
-  safelist : [
+  safelist: [
     "col-span-1",
     "col-span-2",
     "col-span-3",
@@ -44,7 +44,6 @@ export default {
     "lg:col-span-10",
     "lg:col-span-11",
     "lg:col-span-12",
-
   ],
   important: true,
   darkMode: "class",

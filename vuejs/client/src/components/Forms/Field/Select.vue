@@ -248,22 +248,23 @@ function closeOutside(e) {
   }
 }
 
-function indexUp() {
-  select.isIndexUp = true;
-}
-
-function indexDown() {
-  select.isIndexUp = false;
+function closeScroll(e) {
+  if (!e.target) return;
+  // Case not a DOM element (like the document itself)
+  if (e.target.nodeType !== 1) return (select.isOpen = false);
+  // Case DOM, check if it is the select dropdown
+  if (e.target.hasAttribute("data-select-dropdown")) return;
+  select.isOpen = false;
 }
 
 // Close select dropdown when clicked outside element
 watch(select, () => {
   if (select.isOpen) {
     window.addEventListener("click", closeOutside);
-    window.addEventListener("scroll", closeSelect, true);
+    window.addEventListener("scroll", closeScroll, true);
   } else {
     window.removeEventListener("click", closeOutside);
-    window.removeEventListener("scroll", closeSelect, true);
+    window.removeEventListener("scroll", closeScroll, true);
   }
 });
 
@@ -281,12 +282,7 @@ const emits = defineEmits(["inp"]);
 
 <template>
   <Container
-    @focusin="indexUp()"
-    @focusout="indexDown()"
-    @pointerover="indexUp()"
-    @pointerleave="indexDown()"
-    :class="[select.isIndexUp ? 'z-10' : 'z-0']"
-    :containerClass="`z-0 w-full p-2 md:p-3 ${props.containerClass}`"
+    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header
@@ -354,6 +350,7 @@ const emits = defineEmits(["inp"]);
       </button>
       <!-- dropdown-->
       <div
+        data-select-dropdown
         :aria-hidden="select.isOpen ? 'false' : 'true'"
         ref="selectDropdown"
         role="radiogroup"
