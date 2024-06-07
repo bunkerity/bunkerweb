@@ -1306,8 +1306,7 @@ class Database:
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
                             elif (
-                                method == service_setting.method
-                                or (service_setting.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                                method == service_setting.method or (service_setting.method not in ("scheduler", "autoconf") and method == "autoconf")
                             ) and service_setting.value != value:
                                 changed_plugins.add(setting.plugin_id)
                                 query = session.query(Services_settings).filter(
@@ -1339,7 +1338,7 @@ class Database:
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
                             elif (
-                                method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                                method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method == "autoconf")
                             ) and global_value.value != value:
                                 changed_plugins.add(setting.plugin_id)
                                 query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
@@ -1384,7 +1383,7 @@ class Database:
                             changed_plugins.add(setting.plugin_id)
                             to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
                         elif (
-                            method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                            method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method == "autoconf")
                         ) and value != global_value.value:
                             changed_plugins.add(setting.plugin_id)
                             query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
@@ -1489,7 +1488,7 @@ class Database:
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
                 elif custom_config["checksum"] != custom_conf.checksum and (
-                    method == custom_conf.method or (custom_conf.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                    method == custom_conf.method or (custom_conf.method not in ("scheduler", "autoconf") and method == "autoconf")
                 ):
                     custom_conf.data = custom_config["data"]
                     custom_conf.checksum = custom_config["checksum"]
