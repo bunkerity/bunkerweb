@@ -360,14 +360,16 @@ class JobScheduler(ApiCaller):
             return False
         return ret
 
-    def try_database_readonly(self) -> bool:
+    def try_database_readonly(self, force: bool = False) -> bool:
         if not self.db.readonly:
             try:
                 self.db.test_write()
+                self.db.readonly = False
+                return False
             except BaseException:
                 self.db.readonly = True
                 return True
-        elif self.db.last_connection_retry and (datetime.now() - self.db.last_connection_retry).total_seconds() > 30:
+        elif not force and self.db.last_connection_retry and (datetime.now() - self.db.last_connection_retry).total_seconds() > 30:
             return True
 
         if self.db.database_uri and self.db.readonly:
