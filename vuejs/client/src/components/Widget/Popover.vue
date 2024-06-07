@@ -72,9 +72,43 @@ function showPopover() {
 
   // Position popover relative to btn
   const popoverBtnRect = popoverBtn.value.getBoundingClientRect();
+  const popoverContainerRect = popoverContainer.value.getBoundingClientRect();
 
   popoverContainer.value.style.right = `${
     window.innerWidth - popoverBtnRect.left - popoverBtnRect.width
+  }px`;
+
+  // We need to take care of parent padding and margin that will affect dropdown position but aren't calculate in rect
+  const parents = [popoverBtn.value.parentElement];
+  let isParent = popoverBtn.value.parentElement ? true : false;
+  while (isParent) {
+    parents.push(parents[parents.length - 1].parentElement);
+    isParent = parents[parents.length - 1].parentElement ? true : false;
+  }
+
+  let noRectParentHeight = 0;
+  for (let i = 0; i < parents.length; i++) {
+    try {
+      noRectParentHeight += +window
+        .getComputedStyle(parents[i], null)
+        .getPropertyValue("padding-top")
+        .replace("px", "");
+    } catch (e) {}
+
+    try {
+      noRectParentHeight += +window
+        .getComputedStyle(parents[i], null)
+        .getPropertyValue("margin-top")
+        .replace("px", "");
+    } catch (e) {}
+  }
+
+  popoverContainer.value.style.top = `${
+    window.scrollY +
+    popoverBtnRect.top -
+    noRectParentHeight -
+    popoverBtnRect.height * 2 -
+    80
   }px`;
 
   // Show popover

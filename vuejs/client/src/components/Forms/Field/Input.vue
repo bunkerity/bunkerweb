@@ -5,7 +5,7 @@ import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 
-/** 
+/**
   @name Forms/Field/Input.vue
   @description This component is used to create a complete input field input with error handling and label.
   We can add a clipboard button to copy the input value.
@@ -146,7 +146,16 @@ const inp = reactive({
   showInp: false,
   isClipAllow: false,
   isValid: false,
+  isIndexUp: false,
 });
+
+function indexUp() {
+  inp.isIndexUp = true;
+}
+
+function indexDown() {
+  inp.isIndexUp = false;
+}
 
 const emits = defineEmits(["inp"]);
 
@@ -183,7 +192,12 @@ onMounted(() => {
 
 <template>
   <Container
-    :containerClass="`w-full p-2 md:p-3  ${props.containerClass}`"
+    @focusin="indexUp()"
+    @focusout="indexDown()"
+    @pointerover="indexUp()"
+    @pointerleave="indexDown()"
+    :class="[inp.isIndexUp ? 'z-10' : 'z-0']"
+    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header
@@ -195,7 +209,7 @@ onMounted(() => {
       :headerClass="props.headerClass"
     />
 
-    <div class="relative flex flex-col items-start">
+    <div class="input-regular-container">
       <input
         :tabindex="props.tabId"
         ref="inputEl"

@@ -252,6 +252,10 @@ body {
   @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full  appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
+.input-regular-container {
+  @apply relative flex flex-col items-start;
+}
+
 .invalid.input-regular,
 .invalid.input-regular:hover,
 .invalid.input-regular:focus,
@@ -374,7 +378,7 @@ body {
 }
 
 .popover-container {
-  @apply pointer-events-none z-10 fixed max-w-[80vw] sm:max-w-[350px] opacity-100 justify-center items-center dark:brightness-90 transition z-50 rounded-md py-3 px-5;
+  @apply pointer-events-none fixed max-w-[80vw] sm:max-w-[350px] opacity-100 justify-center items-center dark:brightness-90 transition rounded-md py-3 px-5;
 }
 
 .open.popover-container {

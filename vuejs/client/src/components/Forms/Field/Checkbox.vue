@@ -117,6 +117,7 @@ const checkboxEl = ref(null);
 const checkbox = reactive({
   value: props.value,
   isValid: false,
+  isIndexUp: false,
 });
 
 const emits = defineEmits(["inp"]);
@@ -127,6 +128,14 @@ function updateValue() {
   return checkbox.value;
 }
 
+function indexUp() {
+  checkbox.isIndexUp = true;
+}
+
+function indexDown() {
+  checkbox.isIndexUp = false;
+}
+
 onMounted(() => {
   checkbox.isValid = checkboxEl.value.checkValidity();
 });
@@ -134,7 +143,12 @@ onMounted(() => {
 
 <template>
   <Container
-    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
+    @focusin="indexUp()"
+    @focusout="indexDown()"
+    @pointerover="indexUp()"
+    @pointerleave="indexDown()"
+    :class="[checkbox.isIndexUp ? 'z-10' : 'z-0']"
+    :containerClass="`z-0 w-full p-2 md:p-3 ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

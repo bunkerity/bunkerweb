@@ -147,6 +147,7 @@ const select = reactive({
     : props.requiredValues.includes(props.value)
     ? true
     : false,
+  isIndexUp: false,
 });
 
 const selectBtn = ref();
@@ -247,6 +248,14 @@ function closeOutside(e) {
   }
 }
 
+function indexUp() {
+  select.isIndexUp = true;
+}
+
+function indexDown() {
+  select.isIndexUp = false;
+}
+
 // Close select dropdown when clicked outside element
 watch(select, () => {
   if (select.isOpen) {
@@ -272,7 +281,12 @@ const emits = defineEmits(["inp"]);
 
 <template>
   <Container
-    :containerClass="`w-full p-2 md:p-3 ${props.containerClass}`"
+    @focusin="indexUp()"
+    @focusout="indexDown()"
+    @pointerover="indexUp()"
+    @pointerleave="indexDown()"
+    :class="[select.isIndexUp ? 'z-10' : 'z-0']"
+    :containerClass="`z-0 w-full p-2 md:p-3 ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header
