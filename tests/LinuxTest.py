@@ -115,7 +115,7 @@ class LinuxTest(Test):
                 raise Exception("docker exec cp variables.env failed (test)")
             proc = self.docker_exec(
                 self.__distro,
-                "echo '' >> /etc/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /etc/bunkerweb/variables.env ; echo 'LOG_LEVEL=info' >> /etc/bunkerweb/variables.env",
+                "echo '' >> /etc/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /etc/bunkerweb/variables.env ; echo 'LOG_LEVEL=info' >> /etc/bunkerweb/variables.env ; echo 'USE_BUNKERNET=no' >> /etc/bunkerweb/variables.env ; echo 'SEND_ANONYMOUS_REPORT=no' >> /etc/bunkerweb/variables.env ; echo 'USE_DNSBL=no' >> /etc/bunkerweb/variables.env",
             )
             if proc.returncode != 0:
                 raise (Exception("docker exec append variables.env failed (test)"))
