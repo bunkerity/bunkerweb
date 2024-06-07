@@ -482,7 +482,7 @@ class Database:
 
         return data
 
-    def check_changes(self) -> Union[Dict[str, bool], bool, str]:
+    def check_changes(self, with_date: bool = False) -> Union[Dict[str, Any], str]:
         """Check if either the config, the custom configs, plugins or instances have changed inside the database"""
         with self.__db_session() as session:
             try:
@@ -490,30 +490,66 @@ class Database:
                     session.query(Metadata)
                     .with_entities(
                         Metadata.custom_configs_changed,
+                        Metadata.last_custom_configs_change,
                         Metadata.external_plugins_changed,
+                        Metadata.last_external_plugins_change,
                         Metadata.pro_plugins_changed,
+                        Metadata.last_pro_plugins_change,
                         Metadata.instances_changed,
+                        Metadata.last_instances_change,
                     )
                     .filter_by(id=1)
                     .first()
                 )
 
-                return dict(
-                    custom_configs_changed=metadata is not None and metadata.custom_configs_changed,
-                    external_plugins_changed=metadata is not None and metadata.external_plugins_changed,
-                    pro_plugins_changed=metadata is not None and metadata.pro_plugins_changed,
-                    instances_changed=metadata is not None and metadata.instances_changed,
-                    plugins_config_changed=[plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).filter_by(config_changed=True).all()],
-                )
-            except BaseException as e:
-                return str(e)
+                base_data = {
+                    "custom_configs_changed": False,
+                    "external_plugins_changed": False,
+                    "pro_plugins_changed": False,
+                    "instances_changed": False,
+                }
 
-    def check_plugin_changes(self) -> Union[List[str], str]:
-        """Check if the plugins have changed inside the database"""
-        with self.__db_session() as session:
-            try:
-                plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(config_changed=True).all()
-                return [plugin.id for plugin in plugins]
+                if with_date:
+                    data = base_data | {
+                        "last_custom_configs_change": None,
+                        "last_external_plugins_change": None,
+                        "last_pro_plugins_change": None,
+                        "last_instances_change": None,
+                        "plugins_config_changed": {
+                            plugin.id: plugin.last_config_change
+                            for plugin in session.query(Plugins).with_entities(Plugins.id, Plugins.last_config_change).filter_by(config_changed=True).all()
+                        },
+                    }
+
+                    if not metadata:
+                        return data
+
+                    return data | {
+                        "custom_configs_changed": metadata.custom_configs_changed,
+                        "last_custom_configs_change": metadata.last_custom_configs_change,
+                        "external_plugins_changed": metadata.external_plugins_changed,
+                        "last_external_plugins_change": metadata.last_external_plugins_change,
+                        "pro_plugins_changed": metadata.pro_plugins_changed,
+                        "last_pro_plugins_change": metadata.last_pro_plugins_change,
+                        "instances_changed": metadata.instances_changed,
+                        "last_instances_change": metadata.last_instances_change,
+                    }
+
+                data = base_data | {
+                    "plugins_config_changed": sorted(
+                        plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).filter_by(config_changed=True).all()
+                    ),
+                }
+
+                if not metadata:
+                    return data
+
+                return data | {
+                    "custom_configs_changed": metadata.custom_configs_changed,
+                    "external_plugins_changed": metadata.external_plugins_changed,
+                    "pro_plugins_changed": metadata.pro_plugins_changed,
+                    "instances_changed": metadata.instances_changed,
+                }
             except BaseException as e:
                 return str(e)
 
@@ -536,23 +572,31 @@ class Database:
                 if not metadata:
                     return "The metadata are not set yet, try again"
 
+                current_time = datetime.now()
+
                 if "config" in changes:
                     if not metadata.first_config_saved:
                         metadata.first_config_saved = True
                 if "custom_configs" in changes:
                     metadata.custom_configs_changed = value
+                    metadata.last_custom_configs_change = current_time
                 if "external_plugins" in changes:
                     metadata.external_plugins_changed = value
+                    metadata.last_external_plugins_change = current_time
                 if "pro_plugins" in changes:
                     metadata.pro_plugins_changed = value
+                    metadata.last_pro_plugins_change = current_time
                 if "instances" in changes:
                     metadata.instances_changed = value
+                    metadata.last_instances_change = current_time
 
                 if plugins_changes:
                     if plugins_changes == "all":
-                        session.query(Plugins).update({Plugins.config_changed: value})
+                        session.query(Plugins).update({Plugins.config_changed: value, Plugins.last_config_change: current_time})
                     else:
-                        session.query(Plugins).filter(Plugins.id.in_(plugins_changes)).update({Plugins.config_changed: value})
+                        session.query(Plugins).filter(Plugins.id.in_(plugins_changes)).update(
+                            {Plugins.config_changed: value, Plugins.last_config_change: current_time}
+                        )
 
                 session.commit()
             except BaseException as e:
@@ -581,7 +625,7 @@ class Database:
 
             if db_version != bunkerweb_version:
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
-                curren_time = datetime.now()
+                current_time = datetime.now()
                 error = True
                 while error:
                     try:
@@ -589,7 +633,7 @@ class Database:
                         metadata.reflect(self.sql_engine)
                         error = False
                     except BaseException as e:
-                        if (datetime.now() - curren_time).total_seconds() > 10:
+                        if (datetime.now() - current_time).total_seconds() > 10:
                             raise e
                         sleep(1)
 
@@ -1262,8 +1306,7 @@ class Database:
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
                             elif (
-                                method == service_setting.method
-                                or (service_setting.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                                method == service_setting.method or (service_setting.method not in ("scheduler", "autoconf") and method == "autoconf")
                             ) and service_setting.value != value:
                                 changed_plugins.add(setting.plugin_id)
                                 query = session.query(Services_settings).filter(
@@ -1295,7 +1338,7 @@ class Database:
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
                             elif (
-                                method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                                method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method == "autoconf")
                             ) and global_value.value != value:
                                 changed_plugins.add(setting.plugin_id)
                                 query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
@@ -1340,7 +1383,7 @@ class Database:
                             changed_plugins.add(setting.plugin_id)
                             to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
                         elif (
-                            method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                            method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method == "autoconf")
                         ) and value != global_value.value:
                             changed_plugins.add(setting.plugin_id)
                             query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
@@ -1445,7 +1488,7 @@ class Database:
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
                 elif custom_config["checksum"] != custom_conf.checksum and (
-                    method == custom_conf.method or (custom_conf.method not in ("scheduler", "autoconf") and method in ("scheduler", "autoconf"))
+                    method == custom_conf.method or (custom_conf.method not in ("scheduler", "autoconf") and method == "autoconf")
                 ):
                     custom_conf.data = custom_config["data"]
                     custom_conf.checksum = custom_config["checksum"]
@@ -1455,6 +1498,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.custom_configs_changed = True
+                        metadata.last_custom_configs_change = datetime.now()
 
             try:
                 session.add_all(to_put)
@@ -2181,8 +2225,10 @@ class Database:
                     if metadata is not None:
                         if _type == "external":
                             metadata.external_plugins_changed = True
+                            metadata.last_external_plugins_change = datetime.now()
                         elif _type == "pro":
                             metadata.pro_plugins_changed = True
+                            metadata.last_pro_plugins_change = datetime.now()
 
             try:
                 session.add_all(to_put)
@@ -2398,6 +2444,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.instances_changed = True
+                        metadata.last_instances_change = datetime.now()
 
             try:
                 session.commit()
@@ -2429,6 +2476,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.instances_changed = True
+                        metadata.last_instances_change = datetime.now()
 
             try:
                 session.add_all(to_put)

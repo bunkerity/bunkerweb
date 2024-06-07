@@ -663,6 +663,7 @@ if __name__ == "__main__":
             Thread(target=listen_for_instances_reload, name="listen_for_instances_reload").start()
 
         changed_plugins = []
+        old_changes = {}
 
         while True:
             threads.clear()
@@ -788,7 +789,7 @@ if __name__ == "__main__":
             while RUN and not NEED_RELOAD:
                 try:
                     SCHEDULER.run_pending()
-                    sleep(1)
+                    sleep(3 if SCHEDULER.db.readonly else 1)
                     current_time = datetime.now()
 
                     while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
@@ -797,20 +798,33 @@ if __name__ == "__main__":
 
                     DB_LOCK_FILE.unlink(missing_ok=True)
 
-                    changes = SCHEDULER.db.check_changes()
+                    changes = SCHEDULER.db.check_changes(with_date=True)
 
                     if isinstance(changes, str):
                         raise Exception(f"An error occurred when checking for changes in the database : {changes}")
 
+                    if SCHEDULER.db.readonly and changes == old_changes:
+                        continue
+
                     # check if the plugins have changed since last time
-                    if changes["pro_plugins_changed"]:
+                    if changes["pro_plugins_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_pro_plugins_change"]
+                        or not old_changes
+                        or old_changes["last_pro_plugins_change"] != changes["last_pro_plugins_change"]
+                    ):
                         logger.info("Pro plugins changed, generating ...")
                         PRO_PLUGINS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
 
-                    if changes["external_plugins_changed"]:
+                    if changes["external_plugins_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_external_plugins_change"]
+                        or not old_changes
+                        or old_changes["last_external_plugins_change"] != changes["last_external_plugins_change"]
+                    ):
                         logger.info("External plugins changed, generating ...")
                         PLUGINS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
@@ -818,27 +832,44 @@ if __name__ == "__main__":
                         NEED_RELOAD = True
 
                     # check if the custom configs have changed since last time
-                    if changes["custom_configs_changed"]:
+                    if changes["custom_configs_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_custom_configs_change"]
+                        or not old_changes
+                        or old_changes["last_custom_configs_change"] != changes["last_custom_configs_change"]
+                    ):
                         logger.info("Custom configs changed, generating ...")
                         CONFIGS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True
 
                     # check if the config have changed since last time
-                    if changes["plugins_config_changed"]:
+                    if changes["plugins_config_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_plugins_config_change"]
+                        or not old_changes
+                        or old_changes["plugins_config_changed"] != changes["plugins_config_changed"]
+                    ):
                         logger.info("Plugins config changed, generating ...")
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
-                        changed_plugins = changes["plugins_config_changed"]
+                        changed_plugins = list(changes["plugins_config_changed"])
 
                     # check if the instances have changed since last time
-                    if changes["instances_changed"]:
+                    if changes["instances_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_instances_change"]
+                        or not old_changes
+                        or old_changes["last_instances_change"] != changes["last_instances_change"]
+                    ):
                         logger.info("Instances changed, generating ...")
                         INSTANCES_NEED_GENERATION = True
                         CONFIGS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True
+
+                    old_changes = changes.copy()
                 except BaseException:
                     logger.debug(format_exc())
                     if errors > 5:
@@ -848,6 +879,8 @@ if __name__ == "__main__":
                     sleep(5)
 
             if NEED_RELOAD:
+                logger.debug(f"Changes: {changes}")
+                SCHEDULER.try_database_readonly(force=True)
                 CHANGES.clear()
 
                 if INSTANCES_NEED_GENERATION:

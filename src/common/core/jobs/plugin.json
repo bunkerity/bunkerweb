@@ -17,12 +17,6 @@
       "file": "mmdb-asn.py",
       "every": "day",
       "reload": true
-    },
-    {
-      "name": "download-plugins",
-      "file": "download-plugins.py",
-      "every": "once",
-      "reload": false
     }
   ]
 }

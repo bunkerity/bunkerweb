@@ -67,7 +67,7 @@ class Config:
 
     def wait_applying(self, startup: bool = False):
         i = 0
-        while i < 10:
+        while i < 60:
             curr_changes = self._db.check_changes()
             if isinstance(curr_changes, str):
                 if not startup:
