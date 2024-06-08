@@ -396,7 +396,7 @@ class Database:
             try:
                 if multisite:
                     return session.query(Settings).filter_by(id=setting, context="multisite").first() is not None
-                return session.query(Settings).filter_by(name=setting).first() is not None
+                return session.query(Settings).filter_by(id=setting).first() is not None
             except (ProgrammingError, OperationalError):
                 return False
 
