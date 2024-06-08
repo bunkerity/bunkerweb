@@ -17,6 +17,12 @@
       "file": "mmdb-asn.py",
       "every": "day",
       "reload": true
+    },
+    {
+      "name": "update-check",
+      "file": "update-check.py",
+      "every": "day",
+      "reload": false
     }
   ]
 }
