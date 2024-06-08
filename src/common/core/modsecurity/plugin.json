@@ -25,7 +25,7 @@
     },
     "MODSECURITY_CRS_VERSION": {
       "context": "multisite",
-      "default": "3",
+      "default": "4",
       "help": "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
       "id": "modsecurity-crs-version",
       "label": "Core Rule Set Version",
