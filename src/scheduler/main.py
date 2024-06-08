@@ -835,14 +835,15 @@ if __name__ == "__main__":
                         raise Exception(f"An error occurred when checking for changes in the database : {db_metadata}")
 
                     changes = {
-                        "custom_configs_changed": db_metadata["custom_configs_changed"],
-                        "instances_changed": db_metadata["instances_changed"],
-                        "external_plugins_changed": db_metadata["external_plugins_changed"],
                         "pro_plugins_changed": db_metadata["pro_plugins_changed"],
-                        "last_custom_configs_change": db_metadata["last_custom_configs_change"],
-                        "last_instances_change": db_metadata["last_instances_change"],
-                        "last_external_plugins_change": db_metadata["last_external_plugins_change"],
                         "last_pro_plugins_change": db_metadata["last_pro_plugins_change"],
+                        "external_plugins_changed": db_metadata["external_plugins_changed"],
+                        "last_external_plugins_change": db_metadata["last_external_plugins_change"],
+                        "custom_configs_changed": db_metadata["custom_configs_changed"],
+                        "last_custom_configs_change": db_metadata["last_custom_configs_change"],
+                        "plugins_config_changed": db_metadata["plugins_config_changed"],
+                        "instances_changed": db_metadata["instances_changed"],
+                        "last_instances_change": db_metadata["last_instances_change"],
                     }
 
                     if SCHEDULER.db.readonly and changes == old_changes:

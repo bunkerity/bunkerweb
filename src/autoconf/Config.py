@@ -61,28 +61,38 @@ class Config:
             return True
         return False
 
-    def wait_applying(self):
+    def have_to_wait(self) -> bool:
+        db_metadata = self._db.get_metadata()
+        return (
+            isinstance(db_metadata, str)
+            or not db_metadata["is_initialized"]
+            or any(
+                v
+                for k, v in db_metadata.items()
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
+            )
+        )
+
+    def wait_applying(self, startup: bool = False):
         current_time = datetime.now()
         ready = False
         while not ready and (datetime.now() - current_time).seconds < 240:
             db_metadata = self._db.get_metadata()
             if isinstance(db_metadata, str):
-                self.__logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
-            elif not any(
+                if not startup:
+                    self.__logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
+            elif db_metadata["is_initialized"] and not any(
                 v
                 for k, v in db_metadata.items()
-                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
             ):
                 ready = True
                 continue
+            self.__logger.warning("Scheduler is already applying a configuration, retrying in 5 seconds ...")
+            sleep(5)
 
-    def have_to_wait(self) -> bool:
-        db_metadata = self._db.get_metadata()
-        return isinstance(db_metadata, str) or any(
-            v
-            for k, v in db_metadata.items()
-            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
-        )
+        if not ready:
+            raise Exception("Too many retries while waiting for scheduler to apply configuration...")
 
     def apply(
         self, instances: List[Dict[str, Any]], services: List[Dict[str, str]], configs: Optional[Dict[str, Dict[str, bytes]]] = None, first: bool = False
@@ -92,10 +102,6 @@ class Config:
         err = self._try_database_readonly()
         if err:
             return False
-
-        while not self._db.is_initialized():
-            self.__logger.warning("Database is not initialized, retrying in 5 seconds ...")
-            sleep(5)
 
         self.wait_applying()
 

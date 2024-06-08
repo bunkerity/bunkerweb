@@ -300,6 +300,16 @@ class Database:
                 if session:
                     session.remove()
 
+    def is_setting(self, setting: str, *, multisite: bool = False) -> bool:
+        """Check if the setting exists in the database and optionally if it's multisite"""
+        with self.__db_session() as session:
+            try:
+                if multisite:
+                    return session.query(Settings).filter_by(id=setting, context="multisite").first() is not None
+                return session.query(Settings).filter_by(id=setting).first() is not None
+            except (ProgrammingError, OperationalError):
+                return False
+
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
         with self.__db_session() as session:
@@ -345,6 +355,7 @@ class Database:
             "external_plugins_changed": False,
             "pro_plugins_changed": False,
             "instances_changed": False,
+            "plugins_config_changed": {},
             "last_custom_configs_change": None,
             "last_external_plugins_change": None,
             "last_pro_plugins_change": None,
@@ -366,6 +377,11 @@ class Database:
                         if hasattr(metadata, key) and key not in ("database_version", "default"):
                             data[key] = getattr(metadata, key)
                     data["default"] = False
+
+                data["plugins_config_changed"] = {
+                    plugin.id: plugin.last_config_change
+                    for plugin in session.query(Plugins).with_entities(Plugins.id, Plugins.last_config_change).filter_by(config_changed=True).all()
+                }
             except BaseException as e:
                 if "doesn't exist" not in str(e):
                     self.logger.debug(f"Can't get the metadata: {e}")

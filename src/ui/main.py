@@ -157,7 +157,7 @@ def wait_applying():
         elif not any(
             v
             for k, v in db_metadata.items()
-            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         ):
             ready = True
             continue
@@ -365,7 +365,7 @@ def inject_variables():
     if ui_data.get("PRO_LOADING") and not any(
         v
         for k, v in db_metadata.items()
-        if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+        if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
     ):
         ui_data["PRO_LOADING"] = False
         with LOCK:
@@ -799,8 +799,7 @@ def home():
         remote_version = basename(r.url).strip().replace("v", "")
 
     config = app.config["CONFIG"].get_config(with_drafts=True)
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
-    instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
+    instances = app.config["INSTANCES"].get_instances()
 
     instance_health_count = 0
 
@@ -919,7 +918,7 @@ def account():
             if any(
                 v
                 for k, v in db_metadata.items()
-                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
             ):
                 ui_data["RELOADING"] = True
                 ui_data["LAST_RELOAD"] = time()
@@ -1259,7 +1258,7 @@ def services():
         if any(
             v
             for k, v in db_metadata.items()
-            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         ):
             ui_data = get_ui_data()
             ui_data["RELOADING"] = True
@@ -1388,7 +1387,7 @@ def global_config():
         if any(
             v
             for k, v in db_metadata.items()
-            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         ):
             ui_data["RELOADING"] = True
             ui_data["LAST_RELOAD"] = time()
@@ -1590,7 +1589,7 @@ def plugins():
             if any(
                 v
                 for k, v in db_metadata.items()
-                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
             ):
                 ui_data = get_ui_data()
                 ui_data["RELOADING"] = True
@@ -1804,7 +1803,7 @@ def plugins():
             if any(
                 v
                 for k, v in db_metadata.items()
-                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
             ):
                 ui_data = get_ui_data()
                 ui_data["RELOADING"] = True
