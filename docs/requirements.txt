@@ -16,9 +16,9 @@ cairosvg==2.7.1 \
     --hash=sha256:432531d72347291b9a9ebfb6777026b607563fd8719c46ee742db0aef7271ba0 \
     --hash=sha256:8a5222d4e6c3f86f1f7046b63246877a63b49923a1cd202184c3a634ef546b3b
     # via mkdocs-material
-certifi==2024.2.2 \
-    --hash=sha256:0569859f95fc761b18b45ef421b1290a0f65f147e92a1e5eb3e635f9a5e4e66f \
-    --hash=sha256:dc383c07b76109f368f6106eee2b593b04a011ea4d55f652c6ca24a754d1cdd1
+certifi==2024.6.2 \
+    --hash=sha256:3cd43f1c6fa7dedc5899d69d3ad0398fd018ad1a17fba83ddaf78aa46c747516 \
+    --hash=sha256:ddc6c8ce995e6987e7faf5e3f1b02b302836a0e5d98ece18392cb1a36c72ad56
     # via requests
 cffi==1.16.0 \
     --hash=sha256:0c9ef6ff37e974b73c25eecc13952c55bceed9112be2d9d938ded8e856138bcc \
@@ -317,9 +317,9 @@ mkdocs-get-deps==0.2.0 \
     --hash=sha256:162b3d129c7fad9b19abfdcb9c1458a651628e4b1dea628ac68790fb3061c60c \
     --hash=sha256:2bf11d0b133e77a0dd036abeeb06dec8775e46efa526dc70667d8863eefc6134
     # via mkdocs
-mkdocs-material==9.5.24 \
-    --hash=sha256:02d5aaba0ee755e707c3ef6e748f9acb7b3011187c0ea766db31af8905078a34 \
-    --hash=sha256:e12cd75954c535b61e716f359cf2a5056bf4514889d17161fdebd5df4b0153c6
+mkdocs-material==9.5.26 \
+    --hash=sha256:56aeb91d94cffa43b6296fa4fbf0eb7c840136e563eecfd12c2d9e92e50ba326 \
+    --hash=sha256:5d01fb0aa1c7946a1e3ae8689aa2b11a030621ecb54894e35aabb74c21016312
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -327,9 +327,9 @@ mkdocs-material-extensions==1.3.1 \
     --hash=sha256:10c9511cea88f568257f960358a467d12b970e1f7b2c0e5fb2bb48cab1928443 \
     --hash=sha256:adff8b62700b25cb77b53358dad940f3ef973dd6db797907c49e3c2ef3ab4e31
     # via mkdocs-material
-mkdocs-print-site-plugin==2.4.1 \
-    --hash=sha256:8c05bdd6b34095fdfdb77a37a117106d4ba362ac5145a1664a3bef53b8cc9ba5 \
-    --hash=sha256:c62eda1d47b65e48aa5a9316cb8ea93c035a342b5648b84bd892f48729aea6c9
+mkdocs-print-site-plugin==2.5.0 \
+    --hash=sha256:48b3d41ae80384de72062b2712fce677f2e46d8364d9fe603ba837b0cf7156a4 \
+    --hash=sha256:95dccc8d5cc8a59da67815a2d3304ef0101b065e363f2b9ac919c23d6196dd24
     # via -r requirements.in
 packaging==24.0 \
     --hash=sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5 \
@@ -600,9 +600,9 @@ regex==2024.5.15 \
     --hash=sha256:f8ec0c2fea1e886a19c3bee0cd19d862b3aa75dcdfb42ebe8ed30708df64687a \
     --hash=sha256:f9ebd0a36102fcad2f03696e8af4ae682793a5d30b46c647eaf280d6cfb32796
     # via mkdocs-material
-requests==2.32.2 \
-    --hash=sha256:dd951ff5ecf3e3b3aa26b40703ba77495dab41da839ae72ef3c8e5d8e2433289 \
-    --hash=sha256:fc06670dd0ed212426dfeb94fc1b983d917c4f9847c863f313c9dfaaffb7c23c
+requests==2.32.3 \
+    --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
+    --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
     # via
     #   importlib-metadata
     #   importlib-resources
@@ -685,7 +685,7 @@ webencodings==0.5.1 \
     # via
     #   cssselect2
     #   tinycss2
-zipp==3.18.2 \
-    --hash=sha256:6278d9ddbcfb1f1089a88fde84481528b07b0e10474e09dcfe53dad4069fa059 \
-    --hash=sha256:dce197b859eb796242b0622af1b8beb0a722d52aa2f57133ead08edd5bf5374e
+zipp==3.19.2 \
+    --hash=sha256:bf1dcf6450f873a13e952a29504887c89e6de7506209e5b1bcc3460135d4de19 \
+    --hash=sha256:f091755f667055f2d02b32c53771a7a6c8b47e1fdbc4b72a8b9072b3eef8015c
     # via pytablewriter

@@ -11,7 +11,7 @@ from pathlib import Path
 from re import compile as re_compile
 from sys import argv, path as sys_path
 from threading import Lock
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 from time import sleep
 from uuid import uuid4
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -71,6 +71,7 @@ def set_sqlite_pragma(dbapi_connection, _):
 
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
+    READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
 
     def __init__(
         self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
@@ -78,7 +79,7 @@ class Database:
         """Initialize the database"""
         self.logger = logger
         self.readonly = False
-        self.last_fallback = None
+        self.last_connection_retry = None
 
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
@@ -133,6 +134,7 @@ class Database:
             "pool_recycle": 1800,
             "pool_size": 40,
             "max_overflow": 20,
+            "pool_timeout": 5,
         } | kwargs
 
         try:
@@ -183,19 +185,17 @@ class Database:
                         self.sql_engine.dispose(close=True)
                         self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
                         self.readonly = True
-                        self.last_fallback = datetime.now()
                         fallback = True
                         continue
                     self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
                     _exit(1)
 
-                if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
+                if any(error in str(e) for error in self.READONLY_ERROR):
                     if log:
                         self.logger.warning("The database is read-only. Retrying in read-only mode in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
                     self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
                     self.readonly = True
-                    self.last_fallback = datetime.now()
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
@@ -218,6 +218,12 @@ class Database:
         if self.sql_engine:
             self.sql_engine.dispose()
 
+    def test_read(self):
+        """Test the read access to the database"""
+        self.logger.debug("Testing read access to the database ...")
+        with self.__db_session() as session:
+            session.execute(text("SELECT 1"))
+
     def test_write(self):
         """Test the write access to the database"""
         self.logger.debug("Testing write access to the database ...")
@@ -227,10 +233,12 @@ class Database:
             session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
             session.commit()
 
-    def retry_connection(self, *, readonly: bool = False, fallback: bool = False, **kwargs) -> None:
+    def retry_connection(self, *, readonly: bool = False, fallback: bool = False, log: bool = True, **kwargs) -> None:
         """Retry the connection to the database"""
+        self.last_connection_retry = datetime.now()
 
-        self.logger.debug(f"Retrying the connection to the database {'in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
+        if log:
+            self.logger.debug(f"Retrying the connection to the database{' in read-only mode' if readonly else ''}{' with fallback' if fallback else ''} ...")
 
         assert self.sql_engine is not None
 
@@ -245,9 +253,10 @@ class Database:
                 conn.execute(text("SELECT 1"))
             return
 
+        table_name = uuid4().hex
         with self.sql_engine.connect() as conn:
-            conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
-            conn.execute(text("DROP TABLE test"))
+            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
     @contextmanager
     def __db_session(self) -> Any:
@@ -256,21 +265,6 @@ class Database:
         except AssertionError:
             self.logger.error("The database engine is not initialized")
             _exit(1)
-
-        if self.database_uri and self.readonly and self.last_fallback and (datetime.now() - self.last_fallback).total_seconds() > 30:
-            # ? If the database is forced to be read-only, we try to connect as a non read-only user every time until the database is writable
-            try:
-                self.retry_connection(pool_timeout=1)
-                self.readonly = False
-                self.logger.info("The database is no longer read-only, defaulting to read-write mode")
-            except (OperationalError, DatabaseError):
-                try:
-                    self.retry_connection(readonly=True, pool_timeout=1)
-                except (OperationalError, DatabaseError):
-                    if self.database_uri_readonly:
-                        with suppress(OperationalError, DatabaseError):
-                            self.retry_connection(fallback=True, pool_timeout=1)
-                self.readonly = True
 
         with LOCK:
             session = None
@@ -283,24 +277,25 @@ class Database:
                 if session:
                     session.rollback()
 
-                if "readonly" in str(e) or "read-only" in str(e) or "command denied" in str(e):
+                if any(error in str(e) for error in self.READONLY_ERROR):
                     self.logger.warning("The database is read-only, retrying in read-only mode ...")
                     try:
                         self.retry_connection(readonly=True, pool_timeout=1)
+                        self.retry_connection(readonly=True, log=False)
                     except (OperationalError, DatabaseError):
                         if self.database_uri_readonly:
                             self.logger.warning("Can't connect to the database in read-only mode, falling back to read-only one")
                             with suppress(OperationalError, DatabaseError):
                                 self.retry_connection(fallback=True, pool_timeout=1)
+                            self.retry_connection(fallback=True, log=False)
                     self.readonly = True
-                    self.last_fallback = datetime.now()
                 elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
                     self.logger.warning("Can't connect to the database, falling back to read-only one ...")
                     with suppress(OperationalError, DatabaseError):
                         self.retry_connection(fallback=True, pool_timeout=1)
+                        self.retry_connection(fallback=True, log=False)
                         self.readonly = True
-                        self.last_fallback = datetime.now()
-                raise
+                    raise
             finally:
                 if session:
                     session.remove()
@@ -349,8 +344,11 @@ class Database:
             "custom_configs_changed": False,
             "external_plugins_changed": False,
             "pro_plugins_changed": False,
-            "config_changed": False,
             "instances_changed": False,
+            "last_custom_configs_change": None,
+            "last_external_plugins_change": None,
+            "last_pro_plugins_change": None,
+            "last_instances_change": None,
             "integration": "unknown",
             "version": "1.5.8",
             "database_version": "Unknown",  # ? Extracted from the database
@@ -398,15 +396,15 @@ class Database:
 
         return ""
 
-    def checked_changes(self, changes: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
+    def checked_changes(
+        self,
+        changes: Optional[List[str]] = None,
+        plugins_changes: Optional[Union[Literal["all"], Set[str], List[str], Tuple[str]]] = None,
+        value: Optional[bool] = False,
+    ) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
-        changes = changes or [
-            "config",
-            "custom_configs",
-            "external_plugins",
-            "pro_plugins",
-            "instances",
-        ]
+        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"]
+        plugins_changes = plugins_changes or set()
         with self.__db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -417,18 +415,32 @@ class Database:
                 if not metadata:
                     return "The metadata are not set yet, try again"
 
+                current_time = datetime.now()
+
                 if "config" in changes:
                     if not metadata.first_config_saved:
                         metadata.first_config_saved = True
-                    metadata.config_changed = value
                 if "custom_configs" in changes:
                     metadata.custom_configs_changed = value
+                    metadata.last_custom_configs_change = current_time
                 if "external_plugins" in changes:
                     metadata.external_plugins_changed = value
+                    metadata.last_external_plugins_change = current_time
                 if "pro_plugins" in changes:
                     metadata.pro_plugins_changed = value
+                    metadata.last_pro_plugins_change = current_time
                 if "instances" in changes:
                     metadata.instances_changed = value
+                    metadata.last_instances_change = current_time
+
+                if plugins_changes:
+                    if plugins_changes == "all":
+                        session.query(Plugins).update({Plugins.config_changed: value, Plugins.last_config_change: current_time})
+                    else:
+                        session.query(Plugins).filter(Plugins.id.in_(plugins_changes)).update(
+                            {Plugins.config_changed: value, Plugins.last_config_change: current_time}
+                        )
+
                 session.commit()
             except BaseException as e:
                 return str(e)
@@ -456,7 +468,7 @@ class Database:
 
             if db_version != bunkerweb_version:
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
-                curren_time = datetime.now()
+                current_time = datetime.now()
                 error = True
                 while error:
                     try:
@@ -464,7 +476,7 @@ class Database:
                         metadata.reflect(self.sql_engine)
                         error = False
                     except BaseException as e:
-                        if (datetime.now() - curren_time).total_seconds() > 10:
+                        if (datetime.now() - current_time).total_seconds() > 10:
                             raise e
                         sleep(1)
 
@@ -971,7 +983,7 @@ class Database:
 
         if db_version and db_version != bunkerweb_version:
             for table_name, data in old_data.items():
-                if table_name == "bw_metadata" or not data:
+                if not data:
                     continue
 
                 self.logger.warning(f'Restoring data for table "{table_name}"')
@@ -990,6 +1002,15 @@ class Database:
 
                     with self.__db_session() as session:
                         try:
+                            if table_name == "bw_metadata":
+                                existing_row = session.query(Metadata).filter_by(id=1).first()
+                                if not existing_row:
+                                    session.add(Metadata(**row))
+                                    session.commit()
+                                    continue
+                                session.query(Metadata).filter_by(id=1).update(row)
+                                continue
+
                             # Check if the row already exists in the table
                             existing_row = session.query(Base.metadata.tables[table_name]).filter_by(**row).first()
                             if not existing_row:
@@ -1004,16 +1025,36 @@ class Database:
 
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> str:
+    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> Union[str, Set[str]]:
         """Save the config in the database"""
         to_put = []
         with self.__db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            # Delete all the old config
-            session.query(Global_values).filter(Global_values.method == method).delete()
-            session.query(Services_settings).filter(Services_settings.method == method).delete()
+            changed_plugins = set()
+            changed_services = False
+
+            for db_global_config in session.query(Global_values).filter_by(method=method).all():
+                key = db_global_config.setting_id
+                if db_global_config.suffix:
+                    key = f"{key}_{db_global_config.suffix}"
+
+                if key not in config and (db_global_config.suffix or f"{key}_0" not in config):
+                    session.delete(db_global_config)
+                    changed_plugins.add(session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_global_config.setting_id).first().plugin_id)
+
+                    if key == "SERVER_NAME":
+                        changed_services = True
+
+            for db_service_config in session.query(Services_settings).filter_by(method=method).all():
+                key = f"{db_service_config.service_id}_{db_service_config.setting_id}"
+                if db_service_config.suffix:
+                    key = f"{key}_{db_service_config.suffix}"
+
+                if key not in config and (db_service_config.suffix or f"{key}_0" not in config):
+                    session.delete(db_service_config)
+                    changed_plugins.add(session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first().plugin_id)
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -1023,7 +1064,11 @@ class Database:
                 services = config.get("SERVER_NAME", [])
 
                 if isinstance(services, str):
-                    services = services.split(" ")
+                    services = services.strip().split(" ")
+
+                for i, service in enumerate(services):
+                    if not service:
+                        services.pop(i)
 
                 if db_services:
                     missing_ids = [service.id for service in db_services if service.method == method and service.id not in services]
@@ -1034,6 +1079,7 @@ class Database:
                         session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete()
                         session.query(Custom_configs).filter(Custom_configs.service_id.in_(missing_ids)).delete()
                         session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(missing_ids)).delete()
+                        changed_services = True
 
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
                 db_drafts = {service.id for service in db_services if service.is_draft}
@@ -1046,6 +1092,7 @@ class Database:
                     if missing_drafts:
                         # Remove drafts that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_drafts)).update({Services.is_draft: False})
+                        changed_services = True
 
                 for draft in drafts:
                     if draft not in db_drafts:
@@ -1054,6 +1101,7 @@ class Database:
                             db_ids[draft] = {"method": method, "is_draft": True}
                         elif method == db_ids[draft]["method"]:
                             session.query(Services).filter(Services.id == draft).update({Services.is_draft: True})
+                            changed_services = True
 
                 if config.get("MULTISITE", "no") == "yes":
                     global_values = []
@@ -1064,7 +1112,7 @@ class Database:
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
-                        setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
+                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
 
                         if not setting and services:
                             try:
@@ -1075,10 +1123,12 @@ class Database:
                             if server_name not in db_ids:
                                 to_put.append(Services(id=server_name, method=method, is_draft=server_name in drafts))
                                 db_ids[server_name] = {"method": method, "is_draft": server_name in drafts}
+                                if server_name not in drafts:
+                                    changed_services = True
 
                             key = key.replace(f"{server_name}_", "")
                             original_key = original_key.replace(f"{server_name}_", "")
-                            setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
+                            setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
 
                             if not setting:
                                 continue
@@ -1086,11 +1136,7 @@ class Database:
                             service_setting = (
                                 session.query(Services_settings)
                                 .with_entities(Services_settings.value, Services_settings.method)
-                                .filter_by(
-                                    service_id=server_name,
-                                    setting_id=key,
-                                    suffix=suffix,
-                                )
+                                .filter_by(service_id=server_name, setting_id=key, suffix=suffix)
                                 .first()
                             )
 
@@ -1100,45 +1146,31 @@ class Database:
                                 ):
                                     continue
 
-                                to_put.append(
-                                    Services_settings(
-                                        service_id=server_name,
-                                        setting_id=key,
-                                        value=value,
-                                        suffix=suffix,
-                                        method=method,
-                                    )
-                                )
-                            elif method in (service_setting.method, "autoconf") and service_setting.value != value:
-                                if key != "SERVER_NAME" and (
-                                    (original_key not in config and value == setting.default) or (original_key in config and value == config[original_key])
-                                ):
-                                    session.query(Services_settings).filter(
-                                        Services_settings.service_id == server_name,
-                                        Services_settings.setting_id == key,
-                                        Services_settings.suffix == suffix,
-                                    ).delete()
-                                    continue
-
-                                session.query(Services_settings).filter(
+                                changed_plugins.add(setting.plugin_id)
+                                to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
+                            elif (
+                                method == service_setting.method or (service_setting.method not in ("scheduler", "autoconf") and method == "autoconf")
+                            ) and service_setting.value != value:
+                                changed_plugins.add(setting.plugin_id)
+                                query = session.query(Services_settings).filter(
                                     Services_settings.service_id == server_name,
                                     Services_settings.setting_id == key,
                                     Services_settings.suffix == suffix,
-                                ).update(
-                                    {
-                                        Services_settings.value: value,
-                                        Services_settings.method: method,
-                                    }
                                 )
+
+                                if key != "SERVER_NAME" and (
+                                    (original_key not in config and value == setting.default) or (original_key in config and value == config[original_key])
+                                ):
+                                    query.delete()
+                                    continue
+
+                                query.update({Services_settings.value: value, Services_settings.method: method})
                         elif setting and original_key not in global_values:
                             global_values.append(original_key)
                             global_value = (
                                 session.query(Global_values)
                                 .with_entities(Global_values.value, Global_values.method)
-                                .filter_by(
-                                    setting_id=key,
-                                    suffix=suffix,
-                                )
+                                .filter_by(setting_id=key, suffix=suffix)
                                 .first()
                             )
 
@@ -1146,31 +1178,18 @@ class Database:
                                 if value == setting.default:
                                     continue
 
-                                to_put.append(
-                                    Global_values(
-                                        setting_id=key,
-                                        value=value,
-                                        suffix=suffix,
-                                        method=method,
-                                    )
-                                )
-                            elif method in (global_value.method, "autoconf") and global_value.value != value:
-                                if value == setting.default:
-                                    session.query(Global_values).filter(
-                                        Global_values.setting_id == key,
-                                        Global_values.suffix == suffix,
-                                    ).delete()
-                                    continue
+                                changed_plugins.add(setting.plugin_id)
+                                to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
+                            elif (
+                                method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method == "autoconf")
+                            ) and global_value.value != value:
+                                changed_plugins.add(setting.plugin_id)
+                                query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
-                                session.query(Global_values).filter(
-                                    Global_values.setting_id == key,
-                                    Global_values.suffix == suffix,
-                                ).update(
-                                    {
-                                        Global_values.value: value,
-                                        Global_values.method: method,
-                                    }
-                                )
+                                if value == setting.default:
+                                    query.delete()
+                                    continue
+                                query.update({Global_values.value: value, Global_values.method: method})
                 else:
                     if (
                         config.get("SERVER_NAME", "www.example.com")
@@ -1180,6 +1199,7 @@ class Database:
                         .first()
                     ):
                         to_put.append(Services(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0], method=method))
+                        changed_services = True
 
                     for key, value in config.items():
                         suffix = 0
@@ -1187,7 +1207,7 @@ class Database:
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
-                        setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
+                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
 
                         if not setting:
                             continue
@@ -1203,26 +1223,21 @@ class Database:
                             if value == setting.default:
                                 continue
 
-                            to_put.append(
-                                Global_values(
-                                    setting_id=key,
-                                    value=value,
-                                    suffix=suffix,
-                                    method=method,
-                                )
-                            )
-                        elif global_value.method == method and value != global_value.value:
-                            if value == setting.default:
-                                session.query(Global_values).filter(
-                                    Global_values.setting_id == key,
-                                    Global_values.suffix == suffix,
-                                ).delete()
-                                continue
+                            changed_plugins.add(setting.plugin_id)
+                            to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
+                        elif (
+                            method == global_value.method or (global_value.method not in ("scheduler", "autoconf") and method == "autoconf")
+                        ) and value != global_value.value:
+                            changed_plugins.add(setting.plugin_id)
+                            query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
-                            session.query(Global_values).filter(
-                                Global_values.setting_id == key,
-                                Global_values.suffix == suffix,
-                            ).update({Global_values.value: value})
+                            if value == setting.default:
+                                query.delete()
+                                continue
+                            query.update({Global_values.value: value, Global_values.method: method})
+
+            if changed_services:
+                changed_plugins = set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all())
 
             if changed:
                 with suppress(ProgrammingError, OperationalError):
@@ -1230,7 +1245,9 @@ class Database:
                     if metadata is not None:
                         if not metadata.first_config_saved:
                             metadata.first_config_saved = True
-                        metadata.config_changed = True
+
+                    if changed_plugins:
+                        session.query(Plugins).filter(Plugins.id.in_(changed_plugins)).update({Plugins.config_changed: True})
 
             try:
                 session.add_all(to_put)
@@ -1238,7 +1255,7 @@ class Database:
             except BaseException as e:
                 return str(e)
 
-        return ""
+        return changed_plugins
 
     def save_custom_configs(
         self,
@@ -1313,17 +1330,18 @@ class Database:
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
-                elif custom_config["checksum"] != custom_conf.checksum and method in (custom_conf.method, "autoconf"):
+                elif custom_config["checksum"] != custom_conf.checksum and (
+                    method == custom_conf.method or (custom_conf.method not in ("scheduler", "autoconf") and method == "autoconf")
+                ):
                     custom_conf.data = custom_config["data"]
                     custom_conf.checksum = custom_config["checksum"]
-
-                    if method == "autoconf":
-                        custom_conf.method = method
+                    custom_conf.method = method
             if changed:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.custom_configs_changed = True
+                        metadata.last_custom_configs_change = datetime.now()
 
             try:
                 session.add_all(to_put)
@@ -1333,7 +1351,7 @@ class Database:
 
         return message
 
-    def get_config(self, methods: bool = False, with_drafts: bool = False) -> Dict[str, Any]:
+    def get_config(self, global_only: bool = False, methods: bool = False, with_drafts: bool = False) -> Dict[str, Any]:
         """Get the config from the database"""
         with self.__db_session() as session:
             config = {}
@@ -1373,7 +1391,7 @@ class Database:
             if not with_drafts:
                 services = services.filter_by(is_draft=False)
 
-            if is_multisite:
+            if not global_only and is_multisite:
                 for service in services:
                     config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
                     if methods:
@@ -2050,8 +2068,10 @@ class Database:
                     if metadata is not None:
                         if _type == "external":
                             metadata.external_plugins_changed = True
+                            metadata.last_external_plugins_change = datetime.now()
                         elif _type == "pro":
                             metadata.pro_plugins_changed = True
+                            metadata.last_pro_plugins_change = datetime.now()
 
             try:
                 session.add_all(to_put)
@@ -2267,6 +2287,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.instances_changed = True
+                        metadata.last_instances_change = datetime.now()
 
             try:
                 session.commit()
@@ -2299,6 +2320,7 @@ class Database:
                     metadata = session.query(Metadata).get(1)
                     if metadata is not None:
                         metadata.instances_changed = True
+                        metadata.last_instances_change = datetime.now()
 
             try:
                 session.add_all(to_put)

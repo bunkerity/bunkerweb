@@ -1,16 +1,16 @@
-FROM redhat/ubi9-init:9.4-6.1714668826@sha256:dfae07a6c86c27ac5f33e1c3953906171eb4b65756d8e9817bd47d1b05854d90
+FROM redhat/ubi9-init:9.4-6.1717075635@sha256:c86a45477e2803d2787217d3dde408512cd11af07ce12a624b2083eb18acb3e0
 
-ENV NGINX_VERSION 1.26.0
+ENV NGINX_VERSION 1.26.1
 
-# Copy centos repo
-COPY src/linux/centos-9.repo /etc/yum.repos.d/centos.repo
-RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/centos.repo
+# Copy rocky repo
+COPY src/linux/rocky-9.repo /etc/yum.repos.d/rocky.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/rocky.repo
 
-# Copy RPM-GPG-KEY-CentOS-Official
-COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+# Copy RPM-GPG-KEY-Rocky-9
+COPY src/linux/RPM-GPG-KEY-Rocky-9 /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 
-# Import RPM-GPG-KEY-CentOS-Official
-RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+# Import RPM-GPG-KEY-Rocky-9
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 

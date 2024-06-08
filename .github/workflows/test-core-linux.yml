@@ -12,15 +12,15 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
-      - name: Set up Python 3.9
+      - name: Set up Python 3.12
         uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
         with:
-          python-version: "3.9"
+          python-version: "3.12"
       - name: Install Firefox manually and dependencies
         run: |
           sudo add-apt-repository ppa:mozillateam/ppa -y
@@ -31,10 +31,12 @@ jobs:
           Pin-Priority: 1001
 
           Package: firefox
-          Pin: version 1:1snap1-0ubuntu2
+          Pin: version 1:1snap1-0ubuntu5
           Pin-Priority: -1
           ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
-          sudo apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip firefox
+          export NEEDRESTART_SUSPEND=1
+          export DEBIAN_FRONTEND=noninteractive
+          sudo -E apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2t64 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip firefox
       - name: Download geckodriver
         uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
         with:
@@ -47,7 +49,7 @@ jobs:
             sudo chmod +x /usr/local/bin/geckodriver
             rm -f geckodriver.tar.gz
       - name: Login to ghcr
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -61,11 +63,13 @@ jobs:
           docker rm "$container_id"
       - name: Install NGINX
         run: |
-          sudo apt install -y gnupg2 ca-certificates lsb-release ubuntu-keyring
+          export NEEDRESTART_SUSPEND=1
+          export DEBIAN_FRONTEND=noninteractive
+          sudo -E apt install -y gnupg2 ca-certificates lsb-release ubuntu-keyring
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
           sudo apt update
-          sudo apt install -y nginx=1.26.0-1~jammy
+          sudo -E apt install -y nginx=1.26.1-2~noble
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
@@ -75,9 +79,9 @@ jobs:
           echo "127.0.0.1 www.example.com" | sudo tee -a /etc/hosts
           echo "127.0.0.1 app1.example.com" | sudo tee -a /etc/hosts
           echo "127.0.0.1 bwadm.example.com" | sudo tee -a /etc/hosts
-          sudo cp ./tests/www-deb.conf /etc/php/8.1/fpm/pool.d/www.conf
-          sudo systemctl stop php8.1-fpm
-          sudo systemctl start php8.1-fpm
+          sudo cp ./tests/www-deb.conf /etc/php/8.3/fpm/pool.d/www.conf
+          sudo systemctl stop php8.3-fpm
+          sudo systemctl start php8.3-fpm
           # BunkerWeb
           sudo mkdir -p /etc/bunkerweb
           echo "SERVER_NAME=www.example.com" | sudo tee /etc/bunkerweb/variables.env
@@ -92,12 +96,15 @@ jobs:
           sudo chown nginx:nginx /etc/bunkerweb/variables.env
           sudo chmod 777 /etc/bunkerweb/variables.env
       - name: Install BunkerWeb
-        run: sudo apt install -fy /tmp/bunkerweb.deb
+        run: |
+          export NEEDRESTART_SUSPEND=1
+          export DEBIAN_FRONTEND=noninteractive
+          sudo -E apt install -fy /tmp/bunkerweb.deb
       - name: Run tests
         run: |
           export MAKEFLAGS="-j $(nproc)"
-          pip install --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements-deps.txt
+          pip install --break-system-packages --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements-deps.txt
           cd tests/core/${{ inputs.TEST }}
-          find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes --no-deps -r {} \;
+          find . -name "requirements.txt" -exec pip install --break-system-packages --no-cache-dir --require-hashes --no-deps -r {} \;
           sudo truncate -s 0 /var/log/bunkerweb/error.log
           ./test.sh "linux"

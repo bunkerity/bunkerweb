@@ -75,7 +75,6 @@
                     {"name" : "TOP STATUS CODE", "data" : top_code['name']|string},
                 ] %}
         {% include "card_info.html" %}
-
         <!-- filter -->
         {% set filters = [
                     {
@@ -117,14 +116,12 @@
                 ] %}
         {% include "card_filter.html" %}
         {% include "filter_nomatch.html" %}
-
-        <div data-{{attribute_name}}-list-container  class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        <div data-{{ attribute_name }}-list-container  class="overflow-auto w-full col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
             <div class="col-span-12">
                 <h5 class="mx-2 font-bold dark:text-white/90 mx-2">REPORTING LIST</h5>
             </div>
-            <div
-                    class="w-full overflow-auto grid grid-cols-12 col-span-12 p-4 relative">
-                   <div class=" max-h-100 sm:max-h-125  col-span-12 overflow-y-auto overflow-x-auto">
+            <div class="w-full overflow-auto grid grid-cols-12 col-span-12 p-4 relative">
+                <div class=" max-h-100 sm:max-h-125  col-span-12 overflow-y-auto overflow-x-auto">
                     <!-- list container-->
                     <div class="overflow-hidden min-w-[1300px] w-full grid grid-cols-12 rounded p-2">
                         {% set reports_header = [
@@ -173,33 +170,20 @@
                         {% endfor %}
                         <!-- end header-->
                         <!-- list -->
-                        <ul class="col-span-12 w-full" data-{{attribute_name}}-list>
+                        <ul class="col-span-12 w-full" data-{{ attribute_name }}-list>
                             {% for report in reports %}
-                                <li data-{{attribute_name}}-item
-                                data-{{attribute_name}}-country="{{ report['country'] }}"
-                                data-{{attribute_name}}-method="{{ report['method'] }}"
-                                data-{{attribute_name}}-status="{{ report['status'] }}"
-                                data-{{attribute_name}}-reason="{{ report['reason'] }}"
-                                data-{{attribute_name}}-keyword="{{ report['ip'] }} {{ report['url'] }} {{ report['data'] }} {{ report['date'] }} {{ report['user_agent'] }}"
-                                    class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5 break-all">
-                                    <p class="text-center flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1"
-                                        >{{ report['date'] }}</p>
-                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1"
-                                        >{{ report['ip'] }}</p>
-                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1"
-                                        >{{ report['country'] }}</p>
-                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 "
-                                        >{{ report["method"] }}</p>
-                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1"
-                                        >{{ report['url'] }}</p>
-                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 "
-                                        >{{ report["status"] }}</p>
-                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1 "
-                                        >{{ report["user_agent"] }}</p>
-                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 "
-                                        >{{ report["reason"] }}</p>
-                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1"
-                                        >{{ report["data"] }}</p>
+                                <li data-{{ attribute_name }}-item data-{{ attribute_name }}-country="{{ report['country'] }}" data-{{ attribute_name }}-method="{{ report['method'] }}" data-{{ attribute_name }}-status="{{ report['status'] }}" data-{{ attribute_name }}-reason="{{ report['reason'] }}" data-{{ attribute_name }}-keyword="{{ report['ip'] }} {{ report['url'] }} {{ report['data'] }} {{ report['date'] }} {{ report['user_agent'] }}" class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5 break-all">
+                                    <p class="text-center flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1">
+                                        {{ report['date'] }}
+                                    </p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1">{{ report['ip'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1">{{ report['country'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 ">{{ report["method"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1">{{ report['url'] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 ">{{ report["status"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1 ">{{ report["user_agent"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-1 m-0 my-1 mr-1 ">{{ report["reason"] }}</p>
+                                    <p class="flex justify-center dark:text-gray-400  text-sm col-span-2 m-0 my-1 mr-1">{{ report["data"] }}</p>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -209,6 +193,5 @@
                 </div>
             </div>
         </div>
-
     {% endif %}
 {% endblock content %}

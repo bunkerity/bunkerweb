@@ -7,7 +7,7 @@ from flask import flash
 from json import loads as json_loads
 from pathlib import Path
 from re import error as RegexError, search as re_search
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Set, Tuple, Union
 
 
 class Config:
@@ -15,7 +15,9 @@ class Config:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
 
-    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None) -> None:
+    def __gen_conf(
+        self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None
+    ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
 
         Parameters
@@ -76,7 +78,7 @@ class Config:
     def get_settings(self) -> dict:
         return self.__settings
 
-    def get_config(self, methods: bool = True, with_drafts: bool = False) -> dict:
+    def get_config(self, global_only: bool = False, methods: bool = True, with_drafts: bool = False) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
         Returns
@@ -84,7 +86,7 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__db.get_config(methods=methods, with_drafts=with_drafts)
+        return self.__db.get_config(global_only=global_only, methods=methods, with_drafts=with_drafts)
 
     def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services
@@ -136,9 +138,6 @@ class Config:
 
         return error
 
-    def reload_config(self) -> Optional[str]:
-        return self.__gen_conf(self.get_config(methods=False), self.get_services(methods=False))
-
     def new_service(self, variables: dict, is_draft: bool = False) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
@@ -165,7 +164,7 @@ class Config:
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
         ret = self.__gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
-        if ret:
+        if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
 
@@ -205,7 +204,7 @@ class Config:
                     config.pop(k)
 
         ret = self.__gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0])
-        if ret:
+        if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
@@ -223,7 +222,7 @@ class Config:
             the confirmation message
         """
         ret = self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
-        if ret:
+        if isinstance(ret, str):
             return ret, 1
         return "The global configuration has been edited.", 0
 
@@ -273,6 +272,6 @@ class Config:
                         service.pop(k)
 
         ret = self.__gen_conf(new_env, new_services, check_changes=check_changes)
-        if ret:
+        if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {service_name} has been deleted.", 0

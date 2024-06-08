@@ -19,9 +19,9 @@
       "reload": true
     },
     {
-      "name": "download-plugins",
-      "file": "download-plugins.py",
-      "every": "once",
+      "name": "update-check",
+      "file": "update-check.py",
+      "every": "day",
       "reload": false
     }
   ]

@@ -20,6 +20,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
+from common_utils import get_integration  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
@@ -71,6 +72,7 @@ class CLI(ApiCaller):
 
         assert isinstance(self.__variables, dict), "Failed to get variables from database"
 
+        self.__integration = get_integration()
         self.__use_redis = self.__get_variable("USE_REDIS", "no") == "yes"
         self.__redis = None
         if self.__use_redis:
@@ -113,7 +115,7 @@ class CLI(ApiCaller):
                 sentinel_hosts = self.__get_variable("REDIS_SENTINEL_HOSTS", [])
 
                 if isinstance(sentinel_hosts, str):
-                    sentinel_hosts = [host.split(":") if ":" in host else host for host in sentinel_hosts.split(" ") if host]
+                    sentinel_hosts = [host.split(":") if ":" in host else (host, "26379") for host in sentinel_hosts.split(" ") if host]
 
                 if sentinel_hosts:
                     sentinel_username = self.__get_variable("REDIS_SENTINEL_USERNAME", None) or None
@@ -178,8 +180,17 @@ class CLI(ApiCaller):
                 self.__logger.error("USE_REDIS is set to yes but REDIS_HOST or REDIS_SENTINEL_HOSTS is not set, disabling redis")
                 self.__use_redis = False
 
-        for db_instance in self.__db.get_instances():
-            self.apis.append(API(db_instance["hostname"], db_instance["port"], db_instance["server_name"]))
+        if Path(sep, "usr", "sbin", "nginx").exists() or self.__integration == "Linux":
+            return super().__init__(
+                [
+                    API(
+                        f"http://127.0.0.1:{self.__get_variable('API_HTTP_PORT', '5000')}",
+                        host=self.__get_variable("API_SERVER_NAME", "bwapi"),
+                    )
+                ]
+            )
+        super().__init__()
+        self.auto_setup(self.__integration)
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))

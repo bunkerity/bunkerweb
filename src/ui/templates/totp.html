@@ -11,7 +11,6 @@
             <link rel="stylesheet" href="css/login.css" />
             <script defer src="./js/totp.js" nonce="{{ script_nonce }}"></script>
             <script src="js/lottie-web.min.js" defer nonce="{{ script_nonce }}"></script>
-
         </head>
         <body>
             <div data-loader
@@ -110,7 +109,9 @@
                 <!-- end form -->
                 <!-- particles -->
                 <div class="-z-10 fixed bg-primary">
-                    <div id="lottie-particles" data-lottie="/lotties/PARTICLES.json" class="fixed top-0 left-0 w-full h-full login-img [&>*]:bg-primary"></div>
+                    <div id="lottie-particles"
+                         data-lottie="/lotties/PARTICLES.json"
+                         class="fixed top-0 left-0 w-full h-full login-img [&>*]:bg-primary"></div>
                 </div>
             </main>
             <script nonce="{{ script_nonce }}">

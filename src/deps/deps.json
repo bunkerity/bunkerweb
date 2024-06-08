@@ -25,13 +25,13 @@
       "name": "ModSecurity-nginx v1.0.3",
       "url": "https://github.com/SpiderLabs/ModSecurity-nginx.git",
       "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
-      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/config.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch"
+      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch"
     },
     {
       "id": "nginx",
-      "name": "Nginx v1.26.0",
+      "name": "Nginx v1.26.1",
       "url": "https://github.com/nginx/nginx.git",
-      "commit": "361f6bf4b1cd5057d8f6365d1c0a94f3d72824e4"
+      "commit": "02725ce722bc7b34fa307d611eac3956ef744efa"
     },
     {
       "id": "ngx_brotli",
@@ -151,9 +151,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.3.1",
+      "name": "lua-resty-openssl v1.4.0",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "643956d990b3ef4d9b52d0b77ba4d69d7e912dcc",
+      "commit": "e56da6c5f285ff0e40fce703b870e83ee8eac321",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {

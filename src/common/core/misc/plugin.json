@@ -204,15 +204,15 @@
       "reload": false
     },
     {
-      "name": "update-check",
-      "file": "update-check.py",
+      "name": "anonymous-report",
+      "file": "anonymous-report.py",
       "every": "day",
       "reload": false
     },
     {
-      "name": "anonymous-report",
-      "file": "anonymous-report.py",
-      "every": "day",
+      "name": "download-plugins",
+      "file": "download-plugins.py",
+      "every": "once",
       "reload": false
     }
   ]

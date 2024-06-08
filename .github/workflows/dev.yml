@@ -43,11 +43,11 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu, ubuntu-noble, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, debian, fedora, rhel, rhel9, ubuntu-jammy]
         include:
           - linux: ubuntu
             package: deb
-          - linux: ubuntu-noble
+          - linux: ubuntu-jammy
             package: deb
           - linux: debian
             package: deb
@@ -151,12 +151,12 @@ jobs:
       packages: write
     steps:
       - name: Login to Docker Hub
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -187,18 +187,12 @@ jobs:
     needs: [tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
-        linux: [ubuntu, ubuntu-noble, debian, fedora, el, el9]
+        linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
         arch: [amd64]
         include:
           - release: dev
             repo: bunkerweb
           - linux: ubuntu
-            package_arch: amd64
-            separator: _
-            suffix: ""
-            version: jammy
-            package: deb
-          - linux: ubuntu-noble
             package_arch: amd64
             separator: _
             suffix: ""
@@ -214,7 +208,7 @@ jobs:
             package_arch: x86_64
             separator: "-"
             suffix: "1."
-            version: 39
+            version: 40
             package: rpm
           - linux: el
             package_arch: x86_64
@@ -228,6 +222,12 @@ jobs:
             suffix: "1."
             version: 9
             package: rpm
+          - linux: ubuntu-jammy
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: jammy
+            package: deb
     uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: ${{ matrix.separator }}

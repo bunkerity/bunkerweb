@@ -132,3 +132,4 @@ def when_ready(server):
 def on_exit(server):
     RUN_DIR.joinpath("ui.pid").unlink(missing_ok=True)
     TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
+    TMP_DIR.joinpath(".flask_secret").unlink(missing_ok=True)

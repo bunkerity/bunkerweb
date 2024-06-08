@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from copy import deepcopy
+from datetime import datetime
 from functools import partial
 from glob import glob
 from json import loads
@@ -10,7 +11,7 @@ from os import cpu_count, environ, getenv, sep
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from schedule import (
     Job,
     clear as schedule_clear,
@@ -218,6 +219,7 @@ class JobScheduler(ApiCaller):
 
         err = self.try_database_readonly()
         if err:
+            self.__logger.error("Database is in read-only mode, pending jobs will not be executed")
             return True
 
         self.__job_success = True
@@ -255,16 +257,22 @@ class JobScheduler(ApiCaller):
 
         return success
 
-    def run_once(self) -> bool:
+    def run_once(self, plugins: Optional[List[str]] = None) -> bool:
         err = self.try_database_readonly()
         if err:
+            self.__logger.error("Database is in read-only mode, jobs will not be executed")
             return True
 
         threads = []
         self.__job_success = True
         self.__job_reload = False
 
+        plugins = plugins or []
+
         for plugin, jobs in self.__jobs.items():
+            if plugins and plugin not in plugins:
+                continue
+
             # Add job to the list of jobs to run in the order they are defined
             jobs_jobs = [partial(self.__job_wrapper, job["path"], plugin, job["name"], job["file"]) for job in jobs]
 
@@ -285,6 +293,7 @@ class JobScheduler(ApiCaller):
     def run_single(self, job_name: str) -> bool:
         err = self.try_database_readonly()
         if err:
+            self.__logger.error(f"Database is in read-only mode, single job {job_name} will not be executed")
             return True
 
         if self.__lock:
@@ -318,44 +327,47 @@ class JobScheduler(ApiCaller):
     def clear(self):
         schedule_clear()
 
-    def reload(self, env: Dict[str, Any], apis: Optional[list] = None) -> bool:
+    def reload(self, env: Dict[str, Any], apis: Optional[list] = None, *, changed_plugins: Optional[List[str]] = None) -> bool:
         ret = True
         try:
             self.__env = env
             super().__init__(apis or self.apis)
             self.clear()
             self.__jobs = self.__get_jobs()
-            ret = self.run_once()
+            ret = self.run_once(changed_plugins)
             self.setup()
         except:
             self.__logger.error(f"Exception while reloading scheduler {format_exc()}")
             return False
         return ret
 
-    def try_database_readonly(self) -> bool:
+    def try_database_readonly(self, force: bool = False) -> bool:
         if not self.db.readonly:
             try:
                 self.db.test_write()
+                self.db.readonly = False
+                return False
             except BaseException:
                 self.db.readonly = True
                 return True
+        elif not force and self.db.last_connection_retry and (datetime.now() - self.db.last_connection_retry).total_seconds() > 30:
+            return True
 
         if self.db.database_uri and self.db.readonly:
             try:
                 self.db.retry_connection(pool_timeout=1)
+                self.db.retry_connection(log=False)
                 self.db.readonly = False
                 self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
             except BaseException:
                 try:
                     self.db.retry_connection(readonly=True, pool_timeout=1)
+                    self.db.retry_connection(readonly=True, log=False)
                 except BaseException:
                     if self.db.database_uri_readonly:
                         with suppress(BaseException):
                             self.db.retry_connection(fallback=True, pool_timeout=1)
+                            self.db.retry_connection(fallback=True, log=False)
                 self.db.readonly = True
-
-            if self.db.readonly:
-                self.__logger.error("Database is in read-only mode, jobs will not be executed")
-                return True
 
         return self.db.readonly

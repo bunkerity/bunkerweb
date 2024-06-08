@@ -135,7 +135,7 @@ def stop(status):
     _exit(status)
 
 
-def generate_custom_configs(configs: List[Dict[str, Any]], *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):
+def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
 
@@ -148,6 +148,10 @@ def generate_custom_configs(configs: List[Dict[str, Any]], *, original_path: Uni
                     file.unlink()
             elif file.is_dir():
                 rmtree(file, ignore_errors=True)
+
+    if configs is None:
+        assert SCHEDULER is not None
+        configs = SCHEDULER.db.get_custom_configs()
 
     if configs:
         LOGGER.info("Generating new custom configs ...")
@@ -182,7 +186,7 @@ def generate_custom_configs(configs: List[Dict[str, Any]], *, original_path: Uni
             LOGGER.error("Sending custom configs failed, configuration will not work as expected...")
 
 
-def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]], *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
+def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
     pro = "pro" in original_path.parts
@@ -251,62 +255,61 @@ def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]], *, origin
             LOGGER.error(f"Sending {'pro ' if pro else ''}external plugins failed, configuration will not work as expected...")
 
 
-def generate_caches(plugins: List[Dict[str, Any]]):
+def generate_caches():
     assert SCHEDULER is not None
 
-    for plugin in plugins:
-        job_cache_files = SCHEDULER.db.get_jobs_cache_files(plugin_id=plugin["id"])
-        plugin_cache_files = set()
-        ignored_dirs = set()
-        job_path = Path(sep, "var", "cache", "bunkerweb", plugin["id"])
+    job_cache_files = SCHEDULER.db.get_jobs_cache_files()
+    plugin_cache_files = set()
+    ignored_dirs = set()
 
-        for job_cache_file in job_cache_files:
-            cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
-            plugin_cache_files.add(cache_path)
+    for job_cache_file in job_cache_files:
+        job_path = Path(sep, "var", "cache", "bunkerweb", job_cache_file["plugin_id"])
+        cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
+        plugin_cache_files.add(cache_path)
 
-            try:
-                if job_cache_file["file_name"].endswith(".tgz"):
-                    extract_path = cache_path.parent
-                    if job_cache_file["file_name"].startswith("folder:"):
-                        extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
-                    ignored_dirs.add(extract_path.as_posix())
-                    rmtree(extract_path, ignore_errors=True)
-                    extract_path.mkdir(parents=True, exist_ok=True)
-                    with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
-                        assert isinstance(tar, TarFile)
-                        try:
-                            for member in tar.getmembers():
-                                try:
-                                    tar.extract(member, path=extract_path)
-                                except Exception as e:
-                                    LOGGER.error(f"Error extracting {member.name}: {e}")
-                        except Exception as e:
-                            LOGGER.error(f"Error extracting tar file: {e}")
-                    LOGGER.debug(f"Restored cache directory {extract_path}")
-                    continue
-                cache_path.parent.mkdir(parents=True, exist_ok=True)
-                cache_path.write_bytes(job_cache_file["data"])
-                LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
-            except BaseException as e:
-                LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
+        try:
+            if job_cache_file["file_name"].endswith(".tgz"):
+                extract_path = cache_path.parent
+                if job_cache_file["file_name"].startswith("folder:"):
+                    extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
+                ignored_dirs.add(extract_path.as_posix())
+                rmtree(extract_path, ignore_errors=True)
+                extract_path.mkdir(parents=True, exist_ok=True)
+                with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
+                    assert isinstance(tar, TarFile)
+                    try:
+                        for member in tar.getmembers():
+                            try:
+                                tar.extract(member, path=extract_path)
+                            except Exception as e:
+                                LOGGER.error(f"Error extracting {member.name}: {e}")
+                    except Exception as e:
+                        LOGGER.error(f"Error extracting tar file: {e}")
+                LOGGER.debug(f"Restored cache directory {extract_path}")
+                continue
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            cache_path.write_bytes(job_cache_file["data"])
+            LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
+        except BaseException as e:
+            LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
 
-        if job_path.is_dir():
-            for file in job_path.rglob("*"):
-                if file.as_posix().startswith(tuple(ignored_dirs)):
-                    continue
+    if job_path.is_dir():
+        for file in job_path.rglob("*"):
+            if file.as_posix().startswith(tuple(ignored_dirs)):
+                continue
 
-                LOGGER.debug(f"Checking if {file} should be removed")
-                if file not in plugin_cache_files and file.is_file():
-                    LOGGER.debug(f"Removing non-cached file {file}")
-                    file.unlink(missing_ok=True)
-                    if file.parent.is_dir() and not list(file.parent.iterdir()):
-                        LOGGER.debug(f"Removing empty directory {file.parent}")
-                        rmtree(file.parent, ignore_errors=True)
-                        if file.parent == job_path:
-                            break
-                elif file.is_dir() and not list(file.iterdir()):
-                    LOGGER.debug(f"Removing empty directory {file}")
-                    rmtree(file, ignore_errors=True)
+            LOGGER.debug(f"Checking if {file} should be removed")
+            if file not in plugin_cache_files and file.is_file():
+                LOGGER.debug(f"Removing non-cached file {file}")
+                file.unlink(missing_ok=True)
+                if file.parent.is_dir() and not list(file.parent.iterdir()):
+                    LOGGER.debug(f"Removing empty directory {file.parent}")
+                    rmtree(file.parent, ignore_errors=True)
+                    if file.parent == job_path:
+                        break
+            elif file.is_dir() and not list(file.iterdir()):
+                LOGGER.debug(f"Removing empty directory {file}")
+                rmtree(file, ignore_errors=True)
 
 
 def run_in_slave_mode():  # TODO: Refactor this feature
@@ -328,17 +331,18 @@ def run_in_slave_mode():  # TODO: Refactor this feature
     # Instantiate scheduler environment
     SCHEDULER.env = env
 
-    # Download plugins
-    pro_plugins = SCHEDULER.db.get_plugins(_type="pro", with_data=True)
-    generate_external_plugins(pro_plugins, original_path=PRO_PLUGINS_PATH)
-    external_plugins = SCHEDULER.db.get_plugins(_type="external", with_data=True)
-    generate_external_plugins(external_plugins)
+    threads = [
+        Thread(target=generate_custom_configs),
+        Thread(target=generate_external_plugins),
+        Thread(target=generate_external_plugins, kwargs={"original_path": PRO_PLUGINS_PATH}),
+        Thread(target=generate_caches),
+    ]
 
-    # Download custom configs
-    generate_custom_configs(SCHEDULER.db.get_custom_configs())
+    for thread in threads:
+        thread.start()
 
-    # Download caches
-    generate_caches(pro_plugins + external_plugins)
+    for thread in threads:
+        thread.join()
 
     # Gen config
     content = ""
@@ -634,9 +638,9 @@ if __name__ == "__main__":
             threads.clear()
 
             if db_metadata["pro_plugins_changed"]:
-                threads.append(Thread(target=generate_external_plugins, args=(None,), kwargs={"original_path": PRO_PLUGINS_PATH}))
+                threads.append(Thread(target=generate_external_plugins, kwargs={"original_path": PRO_PLUGINS_PATH}))
             if db_metadata["external_plugins_changed"]:
-                threads.append(Thread(target=generate_external_plugins, args=(None,)))
+                threads.append(Thread(target=generate_external_plugins))
 
             for thread in threads:
                 thread.start()
@@ -688,17 +692,20 @@ if __name__ == "__main__":
             else:
                 LOGGER.info(f"Successfully sent {CACHE_PATH} folder")
 
+        changed_plugins = []
+        old_changes = {}
+
         while True:
             threads.clear()
 
             if RUN_JOBS_ONCE:
                 # Only run jobs once
-                if not SCHEDULER.reload(env):
+                if not SCHEDULER.reload(env, changed_plugins=changed_plugins):
                     LOGGER.error("At least one job in run_once() failed")
                 else:
                     LOGGER.info("All jobs in run_once() were successful")
                     if SCHEDULER.db.readonly:
-                        generate_caches(SCHEDULER.db.get_plugins())
+                        generate_caches()
 
             if CONFIG_NEED_GENERATION:
                 content = ""
@@ -718,7 +725,8 @@ if __name__ == "__main__":
                         join(sep, "etc", "nginx"),
                         "--variables",
                         str(SCHEDULER_TMP_ENV_PATH),
-                    ],
+                    ]
+                    + (["--no-linux-reload"] if MASTER_MODE else []),
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -751,7 +759,7 @@ if __name__ == "__main__":
                         LOGGER.info("Successfully reloaded nginx")
                     else:
                         LOGGER.error("Error while reloading nginx")
-                elif INTEGRATION == "Linux" and not MASTER_MODE:
+                elif INTEGRATION == "Linux":
                     # Reload nginx
                     LOGGER.info("Reloading nginx ...")
                     proc = subprocess_run(
@@ -774,7 +782,7 @@ if __name__ == "__main__":
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
             try:
-                ret = SCHEDULER.db.checked_changes(CHANGES)
+                ret = SCHEDULER.db.checked_changes(CHANGES, plugins_changes="all")
                 if ret:
                     LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
             except BaseException as e:
@@ -787,6 +795,7 @@ if __name__ == "__main__":
             PLUGINS_NEED_GENERATION = False
             PRO_PLUGINS_NEED_GENERATION = False
             INSTANCES_NEED_GENERATION = False
+            changed_plugins.clear()
 
             if scheduler_first_start:
                 try:
@@ -809,7 +818,7 @@ if __name__ == "__main__":
             errors = 0
             while RUN and not NEED_RELOAD:
                 try:
-                    sleep(1)
+                    sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
                     SCHEDULER.run_pending()
                     current_time = datetime.now()
@@ -825,15 +834,39 @@ if __name__ == "__main__":
                     if isinstance(db_metadata, str):
                         raise Exception(f"An error occurred when checking for changes in the database : {db_metadata}")
 
+                    changes = {
+                        "custom_configs_changed": db_metadata["custom_configs_changed"],
+                        "instances_changed": db_metadata["instances_changed"],
+                        "external_plugins_changed": db_metadata["external_plugins_changed"],
+                        "pro_plugins_changed": db_metadata["pro_plugins_changed"],
+                        "last_custom_configs_change": db_metadata["last_custom_configs_change"],
+                        "last_instances_change": db_metadata["last_instances_change"],
+                        "last_external_plugins_change": db_metadata["last_external_plugins_change"],
+                        "last_pro_plugins_change": db_metadata["last_pro_plugins_change"],
+                    }
+
+                    if SCHEDULER.db.readonly and changes == old_changes:
+                        continue
+
                     # check if the plugins have changed since last time
-                    if db_metadata["pro_plugins_changed"]:
+                    if changes["pro_plugins_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_pro_plugins_change"]
+                        or not old_changes
+                        or old_changes["last_pro_plugins_change"] != changes["last_pro_plugins_change"]
+                    ):
                         LOGGER.info("Pro plugins changed, generating ...")
                         PRO_PLUGINS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
 
-                    if db_metadata["external_plugins_changed"]:
+                    if changes["external_plugins_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_external_plugins_change"]
+                        or not old_changes
+                        or old_changes["last_external_plugins_change"] != changes["last_external_plugins_change"]
+                    ):
                         LOGGER.info("External plugins changed, generating ...")
                         PLUGINS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
@@ -841,26 +874,44 @@ if __name__ == "__main__":
                         NEED_RELOAD = True
 
                     # check if the custom configs have changed since last time
-                    if db_metadata["custom_configs_changed"]:
+                    if changes["custom_configs_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_custom_configs_change"]
+                        or not old_changes
+                        or old_changes["last_custom_configs_change"] != changes["last_custom_configs_change"]
+                    ):
                         LOGGER.info("Custom configs changed, generating ...")
                         CONFIGS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True
 
                     # check if the config have changed since last time
-                    if db_metadata["config_changed"]:
-                        LOGGER.info("Config changed, generating ...")
+                    if changes["plugins_config_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_plugins_config_change"]
+                        or not old_changes
+                        or old_changes["plugins_config_changed"] != changes["plugins_config_changed"]
+                    ):
+                        LOGGER.info("Plugins config changed, generating ...")
                         CONFIG_NEED_GENERATION = True
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
+                        changed_plugins = list(changes["plugins_config_changed"])
 
                     # check if the instances have changed since last time
-                    if db_metadata["instances_changed"]:
+                    if changes["instances_changed"] and (
+                        not SCHEDULER.db.readonly
+                        or not changes["last_instances_change"]
+                        or not old_changes
+                        or old_changes["last_instances_change"] != changes["last_instances_change"]
+                    ):
                         LOGGER.info("Instances changed, generating ...")
                         INSTANCES_NEED_GENERATION = True
                         CONFIGS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True
+
+                    old_changes = changes.copy()
                 except BaseException:
                     LOGGER.debug(format_exc())
                     if errors > 5:
@@ -870,6 +921,8 @@ if __name__ == "__main__":
                     sleep(5)
 
             if NEED_RELOAD:
+                LOGGER.debug(f"Changes: {changes}")
+                SCHEDULER.try_database_readonly(force=True)
                 CHANGES.clear()
 
                 if INSTANCES_NEED_GENERATION:

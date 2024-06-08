@@ -8,8 +8,9 @@ services:
       context: ../..
       dockerfile: ./src/bw/Dockerfile
     ports:
-      - 80:8080
-      - 443:8443
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:

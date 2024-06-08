@@ -4,13 +4,13 @@ from contextlib import suppress
 from datetime import datetime
 from os import getenv
 from time import sleep
+from typing import Any, Dict, List, Optional
 
-from ConfigCaller import ConfigCaller  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
-class Config(ConfigCaller):
+class Config:
     def __init__(self):
         super().__init__()
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
@@ -40,25 +40,24 @@ class Config(ConfigCaller):
             self._settings.update(plugin["settings"])
 
     def __get_full_env(self) -> dict:
-        env_instances = {"SERVER_NAME": ""}
-        for instance in self.__instances:
-            for variable, value in instance["env"].items():
-                env_instances[variable] = value
-        env_services = {}
+        config = {"SERVER_NAME": "", "MULTISITE": "yes"}
         for service in self.__services:
             server_name = service["SERVER_NAME"].split(" ")[0]
+            if not server_name:
+                continue
             for variable, value in service.items():
-                env_services[f"{server_name}_{variable}"] = value
-            env_instances["SERVER_NAME"] += f" {server_name}"
-        env_instances["SERVER_NAME"] = env_instances["SERVER_NAME"].strip()
-        return self._full_env(env_instances, env_services)
+                if self._db.is_setting(variable, multisite=True):
+                    config[f"{server_name}_{variable}"] = value
+            config["SERVER_NAME"] += f" {server_name}"
+        config["SERVER_NAME"] = config["SERVER_NAME"].strip()
+        return config
 
-    def update_needed(self, instances, services, configs={}) -> bool:
+    def update_needed(self, instances: List[Dict[str, Any]], services: List[Dict[str, str]], configs: Optional[Dict[str, Dict[str, bytes]]] = None) -> bool:
         if instances != self.__instances:
             return True
         elif services != self.__services:
             return True
-        elif configs != self.__configs:
+        elif (configs or {}) != self.__configs:
             return True
         return False
 
@@ -76,15 +75,31 @@ class Config(ConfigCaller):
             ):
                 ready = True
                 continue
-            else:
-                self.__logger.warning("Scheduler is already applying a configuration, retrying in 5 seconds ...")
+
+    def have_to_wait(self) -> bool:
+        db_metadata = self._db.get_metadata()
+        return isinstance(db_metadata, str) or any(
+            v
+            for k, v in db_metadata.items()
+            if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "config_changed", "instances_changed")
+        )
+
+    def apply(
+        self, instances: List[Dict[str, Any]], services: List[Dict[str, str]], configs: Optional[Dict[str, Dict[str, bytes]]] = None, first: bool = False
+    ) -> bool:
+        success = True
+
+        err = self._try_database_readonly()
+        if err:
+            return False
+
+        while not self._db.is_initialized():
+            self.__logger.warning("Database is not initialized, retrying in 5 seconds ...")
             sleep(5)
 
-        if not ready:
-            raise Exception("Too many retries while waiting for scheduler to apply configuration...")
+        self.wait_applying()
 
-    def apply(self, instances, services, configs={}, first=False) -> bool:
-        success = True
+        configs = configs or {}
 
         changes = []
         if instances != self.__instances or first:
@@ -116,36 +131,9 @@ class Config(ConfigCaller):
                     custom_configs.append(
                         {
                             "value": data,
-                            "exploded": [
-                                site,
-                                config_type,
-                                name.replace(".conf", ""),
-                            ],
+                            "exploded": [site, config_type, name.replace(".conf", "")],
                         }
                     )
-
-        current_time = datetime.now()
-        ready = False
-        while not ready and (datetime.now() - current_time).seconds < 120:
-            db_metadata = self._db.get_metadata()
-            if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
-                self.__logger.warning("Database is not initialized, retrying in 5s ...")
-                sleep(5)
-                continue
-            ready = True
-
-        if not ready:
-            self.__logger.error(f"Timeout while waiting for database to be initialized, ignoring changes ...\ndb data: {db_metadata}")
-            return False
-
-        # wait until changes are applied
-        ready = False
-        with suppress(BaseException):
-            self.wait_applying()
-            ready = True
-
-        if not ready:
-            self.__logger.warning("Timeout while waiting for scheduler to apply configuration, continuing anyway...")
 
         # update instances in database
         if "instances" in changes:
@@ -154,11 +142,13 @@ class Config(ConfigCaller):
                 self.__logger.error(f"Failed to update instances: {err}")
 
         # save config to database
+        changed_plugins = []
         if "config" in changes:
             err = self._db.save_config(self.__config, "autoconf", changed=False)
-            if err:
+            if isinstance(err, str):
                 success = False
                 self.__logger.error(f"Can't save config in database: {err}, config may not work as expected")
+            changed_plugins = err
 
         # save custom configs to database
         if "custom_configs" in changes:
@@ -168,10 +158,40 @@ class Config(ConfigCaller):
                 self.__logger.error(f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected")
 
         # update changes in db
-        ret = self._db.checked_changes(changes, value=True)
+        ret = self._db.checked_changes(changes, plugins_changes=changed_plugins, value=True)
         if ret:
             self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
 
         self.__logger.info("Successfully saved new configuration 🚀")
 
         return success
+
+    def _try_database_readonly(self) -> bool:
+        if not self._db.readonly:
+            try:
+                self._db.test_write()
+            except BaseException:
+                self._db.readonly = True
+                return True
+
+        if self._db.database_uri and self._db.readonly:
+            try:
+                self._db.retry_connection(pool_timeout=1)
+                self._db.retry_connection(log=False)
+                self._db.readonly = False
+                self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
+            except BaseException:
+                try:
+                    self._db.retry_connection(readonly=True, pool_timeout=1)
+                    self._db.retry_connection(readonly=True, log=False)
+                except BaseException:
+                    if self._db.database_uri_readonly:
+                        with suppress(BaseException):
+                            self._db.retry_connection(fallback=True, pool_timeout=1)
+                            self._db.retry_connection(fallback=True, log=False)
+                self._db.readonly = True
+
+            if self._db.readonly:
+                self.__logger.error("Database is in read-only mode, configuration will not be saved")
+
+        return self._db.readonly

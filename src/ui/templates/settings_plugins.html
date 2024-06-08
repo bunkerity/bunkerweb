@@ -1,9 +1,9 @@
 {% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- plugin item -->
 {% for plugin in plugins %}
-    <div data-advanced data-plugin-item="{{ plugin['id'] }}" {% if  plugin['type'] == 'pro' and not is_pro_version %} data-pro-disabled {% endif %}"
-         id="{{ plugin['id'] }}"
-         class="{% if loop.index != 1 %}hidden{% endif %} w-full px-1">
+    <div data-advanced data-plugin-item="{{ plugin['id'] }}" {% if  plugin['type'] == 'pro' and not is_pro_version %}data-pro-disabled{% endif %}"
+        id="{{ plugin['id'] }}"
+        class="{% if loop.index != 1 %}hidden{% endif %} w-full px-1">
         <!-- title and desc -->
         <div class="col-span-12" data-setting-header>
             {% if  plugin['type'] == "pro" and not is_pro_version %}
@@ -53,7 +53,6 @@
             <!-- plugin settings not multiple -->
             {% for setting, value in plugin["settings"].items() %}
                 {% set setting_input = { "is_pro_plugin" : True if plugin["type"] == "pro" else False, "name" : setting, "context" : value.get("context"), "method" : value.get("method"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "value" : value.get("value"), "is_multiple" : False, "levels" : value.get('levels', {})} %}
-
                 {% if setting != "IS_DRAFT" and (current_endpoint == "global-config" and setting not in ["SERVER_NAME", "IS_LOADING", "BUNKERWEB_INSTANCES"] or current_endpoint == "services" and value['context'] == "multisite") %}
                     {% if value['multiple'] and value['multiple'] not in multList %}
                         {% if multList.append(value['multiple']) %}{% endif %}
@@ -65,8 +64,7 @@
                             {% include "setting_input.html" %}
                             {% include "setting_select.html" %}
                             {% include "setting_checkbox.html" %}
-                            {% include "setting_invalid.html"%}
-
+                            {% include "setting_invalid.html" %}
                         </div>
                     {% endif %}
                 {% endif %}
@@ -97,7 +95,6 @@
             <div data-{{ current_endpoint }}-settings-multiple="{{ multiple }}_SCHEMA" class="bg-gray-50 dark:bg-slate-900/30 hidden w-full my-4 grid-cols-12 border dark:border-gray-700 rounded">
                 {% for setting, value in plugin["settings"].items() %}
                     {% set setting_input = { "is_pro_plugin" : True if plugin["type"] == "pro" else False, "name" : setting, "context" : value.get("context"), "method" : value.get("method"), "help" : value.get("help"), "label" : value.get("label"), "id" : value.get("id"), "type" : value.get("type"), "default" : value.get("default"), "select" : value.get("select"), "regex" : value.get("regex"), "value" : value.get("value"), "is_multiple" : True, "levels" : value.get('levels', {})} %}
-
                     {# render only setting that match the multiple id and context #}
                     {% if value['multiple'] == multiple and (
                         current_endpoint == "global-config"
@@ -105,23 +102,23 @@
                         ) %}
                         <div data-setting-container="{{ setting }}_SCHEMA" data-{{ current_endpoint }}-type="{{ plugin['type'] }}" data-{{ current_endpoint }}-context="{{ value['context'] }}" class="relative mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4" id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
                             {% include "setting_header.html" %}
-                            {% include "setting_input.html"%}
-                            {% include "setting_select.html"%}
-                            {% include "setting_checkbox.html"%}
-                            {% include "setting_invalid.html"%}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                    <div data-multiple-delete-container
-                         class="col-span-12 flex justify-center my-4">
-                        <button data-{{ current_endpoint }}-multiple-delete="{{ plugin['name'] }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
-                            Remove
-                        </button>
-                    </div>
-                    <!-- end plugin settings -->
+                            {% include "setting_input.html" %}
+                            {% include "setting_select.html" %}
+                            {% include "setting_checkbox.html" %}
+                            {% include "setting_invalid.html" %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <div data-multiple-delete-container
+                     class="col-span-12 flex justify-center my-4">
+                    <button data-{{ current_endpoint }}-multiple-delete="{{ plugin['name'] }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                        Remove
+                    </button>
                 </div>
-            {% endfor %}
-            <!-- end multiple settings -->
-        </div>
+                <!-- end plugin settings -->
+            </div>
+        {% endfor %}
+        <!-- end multiple settings -->
+    </div>
 {% endfor %}
 <!-- end plugin item -->

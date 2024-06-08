@@ -1,5 +1,19 @@
 # Integrations
 
+## BunkerWeb Cloud
+
+<figure markdown>
+  ![Overview](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  <figcaption>BunkerWeb Cloud</figcaption>
+</figure>
+
+!!! example "Beta phase"
+    BunkerWeb Cloud offer is in beta phase. We are actively getting feedbacks from our precious beta tester to improve the offer.
+
+BunkerWeb Cloud is the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of a like a BunkerWeb-as-a-Service !
+
+You will find more information about BunkerWeb Cloud beta [here](https://www.bunkerweb.io/cloud?utm_campaign=self&utm_source=docs) and you can apply for free [in the BunkerWeb panel](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_campaign=self&utm_source=docs).
+
 ## Docker
 
 <figure markdown>
@@ -316,11 +330,11 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 39
+- Fedora 40
 - Red Hat Enterprise Linux (RHEL) 8.9
 - Red Hat Enterprise Linux (RHEL) 9.4
 
-Please ensure that you have **NGINX 1.26.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.26.1 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 To simplify the installation process, Linux package repositories for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb). They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer.
 
@@ -337,11 +351,11 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.26.0 :
+    You should now be able to install NGINX 1.26.1 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.26.0-1~$(lsb_release -cs)
+    sudo apt install -y nginx=1.26.1-2~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -384,11 +398,11 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.26.0 :
+    You should now be able to install NGINX 1.26.1 :
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.26.0-1~$(lsb_release -cs)
+    sudo apt install -y nginx=1.26.1-2~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -420,10 +434,17 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
 
 === "Fedora"
 
-    Fedora already provides NGINX 1.26.0 that we support :
+    !!! info "Fedora Update Testing"
+        If you can't find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository :
+
+        ```shell
+        sudo dnf config-manager --set-enabled updates-testing
+        ```
+
+    Fedora already provides NGINX 1.26.1 that we support :
 
     ```shell
-    sudo dnf install -y nginx-1.26.0
+    sudo dnf install -y nginx-1.26.1
     ```
 
     Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :
@@ -471,10 +492,10 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.26.0 :
+    You should now be able to install NGINX 1.26.1 :
 
     ```shell
-    sudo dnf install nginx-1.26.0
+    sudo dnf install nginx-1.26.1
     ```
 
     Optional step : if you want to automatically enable the [setup wizard](web-ui.md#setup-wizard) when BunkerWeb is installed, export the following variable :

@@ -104,16 +104,11 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, ubuntu-noble, debian, fedora, rhel, rhel9]
+        linux: [ubuntu, debian, fedora, rhel, rhel9, ubuntu-jammy]
         platforms: [linux/amd64, linux/arm64]
-        exclude:
-          - linux: ubuntu-noble
-            platforms: linux/arm64
         include:
           - release: latest
           - linux: ubuntu
-            package: deb
-          - linux: ubuntu-noble
             package: deb
           - linux: debian
             package: deb
@@ -123,6 +118,8 @@ jobs:
             package: rpm
           - linux: rhel9
             package: rpm
+          - linux: ubuntu-jammy
+            package: deb
     uses: ./.github/workflows/linux-build.yml
     with:
       RELEASE: ${{ matrix.release }}
@@ -196,20 +193,12 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, ubuntu-noble, debian, fedora, el, el9]
+        linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
         arch: [amd64, arm64]
-        exclude:
-          - linux: ubuntu-noble
-            arch: arm64
         include:
           - release: latest
             repo: bunkerweb
           - linux: ubuntu
-            separator: _
-            suffix: ""
-            version: jammy
-            package: deb
-          - linux: ubuntu-noble
             separator: _
             suffix: ""
             version: noble
@@ -222,7 +211,7 @@ jobs:
           - linux: fedora
             separator: "-"
             suffix: "1."
-            version: 39
+            version: 40
             package: rpm
           - linux: el
             separator: "-"
@@ -234,10 +223,12 @@ jobs:
             suffix: "1."
             version: 9
             package: rpm
+          - linux: ubuntu-jammy
+            separator: _
+            suffix: ""
+            version: jammy
+            package: deb
           - linux: ubuntu
-            arch: amd64
-            package_arch: amd64
-          - linux: ubuntu-noble
             arch: amd64
             package_arch: amd64
           - linux: debian
@@ -252,6 +243,9 @@ jobs:
           - linux: el9
             arch: amd64
             package_arch: x86_64
+          - linux: ubuntu-jammy
+            arch: amd64
+            package_arch: amd64
           - linux: ubuntu
             arch: arm64
             package_arch: arm64
@@ -267,6 +261,9 @@ jobs:
           - linux: el9
             arch: arm64
             package_arch: aarch64
+          - linux: ubuntu-jammy
+            arch: arm64
+            package_arch: arm64
     uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: ${{ matrix.separator }}

@@ -37,7 +37,7 @@ jobs:
       - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4.0.0
         if: inputs.TYPE == 'k8s'
         with:
-          version: "v1.28.2"
+          version: "v1.29.1"
       # Remove infra
       - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60s ; kubectl delete pvc --all --timeout=60s ; kubectl delete pv --all --timeout=60s
         if: inputs.TYPE == 'k8s'

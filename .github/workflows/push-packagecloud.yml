@@ -42,7 +42,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       - name: Install ruby
-        uses: ruby/setup-ruby@943103cae7d3f1bb1e4951d5fcc7928b40e4b742 # v1.177.1
+        uses: ruby/setup-ruby@d5fb7a202fc07872cb44f00ba8e6197b70cb0c55 # v1.179.0
         with:
           ruby-version: "3.0"
       - name: Install packagecloud
@@ -60,7 +60,7 @@ jobs:
           path: /tmp/${{ inputs.LINUX }}
       # Remove existing packages
       - name: Remove existing package
-        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-noble'
+        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'
         run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
@@ -71,9 +71,9 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Remove existing package ubuntu-noble
-        if: inputs.LINUX == 'ubuntu-noble'
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/ubuntu/noble bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+      - name: Remove existing package ubuntu-jammy
+        if: inputs.LINUX == 'ubuntu-jammy'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/ubuntu/jammy bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
@@ -83,7 +83,7 @@ jobs:
       #   run: sudo apt install -y rename && rename 's/[0-9]\.[0-9]\.[0-9]/testing/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package
       - name: Push package to packagecloud
-        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-noble'
+        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy'
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
         with:
           PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
@@ -100,12 +100,12 @@ jobs:
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: el/9
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push package to packagecloud for ubuntu-noble
-        if: inputs.LINUX == 'ubuntu-noble'
+      - name: Push package to packagecloud for ubuntu-jammy
+        if: inputs.LINUX == 'ubuntu-jammy'
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
         with:
           PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
-          PACKAGECLOUD-DISTRIB: ubuntu/noble
+          PACKAGECLOUD-DISTRIB: ubuntu/jammy
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from time import sleep
 from typing import Any, Dict, List
 from docker import DockerClient
 from re import compile as re_compile
@@ -22,53 +23,24 @@ class DockerController(Controller):
         return self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"})
 
     def _to_instances(self, controller_instance) -> List[dict]:
-        return [
-            {
-                "name": controller_instance.name,
-                "hostname": controller_instance.name,
-                "health": controller_instance.status == "running" and controller_instance.attrs["State"]["Health"]["Status"] == "healthy",
-                "env": self._get_scheduler_env(),
-            }
-        ]
+        instance = {}
+        instance["name"] = controller_instance.name
+        instance["hostname"] = controller_instance.name
+        instance["health"] = controller_instance.status == "running" and controller_instance.attrs["State"]["Health"]["Status"] == "healthy"
+        instance["env"] = {}
+        for env in controller_instance.attrs["Config"]["Env"]:
+            variable = env.split("=")[0]
+            value = env.replace(f"{variable}=", "", 1)
+            instance["env"][variable] = value
+        return [instance]
 
     def _to_services(self, controller_service) -> List[dict]:
         service = {}
         for variable, value in controller_service.labels.items():
             if not variable.startswith("bunkerweb."):
                 continue
-            real_variable = variable.replace("bunkerweb.", "", 1)
-            if not self._is_setting_context(real_variable, "multisite"):
-                continue
-            service[real_variable] = value
+            service[variable.replace("bunkerweb.", "", 1)] = value
         return [service]
-
-    def _get_scheduler_env(self) -> Dict[str, str]:
-        env = {}
-        for instance in self.__client.containers.list(filters={"label": "bunkerweb.type=scheduler"}):
-            if not instance.attrs or not instance.attrs.get("Config", {}).get("Env"):
-                continue
-
-            for env_var in instance.attrs["Config"]["Env"]:
-                variable = env_var.split("=")[0]
-                value = env_var.replace(f"{variable}=", "", 1)
-                env[variable] = value
-        return env
-
-    def _get_static_services(self) -> List[dict]:
-        services = []
-        variables = self._get_scheduler_env()
-        if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
-            for server_name in variables["SERVER_NAME"].strip().split(" "):
-                if not server_name:
-                    continue
-                service = {"SERVER_NAME": server_name}
-                for variable, value in variables.items():
-                    prefix = variable.split("_")[0]
-                    real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_setting_context(real_variable, "multisite"):
-                        service[real_variable] = value
-                services.append(service)
-        return services
 
     def get_configs(self) -> Dict[str, Dict[str, Any]]:
         configs = {config_type: {} for config_type in self._supported_config_types}
@@ -112,21 +84,34 @@ class DockerController(Controller):
     def process_events(self):
         self._set_autoconf_load_db()
         for event in self.__client.events(decode=True, filters={"type": "container"}):
+            applied = False
             try:
                 if not self.__process_event(event):
                     continue
-                self.wait_applying()
-                self._update_settings()
-                self._instances = self.get_instances()
-                self._services = self.get_services()
-                self._configs = self.get_configs()
-                if not self.update_needed(self._instances, self._services, configs=self._configs):
-                    continue
-                self._logger.info("Caught Docker event, deploying new configuration ...")
-                if not self.apply_config():
-                    self._logger.error("Error while deploying new configuration")
-                else:
-                    self._logger.info("Successfully deployed new configuration 🚀")
-                    self._set_autoconf_load_db()
+                to_apply = False
+                while not applied:
+                    waiting = self.have_to_wait()
+                    self._update_settings()
+                    self._instances = self.get_instances()
+                    self._services = self.get_services()
+                    self._configs = self.get_configs()
+
+                    if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                        applied = True
+                        continue
+
+                    to_apply = True
+                    if waiting:
+                        sleep(1)
+                        continue
+
+                    self._logger.info("Caught Docker event, deploying new configuration ...")
+                    if not self.apply_config():
+                        self._logger.error("Error while deploying new configuration")
+                    else:
+                        self._logger.info("Successfully deployed new configuration 🚀")
+
+                        self._set_autoconf_load_db()
+                    applied = True
             except:
                 self._logger.error(f"Exception while processing events :\n{format_exc()}")

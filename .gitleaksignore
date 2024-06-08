@@ -13,3 +13,7 @@ src/ui/templates/account.html:hashicorp-tf-password:162
 src/common/core/errors/files/error.html:aws-access-token:20
 src/deps/src/nginx/src/event/quic/ngx_event_quic_protection.c:generic-api-key:164
 src/deps/src/nginx/src/event/quic/ngx_event_quic_protection.c:generic-api-key:165
+src/deps/src/lua-resty-openssl/lib/resty/openssl/pkey.lua:generic-api-key:438
+src/deps/src/lua-resty-openssl/lib/resty/openssl/pkey.lua:generic-api-key:439
+src/deps/src/lua-resty-openssl/lib/resty/openssl/pkey.lua:generic-api-key:440
+src/deps/src/lua-resty-openssl/lib/resty/openssl/pkey.lua:generic-api-key:441

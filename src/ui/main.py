@@ -104,6 +104,7 @@ if not FLASK_SECRET:
 app.config["SECRET_KEY"] = FLASK_SECRET
 
 login_manager = LoginManager()
+login_manager.session_protection = "strong"
 login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.anonymous_user = AnonymousUser
@@ -382,7 +383,7 @@ def inject_variables():
         plugins=app.config["CONFIG"].get_plugins(),
         pro_loading=ui_data.get("PRO_LOADING", False),
         bw_version=metadata["version"],
-        is_readonly=app.config["DB"].readonly,
+        is_readonly=ui_data.get("READONLY_MODE", False),
         username=current_user.get_id() if current_user.is_authenticated else "",
     )
 
@@ -401,8 +402,6 @@ def set_csp_header(response):
         + " base-uri 'self';"
         + (" connect-src *;" if request.path.startswith(("/check", "/setup")) else "")
     )
-    if app.config["DB"].readonly:
-        flash("Database connection is in read-only mode : no modification possible.", "error")
 
     return response
 
@@ -438,25 +437,51 @@ def before_request():
     app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
 
     if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
-        if app.config["DB"].database_uri and app.config["DB"].readonly:
+        ui_data = get_ui_data()
+
+        if (
+            app.config["DB"].database_uri
+            and app.config["DB"].readonly
+            and (
+                datetime.now(timezone.utc) - datetime.fromisoformat(ui_data.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).replace(tzinfo=timezone.utc)
+                > timedelta(minutes=1)
+            )
+        ):
             try:
                 app.config["DB"].retry_connection(pool_timeout=1)
-                app.config["DB"].readonly = False
+                app.config["DB"].retry_connection(log=False)
+                ui_data["READONLY_MODE"] = False
                 app.logger.info("The database is no longer read-only, defaulting to read-write mode")
             except BaseException:
                 try:
                     app.config["DB"].retry_connection(readonly=True, pool_timeout=1)
+                    app.config["DB"].retry_connection(readonly=True, log=False)
                 except BaseException:
                     if app.config["DB"].database_uri_readonly:
                         with suppress(BaseException):
                             app.config["DB"].retry_connection(fallback=True, pool_timeout=1)
-                app.config["DB"].readonly = True
-
-        if not app.config["DB"].readonly and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
+                            app.config["DB"].retry_connection(fallback=True, log=False)
+                ui_data["READONLY_MODE"] = True
+            ui_data["LAST_DATABASE_RETRY"] = app.config["DB"].last_connection_retry.isoformat()
+        elif not ui_data.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
                 app.config["DB"].test_write()
+                ui_data["READONLY_MODE"] = False
             except BaseException:
-                app.config["DB"].readonly = True
+                ui_data["READONLY_MODE"] = True
+                ui_data["LAST_DATABASE_RETRY"] = app.config["DB"].last_connection_retry.isoformat()
+        else:
+            try:
+                app.config["DB"].test_read()
+            except BaseException:
+                ui_data["LAST_DATABASE_RETRY"] = app.config["DB"].last_connection_retry.isoformat()
+
+        app.config["DB"].readonly = ui_data.get("READONLY_MODE", False)
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+        if app.config["DB"].readonly:
+            flash("Database connection is in read-only mode : no modification possible.", "error")
 
         if current_user.is_authenticated:
             passed = True
@@ -472,8 +497,7 @@ def before_request():
                 passed = False
 
             if not passed:
-                logout_user()
-                session.clear()
+                return logout()
 
 
 @app.route("/", strict_slashes=False)
@@ -571,7 +595,9 @@ def setup():
                     "REVERSE_PROXY_HOST": request.form["ui_host"],
                     "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
                     "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
-                    "GENERATE_SELF_SIGNED_SSL": "yes" if request.form.get("auto_lets_encrypt", "no") == "no" else "no",
+                    "USE_CUSTOM_SSL": "yes" if request.form.get("auto_lets_encrypt", "no") == "no" else "no",
+                    "CUSTOM_SSL_CERT": "/var/cache/bunkerweb/misc/default-server-cert.pem" if request.form.get("auto_lets_encrypt", "no") == "no" else "",
+                    "CUSTOM_SSL_KEY": "/var/cache/bunkerweb/misc/default-server-cert.key" if request.form.get("auto_lets_encrypt", "no") == "no" else "",
                     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
                     "MAX_CLIENT_SIZE": "50m",
                 },
@@ -800,31 +826,31 @@ def home():
 
     metadata = app.config["DB"].get_metadata()
 
-    is_pro_version = metadata["is_pro"]
-    pro_status = metadata["pro_status"]
-    pro_services = metadata["pro_services"]
-    pro_overlapped = metadata["pro_overlapped"]
+    # is_pro_version = metadata["is_pro"] # TODO: either remove or use this
+    # pro_status = metadata["pro_status"]
+    # pro_services = metadata["pro_services"]
+    # pro_overlapped = metadata["pro_overlapped"]
     bw_version = metadata["version"]
 
-    data = {
-        "check_version": not remote_version or bw_version == remote_version,
-        "remote_version": remote_version,
-        "version": bw_version,
-        "instances_number": len(instances),
-        "services_number": services,
-        "instance_health_count": instance_health_count,
-        "services_scheduler_count": services_scheduler_count,
-        "services_ui_count": services_ui_count,
-        "services_autoconf_count": services_autoconf_count,
-        "is_pro_version": is_pro_version,
-        "pro_status": pro_status,
-        "pro_services": pro_services,
-        "pro_overlapped": pro_overlapped,
-        "plugins_number": len(app.config["CONFIG"].get_plugins()),
-        "plugins_errors": app.config["DB"].get_plugins_errors(),
-    }
+    # data = { # TODO: either remove or use this
+    #     "check_version": not remote_version or bw_version == remote_version,
+    #     "remote_version": remote_version,
+    #     "version": bw_version,
+    #     "instances_number": len(instances),
+    #     "services_number": services,
+    #     "instance_health_count": instance_health_count,
+    #     "services_scheduler_count": services_scheduler_count,
+    #     "services_ui_count": services_ui_count,
+    #     "services_autoconf_count": services_autoconf_count,
+    #     "is_pro_version": is_pro_version,
+    #     "pro_status": pro_status,
+    #     "pro_services": pro_services,
+    #     "pro_overlapped": pro_overlapped,
+    #     "plugins_number": len(app.config["CONFIG"].get_plugins()),
+    #     "plugins_errors": app.config["DB"].get_plugins_errors(),
+    # }
 
-    data_server_builder = home_builder(data)
+    # data_server_builder = home_builder(data) # TODO: either remove or use this
 
     return render_template(
         "home.html",
@@ -1017,16 +1043,15 @@ def instances_builder(instances: list):
                 else ["start"] if instance._type == "local" and not instance.health else []
             )
         )
-        buttons = []
-        for action in actions:
-            buttons.append(
-                {
-                    "attrs": {"data-form-INSTANCE_ID": instance._id, "data-form-operation": action, "data-submit-form": "true"},
-                    "text": f"action_{action}",
-                    "color": "success" if action == "start" else "error" if action == "stop" else "warning",
-                    "size": "normal",
-                }
-            )
+        buttons = [
+            {
+                "attrs": {"data-form-INSTANCE_ID": instance._id, "data-form-operation": action, "data-submit-form": "true"},
+                "text": f"action_{action}",
+                "color": "success" if action == "start" else "error" if action == "stop" else "warning",
+                "size": "normal",
+            }
+            for action in actions
+        ]
 
         component = {
             "type": "card",
@@ -1093,9 +1118,7 @@ def instances():
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
-
     data_server_builder = instances_builder(instances)
-
     return render_template("instances.html", title="Instances", data_server_builder=data_server_builder, instances=instances, username=current_user.get_id())
 
 
@@ -1131,9 +1154,9 @@ def services():
         if "SERVER_NAME" not in variables:
             variables["SERVER_NAME"] = variables["OLD_SERVER_NAME"]
 
-        config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
+        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
         server_name = variables["SERVER_NAME"].split(" ")[0]
-        was_draft = config.get(f"{server_name}_IS_DRAFT", "no") == "yes"
+        was_draft = config.get(f"{server_name}_IS_DRAFT", {"value": "no"})["value"] == "yes"
         operation = request.form["operation"]
         # Get all variables starting with custom_config and delete them from variables
         custom_configs = []
@@ -1144,21 +1167,21 @@ def services():
                 custom_configs.append(variable)
                 del variables[variable]
 
-        # config variable format is custom_config_<type>_<filename>
+        # custom_config variable format is custom_config_<type>_<filename>
         # we want a list of dict with each dict containing type, filename, action and server name
         # after getting all configs, we want to save them after the end of current service action
         # to avoid create config for none existing service or in case editing server name
         format_configs = []
-        for config in custom_configs:
+        for custom_config in custom_configs:
             # first remove custom_config_ prefix
-            config = config.split("custom_config_")[1]
+            custom_config = custom_config.split("custom_config_")[1]
             # then split the config into type, filename, action
-            config = config.split("_")
+            custom_config = custom_config.split("_")
             # check if the config is valid
-            if len(config) == 2 and config[0] in config_types:
-                format_configs.append({"type": config[0], "filename": config[1], "action": operation, "server_name": server_name})
+            if len(custom_config) == 2 and custom_config[0] in config_types:
+                format_configs.append({"type": custom_config[0], "filename": custom_config[1], "action": operation, "server_name": server_name})
             else:
-                return redirect_flash_error("Invalid custom config {config}", "services", True)
+                return redirect_flash_error(f"Invalid custom config {custom_config}", "services", True)
 
         if request.form["operation"] in ("new", "edit"):
             del variables["operation"]
@@ -1178,7 +1201,7 @@ def services():
                 if (
                     variable in variables
                     and variable != "SERVER_NAME"
-                    and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, None)
+                    and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, {"value": None})["value"]
                 ):
                     del variables[variable]
 
@@ -1208,6 +1231,9 @@ def services():
 
             if error:
                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
+
+            if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
+                return redirect_flash_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
 
         error = 0
 
@@ -1385,13 +1411,8 @@ def global_config():
             )
         )
 
-    global_config = app.config["CONFIG"].get_config()
-    for service in global_config["SERVER_NAME"]["value"].split(" "):
-        for key in global_config.copy():
-            if key.startswith(f"{service}_"):
-                global_config.pop(key)
-
     # Display global config
+    global_config = app.config["CONFIG"].get_config(global_only=True)
     return render_template("global_config.html", global_config=global_config, dumped_global_config=dumps(global_config))
 
 
@@ -2349,7 +2370,7 @@ def bans():
         sentinel_hosts = db_config.get("REDIS_SENTINEL_HOSTS", [])
 
         if isinstance(sentinel_hosts, str):
-            sentinel_hosts = [host.split(":") if ":" in host else host for host in sentinel_hosts.split(" ") if host]
+            sentinel_hosts = [host.split(":") if ":" in host else (host, "26379") for host in sentinel_hosts.split(" ") if host]
 
         if sentinel_hosts:
             sentinel_username = db_config.get("REDIS_SENTINEL_USERNAME", None) or None

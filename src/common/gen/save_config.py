@@ -90,6 +90,8 @@ if __name__ == "__main__":
                 LOGGER.error(f"Missing RX rights on directory : {path}")
                 sys_exit(1)
 
+        tmp_config = {}
+
         if args.variables:
             variables_path = Path(args.variables)
             LOGGER.info(f"Variables : {variables_path}")
@@ -191,11 +193,13 @@ if __name__ == "__main__":
             sys_exit(0)
 
         changes = []
+        changed_plugins = set()
         err = db.save_config(settings, args.method, changed=False)
 
-        if err:
+        if isinstance(err, str):
             LOGGER.warning(f"Couldn't save config to database : {err}, config may not work as expected")
         else:
+            changed_plugins = err
             changes.append("config")
             LOGGER.info("Config successfully saved to database")
 
@@ -220,7 +224,7 @@ if __name__ == "__main__":
 
         if not args.no_check_changes:
             # update changes in db
-            ret = db.checked_changes(changes, value=True)
+            ret = db.checked_changes(changes, plugins_changes=changed_plugins, value=True)
             if ret:
                 LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
     except SystemExit as e:

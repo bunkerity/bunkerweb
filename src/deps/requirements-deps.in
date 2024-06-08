@@ -1,5 +1,5 @@
 pip==24.0
-pip-compile-multi==2.6.3
+pip-compile-multi==2.6.4
 pip-tools==7.4.1
 pip-upgrader==1.4.15
 setuptools==70.0.0

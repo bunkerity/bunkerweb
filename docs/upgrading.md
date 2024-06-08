@@ -229,7 +229,7 @@
 
     Get support and more information :
 
-    - [Order professionnal support](https://panel.bunkerweb.io/?utm_source=doc&utm_campaign=self)
+    - [Order professional support](https://panel.bunkerweb.io/?utm_source=doc&utm_campaign=self)
     - [Create an issue on GitHub](https://github.com/bunkerity/bunkerweb/issues)
     - [Join the BunkerWeb Discord server](https://discord.bunkerity.com)
 
@@ -239,27 +239,40 @@
 
         === "SQLite"
 
-            1. **Remove the existing database file.**
+            1. **Stop the Stack.**
+
+                ```bash
+                docker compose down
+                ```
+
+            2. **Remove the existing database file.**
 
                 ```bash
                 docker exec -u 0 -i <scheduler_container> rm -f /var/lib/bunkerweb/db.sqlite3
                 ```
 
-            2. **Restore the backup.**
+            3. **Restore the backup.**
 
                 ```bash
                 docker exec -i -T <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
                 ```
 
-        === "MySQL/MariaDB"
-
-            3. **Stop the Scheduler container.**
+            4. **Fix permissions.**
 
                 ```bash
-                docker compose down <scheduler_container>
+                docker exec -u 0 -i <scheduler_container> chown root:nginx /var/lib/bunkerweb/db.sqlite3
+                docker exec -u 0 -i <scheduler_container> chmod 770 /var/lib/bunkerweb/db.sqlite3
                 ```
 
-            4. **Restore the backup.**
+        === "MySQL/MariaDB"
+
+            5. **Stop the Stack.**
+
+                ```bash
+                docker compose down
+                ```
+
+            6. **Restore the backup.**
 
                 ```bash
                 docker exec -e MYSQL_PWD=<your_password> -i -T <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
@@ -267,25 +280,25 @@
 
         === "PostgreSQL"
 
-            5. **Stop the Scheduler container.**
+            7. **Stop the Stack.**
 
                 ```bash
-                docker compose down <scheduler_container>
+                docker compose down
                 ```
 
-            6. **Remove the existing database.**
+            8. **Remove the existing database.**
 
                 ```bash
                 docker exec -i <database_container> dropdb -U <username> --force <database_name>
                 ```
 
-            7. **Recreate the database.**
+            9. **Recreate the database.**
 
                 ```bash
                 docker exec -i <database_container> createdb -U <username> <database_name>
                 ```
 
-            8. **Restore the backup.**
+            10. **Restore the backup.**
 
                 ```bash
                 docker exec -i -T <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
@@ -309,10 +322,9 @@
                 ...
         ```
 
-    3. **Restart the containers**.
+    3. **Start the containers**.
 
         ```bash
-        docker compose down
         docker compose up -d
         ```
 
@@ -321,8 +333,7 @@
     4. **Stop the services**.
 
         ```bash
-        systemctl stop bunkerweb
-        systemctl stop bunkerweb-ui
+        systemctl stop bunkerweb bunkerweb-ui
         ```
 
     5. **Restore the backup**.
@@ -330,8 +341,10 @@
         === "SQLite"
 
             ```bash
-            rm -f /var/lib/bunkerweb/db.sqlite3
-            sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+            sudo rm -f /var/lib/bunkerweb/db.sqlite3
+            sudo sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+            sudo chown root:nginx /var/lib/bunkerweb/db.sqlite3
+            sudo chmod 770 /var/lib/bunkerweb/db.sqlite3
             ```
 
         === "MySQL/MariaDB"

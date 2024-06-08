@@ -177,6 +177,7 @@ function _M.load_jwk(txt)
     if key ~= nil then
       return key
     end
+    key_free = function() end
   else
     return nil, "not yet supported jwk type \"" .. (tbl["kty"] or "nil") .. "\""
   end
