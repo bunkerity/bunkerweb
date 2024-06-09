@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
-import Builder from "@components/Builder.vue";
+import BuilderInstances from "@components/Builder/Instances.vue";
 import { useGlobal } from "@utils/global.js";
 import { useForm } from "@utils/form.js";
 
@@ -11,7 +11,7 @@ import { useForm } from "@utils/form.js";
   This page displays current instances and allows to manage them.
 */
 
-const home = reactive({
+const instances = reactive({
   builder: "",
 });
 
@@ -23,7 +23,7 @@ onBeforeMount(() => {
     dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
       ? JSON.parse(dataEl.getAttribute(dataAtt))
       : {};
-  home.builder = data;
+  instances.builder = data;
 });
 
 onMounted(() => {
@@ -57,7 +57,7 @@ onMounted(() => {
 
 <template>
   <DashboardLayout>
-    <Builder v-if="home.builder" :builder="home.builder" />
+    <BuilderInstances v-if="instances.builder" :builder="instances.builder" />
     <div id="test-el"></div>
   </DashboardLayout>
 </template>

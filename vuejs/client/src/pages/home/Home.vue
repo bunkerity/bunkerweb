@@ -1,7 +1,9 @@
 <script setup>
-import { reactive, onBeforeMount } from "vue";
+import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
-import Builder from "@components/Builder.vue";
+import BuilderHome from "@components/Builder/Home.vue";
+import { useGlobal } from "@utils/global.js";
+import { useForm } from "@utils/form.js";
 
 /** 
   @name Page/Home.vue
@@ -22,6 +24,11 @@ onBeforeMount(() => {
       ? JSON.parse(dataEl.getAttribute(dataAtt))
       : {};
   home.builder = data;
+});
+
+onMounted(() => {
+  useGlobal();
+  useForm();
 });
 
 // const data = [
@@ -120,6 +127,6 @@ onBeforeMount(() => {
 
 <template>
   <DashboardLayout>
-    <Builder v-if="home.builder" :builder="home.builder" />
+    <BuilderHome v-if="home.builder" :builder="home.builder" />
   </DashboardLayout>
 </template>

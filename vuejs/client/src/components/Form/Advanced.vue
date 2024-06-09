@@ -1,15 +1,12 @@
 <script setup>
 import { reactive, defineProps, onMounted, ref } from "vue";
 import Container from "@components/Widget/Container.vue";
-import Checkbox from "@components/Forms/Field/Checkbox.vue";
-import Input from "@components/Forms/Field/Input.vue";
-import Select from "@components/Forms/Field/Select.vue";
-import Datepicker from "@components/Forms/Field/Datepicker.vue";
+import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 
 /** 
-  @name Forms/Type/Advanced.vue
+  @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
   @example
   const data = [
@@ -85,13 +82,7 @@ const props = defineProps({
             v-for="(setting, name, index) in plugin.settings"
             :key="index"
           >
-            <Checkbox v-if="setting.inpType === 'checkbox'" v-bind="setting" />
-            <Select v-if="setting.inpType === 'select'" v-bind="setting" />
-            <Datepicker
-              v-if="setting.inpType === 'datepicker'"
-              v-bind="setting"
-            />
-            <Input v-if="setting.inpType === 'input'" v-bind="setting" />
+            <Fields :setting="setting" />
           </template>
         </Container>
       </Container>

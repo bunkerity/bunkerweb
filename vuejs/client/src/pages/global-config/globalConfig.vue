@@ -1,8 +1,8 @@
 <script setup>
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
-import Builder from "@components/Builder.vue";
-import Advanced from "@components/Forms/Type/Advanced.vue";
+import Builder from "@components/Builder/Collection.vue";
+import Advanced from "@components/Form/Advanced.vue";
 import { useGlobal } from "@utils/global.js";
 import { useForm } from "@utils/form.js";
 

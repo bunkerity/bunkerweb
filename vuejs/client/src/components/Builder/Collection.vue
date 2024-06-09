@@ -1,5 +1,4 @@
 <script setup>
-import { reactive, onBeforeMount } from "vue";
 // Containers
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
@@ -10,7 +9,7 @@ import Subtitle from "@components/Widget/Subtitle.vue";
 import ContentStat from "@components/Content/Stat.vue";
 import ContentDetailList from "@components/Content/DetailList.vue";
 // Icon
-import IconStatus from "@components/Widget/Status.vue";
+import Icons from "@components/Widget/Icons.vue";
 // Form
 import Checkbox from "@components/Forms/Field/Checkbox.vue";
 import Select from "@components/Forms/Field/Select.vue";
@@ -23,8 +22,8 @@ import Stat from "@components/Widget/Stat.vue";
 import Instance from "@components/Widget/Instance.vue";
 
 /**
-  @name Builder.vue
-  @description This component is a wrapper to create a complete page using containers and widgets.
+  @name Builder/Collection.vue
+  @description This component is a builder containing all collection of widgets / containers / components  to create a complete page.
   We have to define each container and each widget inside it.
   This is an abstract component that will be used to create any kind of page content (base dashboard elements like menu and news excluded)
   @example
@@ -93,9 +92,8 @@ const props = defineProps({
           v-if="widget.type === 'ContentStat'"
           v-bind="widget.data"
         />
-        <IconStat v-if="widget.type === 'IconStat'" v-bind="widget.data" />
+        <Icons v-if="widget.type === 'Icons'" v-bind="widget.data" />
         <Instance v-if="widget.type === 'Instance'" v-bind="widget.data" />
-        <IconStatus v-if="widget.type === 'IconStatus'" v-bind="widget.data" />
         <ContentDetailList
           v-if="widget.type === 'ContentDetailList'"
           v-bind="widget.data"
