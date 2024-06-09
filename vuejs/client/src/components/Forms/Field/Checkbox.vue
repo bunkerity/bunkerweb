@@ -4,6 +4,7 @@ import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
+import { v4 as uuidv4 } from "uuid";
 
 /** 
   @name Forms/Field/Checkbox.vue
@@ -29,7 +30,7 @@ import ErrorField from "@components/Forms/Error/Field.vue";
     },
   ]
   }
-  @param {string} id
+  @param {string} [id=uuidv4()] - Unique id 
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
@@ -49,7 +50,8 @@ const props = defineProps({
   // id && value && method
   id: {
     type: String,
-    required: true,
+    required: false,
+    default: uuidv4(),
   },
   columns: {
     type: [Object, Boolean],

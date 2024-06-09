@@ -229,6 +229,14 @@ body {
   @apply pointer-events-none transition-transform h-4 w-4 fill-gray-600 dark:fill-gray-500;
 }
 
+.select-combobox-list {
+  @apply flex  flex-col;
+}
+
+.combobox-no-match {
+  @apply text-[0.75rem] font-semibold mb-0 mt-0.5;
+}
+
 .select-dropdown-container {
   @apply flex fixed h-full max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-fit mt-2;
 }

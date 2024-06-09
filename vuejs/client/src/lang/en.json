@@ -85,6 +85,8 @@
   "inp_input_error": "input is invalid",
   "inp_popover_multisite": "This setting is multisite.",
   "inp_popover_global": "This setting is global.",
+  "inp_combobox": "Combobox input for relate select radio group.",
+  "inp_combobox_no_match": "No match found.",
   "action_send": "send {name}",
   "action_start": "start {name}",
   "action_disable": "disable {name}",

@@ -7,11 +7,10 @@ import ErrorField from "@components/Forms/Error/Field.vue";
 import { v4 as uuidv4 } from "uuid";
 
 /**
-  @name Forms/Field/Select.vue
-  @description This component is used to create a complete select field input with error handling and label.
+  @name Forms/Field/Combobox.vue
+  @description This component is used to create a complete combobox field input with error handling and label.
   We can be more precise by adding values that need to be selected to be valid.
   We can also add popover to display more information.
-  It is mainly use in forms.
   @example
   {
     id: 'test-input',
@@ -135,6 +134,13 @@ watch(props, (newProp, oldProp) => {
   }
 });
 
+const inp = reactive({
+  value: props.value,
+  isValid: false,
+});
+
+const inputEl = ref();
+
 const select = reactive({
   isOpen: false,
   // On mounted value is null to display props value
@@ -160,6 +166,12 @@ function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
   // Position dropdown relative to btn on open on fixed position
   if (select.isOpen) {
+    // focus on combobox and reset value
+    inp.value = "";
+    inp.isValid = inputEl.value.checkValidity();
+    inputEl.value.focus();
+
+    // setup dropdown position
     const selectBtnRect = selectBtn.value.getBoundingClientRect();
     const selectDropdownRect = selectDropdown.value.getBoundingClientRect();
 
@@ -241,7 +253,7 @@ function changeValue(newValue) {
 // Close select when clicked outside logic
 function closeOutside(e) {
   try {
-    if (e.target !== selectBtn.value) {
+    if (e.target !== selectBtn.value && e.target !== inputEl.value) {
       select.isOpen = false;
     }
   } catch (err) {
@@ -351,41 +363,97 @@ const emits = defineEmits(["inp"]);
       </button>
       <!-- dropdown-->
       <div
-        data-select-dropdown
-        :aria-hidden="select.isOpen ? 'false' : 'true'"
-        :aria-expanded="select.isOpen ? 'true' : 'false'"
         ref="selectDropdown"
-        role="radiogroup"
         :style="{ width: selectWidth }"
         :id="`${props.id}-custom`"
         :class="[select.isOpen ? 'open' : 'close']"
         class="select-dropdown-container"
+        :aria-hidden="select.isOpen ? 'false' : 'true'"
+        :aria-expanded="select.isOpen ? 'true' : 'false'"
         :aria-description="$t('inp_select_dropdown_desc')"
       >
-        <button
-          :tabindex="select.isOpen ? props.tabId : '-1'"
-          v-for="(value, id) in props.values"
-          role="radio"
-          @click.prevent="$emit('inp', changeValue(value))"
-          :class="[
-            id === 0 ? 'first' : '',
-            id === props.values.length - 1 ? 'last' : '',
-            (value === select.value && select.value === value) ||
-            (!select.value && value === props.value)
-              ? 'active'
-              : '',
-            'select-dropdown-btn',
-          ]"
-          :aria-controls="`${props.id}-text`"
-          :aria-checked="
-            (select.value && select.value === value) ||
-            (!select.value && value === props.value)
-              ? 'true'
-              : 'false'
-          "
+        <div>
+          <label :class="['sr-only']" :for="`${props.id}-combobox`">
+            {{ $t("inp_combobox", "inp_combobox") }}
+          </label>
+          <input
+            :tabindex="select.isOpen ? props.tabId : '-1'"
+            ref="inputEl"
+            v-model="inp.value"
+            @input="
+              () => {
+                inp.isValid = inputEl.checkValidity();
+                $emit('inp', inp.value);
+              }
+            "
+            :aria-controls="`${props.id}-list`"
+            :id="`${props.id}-combobox`"
+            :class="[
+              'input-regular',
+              inp.isValid ? 'valid' : 'invalid',
+              props.inpClass,
+            ]"
+            :placeholder="props.placeholder || ''"
+            :pattern="props.pattern || '(?s).*'"
+            :name="`${props.id}-combobox`"
+            :value="inp.value"
+            :type="'text'"
+          />
+          <div
+            class="select-dropdown-btn"
+            v-if="!props.values.some((str) => str.includes(inp.value))"
+            :aria-hidden="
+              !props.values.some((str) => str.includes(inp.value))
+                ? 'true'
+                : 'false'
+            "
+            role="alert"
+          >
+            <p class="combobox-no-match">
+              {{ $t("inp_combobox_no_match", "inp_combobox_no_match") }}
+            </p>
+          </div>
+        </div>
+        <div
+          :id="`${props.id}-list`"
+          :aria-hidden="select.isOpen ? 'false' : 'true'"
+          role="radiogroup"
+          class="select-combobox-list"
         >
-          {{ value }}
-        </button>
+          <template v-for="(value, id) in props.values">
+            <button
+              v-if="value.includes(inp.value)"
+              :aria-hidden="value.includes(inp.value) ? 'false' : 'true'"
+              :tabindex="
+                select.isOpen
+                  ? value.includes(inp.value)
+                    ? props.tabId
+                    : '-1'
+                  : '-1'
+              "
+              role="radio"
+              @click.prevent="$emit('inp', changeValue(value))"
+              :class="[
+                id === 0 ? 'first' : '',
+                id === props.values.length - 1 ? 'last' : '',
+                (value === select.value && select.value === value) ||
+                (!select.value && value === props.value)
+                  ? 'active'
+                  : '',
+                'select-dropdown-btn',
+              ]"
+              :aria-controls="`${props.id}-text`"
+              :aria-checked="
+                (select.value && select.value === value) ||
+                (!select.value && value === props.value)
+                  ? 'true'
+                  : 'false'
+              "
+            >
+              {{ value }}
+            </button>
+          </template>
+        </div>
       </div>
       <ErrorField :isValid="select.isValid" :isValue="true" />
       <!-- end dropdown-->
