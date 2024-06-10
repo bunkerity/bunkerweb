@@ -6,42 +6,20 @@ import Advanced from "@components/Form/Advanced.vue";
 import { v4 as uuidv4 } from "uuid";
 
 /**
-  @name Form/Settings.vue
+  @name Form/Templates.vue
   @description This component is used to create a complete  settings form with all modes (advanced, raw, easy).
   @example
-  const data = [
-    {
-      name: "plugin name",
-      type: "pro",
-      description: "plugin description",
-      page: "/page",
-      settings: [
-        {
-          columns: { pc: 6, tablet: 12, mobile: 12 },
-          id: "test-check",
-          value: "yes",
-          label: "Checkbox",
-          name: "checkbox",
-          required: true,
-          hideLabel: false,
-          headerClass: "text-red-500",
-          inpType: "checkbox",
-        },
-        {
-          id: "test-input",
-          value: "yes",
-          type: "text",
-          name: "test-input",
-          disabled: false,
-          required: true,
-          label: "Test input",
-          pattern: "(test)",
-          inpType: "input",
-        },
-      ],
+  const data = {
+    advanced : {
+      default : [{SETTING_1}, {SETTING_2}...],
+      low : [{SETTING_1}, {SETTING_2}...],
     },
-  ];
-  @param {object} templates - List of advanced templates that contains settings.
+    easy : {
+      default : [...],
+      low : [...],
+    }
+  }
+  @param {object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
 */
 
 const props = defineProps({
@@ -112,15 +90,19 @@ onBeforeMount(() => {
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >
-    {{ data }}
-    <Container :containerClass="`col-span-12 grid grid-cols-12`">
+    <Container
+      v-if="data.modes.length && data.templates.length"
+      :containerClass="`col-span-12 grid grid-cols-12`"
+    >
       <Combobox
+        v-if="data.templates.length"
         v-bind="comboboxTemplate"
         :value="data.currTemplateName"
         :values="data.templates"
         @inp="data.currTemplateName = $event"
       />
       <Combobox
+        v-if="data.modes.length"
         v-bind="comboboxModes"
         :value="data.currModeName"
         :values="data.modes"
