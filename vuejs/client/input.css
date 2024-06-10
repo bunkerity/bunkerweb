@@ -904,15 +904,15 @@ body {
 /* TITLE */
 
 .title-container {
-  @apply break-words max-w-[80%] font-bold mb-2 col-span-12 dark:text-white/90 transition duration-300 ease-in-out text-2xl;
+  @apply w-full col-span-12 break-words max-w-[80%] font-bold mb-2 dark:text-white/90 transition duration-300 ease-in-out text-2xl;
 }
 
 .title-card {
-  @apply break-words max-w-[80%] mb-2 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl;
+  @apply w-full col-span-12  break-words max-w-[80%] mb-2 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl;
 }
 
 .title-stat {
-  @apply mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-400;
+  @apply w-full col-span-12  mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-400;
 }
 
 /* SUBTITLE */

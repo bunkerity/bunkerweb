@@ -1,11 +1,15 @@
 <script setup>
-import { defineProps, reactive, onMounted } from "vue";
+import { defineProps, reactive, onMounted, computed } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
+import Input from "@components/Forms/Field/Input.vue";
+import Select from "@components/Forms/Field/Select.vue";
+import Button from "@components/Widget/Button.vue";
 import { v4 as uuidv4 } from "uuid";
+import { plugin_types } from "@utils/variables";
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
@@ -61,6 +65,9 @@ const props = defineProps({
 
 const data = reactive({
   currPlugin: "",
+  filtered: computed(() => {
+    console.log(props.template);
+  }),
 });
 
 function getFirstPlugin(form) {
@@ -84,7 +91,59 @@ const comboboxPlugin = {
   required: false,
   label: "dashboard_plugins",
   tabId: "1",
-  columns: { pc: 4, tablet: 6, mobile: 12 },
+  popovers: [
+    {
+      text: "inp_combobox_advanced_desc",
+      iconName: "info",
+      iconColor: "info",
+    },
+  ],
+  columns: { pc: 3, tablet: 4, mobile: 12 },
+};
+
+const inpKeyword = {
+  id: uuidv4(),
+  value: "",
+  type: "text",
+  name: uuidv4(),
+  label: "inp_search_settings",
+  placeholder: "inp_keyword",
+  popovers: [
+    {
+      text: "inp_search_settings_desc",
+      iconName: "info",
+      iconColor: "info",
+    },
+  ],
+  columns: { pc: 3, tablet: 4, mobile: 12 },
+};
+
+const selectType = {
+  id: uuidv4(),
+  value: "all",
+  // add 'all' as first value
+  values: ["all"].concat(plugin_types),
+  type: "text",
+  name: uuidv4(),
+  label: "inp_select_plugin_type",
+  popovers: [
+    {
+      text: "inp_select_plugin_type_desc",
+      iconName: "info",
+      iconColor: "info",
+    },
+  ],
+  columns: { pc: 3, tablet: 4, mobile: 12 },
+};
+
+const buttonSave = {
+  id: uuidv4(),
+  text: "action_save",
+  disabled: false,
+  color: "success",
+  size: "normal",
+  type: "submit",
+  containerClass: "flex justify-center",
 };
 
 onMounted(() => {
@@ -94,19 +153,22 @@ onMounted(() => {
 </script>
 
 <template>
+  {{ data.filtered }}
   <Container
     :tag="'form'"
     method="POST"
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >
-    <Container :containerClass="`grid grid-cols-12 col-span-12 w-full m-1 p-1`">
+    <Container :containerClass="`grid grid-cols-12 col-span-12 w-full`">
       <Combobox
         v-bind="comboboxPlugin"
         :value="getFirstPlugin(props.template)"
         :values="getPluginNames(props.template)"
         @inp="data.currPlugin = $event"
       />
+      <Input v-bind="inpKeyword" />
+      <Select v-bind="selectType" />
     </Container>
     <template v-for="plugin in props.template">
       <Container
@@ -129,5 +191,6 @@ onMounted(() => {
         </Container>
       </Container>
     </template>
+    <Button v-bind="buttonSave" />
   </Container>
 </template>

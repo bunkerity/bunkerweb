@@ -218,7 +218,9 @@ onMounted(() => {
         :required="props.required || false"
         :readonly="props.readonly || false"
         :disabled="props.disabled || false"
-        :placeholder="props.placeholder || ''"
+        :placeholder="
+          props.placeholder ? $t(props.placeholder, props.placeholder) : ''
+        "
         :pattern="props.pattern || '(?s).*'"
         :name="props.name"
         :value="inp.value"

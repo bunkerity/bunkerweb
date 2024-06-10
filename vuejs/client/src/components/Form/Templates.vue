@@ -91,18 +91,18 @@ onBeforeMount(() => {
     :columns="props.columns"
   >
     <Container
-      v-if="data.modes.length > 0 && data.templates.length > 0"
+      v-if="data.modes.length > 1 && data.templates.length > 1"
       :containerClass="`col-span-12 grid grid-cols-12`"
     >
       <Combobox
-        v-if="data.templates.length"
+        v-if="data.templates.length > 1"
         v-bind="comboboxTemplate"
         :value="data.currTemplateName"
         :values="data.templates"
         @inp="data.currTemplateName = $event"
       />
       <Combobox
-        v-if="data.modes.length"
+        v-if="data.modes.length > 1"
         v-bind="comboboxModes"
         :value="data.currModeName"
         :values="data.modes"

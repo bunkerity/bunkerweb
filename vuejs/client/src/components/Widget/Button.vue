@@ -18,9 +18,8 @@ import { v4 as uuidv4 } from "uuid";
     size: "normal",
     iconName: "modal",
     iconColor: "white",
-    attrs: [
-      { key: "modal", defaultValue: "close", clickValue: "open", targetId: "modal_id", valueExpanded: "open" },
-    ],
+    attrs: { data-toggle: "modal", "data-target": "#modal"},
+    
   }
   @param {string} [id=uuidv4()] - Unique id of the button
   @param {string} text - Content of the button. Can be a translation key or by default raw text.
@@ -130,7 +129,11 @@ function setAttrs() {
       :type="props.type"
       ref="btnEl"
       :id="props.id"
-      @click.prevent=""
+      @click="
+        (e) => {
+          if (e.target.getAttribute('type') !== 'submit') e.preventDefault();
+        }
+      "
       :tabindex="props.tabId"
       :class="[buttonClass]"
       :disabled="props.disabled || false"
