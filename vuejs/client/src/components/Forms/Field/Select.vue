@@ -125,16 +125,6 @@ const props = defineProps({
   },
 });
 
-// When mounted or when props changed, we want select to display new props values
-// When component value change itself, we want to switch to select.value
-// To avoid component to send and stick to props values (bad behavior)
-// Trick is to use select.value || props.value on template
-watch(props, (newProp, oldProp) => {
-  if (newProp.value !== select.value) {
-    select.value = "";
-  }
-});
-
 const select = reactive({
   isOpen: false,
   // On mounted value is null to display props value

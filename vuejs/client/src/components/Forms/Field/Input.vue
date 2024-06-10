@@ -147,7 +147,7 @@ const inp = reactive({
   value: props.value,
   showInp: false,
   isClipAllow: false,
-  isValid: false,
+  isValid: true,
 });
 
 const emits = defineEmits(["inp"]);
@@ -170,6 +170,7 @@ function copyClipboard() {
 
 onMounted(() => {
   inp.isValid = inputEl.value.checkValidity();
+
   // Clipboard not allowed on http
   if (!window.location.href.startsWith("https://")) return;
 

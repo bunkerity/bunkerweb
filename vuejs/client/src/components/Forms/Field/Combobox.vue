@@ -29,7 +29,7 @@ import { v4 as uuidv4 } from "uuid";
         iconColor: "info",
       },]
   }
-  @param {string} [id=uuidv4()] - Unique id 
+  @param {string} [id=uuidv4()] - Unique id
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
@@ -124,19 +124,9 @@ const props = defineProps({
   },
 });
 
-// When mounted or when props changed, we want select to display new props values
-// When component value change itself, we want to switch to select.value
-// To avoid component to send and stick to props values (bad behavior)
-// Trick is to use select.value || props.value on template
-watch(props, (newProp, oldProp) => {
-  if (newProp.value !== select.value) {
-    select.value = "";
-  }
-});
-
 const inp = reactive({
   value: "",
-  isValid: false,
+  isValid: true,
 });
 
 const inputEl = ref();
@@ -253,6 +243,7 @@ watch(select, () => {
 });
 
 onMounted(() => {
+  inp.isValid = inputEl.value.checkValidity();
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
   window.addEventListener("resize", () => {
     try {
@@ -353,12 +344,7 @@ const emits = defineEmits(["inp"]);
             ref="inputEl"
             v-model="inp.value"
             :placeholder="$t('inp_combobox_placeholder')"
-            @input="
-              () => {
-                inp.isValid = inputEl.checkValidity();
-                $emit('inp', inp.value);
-              }
-            "
+            @input="inp.isValid = inputEl.checkValidity()"
             :aria-controls="`${props.id}-list`"
             :id="`${props.id}-combobox`"
             :class="[
@@ -373,9 +359,15 @@ const emits = defineEmits(["inp"]);
           />
           <div
             class="select-dropdown-btn"
-            v-if="!props.values.some((str) => str.includes(inp.value))"
+            v-if="
+              !props.values.some((str) =>
+                str.toLowerCase().includes(inp.value.toLowerCase())
+              )
+            "
             :aria-hidden="
-              !props.values.some((str) => str.includes(inp.value))
+              !props.values.some((str) =>
+                str.toLowerCase().includes(inp.value.toLowerCase())
+              )
                 ? 'true'
                 : 'false'
             "
@@ -395,11 +387,15 @@ const emits = defineEmits(["inp"]);
         >
           <template v-for="(value, id) in props.values">
             <button
-              v-if="value.includes(inp.value)"
-              :aria-hidden="value.includes(inp.value) ? 'false' : 'true'"
+              v-if="value.toLowerCase().includes(inp.value.toLowerCase())"
+              :aria-hidden="
+                value.toLowerCase().includes(inp.value.toLowerCase())
+                  ? 'false'
+                  : 'true'
+              "
               :tabindex="
                 select.isOpen
-                  ? value.includes(inp.value)
+                  ? value.toLowerCase().includes(inp.value.toLowerCase())
                     ? props.tabId
                     : '-1'
                   : '-1'

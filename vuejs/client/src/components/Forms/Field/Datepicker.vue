@@ -137,7 +137,7 @@ const props = defineProps({
 });
 
 const date = reactive({
-  isValid: false,
+  isValid: true,
   format: "m/d/Y H:i:S",
 });
 

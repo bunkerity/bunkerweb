@@ -4,8 +4,10 @@ import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
+import Combobox from "@components/Forms/Field/Combobox.vue";
+import { v4 as uuidv4 } from "uuid";
 
-/** 
+/**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
   @example
@@ -13,7 +15,6 @@ import Subtitle from "@components/Widget/Subtitle.vue";
     {
       name: "plugin name",
       type: "pro",
-      is_activate: true,
       description: "plugin description",
       page: "/page",
       settings: [
@@ -43,7 +44,6 @@ import Subtitle from "@components/Widget/Subtitle.vue";
     },
   ];
   @param {object} forms - List of advanced forms that contains settings.
-  @param {boolean} [isActive=true] - Check if the form is active, it will display the form if true
 */
 
 const props = defineProps({
@@ -53,39 +53,108 @@ const props = defineProps({
     required: true,
     default: {},
   },
-  isActive: {
-    type: Boolean,
-    required: false,
-    default: true,
-  },
+});
+
+const comboboxPlugin = {
+  id: uuidv4(),
+  name: uuidv4(),
+  disabled: false,
+  required: false,
+  label: "dashboard_plugins",
+  tabId: "1",
+  columns: { pc: 4, tablet: 6, mobile: 12 },
+};
+
+const comboboxTemplate = {
+  id: uuidv4(),
+  name: uuidv4(),
+  disabled: false,
+  required: false,
+  label: "dashboard_templates",
+  tabId: "1",
+  columns: { pc: 4, tablet: 6, mobile: 12 },
+};
+
+const data = reactive({
+  currTemplate: "",
+  currPlugin: "",
+});
+
+function getFirstTemplate() {
+  return Object.keys(props.forms)[0];
+}
+
+function getTemplateNames() {
+  return Object.keys(props.forms);
+}
+
+function getFirstPlugin(form) {
+  return form[0]["name"];
+}
+
+function getPluginNames(form) {
+  const pluginNames = [];
+  // Loop on each dict from form list
+  for (const plugin of form) {
+    // Return the first plugin
+    pluginNames.push(plugin.name);
+  }
+  return pluginNames;
+}
+
+onMounted(() => {
+  // Get first props.forms template name
+  data.currTemplate = getFirstTemplate();
+  // Get first plugin name
+  data.currPlugin = getFirstPlugin(props.forms[data.currTemplate]);
 });
 </script>
 
 <template>
   <Container
-    v-if="props.isActive"
     :tag="'form'"
     method="POST"
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >
-    <Container v-for="form in props.forms">
-      <Container class="col-span-12 w-full" v-for="plugin in form">
-        <Title type="card" :title="plugin.name" />
-        <Subtitle type="card" :subtitle="plugin.description" />
-
-        <Container
-          style="max-height: 300px; overflow: auto"
-          class="grid grid-cols-12 w-full relative"
-        >
-          <template
-            v-for="(setting, name, index) in plugin.settings"
-            :key="index"
+    <template v-for="(template, template_name) in props.forms">
+      <Container
+        :containerClass="`col-span-12 grid grid-cols-12`"
+        v-if="template_name === data.currTemplate"
+      >
+        <Combobox
+          v-bind="comboboxTemplate"
+          :value="getFirstTemplate()"
+          :values="getTemplateNames()"
+          @inp="data.currPlugin = $event"
+        />
+        <Combobox
+          v-bind="comboboxPlugin"
+          :value="getFirstPlugin(template)"
+          :values="getPluginNames(template)"
+          @inp="data.currPlugin = $event"
+        />
+        <template v-for="plugin in template">
+          <Container
+            v-if="plugin.name === data.currPlugin"
+            class="col-span-12 w-full"
           >
-            <Fields :setting="setting" />
-          </template>
-        </Container>
-      </Container>
-    </Container>
+            <Title type="card" :title="plugin.name" />
+            <Subtitle type="card" :subtitle="plugin.description" />
+
+            <Container
+              style="max-height: 300px; overflow: auto"
+              class="grid grid-cols-12 w-full relative"
+            >
+              <template
+                v-for="(setting, name, index) in plugin.settings"
+                :key="index"
+              >
+                <Fields :setting="setting" />
+              </template>
+            </Container>
+          </Container>
+        </template> </Container
+    ></template>
   </Container>
 </template>
