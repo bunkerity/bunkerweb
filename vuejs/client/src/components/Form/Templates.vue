@@ -91,7 +91,7 @@ onBeforeMount(() => {
     :columns="props.columns"
   >
     <Container
-      v-if="data.modes.length && data.templates.length"
+      v-if="data.modes.length > 0 && data.templates.length > 0"
       :containerClass="`col-span-12 grid grid-cols-12`"
     >
       <Combobox

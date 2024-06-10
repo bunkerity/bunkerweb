@@ -110,7 +110,7 @@ onMounted(() => {
     </Container>
     <template v-for="plugin in props.template">
       <Container
-        v-if="plugin.name === data.currPlugin"
+        v-show="plugin.name === data.currPlugin"
         class="col-span-12 w-full"
       >
         <Title type="card" :title="plugin.name" />
