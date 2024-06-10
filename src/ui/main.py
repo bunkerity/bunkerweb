@@ -94,79 +94,80 @@ sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
 # Flask app
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
 
-PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
-app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
-app.logger = setup_logger("UI")
+with app.app_context():
+    PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
+    app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
+    app.logger = setup_logger("UI")
 
-FLASK_SECRET = getenv("FLASK_SECRET")
+    FLASK_SECRET = getenv("FLASK_SECRET")
 
-if not FLASK_SECRET:
-    if not TMP_DIR.joinpath(".flask_secret").is_file():
-        app.logger.error("The .flask_secret file is missing")
-        stop(1)
-    FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
+    if not FLASK_SECRET:
+        if not TMP_DIR.joinpath(".flask_secret").is_file():
+            app.logger.error("The .flask_secret file is missing")
+            stop(1)
+        FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
-app.config["SECRET_KEY"] = FLASK_SECRET
-app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
-app.config["SESSION_COOKIE_PATH"] = "/"
-app.config["SESSION_COOKIE_SECURE"] = True  # Required for __Host- prefix
-app.config["SESSION_COOKIE_HTTPONLY"] = True  # Recommended for security
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Or 'Strict' for stricter settings
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
-app.config["PREFERRED_URL_SCHEME"] = "https"
+    app.config["SECRET_KEY"] = FLASK_SECRET
+    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+    app.config["SESSION_COOKIE_PATH"] = "/"
+    app.config["SESSION_COOKIE_SECURE"] = True  # Required for __Host- prefix
+    app.config["SESSION_COOKIE_HTTPONLY"] = True  # Recommended for security
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Or 'Strict' for stricter settings
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
+    app.config["PREFERRED_URL_SCHEME"] = "https"
 
-login_manager = LoginManager()
-login_manager.session_protection = "strong"
-login_manager.init_app(app)
-login_manager.login_view = "login"
-login_manager.anonymous_user = AnonymousUser
-PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
+    login_manager = LoginManager()
+    login_manager.session_protection = "strong"
+    login_manager.init_app(app)
+    login_manager.login_view = "login"
+    login_manager.anonymous_user = AnonymousUser
+    PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 
-INTEGRATION = get_integration()
+    INTEGRATION = get_integration()
 
-docker_client = None
-kubernetes_client = None
-if INTEGRATION in ("Docker", "Swarm", "Autoconf"):
+    docker_client = None
+    kubernetes_client = None
+    if INTEGRATION in ("Docker", "Swarm", "Autoconf"):
+        try:
+            docker_client: DockerClient = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
+        except (docker_APIError, DockerException):
+            app.logger.warning("No docker host found")
+    elif INTEGRATION == "Kubernetes":
+        kube_config.load_incluster_config()
+        kubernetes_client = kube_client.CoreV1Api()
+
+    db = Database(app.logger, ui=True, log=False)
+
+    USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+
+    bw_version = get_version()
+
+    if not TMP_DIR.joinpath(".ui.json").is_file():
+        TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
+
     try:
-        docker_client: DockerClient = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
-    except (docker_APIError, DockerException):
-        app.logger.warning("No docker host found")
-elif INTEGRATION == "Kubernetes":
-    kube_config.load_incluster_config()
-    kubernetes_client = kube_client.CoreV1Api()
+        app.config.update(
+            INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION, db),
+            CONFIG=Config(db),
+            CONFIGFILES=ConfigFiles(),
+            WTF_CSRF_SSL_STRICT=False,
+            SEND_FILE_MAX_AGE_DEFAULT=86400,
+            SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
+            DB=db,
+            UI_TEMPLATES=get_ui_templates(),
+        )
+    except FileNotFoundError as e:
+        app.logger.error(repr(e), e.filename)
+        stop(1)
 
-db = Database(app.logger, ui=True, log=False)
+    plugin_id_rx = re_compile(r"^[\w_-]{1,64}$")
 
-USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+    # Declare functions for jinja2
+    app.jinja_env.globals.update(check_settings=check_settings)
 
-bw_version = get_version()
-
-if not TMP_DIR.joinpath(".ui.json").is_file():
-    TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
-
-try:
-    app.config.update(
-        INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION, db),
-        CONFIG=Config(db),
-        CONFIGFILES=ConfigFiles(),
-        WTF_CSRF_SSL_STRICT=False,
-        SEND_FILE_MAX_AGE_DEFAULT=86400,
-        SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
-        DB=db,
-        UI_TEMPLATES=get_ui_templates(),
-    )
-except FileNotFoundError as e:
-    app.logger.error(repr(e), e.filename)
-    stop(1)
-
-plugin_id_rx = re_compile(r"^[\w_-]{1,64}$")
-
-# Declare functions for jinja2
-app.jinja_env.globals.update(check_settings=check_settings)
-
-# CSRF protection
-csrf = CSRFProtect()
-csrf.init_app(app)
+    # CSRF protection
+    csrf = CSRFProtect()
+    csrf.init_app(app)
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
