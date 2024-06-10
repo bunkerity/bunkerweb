@@ -346,7 +346,7 @@ body {
 }
 
 .input-pw-container {
-  @apply absolute flex right-2 h-5 w-5;
+  @apply absolute flex top-[0.35rem] md:top-2 right-2 h-5 w-5;
 }
 
 .input-pw-svg {

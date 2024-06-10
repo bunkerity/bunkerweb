@@ -1,23 +1,16 @@
 <script setup>
-import { reactive, defineProps, onMounted, ref } from "vue";
+import { defineProps, reactive, onMounted } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
 import { v4 as uuidv4 } from "uuid";
-
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
   @example
-  const data = [
-    {
-      name: "plugin name",
-      type: "pro",
-      description: "plugin description",
-      page: "/page",
-      settings: [
+  template: [
         {
           columns: { pc: 6, tablet: 12, mobile: 12 },
           id: "test-check",
@@ -41,52 +34,34 @@ import { v4 as uuidv4 } from "uuid";
           inpType: "input",
         },
       ],
-    },
-  ];
-  @param {object} forms - List of advanced forms that contains settings.
+  @param {object} template - Template object with plugin and settings data.
+  @param {string} containerClass - Container
+  @param {object} columns - Columns object.
 */
 
 const props = defineProps({
   // id && value && method
-  forms: {
-    type: Object,
+  template: {
+    type: Array,
     required: true,
+    default: {},
+  },
+
+  containerClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  columns: {
+    type: Object,
+    required: false,
     default: {},
   },
 });
 
-const comboboxPlugin = {
-  id: uuidv4(),
-  name: uuidv4(),
-  disabled: false,
-  required: false,
-  label: "dashboard_plugins",
-  tabId: "1",
-  columns: { pc: 4, tablet: 6, mobile: 12 },
-};
-
-const comboboxTemplate = {
-  id: uuidv4(),
-  name: uuidv4(),
-  disabled: false,
-  required: false,
-  label: "dashboard_templates",
-  tabId: "1",
-  columns: { pc: 4, tablet: 6, mobile: 12 },
-};
-
 const data = reactive({
-  currTemplate: "",
   currPlugin: "",
 });
-
-function getFirstTemplate() {
-  return Object.keys(props.forms)[0];
-}
-
-function getTemplateNames() {
-  return Object.keys(props.forms);
-}
 
 function getFirstPlugin(form) {
   return form[0]["name"];
@@ -102,11 +77,19 @@ function getPluginNames(form) {
   return pluginNames;
 }
 
+const comboboxPlugin = {
+  id: uuidv4(),
+  name: uuidv4(),
+  disabled: false,
+  required: false,
+  label: "dashboard_plugins",
+  tabId: "1",
+  columns: { pc: 4, tablet: 6, mobile: 12 },
+};
+
 onMounted(() => {
   // Get first props.forms template name
-  data.currTemplate = getFirstTemplate();
-  // Get first plugin name
-  data.currPlugin = getFirstPlugin(props.forms[data.currTemplate]);
+  data.currPlugin = getFirstPlugin(props.template);
 });
 </script>
 
@@ -117,44 +100,34 @@ onMounted(() => {
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >
-    <template v-for="(template, template_name) in props.forms">
+    <Container :containerClass="`grid grid-cols-12 col-span-12 w-full m-1 p-1`">
+      <Combobox
+        v-bind="comboboxPlugin"
+        :value="getFirstPlugin(props.template)"
+        :values="getPluginNames(props.template)"
+        @inp="data.currPlugin = $event"
+      />
+    </Container>
+    <template v-for="plugin in props.template">
       <Container
-        :containerClass="`col-span-12 grid grid-cols-12`"
-        v-if="template_name === data.currTemplate"
+        v-if="plugin.name === data.currPlugin"
+        class="col-span-12 w-full"
       >
-        <Combobox
-          v-bind="comboboxTemplate"
-          :value="getFirstTemplate()"
-          :values="getTemplateNames()"
-          @inp="data.currPlugin = $event"
-        />
-        <Combobox
-          v-bind="comboboxPlugin"
-          :value="getFirstPlugin(template)"
-          :values="getPluginNames(template)"
-          @inp="data.currPlugin = $event"
-        />
-        <template v-for="plugin in template">
-          <Container
-            v-if="plugin.name === data.currPlugin"
-            class="col-span-12 w-full"
-          >
-            <Title type="card" :title="plugin.name" />
-            <Subtitle type="card" :subtitle="plugin.description" />
+        <Title type="card" :title="plugin.name" />
+        <Subtitle type="card" :subtitle="plugin.description" />
 
-            <Container
-              style="max-height: 300px; overflow: auto"
-              class="grid grid-cols-12 w-full relative"
-            >
-              <template
-                v-for="(setting, name, index) in plugin.settings"
-                :key="index"
-              >
-                <Fields :setting="setting" />
-              </template>
-            </Container>
-          </Container>
-        </template> </Container
-    ></template>
+        <Container
+          style="max-height: 300px; overflow: auto"
+          class="grid grid-cols-12 w-full relative"
+        >
+          <template
+            v-for="(setting, name, index) in plugin.settings"
+            :key="index"
+          >
+            <Fields :setting="setting" />
+          </template>
+        </Container>
+      </Container>
+    </template>
   </Container>
 </template>

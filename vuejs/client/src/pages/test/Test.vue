@@ -36,7 +36,7 @@ const selectData = {
 const inputData = {
   id: "test-input",
   value: "yes",
-  type: "text",
+  type: "password",
   name: "test-input",
   disabled: false,
   required: true,

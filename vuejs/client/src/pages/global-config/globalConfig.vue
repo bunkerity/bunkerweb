@@ -9447,7 +9447,7 @@ const data = {
 <template>
   <DashboardLayout>
     <div class="col-span-12 grid grid-cols-12 card">
-      <Advanced :forms="data.advanced" />
+      <Advanced :template="data.advanced.default" />
     </div>
   </DashboardLayout>
 </template>

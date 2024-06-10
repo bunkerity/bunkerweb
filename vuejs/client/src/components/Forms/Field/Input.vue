@@ -237,7 +237,7 @@ onMounted(() => {
       >
         <button
           :tabindex="contentIndex"
-          @click="copyClipboard()"
+          @click.prevent="copyClipboard()"
           :class="[props.disabled ? 'disabled' : 'enabled']"
           class="input-clipboard-button"
           :aria-describedby="`${props.id}-clipboard-text`"
@@ -268,7 +268,7 @@ onMounted(() => {
           :tabindex="contentIndex"
           :aria-description="$t('inp_input_password_desc')"
           :aria-controls="props.id"
-          @click="inp.showInp = inp.showInp ? false : true"
+          @click.prevent="inp.showInp = inp.showInp ? false : true"
           :class="[props.disabled ? 'disabled' : 'enabled']"
           class="input-pw-button"
         >
