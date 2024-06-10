@@ -177,11 +177,11 @@ body {
 }
 
 .input-header-label {
-  @apply relative lowercase capitalize-first mb-1 transition duration-300 ease-in-out text-sm  font-bold m-0 dark:text-gray-300 mr-2;
+  @apply relative lowercase capitalize-first mb-1 transition duration-300 ease-in-out text-sm  font-bold m-0 dark:text-gray-300 mr-1;
 }
 
 .input-header-required-sign {
-  @apply font-bold text-red-500 absolute ml-1;
+  @apply font-bold text-red-500 absolute;
 }
 
 .input-error-msg {
@@ -229,8 +229,12 @@ body {
   @apply pointer-events-none transition-transform h-4 w-4 fill-gray-600 dark:fill-gray-500;
 }
 
+.select-combobox-dropdown-container {
+  @apply flex  w-fit mt-2;
+}
+
 .select-combobox-list {
-  @apply flex  flex-col;
+  @apply flex flex-col max-h-[200px] overflow-x-hidden overflow-y-auto;
 }
 
 .combobox-no-match {
@@ -238,15 +242,15 @@ body {
 }
 
 .select-dropdown-container {
-  @apply flex fixed h-full max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-fit mt-2;
+  @apply flex max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-fit mt-2;
 }
 
 .open.select-dropdown-container {
-  @apply z-[20] opacity-100;
+  @apply absolute z-[20] opacity-100;
 }
 
 .close.select-dropdown-container {
-  @apply -z-10 opacity-0 pointer-events-none;
+  @apply -z-10 fixed opacity-0 pointer-events-none;
 }
 
 .select-dropdown-btn {

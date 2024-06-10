@@ -30,7 +30,7 @@ import { v4 as uuidv4 } from "uuid";
         iconColor: "info",
       },]
   }
-  @param {string} [id=uuidv4()] - Unique id 
+  @param {string} [id=uuidv4()] - Unique id
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
@@ -158,62 +158,35 @@ const selectDropdown = ref();
 // EVENTS
 function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
-  // Position dropdown relative to btn on open on fixed position
+  // Check if parent has overflow
   if (select.isOpen) {
+    // Get field container rect
+    const fieldContainer = selectBtn.value.closest("[data-field-container]");
+    const parent = fieldContainer.parentElement;
+    // Update position only if parent has overflow
+    const isOverflow = parent.scrollHeight > parent.clientHeight ? true : false;
+    if (!isOverflow) return;
+
+    // Get all rect
     const selectBtnRect = selectBtn.value.getBoundingClientRect();
-    const selectDropdownRect = selectDropdown.value.getBoundingClientRect();
+    const fieldContainerRect = fieldContainer.getBoundingClientRect();
+    const selectDropRect = selectDropdown.value.getBoundingClientRect();
 
-    // We need to take care of parent padding and margin that will affect dropdown position but aren't calculate in rect
-    const parents = [selectBtn.value.parentElement];
-    let isParent = selectBtn.value.parentElement ? true : false;
-    while (isParent) {
-      parents.push(parents[parents.length - 1].parentElement);
-      isParent = parents[parents.length - 1].parentElement ? true : false;
-    }
+    const parentRect = parent.getBoundingClientRect();
 
-    let noRectParentHeight = 0;
-    for (let i = 0; i < parents.length; i++) {
-      try {
-        noRectParentHeight += +window
-          .getComputedStyle(parents[i], null)
-          .getPropertyValue("padding-top")
-          .replace("px", "");
-      } catch (e) {}
-
-      try {
-        noRectParentHeight += +window
-          .getComputedStyle(parents[i], null)
-          .getPropertyValue("margin-top")
-          .replace("px", "");
-      } catch (e) {}
-    }
-
-    // If dropdown is too close to bottom, we need to drop it up
-    const canDropBeDown =
-      selectBtnRect.top + selectDropdownRect.height + 20 < window.innerHeight
+    const canBeDown =
+      fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
         ? true
         : false;
 
-    if (canDropBeDown) {
-      selectDropdown.value.style.top = `${
-        window.scrollY +
-        selectBtnRect.bottom +
-        selectBtnRect.height * 2 -
-        selectDropdownRect.height -
-        noRectParentHeight +
-        16
+    if (!canBeDown) {
+      selectDropdown.value.style.top = `-${
+        selectDropRect.height + selectBtnRect.height
       }px`;
     }
 
-    if (!canDropBeDown) {
-      selectDropdown.value.style.top = `${
-        window.scrollY +
-        selectBtnRect.top +
-        selectBtnRect.height * 2 -
-        selectDropdownRect.height * 2 -
-        noRectParentHeight -
-        24
-      }px`;
+    if (canBeDown) {
+      selectDropdown.value.style.top = `${selectBtnRect.height}px`;
     }
   }
 }
@@ -283,6 +256,8 @@ const emits = defineEmits(["inp"]);
 
 <template>
   <Container
+    :class="[select.isOpen ? 'z-[100]' : '']"
+    data-field-container
     :containerClass="`field-container ${props.containerClass}`"
     :columns="props.columns"
   >

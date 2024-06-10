@@ -135,7 +135,7 @@ watch(props, (newProp, oldProp) => {
 });
 
 const inp = reactive({
-  value: props.value,
+  value: "",
   isValid: false,
 });
 
@@ -166,66 +166,37 @@ function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
   // Position dropdown relative to btn on open on fixed position
   if (select.isOpen) {
-    // focus on combobox and reset value
+    // Reset input value
     inp.value = "";
-    inp.isValid = inputEl.value.checkValidity();
     inputEl.value.focus();
 
-    // setup dropdown position
+    // Get field container rect
+    const fieldContainer = selectBtn.value.closest("[data-field-container]");
+    const parent = fieldContainer.parentElement;
+    // Update position only if parent has overflow
+    const isOverflow = parent.scrollHeight > parent.clientHeight ? true : false;
+    if (!isOverflow) return;
+
+    // Get all rect
     const selectBtnRect = selectBtn.value.getBoundingClientRect();
-    const selectDropdownRect = selectDropdown.value.getBoundingClientRect();
+    const fieldContainerRect = fieldContainer.getBoundingClientRect();
+    const selectDropRect = selectDropdown.value.getBoundingClientRect();
 
-    // We need to take care of parent padding and margin that will affect dropdown position but aren't calculate in rect
-    const parents = [selectBtn.value.parentElement];
-    let isParent = selectBtn.value.parentElement ? true : false;
-    while (isParent) {
-      parents.push(parents[parents.length - 1].parentElement);
-      isParent = parents[parents.length - 1].parentElement ? true : false;
-    }
+    const parentRect = parent.getBoundingClientRect();
 
-    let noRectParentHeight = 0;
-    for (let i = 0; i < parents.length; i++) {
-      try {
-        noRectParentHeight += +window
-          .getComputedStyle(parents[i], null)
-          .getPropertyValue("padding-top")
-          .replace("px", "");
-      } catch (e) {}
-
-      try {
-        noRectParentHeight += +window
-          .getComputedStyle(parents[i], null)
-          .getPropertyValue("margin-top")
-          .replace("px", "");
-      } catch (e) {}
-    }
-
-    // If dropdown is too close to bottom, we need to drop it up
-    const canDropBeDown =
-      selectBtnRect.top + selectDropdownRect.height + 20 < window.innerHeight
+    const canBeDown =
+      fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
         ? true
         : false;
 
-    if (canDropBeDown) {
-      selectDropdown.value.style.top = `${
-        window.scrollY +
-        selectBtnRect.bottom +
-        selectBtnRect.height * 2 -
-        selectDropdownRect.height -
-        noRectParentHeight +
-        16
+    if (!canBeDown) {
+      selectDropdown.value.style.top = `-${
+        selectDropRect.height + selectBtnRect.height
       }px`;
     }
 
-    if (!canDropBeDown) {
-      selectDropdown.value.style.top = `${
-        window.scrollY +
-        selectBtnRect.top +
-        selectBtnRect.height * 2 -
-        selectDropdownRect.height * 2 -
-        noRectParentHeight -
-        24
-      }px`;
+    if (canBeDown) {
+      selectDropdown.value.style.top = `${selectBtnRect.height}px`;
     }
   }
 }
@@ -295,6 +266,8 @@ const emits = defineEmits(["inp"]);
 
 <template>
   <Container
+    data-field-container
+    :class="[select.isOpen ? 'z-[100]' : '']"
     :containerClass="`field-container ${props.containerClass}`"
     :columns="props.columns"
   >
@@ -334,7 +307,6 @@ const emits = defineEmits(["inp"]);
         :aria-controls="`${props.id}-custom`"
         :aria-expanded="select.isOpen ? 'true' : 'false'"
         :aria-description="$t('inp_select_dropdown_button_desc')"
-        data-select-dropdown
         :disabled="props.disabled || false"
         @click.prevent="toggleSelect()"
         :class="[
@@ -380,6 +352,7 @@ const emits = defineEmits(["inp"]);
             :tabindex="select.isOpen ? props.tabId : '-1'"
             ref="inputEl"
             v-model="inp.value"
+            :placeholder="$t('inp_combobox_placeholder')"
             @input="
               () => {
                 inp.isValid = inputEl.checkValidity();
@@ -393,7 +366,6 @@ const emits = defineEmits(["inp"]);
               inp.isValid ? 'valid' : 'invalid',
               props.inpClass,
             ]"
-            :placeholder="props.placeholder || ''"
             :pattern="props.pattern || '(?s).*'"
             :name="`${props.id}-combobox`"
             :value="inp.value"
@@ -415,6 +387,7 @@ const emits = defineEmits(["inp"]);
           </div>
         </div>
         <div
+          data-select-dropdown
           :id="`${props.id}-list`"
           :aria-hidden="select.isOpen ? 'false' : 'true'"
           role="radiogroup"
@@ -434,8 +407,6 @@ const emits = defineEmits(["inp"]);
               role="radio"
               @click.prevent="$emit('inp', changeValue(value))"
               :class="[
-                id === 0 ? 'first' : '',
-                id === props.values.length - 1 ? 'last' : '',
                 (value === select.value && select.value === value) ||
                 (!select.value && value === props.value)
                   ? 'active'

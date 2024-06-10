@@ -6,6 +6,9 @@ import Input from "@components/Forms/Field/Input.vue";
 import Datepicker from "@components/Forms/Field/Datepicker.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
 import Button from "@components/Widget/Button.vue";
+import DashboardLayout from "@components/Dashboard/Layout.vue";
+import GridLayout from "@components/Widget/GridLayout.vue";
+import Grid from "@components/Widget/Grid.vue";
 
 const checkboxData = {
   id: "test-checkbox",
@@ -27,6 +30,7 @@ const selectData = {
   requiredValues: ["no"],
   label: "Test select",
   tabId: "1",
+  columns: { pc: 12, tablet: 12, mobile: 12 },
 };
 
 const inputData = {
@@ -39,6 +43,7 @@ const inputData = {
   label: "Test input",
   pattern: "(test)",
   tabId: "1",
+  columns: { pc: 12, tablet: 12, mobile: 12 },
 };
 
 const datepickerData = {
@@ -104,27 +109,30 @@ const buttonOnlySVGData = {
 const comboboxData = {
   id: "test-combobox",
   value: "yes",
-  values: ["yes", "no"],
+  values: ["yes", "no", "tes", "f", "fes", "esd", "fesfse"],
   name: "test-combobox",
   disabled: false,
   required: false,
   requiredValues: ["no"],
   label: "Test combobox",
   tabId: "1",
+  columns: { pc: 12, tablet: 12, mobile: 12 },
 };
 </script>
 
 <template>
-  <div class="bg-secondary flex flex-col items-center justify-center h-full">
-    <div style="width: 300px">
-      <Checkbox v-bind="checkboxData" />
-      <Select v-bind="selectData" />
-      <Input v-bind="inputData" />
-      <Datepicker v-bind="datepickerData" />
-      <Combobox v-bind="comboboxData" />
-      <Button v-bind="buttonData" />
-      <Button v-bind="buttonSVGData" />
-      <Button v-bind="buttonOnlySVGData" />
-    </div>
-  </div>
+  <DashboardLayout>
+    <GridLayout :columns="{ pc: 4, tablet: 6, mobile: 12 }">
+      <!-- widget grid -->
+      <Grid>
+        <Input v-bind="inputData" />
+      </Grid>
+    </GridLayout>
+    <GridLayout :columns="{ pc: 4, tablet: 6, mobile: 12 }">
+      <!-- widget grid -->
+      <Grid>
+        <Combobox v-bind="comboboxData" />
+      </Grid>
+    </GridLayout>
+  </DashboardLayout>
 </template>
