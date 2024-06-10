@@ -25,6 +25,7 @@
   "dashboard_configs": "configs",
   "dashboard_plugins": "plugins",
   "dashboard_templates": "templates",
+  "dashboard_modes": "modes",
   "dashboard_jobs": "jobs",
   "dashboard_bans": "bans",
   "dashboard_actions": "actions",

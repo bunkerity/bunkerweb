@@ -1,5 +1,13 @@
 <script setup>
-import { ref, reactive, watch, onMounted, defineEmits, defineProps } from "vue";
+import {
+  ref,
+  reactive,
+  watch,
+  onMounted,
+  defineEmits,
+  defineProps,
+  computed,
+} from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
@@ -66,6 +74,7 @@ const props = defineProps({
   values: {
     type: Array,
     required: true,
+    default: [],
   },
   inpType: {
     type: String,
@@ -127,6 +136,12 @@ const props = defineProps({
 const inp = reactive({
   value: "",
   isValid: true,
+  isMatching: computed(() => {
+    if (!props.values) return false;
+    return props.values.some((str) =>
+      str.toLowerCase().includes(inp.value.toLowerCase())
+    );
+  }),
 });
 
 const inputEl = ref();
@@ -359,18 +374,8 @@ const emits = defineEmits(["inp"]);
           />
           <div
             class="select-dropdown-btn"
-            v-if="
-              !props.values.some((str) =>
-                str.toLowerCase().includes(inp.value.toLowerCase())
-              )
-            "
-            :aria-hidden="
-              !props.values.some((str) =>
-                str.toLowerCase().includes(inp.value.toLowerCase())
-              )
-                ? 'true'
-                : 'false'
-            "
+            v-if="!inp.isMatching"
+            :aria-hidden="!inp.isMatching ? 'true' : 'false'"
             role="alert"
           >
             <p class="combobox-no-match">
