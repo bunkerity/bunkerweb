@@ -107,6 +107,13 @@ if not FLASK_SECRET:
     FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
 app.config["SECRET_KEY"] = FLASK_SECRET
+app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+app.config["SESSION_COOKIE_PATH"] = "/"
+app.config["SESSION_COOKIE_SECURE"] = True  # Required for __Host- prefix
+app.config["SESSION_COOKIE_HTTPONLY"] = True  # Recommended for security
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Or 'Strict' for stricter settings
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
+app.config["PREFERRED_URL_SCHEME"] = "https"
 
 login_manager = LoginManager()
 login_manager.session_protection = "strong"
