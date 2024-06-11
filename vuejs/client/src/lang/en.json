@@ -100,6 +100,8 @@
   "inp_combobox_advanced_desc": "Switch between available plugins.",
   "inp_select_plugin_type": "plugin type",
   "inp_select_plugin_type_desc": "Only show plugins of the chosen type",
+  "inp_select_plugin_context": "plugin context",
+  "inp_select_plugin_context_desc": "Only show plugins of the chosen context.",
   "action_send": "send {name}",
   "action_start": "start {name}",
   "action_disable": "disable {name}",

@@ -10,6 +10,7 @@ import Select from "@components/Forms/Field/Select.vue";
 import Button from "@components/Widget/Button.vue";
 import { v4 as uuidv4 } from "uuid";
 import { plugin_types } from "@utils/variables";
+import { useFilterPluginsAdvanced } from "@utils/form.js";
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
@@ -65,23 +66,57 @@ const props = defineProps({
 
 const data = reactive({
   currPlugin: "",
+  plugins: [],
+  keyword: "",
+  type: "all",
+  context: "all",
   filtered: computed(() => {
-    console.log(props.template);
+    const filters = [
+      {
+        type: "keyword",
+        value: data.keyword,
+        keys: ["id", "label", "name", "description", "help", "value"],
+      },
+      {
+        type: "select",
+        value: data.type,
+        keys: ["type"],
+      },
+      {
+        type: "select",
+        value: data.context,
+        keys: ["context"],
+      },
+    ];
+    // deep copy
+    const template = JSON.parse(JSON.stringify(props.template));
+    const filterData = useFilterPluginsAdvanced(template, filters);
+    data.plugins = getPluginNames(filterData);
+    data.currPlugin = getFirstPlugin(filterData);
+    return filterData;
   }),
 });
 
-function getFirstPlugin(form) {
-  return form[0]["name"];
+function getFirstPlugin(template) {
+  try {
+    return template[0]["name"];
+  } catch (e) {
+    return "";
+  }
 }
 
-function getPluginNames(form) {
-  const pluginNames = [];
-  // Loop on each dict from form list
-  for (const plugin of form) {
-    // Return the first plugin
-    pluginNames.push(plugin.name);
+function getPluginNames(template) {
+  try {
+    const pluginNames = [];
+    // Loop on each dict from template list
+    for (const plugin of template) {
+      // Return the first plugin
+      pluginNames.push(plugin.name);
+    }
+    return pluginNames;
+  } catch (e) {
+    return [];
   }
-  return pluginNames;
 }
 
 const comboboxPlugin = {
@@ -123,12 +158,28 @@ const selectType = {
   value: "all",
   // add 'all' as first value
   values: ["all"].concat(plugin_types),
-  type: "text",
   name: uuidv4(),
   label: "inp_select_plugin_type",
   popovers: [
     {
       text: "inp_select_plugin_type_desc",
+      iconName: "info",
+      iconColor: "info",
+    },
+  ],
+  columns: { pc: 3, tablet: 4, mobile: 12 },
+};
+
+const selectContext = {
+  id: uuidv4(),
+  value: "all",
+  // add 'all' as first value
+  values: ["all", "multisite", "global"],
+  name: uuidv4(),
+  label: "inp_select_plugin_context",
+  popovers: [
+    {
+      text: "inp_select_plugin_context_desc",
       iconName: "info",
       iconColor: "info",
     },
@@ -149,11 +200,11 @@ const buttonSave = {
 onMounted(() => {
   // Get first props.forms template name
   data.currPlugin = getFirstPlugin(props.template);
+  data.plugins = getPluginNames(props.template);
 });
 </script>
 
 <template>
-  {{ data.filtered }}
   <Container
     :tag="'form'"
     method="POST"
@@ -163,14 +214,15 @@ onMounted(() => {
     <Container :containerClass="`grid grid-cols-12 col-span-12 w-full`">
       <Combobox
         v-bind="comboboxPlugin"
-        :value="getFirstPlugin(props.template)"
-        :values="getPluginNames(props.template)"
+        :value="data.currPlugin"
+        :values="data.plugins"
         @inp="data.currPlugin = $event"
       />
-      <Input v-bind="inpKeyword" />
-      <Select v-bind="selectType" />
+      <Input @inp="(v) => (data.keyword = v)" v-bind="inpKeyword" />
+      <Select @inp="(v) => (data.type = v)" v-bind="selectType" />
+      <Select @inp="(v) => (data.context = v)" v-bind="selectContext" />
     </Container>
-    <template v-for="plugin in props.template">
+    <template v-for="plugin in data.filtered">
       <Container
         v-show="plugin.name === data.currPlugin"
         class="col-span-12 w-full"

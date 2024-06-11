@@ -6042,8 +6042,6 @@ function useFilterSettings(plugins, filters) {
     if (!filterTypes.includes(filter.type)) filterTypes.push(filter.type);
   });
 
-  console.log("filters type", filterTypes);
-
   // Deepcopy
   const data = JSON.parse(JSON.stringify(plugins));
   const filterData = [];
@@ -6071,7 +6069,6 @@ function useFilterSettings(plugins, filters) {
 
     filterData.push(data[i]);
   }
-  console.log(filterData);
 }
 
 function isMatchingKeyword(filters, items) {
