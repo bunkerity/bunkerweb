@@ -47,7 +47,7 @@ import { useFilter } from "@utils/form.js";
 const props = defineProps({
   // id && value && method
   template: {
-    type: Array,
+    type: Object,
     required: true,
     default: {},
   },
@@ -245,6 +245,8 @@ onMounted(() => {
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >
+    <Title type="card" :title="'dashboard_advanced_mode'" />
+    <Subtitle type="card" :subtitle="'dashboard_advanced_mode_subtitle'" />
     <Container :containerClass="`grid grid-cols-12 col-span-12 w-full`">
       <Combobox
         v-bind="comboboxPlugin"
@@ -264,10 +266,7 @@ onMounted(() => {
         <Title type="card" :title="plugin.name" />
         <Subtitle type="card" :subtitle="plugin.description" />
 
-        <Container
-          style="max-height: 300px; overflow: auto"
-          class="grid grid-cols-12 w-full relative"
-        >
+        <Container class="grid grid-cols-12 w-full relative">
           <template
             v-for="(setting, name, index) in plugin.settings"
             :key="index"

@@ -266,4 +266,4 @@ function isItemSelect(filters, item) {
   return false;
 }
 
-export { useForm, useFilter };
+export { useForm, useFilter, isItemKeyword, isItemSelect };

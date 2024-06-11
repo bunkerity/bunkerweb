@@ -91,6 +91,8 @@ def set_raw(template, plugins_data):
     # Update settings with global config data
     for plugin in plugins :          
         for setting, value in plugin.get("settings").items() :
+            value["value"] = value.get("default")
+
             # check if setting is in template
             if setting in settings :
                 # Update value or set default as value
@@ -116,12 +118,14 @@ def set_advanced(template, plugins_data):
             loop_id += 1
             # add zindex for container
             value["containerClass"] = f"z-{total_settings - loop_id}"
+
             # regex by pattern
             value["pattern"] = value.get("regex", "")
 
             # set inpType based on type define for each settings
             inpType = "checkbox" if value.get("type") == "check" else "select" if value.get("type") == "select" else "datepicker" if value.get("type") == "date" else "input"
             value["inpType"] =  inpType
+
             # set name using the label
             value["name"] = value.get("label")
 
@@ -136,6 +140,8 @@ def set_advanced(template, plugins_data):
 
             # By default, the input is enabled unless specific method
             value["disabled"] = False
+
+            value["value"] = value.get("default")
 
             # check if setting is in template
             if setting in settings :
@@ -174,5 +180,3 @@ with open('plugins.json', 'w') as f:
     json.dump(forms_global, f, indent=4)
 
         
-
-

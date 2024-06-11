@@ -3,6 +3,7 @@ import { reactive, defineProps, computed, onBeforeMount } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
 import Advanced from "@components/Form/Advanced.vue";
+import Raw from "@components/Form/Raw.vue";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -91,7 +92,7 @@ onBeforeMount(() => {
     :columns="props.columns"
   >
     <Container
-      v-if="data.modes.length > 1 && data.templates.length > 1"
+      v-if="data.modes.length > 1 || data.templates.length > 1"
       :containerClass="`col-span-12 grid grid-cols-12`"
     >
       <Combobox
@@ -111,6 +112,10 @@ onBeforeMount(() => {
     </Container>
     <Advanced
       v-if="data.currModeName === 'advanced'"
+      :template="props.templates[data.currModeName][data.currTemplateName]"
+    />
+    <Raw
+      v-if="data.currModeName === 'raw'"
       :template="props.templates[data.currModeName][data.currTemplateName]"
     />
   </Container>

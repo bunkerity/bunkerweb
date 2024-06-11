@@ -1109,6 +1109,7 @@
                             "mobile": 12
                         },
                         "disabled": false,
+                        "value": "127.0.0.1",
                         "popovers": [
                             {
                                 "iconColor": "blue",
