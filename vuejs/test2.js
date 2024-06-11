@@ -6022,12 +6022,7 @@ const data = [
   },
 ];
 
-const filters = [
-  {
-    type: "keyword",
-    value: "whitelist_ip",
-    keys: ["id", "label", "name", "description", "help", "value"],
-  },
+const filtersPlugin = [
   {
     type: "select",
     value: "core",
@@ -6035,7 +6030,20 @@ const filters = [
   },
 ];
 
-function useFilterSettings(plugins, filters) {
+const filtersSettings = [
+  {
+    type: "keyword",
+    value: "client",
+    keys: ["id", "label", "name", "description", "help", "value"],
+  },
+];
+
+function useFilter(items, filters) {
+  // loop on filters to determine types
+  filters = removeDefaultFilters(filters);
+
+  // Case no filters, return items
+  if (filters.length === 0) return items;
   // loop on filters to determine types
   const filterTypes = [];
   filters.forEach((filter) => {
@@ -6043,106 +6051,98 @@ function useFilterSettings(plugins, filters) {
   });
 
   // Deepcopy
-  const data = JSON.parse(JSON.stringify(plugins));
+  const data = JSON.parse(JSON.stringify(items));
   const filterData = [];
   // Loop on data
   for (let i = 0; i < data.length; i++) {
-    // Prepare data
-    const items = [];
-    const plugin = JSON.parse(JSON.stringify(data[i]));
-    // Get SETTING_NAME as id
-    const settings = plugin.settings;
-    for (const key in settings) {
-      items.push({ id: key });
-      items.push(settings[key]);
-    }
-    // Get settings and remove settings from plugin to avoid duplicate
-    delete plugin["settings"];
-    items.push(plugin);
+    const item = data[i];
 
     // Check if one filter of type "select" in filters
-    if (filterTypes.includes("select") && !isMatchingSelect(filters, items))
+    if (filterTypes.includes("select") && !isItemSelect(filters, item))
       continue;
 
-    if (filterTypes.includes("keyword") && !isMatchingKeyword(filters, items))
+    if (filterTypes.includes("keyword") && !isItemKeyword(filters, item))
       continue;
 
     filterData.push(data[i]);
   }
+  return filterData;
 }
 
-function isMatchingKeyword(filters, items) {
+function removeDefaultFilters(filters) {
+  // Remove filters with type "select" and "all" as value
+  filters = filters.filter((filter) => {
+    return filter.type !== "select" || filter.value !== "all";
+  });
+  // Remove filters with type "keyword" and empty value
+  filters = filters.filter((filter) => {
+    return filter.type !== "keyword" || filter.value !== "";
+  });
+  return filters;
+}
+
+function isItemKeyword(filters, item) {
   // Match if at least one match
-  let atLeastOneMatch = false;
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    for (let j = 0; j < filters.length; j++) {
-      const filter = filters[j];
-      // Avoid filter cases
-      const filterValue = filter.value;
-      const filterType = filter.type;
+  for (let j = 0; j < filters.length; j++) {
+    const filter = filters[j];
+    // Avoid filter cases
+    const filterValue = filter.value;
+    const filterType = filter.type;
+    if (filterType !== "keyword" || (filterType === "keyword" && !filterValue))
+      continue;
+
+    for (let k = 0; k < filter.keys.length; k++) {
+      const key = filter.keys[k];
+      // Avoid if key not found in item
+      if (!item[key]) continue;
+      const value = item[key].replaceAll("_", " ").toLowerCase();
+      // Avoid non-primitive value
+      if (typeof value !== "string" && typeof value !== "number") continue;
+      // Check if value contains filter value
+
       if (
-        filterType !== "keyword" ||
-        (filterType === "keyword" && !filterValue)
-      )
-        continue;
-
-      for (let k = 0; k < filter.keys.length; k++) {
-        const key = filter.keys[k];
-        // Avoid if key not found in item
-        if (!item[key]) continue;
-        const value = item[key].replaceAll("_", " ").toLowerCase();
-        // Avoid non-primitive value
-        if (typeof value !== "string" && typeof value !== "number") continue;
-        // Check if value contains filter value
-
-        if (
-          value &&
-          value
-            .toString()
-            .toLowerCase()
-            .includes(filter.value.replaceAll("_", " ").toLowerCase())
-        ) {
-          atLeastOneMatch = true;
-          break;
-        }
+        value &&
+        value
+          .toString()
+          .toLowerCase()
+          .includes(filter.value.replaceAll("_", " ").toLowerCase())
+      ) {
+        return true;
       }
     }
   }
 
-  return atLeastOneMatch;
+  return false;
 }
 
-function isMatchingSelect(filters, items) {
-  let atLeastOneMatch = false;
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    for (let j = 0; j < filters.length; j++) {
-      const filter = filters[j];
-      // Avoid filter cases
-      const filterValue = filter.value;
-      const filterType = filter.type;
-      if (
-        filterType !== "select" ||
-        (filterType === "select" && filterValue === "all")
-      )
-        continue;
-      for (let k = 0; k < filter.keys.length; k++) {
-        const key = filter.keys[k];
-        // Avoid if key not found in item
-        if (!item[key]) continue;
-        const value = item[key];
-        // Avoid non-primitive value
-        if (typeof value !== "string" && typeof value !== "number") continue;
-        // Value need to match exactly filter value
-        if (value.toString().toLowerCase() === filterValue.toLowerCase()) {
-          atLeastOneMatch = true;
-          break;
-        }
+function isItemSelect(filters, item) {
+  for (let j = 0; j < filters.length; j++) {
+    const filter = filters[j];
+    // Avoid filter cases
+    const filterValue = filter.value;
+    const filterType = filter.type;
+    if (
+      filterType !== "select" ||
+      (filterType === "select" && filterValue === "all")
+    )
+      continue;
+    for (let k = 0; k < filter.keys.length; k++) {
+      const key = filter.keys[k];
+      // Avoid if key not found in item
+      if (!item[key]) continue;
+      const value = item[key];
+      // Avoid non-primitive value
+      if (typeof value !== "string" && typeof value !== "number") continue;
+      // Value need to match exactly filter value
+      if (value.toString().toLowerCase() === filterValue.toLowerCase()) {
+        return true;
       }
     }
   }
-  return atLeastOneMatch;
+  return false;
 }
 
-useFilterSettings(data, filters);
+//useFilter(data, filtersPlugin);
+
+const setting = [data[0]["settings"]["USE_CLIENT_CACHE"]];
+useFilter(setting, filtersSettings);

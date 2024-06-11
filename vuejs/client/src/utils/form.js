@@ -74,8 +74,8 @@ function useGetFormDataAttr(el) {
 }
 
 /**
-  @name useFilterSettingsAdvanced
-  @description   Filter advanced settings templates based on filters object.
+  @name useFilter
+  @description   Filter keys of an items list of objects with filters.
   @example 
   const filters = [
   {
@@ -90,91 +90,46 @@ function useGetFormDataAttr(el) {
   },
 ];
 
-  const plugins = [
+  const data = [
   {
     id: "clientcache",
     stream: "no",
     name: "Client cache",
     description: "Manage caching for clients.",
-    version: "1.0",
-    type: "core",
-    method: "manual",
-    page: false,
-    settings: {
-      USE_CLIENT_CACHE: {
-        context: "multisite",
-        default: "no",
-        help: "Tell client to store locally static files.",
-        id: "use-client-cache-default",
-        label: "Use client cache",
-        regex: "^(yes|no)$",
-        type: "check",
-        containerClass: "z-3",
-        pattern: "^(yes|no)$",
-        inpType: "checkbox",
-        name: "Use client cache",
-        columns: {
-          pc: 4,
-          tablet: 6,
-          mobile: 12,
-        },
-        disabled: true,
-        value: "yes",
-        popovers: [
-          {
-            iconColor: "info",
-            iconName: "info",
-            text: "Tell client to store locally static files.",
-          },
-          {
-            iconColor: "orange",
-            iconName: "disk",
-            text: "inp_popover_multisite",
-          },
-        ],
-      },
-    },
-    checksum: null,
-  },
+},
+  {
+    id: "whitelist",
+    stream: "no",
+    name: "whitelist",
+    description: "Whitelist IP",
+}
 ];
   @param {object} plugins - Object with the plugins data.
   @param {object} filters - Object with the filters data.
 */
-function useFilterPluginsAdvanced(plugins, filters) {
+function useFilter(items, filters) {
   // loop on filters to determine types
   filters = removeDefaultFilters(filters);
 
-  // Case no filters, return plugins
-  if (filters.length === 0) return plugins;
-
+  // Case no filters, return items
+  if (filters.length === 0) return items;
+  // loop on filters to determine types
   const filterTypes = [];
   filters.forEach((filter) => {
     if (!filterTypes.includes(filter.type)) filterTypes.push(filter.type);
   });
 
   // Deepcopy
-  const data = JSON.parse(JSON.stringify(plugins));
+  const data = JSON.parse(JSON.stringify(items));
   const filterData = [];
   // Loop on data
   for (let i = 0; i < data.length; i++) {
-    // Prepare data
-    const items = [];
-    const plugin = JSON.parse(JSON.stringify(data[i]));
-    // Get SETTING_NAME as id
-    const settings = plugin.settings;
-    for (const key in settings) {
-      items.push({ id: key });
-      items.push(settings[key]);
-    }
-    // Get settings and remove settings from plugin to avoid duplicate
-    delete plugin["settings"];
-    items.push(plugin);
-
+    const item = data[i];
     // Check if one filter of type "select" in filters
-    if (filterTypes.includes("select") && !isMatchingSelect(filters, items))
+    if (filterTypes.includes("select") && !isItemSelect(filters, item))
       continue;
 
-    if (filterTypes.includes("keyword") && !isMatchingKeyword(filters, items))
+    if (filterTypes.includes("keyword") && !isItemKeyword(filters, item))
       continue;
 
     filterData.push(data[i]);
@@ -213,7 +168,7 @@ function removeDefaultFilters(filters) {
 }
 
 /**
-  @name isMatchingKeyword
+  @name isItemKeyword
   @description  Check all items keys if at least one match with the filter value.
   @example 
     const filters = [
@@ -231,46 +186,42 @@ function removeDefaultFilters(filters) {
   @param filters - Array of filters
   @param items - Array of items
 */
-function isMatchingKeyword(filters, items) {
+function isItemKeyword(filters, item) {
   // Match if at least one match
-  let atLeastOneMatch = false;
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    for (let j = 0; j < filters.length; j++) {
-      const filter = filters[j];
-      // Avoid filter cases
-      const filterValue = filter.value;
-      const filterType = filter.type;
-      if (filterType !== "keyword") continue;
+  for (let j = 0; j < filters.length; j++) {
+    const filter = filters[j];
+    // Avoid filter cases
+    const filterValue = filter.value;
+    const filterType = filter.type;
+    if (filterType !== "keyword" || (filterType === "keyword" && !filterValue))
+      continue;
 
-      for (let k = 0; k < filter.keys.length; k++) {
-        const key = filter.keys[k];
-        // Avoid if key not found in item
-        if (!item[key]) continue;
-        const value = item[key].replaceAll("_", " ").toLowerCase();
-        // Avoid non-primitive value
-        if (typeof value !== "string" && typeof value !== "number") continue;
-        // Check if value contains filter value
+    for (let k = 0; k < filter.keys.length; k++) {
+      const key = filter.keys[k];
+      // Avoid if key not found in item
+      if (!item[key]) continue;
+      const value = item[key].replaceAll("_", " ").toLowerCase();
+      // Avoid non-primitive value
+      if (typeof value !== "string" && typeof value !== "number") continue;
+      // Check if value contains filter value
 
-        if (
-          value &&
-          value
-            .toString()
-            .toLowerCase()
-            .includes(filterValue.replaceAll("_", " ").toLowerCase())
-        ) {
-          atLeastOneMatch = true;
-          break;
-        }
+      if (
+        value &&
+        value
+          .toString()
+          .toLowerCase()
+          .includes(filter.value.replaceAll("_", " ").toLowerCase())
+      ) {
+        return true;
       }
     }
   }
 
-  return atLeastOneMatch;
+  return false;
 }
 
 /**
-  @name isMatchingSelect
+  @name isItemSelect
   @description  Check all items keys if at least one match exactly the filter value.
   @example 
     const filters = [
@@ -288,33 +239,31 @@ function isMatchingKeyword(filters, items) {
   @param filters - Array of filters
   @param items - Array of items
 */
-function isMatchingSelect(filters, items) {
-  let atLeastOneMatch = false;
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    for (let j = 0; j < filters.length; j++) {
-      const filter = filters[j];
-      // Avoid filter cases
-      const filterValue = filter.value;
-      const filterType = filter.type;
-      if (filterType !== "select") continue;
-
-      for (let k = 0; k < filter.keys.length; k++) {
-        const key = filter.keys[k];
-        // Avoid if key not found in item
-        if (!item[key]) continue;
-        const value = item[key];
-        // Avoid non-primitive value
-        if (typeof value !== "string" && typeof value !== "number") continue;
-        // Value need to match exactly filter value
-        if (value.toString().toLowerCase() === filterValue.toLowerCase()) {
-          atLeastOneMatch = true;
-          break;
-        }
+function isItemSelect(filters, item) {
+  for (let j = 0; j < filters.length; j++) {
+    const filter = filters[j];
+    // Avoid filter cases
+    const filterValue = filter.value;
+    const filterType = filter.type;
+    if (
+      filterType !== "select" ||
+      (filterType === "select" && filterValue === "all")
+    )
+      continue;
+    for (let k = 0; k < filter.keys.length; k++) {
+      const key = filter.keys[k];
+      // Avoid if key not found in item
+      if (!item[key]) continue;
+      const value = item[key];
+      // Avoid non-primitive value
+      if (typeof value !== "string" && typeof value !== "number") continue;
+      // Value need to match exactly filter value
+      if (value.toString().toLowerCase() === filterValue.toLowerCase()) {
+        return true;
       }
     }
   }
-  return atLeastOneMatch;
+  return false;
 }
 
-export { useForm, useFilterPluginsAdvanced };
+export { useForm, useFilter };
