@@ -10,7 +10,7 @@ import Select from "@components/Forms/Field/Select.vue";
 import Button from "@components/Widget/Button.vue";
 import { v4 as uuidv4 } from "uuid";
 import { plugin_types } from "@utils/variables";
-import { useFilterPluginsAdvanced } from "@utils/form.js";
+import { useFilter } from "@utils/form.js";
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
@@ -71,16 +71,27 @@ const data = reactive({
   type: "all",
   context: "all",
   filtered: computed(() => {
-    const filters = [
-      {
-        type: "keyword",
-        value: data.keyword,
-        keys: ["id", "label", "name", "description", "help", "value"],
-      },
+    const filterPlugin = [
       {
         type: "select",
         value: data.type,
         keys: ["type"],
+      },
+    ];
+
+    const filterSettings = [
+      {
+        type: "keyword",
+        value: data.keyword,
+        keys: [
+          "id",
+          "label",
+          "name",
+          "description",
+          "help",
+          "value",
+          "setting_name",
+        ],
       },
       {
         type: "select",
@@ -88,9 +99,32 @@ const data = reactive({
         keys: ["context"],
       },
     ];
-    // deep copy
+
+    // Deep copy
     const template = JSON.parse(JSON.stringify(props.template));
-    const filterData = useFilterPluginsAdvanced(template, filters);
+    // Start plugin filtering
+    const filterPlugins = useFilter(template, filterPlugin);
+    // Filter settings
+    filterPlugins.forEach((plugin, id) => {
+      // loop on plugin settings dict
+      const settings = [];
+      for (const [key, value] of Object.entries(plugin.settings)) {
+        // add to value the key as setting_name
+        settings.push({ ...value, setting_name: key });
+      }
+      const filterSettingsData = useFilter(settings, filterSettings);
+      // Transform list of dict by a dict of dict with setting_name as key and add update plugin settings
+      const settingsData = {};
+      filterSettingsData.forEach((setting) => {
+        settingsData[setting.setting_name] = setting;
+      });
+      filterPlugins[id].settings = settingsData;
+    });
+
+    // Case no settings found, remove plugin
+    const filterData = filterPlugins.filter((plugin) => {
+      return Object.keys(plugin.settings).length > 0;
+    });
     data.plugins = getPluginNames(filterData);
     data.currPlugin = getFirstPlugin(filterData);
     return filterData;
