@@ -299,7 +299,7 @@ body {
 }
 
 .input-editor-error {
-  @apply absolute w-full h-full border-2 border-red-500 z-10 pointer-events-none outline-red-500;
+  @apply absolute w-full h-full border-2 border-red-500 z-20 pointer-events-none outline-red-500;
 }
 
 .input-clipboard-container {
