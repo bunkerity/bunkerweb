@@ -15,7 +15,7 @@ from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
-from threading import Thread
+from threading import Event, Thread
 from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Union
@@ -33,6 +33,7 @@ from JobScheduler import JobScheduler
 from jobs import Job  # type: ignore
 from API import API  # type: ignore
 
+APPLYING_CHANGES = Event()
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 
@@ -82,6 +83,14 @@ MASTER_MODE = environ.get("MASTER_MODE", "no") == "yes"
 
 
 def handle_stop(signum, frame):
+    current_time = datetime.now()
+    while APPLYING_CHANGES.is_set() and (datetime.now() - current_time).seconds < 30:
+        logger.warning("Waiting for the changes to be applied before stopping ...")
+        sleep(1)
+
+    if APPLYING_CHANGES.is_set():
+        logger.warning("Timeout reached, stopping without waiting for the changes to be applied ...")
+
     if SCHEDULER is not None:
         SCHEDULER.clear()
     stop(0)
@@ -450,6 +459,8 @@ if __name__ == "__main__":
             run_in_slave_mode()
             stop(1)
 
+        APPLYING_CHANGES.set()
+
         if (
             INTEGRATION in ("Swarm", "Kubernetes", "Autoconf")
             or not tmp_variables_path.exists()
@@ -520,6 +531,7 @@ if __name__ == "__main__":
 
         def check_configs_changes():
             # Checking if any custom config has been created by the user
+            assert SCHEDULER is not None, "SCHEDULER is not defined"
             logger.info("Checking if there are any changes in custom configs ...")
             custom_configs = []
             db_configs = SCHEDULER.db.get_custom_configs()
@@ -561,6 +573,7 @@ if __name__ == "__main__":
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
+            assert SCHEDULER is not None, "SCHEDULER is not defined"
             logger.info(f"Checking if there are any changes in {_type} plugins ...")
             plugin_path = EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
@@ -833,6 +846,8 @@ if __name__ == "__main__":
             if not HEALTHY_PATH.is_file():
                 HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")
 
+            APPLYING_CHANGES.clear()
+
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
             errors = 0
@@ -929,6 +944,7 @@ if __name__ == "__main__":
                     sleep(5)
 
             if NEED_RELOAD:
+                APPLYING_CHANGES.set()
                 logger.debug(f"Changes: {changes}")
                 SCHEDULER.try_database_readonly(force=True)
                 CHANGES.clear()
