@@ -6,6 +6,7 @@
 #       cff03b039d850f370a7362f3313e5268
 
 use strict;
+no warnings 'nonchar';
 
 # 0xD800 - 0xDFFF are used to encode supplementary codepoints
 # 0x10000 - 0x10FFFF are supplementary codepoints

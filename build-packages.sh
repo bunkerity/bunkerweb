@@ -5,7 +5,7 @@
 # Build packages. Use current checked out version, or a specific tag/commit.
 
 # Files requiring a version bump
-VERSION_FILES="lua-cjson-2.1devel-1.rockspec lua-cjson.spec lua_cjson.c manual.txt runtests.sh tests/test.lua"
+VERSION_FILES="lua-cjson-2.1devel-1.rockspec lua-cjson.spec lua_cjson.c manual.adoc runtests.sh tests/test.lua"
 
 [ "$1" ] && BRANCH="$1" || BRANCH="`git describe --match '[1-3].[0-9]*'`"
 VERSION="`git describe --match '[1-3].[0-9]*' $BRANCH`"

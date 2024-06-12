@@ -1,6 +1,7 @@
 *.html
 *.o
 *.so
+*.a
 notes
 packages
 tags

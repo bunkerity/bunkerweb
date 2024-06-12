@@ -68,6 +68,13 @@ else()
     set(_lua_module_dir "${_lua_lib_dir}/lua/5.1")
 endif()
 
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-Dinline=__inline)
+    add_definitions(-Dsnprintf=_snprintf)
+    add_definitions(-Dstrncasecmp=_strnicmp)
+endif()
+
 add_library(cjson MODULE lua_cjson.c strbuf.c ${FPCONV_SOURCES})
 set_target_properties(cjson PROPERTIES PREFIX "")
 target_link_libraries(cjson ${_MODULE_LINK})

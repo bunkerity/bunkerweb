@@ -332,3 +332,45 @@ Cannot serialise function: type not supported
 
 {"valid":"valid"}
 ["one","two","three"]
+
+
+
+=== TEST 23: array-like proxy object with __len and __index
+--- lua
+local cjson = require "cjson"
+local real_array = {"foo", "bar", "baz"}
+local proxy_array = {}
+setmetatable(proxy_array, {
+  __len = function() return 3 end,
+  __index = function(t, k)
+    return real_array[k]
+  end,
+})
+
+print(cjson.encode(proxy_array))
+--- out
+["foo","bar","baz"]
+
+
+
+=== TEST 24: check that integers are handled correctly on Lua 5.3+
+--- lua
+local lv = tonumber((_VERSION):match("Lua 5%.([0-9]+)"))
+
+if lv >= 3 then
+  local cjson = require "cjson"
+  local array = cjson.decode [[ [10, 10.0, 3.5] ]]
+  for i = 1, 4 do
+    print(tostring(i) .. ": " .. tostring(math.type(array[i])))
+  end
+else
+  print("1: integer")
+  print("2: float")
+  print("3: float")
+  print("4: nil")
+end
+--- out
+1: integer
+2: float
+3: float
+4: nil
