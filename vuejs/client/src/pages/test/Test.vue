@@ -5,6 +5,7 @@ import Select from "@components/Forms/Field/Select.vue";
 import Input from "@components/Forms/Field/Input.vue";
 import Datepicker from "@components/Forms/Field/Datepicker.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
+import Editor from "@components/Forms/Field/Editor.vue";
 import Button from "@components/Widget/Button.vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
@@ -42,7 +43,6 @@ const inputData = {
   required: true,
   label: "Test input",
   pattern: "(test)",
-  tabId: "1",
   columns: { pc: 12, tablet: 12, mobile: 12 },
 };
 
@@ -115,6 +115,17 @@ const comboboxData = {
   required: false,
   requiredValues: ["no"],
   label: "Test combobox",
+  columns: { pc: 12, tablet: 12, mobile: 12 },
+};
+
+const editorData = {
+  id: "test-editor",
+  value: "yes",
+  name: "test-editor",
+  disabled: false,
+  required: true,
+  pattern: "(test)",
+  label: "Test editor",
   tabId: "1",
   columns: { pc: 12, tablet: 12, mobile: 12 },
 };
@@ -132,6 +143,7 @@ const comboboxData = {
       <!-- widget grid -->
       <Grid>
         <Combobox v-bind="comboboxData" />
+        <Editor v-bind="editorData" />
       </Grid>
     </GridLayout>
   </DashboardLayout>

@@ -282,6 +282,26 @@ body {
   @apply relative flex flex-col items-start;
 }
 
+.input-editor-container {
+  @apply h-full relative;
+}
+
+.disabled.input-editor-container {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.input-editor {
+  @apply min-h-[200px] w-full;
+}
+
+.disabled.input-editor {
+  @apply -z-10 pointer-events-none;
+}
+
+.input-editor-error {
+  @apply absolute w-full h-full border-2 border-red-500 z-10 pointer-events-none outline-red-500;
+}
+
 .invalid.input-regular,
 .invalid.input-regular:hover,
 .invalid.input-regular:focus,

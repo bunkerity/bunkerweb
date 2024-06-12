@@ -108,6 +108,7 @@
   "inp_select_plugin_context_desc": "Only show plugins of the chosen context.",
   "inp_search_key": "search key",
   "inp_search_key_desc": "Search within the settings key.",
+  "inp_editor_desc" : "Editor input behaving like a code editor.",
   "action_send": "send {name}",
   "action_start": "start {name}",
   "action_disable": "disable {name}",
