@@ -282,6 +282,10 @@ onMounted(() => {
     const editorArea = document.querySelector("textarea.ace_text-input");
     editorArea.tabIndex = contentIndex;
     editorArea.setAttribute("name", props.name);
+    editorArea.addEventListener("focus", (e) => {
+      const editorRange = editorEl.editor.getSelectionRange();
+      editorEl.editor.gotoLine(editorRange.start.row, editorRange.start.column);
+    });
   } catch (e) {}
 });
 

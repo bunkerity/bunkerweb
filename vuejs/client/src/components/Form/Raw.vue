@@ -3,10 +3,10 @@ import { defineProps, reactive, onMounted, computed } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
-import Input from "@components/Forms/Field/Input.vue";
+import Editor from "@components/Forms/Field/Editor.vue";
 import Button from "@components/Widget/Button.vue";
 import { v4 as uuidv4 } from "uuid";
-import { isItemKeyword } from "@utils/form.js";
+
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
@@ -59,6 +59,21 @@ const props = defineProps({
   },
 });
 
+const data = reactive({
+  format: computed(() => {
+    const dataStr = JSON.stringify(props.template);
+    // Add a new line after the comma
+    return dataStr.replace(/,/g, ",\n");
+  }),
+});
+
+const editorData = {
+  value: data.format,
+  name: "test-editor",
+  label: "Test editor",
+  columns: { pc: 12, tablet: 12, mobile: 12 },
+};
+
 const buttonSave = {
   id: uuidv4(),
   text: "action_save",
@@ -80,9 +95,7 @@ const buttonSave = {
     <Title type="card" :title="'dashboard_raw_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_raw_mode_subtitle'" />
     <Container class="col-span-12 w-full">
-      <div>
-        {{ props.template }}
-      </div>
+      <Editor v-bind="editorData" />
     </Container>
     <Button v-bind="buttonSave" />
   </Container>

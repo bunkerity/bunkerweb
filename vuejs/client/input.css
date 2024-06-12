@@ -291,7 +291,7 @@ body {
 }
 
 .input-editor {
-  @apply min-h-[200px] w-full;
+  @apply z-10 min-h-[200px] w-full;
 }
 
 .disabled.input-editor {
@@ -303,11 +303,11 @@ body {
 }
 
 .input-clipboard-container {
-  @apply rounded-full  absolute flex w-full h-full;
+  @apply z-20 rounded-full absolute flex;
 }
 
 .editor.input-clipboard-container {
-  @apply top-2 right-2;
+  @apply top-2 right-4;
 }
 
 .pw-input.input-clipboard-container {
@@ -323,11 +323,11 @@ body {
 }
 
 .input-clipboard-button {
-  @apply transition-all h-5.5 w-5.5 md:h-6 md:w-6 absolute flex block top-0 right-0 text-gray-500 hover:text-gray-900 transition duration-300 ease-in-out cursor-pointer focus:outline-none focus:ring-0 rounded-full hover:bg-gray-100 z-10;
+  @apply transition-all h-5.5 w-5.5 md:h-6 md:w-6 absolute flex block top-0 right-0 text-gray-500 hover:text-gray-900 transition duration-300 ease-in-out cursor-pointer  rounded-full hover:bg-gray-100 z-10;
 }
 
 .copied.input-clipboard-button {
-  @apply opacity-100;
+  @apply focus:ring-0 opacity-100;    
 }
 
 .not-copied.input-clipboard-button {
