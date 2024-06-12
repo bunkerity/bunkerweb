@@ -352,7 +352,7 @@ const emits = defineEmits(["inp"]);
       >
         <div>
           <label :class="['sr-only']" :for="`${props.id}-combobox`">
-            {{ $t("inp_combobox", "inp_combobox") }}
+            {{ $t("inp_combobox") }}
           </label>
           <input
             :tabindex="select.isOpen ? props.tabId : '-1'"
@@ -379,7 +379,7 @@ const emits = defineEmits(["inp"]);
             role="alert"
           >
             <p class="combobox-no-match">
-              {{ $t("inp_combobox_no_match", "inp_combobox_no_match") }}
+              {{ $t("inp_combobox_no_match") }}
             </p>
           </div>
         </div>

@@ -59,7 +59,8 @@ function getI18n(pagesArr = []) {
     availableLocales: availablesLangs,
     fallbackWarn: false,
     missingWarn: false,
-  });
+    warnHtmlMessage: false
+    });
 
   return i18n;
 }
