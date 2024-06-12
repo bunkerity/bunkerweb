@@ -3,8 +3,8 @@
 void test_metadata(MMDB_s *mmdb, const char *mode_desc) {
     cmp_ok(mmdb->metadata.node_count,
            "==",
-           37,
-           "node_count is 37 - %s",
+           163,
+           "node_count is 163 - %s",
            mode_desc);
     cmp_ok(mmdb->metadata.record_size,
            "==",
@@ -197,7 +197,7 @@ void test_metadata_as_data_entry_list(MMDB_s *mmdb, const char *mode_desc) {
         if (strcmp(key_name, "node_count") == 0) {
             MMDB_entry_data_list_s *value = entry_data_list =
                 entry_data_list->next;
-            cmp_ok(value->entry_data.uint32, "==", 37, "node_count == 37");
+            cmp_ok(value->entry_data.uint32, "==", 163, "node_count == 163");
         } else if (strcmp(key_name, "record_size") == 0) {
             MMDB_entry_data_list_s *value = entry_data_list =
                 entry_data_list->next;

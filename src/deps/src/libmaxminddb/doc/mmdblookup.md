@@ -9,8 +9,10 @@ mmdblookup --file [FILE PATH] --ip [IP ADDRESS] [DATA PATH]
 # DESCRIPTION
 
 `mmdblookup` looks up an IP address in the specified MaxMind DB file. The
-record for the IP address is displayed in a JSON-like structure with type
-annotations.
+record for the IP address is displayed with `{}` to denote maps and `[]` to
+denote arrays. The values are followed by type annotations. This output is
+_not_ JSON and is not intended to be used as such. If you need JSON, please
+see [`mmdbinspect`](https://github.com/maxmind/mmdbinspect).
 
 If an IP's data entry resolves to a map or array, you can provide a lookup
 path to only show part of that data.
