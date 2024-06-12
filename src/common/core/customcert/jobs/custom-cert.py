@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -21,8 +20,8 @@ LOGGER = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
 JOB = Job(LOGGER)
 
 
-def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], first_server: str) -> Tuple[bool, str]:
-    with suppress(BaseException):
+def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], first_server: str) -> Tuple[bool, Union[str, BaseException]]:
+    try:
         ret = False
         if not cert_file or not key_file:
             return False, "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates"
@@ -54,7 +53,8 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
                 LOGGER.error(f"Error while caching custom-key key.pem file : {err}")
 
         return ret, ""
-    return False, "exception"
+    except BaseException as e:
+        return False, e
 
 
 status = 0
@@ -112,8 +112,8 @@ try:
 
                 LOGGER.info(f"Checking certificate for {first_server} ...")
                 need_reload, err = check_cert(cert_file, key_file, first_server)
-                if err == "exception":
-                    LOGGER.exception(f"Exception while checking {first_server}'s certificate, skipping ...")
+                if isinstance(err, BaseException):
+                    LOGGER.error(f"Exception while checking {first_server}'s certificate, skipping ... \n{err}")
                     skipped_servers.append(first_server)
                     continue
                 elif err:
