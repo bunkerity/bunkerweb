@@ -77,9 +77,9 @@
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.12",
+      "name": "lua-cjson v2.1.0.14",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "881accc8fadca5ec02aa34d364df2a1aa25cd2f9"
+      "commit": "f95cd9ea1e39221a36818772eb85f05b4164bbb1"
     },
     {
       "id": "lua-ffi-zlib",
