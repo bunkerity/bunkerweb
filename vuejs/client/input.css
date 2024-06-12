@@ -302,6 +302,50 @@ body {
   @apply absolute w-full h-full border-2 border-red-500 z-10 pointer-events-none outline-red-500;
 }
 
+.input-clipboard-container {
+  @apply rounded-full  absolute flex w-full h-full;
+}
+
+.editor.input-clipboard-container {
+  @apply top-2 right-2;
+}
+
+.pw-input.input-clipboard-container {
+  @apply top-1 md:top-1.5 right-[2.25rem];
+}
+
+.no-pw-input.input-clipboard-container {
+  @apply top-1 md:top-1.5 right-2;
+}
+
+.input-clipboard-svg {
+  @apply stroke-gray-800 dark:stroke-gray-300 ;
+}
+
+.input-clipboard-button {
+  @apply transition-all h-5.5 w-5.5 md:h-6 md:w-6 absolute flex block top-0 right-0 text-gray-500 hover:text-gray-900 transition duration-300 ease-in-out cursor-pointer focus:outline-none focus:ring-0 rounded-full hover:bg-gray-100 z-10;
+}
+
+.copied.input-clipboard-button {
+  @apply opacity-100;
+}
+
+.not-copied.input-clipboard-button {
+  @apply opacity-[50%] hover:opacity-100;
+}
+
+.input-clipboard-copy {
+  @apply absolute bg-green-500 text-white px-1 py-0.5 rounded z-50 text-sm w-full min-w-[150px];
+}
+
+.editor.input-clipboard-copy {
+  @apply top-0 right-0;
+}
+
+.input.input-clipboard-copy {
+  @apply -top-0.5 right-0;
+}
+
 .invalid.input-regular,
 .invalid.input-regular:hover,
 .invalid.input-regular:focus,
@@ -389,33 +433,6 @@ body {
   @apply flex scale-110 h-5 w-5 items-center align-middle;
 }
 
-.input-clipboard-container {
-  @apply rounded-full  absolute flex h-5 w-5;
-}
-
-.pw-input.input-clipboard-container {
-  @apply right-[2.25rem];
-}
-
-.no-pw-input.input-clipboard-container {
-  @apply right-2;
-}
-
-.input-clipboard-button {
-  @apply transition-all rounded-full h-5 w-5 flex items-center align-middle hover:brightness-90;
-}
-
-.enabled.input-clipboard-button {
-  @apply bg-white dark:bg-slate-700;
-}
-
-.disabled.input-clipboard-button {
-  @apply bg-gray-400 dark:bg-gray-800;
-}
-
-.input-clipboard-svg {
-  @apply stroke-gray-800 dark:stroke-gray-300 h-full w-full;
-}
 
 /* POPOVER */
 

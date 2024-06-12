@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vueuse/core": "^10.11.0",
     "ace-builds": "^1.24.2",
     "flag-icons": "^6.15.0",
     "flatpickr": "^4.6.13",

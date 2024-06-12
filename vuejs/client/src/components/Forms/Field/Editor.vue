@@ -1,13 +1,13 @@
 <script setup>
 import {
   reactive,
-  ref,
   computed,
   defineEmits,
   onMounted,
   defineProps,
   onUnmounted,
 } from "vue";
+import { useClipboard } from "@vueuse/core";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
@@ -16,30 +16,24 @@ import { v4 as uuidv4 } from "uuid";
 import "@assets/script/editor/ace.js";
 import "@assets/script/editor/theme-dracula.js";
 import "@assets/script/editor/theme-dawn.js";
+
 /**
   @name Forms/Field/Editor.vue
-  @description This component is used to create a complete editor field input with error handling and label.
+  @description This component is used to create a complete editor field  with error handling and label.
   We can also add popover to display more information.
   It is mainly use in forms.
   @example
   {
-    id: 'test-input',
-    value: 'yes',
-    type: "text",
-    name: 'test-input',
-    disabled: false,
-    required: true,
-    label: 'Test input',
-    pattern : "(test)",
-    inpType: "input",
-    popovers : [
-      {
-        text: "This is a popover text",
-        iconName: "info",
-        iconColor: "info",
-      },
-    ],
-  }
+  id: "test-editor",
+  value: "yes",
+  name: "test-editor",
+  disabled: false,
+  required: true,
+  pattern: "(test)",
+  label: "Test editor",
+  tabId: "1",
+  columns: { pc: 12, tablet: 12, mobile: 12 },
+};
   @param {string} [id=uuidv4()] - Unique id
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.  @param {string} label
@@ -57,6 +51,8 @@ import "@assets/script/editor/theme-dawn.js";
   @param {string} [headerClass=""]
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
+
+const { text, copy, copied, isSupported } = useClipboard({ legacy: true });
 
 const props = defineProps({
   // id && value && method
@@ -99,6 +95,7 @@ const props = defineProps({
   clipboard: {
     type: Boolean,
     required: false,
+    default: true,
   },
   label: {
     type: String,
@@ -324,24 +321,20 @@ onUnmounted(() => {
         :aria-description="$t('inp_editor_desc')"
         :id="props.id"
       ></div>
-      <div
-        v-if="props.clipboard && inp.isClipAllow"
-        :class="[props.type === 'password' ? 'pw-input' : 'no-pw-input']"
-        class="input-clipboard-container"
-      >
+      <div v-if="props.clipboard" class="input-clipboard-container editor">
         <button
+          type="button"
+          :class="['input-clipboard-button', copied ? 'copied' : 'not-copied']"
           :tabindex="contentIndex"
-          @click.prevent="copyClipboard()"
-          :class="[props.disabled ? 'disabled' : 'enabled']"
-          class="input-clipboard-button"
+          @click.prevent="copy(editor.value)"
           :aria-describedby="`${props.id}-clipboard-text`"
         >
           <span :id="`${props.id}-clipboard-text`" class="sr-only"
             >{{ $t("inp_input_clipboard_desc") }}
           </span>
           <svg
-            role="img"
             aria-hidden="true"
+            role="img"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -352,9 +345,12 @@ onUnmounted(() => {
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
-              d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
-            />
+              d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z"
+            ></path>
           </svg>
+          <div v-if="copied" role="alert" class="editor input-clipboard-copy">
+            {{ $t("inp_input_clipboard_copied") }}
+          </div>
         </button>
       </div>
     </div>
