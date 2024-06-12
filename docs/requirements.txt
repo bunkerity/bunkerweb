@@ -331,9 +331,9 @@ mkdocs-print-site-plugin==2.5.0 \
     --hash=sha256:48b3d41ae80384de72062b2712fce677f2e46d8364d9fe603ba837b0cf7156a4 \
     --hash=sha256:95dccc8d5cc8a59da67815a2d3304ef0101b065e363f2b9ac919c23d6196dd24
     # via -r requirements.in
-packaging==24.0 \
-    --hash=sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5 \
-    --hash=sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9
+packaging==24.1 \
+    --hash=sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002 \
+    --hash=sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124
     # via
     #   mkdocs
     #   typepy

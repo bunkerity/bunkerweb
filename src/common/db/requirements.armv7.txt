@@ -222,9 +222,9 @@ sqlalchemy==2.0.30 \
     --hash=sha256:f7703c2010355dd28f53deb644a05fc30f796bd8598b43f0ba678878780b6e4c \
     --hash=sha256:fa561138a64f949f3e889eb9ab8c58e1504ab351d6cf55259dc4c248eaa19da6
     # via -r requirements.armv7.in
-typing-extensions==4.12.1 \
-    --hash=sha256:6024b58b69089e5a89c347397254e35f1bf02a907728ec7fee9bf0fe837d203a \
-    --hash=sha256:915f5e35ff76f56588223f15fdd5938f9a1cf9195c0de25130c627e4d597f6d1
+typing-extensions==4.12.2 \
+    --hash=sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d \
+    --hash=sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8
     # via
     #   psycopg
     #   psycopg-pool
