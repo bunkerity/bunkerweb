@@ -14,7 +14,7 @@
          data-server-flash='[{"type" : "success", "title" : "title", "message" : "Success feedback"}, {"type" : "error", "title" : "title", "message" : "Error feedback"}, {"type" : "warning", "title" : "title", "message" : "Warning feedback"}, {"type" : "info", "title" : "title", "message" : "Info feedback"}]'>
     </div>
     <div class="hidden"
-         data-server-builder='[{"type":"card","containerColumns":{"pc":6,"tablet":6,"mobile":12},"widgets":[{"type":"Instance","data":{"details":[{"key":"instances_hostname","value":"bunkerweb"},{"key":"instances_type","value":"manual"},{"key":"instances_status","value":"instances_active"}],"status":"success","title":"bunkerweb","buttons":[{"attrs":{"data-form-INSTANCE_ID":"bunkerweb","data-form-operation":"reload","data-submit-form":"true"},"text":"action_reload","color":"warning","size":"normal"},{"attrs":{"data-form-INSTANCE_ID":"bunkerweb","data-form-operation":"stop","data-submit-form":"true"},"text":"action_stop","color":"error","size":"normal"}]}}]}]'>
+         data-server-builder='[{"type":"card","containerColumns":{"pc":6,"tablet":6,"mobile":12},"widgets":[{"type":"Instance","data":{"details":[{"key":"instances_hostname","value":"bunkerweb"},{"key":"instances_type","value":"manual"},{"key":"instances_status","value":"instances_active"}],"status":"success","title":"bunkerweb","buttons":[{"attrs":{"data-submit-form": {"operation" : "reload", "INSTANCE_ID" : "bunkerweb"}  },"text":"action_reload","color":"warning","size":"normal"},{"attrs":{"data-submit-form": { "operation" : "stop", "INSTANCE_ID" : "bunkerweb"} },"text":"action_stop","color":"error","size":"normal"}]}}]}]'>
     </div>
     <div id="app"></div>
     <script type="module" src="instances.js"></script>

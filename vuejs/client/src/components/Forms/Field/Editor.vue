@@ -276,6 +276,8 @@ onMounted(() => {
   editorEl.readOnlyBool(props.disabled);
   editorEl.editor.on("change", () => {
     editor.value = editorEl.getValue();
+    // emit inp
+    emits("inp", editor.value);
   });
   // Add tabindex to editor
   try {
@@ -321,7 +323,11 @@ onUnmounted(() => {
         class="input-editor-error"
       ></div>
       <div
-        :class="['input-editor', props.disabled ? 'disabled' : 'enabled']"
+        :class="[
+          'input-editor',
+          props.disabled ? 'disabled' : 'enabled',
+          props.editorClass,
+        ]"
         :aria-description="$t('inp_editor_desc')"
         :id="props.id"
       ></div>

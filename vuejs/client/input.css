@@ -291,7 +291,7 @@ body {
 }
 
 .input-editor {
-  @apply z-10 min-h-[200px] w-full;
+  @apply z-10 min-h-[200px] h-full w-full;
 }
 
 .disabled.input-editor {
@@ -307,7 +307,7 @@ body {
 }
 
 .editor.input-clipboard-container {
-  @apply top-2 right-4;
+  @apply top-2 right-6;
 }
 
 .pw-input.input-clipboard-container {
@@ -913,9 +913,10 @@ body {
 
 /* CONTENT COMPONENT */
 
-.content-text {
-  @apply leading-normal text-base mb-0 lowercase;
+.text-content {
+  @apply leading-normal mb-0 lowercase;
 }
+
 /* CONTENT DETAIL LSIT COMPONENT */
 
 .content-detail-list-container {
@@ -935,7 +936,7 @@ body {
 }
 
 .content-stat {
-  @apply my-1 font-bold dark:text-white/90 uppercase;
+  @apply my-1 font-bold dark:text-white/90 text-black uppercase;
 }
 
 /* TITLE */
@@ -1383,7 +1384,8 @@ body {
 .success.subtitle-card,
 .success.title-card,
 .success.title-container,
-.success.title-stat {
+.success.title-stat,
+.success.text-content {
   @apply text-green-500;
 }
 
@@ -1391,7 +1393,8 @@ body {
 .error.subtitle-card,
 .error.title-card,
 .error.title-container,
-.error.title-stat {
+.error.title-stat,
+.error.text-content {
   @apply text-red-500;
 }
 
@@ -1399,7 +1402,8 @@ body {
 .warning.subtitle-card,
 .warning.title-card,
 .warning.title-container,
-.warning.title-stat {
+.warning.title-stat,
+.warning.text-content {
   @apply text-yellow-500;
 }
 
@@ -1407,7 +1411,8 @@ body {
 .info.subtitle-card,
 .info.title-card,
 .info.title-container,
-.info.title-stat {
+.info.title-stat,
+.info.text-content {
   @apply text-sky-500;
 }
 
@@ -1415,7 +1420,8 @@ body {
 .purple.subtitle-card,
 .purple.title-card,
 .purple.title-container,
-.purple.title-stat {
+.purple.title-stat,
+.purple.text-content {
   @apply text-purple-500;
 }
 
@@ -1423,7 +1429,8 @@ body {
 .green.subtitle-card,
 .green.title-card,
 .green.title-container,
-.green.title-stat {
+.green.title-stat,
+.green.text-content {
   @apply text-green-500;
 }
 
@@ -1431,7 +1438,8 @@ body {
 .red.subtitle-card,
 .red.title-card,
 .red.title-container,
-.red.title-stat {
+.red.title-stat,
+.red.text-content {
   @apply text-red-500;
 }
 
@@ -1439,7 +1447,8 @@ body {
 .orange.subtitle-card,
 .orange.title-card,
 .orange.title-container,
-.orange.title-stat {
+.orange.title-stat,
+.orange.text-content {
   @apply text-orange-500;
 }
 
@@ -1447,7 +1456,8 @@ body {
 .blue.subtitle-card,
 .blue.title-card,
 .blue.title-container,
-.blue.title-stat {
+.blue.title-stat,
+.blue.text-content {
   @apply text-blue-500;
 }
 
@@ -1455,7 +1465,8 @@ body {
 .yellow.subtitle-card,
 .yellow.title-card,
 .yellow.title-container,
-.yellow.title-stat {
+.yellow.title-stat,
+.yellow.text-content {
   @apply text-yellow-500;
 }
 
@@ -1463,7 +1474,8 @@ body {
 .gray.subtitle-card,
 .gray.title-card,
 .gray.title-container,
-.gray.title-stat {
+.gray.title-stat,
+.gray.text-content {
   @apply text-gray-500;
 }
 
@@ -1471,7 +1483,8 @@ body {
 .dark.subtitle-card,
 .dark.title-card,
 .dark.title-container,
-.dark.title-stat {
+.dark.title-stat,
+.dark.text-content {
   @apply text-slate-500;
 }
 
@@ -1479,7 +1492,8 @@ body {
 .amber.subtitle-card,
 .amber.title-card,
 .amber.title-container,
-.amber.title-stat {
+.amber.title-stat,
+.amber.text-content {
   @apply text-amber-500;
 }
 
@@ -1487,7 +1501,8 @@ body {
 .emerald.subtitle-card,
 .emerald.title-card,
 .emerald.title-container,
-.emerald.title-stat {
+.emerald.title-stat,
+.emerald.text-content {
   @apply text-emerald-500;
 }
 
@@ -1495,7 +1510,8 @@ body {
 .teal.subtitle-card,
 .teal.title-card,
 .teal.title-container,
-.teal.title-stat {
+.teal.title-stat,
+.teal.text-content {
   @apply text-teal-500;
 }
 
@@ -1503,7 +1519,8 @@ body {
 .indigo.subtitle-card,
 .indigo.title-card,
 .indigo.title-container,
-.indigo.title-stat {
+.indigo.title-stat,
+.indigo.text-content {
   @apply text-indigo-500;
 }
 
@@ -1511,7 +1528,8 @@ body {
 .cyan.subtitle-card,
 .cyan.title-card,
 .cyan.title-container,
-.cyan.title-stat {
+.cyan.title-stat,
+.cyan.text-content {
   @apply text-cyan-500;
 }
 
@@ -1519,7 +1537,8 @@ body {
 .sky.subtitle-card,
 .sky.title-card,
 .sky.title-container,
-.sky.title-stat {
+.sky.title-stat,
+.sky.text-content {
   @apply text-sky-500;
 }
 
@@ -1527,7 +1546,8 @@ body {
 .pink.subtitle-card,
 .pink.title-card,
 .pink.title-container,
-.pink.title-stat {
+.pink.title-stat,
+.pink.text-content {
   @apply text-pink-500;
 }
 
@@ -1535,7 +1555,8 @@ body {
 .lime.subtitle-card,
 .lime.title-card,
 .lime.title-container,
-.lime.title-stat {
+.lime.title-stat,
+.lime.text-content {
   @apply text-lime-500;
 }
 
@@ -1543,7 +1564,8 @@ body {
 .purple.subtitle-card,
 .purple.title-card,
 .purple.title-container,
-.purple.title-stat {
+.purple.title-stat,
+.purple.text-content {
   @apply text-purple-600;
 }
 
@@ -1551,7 +1573,8 @@ body {
 .green-dark.subtitle-card,
 .green-dark.title-card,
 .green-dark.title-container,
-.green-dark.title-stat {
+.green-dark.title-stat,
+.green-darker.text-content {
   @apply text-green-700;
 }
 
@@ -1559,7 +1582,8 @@ body {
 .red-darker.subtitle-card,
 .red-darker.title-card,
 .red-darker.title-container,
-.red-darker.title-stat {
+.red-darker.title-stat,
+.red-darker.text-content {
   @apply text-red-700;
 }
 
@@ -1567,7 +1591,8 @@ body {
 .orange-darker.subtitle-card,
 .orange-darker.title-card,
 .orange-darker.title-container,
-.orange-darker.title-stat {
+.orange-darker.title-stat,
+.orange-darker.text-content {
   @apply text-orange-600;
 }
 
@@ -1575,7 +1600,8 @@ body {
 .blue-darker.subtitle-card,
 .blue-darker.title-card,
 .blue-darker.title-container,
-.blue-darker.title-stat {
+.blue-darker.title-stat,
+.blue-darker.text-content {
   @apply text-blue-600;
 }
 
@@ -1583,7 +1609,8 @@ body {
 .yellow-darker.subtitle-card,
 .yellow-darker.title-card,
 .yellow-darker.title-container,
-.yellow-darker.title-stat {
+.yellow-darker.title-stat,
+.yellow-darker.text-content {
   @apply text-yellow-600;
 }
 
@@ -1591,7 +1618,8 @@ body {
 .gray-darker.subtitle-card,
 .gray-darker.title-card,
 .gray-darker.title-container,
-.gray-darker.title-stat {
+.gray-darker.title-stat,
+.gray-darker.text-content {
   @apply text-gray-600;
 }
 
@@ -1599,7 +1627,8 @@ body {
 .dark-darker.subtitle-card,
 .dark-darker.title-card,
 .dark-darker.title-container,
-.dark-darker.title-stat {
+.dark-darker.title-stat,
+.dark-darker.text-content {
   @apply text-slate-600;
 }
 
@@ -1607,7 +1636,8 @@ body {
 .amber-darker.subtitle-card,
 .amber-darker.title-card,
 .amber-darker.title-container,
-.amber-darker.title-stat {
+.amber-darker.title-stat,
+.amber-darker.text-content {
   @apply text-amber-600;
 }
 
@@ -1615,7 +1645,8 @@ body {
 .emerald-darker.subtitle-card,
 .emerald-darker.title-card,
 .emerald-darker.title-container,
-.emerald-darker.title-stat {
+.emerald-darker.title-stat,
+.emerald-darker.text-content {
   @apply text-emerald-600;
 }
 
@@ -1623,7 +1654,8 @@ body {
 .teal-darker.subtitle-card,
 .teal-darker.title-card,
 .teal-darker.title-container,
-.teal-darker.title-stat {
+.teal-darker.title-stat,
+.teal-darker.text-content {
   @apply text-teal-600;
 }
 
@@ -1631,7 +1663,8 @@ body {
 .indigo-darker.subtitle-card,
 .indigo-darker.title-card,
 .indigo-darker.title-container,
-.indigo-darker.title-stat {
+.indigo-darker.title-stat,
+.indigo-darker.text-content {
   @apply text-indigo-600;
 }
 
@@ -1639,7 +1672,8 @@ body {
 .cyan-darker.subtitle-card,
 .cyan-darker.title-card,
 .cyan-darker.title-container,
-.cyan-darker.title-stat {
+.cyan-darker.title-stat,
+.cyan-darker.text-content {
   @apply text-cyan-600;
 }
 
@@ -1647,7 +1681,8 @@ body {
 .sky-darker.subtitle-card,
 .sky-darker.title-card,
 .sky-darker.title-container,
-.sky-darker.title-stat {
+.sky-darker.title-stat,
+.sky-darker.text-content {
   @apply text-sky-700;
 }
 
@@ -1655,7 +1690,8 @@ body {
 .pink-darker.subtitle-card,
 .pink-darker.title-card,
 .pink-darker.title-container,
-.pink-darker.title-stat {
+.pink-darker.title-stat,
+.pink-darker.text-content {
   @apply text-pink-600;
 }
 
@@ -1663,7 +1699,8 @@ body {
 .lime-darker.subtitle-card,
 .lime-darker.title-card,
 .lime-darker.title-container,
-.lime-darker.title-stat {
+.lime-darker.title-stat,
+.lime-darker.text-content {
   @apply text-lime-600;
 }
 

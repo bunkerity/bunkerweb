@@ -115,6 +115,12 @@ onMounted(() => {
 
 function setAttrs() {
   for (const [key, value] of Object.entries(props.attrs)) {
+    // stringify if object
+    if (typeof value === "object") {
+      btnEl.value.setAttribute(key, JSON.stringify(value));
+      continue;
+    }
+
     btnEl.value.setAttribute(key, value);
   }
 }

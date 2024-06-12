@@ -91,14 +91,13 @@ def set_raw(template, plugins_data):
     # Update settings with global config data
     for plugin in plugins :          
         for setting, value in plugin.get("settings").items() :
-            value["value"] = value.get("default")
-
-            # check if setting is in template
+            # avoid some methods
+            if value.get("method", "default") not in ("ui", "default", "manual") :
+                continue
+            # check if setting is in template (not a default value)
             if setting in settings :
                 # Update value or set default as value
-                value["value"] = settings[setting].get("value", value.get("default"))
-
-            raw_settings[setting] = value.get("value", value.get("default"))
+                raw_settings[setting] = value.get("value", value.get("default"))
 
     return raw_settings
 

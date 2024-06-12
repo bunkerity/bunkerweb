@@ -30,7 +30,6 @@ import { v4 as uuidv4 } from "uuid";
         size: "normal",
         iconName: "modal",
         iconColor: "white",
-        eventAttr: {"store" : "modal", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},
       },
     ]
   }

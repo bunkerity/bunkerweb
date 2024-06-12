@@ -74,7 +74,7 @@ const props = defineProps({
         props.iconName ? 'is-icon' : 'no-icon',
       ]"
     >
-      <Title type="stat" :title="props.title" />
+      <Title :tag="'h3'" type="stat" :title="props.title" />
       <ContentStat :stat="props.stat" />
       <Subtitle
         type="stat"
