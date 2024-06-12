@@ -17,7 +17,7 @@ jobs:
             runtestArgs: "LUA_INCLUDE_DIR=.lua/include/luajit-2.1"
             runtestEnv: "SKIP_CMAKE=1"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@master
@@ -47,7 +47,7 @@ jobs:
         sudo cpanm --notest Test::Base Test::LongString
 
     - name: cppcheck
-      run: cppcheck -i .lua/ -i .install/ -i dtoa.c --force --error-exitcode=1 --enable=warning .
+      run: cppcheck -i .lua/ -i .install/ -i dtoa.c --force --error-exitcode=1 --enable=warning --inline-suppr .
 
     - name: prove
       run: LUA_BIN=lua prove -Itests tests
