@@ -250,5 +250,6 @@ class Metadata(Base):
     last_pro_plugins_change = Column(DateTime, nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     last_instances_change = Column(DateTime, nullable=True)
+    failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
     version = Column(String(32), default="1.5.8", nullable=False)

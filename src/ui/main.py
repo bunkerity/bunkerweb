@@ -232,7 +232,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     elif operation == "restart":
         operation = app.config["INSTANCES"].restart_instance(args[0])
     elif not error:
-        operation = "The scheduler will be in charge of reloading the instances."
+        operation = "The scheduler will be in charge of applying the changes."
 
     if operation:
         if isinstance(operation, list):
@@ -380,10 +380,21 @@ def inject_variables():
     ui_data = get_ui_data()
     metadata = app.config["DB"].get_metadata()
 
-    curr_changes = app.config["DB"].check_changes()
+    changes_ongoing = any(app.config["DB"].check_changes().values())
 
-    if ui_data.get("PRO_LOADING") and not any(curr_changes.values()):
+    if ui_data.get("PRO_LOADING") and not changes_ongoing:
         ui_data["PRO_LOADING"] = False
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+    if not changes_ongoing and metadata["failover"]:
+        flash(
+            "The last changes could not be applied because it creates a configuration error on NGINX, please check the logs for more information. The configured fell back to the last working one.",
+            "error",
+        )
+    elif not changes_ongoing and not metadata["failover"] and ui_data.get("CONFIG_CHANGED", False):
+        flash("The last changes have been applied successfully.", "success")
+        ui_data["CONFIG_CHANGED"] = False
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
@@ -769,6 +780,7 @@ def account():
 
             ui_data = get_ui_data()
             ui_data["PRO_LOADING"] = True
+            ui_data["CONFIG_CHANGED"] = True
 
             if any(curr_changes.values()):
                 ui_data["RELOADING"] = True
@@ -1056,16 +1068,19 @@ def services():
                 threaded=threaded,
             )
 
+        ui_data = get_ui_data()
+
         if any(curr_changes.values()):
-            ui_data = get_ui_data()
             ui_data["RELOADING"] = True
             ui_data["LAST_RELOAD"] = time()
             Thread(target=update_services, args=(True,)).start()
-
-            with LOCK:
-                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
         else:
             update_services()
+
+        ui_data["CONFIG_CHANGED"] = True
+
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         message = ""
 
@@ -1189,6 +1204,8 @@ def global_config():
         else:
             update_global_config()
 
+        ui_data["CONFIG_CHANGED"] = True
+
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
@@ -1311,6 +1328,11 @@ def configs():
         if error:
             app.logger.error(f"Could not save custom configs: {error}")
             return redirect_flash_error("Couldn't save custom configs", "configs", True)
+
+        ui_data = get_ui_data()
+        ui_data["CONFIG_CHANGED"] = True
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         flash(operation)
 
@@ -1953,7 +1975,11 @@ def logs_linux():
         error_type = (
             "error"
             if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
-            else (("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message")))
+            else (
+                "emerg"
+                if "[emerg]" in log_lower
+                else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+            )
         )
 
         logs.append(
@@ -2079,7 +2105,11 @@ def logs_container(container_id):
                 "type": (
                     "error"
                     if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
-                    else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+                    else (
+                        "emerg"
+                        if "[emerg]" in log_lower
+                        else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+                    )
                 ),
             }
         )

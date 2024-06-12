@@ -400,6 +400,25 @@ class Database:
             except (ProgrammingError, OperationalError):
                 return False
 
+    def set_failover(self, value: bool = True) -> str:
+        """Set the failover value"""
+        with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.failover = value
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
         with self.__db_session() as session:
@@ -428,7 +447,7 @@ class Database:
 
         return ""
 
-    def get_metadata(self) -> Dict[str, str]:
+    def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
             "version": "1.5.8",
@@ -440,6 +459,7 @@ class Database:
             "pro_overlapped": False,
             "pro_status": "invalid",
             "last_pro_check": None,
+            "failover": False,
             "default": True,
         }
         with self.__db_session() as session:
@@ -459,6 +479,7 @@ class Database:
                         Metadata.pro_overlapped,
                         Metadata.pro_status,
                         Metadata.last_pro_check,
+                        Metadata.failover,
                     )
                     .filter_by(id=1)
                     .first()
@@ -474,6 +495,7 @@ class Database:
                             "pro_overlapped": metadata.pro_overlapped,
                             "pro_status": metadata.pro_status,
                             "last_pro_check": metadata.last_pro_check,
+                            "failover": metadata.failover,
                             "default": False,
                         }
                     )
