@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, computed } from "vue";
+import { defineProps, reactive, onMounted, computed, KeepAlive } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
@@ -107,19 +107,21 @@ onMounted(() => {
     <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
 
     <template v-for="(step, id) in props.template">
-      <Container v-if="data.currStep === id" class="col-span-12 w-full">
-        <Title type="card" :title="step.title" />
-        <Subtitle type="card" :subtitle="step.subtitle" />
+      <KeepAlive>
+        <Container v-if="data.currStep === id" class="col-span-12 w-full">
+          <Title type="card" :title="step.title" />
+          <Subtitle type="card" :subtitle="step.subtitle" />
 
-        <Container class="grid grid-cols-12 w-full relative">
-          <template
-            v-for="(setting, name, index) in step.settings"
-            :key="index"
-          >
-            <Fields :setting="setting" />
-          </template>
+          <Container class="grid grid-cols-12 w-full relative">
+            <template
+              v-for="(setting, name, index) in step.settings"
+              :key="index"
+            >
+              <Fields :setting="setting" />
+            </template>
+          </Container>
         </Container>
-      </Container>
+      </KeepAlive>
     </template>
     <Flex :flexClass="'justify-center'">
       <Button

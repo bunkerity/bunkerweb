@@ -37,9 +37,7 @@ const comboboxTemplate = {
   id: uuidv4(),
   name: uuidv4(),
   disabled: false,
-  required: false,
   label: "dashboard_templates",
-  tabId: "1",
   columns: { pc: 4, tablet: 6, mobile: 12 },
 };
 
@@ -49,7 +47,6 @@ const comboboxModes = {
   disabled: false,
   required: false,
   label: "dashboard_modes",
-  tabId: "1",
   columns: { pc: 4, tablet: 6, mobile: 12 },
 };
 

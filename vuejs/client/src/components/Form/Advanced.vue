@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, computed } from "vue";
+import { defineProps, reactive, onMounted, computed, KeepAlive } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
@@ -159,7 +159,6 @@ const comboboxPlugin = {
   disabled: false,
   required: false,
   label: "dashboard_plugins",
-  tabId: "1",
   popovers: [
     {
       text: "inp_combobox_advanced_desc",
@@ -259,22 +258,24 @@ onMounted(() => {
       <Select @inp="(v) => (data.context = v)" v-bind="selectContext" />
     </Container>
     <template v-for="plugin in data.filtered">
-      <Container
-        v-if="plugin.name === data.currPlugin"
-        class="col-span-12 w-full"
-      >
-        <Title type="card" :title="plugin.name" />
-        <Subtitle type="card" :subtitle="plugin.description" />
+      <KeepAlive>
+        <Container
+          v-if="plugin.name === data.currPlugin"
+          class="col-span-12 w-full"
+        >
+          <Title type="card" :title="plugin.name" />
+          <Subtitle type="card" :subtitle="plugin.description" />
 
-        <Container class="grid grid-cols-12 w-full relative">
-          <template
-            v-for="(setting, name, index) in plugin.settings"
-            :key="index"
-          >
-            <Fields :setting="setting" />
-          </template>
+          <Container class="grid grid-cols-12 w-full relative">
+            <template
+              v-for="(setting, name, index) in plugin.settings"
+              :key="index"
+            >
+              <Fields :setting="setting" />
+            </template>
+          </Container>
         </Container>
-      </Container>
+      </KeepAlive>
     </template>
     <Button v-bind="buttonSave" />
   </Container>
