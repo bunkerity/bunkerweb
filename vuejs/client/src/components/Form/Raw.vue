@@ -47,8 +47,6 @@ const data = reactive({
   str: JSON.stringify(props.template),
   // Data on creation of editor
   entry: computed(() => {
-    // TODO : WORK WITH LINE LOOP
-    // ONLY REPLACE FIRST ':' IS REPLACED (IN CASE VALUE CONTAIN ':')
     let dataStr = data.str;
     // Remove first and last curly brackets
     dataStr = dataStr.slice(1, -1);
@@ -144,7 +142,6 @@ const buttonSave = {
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >
-    {{ data.isValid ? "Valid" : "Not Valid" }}
     <Title type="card" :title="'dashboard_raw_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_raw_mode_subtitle'" />
     <Container class="col-span-12 w-full">

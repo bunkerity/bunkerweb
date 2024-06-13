@@ -35,7 +35,7 @@ def create_template(name, settings = {}, configs = {}, steps = []):
                     "SETTING_1"
                 ],
                 "configs": [
-                    "CONFIG_2"
+                    "CONFIG_1"
                 ]
             },
             {
@@ -45,7 +45,7 @@ def create_template(name, settings = {}, configs = {}, steps = []):
                     "SETTING_2"
                 ],
                 "configs": [
-                    "CONFIG_4"
+                    "CONFIG_1"
                 ]
             }
         ]
@@ -74,6 +74,14 @@ def get_forms_from_templates(templates, plugins):
     return forms
 
 def set_easy(template, plugins_data):
+    """
+    Prepare the easy form based on the template and plugins data.
+    We need to loop on each steps and prepare settings and configs for each step.
+    """
+    settings = template.get("settings")
+    configs = template.get("configs")
+    plugins = copy.deepcopy(plugins_data)
+
     try:
         return {}
     except:
@@ -169,7 +177,31 @@ def set_advanced(template, plugins_data):
 
 
 templates = [default, low_level]
-global_page_templates = [create_template("global config", global_config_settings)]
+global_page_templates = [create_template("global config", global_config_settings, {
+            "CONFIG_1": "value",
+            "CONFIG_2": "value"
+        }, [
+            {
+                "title": "Title 1",
+                "subtitle": "subtitle 1",
+                "settings": [
+                    "SETTING_1"
+                ],
+                "configs": [
+                    "CONFIG_2"
+                ]
+            },
+            {
+                "title": "Title 2",
+                "subtitle": "subtitle 2",
+                "settings": [
+                    "SETTING_2"
+                ],
+                "configs": [
+                    "CONFIG_4"
+                ]
+            }
+        ])]
 
 
 forms_global = get_forms_from_templates(global_page_templates, plugins_list)
