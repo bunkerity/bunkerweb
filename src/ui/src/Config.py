@@ -104,7 +104,7 @@ class Config:
         """
         return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
-    def check_variables(self, variables: dict) -> int:
+    def check_variables(self, variables: dict, config: dict) -> dict:
         """Testify that the variables passed are valid
 
         Parameters
@@ -117,32 +117,44 @@ class Config:
         int
             Return the error code
         """
-        error = 0
         plugins_settings = self.get_plugins_settings()
-        for k, v in variables.items():
+        for k, v in variables.copy().items():
             check = False
+
+            if k.endswith("SCHEMA"):
+                variables.pop(k)
+                continue
 
             if k in plugins_settings:
                 setting = k
             else:
                 setting = k[0 : k.rfind("_")]  # noqa: E203
                 if setting not in plugins_settings or "multiple" not in plugins_settings[setting]:
-                    error = 1
                     flash(f"Variable {k} is not valid.", "error")
+                    variables.pop(k)
                     continue
+
+            if setting in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "IS_LOADING", "IS_DRAFT"):
+                flash(f"Variable {k} is not editable, ignoring it", "error")
+                variables.pop(k)
+                continue
+            elif setting not in config and plugins_settings[setting]["default"] == v:
+                variables.pop(k)
+                continue
 
             try:
                 if re_search(plugins_settings[setting]["regex"], v):
                     check = True
-            except RegexError:
-                self.__db.logger.warning(f"Invalid regex for setting {setting} : {plugins_settings[setting]['regex']}, ignoring regex check")
-
-            if not check:
-                error = 1
-                flash(f"Variable {k} is not valid.", "error")
+            except RegexError as e:
+                flash(f"Invalid regex for setting {setting} : {plugins_settings[setting]['regex']}, ignoring regex check:{e}", "error")
+                variables.pop(k)
                 continue
 
-        return error
+            if not check:
+                flash(f"Variable {k} is not valid.", "error")
+                variables.pop(k)
+
+        return variables
 
     def new_service(self, variables: dict, is_draft: bool = False) -> Tuple[str, int]:
         """Creates a new service from the given variables

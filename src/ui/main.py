@@ -998,21 +998,14 @@ def services():
 
             # Edit check fields and remove already existing ones
             for variable, value in deepcopy(variables).items():
-                if variable == "IS_DRAFT" or variable.endswith("SCHEMA"):
-                    del variables[variable]
-                    continue
-
-                if value == "on":
-                    value = "yes"
-                elif value == "off":
-                    value = "no"
-
                 if (
                     variable in variables
                     and variable != "SERVER_NAME"
                     and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, {"value": None})["value"]
                 ):
                     del variables[variable]
+
+            variables = app.config["CONFIG"].check_variables(variables)
 
             if (
                 was_draft == is_draft
@@ -1026,25 +1019,18 @@ def services():
             elif request.form["operation"] == "new" and not variables:
                 return redirect_flash_error("The service was not created because all values had the default value.", "services", True)
 
-            error = app.config["CONFIG"].check_variables(variables)
-
-            if error:
-                error_message("The config variable checks returned error")
-
         # Delete
         if request.form["operation"] == "delete":
 
             is_request_params(["SERVER_NAME"], "services", True)
 
-            error = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]})
+            variables = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]})
 
-            if error:
+            if not variables:
                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
 
             if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
                 return redirect_flash_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
-
-        error = 0
 
         curr_changes = app.config["DB"].check_changes()
 
@@ -1155,26 +1141,14 @@ def global_config():
         config = app.config["CONFIG"].get_config(with_drafts=True, filtered_settings=variables.keys())
         services = config["SERVER_NAME"]["value"].split(" ")
         for variable, value in variables.copy().items():
-            if variable in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "SERVER_NAME", "IS_LOADING", "IS_DRAFT") or variable.endswith("SCHEMA"):
-                del variables[variable]
-                continue
-
-            if value == "on":
-                value = "yes"
-            elif value == "off":
-                value = "no"
-
             setting = config.get(variable, {"value": None, "global": True})
             if setting["global"] and value == setting["value"]:
                 del variables[variable]
 
+        variables = app.config["CONFIG"].check_variables(variables, config)
+
         if not variables:
             return redirect_flash_error("The global configuration was not edited because no values were changed.", "global_config", True)
-
-        error = app.config["CONFIG"].check_variables(variables)
-
-        if error:
-            return redirect_flash_error("The global configuration variable checks returned error", "global_config", True)
 
         for variable, value in variables.copy().items():
             for service in services:
@@ -1219,7 +1193,7 @@ def global_config():
         )
 
     # Display global config
-    global_config = app.config["CONFIG"].get_config(global_only=True)
+    global_config = app.config["DB"].get_config(global_only=True, methods=True)
     return render_template("global_config.html", username=current_user.get_id(), global_config=global_config, dumped_global_config=dumps(global_config))
 
 
@@ -1756,7 +1730,7 @@ def custom_plugin(plugin: str):
         if plugin_id is None:
             return error_message("Plugin not found"), 404
 
-        config = app.config["CONFIG"].get_config(methods=False)
+        config = app.config["DB"].get_config()
 
         # Check if we are using metrics
         for service in config.get("SERVER_NAME", "").split(" "):
