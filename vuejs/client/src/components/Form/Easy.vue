@@ -7,11 +7,9 @@ import Subtitle from "@components/Widget/Subtitle.vue";
 import Flex from "@components/Widget/Flex.vue";
 import Button from "@components/Widget/Button.vue";
 import { v4 as uuidv4 } from "uuid";
-import { plugin_types } from "@utils/variables";
-import { useFilter } from "@utils/form.js";
 /**
-  @name Form/Advanced.vue
-  @description This component is used to create a complete advanced form with plugin selection.
+  @name Form/Easy.vue
+  @description This component is used to create a complete easy form with plugin selection.
   @example
   template: [
         {
