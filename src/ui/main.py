@@ -449,8 +449,7 @@ def handle_csrf_error(_):
     :param e: The exception object
     :return: A template with the error message and a 401 status code.
     """
-    session.clear()
-    logout_user()
+    logout()
     flash("Wrong CSRF token !", "error")
     if not current_user:
         return render_template("setup.html"), 403
@@ -548,7 +547,7 @@ def check():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
-    db_config = app.config["CONFIG"].get_config(methods=False)
+    db_config = app.config["CONFIG"].get_config(methods=False, filtered_settings=("SERVER_NAME", "USE_UI", "UI_HOST"))
 
     for server_name in db_config["SERVER_NAME"].split(" "):
         if db_config.get(f"{server_name}_USE_UI", "no") == "yes":
@@ -690,8 +689,8 @@ def home():
     if r and r.status_code == 200:
         remote_version = basename(r.url).strip().replace("v", "")
 
-    config = app.config["CONFIG"].get_config(with_drafts=True)
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    config = app.config["CONFIG"].get_config(with_drafts=True, filtered_settings=("SERVER_NAME", "OVERRIDE_INSTANCES"))
+    override_instances = config.get("OVERRIDE_INSTANCES", {"value": ""})["value"] != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
 
     instance_health_count = 0
@@ -812,8 +811,7 @@ def account():
 
             username = request.form["admin_username"]
 
-            session.clear()
-            logout_user()
+            logout()
 
         if request.form["operation"] == "password":
 
@@ -830,8 +828,7 @@ def account():
 
             password = request.form["admin_password"]
 
-            session.clear()
-            logout_user()
+            logout()
 
         if request.form["operation"] == "totp":
 
@@ -928,8 +925,8 @@ def instances():
         )
 
     # Display instances
-    config = app.config["CONFIG"].get_config(global_only=True)
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    config = app.config["CONFIG"].get_config(global_only=True, methods=False, filtered_settings=("OVERRIDE_INSTANCES",))
+    override_instances = config.get("OVERRIDE_INSTANCES", "") != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
     return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id())
 
@@ -966,7 +963,7 @@ def services():
         if "SERVER_NAME" not in variables:
             variables["SERVER_NAME"] = variables["OLD_SERVER_NAME"]
 
-        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
+        config = app.config["CONFIG"].get_config(with_drafts=True, filtered_settings=variables.keys())
         server_name = variables["SERVER_NAME"].split(" ")[0]
         was_draft = config.get(f"{server_name}_IS_DRAFT", {"value": "no"})["value"] == "yes"
         operation = request.form["operation"]
@@ -1095,7 +1092,7 @@ def services():
 
     # Display services
     services = []
-    global_config = app.config["CONFIG"].get_config(with_drafts=True)
+    global_config = app.config["DB"].get_config(methods=True, with_drafts=True)
     service_names = global_config["SERVER_NAME"]["value"].split(" ")
     for service in service_names:
         service_settings = []
@@ -1155,7 +1152,7 @@ def global_config():
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
+        config = app.config["CONFIG"].get_config(with_drafts=True, filtered_settings=variables.keys())
         services = config["SERVER_NAME"]["value"].split(" ")
         for variable, value in variables.copy().items():
             if variable in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "SERVER_NAME", "IS_LOADING", "IS_DRAFT") or variable.endswith("SCHEMA"):
@@ -1344,7 +1341,7 @@ def configs():
             path_to_dict(
                 join(sep, "etc", "bunkerweb", "configs"),
                 db_data=db_configs,
-                services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
+                services=app.config["CONFIG"].get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
         username=current_user.get_id(),
@@ -1869,7 +1866,7 @@ def cache():
                 join(sep, "var", "cache", "bunkerweb"),
                 is_cache=True,
                 db_data=app.config["DB"].get_jobs_cache_files(),
-                services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
+                services=app.config["CONFIG"].get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
         username=current_user.get_id(),
@@ -1879,8 +1876,8 @@ def cache():
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    config = app.config["CONFIG"].get_config(with_drafts=True)
-    override_instances = config["OVERRIDE_INSTANCES"]["value"] != ""
+    config = app.config["CONFIG"].get_config(global_only=True, methods=False, filtered_settings=("OVERRIDE_INSTANCES",))
+    override_instances = config.get("OVERRIDE_INSTANCES", "") != ""
     instances = app.config["INSTANCES"].get_instances(override_instances=override_instances)
     return render_template("logs.html", instances=instances, username=current_user.get_id())
 
@@ -2158,7 +2155,25 @@ def bans():
         return redirect_flash_error("Database is in read-only mode", "bans")
 
     redis_client = None
-    db_config = app.config["CONFIG"].get_config(methods=False)
+    db_config = app.config["CONFIG"].get_config(
+        global_only=True,
+        methods=False,
+        filtered_settings=(
+            "USE_REDIS",
+            "REDIS_HOST",
+            "REDIS_PORT",
+            "REDIS_DB",
+            "REDIS_TIMEOUT",
+            "REDIS_KEEPALIVE_POOL",
+            "REDIS_SSL",
+            "REDIS_USERNAME",
+            "REDIS_PASSWORD",
+            "REDIS_SENTINEL_HOSTS",
+            "REDIS_SENTINEL_USERNAME",
+            "REDIS_SENTINEL_PASSWORD",
+            "REDIS_SENTINEL_MASTER",
+        ),
+    )
     use_redis = db_config.get("USE_REDIS", "no") == "yes"
     redis_host = db_config.get("REDIS_HOST")
     if use_redis and redis_host:

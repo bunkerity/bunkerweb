@@ -6,9 +6,9 @@ from datetime import datetime
 from io import BytesIO
 from logging import Logger
 from os import _exit, getenv, listdir, sep
-from os.path import join
+from os.path import join as os_join
 from pathlib import Path
-from re import compile as re_compile
+from re import compile as re_compile, escape, search
 from sys import argv, path as sys_path
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 from time import sleep
@@ -33,14 +33,14 @@ from model import (
     Metadata,
 )
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
+for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from common_utils import bytes_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import create_engine, event, MetaData as sql_metadata, text, inspect
+from sqlalchemy import create_engine, event, MetaData as sql_metadata, join, select as db_select, text, inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import (
     ArgumentError,
@@ -343,7 +343,7 @@ class Database:
 
         return ""
 
-    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
+    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_license", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
         """Set the pro metadata values"""
         with self.__db_session() as session:
             if self.readonly:
@@ -454,6 +454,7 @@ class Database:
             "integration": "unknown",
             "database_version": "Unknown",
             "is_pro": "no",
+            "pro_license": "",
             "pro_expire": None,
             "pro_services": 0,
             "pro_overlapped": False,
@@ -474,6 +475,7 @@ class Database:
                         Metadata.version,
                         Metadata.integration,
                         Metadata.is_pro,
+                        Metadata.pro_license,
                         Metadata.pro_expire,
                         Metadata.pro_services,
                         Metadata.pro_overlapped,
@@ -490,6 +492,7 @@ class Database:
                             "version": metadata.version,
                             "integration": metadata.integration,
                             "is_pro": metadata.is_pro,
+                            "pro_license": metadata.pro_license,
                             "pro_expire": metadata.pro_expire,
                             "pro_services": metadata.pro_services,
                             "pro_overlapped": metadata.pro_overlapped,
@@ -1614,6 +1617,111 @@ class Database:
                                     "method": service_setting.method,
                                 }
                             )
+
+            servers = " ".join(service.id for service in services)
+            config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
+
+            return config
+
+    def get_filtered_config(
+        self,
+        global_only: bool = False,
+        methods: bool = False,
+        with_drafts: bool = False,
+        filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+    ) -> Dict[str, Any]:
+        """Get the config from the database"""
+        filtered_settings = set(filtered_settings or [])
+
+        if filtered_settings and not global_only:
+            filtered_settings.update(("SERVER_NAME", "MULTISITE"))
+
+        with self.__db_session() as session:
+            config = {}
+
+            # Define the join operation
+            j = join(Settings, Global_values, Settings.id == Global_values.setting_id)
+
+            # Define the select statement
+            stmt = (
+                db_select(Settings.id, Settings.multiple, Global_values.value, Global_values.suffix, Global_values.method)
+                .select_from(j)
+                .order_by(Settings.order)
+            )
+
+            if filtered_settings:
+                stmt = stmt.where(Settings.id.in_(filtered_settings))
+
+            # Execute the query and fetch all results
+            results = session.execute(stmt).fetchall()
+
+            for setting in results:
+                key = setting.id + (f"_{setting.suffix}" if setting.multiple and setting.suffix else "")
+                config[key] = setting.value if not methods else {"value": setting.value, "global": True, "method": setting.method}
+
+            is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"
+
+            # Define the join operation
+            j = join(Services, Services_settings, Services.id == Services_settings.service_id)
+            j = j.join(Settings, Settings.id == Services_settings.setting_id)
+
+            # Define the select statement
+            stmt = db_select(
+                Services.id.label("service_id"),
+                Services.is_draft,
+                Settings.id.label("setting_id"),
+                Settings.context,
+                Settings.default,
+                Settings.multiple,
+                Services_settings.value,
+                Services_settings.suffix,
+                Services_settings.method,
+            ).select_from(j)
+
+            if not with_drafts:
+                stmt = stmt.where(Services.is_draft == False)  # noqa: E712
+
+            if filtered_settings:
+                stmt = stmt.where(Services_settings.setting_id.in_(filtered_settings))
+
+            # Execute the query and fetch all results
+            results = session.execute(stmt).fetchall()
+
+            if not global_only and is_multisite:
+                for result in results:
+                    if f"{result.service_id}_IS_DRAFT" not in config:
+                        config[f"{result.service_id}_IS_DRAFT"] = "yes" if result.is_draft else "no"
+                        if methods:
+                            config[f"{result.service_id}_IS_DRAFT"] = {"value": config[f"{result.service_id}_IS_DRAFT"], "global": False, "method": "default"}
+
+                    key = result.setting_id
+                    original_key = key
+                    if self.suffix_rx.search(key):
+                        key = key[: -len(str(key.split("_")[-1])) - 1]
+
+                    if result.context != "multisite":
+                        continue
+                    elif f"{result.service_id}_{original_key}" not in config:
+                        config[f"{result.service_id}_{original_key}"] = result.default
+
+                    value = result.value
+                    if key == "SERVER_NAME" and not search(r"(^| )" + escape(result.service_id) + r"($| )", value):
+                        value = f"{result.service_id} {value}".strip()
+
+                    config[f"{result.service_id}_{key}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = (
+                        value
+                        if not methods
+                        else {
+                            "value": value,
+                            "global": False,
+                            "method": result.method,
+                        }
+                    )
+
+            services = session.query(Services).with_entities(Services.id)
+
+            if not with_drafts:
+                services = services.filter_by(is_draft=False)
 
             servers = " ".join(service.id for service in services)
             config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}

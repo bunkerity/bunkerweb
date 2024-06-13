@@ -6,6 +6,7 @@
     {% set inp_regex = setting_input['regex'] %}
     {% set inp_default = setting_input['default'] %}
     {% set inp_value = setting_input['value'] %}
+    {% set inp_method = setting_input['method'] %}
     {% set global_config_method = global_config.get(inp_name, {'method' : inp_method }).get('method') %}
     {% set global_config_value = global_config.get(inp_name, {'value' : inp_value }).get('value') %}
     {% set is_read_only = True if setting_input['is_pro_plugin'] and not is_pro_version else False %}

@@ -78,7 +78,13 @@ class Config:
     def get_settings(self) -> dict:
         return self.__settings
 
-    def get_config(self, global_only: bool = False, methods: bool = True, with_drafts: bool = False) -> dict:
+    def get_config(
+        self,
+        global_only: bool = False,
+        methods: bool = True,
+        with_drafts: bool = False,
+        filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+    ) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
         Returns
@@ -86,7 +92,7 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__db.get_config(global_only=global_only, methods=methods, with_drafts=with_drafts)
+        return self.__db.get_filtered_config(global_only=global_only, methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings)
 
     def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services
