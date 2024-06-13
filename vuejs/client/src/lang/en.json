@@ -132,6 +132,8 @@
   "action_restart": "restart {name}",
   "action_upload": "upload {name}",
   "action_delete_all": "delete all {name}",
+  "action_previous" : "previous",
+  "action_next" : "next",
   "home_version": "version",
   "home_all_features_available": "all features are available",
   "home_awaiting_compliance": "awaiting compliance",

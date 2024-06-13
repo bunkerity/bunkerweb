@@ -4,6 +4,7 @@ import Container from "@components/Widget/Container.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
 import Advanced from "@components/Form/Advanced.vue";
 import Raw from "@components/Form/Raw.vue";
+import Easy from "@components/Form/Easy.vue";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -116,6 +117,10 @@ onBeforeMount(() => {
     />
     <Raw
       v-if="data.currModeName === 'raw'"
+      :template="props.templates[data.currModeName][data.currTemplateName]"
+    />
+    <Easy
+      v-if="data.currModeName === 'easy'"
       :template="props.templates[data.currModeName][data.currTemplateName]"
     />
   </Container>

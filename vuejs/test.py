@@ -11,7 +11,7 @@ service_settings = {'ERRORS': {'value': '', 'global': True, 'method': 'scheduler
 
 
 # Default template
-default_template = {"name" : "default", "steps": [{"title" : "Title 1", "subtitle" : "subtitle 1",  "settings" : ["USE_UI", "USE_CORS"]}], "configs" : {}, "settings" : {'USE_UI': 'no', 'USE_CORS': 'no', 'USE_GZIP': 'dsfrgrdgrdgrdhgd'}}
+default_template = {"name" : "default", "steps": [{"title" : "Title 1", "subtitle" : "subtitle 1",  "settings" : ["USE_UI", "USE_CORS"]}, {"title" : "Title 2", "subtitle" : "subtitle 2",  "settings" : ["USE_UI", "USE_CORS"]}], "configs" : {}, "settings" : {'USE_UI': 'no', 'USE_CORS': 'no', 'USE_GZIP': 'dsfrgrdgrdgrdhgd'}}
 
 
 def get_service_forms(templates = [], plugins = [], service_settings = {}):

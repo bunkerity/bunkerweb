@@ -62,16 +62,32 @@ const props = defineProps({
 
 const data = reactive({
   currStep: 0,
+  totalSteps: Object.keys(props.template).length,
+  isFinalStep: computed(() => data.currStep === data.totalSteps - 1),
+  isFirstStep: computed(() => data.currStep === 0),
 });
 
 const buttonSave = {
   id: uuidv4(),
   text: "action_save",
-  disabled: false,
   color: "success",
   size: "normal",
   type: "submit",
   containerClass: "flex justify-center",
+};
+
+const buttonPrev = {
+  id: uuidv4(),
+  text: "action_previous",
+  color: "info",
+  size: "normal",
+};
+
+const buttonNext = {
+  id: uuidv4(),
+  text: "action_next",
+  color: "info",
+  size: "normal",
 };
 
 onMounted(() => {
@@ -92,8 +108,8 @@ onMounted(() => {
 
     <template v-for="(step, id) in props.template">
       <Container v-if="data.currStep === id" class="col-span-12 w-full">
-        <Title type="card" :title="step.name" />
-        <Subtitle type="card" :subtitle="step.description" />
+        <Title type="card" :title="step.title" />
+        <Subtitle type="card" :subtitle="step.subtitle" />
 
         <Container class="grid grid-cols-12 w-full relative">
           <template
@@ -105,8 +121,20 @@ onMounted(() => {
         </Container>
       </Container>
     </template>
-    <Flex>
-      <Button v-bind="buttonSave" />
+    <Flex :flexClass="'justify-center'">
+      <Button
+        @click="data.currStep = Math.max(data.currStep - 1, 0)"
+        :disabled="data.isFirstStep"
+        v-bind="buttonPrev"
+        :containerClass="`mr-2`"
+      />
+      <Button
+        :containerClass="`mr-2`"
+        @click="data.currStep = Math.min(data.currStep + 1, data.totalSteps)"
+        :disabled="data.isFinalStep"
+        v-bind="buttonNext"
+      />
+      <Button :disabled="!data.isFinalStep" v-bind="buttonSave" />
     </Flex>
   </Container>
 </template>
