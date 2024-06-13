@@ -9317,7 +9317,80 @@
             }
         ]
     },
-    "easy": {},
+    "easy": {
+        "default": [
+            {
+                "title": "Title 1",
+                "subtitle": "subtitle 1",
+                "settings": {
+                    "USE_UI": {
+                        "context": "multisite",
+                        "default": "no",
+                        "help": "Use UI",
+                        "id": "use-ui",
+                        "label": "Use UI",
+                        "regex": "^(yes|no)$",
+                        "type": "check",
+                        "containerClass": "z-1",
+                        "pattern": "^(yes|no)$",
+                        "inpType": "checkbox",
+                        "name": "Use UI",
+                        "columns": {
+                            "pc": 4,
+                            "tablet": 6,
+                            "mobile": 12
+                        },
+                        "disabled": false,
+                        "value": "yes",
+                        "popovers": [
+                            {
+                                "iconColor": "orange",
+                                "iconName": "disk",
+                                "text": "inp_popover_multisite"
+                            },
+                            {
+                                "iconColor": "info",
+                                "iconName": "info",
+                                "text": "Use UI"
+                            }
+                        ]
+                    },
+                    "USE_CORS": {
+                        "context": "multisite",
+                        "default": "no",
+                        "help": "Use CORS",
+                        "id": "use-cors",
+                        "label": "Use CORS",
+                        "regex": "^(yes|no)$",
+                        "type": "check",
+                        "containerClass": "z-0",
+                        "pattern": "^(yes|no)$",
+                        "inpType": "checkbox",
+                        "name": "Use CORS",
+                        "columns": {
+                            "pc": 4,
+                            "tablet": 6,
+                            "mobile": 12
+                        },
+                        "disabled": true,
+                        "value": "yes",
+                        "popovers": [
+                            {
+                                "iconColor": "orange",
+                                "iconName": "disk",
+                                "text": "inp_popover_multisite"
+                            },
+                            {
+                                "iconColor": "info",
+                                "iconName": "info",
+                                "text": "Use CORS"
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
     "raw": {
         "default": {
             "USE_GZIP": "dsfrgrdgrdgrdhgd",

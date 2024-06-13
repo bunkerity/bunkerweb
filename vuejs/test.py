@@ -25,41 +25,46 @@ def get_service_forms(templates = [], plugins = [], service_settings = {}):
     for template in templates:
         forms["advanced"][template.get('name')] = set_advanced(template, plugins, service_settings)
         forms["raw"][template.get('name')] = set_raw(template, plugins, service_settings)
-       # forms["easy"][template.get('name')] = set_easy(template, plugins, service_settings)
-        pass
-
-
+        forms["easy"][template.get('name')] = set_easy(template, plugins, service_settings)
+        
     return forms
 
-def set_easy(template, plugins_data):
+def set_easy(template, plugins_base, service_settings):
     """
     Prepare the easy form based on the template and plugins data.
     We need to loop on each steps and prepare settings and configs for each step.
     """
-    settings = template.get("settings")
+    template_settings = template.get("settings")
+    plugins = copy.deepcopy(plugins_base)
     configs = template.get("configs")
-    plugins = copy.deepcopy(plugins_data)
     steps = template.get("steps")
 
     for step in steps:
         step_settings = step.get("settings", {})
         step_configs = step.get("configs", {})
         # Loop on step settings to set the settings value
+        loop_id = 0
+        step_settings_output = {}
         for setting in step_settings:
-            print(setting)
+            loop_id += 1
             # Get relate setting from plugins using setting name
             plugin = next((plugin for plugin in plugins if setting in plugin.get("settings")), None)
+
             if not plugin:
                 continue
-            # Get base setting data from plugin
-            plugin_setting_data = plugin.get("settings").get(setting)
-            if not plugin_setting_data:
-                continue
-            
-            # Override default setting value by the service or global config setting value
-            
-            print(plugin_setting_data)
 
+            if not plugin.get("settings").get(setting):
+                continue
+
+            plugin_setting = copy.deepcopy(plugin.get("settings").get(setting))
+
+            plugin_setting = format_setting(setting, plugin_setting, len(step_settings), loop_id, template_settings, service_settings)
+
+            step_settings_output[setting] = plugin_setting
+        
+        step["settings"] = step_settings_output
+
+    return steps
 
 def set_raw(template, plugins_base, service_settings):
     """
@@ -109,58 +114,65 @@ def set_advanced(template, plugins_base, service_settings):
         total_settings = len(plugin.get("settings"))            
         for setting, value in plugin.get("settings").items() :
             loop_id += 1
-            # add zindex for container
-            value["containerClass"] = f"z-{total_settings - loop_id}"
-
-            # regex by pattern
-            value["pattern"] = value.get("regex", "")
-
-            # set inpType based on type define for each settings
-            inpType = "checkbox" if value.get("type") == "check" else "select" if value.get("type") == "select" else "datepicker" if value.get("type") == "date" else "input"
-            value["inpType"] =  inpType
-
-            # set name using the label
-            value["name"] = value.get("label")
-
-            # case select
-            if inpType == "select" :
-                # replace "select" key by "values"
-                value["values"] = value.pop("select")
-
-            # add columns
-            value["columns"] = {"pc" : 4, "tablet" : 6, "mobile" : 12}
-
-            # By default, the input is enabled unless specific method
-            value["disabled"] = False
-
-            value["value"] = value.get("default")
-
-            # Start by setting template value if exists
-            if setting in template_settings :
-                # Update value or set default as value
-                value["value"] = template_settings.get(setting, value.get("default"))    
-                        
-            # Then override by service settings
-            if setting in service_settings :
-                value["value"] = service_settings[setting].get("value", value.get("value", value.get("default")))
-                value["disabled"] = False if service_settings[setting].get("method", "ui") in ("ui", "default") else True
-
-            # Prepare popover checking "help", "context"
-            popovers = []
-
-            if(value.get("context")):
-                popovers.append({"iconColor": "orange" if value.get("context") == "multisite" else "blue", 
-                                "iconName": "disk" if value.get("context") == "multisite" else "globe", 
-                                "text" : "inp_popover_multisite" if value.get("context") == "multisite" else "inp_popover_global"
-                                })
-                
-            if(value.get("help")):
-                popovers.append({"iconColor": "info", "iconName": "info", "text" : value.get("help")})
-
-        
-            value["popovers"] = popovers
+            value = format_setting(setting, value, total_settings, loop_id, template_settings, service_settings)
     return plugins
   
+
+def format_setting(setting_name, setting_value, total_settings, loop_id, template_settings, service_settings):
+    """
+    Format a setting in ordert to be used with form builder.
+    """
+ # add zindex for container
+    setting_value["containerClass"] = f"z-{total_settings - loop_id}"
+
+    # regex by pattern
+    setting_value["pattern"] = setting_value.get("regex", "")
+
+    # set inpType based on type define for each settings
+    inpType = "checkbox" if setting_value.get("type") == "check" else "select" if setting_value.get("type") == "select" else "datepicker" if setting_value.get("type") == "date" else "input"
+    setting_value["inpType"] =  inpType
+
+    # set name using the label
+    setting_value["name"] = setting_value.get("label")
+
+    # case select
+    if inpType == "select" :
+        # replace "select" key by "values"
+        setting_value["values"] = setting_value.pop("select")
+
+    # add columns
+    setting_value["columns"] = {"pc" : 4, "tablet" : 6, "mobile" : 12}
+
+    # By default, the input is enabled unless specific method
+    setting_value["disabled"] = False
+
+    setting_value["value"] = setting_value.get("default")
+
+    # Start by setting template value if exists
+    if setting_name in template_settings :
+        # Update value or set default as value
+        setting_value["value"] = template_settings.get(setting_name, setting_value.get("default"))    
+                
+    # Then override by service settings
+    if setting_name in service_settings :
+        setting_value["value"] = service_settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
+        setting_value["disabled"] = False if service_settings[setting_name].get("method", "ui") in ("ui", "default") else True
+
+    # Prepare popover checking "help", "context"
+    popovers = []
+
+    if(setting_value.get("context")):
+        popovers.append({"iconColor": "orange" if setting_value.get("context") == "multisite" else "blue", 
+                        "iconName": "disk" if setting_value.get("context") == "multisite" else "globe", 
+                        "text" : "inp_popover_multisite" if setting_value.get("context") == "multisite" else "inp_popover_global"
+                        })
+        
+    if(setting_value.get("help")):
+        popovers.append({"iconColor": "info", "iconName": "info", "text" : setting_value.get("help")})
+
+
+    setting_value["popovers"] = popovers
+    return setting_value
 
 
 templates = [default_template]
