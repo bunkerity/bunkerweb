@@ -54,14 +54,19 @@ const data = reactive({
     dataStr = dataStr.slice(1, -1);
     // Remove all '\"' from stringified JSON
     dataStr = dataStr.replace(/\\"/g, '"');
-    // Remove all newlines
+    // Remove all newlines inside values
     dataStr = dataStr.replace(/\n/g, "");
     // Add new line only at the end of each key value
     dataStr = dataStr.replace(/",/g, "\n");
-    // Replace ":" with "=" when between quotes ""
-    dataStr = dataStr.replace(/":"/g, "=");
-    // Remove quotes before a new line
-    dataStr = dataStr.replace(/\n"/g, "\n");
+
+    const lines = dataStr.split("\n");
+    dataStr = lines.map((line) => {
+      // Get index of the first colon
+      const index = line.indexOf(":");
+      // Update colon by equal sign and remove quotes
+      return line.slice(1, index - 1) + "=" + line.slice(index + 2);
+    });
+    dataStr = dataStr.join("\n");
     // Remove first char if it is a quote
     dataStr = dataStr[0] === '"' ? dataStr.slice(1) : dataStr;
     // Remove last char if it is a quote
@@ -76,18 +81,28 @@ const data = reactive({
     let dataToCheck = data.inp || data.entry;
     // Replace quotes "" with quotes ''
     dataToCheck = dataToCheck.replace(/"/g, "'");
+
+    let isValidRaw = true;
+    let jsonReady = "";
+
     // loop on each line
     dataToCheck = dataToCheck.split("\n");
-    let jsonReady = "";
     dataToCheck = dataToCheck.map((line) => {
       // Get index of the first equal sign
       const index = line.indexOf("=");
+      // Case no equal sign in a line, this is invalid
+      if (index === -1) isValidRaw = false;
+
       // Update at this index with a colon
       jsonReady +=
         '"' + line.slice(0, index) + '":"' + line.slice(index + 1) + '",';
     });
 
+    if (!isValidRaw) return false;
+
+    // Try to parse the JSON
     jsonReady = "{" + jsonReady.slice(0, -1) + "}";
+
     try {
       JSON.parse(jsonReady);
       return true;
