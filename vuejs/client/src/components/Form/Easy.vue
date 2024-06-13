@@ -98,6 +98,7 @@ onMounted(() => {
 
 <template>
   <Container
+    data-easy-form
     :tag="'form'"
     method="POST"
     :containerClass="`col-span-12 w-full m-1 p-1`"

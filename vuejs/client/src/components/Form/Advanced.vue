@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, computed, KeepAlive } from "vue";
+import { defineProps, reactive, onMounted, computed, onUnmounted } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
@@ -70,6 +70,7 @@ const data = reactive({
   keyword: "",
   type: "all",
   context: "all",
+  base: JSON.parse(JSON.stringify(props.template)),
   filtered: computed(() => {
     const filterPlugin = [
       {
@@ -101,7 +102,7 @@ const data = reactive({
     ];
 
     // Deep copy
-    const template = JSON.parse(JSON.stringify(props.template));
+    const template = JSON.parse(JSON.stringify(data.base));
     // Start plugin filtering
     const filterPlugins = useFilter(template, filterPlugin);
     // Filter settings
@@ -226,19 +227,74 @@ const buttonSave = {
   disabled: false,
   color: "success",
   size: "normal",
-  type: "submit",
+  type: "bouton",
+  attrs: {
+    "data-submit-form": JSON.stringify(data.base),
+  },
   containerClass: "flex justify-center",
 };
+
+function updateInp(e) {
+  // Check if target is child of data-advanced-form
+  if (!e.target.closest("[data-advanced-form-plugin]")) return;
+
+  // Wait some ms that previous update logic is done like datepicker
+  setTimeout(() => {
+    let inpId, inpValue;
+
+    // Case target is input (a little different for datepicker)
+    if (e.target.tagName === "INPUT") {
+      inpId = e.target.id;
+      inpValue = e.target.hasAttribute("data-timestamp")
+        ? e.target.getAttribute("data-timestamp")
+        : e.target.value;
+    }
+
+    // Case target is select
+    if (
+      e.target.closest("[data-field-container]") &&
+      e.target.hasAttribute("data-setting-id") &&
+      e.target.hasAttribute("data-setting-value")
+    ) {
+      inpId = e.target.getAttribute("data-setting-id");
+      inpValue = e.target.getAttribute("data-setting-value");
+    }
+
+    // Case target is not an input-like
+    if (!inpId) return;
+
+    data.base.find((plugin) => {
+      const settings = plugin["settings"];
+      // loop on each settings from plugin
+      for (const [key, value] of Object.entries(settings)) {
+        if (value.id === inpId) {
+          value.value = inpValue;
+        }
+      }
+    });
+  }, 50);
+}
 
 onMounted(() => {
   // Get first props.forms template name
   data.currPlugin = getFirstPlugin(props.template);
   data.plugins = getPluginNames(props.template);
+  // Store update data on
+  window.addEventListener("input", updateInp);
+  window.addEventListener("change", updateInp);
+  window.addEventListener("click", updateInp);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("input", updateInp);
+  window.removeEventListener("change", updateInp);
+  window.removeEventListener("click", updateInp);
 });
 </script>
 
 <template>
   <Container
+    data-advanced-form
     :tag="'form'"
     method="POST"
     :containerClass="`col-span-12 w-full m-1 p-1`"
@@ -258,24 +314,23 @@ onMounted(() => {
       <Select @inp="(v) => (data.context = v)" v-bind="selectContext" />
     </Container>
     <template v-for="plugin in data.filtered">
-      <KeepAlive>
-        <Container
-          v-if="plugin.name === data.currPlugin"
-          class="col-span-12 w-full"
-        >
-          <Title type="card" :title="plugin.name" />
-          <Subtitle type="card" :subtitle="plugin.description" />
+      <Container
+        data-advanced-form-plugin
+        v-if="plugin.name === data.currPlugin"
+        class="col-span-12 w-full"
+      >
+        <Title type="card" :title="plugin.name" />
+        <Subtitle type="card" :subtitle="plugin.description" />
 
-          <Container class="grid grid-cols-12 w-full relative">
-            <template
-              v-for="(setting, name, index) in plugin.settings"
-              :key="index"
-            >
-              <Fields :setting="setting" />
-            </template>
-          </Container>
+        <Container class="grid grid-cols-12 w-full relative">
+          <template
+            v-for="(setting, name, index) in plugin.settings"
+            :key="index"
+          >
+            <Fields :setting="setting" />
+          </template>
         </Container>
-      </KeepAlive>
+      </Container>
     </template>
     <Button v-bind="buttonSave" />
   </Container>

@@ -286,7 +286,7 @@ const emits = defineEmits(["inp"]);
       :headerClass="props.headerClass"
     />
 
-    <select :name="props.name" class="hidden">
+    <select aria-hidden="true" :name="props.name" class="hidden">
       <option
         v-for="(value, id) in props.values"
         :key="id"
@@ -414,6 +414,8 @@ const emits = defineEmits(["inp"]);
                   : '',
                 'select-dropdown-btn',
               ]"
+              :data-setting-id="props.id"
+              :data-setting-value="value"
               :aria-controls="`${props.id}-text`"
               :aria-checked="
                 (select.value && select.value === value) ||

@@ -24,7 +24,7 @@ import "@assets/css/flatpickr.dark.css";
     columns : {"pc": 6, "tablet": 12, "mobile": 12},
     disabled: false,
     required: true,
-    defaultDate: 1735682600000,
+    value: 1735682600000,
     noPickBeforeStamp: 1735682600000,
     noPickAfterStamp: 1735689600000,
     inpClass: "text-center",
@@ -42,7 +42,7 @@ import "@assets/css/flatpickr.dark.css";
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {array} popovers - List of popovers to display more information
   @param {string} [inpType="datepicker"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
-  @param {string|number|date} [defaultDate=null] - Default date when instanciate
+  @param {string|number|date} [value=""] - Default date when instanciate
   @param {string|number} [noPickBeforeStamp=""] - Impossible to pick a date before this date
   @param {string|number} [noPickAfterStamp=""] - Impossible to pick a date after this date
   @param {boolean} [hideLabel=false]
@@ -68,6 +68,11 @@ const props = defineProps({
   label: {
     type: String,
     required: false,
+  },
+  value: {
+    type: [String, Number, Date],
+    required: false,
+    default: "",
   },
   popovers: {
     type: Array,
@@ -98,7 +103,6 @@ const props = defineProps({
     required: false,
     default: "",
   },
-
   columns: {
     type: [Object, Boolean],
     required: false,
@@ -111,11 +115,6 @@ const props = defineProps({
   required: {
     type: Boolean,
     required: false,
-  },
-  defaultDate: {
-    type: [String, Number, Date],
-    required: false,
-    default: null,
   },
   // Impossible to pick a date before this date
   noPickBeforeStamp: {
@@ -139,6 +138,7 @@ const props = defineProps({
 const date = reactive({
   isValid: true,
   format: "m/d/Y H:i:S",
+  currStamp: "",
 });
 
 const picker = reactive({
@@ -150,7 +150,7 @@ onMounted(() => {
   datepicker = flatpickr(`#${props.id}`, {
     locale: "en",
     dateFormat: date.format,
-    defaultDate: props.defaultDate || "",
+    defaultDate: props.value,
     enableTime: true,
     enableSeconds: true,
     time_24hr: true,
@@ -160,6 +160,7 @@ onMounted(() => {
       //Check if date is in interval
       try {
         const currStamp = Date.parse(dateStr);
+        date.currStamp = currStamp;
         // Check pick is before min allow
         if (props.noPickBeforeStamp && currStamp < props.noPickBeforeStamp) {
           return instance.setDate(props.noPickBeforeStamp);
@@ -652,6 +653,7 @@ function setIndex(calendarEl, tabindex) {
 
     <div class="relative flex flex-col items-start">
       <input
+        :data-timestamp="date.currStamp"
         :tabindex="props.tabId"
         :aria-controls="props.id"
         :aria-selected="picker.isOpen ? 'true' : 'false'"
