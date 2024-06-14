@@ -18,7 +18,7 @@ const bannerStore = useBannerStore();
 // Navigation with components
 // resolveComponent allow to replace a tag by a real Vue component
 const navList = [
-  { tag: "home", svg: "house", svgColor : "cyan", path: "/home" },
+  { tag: "home", svg: "house", svgColor: "cyan", path: "/home" },
   {
     tag: "instances",
     svg: "box",
@@ -29,42 +29,42 @@ const navList = [
   {
     tag: "global_config",
     svg: "settings",
-    svgColor : "blue",
+    svgColor: "blue",
     path: "/global-config",
   },
   {
     tag: "services",
     svg: "disk",
-    svgColor : "orange",
+    svgColor: "orange",
     path: "/services",
   },
   {
     tag: "configs",
     svg: "gear",
-    svgColor : "purple",
+    svgColor: "purple",
     path: "/configs",
   },
   {
     tag: "plugins",
     svg: "puzzle",
-    svgColor : "yellow",
+    svgColor: "yellow",
     path: "/plugins",
   },
   {
     tag: "cache",
     svg: "carton",
-    svgColor : "purple",
+    svgColor: "purple",
     path: "/cache",
   },
   {
     tag: "reports",
     svg: "flag",
-    svgColor : "amber",
+    svgColor: "amber",
     path: "/reports",
   },
-  { tag: "bans", svg: "funnel", svgColor : "red", path: "/bans" },
-  { tag: "jobs", svg: "task", svgColor : "emerald", path: "/jobs" },
-  { tag: "logs", svg: "list", svgColor : "dark", path: "/logs" },
+  { tag: "bans", svg: "funnel", svgColor: "red", path: "/bans" },
+  { tag: "jobs", svg: "task", svgColor: "emerald", path: "/jobs" },
+  { tag: "logs", svg: "list", svgColor: "dark", path: "/logs" },
 ];
 
 // Social links
@@ -73,25 +73,25 @@ const socialList = [
     tag: "twitter",
     href: "https://twitter.com/bunkerity",
     svg: "twitter",
-    svgColor : "twitter"
+    svgColor: "twitter",
   },
   {
     tag: "linkedin",
     href: "https://www.linkedin.com/company/bunkerity/",
     svg: "linkedin",
-    svgColor : "linkedin"
+    svgColor: "linkedin",
   },
   {
     tag: "discord",
     href: "https://discord.gg/fTf46FmtyD",
     svg: "discord",
-    svgColor : "discord"
+    svgColor: "discord",
   },
   {
     tag: "github",
     href: "https://github.com/bunkerity",
     svg: "github",
-    svgColor: "github"
+    svgColor: "github",
   },
 ];
 
@@ -101,7 +101,7 @@ const menu = reactive({
   isActive: false, // Handle menu display/expand
   isDesktop: true, // Expand logic exclude with desktop
   currPath: false,
-  username : "",
+  username: "",
 });
 
 function getDarkMode() {
@@ -165,9 +165,12 @@ onBeforeMount(() => {
   });
 
   // Get username
-  const dataAtt = 'data-server-global';
+  const dataAtt = "data-server-global";
   const dataEl = document.querySelector(`[${dataAtt}]`);
-  const data = dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt) ? JSON.parse(dataEl.getAttribute(dataAtt)) : {};
+  const data =
+    dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
+      ? JSON.parse(dataEl.getAttribute(dataAtt))
+      : {};
   menu.username = data?.username || "";
 });
 </script>
@@ -255,15 +258,32 @@ onBeforeMount(() => {
           <span id="logo-link-label" class="sr-only">
             {{ $t("dashboard_logo_link_label") }}
           </span>
-          <img :aria-hidden="'true'" v-if="menu.darkMode" :src="logoMenu2" class="menu-logo-dark" />
-          <img :aria-hidden="'true'" v-if="!menu.darkMode" :src="logoMenu" class="menu-logo-light" />
+          <img
+            :aria-hidden="'true'"
+            v-if="menu.darkMode"
+            :src="logoMenu2"
+            class="menu-logo-dark"
+          />
+          <img
+            :aria-hidden="'true'"
+            v-if="!menu.darkMode"
+            :src="logoMenu"
+            class="menu-logo-light"
+          />
         </a>
       </div>
       <div class="menu-account-title-container">
         <h1 class="menu-account-title">
           {{ menu.username }}
         </h1>
-        <a :tabindex=" menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'" class="menu-account-link" href="/account">{{ $t('dashboard_manage_account') }}</a>
+        <a
+          :tabindex="
+            menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
+          "
+          class="menu-account-link"
+          href="/account"
+          >{{ $t("dashboard_manage_account") }}</a
+        >
       </div>
       <hr class="menu-separator" />
       <!-- end logo version -->
@@ -286,7 +306,11 @@ onBeforeMount(() => {
             "
           >
             <div class="menu-nav-item-container">
-              <Icons :iconName="item.svg" :iconClass="'menu-svg'" :iconColor="item.svgColor" />
+              <Icons
+                :iconName="item.svg"
+                :iconClass="'menu-svg'"
+                :iconColor="item.svgColor"
+              />
             </div>
             <span class="menu-nav-item-title">
               {{ $t(`dashboard_${item.tag}`) }}
@@ -317,7 +341,11 @@ onBeforeMount(() => {
             :href="`/plugins?plugin_id=${plugin.id}`"
           >
             <div aria-hidden="true" class="menu-page-plugin-svg-container">
-              <Icons :iconName="plugin.type === 'pro' ? 'crown' : 'free'" :iconClass="'menu-svg'" :iconColor="plugin.type === 'pro' ? 'amber' : 'dark'" />
+              <Icons
+                :iconName="plugin.type === 'pro' ? 'crown' : 'free'"
+                :iconClass="'menu-svg'"
+                :iconColor="plugin.type === 'pro' ? 'amber' : 'dark'"
+              />
             </div>
             <span class="menu-page-plugin-name">{{ plugin.name }}</span>
           </a>
@@ -338,6 +366,7 @@ onBeforeMount(() => {
           "
           :checked="menu.darkMode"
           @click="switchMode()"
+          @keyup.enter="switchMode()"
           id="darkMode"
           data-dark-toggle
           class="menu-mode-checkbox"
@@ -367,7 +396,11 @@ onBeforeMount(() => {
             <span :id="`${item}-id`" class="sr-only">
               {{ $t(`dashboard_menu_${item.tag}_label`) }}
             </span>
-            <Icons :iconName="item.svg" :iconClass="'social-svg'" :iconColor="item.svgColor" />
+            <Icons
+              :iconName="item.svg"
+              :iconClass="'social-svg'"
+              :iconColor="item.svgColor"
+            />
           </a>
         </li>
       </ul>

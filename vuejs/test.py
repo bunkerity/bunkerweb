@@ -161,6 +161,12 @@ def format_setting(setting_name, setting_value, total_settings, loop_id, templat
     # Prepare popover checking "help", "context"
     popovers = []
 
+    if(setting_value.get("disabled", False)) and service_settings[setting_name].get("method", "ui") not in ("ui", "default"):
+    popovers.append({"iconColor": "red", 
+                    "iconName": "trespass", 
+                    "text" : "inp_popover_method_disabled"
+                    })
+
     if(setting_value.get("context")):
         popovers.append({"iconColor": "orange" if setting_value.get("context") == "multisite" else "blue", 
                         "iconName": "disk" if setting_value.get("context") == "multisite" else "globe", 

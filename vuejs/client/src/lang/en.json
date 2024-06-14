@@ -99,6 +99,7 @@
   "inp_input_error": "input is invalid",
   "inp_popover_multisite": "This setting is multisite.",
   "inp_popover_global": "This setting is global.",
+  "inp_popover_method_disabled": "This setting method (scheduler, autoconf...) unable value change.",
   "inp_combobox": "Combobox input for relate select radio group.",
   "inp_combobox_no_match": "No match found",
   "inp_select_dropdown_button_desc": "Toggle hide/show radio group (dropdown) to change value.",

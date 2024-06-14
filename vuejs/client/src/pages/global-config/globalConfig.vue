@@ -251,6 +251,11 @@ const data = {
             value: "www.example.com",
             popovers: [
               {
+                iconColor: "red",
+                iconName: "trespass",
+                text: "inp_popover_method_disabled",
+              },
+              {
                 iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
