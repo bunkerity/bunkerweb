@@ -327,7 +327,7 @@ body {
 }
 
 .input-clipboard-button {
-  @apply transition-all h-5.5 w-5.5 md:h-6 md:w-6 absolute flex block top-0 right-0 text-gray-500 hover:text-gray-900 transition duration-300 ease-in-out cursor-pointer  rounded-full hover:bg-gray-100 z-10;
+  @apply transition-all h-5.5 w-5.5 md:h-6 md:w-6 absolute flex block top-0 right-0 text-gray-500 hover:text-gray-900 transition duration-300 ease-in-out cursor-pointer  rounded-full hover:bg-gray-100 dark:hover:bg-gray-800  z-10;
 }
 
 .copied.input-clipboard-button {
