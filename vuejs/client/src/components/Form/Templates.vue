@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, defineProps, computed, onBeforeMount } from "vue";
 import Container from "@components/Widget/Container.vue";
+import Title from "@components/Widget/Title.vue";
+import Subtitle from "@components/Widget/Subtitle.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
 import Advanced from "@components/Form/Advanced.vue";
 import Raw from "@components/Form/Raw.vue";
@@ -26,6 +28,16 @@ import { v4 as uuidv4 } from "uuid";
 
 const props = defineProps({
   // id && value && method
+  title: {
+    type: String,
+    required: false,
+    default: "dashboard_templates_title_default",
+  },
+  subtitle: {
+    type: String,
+    required: false,
+    default: "dashboard_templates_subtitle_default",
+  },
   templates: {
     type: Object,
     required: true,
@@ -89,6 +101,8 @@ onBeforeMount(() => {
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >
+    <Title type="container" :title="props.title" />
+    <Subtitle type="container" :subtitle="props.subtitle" />
     <Container
       v-if="data.modes.length > 1 || data.templates.length > 1"
       :containerClass="`col-span-12 grid grid-cols-12`"

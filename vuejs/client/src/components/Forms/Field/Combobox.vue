@@ -363,7 +363,7 @@ const emits = defineEmits(["inp"]);
             :aria-controls="`${props.id}-list`"
             :id="`${props.id}-combobox`"
             :class="[
-              'input-regular',
+              'input-combobox',
               inp.isValid ? 'valid' : 'invalid',
               props.inpClass,
             ]"
