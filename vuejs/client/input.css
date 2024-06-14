@@ -306,20 +306,24 @@ body {
   @apply z-20 rounded-full absolute flex;
 }
 
-.editor.input-clipboard-container {
+.editor-clip.input-clipboard-container {
   @apply top-2 right-6;
 }
 
-.pw-input.input-clipboard-container {
+.datepicker-clip.input-clipboard-container {
   @apply top-1 md:top-1.5 right-[2.25rem];
 }
 
-.no-pw-input.input-clipboard-container {
+.pw-input-clip.input-clipboard-container {
+  @apply top-1 md:top-1.5 right-[2.25rem];
+}
+
+.no-pw-input-clip.input-clipboard-container {
   @apply top-1 md:top-1.5 right-2;
 }
 
 .input-clipboard-svg {
-  @apply stroke-gray-800 dark:stroke-gray-300 ;
+  @apply stroke-gray-800 dark:stroke-gray-300;
 }
 
 .input-clipboard-button {
@@ -338,14 +342,21 @@ body {
   @apply absolute bg-green-500 text-white px-1 py-0.5 rounded z-50 text-sm w-full min-w-[150px];
 }
 
-.editor.input-clipboard-copy {
+.editor-clip.input-clipboard-copy {
   @apply top-0 right-0;
 }
 
-.input.input-clipboard-copy {
+.input-clip.input-clipboard-copy {
   @apply -top-0.5 right-0;
 }
 
+.datepicker-svg {
+  @apply stroke-gray-800 dark:stroke-gray-300 w-6 h-6 opacity-[50%] pointer-events-none absolute top-1 md:top-1.5 right-2;
+}
+
+.datepicker-clip.input-clipboard-copy {
+  @apply -top-0.5 right-0;
+}
 .invalid.input-regular,
 .invalid.input-regular:hover,
 .invalid.input-regular:focus,

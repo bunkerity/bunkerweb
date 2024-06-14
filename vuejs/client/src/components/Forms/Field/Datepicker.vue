@@ -5,6 +5,7 @@ import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 import { v4 as uuidv4 } from "uuid";
+import Clipboard from "@components/Forms/Feature/Clipboard.vue";
 
 import flatpickr from "flatpickr";
 
@@ -25,8 +26,8 @@ import "@assets/css/flatpickr.dark.css";
     disabled: false,
     required: true,
     value: 1735682600000,
-    noPickBeforeStamp: 1735682600000,
-    noPickAfterStamp: 1735689600000,
+    minDate: 1735682600000,
+    maxDate: 1735689600000,
     inpClass: "text-center",
     inpType : ""
     popovers : [
@@ -42,9 +43,10 @@ import "@assets/css/flatpickr.dark.css";
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {array} popovers - List of popovers to display more information
   @param {string} [inpType="datepicker"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
-  @param {string|number|date} [value=""] - Default date when instanciate
-  @param {string|number} [noPickBeforeStamp=""] - Impossible to pick a date before this date
-  @param {string|number} [noPickAfterStamp=""] - Impossible to pick a date after this date
+  @param {number<timestamp>} [value=""] - Default date when instanciate
+  @param {number<timestamp>} [minDate=""] - Impossible to pick a date before this date. 
+  @param {number<timestamp>} [maxDate=""] - Impossible to pick a date after this date.
+  @param {boolean} [isClipboard=true] - allow to copy the timestamp value
   @param {boolean} [hideLabel=false]
   @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
   @param {boolean} [disabled=false]
@@ -84,6 +86,11 @@ const props = defineProps({
     required: false,
     default: "datepicker",
   },
+  isClipboard: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
   hideLabel: {
     type: Boolean,
     required: false,
@@ -116,14 +123,12 @@ const props = defineProps({
     type: Boolean,
     required: false,
   },
-  // Impossible to pick a date before this date
-  noPickBeforeStamp: {
+  minDate: {
     type: [String, Number],
     required: false,
     default: "",
   },
-  // Impossible to pick a date after this date
-  noPickAfterStamp: {
+  maxDate: {
     type: [String, Number],
     required: false,
     default: "",
@@ -151,8 +156,8 @@ onMounted(() => {
     locale: "en",
     dateFormat: date.format,
     defaultDate: +props.value,
-    maxDate: +props.noPickAfterStamp ? +props.noPickAfterStamp : "",
-    minDate: +props.noPickBeforeStamp ? +props.noPickBeforeStamp : "",
+    maxDate: +props.maxDate ? +props.maxDate : "",
+    minDate: +props.minDate ? +props.minDate : "",
     enableTime: true,
     enableSeconds: true,
     time_24hr: true,
@@ -674,7 +679,7 @@ function setIndex(calendarEl, tabindex) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="w-6 h-6 stroke-gray-600 opacity-50 pointer-events-none absolute top-1 md:top-1.5 right-2"
+        class="datepicker-svg"
       >
         <path
           stroke-linecap="round"
@@ -682,6 +687,12 @@ function setIndex(calendarEl, tabindex) {
           d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
         />
       </svg>
+      <Clipboard
+        :isClipboard="props.isClipboard"
+        :valueToCopy="date.currStamp"
+        :clipboardClass="'datepicker-clip'"
+        :copyClass="'datepicker-clip'"
+      />
       <ErrorField :isValid="date.isValid" :isValue="!!date.value" />
     </div>
   </Container>

@@ -212,8 +212,10 @@ onMounted(() => {
       <Clipboard
         :isClipboard="props.isClipboard"
         :valueToCopy="inp.value"
-        :clipboardClass="props.type === 'password' ? 'pw-input' : 'no-pw-input'"
-        :copyClass="'input'"
+        :clipboardClass="
+          props.type === 'password' ? 'pw-input-clip' : 'no-pw-input-clip'
+        "
+        :copyClass="'input-clip'"
       />
 
       <div v-if="props.type === 'password'" class="input-pw-container">

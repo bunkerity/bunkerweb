@@ -331,8 +331,8 @@ onUnmounted(() => {
       ></div>
       <Clipboard
         :isClipboard="props.isClipboard"
-        :clipboardClass="'editor'"
-        :copyClass="'editor'"
+        :clipboardClass="'editor-clip'"
+        :copyClass="'editor-clip'"
         :valueToCopy="editor.value"
       />
     </div>
