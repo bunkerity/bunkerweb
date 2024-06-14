@@ -298,18 +298,60 @@ function useCheckPluginsValidity(template) {
   return [isRegErr, isReqErr, settingErr, pluginErr, id];
 }
 
+/**
+  @name useListenTemp
+  @description  This will add an handler to all needed event listeners to listen to input, select... fields in order to update the template settings.
+  @example 
+  function hander(e) {
+    // some code before calling useUpdateTempSettings
+    if (!e.target.closest("[data-advanced-form-plugin]")) return;
+    useUpdateTempSettings(e, data.base);
+  }
+  @param handler - Callback function to call when event is triggered. This is usually an intermediate function that will call the useUpdateTempSettings function.
+*/
 function useListenTemp(handler) {
   window.addEventListener("input", handler);
   window.addEventListener("change", handler);
   window.addEventListener("click", handler);
 }
 
+/**
+  @name useUnlistenTemp
+  @description  This will stop listening to input, select... fields. Performance optimization and avoid duplicate calls conflicts.
+  @example 
+  function hander(e) {
+    // some code before calling useUpdateTempSettings
+    if (!e.target.closest("[data-advanced-form-plugin]")) return;
+    useUpdateTempSettings(e, data.base);
+  }
+  @param handler - Callback function to call when event is triggered. Need to be the same function as the one passed to useListenTemp.
+*/
 function useUnlistenTemp(handler) {
   window.removeEventListener("input", handler);
   window.removeEventListener("change", handler);
   window.removeEventListener("click", handler);
 }
 
+/**
+  @name useUpdateTempSettings
+  @description This function will check if the target is a setting input-like field.
+  In case it is, it will get the id and value for each field case, this will allow to update the template settings.
+  @example 
+  template = [
+  {
+    name: "test",
+    settings: {
+      test: {
+        required: true,
+        value: "",
+        pattern: "^[a-zA-Z0-9]*$",
+      },
+    },
+  },
+];
+  @param e - Event object, get it by default in the event listener.
+  @param template - Template with plugins list and detail settings
+*/
 function useUpdateTempSettings(e, template) {
   // Wait some ms that previous update logic is done like datepicker
   setTimeout(() => {
