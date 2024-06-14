@@ -150,7 +150,9 @@ onMounted(() => {
   datepicker = flatpickr(`#${props.id}`, {
     locale: "en",
     dateFormat: date.format,
-    defaultDate: props.value,
+    defaultDate: +props.value,
+    maxDate: +props.noPickAfterStamp ? +props.noPickAfterStamp : "",
+    minDate: +props.noPickBeforeStamp ? +props.noPickBeforeStamp : "",
     enableTime: true,
     enableSeconds: true,
     time_24hr: true,
@@ -160,15 +162,8 @@ onMounted(() => {
       //Check if date is in interval
       try {
         const currStamp = Date.parse(dateStr);
+
         date.currStamp = currStamp;
-        // Check pick is before min allow
-        if (props.noPickBeforeStamp && currStamp < props.noPickBeforeStamp) {
-          return instance.setDate(props.noPickBeforeStamp);
-        }
-        // Check pick is after min allow
-        if (props.noPickAfterStamp && currStamp > props.noPickAfterStamp) {
-          return instance.setDate(props.noPickAfterStamp);
-        }
         // Run whatever, if invalid this will override
         date.isValid = true;
       } catch (err) {}
