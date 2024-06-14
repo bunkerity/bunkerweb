@@ -27,7 +27,7 @@ env:
     - JOBS=3
     - LUAROCKS_VER=2.4.2
   matrix:
-      #- LUA=1 LUA_DIR=/usr LUA_INCLUDE_DIR=$LUA_DIR/include/lua5.1
+      #- LUA=1 LUA_DIR=/usr LUA_INCLUDE_DIR=$LUA_DIR/include/lua5.1 
       - LUAJIT=1 LUA_DIR=/usr/local LUA_INCLUDE_DIR=$LUA_DIR/include/luajit-2.1 LUA_SUFFIX=--lua-suffix=jit
 
 install:

@@ -217,7 +217,7 @@ In other words, the scheduler is the brain of BunkerWeb.
 ## BunkerWeb Cloud
 
 <p align="center">
-	<img alt="Docker banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.8/docs/assets/img/bunkerweb-cloud.svg" />
+	<img alt="Docker banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.8/docs/assets/img/bunkerweb-cloud.webp" />
 </p>
 
 BunkerWeb Cloud is the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of a like a BunkerWeb-as-a-Service !

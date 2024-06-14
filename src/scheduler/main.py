@@ -9,13 +9,13 @@ from json import load as json_load
 from os import _exit, environ, getenv, getpid, sep
 from os.path import join
 from pathlib import Path
-from shutil import copy, rmtree
+from shutil import copy, rmtree, copytree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
-from threading import Thread
+from threading import Event, Thread
 from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Union
@@ -30,13 +30,15 @@ from common_utils import bytes_hash, dict_to_frozenset, get_integration  # type:
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
-from API import API
+from jobs import Job  # type: ignore
+from API import API  # type: ignore
 
+APPLYING_CHANGES = Event()
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 
-CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
-Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)
+CACHE_PATH = Path(sep, "var", "cache", "bunkerweb")
+CACHE_PATH.mkdir(parents=True, exist_ok=True)
 
 CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
@@ -54,6 +56,8 @@ CUSTOM_CONFIGS_DIRS = (
 for custom_config_dir in CUSTOM_CONFIGS_DIRS:
     CUSTOM_CONFIGS_PATH.joinpath(custom_config_dir).mkdir(parents=True, exist_ok=True)
 
+CONFIG_PATH = Path(sep, "etc", "nginx")
+
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -62,6 +66,9 @@ PRO_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
 TMP_PATH = Path(sep, "var", "tmp", "bunkerweb")
 TMP_PATH.mkdir(parents=True, exist_ok=True)
+
+FAILOVER_PATH = TMP_PATH.joinpath("failover")
+FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
 
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
@@ -76,6 +83,14 @@ MASTER_MODE = environ.get("MASTER_MODE", "no") == "yes"
 
 
 def handle_stop(signum, frame):
+    current_time = datetime.now()
+    while APPLYING_CHANGES.is_set() and (datetime.now() - current_time).seconds < 30:
+        logger.warning("Waiting for the changes to be applied before stopping ...")
+        sleep(1)
+
+    if APPLYING_CHANGES.is_set():
+        logger.warning("Timeout reached, stopping without waiting for the changes to be applied ...")
+
     if SCHEDULER is not None:
         SCHEDULER.clear()
     stop(0)
@@ -124,6 +139,56 @@ def stop(status):
     _exit(status)
 
 
+def send_nginx_configs(sent_path: Path = CONFIG_PATH):
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    logger.info(f"Sending {sent_path} folder ...")
+    ret = SCHEDULER.send_files(sent_path.as_posix(), "/confs")
+    if not ret:
+        logger.error("Sending nginx configs failed, configuration will not work as expected...")
+
+
+def send_nginx_cache(sent_path: Path = CACHE_PATH):
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    logger.info(f"Sending {sent_path} folder ...")
+    if not SCHEDULER.send_files(sent_path.as_posix(), "/cache"):
+        logger.error(f"Error while sending {sent_path} folder")
+    else:
+        logger.info(f"Successfully sent {sent_path} folder")
+
+
+def send_nginx_custom_configs(sent_path: Path = CUSTOM_CONFIGS_PATH):
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    logger.info(f"Sending {sent_path} folder ...")
+    if not SCHEDULER.send_files(sent_path.as_posix(), "/custom_configs"):
+        logger.error(f"Error while sending {sent_path} folder")
+    else:
+        logger.info(f"Successfully sent {sent_path} folder")
+
+
+def listen_for_instances_reload():
+    from docker import DockerClient
+
+    global SCHEDULER
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+
+    docker_client = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
+    for event in docker_client.events(decode=True, filters={"type": "container", "label": "bunkerweb.INSTANCE"}):
+        if event["Action"] in ("start", "die"):
+            logger.info(f"🐋 Detected {event['Action']} event on container {event['Actor']['Attributes']['name']}")
+            SCHEDULER.auto_setup()
+            try:
+                ret = SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
+                if ret:
+                    logger.error(f"Error while updating instances after {event['Action']} event: {ret}")
+                    continue
+                if event["Action"] == "start":
+                    ret = SCHEDULER.db.checked_changes(value=True)
+                    if ret:
+                        logger.error(f"Error while setting changes to checked in the database after {event['Action']} event: {ret}")
+            except BaseException as e:
+                logger.error(f"Error while updating instances after {event['Action']} event: {e}")
+
+
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
@@ -168,11 +233,7 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                 )
 
     if SCHEDULER and SCHEDULER.apis:
-        logger.info("Sending custom configs to BunkerWeb")
-        ret = SCHEDULER.send_files(original_path, "/custom_configs")
-
-        if not ret:
-            logger.error("Sending custom configs failed, configuration will not work as expected...")
+        send_nginx_custom_configs(original_path)
 
 
 def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
@@ -351,7 +412,7 @@ def run_in_slave_mode():
             "--templates",
             join(sep, "usr", "share", "bunkerweb", "confs"),
             "--output",
-            join(sep, "etc", "nginx"),
+            CONFIG_PATH.as_posix(),
             "--variables",
             str(SCHEDULER_TMP_ENV_PATH),
         ],
@@ -387,14 +448,18 @@ if __name__ == "__main__":
 
         INTEGRATION = get_integration()
         tmp_variables_path = Path(args.variables or join(sep, "var", "tmp", "bunkerweb", "variables.env"))
-        nginx_variables_path = Path(sep, "etc", "nginx", "variables.env")
+        nginx_variables_path = CONFIG_PATH.joinpath("variables.env")
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
         SCHEDULER = JobScheduler(environ, logger, INTEGRATION, db=Database(logger, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
+        JOB = Job(logger, SCHEDULER.db)
+
         if SLAVE_MODE:
             run_in_slave_mode()
             stop(1)
+
+        APPLYING_CHANGES.set()
 
         if (
             INTEGRATION in ("Swarm", "Kubernetes", "Autoconf")
@@ -466,6 +531,7 @@ if __name__ == "__main__":
 
         def check_configs_changes():
             # Checking if any custom config has been created by the user
+            assert SCHEDULER is not None, "SCHEDULER is not defined"
             logger.info("Checking if there are any changes in custom configs ...")
             custom_configs = []
             db_configs = SCHEDULER.db.get_custom_configs()
@@ -507,6 +573,7 @@ if __name__ == "__main__":
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
+            assert SCHEDULER is not None, "SCHEDULER is not defined"
             logger.info(f"Checking if there are any changes in {_type} plugins ...")
             plugin_path = EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
@@ -624,41 +691,6 @@ if __name__ == "__main__":
         RUN_JOBS_ONCE = True
         CHANGES = []
 
-        def send_nginx_configs():
-            logger.info(f"Sending {join(sep, 'etc', 'nginx')} folder ...")
-            ret = SCHEDULER.send_files(join(sep, "etc", "nginx"), "/confs")
-            if not ret:
-                logger.error("Sending nginx configs failed, configuration will not work as expected...")
-
-        def send_nginx_cache():
-            logger.info(f"Sending {CACHE_PATH} folder ...")
-            if not SCHEDULER.send_files(CACHE_PATH, "/cache"):
-                logger.error(f"Error while sending {CACHE_PATH} folder")
-            else:
-                logger.info(f"Successfully sent {CACHE_PATH} folder")
-
-        def listen_for_instances_reload():
-            from docker import DockerClient
-
-            global SCHEDULER
-
-            docker_client = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
-            for event in docker_client.events(decode=True, filters={"type": "container", "label": "bunkerweb.INSTANCE"}):
-                if event["Action"] in ("start", "die"):
-                    logger.info(f"🐋 Detected {event['Action']} event on container {event['Actor']['Attributes']['name']}")
-                    SCHEDULER.auto_setup()
-                    try:
-                        ret = SCHEDULER.db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
-                        if ret:
-                            logger.error(f"Error while updating instances after {event['Action']} event: {ret}")
-                            continue
-                        if event["Action"] == "start":
-                            ret = SCHEDULER.db.checked_changes(value=True)
-                            if ret:
-                                logger.error(f"Error while setting changes to checked in the database after {event['Action']} event: {ret}")
-                    except BaseException as e:
-                        logger.error(f"Error while updating instances after {event['Action']} event: {e}")
-
         if INTEGRATION == "Docker" and not override_instances:
             Thread(target=listen_for_instances_reload, name="listen_for_instances_reload").start()
 
@@ -692,7 +724,7 @@ if __name__ == "__main__":
                         "--templates",
                         join(sep, "usr", "share", "bunkerweb", "confs"),
                         "--output",
-                        join(sep, "etc", "nginx"),
+                        CONFIG_PATH.as_posix(),
                         "--variables",
                         str(SCHEDULER_TMP_ENV_PATH),
                     ]
@@ -716,6 +748,7 @@ if __name__ == "__main__":
                         logger.warning("No BunkerWeb instance found, skipping nginx configs sending ...")
 
             try:
+                failed = False
                 if SCHEDULER.apis:
                     # send cache
                     thread = Thread(target=send_nginx_cache)
@@ -725,10 +758,7 @@ if __name__ == "__main__":
                     for thread in threads:
                         thread.join()
 
-                    if SCHEDULER.send_to_apis("POST", "/reload"):
-                        logger.info("Successfully reloaded nginx")
-                    else:
-                        logger.error("Error while reloading nginx")
+                    failed = not SCHEDULER.send_to_apis("POST", "/reload")
                 elif INTEGRATION == "Linux":
                     # Reload nginx
                     logger.info("Reloading nginx ...")
@@ -740,14 +770,47 @@ if __name__ == "__main__":
                         check=False,
                         stdout=PIPE,
                     )
-                    if proc.returncode == 0:
-                        logger.info("Successfully sent reload signal to nginx")
-                    else:
-                        logger.error(
-                            f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}"
-                        )
+                    failed = proc.returncode != 0
                 else:
-                    logger.warning("No BunkerWeb instance found, skipping nginx reload ...")
+                    logger.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
+
+                try:
+                    SCHEDULER.db.set_failover(failed)
+                except BaseException as e:
+                    logger.error(f"Error while setting failover to true in the database: {e}")
+
+                if failed:
+                    logger.error("Error while reloading bunkerweb, failing over to last working configuration ...")
+                    if (
+                        not FAILOVER_PATH.joinpath("config").is_dir()
+                        or not FAILOVER_PATH.joinpath("custom_configs").is_dir()
+                        or not FAILOVER_PATH.joinpath("cache").is_dir()
+                    ):
+                        logger.error("No failover configuration found, ignoring failover ...")
+                    else:
+                        # Failover to last working configuration
+                        if SCHEDULER.apis:
+                            tmp_threads = [
+                                Thread(target=send_nginx_configs, args=(FAILOVER_PATH.joinpath("config"),)),
+                                Thread(target=send_nginx_cache, args=(FAILOVER_PATH.joinpath("cache"),)),
+                                Thread(target=send_nginx_custom_configs, args=(FAILOVER_PATH.joinpath("custom_configs"),)),
+                            ]
+                            for thread in tmp_threads:
+                                thread.start()
+
+                            for thread in tmp_threads:
+                                thread.join()
+
+                        SCHEDULER.send_to_apis("POST", "/reload")
+                else:
+                    logger.info("Successfully reloaded bunkerweb")
+                    # Update the failover path with the working configuration
+                    rmtree(FAILOVER_PATH, ignore_errors=True)
+                    FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
+                    copytree(CONFIG_PATH, FAILOVER_PATH.joinpath("config"))
+                    copytree(CUSTOM_CONFIGS_PATH, FAILOVER_PATH.joinpath("custom_configs"))
+                    copytree(CACHE_PATH, FAILOVER_PATH.joinpath("cache"))
+                    Thread(target=JOB.cache_dir, args=(FAILOVER_PATH,), kwargs={"job_name": "failover-backup"}).start()
             except:
                 logger.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
@@ -782,6 +845,8 @@ if __name__ == "__main__":
 
             if not HEALTHY_PATH.is_file():
                 HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")
+
+            APPLYING_CHANGES.clear()
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
@@ -879,6 +944,7 @@ if __name__ == "__main__":
                     sleep(5)
 
             if NEED_RELOAD:
+                APPLYING_CHANGES.set()
                 logger.debug(f"Changes: {changes}")
                 SCHEDULER.try_database_readonly(force=True)
                 CHANGES.clear()

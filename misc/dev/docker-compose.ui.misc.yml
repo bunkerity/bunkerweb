@@ -34,6 +34,7 @@ services:
       - www.example.com_REVERSE_PROXY_URL=/admin
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
       - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+      - www.example.com_GENERATE_SELF_SIGNED_SSL=yes
       - www.example.com_CUSTOM_CONF_MODSEC_CRS_ip-host=SecRuleRemoveById 920350
       - app1.example.com_USE_REVERSE_PROXY=yes
       - app1.example.com_REVERSE_PROXY_URL=/

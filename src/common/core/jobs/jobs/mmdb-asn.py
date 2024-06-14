@@ -84,8 +84,8 @@ try:
                 for chunk in resp.iter_content(chunk_size=4 * 1024):
                     if chunk:
                         file_content.write(chunk)
-        except RequestException:
-            LOGGER.error(f"Error while downloading mmdb file from {mmdb_url}")
+        except RequestException as e:
+            LOGGER.error(f"Error while downloading mmdb file from {mmdb_url}: {e}")
             sys_exit(2)
 
         try:

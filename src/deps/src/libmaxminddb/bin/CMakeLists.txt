@@ -15,8 +15,10 @@ if(NOT MSVC)
 
   target_link_libraries(mmdblookup maxminddb pthread)
 
-  install(
-    TARGETS mmdblookup
-    DESTINATION bin
-  )
+  if (MAXMINDDB_INSTALL)
+    install(
+      TARGETS mmdblookup
+      DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+  endif()
 endif()

@@ -23,6 +23,8 @@ LUA_CMODULE_DIR ?=   $(PREFIX)/lib/lua/$(LUA_VERSION)
 LUA_MODULE_DIR ?=    $(PREFIX)/share/lua/$(LUA_VERSION)
 LUA_BIN_DIR ?=       $(PREFIX)/bin
 
+AR= $(CC) -o
+
 ##### Platform overrides #####
 ##
 ## Tweak one of the platform sections below to suit your situation.
@@ -84,12 +86,12 @@ OBJS =              lua_cjson.o strbuf.o $(FPCONV_OBJS)
 
 .PHONY: all clean install install-extra doc
 
-.SUFFIXES: .html .txt
+.SUFFIXES: .html .adoc
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(BUILD_CFLAGS) -o $@ $<
 
-.txt.html:
+.adoc.html:
 	$(ASCIIDOC) -n -a toc $<
 
 all: $(TARGET)
@@ -97,7 +99,7 @@ all: $(TARGET)
 doc: manual.html performance.html
 
 $(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $(CJSON_LDFLAGS) -o $@ $(OBJS)
+	$(AR) $@ $(LDFLAGS) $(CJSON_LDFLAGS) $(OBJS)
 
 install: $(TARGET)
 	mkdir -p $(DESTDIR)$(LUA_CMODULE_DIR)

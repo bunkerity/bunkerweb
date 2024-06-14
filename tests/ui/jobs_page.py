@@ -86,7 +86,13 @@ try:
 
     log_info("Reload filter is working, trying jobs cache ...")
 
-    resp = get(f"http://www.example.com{UI_URL}/jobs/download?job_name=mmdb-country&file_name=country.mmdb", verify=False)
+    cookie = DRIVER.get_cookies()[0]
+    resp = get(
+        f"https://www.example.com{UI_URL}/jobs/download?plugin_id=jobs&job_name=mmdb-country&file_name=country.mmdb",
+        headers={"Host": "www.example.com", "User-Agent": DRIVER.execute_script("return navigator.userAgent;")},
+        cookies={cookie["name"]: cookie["value"]},
+        verify=False,
+    )
 
     if resp.status_code != 200:
         log_error("The cache download is not working, exiting ...")

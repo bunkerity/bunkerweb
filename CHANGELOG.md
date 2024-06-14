@@ -15,6 +15,7 @@
 - [FEATURE] Add experimental support of HTTP/3 (QUIC)
 - [FEATURE] Optimize the way the scheduler handles jobs and the way the jobs are executed
 - [FEATURE] Optimize the way the cache files are being refreshed from the database
+- [FEATURE] Add failover logic in case the NGINX configuration is not valid to fallback to the previous configuration and log the error to prevent the service from being stopped
 - [UI] Force HTTPS on setup wizard
 - [UI] Fallback to self-signed certificate when UI is installed with setup wizard and let's encrypt is not used
 - [UI] Add OVERRIDE_ADMIN_CREDS environment variable to allow overriding the default admin credentials even if an admin user already exists

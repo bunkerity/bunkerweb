@@ -17,6 +17,18 @@
       "file": "mmdb-asn.py",
       "every": "day",
       "reload": true
+    },
+    {
+      "name": "update-check",
+      "file": "update-check.py",
+      "every": "day",
+      "reload": false
+    },
+    {
+      "name": "failover-backup",
+      "file": "failover-backup.py",
+      "every": "once",
+      "reload": false
     }
   ]
 }

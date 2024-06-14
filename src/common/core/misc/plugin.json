@@ -204,12 +204,6 @@
       "reload": false
     },
     {
-      "name": "update-check",
-      "file": "update-check.py",
-      "every": "day",
-      "reload": false
-    },
-    {
       "name": "anonymous-report",
       "file": "anonymous-report.py",
       "every": "day",
