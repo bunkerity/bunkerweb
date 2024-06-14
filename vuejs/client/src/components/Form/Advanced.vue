@@ -8,6 +8,7 @@ import Combobox from "@components/Forms/Field/Combobox.vue";
 import Input from "@components/Forms/Field/Input.vue";
 import Select from "@components/Forms/Field/Select.vue";
 import Button from "@components/Widget/Button.vue";
+import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
 import { plugin_types } from "@utils/variables";
 import { useFilter } from "@utils/form.js";
@@ -71,7 +72,40 @@ const data = reactive({
   type: "all",
   context: "all",
   base: JSON.parse(JSON.stringify(props.template)),
-  filtered: computed(() => {
+  isRegErr: false,
+  isReqErr: false,
+  settingErr: "",
+  pluginErr: "",
+  // Add filtering and check validity with regex and required
+  format: computed(() => {
+    // Deep copy
+    const template = JSON.parse(JSON.stringify(data.base));
+
+    // Check validity
+    data.isReqErr = false;
+    data.isRegErr = false;
+
+    template.forEach((plugin) => {
+      for (const [key, value] of Object.entries(plugin.settings)) {
+        if (value.required && !value.value) {
+          data.isReqErr = true;
+          data.settingErr = key;
+          data.pluginErr = plugin.name;
+          break;
+        }
+        if (value.pattern && value.value) {
+          const regex = new RegExp(value.pattern);
+          if (!regex.test(value.value)) {
+            data.isRegErr = true;
+            data.settingErr = key;
+            data.pluginErr = plugin.name;
+            break;
+          }
+        }
+      }
+    });
+
+    // Add filter logic
     const filterPlugin = [
       {
         type: "select",
@@ -101,8 +135,6 @@ const data = reactive({
       },
     ];
 
-    // Deep copy
-    const template = JSON.parse(JSON.stringify(data.base));
     // Start plugin filtering
     const filterPlugins = useFilter(template, filterPlugin);
     // Filter settings
@@ -224,7 +256,6 @@ const selectContext = {
 const buttonSave = {
   id: uuidv4(),
   text: "action_save",
-  disabled: false,
   color: "success",
   size: "normal",
   type: "bouton",
@@ -313,7 +344,7 @@ onUnmounted(() => {
       <Select @inp="(v) => (data.type = v)" v-bind="selectType" />
       <Select @inp="(v) => (data.context = v)" v-bind="selectContext" />
     </Container>
-    <template v-for="plugin in data.filtered">
+    <template v-for="plugin in data.format">
       <Container
         data-advanced-form-plugin
         v-if="plugin.name === data.currPlugin"
@@ -332,6 +363,24 @@ onUnmounted(() => {
         </Container>
       </Container>
     </template>
-    <Button v-bind="buttonSave" />
+    <Button
+      v-bind="buttonSave"
+      :disabled="data.isReqErr || data.isRegErr ? true : false"
+    />
+    <Text
+      v-if="data.isRegErr || data.isReqErr"
+      :textClass="'setting-error'"
+      :text="
+        data.isReqErr
+          ? $t('inp_plugin_setting_required', {
+              plugin: data.pluginErr,
+              setting: data.settingErr,
+            })
+          : $t('inp_plugin_setting_invalid', {
+              plugin: data.pluginErr,
+              setting: data.settingErr,
+            })
+      "
+    />
   </Container>
 </template>

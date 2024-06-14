@@ -914,7 +914,7 @@ body {
 /* CONTENT COMPONENT */
 
 .text-content {
-  @apply leading-normal mb-0 lowercase;
+  @apply leading-normal mb-0 ;
 }
 
 /* CONTENT DETAIL LSIT COMPONENT */
@@ -1027,6 +1027,8 @@ body {
   @apply pt-4 relative w-full flex flex-col items-center xs:flex-row justify-center xs:justify-end flex-wrap;
 }
 
+/* BTN */
+
 .btn {
   @apply tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
@@ -1086,6 +1088,13 @@ body {
 .btn-svg {
   @apply w-6.5 h-6.5;
 }
+
+/* SETTINGS */
+
+.setting-error {
+  @apply font-bold error text-center mt-2 text-red-500;
+}
+
 /* FILE MANAGER */
 
 .file-manager-breadcrumb {

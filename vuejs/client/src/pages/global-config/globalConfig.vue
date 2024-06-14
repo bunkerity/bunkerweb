@@ -246,6 +246,7 @@ const data = {
               tablet: 6,
               mobile: 12,
             },
+            required: true,
             disabled: false,
             value: "www.example.com",
             popovers: [
@@ -4515,7 +4516,7 @@ const data = {
               mobile: 12,
             },
             disabled: false,
-            value: "dsfrgrdgrdgrdhgd",
+            value: "yes",
             popovers: [
               {
                 iconColor: "orange",

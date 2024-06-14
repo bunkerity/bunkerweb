@@ -149,10 +149,11 @@ const buttonSave = {
       <Editor @inp="(v) => (data.inp = v)" v-bind="editorData" />
     </Container>
     <Button :disabled="data.isValid ? false : true" v-bind="buttonSave" />
+
     <Text
       v-if="!data.isValid"
       :text="'dashboard_raw_invalid'"
-      :textClass="'text-center error'"
+      :textClass="'setting-error'"
     />
   </Container>
 </template>
