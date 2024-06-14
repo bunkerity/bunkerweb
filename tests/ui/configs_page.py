@@ -38,6 +38,8 @@ try:
     log_info("Navigating to the configs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[5]/a", "configs")
 
+    sleep(2)
+
     log_info("Trying to create a new config ...")
 
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")

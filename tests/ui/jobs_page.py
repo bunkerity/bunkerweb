@@ -88,7 +88,7 @@ try:
 
     cookie = DRIVER.get_cookies()[0]
     resp = get(
-        f"https://www.example.com{UI_URL}/jobs/download?job_name=mmdb-country&file_name=country.mmdb",
+        f"https://www.example.com{UI_URL}/jobs/download?plugin_id=jobs&job_name=mmdb-country&file_name=country.mmdb",
         headers={"Host": "www.example.com", "User-Agent": DRIVER.execute_script("return navigator.userAgent;")},
         cookies={cookie["name"]: cookie["value"]},
         verify=False,
