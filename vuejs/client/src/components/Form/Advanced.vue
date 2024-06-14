@@ -11,7 +11,13 @@ import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
 import { plugin_types } from "@utils/variables";
-import { useFilter, useCheckPluginsValidity } from "@utils/form.js";
+import {
+  useFilter,
+  useCheckPluginsValidity,
+  useUpdateTempSettings,
+  useListenTemp,
+  useUnlistenTemp,
+} from "@utils/form.js";
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
@@ -174,6 +180,11 @@ function getPluginNames(template) {
   }
 }
 
+function updateTemplate(e) {
+  if (!e.target.closest("[data-advanced-form-plugin]")) return;
+  useUpdateTempSettings(e, data.base);
+}
+
 const comboboxPlugin = {
   id: uuidv4(),
   name: uuidv4(),
@@ -253,62 +264,19 @@ const buttonSave = {
   containerClass: "flex justify-center",
 };
 
-function updateInp(e) {
-  // Check if target is child of data-advanced-form
-  if (!e.target.closest("[data-advanced-form-plugin]")) return;
-
-  // Wait some ms that previous update logic is done like datepicker
-  setTimeout(() => {
-    let inpId, inpValue;
-
-    // Case target is input (a little different for datepicker)
-    if (e.target.tagName === "INPUT") {
-      inpId = e.target.id;
-      inpValue = e.target.hasAttribute("data-timestamp")
-        ? e.target.getAttribute("data-timestamp")
-        : e.target.value;
-    }
-
-    // Case target is select
-    if (
-      e.target.closest("[data-field-container]") &&
-      e.target.hasAttribute("data-setting-id") &&
-      e.target.hasAttribute("data-setting-value")
-    ) {
-      inpId = e.target.getAttribute("data-setting-id");
-      inpValue = e.target.getAttribute("data-setting-value");
-    }
-
-    // Case target is not an input-like
-    if (!inpId) return;
-
-    data.base.find((plugin) => {
-      const settings = plugin["settings"];
-      // loop on each settings from plugin
-      for (const [key, value] of Object.entries(settings)) {
-        if (value.id === inpId) {
-          value.value = inpValue;
-        }
-      }
-    });
-  }, 50);
-}
-
 onMounted(() => {
   // Get first props.forms template name
   data.currPlugin = getFirstPlugin(props.template);
   data.plugins = getPluginNames(props.template);
   setValidity();
   // Store update data on
-  window.addEventListener("input", updateInp);
-  window.addEventListener("change", updateInp);
-  window.addEventListener("click", updateInp);
+
+  // I want updatInp to access event, data.base and the container attribut
+  useListenTemp(updateTemplate);
 });
 
 onUnmounted(() => {
-  window.removeEventListener("input", updateInp);
-  window.removeEventListener("change", updateInp);
-  window.removeEventListener("click", updateInp);
+  useUnlistenTemp(updateTemplate);
 });
 </script>
 

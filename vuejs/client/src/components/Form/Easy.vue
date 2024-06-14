@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, computed } from "vue";
+import { defineProps, reactive, onMounted, onUnmounted, computed } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
@@ -8,7 +8,12 @@ import Flex from "@components/Widget/Flex.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
-import { useCheckPluginsValidity } from "@utils/form.js";
+import {
+  useCheckPluginsValidity,
+  useUpdateTempSettings,
+  useListenTemp,
+  useUnlistenTemp,
+} from "@utils/form.js";
 
 /**
   @name Form/Easy.vue
@@ -82,11 +87,15 @@ function setValidity() {
   const [isRegErr, isReqErr, settingErr, pluginErr, id] =
     useCheckPluginsValidity(data.base);
 
-  console.log(isRegErr, isReqErr, settingErr, pluginErr, id);
   data.stepErr = id;
   data.isRegErr = isRegErr;
   data.isReqErr = isReqErr;
   data.settingErr = settingErr;
+}
+
+function updateTemplate(e) {
+  if (!e.target.closest("[data-easy-form-step]")) return;
+  useUpdateTempSettings(e, data.base);
 }
 
 const buttonSave = {
@@ -116,6 +125,11 @@ onMounted(() => {
   // Restart step one every time the component is mounted
   data.currStep = 0;
   setValidity();
+  useListenTemp(updateTemplate);
+});
+
+onUnmounted(() => {
+  useUnlistenTemp(updateTemplate);
 });
 </script>
 
@@ -130,8 +144,12 @@ onMounted(() => {
     <Title type="card" :title="'dashboard_easy_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
 
-    <template v-for="(step, id) in props.template">
-      <Container v-if="data.currStep === id" class="col-span-12 w-full">
+    <template v-for="(step, id) in data.base">
+      <Container
+        data-easy-form-step
+        v-if="data.currStep === id"
+        class="col-span-12 w-full"
+      >
         <Title
           type="card"
           :title="

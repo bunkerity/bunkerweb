@@ -298,10 +298,63 @@ function useCheckPluginsValidity(template) {
   return [isRegErr, isReqErr, settingErr, pluginErr, id];
 }
 
+function useListenTemp(handler) {
+  window.addEventListener("input", handler);
+  window.addEventListener("change", handler);
+  window.addEventListener("click", handler);
+}
+
+function useUnlistenTemp(handler) {
+  window.removeEventListener("input", handler);
+  window.removeEventListener("change", handler);
+  window.removeEventListener("click", handler);
+}
+
+function useUpdateTempSettings(e, template) {
+  // Wait some ms that previous update logic is done like datepicker
+  setTimeout(() => {
+    let inpId, inpValue;
+
+    // Case target is input (a little different for datepicker)
+    if (e.target.tagName === "INPUT") {
+      inpId = e.target.id;
+      inpValue = e.target.hasAttribute("data-timestamp")
+        ? e.target.getAttribute("data-timestamp")
+        : e.target.value;
+    }
+
+    // Case target is select
+    if (
+      e.target.closest("[data-field-container]") &&
+      e.target.hasAttribute("data-setting-id") &&
+      e.target.hasAttribute("data-setting-value")
+    ) {
+      inpId = e.target.getAttribute("data-setting-id");
+      inpValue = e.target.getAttribute("data-setting-value");
+    }
+
+    // Case target is not an input-like
+    if (!inpId) return;
+
+    template.find((plugin) => {
+      const settings = plugin["settings"];
+      // loop on each settings from plugin
+      for (const [key, value] of Object.entries(settings)) {
+        if (value.id === inpId) {
+          value.value = inpValue;
+        }
+      }
+    });
+  }, 50);
+}
+
 export {
   useForm,
   useFilter,
   isItemKeyword,
   isItemSelect,
   useCheckPluginsValidity,
+  useUpdateTempSettings,
+  useListenTemp,
+  useUnlistenTemp,
 };
