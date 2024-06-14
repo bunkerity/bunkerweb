@@ -1,0 +1,1309 @@
+[
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "anonymous-report"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "misc"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "error",
+                    "iconName": "cross"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:11 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "backup-data"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "backup"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "error",
+                    "iconName": "cross"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:10 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "blacklist-download"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "blacklist"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "hour"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:09 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "bunkernet-data"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "bunkernet"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:11 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "bunkernet-register"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "bunkernet"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "hour"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:09 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "certbot-new"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "letsencrypt"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "once"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "error",
+                    "iconName": "cross"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:08 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "certbot-renew"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "letsencrypt"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:09 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "coreruleset-nightly"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "modsecurity"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:09 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "custom-cert"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "customcert"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:10 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "default-server-cert"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "misc"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "once"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "error",
+                    "iconName": "cross"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:10 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "select",
+                "data": {
+                    "id": "default-server-cert_cache",
+                    "label": "default-server-cert_cache",
+                    "hideLabel": true,
+                    "inpType": "select",
+                    "name": "default-server-cert_cache",
+                    "value": "none",
+                    "values": [
+                        "none",
+                        "default-server-cert.pem",
+                        "default-server-cert.key"
+                    ],
+                    "columns": {
+                        "pc": 12,
+                        "tablet": 12,
+                        "mobile": 12
+                    },
+                    "popovers": [
+                        {
+                            "iconColor": "info",
+                            "iconName": "info",
+                            "text": "jobs_download_cache_file"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "download-plugins"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "misc"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "once"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "error",
+                    "iconName": "cross"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:13 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "download-pro-plugins"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "pro"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:10 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "failover-backup"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "jobs"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "once"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "error",
+                    "iconName": "cross"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:16 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "select",
+                "data": {
+                    "id": "failover-backup_cache",
+                    "label": "failover-backup_cache",
+                    "hideLabel": true,
+                    "inpType": "select",
+                    "name": "failover-backup_cache",
+                    "value": "none",
+                    "values": [
+                        "none",
+                        "folder:/var/tmp/bunkerweb/failover.tgz"
+                    ],
+                    "columns": {
+                        "pc": 12,
+                        "tablet": 12,
+                        "mobile": 12
+                    },
+                    "popovers": [
+                        {
+                            "iconColor": "info",
+                            "iconName": "info",
+                            "text": "jobs_download_cache_file"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "greylist-download"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "greylist"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "hour"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:09 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "mmdb-asn"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "jobs"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:14 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "select",
+                "data": {
+                    "id": "mmdb-asn_cache",
+                    "label": "mmdb-asn_cache",
+                    "hideLabel": true,
+                    "inpType": "select",
+                    "name": "mmdb-asn_cache",
+                    "value": "none",
+                    "values": [
+                        "none",
+                        "asn.mmdb"
+                    ],
+                    "columns": {
+                        "pc": 12,
+                        "tablet": 12,
+                        "mobile": 12
+                    },
+                    "popovers": [
+                        {
+                            "iconColor": "info",
+                            "iconName": "info",
+                            "text": "jobs_download_cache_file"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "mmdb-country"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "jobs"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:12 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "select",
+                "data": {
+                    "id": "mmdb-country_cache",
+                    "label": "mmdb-country_cache",
+                    "hideLabel": true,
+                    "inpType": "select",
+                    "name": "mmdb-country_cache",
+                    "value": "none",
+                    "values": [
+                        "none",
+                        "country.mmdb"
+                    ],
+                    "columns": {
+                        "pc": 12,
+                        "tablet": 12,
+                        "mobile": 12
+                    },
+                    "popovers": [
+                        {
+                            "iconColor": "info",
+                            "iconName": "info",
+                            "text": "jobs_download_cache_file"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "realip-download"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "realip"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "hour"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:09 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "self-signed"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "selfsigned"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:10 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "select",
+                "data": {
+                    "id": "self-signed_cache",
+                    "label": "self-signed_cache",
+                    "hideLabel": true,
+                    "inpType": "select",
+                    "name": "self-signed_cache",
+                    "value": "none",
+                    "values": [
+                        "none",
+                        "www.example.com/cert.pem",
+                        "www.example.com/key.pem"
+                    ],
+                    "columns": {
+                        "pc": 12,
+                        "tablet": 12,
+                        "mobile": 12
+                    },
+                    "popovers": [
+                        {
+                            "iconColor": "info",
+                            "iconName": "info",
+                            "text": "jobs_download_cache_file"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "update-check"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "jobs"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "day"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "error",
+                    "iconName": "cross"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:15 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ],
+    [
+        {
+            "name": {
+                "type": "Text",
+                "data": {
+                    "text": "whitelist-download"
+                }
+            }
+        },
+        {
+            "plugin_id": {
+                "type": "Text",
+                "data": {
+                    "text": "whitelist"
+                }
+            }
+        },
+        {
+            "every": {
+                "type": "Text",
+                "data": {
+                    "text": "hour"
+                }
+            }
+        },
+        {
+            "reload": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "success": {
+                "type": "Icons",
+                "data": {
+                    "iconColor": "success",
+                    "iconName": "check"
+                }
+            }
+        },
+        {
+            "last_run": {
+                "type": "Text",
+                "data": {
+                    "text": "2024/06/14, 01:33:09 PM"
+                }
+            }
+        },
+        {
+            "cache": {
+                "type": "Text",
+                "data": {
+                    "text": "No cache"
+                }
+            }
+        }
+    ]
+]

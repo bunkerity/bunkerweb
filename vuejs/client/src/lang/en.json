@@ -168,5 +168,6 @@
   "instances_type": "type",
   "instances_status": "status",
   "instances_active": "active",
-  "instances_inactive": "inactive"
+  "instances_inactive": "inactive",
+  "jobs_download_cache_file": "download cache files"
 }

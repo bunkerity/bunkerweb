@@ -38,6 +38,7 @@ import { computed } from "vue";
     iconColor: 'amber',
   }
   @param {string} iconName - The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
+  @param {string} [iconType="default"] - The type of the icon between default and stat. Default is used for regular icons, stat is used for icons inside a stat widget.
   @param {string} [iconClass="default-svg"] - Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically.
   @param {string} [iconColor="info"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
   */
