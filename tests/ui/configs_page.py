@@ -38,7 +38,7 @@ try:
     log_info("Navigating to the configs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[5]/a", "configs")
 
-    sleep(2)
+    DRIVER.refresh()
 
     log_info("Trying to create a new config ...")
 
