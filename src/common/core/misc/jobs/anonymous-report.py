@@ -41,7 +41,7 @@ try:
         if key not in ("version", "integration", "database_version", "is_pro"):
             data.pop(key, None)
 
-    db_config = JOB.db.get_config(methods=True, with_drafts=True)
+    db_config = JOB.db.get_non_default_settings(methods=True, with_drafts=True)
     services = db_config.get("SERVER_NAME", {"value": ""})["value"].split(" ")
     multisite = db_config.get("MULTISITE", {"value": "no"})["value"] == "yes"
 
@@ -85,7 +85,7 @@ try:
 
     data["non_default_settings"] = {}
     for setting, setting_data in db_config.items():
-        if isinstance(setting_data, dict) and setting_data["method"] != "default":
+        if isinstance(setting_data, dict):
             for server in services:
                 if setting.startswith(server + "_"):
                     setting = setting[len(server) + 1 :]  # noqa: E203

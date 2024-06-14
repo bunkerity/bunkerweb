@@ -753,9 +753,9 @@ def account():
             variable = {}
             variable["PRO_LICENSE_KEY"] = request.form["license"]
 
-            error = app.config["CONFIG"].check_variables(variable)
+            variable = app.config["CONFIG"].check_variables(variable, {"PRO_LICENSE_KEY": request.form["license"]})
 
-            if error:
+            if not variable:
                 return redirect_flash_error("The license key variable checks returned error", "account", True)
 
             # Force job to contact PRO API
@@ -963,7 +963,7 @@ def services():
         if "SERVER_NAME" not in variables:
             variables["SERVER_NAME"] = variables["OLD_SERVER_NAME"]
 
-        config = app.config["CONFIG"].get_config(with_drafts=True, filtered_settings=variables.keys())
+        config = app.config["DB"].get_config(methods=True, with_drafts=True)
         server_name = variables["SERVER_NAME"].split(" ")[0]
         was_draft = config.get(f"{server_name}_IS_DRAFT", {"value": "no"})["value"] == "yes"
         operation = request.form["operation"]
@@ -997,7 +997,7 @@ def services():
             del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
-            for variable, value in deepcopy(variables).items():
+            for variable, value in variables.copy().items():
                 if (
                     variable in variables
                     and variable != "SERVER_NAME"
@@ -1005,7 +1005,7 @@ def services():
                 ):
                     del variables[variable]
 
-            variables = app.config["CONFIG"].check_variables(variables)
+            variables = app.config["CONFIG"].check_variables(variables, config)
 
             if (
                 was_draft == is_draft
@@ -1024,7 +1024,7 @@ def services():
 
             is_request_params(["SERVER_NAME"], "services", True)
 
-            variables = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]})
+            variables = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
 
             if not variables:
                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
@@ -1138,12 +1138,13 @@ def global_config():
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(with_drafts=True, filtered_settings=variables.keys())
+        config = app.config["DB"].get_config(methods=True, with_drafts=True)
         services = config["SERVER_NAME"]["value"].split(" ")
         for variable, value in variables.copy().items():
             setting = config.get(variable, {"value": None, "global": True})
             if setting["global"] and value == setting["value"]:
                 del variables[variable]
+                continue
 
         variables = app.config["CONFIG"].check_variables(variables, config)
 

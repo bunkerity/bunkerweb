@@ -92,7 +92,7 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__db.get_filtered_config(global_only=global_only, methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings)
+        return self.__db.get_non_default_settings(global_only=global_only, methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings)
 
     def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services

@@ -1533,102 +1533,15 @@ class Database:
 
         return message
 
-    def get_config(self, global_only: bool = False, methods: bool = False, with_drafts: bool = False) -> Dict[str, Any]:
-        """Get the config from the database"""
-        with self.__db_session() as session:
-            config = {}
-            multisite = []
-            for setting in (
-                session.query(Settings)
-                .with_entities(
-                    Settings.id,
-                    Settings.context,
-                    Settings.default,
-                    Settings.multiple,
-                )
-                .order_by(Settings.order)
-            ):
-                default = setting.default or ""
-                config[setting.id] = default if not methods else {"value": default, "global": True, "method": "default"}
-
-                for global_value in (
-                    session.query(Global_values).with_entities(Global_values.value, Global_values.suffix, Global_values.method).filter_by(setting_id=setting.id)
-                ):
-                    config[setting.id + (f"_{global_value.suffix}" if setting.multiple and global_value.suffix > 0 else "")] = (
-                        global_value.value
-                        if not methods
-                        else {
-                            "value": global_value.value,
-                            "global": True,
-                            "method": global_value.method,
-                        }
-                    )
-
-                if setting.context == "multisite":
-                    multisite.append(setting.id)
-
-            is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"
-
-            services = session.query(Services).with_entities(Services.id, Services.is_draft)
-            if not with_drafts:
-                services = services.filter_by(is_draft=False)
-
-            if not global_only and is_multisite:
-                for service in services:
-                    config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
-                    if methods:
-                        config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
-
-                    checked_settings = []
-                    for key, value in config.copy().items():
-                        original_key = key
-                        if self.suffix_rx.search(key):
-                            key = key[: -len(str(key.split("_")[-1])) - 1]
-
-                        if key not in multisite:
-                            continue
-                        elif f"{service.id}_{original_key}" not in config:
-                            config[f"{service.id}_{original_key}"] = value
-
-                        if original_key not in checked_settings:
-                            checked_settings.append(original_key)
-                        else:
-                            continue
-
-                        for service_setting in (
-                            session.query(Services_settings)
-                            .with_entities(
-                                Services_settings.value,
-                                Services_settings.suffix,
-                                Services_settings.method,
-                            )
-                            .filter_by(service_id=service.id, setting_id=key)
-                        ):
-                            value = service_setting.value
-                            if key == "SERVER_NAME" and service.id not in value.split(" "):
-                                value = f"{service.id} {value}".strip()
-
-                            config[f"{service.id}_{key}" + (f"_{service_setting.suffix}" if service_setting.suffix > 0 else "")] = (
-                                value
-                                if not methods
-                                else {
-                                    "value": value,
-                                    "global": False,
-                                    "method": service_setting.method,
-                                }
-                            )
-
-            servers = " ".join(service.id for service in services)
-            config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
-
-            return config
-
-    def get_filtered_config(
+    def get_non_default_settings(
         self,
         global_only: bool = False,
         methods: bool = False,
         with_drafts: bool = False,
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+        *,
+        original_config: Optional[Dict[str, Any]] = None,
+        original_multisite: Optional[Set[str]] = None,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
         filtered_settings = set(filtered_settings or [])
@@ -1637,14 +1550,15 @@ class Database:
             filtered_settings.update(("SERVER_NAME", "MULTISITE"))
 
         with self.__db_session() as session:
-            config = {}
+            config = original_config or {}
+            multisite = original_multisite or set()
 
             # Define the join operation
             j = join(Settings, Global_values, Settings.id == Global_values.setting_id)
 
             # Define the select statement
             stmt = (
-                db_select(Settings.id, Settings.multiple, Global_values.value, Global_values.suffix, Global_values.method)
+                db_select(Settings.id.label("setting_id"), Settings.context, Settings.multiple, Global_values.value, Global_values.suffix, Global_values.method)
                 .select_from(j)
                 .order_by(Settings.order)
             )
@@ -1655,78 +1569,111 @@ class Database:
             # Execute the query and fetch all results
             results = session.execute(stmt).fetchall()
 
-            for setting in results:
-                key = setting.id + (f"_{setting.suffix}" if setting.multiple and setting.suffix else "")
-                config[key] = setting.value if not methods else {"value": setting.value, "global": True, "method": setting.method}
+            for global_value in results:
+                setting_id = global_value.setting_id + (f"_{global_value.suffix}" if global_value.multiple and global_value.suffix > 0 else "")
+                config[setting_id] = global_value.value if not methods else {"value": global_value.value, "global": True, "method": global_value.method}
+                if global_value.context == "multisite":
+                    multisite.add(setting_id)
 
-            is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"
-
-            # Define the join operation
-            j = join(Services, Services_settings, Services.id == Services_settings.service_id)
-            j = j.join(Settings, Settings.id == Services_settings.setting_id)
-
-            # Define the select statement
-            stmt = db_select(
-                Services.id.label("service_id"),
-                Services.is_draft,
-                Settings.id.label("setting_id"),
-                Settings.context,
-                Settings.default,
-                Settings.multiple,
-                Services_settings.value,
-                Services_settings.suffix,
-                Services_settings.method,
-            ).select_from(j)
-
-            if not with_drafts:
-                stmt = stmt.where(Services.is_draft == False)  # noqa: E712
-
-            if filtered_settings:
-                stmt = stmt.where(Services_settings.setting_id.in_(filtered_settings))
-
-            # Execute the query and fetch all results
-            results = session.execute(stmt).fetchall()
-
-            if not global_only and is_multisite:
-                for result in results:
-                    if f"{result.service_id}_IS_DRAFT" not in config:
-                        config[f"{result.service_id}_IS_DRAFT"] = "yes" if result.is_draft else "no"
-                        if methods:
-                            config[f"{result.service_id}_IS_DRAFT"] = {"value": config[f"{result.service_id}_IS_DRAFT"], "global": False, "method": "default"}
-
-                    key = result.setting_id
-                    original_key = key
-                    if self.suffix_rx.search(key):
-                        key = key[: -len(str(key.split("_")[-1])) - 1]
-
-                    if result.context != "multisite":
-                        continue
-                    elif f"{result.service_id}_{original_key}" not in config:
-                        config[f"{result.service_id}_{original_key}"] = result.default
-
-                    value = result.value
-                    if key == "SERVER_NAME" and not search(r"(^| )" + escape(result.service_id) + r"($| )", value):
-                        value = f"{result.service_id} {value}".strip()
-
-                    config[f"{result.service_id}_{key}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = (
-                        value
-                        if not methods
-                        else {
-                            "value": value,
-                            "global": False,
-                            "method": result.method,
-                        }
-                    )
-
-            services = session.query(Services).with_entities(Services.id)
+            services = session.query(Services).with_entities(Services.id, Services.is_draft)
 
             if not with_drafts:
                 services = services.filter_by(is_draft=False)
 
-            servers = " ".join(service.id for service in services)
+            servers = ""
+            for service in services:
+                config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
+                if methods:
+                    config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
+                for key in multisite:
+                    config[f"{service.id}_{key}"] = config[key]
+                servers += f"{service.id} "
+            servers = servers.strip()
+
             config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
 
+            if not global_only and (config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"):
+                # Define the join operation
+                j = join(Services, Services_settings, Services.id == Services_settings.service_id)
+                j = j.join(Settings, Settings.id == Services_settings.setting_id)
+
+                # Define the select statement
+                stmt = (
+                    db_select(
+                        Services.id.label("service_id"),
+                        Settings.id.label("setting_id"),
+                        Settings.multiple,
+                        Services_settings.value,
+                        Services_settings.suffix,
+                        Services_settings.method,
+                    )
+                    .select_from(j)
+                    .order_by(Services.id, Settings.order)
+                )
+
+                if not with_drafts:
+                    stmt = stmt.where(Services.is_draft == False)  # noqa: E712
+
+                if filtered_settings:
+                    stmt = stmt.where(Settings.id.in_(filtered_settings))
+
+                # Execute the query and fetch all results
+                results = session.execute(stmt).fetchall()
+
+                for result in results:
+                    value = result.value
+
+                    if result.setting_id == "SERVER_NAME" and not search(r"^" + escape(result.service_id) + r"( |$)", value):
+                        split = set(value.split(" "))
+                        split.discard(result.service_id)
+                        value = result.service_id + " " + " ".join(split)
+
+                    config[f"{result.service_id}_{result.setting_id}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = (
+                        value if not methods else {"value": value, "global": False, "method": result.method}
+                    )
+
             return config
+
+    def get_config(
+        self,
+        global_only: bool = False,
+        methods: bool = False,
+        with_drafts: bool = False,
+        filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+    ) -> Dict[str, Any]:
+        """Get the config from the database"""
+        with self.__db_session() as session:
+            config = {}
+            multisite = set()
+
+            query = (
+                session.query(Settings)
+                .with_entities(
+                    Settings.id,
+                    Settings.context,
+                    Settings.default,
+                    Settings.multiple,
+                )
+                .order_by(Settings.order)
+            )
+
+            if filtered_settings:
+                query = query.filter(Settings.id.in_(filtered_settings))
+
+            for setting in query:
+                default = setting.default or ""
+                config[setting.id] = default if not methods else {"value": default, "global": True, "method": "default"}
+                if setting.context == "multisite":
+                    multisite.add(setting.id)
+
+        return self.get_non_default_settings(
+            global_only=global_only,
+            methods=methods,
+            with_drafts=with_drafts,
+            filtered_settings=filtered_settings,
+            original_config=config,
+            original_multisite=multisite,
+        )
 
     def get_custom_configs(self) -> List[Dict[str, Any]]:
         """Get the custom configs from the database"""
