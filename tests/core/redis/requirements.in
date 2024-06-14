@@ -1,5 +1,5 @@
 fastapi==0.111.0
-redis==5.0.5
+redis==5.0.6
 requests==2.32.3
 selenium<4.17.0
 uvicorn[standard]==0.30.1
