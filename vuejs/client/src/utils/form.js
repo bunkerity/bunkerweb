@@ -250,4 +250,58 @@ function isItemSelect(filters, item) {
   return false;
 }
 
-export { useForm, useFilter, isItemKeyword, isItemSelect };
+/**
+  @name useCheckPluginsValidity
+  @description  Check all items keys if at least one match exactly the filter value.
+  @example 
+    const template = [
+  {
+    name: "test",
+    settings: {
+      test: {
+        required: true,
+        value: "",
+        pattern: "^[a-zA-Z0-9]*$",
+      },
+    },
+  },
+  @param template - Template with plugins list and detail settings
+*/
+function useCheckPluginsValidity(template) {
+  let isRegErr = false;
+  let isReqErr = false;
+  let settingErr = "";
+  let pluginErr = "";
+  let id = 0;
+
+  template.forEach((plugin, index) => {
+    id = index;
+    for (const [key, value] of Object.entries(plugin.settings)) {
+      if (value.required && !value.value) {
+        isReqErr = true;
+        settingErr = key;
+        pluginErr = plugin.name;
+        break;
+      }
+      if (value.pattern && value.value) {
+        const regex = new RegExp(value.pattern);
+        if (!regex.test(value.value)) {
+          isRegErr = true;
+          settingErr = key;
+          pluginErr = plugin.name;
+          break;
+        }
+      }
+    }
+  });
+
+  return [isRegErr, isReqErr, settingErr, pluginErr, id];
+}
+
+export {
+  useForm,
+  useFilter,
+  isItemKeyword,
+  isItemSelect,
+  useCheckPluginsValidity,
+};

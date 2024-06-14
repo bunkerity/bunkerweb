@@ -11,7 +11,7 @@ import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
 import { plugin_types } from "@utils/variables";
-import { useFilter } from "@utils/form.js";
+import { useFilter, useCheckPluginsValidity } from "@utils/form.js";
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
@@ -78,32 +78,11 @@ const data = reactive({
   pluginErr: "",
   // Add filtering and check validity with regex and required
   format: computed(() => {
+    // Check validity
+    setValidity();
+
     // Deep copy
     const template = JSON.parse(JSON.stringify(data.base));
-
-    // Check validity
-    data.isReqErr = false;
-    data.isRegErr = false;
-
-    template.forEach((plugin) => {
-      for (const [key, value] of Object.entries(plugin.settings)) {
-        if (value.required && !value.value) {
-          data.isReqErr = true;
-          data.settingErr = key;
-          data.pluginErr = plugin.name;
-          break;
-        }
-        if (value.pattern && value.value) {
-          const regex = new RegExp(value.pattern);
-          if (!regex.test(value.value)) {
-            data.isRegErr = true;
-            data.settingErr = key;
-            data.pluginErr = plugin.name;
-            break;
-          }
-        }
-      }
-    });
 
     // Add filter logic
     const filterPlugin = [
@@ -163,6 +142,15 @@ const data = reactive({
     return filterData;
   }),
 });
+
+function setValidity() {
+  const [isRegErr, isReqErr, settingErr, pluginErr, id] =
+    useCheckPluginsValidity(data.base);
+  data.isRegErr = isRegErr;
+  data.isReqErr = isReqErr;
+  data.settingErr = settingErr;
+  data.pluginErr = pluginErr;
+}
 
 function getFirstPlugin(template) {
   try {
@@ -310,6 +298,7 @@ onMounted(() => {
   // Get first props.forms template name
   data.currPlugin = getFirstPlugin(props.template);
   data.plugins = getPluginNames(props.template);
+  setValidity();
   // Store update data on
   window.addEventListener("input", updateInp);
   window.addEventListener("change", updateInp);
@@ -372,11 +361,11 @@ onUnmounted(() => {
       :textClass="'setting-error'"
       :text="
         data.isReqErr
-          ? $t('inp_plugin_setting_required', {
+          ? $t('dashboard_advanced_required', {
               plugin: data.pluginErr,
               setting: data.settingErr,
             })
-          : $t('inp_plugin_setting_invalid', {
+          : $t('dashboard_advanced_invalid', {
               plugin: data.pluginErr,
               setting: data.settingErr,
             })

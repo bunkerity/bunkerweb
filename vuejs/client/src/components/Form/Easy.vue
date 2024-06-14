@@ -1,12 +1,15 @@
 <script setup>
-import { defineProps, reactive, onMounted, computed, KeepAlive } from "vue";
+import { defineProps, reactive, onMounted, computed } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Flex from "@components/Widget/Flex.vue";
 import Button from "@components/Widget/Button.vue";
+import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
+import { useCheckPluginsValidity } from "@utils/form.js";
+
 /**
   @name Form/Easy.vue
   @description This component is used to create a complete easy form with plugin selection.
@@ -61,11 +64,30 @@ const props = defineProps({
 });
 
 const data = reactive({
+  base: JSON.parse(JSON.stringify(props.template)),
   currStep: 0,
   totalSteps: Object.keys(props.template).length,
   isFinalStep: computed(() => data.currStep === data.totalSteps - 1),
   isFirstStep: computed(() => data.currStep === 0),
+  isRegErr: false,
+  isReqErr: false,
+  settingErr: "",
+  stepErr: "",
+  checkValidity: computed(() => {
+    setValidity();
+  }),
 });
+
+function setValidity() {
+  const [isRegErr, isReqErr, settingErr, pluginErr, id] =
+    useCheckPluginsValidity(data.base);
+
+  console.log(isRegErr, isReqErr, settingErr, pluginErr, id);
+  data.stepErr = id;
+  data.isRegErr = isRegErr;
+  data.isReqErr = isReqErr;
+  data.settingErr = settingErr;
+}
 
 const buttonSave = {
   id: uuidv4(),
@@ -93,6 +115,7 @@ const buttonNext = {
 onMounted(() => {
   // Restart step one every time the component is mounted
   data.currStep = 0;
+  setValidity();
 });
 </script>
 
@@ -108,21 +131,28 @@ onMounted(() => {
     <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
 
     <template v-for="(step, id) in props.template">
-      <KeepAlive>
-        <Container v-if="data.currStep === id" class="col-span-12 w-full">
-          <Title type="card" :title="step.title" />
-          <Subtitle type="card" :subtitle="step.subtitle" />
+      <Container v-if="data.currStep === id" class="col-span-12 w-full">
+        <Title
+          type="card"
+          :title="
+            $t('dashboard_easy_mode_title', {
+              step: id + 1,
+              total: data.totalSteps,
+              name: step.title,
+            })
+          "
+        />
+        <Subtitle type="card" :subtitle="step.subtitle" />
 
-          <Container class="grid grid-cols-12 w-full relative">
-            <template
-              v-for="(setting, name, index) in step.settings"
-              :key="index"
-            >
-              <Fields :setting="setting" />
-            </template>
-          </Container>
+        <Container class="grid grid-cols-12 w-full relative">
+          <template
+            v-for="(setting, name, index) in step.settings"
+            :key="index"
+          >
+            <Fields :setting="setting" />
+          </template>
         </Container>
-      </KeepAlive>
+      </Container>
     </template>
     <Flex :flexClass="'justify-center'">
       <Button
@@ -137,7 +167,25 @@ onMounted(() => {
         :disabled="data.isFinalStep"
         v-bind="buttonNext"
       />
-      <Button :disabled="!data.isFinalStep" v-bind="buttonSave" />
+      <Button
+        :disabled="!data.isFinalStep || data.isRegErr || data.isReqErr"
+        v-bind="buttonSave"
+      />
     </Flex>
+    <Text
+      v-if="data.isRegErr || data.isReqErr"
+      :textClass="'setting-error'"
+      :text="
+        data.isReqErr
+          ? $t('dashboard_easy_required', {
+              step: data.stepErr,
+              setting: data.settingErr,
+            })
+          : $t('dashboard_easy_invalid', {
+              step: data.stepErr,
+              setting: data.settingErr,
+            })
+      "
+    />
   </Container>
 </template>
