@@ -1033,35 +1033,36 @@ body {
   @apply tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
-.btn.close {
+
+.btn.close:not([disabled]) {
   @apply bg-white text-red-500 border border-red-500 hover:border-red-500/80 focus:border-red-500/80 hover:text-red-500/80 focus:text-red-500/80;
 }
 
-.btn.delete,
-.btn.error {
+.btn.delete:not([disabled]),
+.btn.error:not([disabled]) {
   @apply bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80;
 }
 
-.btn.valid,
-.btn.success {
+.btn.valid:not([disabled]),
+.btn.success:not([disabled]) {
   @apply bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80;
 }
 
-.btn.edit,
-.btn.warning {
+.btn.edit:not([disabled]),
+.btn.warning:not([disabled]) {
   @apply bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80;
 }
 
-.btn.info,
-.btn.load {
+.btn.info:not([disabled]),
+.btn.load:not([disabled]) {
   @apply bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80;
 }
 
-.btn.primary {
+.btn.primary:not([disabled]) {
   @apply bg-primary hover:bg-primary/80 focus:bg-primary/80;
 }
 
-.btn.secondary {
+.btn.secondary:not([disabled]) {
   @apply bg-secondary hover:bg-secondary/80 focus:bg-secondary/80;
 }
 

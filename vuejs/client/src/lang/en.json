@@ -84,7 +84,7 @@
   "dashboard_status_info": "status loading or waiting or unknown.",
   "dashboard_raw_mode": "raw mode",
   "dashboard_raw_mode_subtitle": "Raw mode shows settings as raw key-value pairs of settings.",
-  "dashboard_raw_invalid": "raw format is invalid",
+  "dashboard_raw_invalid": "RAW format is invalid",
   "dashboard_advanced_mode": "Advanced mode",
   "dashboard_advanced_mode_subtitle": "Advanced mode show settings by plugin in dedicated fields.",
   "dashboard_advanced_invalid": "{plugin} {setting} is invalid",
