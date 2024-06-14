@@ -272,6 +272,7 @@ function useCheckPluginsValidity(template) {
   let isReqErr = false;
   let settingErr = "";
   let pluginErr = "";
+  let settingNameErr = "";
   let id = 0;
 
   template.forEach((plugin, index) => {
@@ -280,6 +281,7 @@ function useCheckPluginsValidity(template) {
       if (value.required && !value.value) {
         isReqErr = true;
         settingErr = key;
+        settingNameErr = value.name;
         pluginErr = plugin.name;
         break;
       }
@@ -288,6 +290,7 @@ function useCheckPluginsValidity(template) {
         if (!regex.test(value.value)) {
           isRegErr = true;
           settingErr = key;
+          settingNameErr = value.name;
           pluginErr = plugin.name;
           break;
         }
@@ -295,7 +298,7 @@ function useCheckPluginsValidity(template) {
     }
   });
 
-  return [isRegErr, isReqErr, settingErr, pluginErr, id];
+  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
 }
 
 /**

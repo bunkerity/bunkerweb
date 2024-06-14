@@ -84,13 +84,13 @@ const data = reactive({
 });
 
 function setValidity() {
-  const [isRegErr, isReqErr, settingErr, pluginErr, id] =
+  const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
     useCheckPluginsValidity(data.base);
 
   data.stepErr = id;
   data.isRegErr = isRegErr;
   data.isReqErr = isReqErr;
-  data.settingErr = settingErr;
+  data.settingErr = `"${settingNameErr}"`;
 }
 
 function updateTemplate(e) {
