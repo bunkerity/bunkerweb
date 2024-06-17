@@ -59,6 +59,19 @@ To delve deeper into the core security features, we invite you to explore the [s
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc). Feel free to visit it and perform some security tests.
 
+## BunkerWeb Cloud
+
+Don't want to self-host and manage your own BunkerWeb instance(s) ? You might be interested into BunkerWeb Cloud, our fully managed SaaS offer for BunkerWeb.
+
+Try our [BunkerWeb Cloud beta offer for free](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_source=doc&utm_campaign=self) and get access to :
+
+- Fully managed BunkerWeb instance hosted in our cloud
+- All BunkerWeb features including PRO ones
+- Monitoring platform including dashboards and alerts
+- Technical support to assist you in the configuration
+
+You will find more information about BunkerWeb Cloud in the [FAQ page](https://panel.bunkerweb.io/knowledgebase/55/BunkerWeb-Cloud?utm_source=doc&utm_campaign=self) of the BunkerWeb panel.
+
 ## PRO version
 
 When using BunkerWeb you have the choice of the version you want to use : open-source or PRO.
