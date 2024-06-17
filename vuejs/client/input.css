@@ -1275,34 +1275,61 @@ body {
   @apply fill-gray-700  stroke-gray-600;
 }
 
-/* LIST */
-.list-container {
+/* TABLE */
+
+.table-container {
+  @apply col-span-12 overflow-x-auto overflow-y-hidden;
+}
+
+.table-container-wrap {
+  @apply col-span-12 overflow-x-auto grid grid-cols-12;
+}
+
+.table {
   @apply w-full grid grid-cols-12 block;
 }
 
-.list-content-container {
-  @apply dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
+.sm.table {
+  @apply min-w-[600px];
 }
 
-.list-content-item {
-  @apply text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5 px-1;
+.md.table {
+  @apply min-w-[800px];
 }
 
-.list-content {
-  @apply border-b hover:bg-gray-100 dark:hover:bg-slate-700 border-gray-300 py-2.5 dark:text-gray-400;
+.base.table {
+  @apply min-w-[1000px];
 }
 
-.list-content-item-wrap {
-  @apply break-words items-center col-span-12 grid grid-cols-12 text-sm dark:text-gray-400;
+.lg.table {
+  @apply min-w-[1200px];
 }
 
-.list-header-container {
+.xl.table {
+  @apply min-w-[1400px];
+}
+
+.table-header {
   @apply block w-full col-span-12 grid grid-cols-12 pl-2;
 }
 
-.list-header-item {
+.table-header-item {
   @apply block dark:text-gray-300 pb-1 text-sm font-bold m-0 border-b border-gray-400;
 }
+
+.table-content {
+  @apply dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
+}
+
+.table-content-item {
+  @apply text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5 px-1;
+}
+
+.table-content-item-wrap {
+  @apply py-2.5 px-1;
+}
+
+
 /** MISC **/
 
 .line-separator {

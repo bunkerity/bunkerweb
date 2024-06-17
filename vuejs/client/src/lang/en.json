@@ -96,6 +96,7 @@
   "dashboard_easy_required": "{setting} in step {step} is required",
   "dashboard_templates_title_default": "Configuration templates",
   "dashboard_templates_subtitle_default": "Manage your settings with available templates and using the mode that suits you best.",
+  "dashboard_table": "Table element",
   "inp_input_valid": "input valid",
   "inp_input_error_required": "input is required",
   "inp_input_error": "input is invalid",

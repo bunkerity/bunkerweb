@@ -1,0 +1,149 @@
+<script setup>
+import Container from "@components/Widget/Container.vue";
+import Text from "@components/Widget/Text.vue";
+import Icons from "@components/Widget/Icons.vue";
+import Fields from "@components/Form/Fields.vue";
+import Button from "@components/Widget/Button.vue";
+import { reactive, computed, resolveComponent } from "vue";
+import { v4 as uuidv4 } from "uuid";
+
+/**
+  @name Widget/Table.vue
+  @description This component is used to create a table.
+  You need to provide a title, a header, a list of positions, and a list of items.
+  Items need to be an array of array with a cell being a regular widget. Not all widget are supported. Check this component import list to see which widget are supported.
+  For example, Text, Icons, Icons, Buttons and Fields are supported.
+  @example
+  {
+  "title": "Table title",
+  "header": ["Header 1", "Header 2", "Header 3"],
+  "minWidth": "base",
+  "positions": [4,4,4],
+  "items": [
+            [
+        {
+          "type": "Text",
+          "data": {
+              "text": "whitelist-download"
+            
+            }
+        },
+        ...
+      ],
+      ...
+    ],
+  }
+       
+  @param {string} title - Determine the title of the table.
+  @param {array} header - Determine the header of the table.
+  @param {array} positions - Determine the position of each item in the table in a list of number based on 12 columns grid.
+  @param {array} items - items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget. 
+  @param {string} [minWidth="base"] - Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl".
+  @param {string} [containerClass=""] - Container additional class.
+  @param {string} [containerWrapClass=""] - Container wrap additional class.
+  @param {string} [tableClass=""] - Table additional class.
+*/
+
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
+  minWidth: {
+    type: String,
+    required: false,
+    default: "base",
+  },
+  positions: {
+    type: Array,
+    required: true,
+  },
+  header: {
+    type: Array,
+    required: true,
+  },
+  items: {
+    type: Array,
+    required: true,
+  },
+  containerClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  containerWrapClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  tableClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+});
+
+const table = reactive({
+  length: computed(() => {
+    return props.header.length;
+  }),
+  rowLength: computed(() => {
+    return props.items.length;
+  }),
+  title: computed(() => {
+    return props.title ? props.title : "dashboard_table";
+  }),
+  id: uuidv4(),
+});
+</script>
+
+<template>
+  <Container :containerClass="`${props.containerClass} table-container`">
+    <Container
+      :containerClass="`${props.containerWrapClass} table-container-wrap`"
+    >
+      <table
+        :aria-colcount="table.length"
+        :aria-rowcount="table.rowLength"
+        :class="['table', props.minWidth, props.tableClass]"
+        :aria-describedby="table.id"
+      >
+        <span class="sr-only" :id="table.id">
+          {{ $t(table.title, table.title) }}
+        </span>
+        <thead class="table-header">
+          <tr
+            v-for="(head, id) in props.header"
+            :class="['table-header-item', `col-span-${props.positions[id]}`]"
+          >
+            <th role="columnheader">
+              {{ head }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="table-content">
+          <tr
+            v-for="rowId in table.rowLength"
+            role="row"
+            :aria-rowindex="rowId"
+            class="table-content-item"
+          >
+            <template v-for="(col, id) in props.items[rowId - 1]">
+              <td
+                :class="[
+                  'table-content-item-wrap',
+                  `col-span-${props.positions[id]}`,
+                ]"
+              >
+                <Text v-if="col.type === 'Text'" v-bind="col.data" />
+                <Icons v-if="col.type === 'Icons'" v-bind="col.data" />
+                <Fields v-if="col.type === 'Fields'" v-bind="col.data" />
+                <Button v-if="col.type === 'Button'" v-bind="col.data" />
+              </td>
+            </template>
+          </tr>
+        </tbody>
+      </table>
+    </Container>
+  </Container>
+</template>
