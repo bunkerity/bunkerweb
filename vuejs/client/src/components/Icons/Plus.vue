@@ -26,6 +26,7 @@ const props = defineProps({
 
 <template>
   <svg
+    data-svg="plus"
     role="img"
     :aria-description="$t('icons_plus_desc')"
     :class="[props.iconClass, props.iconColor]"

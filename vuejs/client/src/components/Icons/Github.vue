@@ -25,6 +25,7 @@ const props = defineProps({
 </script>
 <template>
   <svg
+    data-svg="github"
     role="img"
     fill="none"
     :class="[props.iconClass, props.iconColor]"

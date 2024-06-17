@@ -25,6 +25,7 @@ const props = defineProps({
 </script>
 <template>
   <svg
+    data-svg="key"
     role="img"
     aria-hidden="true"
     :class="[props.iconClass, props.iconColor]"

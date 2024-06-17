@@ -49,6 +49,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  filter: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   minWidth: {
     type: String,
     required: false,

@@ -1348,7 +1348,7 @@ body {
 }
 
 .table-content {
-  @apply appearance-none dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
+  @apply appearance-none dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[500px];
 }
 
 .table-content-item {

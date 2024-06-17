@@ -25,6 +25,7 @@ const props = defineProps({
 </script>
 <template>
   <svg
+    data-svg="twitter"
     role="img"
     :aria-description="$t('icons_twitter_desc')"
     :class="[props.iconClass, props.iconColor]"

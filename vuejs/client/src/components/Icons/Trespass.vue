@@ -26,6 +26,7 @@ const props = defineProps({
 
 <template>
   <svg
+    data-svg="trespass"
     role="img"
     :aria-description="$t('icons_trespass_desc')"
     xmlns="http://www.w3.org/2000/svg"

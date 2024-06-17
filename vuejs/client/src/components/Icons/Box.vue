@@ -25,6 +25,7 @@ const props = defineProps({
 </script>
 <template>
   <svg
+    data-svg="box"
     role="img"
     aria-hidden="true"
     :class="[props.iconClass, props.iconColor, 'dark:brightness-[125%]']"
