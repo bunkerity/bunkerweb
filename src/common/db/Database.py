@@ -394,9 +394,20 @@ class Database:
         """Check if the setting exists in the database and optionally if it's multisite"""
         with self.__db_session() as session:
             try:
-                if multisite:
-                    return session.query(Settings).filter_by(id=setting, context="multisite").first() is not None
-                return session.query(Settings).filter_by(id=setting).first() is not None
+                multiple = False
+                if self.suffix_rx.search(setting):
+                    setting = setting.rsplit("_", 1)[0]
+                    multiple = True
+
+                db_setting = session.query(Settings).filter_by(id=setting).first()
+
+                if not db_setting:
+                    return False
+                elif multisite and db_setting.context != "multisite":
+                    return False
+                elif multiple and db_setting.multiple is None:
+                    return False
+                return True
             except (ProgrammingError, OperationalError):
                 return False
 
@@ -1575,25 +1586,24 @@ class Database:
                 if global_value.context == "multisite":
                     multisite.add(setting_id)
 
+            is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"
+
             services = session.query(Services).with_entities(Services.id, Services.is_draft)
 
             if not with_drafts:
                 services = services.filter_by(is_draft=False)
 
-            servers = ""
-            for service in services:
-                if not global_only:
+            if not global_only and is_multisite:
+                servers = ""
+                for service in services:
                     config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
                     if methods:
                         config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
                     for key in multisite:
                         config[f"{service.id}_{key}"] = config[key]
-                servers += f"{service.id} "
-            servers = servers.strip()
+                    servers += f"{service.id} "
+                servers = servers.strip()
 
-            config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
-
-            if not global_only and (config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"):
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
                 j = j.join(Settings, Settings.id == Services_settings.setting_id)
@@ -1632,6 +1642,10 @@ class Database:
                     config[f"{result.service_id}_{result.setting_id}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = (
                         value if not methods else {"value": value, "global": False, "method": result.method}
                     )
+            else:
+                servers = " ".join(service.id for service in services)
+
+            config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
 
             return config
 

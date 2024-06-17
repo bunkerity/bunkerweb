@@ -60,42 +60,36 @@ function antibot:header()
 		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 	end
 
-	-- Override headers
-	local header = "Content-Security-Policy"
-	if self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes" then
-		header = header .. "-Report-Only"
-	end
+	-- Override CSP header
+	local csp_directives = {
+		["default-src"] = "'none'",
+		["base-uri"] = "'none'",
+		["img-src"] = "'self' data:",
+		["font-src"] = "'self' data:",
+		["script-src"] = "http: https: 'unsafe-inline' 'strict-dynamic' 'nonce-"
+			.. self.ctx.bw.antibot_nonce_script
+			.. "'",
+		["style-src"] = "'self' 'nonce-" .. self.ctx.bw.antibot_nonce_style .. "'",
+		["require-trusted-types-for"] = "'script'",
+	}
 	if self.session_data.type == "recaptcha" then
-		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
-			.. self.session_data.nonce_script
-			.. "' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ 'unsafe-inline' http: https:;"
-			.. " img-src https://www.gstatic.com/recaptcha/ 'self' data:; "
-			.. " frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/;"
-			.. " style-src 'self' 'nonce-"
-			.. self.session_data.nonce_style
-			.. "'; font-src 'self' https://fonts.gstatic.com data:; base-uri 'self';"
+		csp_directives["script-src"] = csp_directives["script-src"]
+			.. "  https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/"
+		csp_directives["frame-src"] = "https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/"
 	elseif self.session_data.type == "hcaptcha" then
-		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
-			.. self.session_data.nonce_script
-			.. "' https://hcaptcha.com https://*.hcaptcha.com 'unsafe-inline' http: https:; img-src 'self' data:;"
-			.. " frame-src https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'nonce-"
-			.. self.session_data.nonce_style
-			.. "' https://hcaptcha.com https://*.hcaptcha.com; connect-src https://hcaptcha.com https://*.hcaptcha.com; "
-			.. " font-src 'self' data:; base-uri 'self';"
+		csp_directives["script-src"] = csp_directives["script-src"] .. "  https://hcaptcha.com https://*.hcaptcha.com"
+		csp_directives["frame-src"] = "https://hcaptcha.com https://*.hcaptcha.com"
+		csp_directives["style-src"] = csp_directives["style-src"] .. " https://hcaptcha.com https://*.hcaptcha.com"
+		csp_directives["connect-src"] = "https://hcaptcha.com https://*.hcaptcha.com"
 	elseif self.session_data.type == "turnstile" then
-		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
-			.. self.session_data.nonce_script
-			.. "' https://challenges.cloudflare.com 'unsafe-inline' http: https:; img-src 'self' data:;"
-			.. " frame-src https://challenges.cloudflare.com; style-src 'self' 'nonce-"
-			.. self.session_data.nonce_style
-			.. "'; font-src 'self' data:; base-uri 'self';"
-	else
-		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
-			.. self.session_data.nonce_script
-			.. "' 'unsafe-inline' http: https:; img-src 'self' data:; style-src 'self' 'nonce-"
-			.. self.session_data.nonce_style
-			.. "'; font-src 'self' data:; base-uri 'self';"
+		csp_directives["script-src"] = csp_directives["script-src"] .. "  https://challenges.cloudflare.com"
+		csp_directives["frame-src"] = "https://challenges.cloudflare.com"
 	end
+	local csp_content = ""
+	for directive, value in pairs(csp_directives) do
+		csp_content = csp_content .. directive .. " " .. value .. "; "
+	end
+	ngx.header["Content-Security-Policy"] = csp_content
 	return self:ret(true, "successfully overridden CSP header")
 end
 
@@ -192,6 +186,9 @@ function antibot:content()
 		return self:ret(true, "no session", nil, "/")
 	end
 
+	self.ctx.bw.antibot_nonce_script = rand(32)
+	self.ctx.bw.antibot_nonce_style = rand(32)
+
 	-- Display content
 	local ok, err = self:display_challenge()
 	if not ok then
@@ -242,8 +239,6 @@ function antibot:prepare_challenge()
 		self.session_data.type = self.variables["USE_ANTIBOT"]
 		self.session_data.resolved = false
 		self.session_data.original_uri = self.ctx.bw.request_uri
-		self.session_data.nonce_script = rand(16)
-		self.session_data.nonce_style = rand(16)
 		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
 			self.session_data.original_uri = "/"
 		end
@@ -268,8 +263,8 @@ function antibot:display_challenge()
 	-- Common variables for templates
 	local template_vars = {
 		antibot_uri = self.variables["ANTIBOT_URI"],
-		nonce_script = self.session_data.nonce_script,
-		nonce_style = self.session_data.nonce_style,
+		nonce_script = self.ctx.bw.antibot_nonce_script,
+		nonce_style = self.ctx.bw.antibot_nonce_style,
 	}
 
 	-- Javascript case
@@ -387,7 +382,10 @@ function antibot:check_challenge()
 		if not ok then
 			return nil, "error while decoding JSON from reCAPTCHA API : " .. rdata, nil
 		end
-		if not rdata.success or rdata.score < tonumber(self.variables["ANTIBOT_RECAPTCHA_SCORE"]) then
+		if not rdata.success then
+			return false, "client failed challenge", nil
+		end
+		if rdata.score and rdata.score < tonumber(self.variables["ANTIBOT_RECAPTCHA_SCORE"]) then
 			return false, "client failed challenge with score " .. tostring(rdata.score), nil
 		end
 		self.session_data.resolved = true

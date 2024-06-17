@@ -22,6 +22,65 @@
         margin-top: 1rem
       }
     </style>
+    {-raw-}
+    <script
+      src="https://www.google.com/recaptcha/api.js?onload=onv3Callback&render={*recaptcha_sitekey*}&trustedtypes=true"
+      nonce="{*nonce_script*}"
+    ></script>
+    <script
+      defer
+      src="https://www.google.com/recaptcha/api.js?onload=onv2Callback&trustedtypes=true"
+      nonce="{*nonce_script*}"
+    ></script>
+    <script type="text/javascript" nonce="{*nonce_script*}">
+      var onSubmit = function (token) {
+        document.getElementById("token").value = token;
+        document.getElementById("form").submit();
+      };
+
+      var usedVersion = "v2";
+
+      var onv2Callback = function () {
+        if (usedVersion === "invisible") {
+          return;
+        }
+
+        // Remove the v3 button
+        document.getElementById("recaptcha-verify").remove();
+
+        // Insert the v2 div
+        var recaptchaDiv = document.createElement("div");
+        recaptchaDiv.id = "recaptcha-v2-verify";
+        recaptchaDiv.className = "g-recaptcha";
+        recaptchaDiv.setAttribute("data-sitekey", "{*recaptcha_sitekey*}");
+        recaptchaDiv.setAttribute("data-callback", "onSubmit");
+        recaptchaDiv.setAttribute("data-action", "submit");
+        document
+          .getElementById("recaptcha-container")
+          .appendChild(recaptchaDiv);
+
+        grecaptcha.ready(function () {
+          grecaptcha.render("recaptcha-v2-verify", {
+            sitekey: "{*recaptcha_sitekey*}",
+            callback: onSubmit,
+            action: "submit",
+          });
+          document.querySelector(".grecaptcha-badge").remove();
+        });
+      };
+
+      var onv3Callback = function () {
+        usedVersion = "invisible";
+        grecaptcha.ready(function () {
+          document
+            .getElementById("recaptcha-verify")
+            .addEventListener("click", function () {
+              grecaptcha.execute();
+            });
+        });
+      };
+    </script>
+    {-raw-}
   </head>
   <body
     class="bg-gradient-to-r from-[#075577] to-[#116D70] w-screen h-screen overflow-hidden"
@@ -255,14 +314,19 @@
         <form class="hidden" method="POST" action="{*antibot_uri*}" id="form">
           <input type="hidden" name="token" id="token" />
         </form>
-        {-raw-}
         <div class="mt-8 flex flex-col justify-center items-center">
-          <button
-            id="recaptcha-verify"
-            class="text-sm xs:text-base mb-2.5 hover:brightness-90 mt-2 rounded-lg bg-secondary px-6 py-2 text-white font-bold"
-          >
-            I'm not a robot
-          </button>
+          <div id="recaptcha-container">
+            <button
+              id="recaptcha-verify"
+              class="g-recaptcha text-sm xs:text-base mb-2.5 hover:brightness-90 mt-2 rounded-lg bg-secondary px-6 py-2 text-white font-bold"
+              data-sitekey="{*recaptcha_sitekey*}"
+              data-callback="onSubmit"
+              data-action="submit"
+            >
+              I'm not a robot
+            </button>
+          </div>
+          {-raw-}
           <p
             id="recaptcha-terms"
             class="text-gray-100 text-center text-xs sm:text-sm"
@@ -283,41 +347,6 @@
           </p>
         </div>
       </div>
-
-      {-raw-}
-      <script nonce="{*nonce_script*}">
-        // recaptcha
-        const check_robot = function () {
-          grecaptcha.ready(function () {
-            grecaptcha
-              .execute("{*recaptcha_sitekey*}", { action: "recaptcha" })
-              .then(function (token) {
-                document.getElementById("token").value = token;
-                document.getElementById("form").submit();
-              });
-          });
-        };
-
-        var cooldown = false;
-
-        document
-          .getElementById("recaptcha-verify")
-          .addEventListener("click", (e) => {
-            e.preventDefault();
-            if (cooldown) return;
-            cooldown = true;
-            check_robot();
-            setTimeout(() => {
-              cooldown = false;
-            }, 1500);
-          });
-      </script>
-      <script
-        async
-        src="https://www.google.com/recaptcha/api.js?render={*recaptcha_sitekey*}"
-        nonce="{*nonce_script*}"
-      ></script>
-      {-raw-}
 
       <!-- text -->
       <footer class="fixed bottom-1.5 lg:bottom-2">

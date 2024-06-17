@@ -165,6 +165,15 @@ def send_nginx_custom_configs(sent_path: Path = CUSTOM_CONFIGS_PATH):
         logger.info(f"Successfully sent {sent_path} folder")
 
 
+def send_nginx_external_plugins(sent_path: Path = EXTERNAL_PLUGINS_PATH):
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    logger.info(f"Sending {sent_path} folder ...")
+    if not SCHEDULER.send_files(sent_path.as_posix(), "/pro_plugins" if sent_path.as_posix().endswith("/pro/plugins") else "/plugins"):
+        logger.error(f"Error while sending {sent_path} folder")
+    else:
+        logger.info(f"Successfully sent {sent_path} folder")
+
+
 def listen_for_instances_reload():
     from docker import DockerClient
 
@@ -236,15 +245,14 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
         send_nginx_custom_configs(original_path)
 
 
-def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
+def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
-    pro = "pro" in original_path.parts
+    pro = original_path.as_posix().endswith("/pro/plugins")
 
-    if not plugins:
-        assert SCHEDULER is not None
-        plugins = SCHEDULER.db.get_plugins(_type="pro" if pro else "external", with_data=True)
-        assert plugins is not None, "Couldn't get plugins from database"
+    assert SCHEDULER is not None
+    plugins = SCHEDULER.db.get_plugins(_type="pro" if pro else "external", with_data=True)
+    assert plugins is not None, "Couldn't get plugins from database"
 
     # Remove old external/pro plugins files
     logger.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
@@ -299,10 +307,7 @@ def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]] = None, *,
 
     if SCHEDULER and SCHEDULER.apis:
         logger.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
-        ret = SCHEDULER.send_files(original_path, "/pro_plugins" if original_path.as_posix().endswith("/pro/plugins") else "/plugins")
-
-        if not ret:
-            logger.error(f"Sending {'pro ' if pro else ''}external plugins failed, configuration will not work as expected...")
+        send_nginx_external_plugins(original_path)
 
 
 def generate_caches():
@@ -388,7 +393,7 @@ def run_in_slave_mode():
     threads = [
         Thread(target=generate_custom_configs),
         Thread(target=generate_external_plugins),
-        Thread(target=generate_external_plugins, kwargs={"original_path": PRO_PLUGINS_PATH}),
+        Thread(target=generate_external_plugins, args=(PRO_PLUGINS_PATH,)),
         Thread(target=generate_caches),
     ]
 
@@ -613,6 +618,7 @@ if __name__ == "__main__":
                         | ({"jobs": jobs} if jobs else {})
                     )
 
+            changes = False
             if tmp_external_plugins:
                 changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
 
@@ -623,8 +629,10 @@ if __name__ == "__main__":
                             logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
                     except BaseException as e:
                         logger.error(f"Error while saving {_type} plugins to database: {e}")
+                else:
+                    return send_nginx_external_plugins(plugin_path)
 
-            generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
+            generate_external_plugins(plugin_path)
 
         threads.extend([Thread(target=check_plugin_changes, args=("external",)), Thread(target=check_plugin_changes, args=("pro",))])
 
@@ -648,7 +656,7 @@ if __name__ == "__main__":
             threads.clear()
 
             if changes["pro_plugins_changed"]:
-                threads.append(Thread(target=generate_external_plugins, kwargs={"original_path": PRO_PLUGINS_PATH}))
+                threads.append(Thread(target=generate_external_plugins, args=(PRO_PLUGINS_PATH,)))
             if changes["external_plugins_changed"]:
                 threads.append(Thread(target=generate_external_plugins))
 
@@ -959,12 +967,12 @@ if __name__ == "__main__":
 
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")
-                    generate_external_plugins(SCHEDULER.db.get_plugins(_type="external", with_data=True))
+                    generate_external_plugins()
                     SCHEDULER.update_jobs()
 
                 if PRO_PLUGINS_NEED_GENERATION:
                     CHANGES.append("pro_plugins")
-                    generate_external_plugins(SCHEDULER.db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
+                    generate_external_plugins(PRO_PLUGINS_PATH)
                     SCHEDULER.update_jobs()
 
                 if CONFIG_NEED_GENERATION:
