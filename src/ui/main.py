@@ -645,6 +645,9 @@ def setup():
         random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}",
     )
 
+@app.route("/setup/loading", methods=["GET"])
+def setup_loading():
+    return render_template("setup_loading.html")
 
 @app.route("/totp", methods=["GET", "POST"])
 @login_required
