@@ -256,6 +256,15 @@
       </div>
       <!-- text -->
 
+      {-raw-}
+      <script nonce="{{ nonce_script }}">
+        // Automatically refresh the page after 2 seconds
+        setTimeout(() => {
+          location.reload();
+        }, 2000);
+      </script>
+      {-raw-}
+
       <footer class="fixed bottom-1.5 lg:bottom-2">
         <div class="flex justify-center pb-2">
           <img
