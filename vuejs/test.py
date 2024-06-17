@@ -123,7 +123,7 @@ def format_setting(setting_name, setting_value, total_settings, loop_id, templat
     Format a setting in ordert to be used with form builder.
     """
  # add zindex for container
-    setting_value["containerClass"] = f"z-{total_settings - loop_id}"
+    setting_value["containerClass"] = f"z-{total_settings - loop_id} setting"
 
     # regex by pattern
     setting_value["pattern"] = setting_value.get("regex", "")
@@ -162,10 +162,10 @@ def format_setting(setting_name, setting_value, total_settings, loop_id, templat
     popovers = []
 
     if(setting_value.get("disabled", False)) and service_settings[setting_name].get("method", "ui") not in ("ui", "default"):
-    popovers.append({"iconColor": "red", 
-                    "iconName": "trespass", 
-                    "text" : "inp_popover_method_disabled"
-                    })
+        popovers.append({"iconColor": "red", 
+                        "iconName": "trespass", 
+                        "text" : "inp_popover_method_disabled"
+                        })
 
     if(setting_value.get("context")):
         popovers.append({"iconColor": "orange" if setting_value.get("context") == "multisite" else "blue", 

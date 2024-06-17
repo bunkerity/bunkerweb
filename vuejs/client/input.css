@@ -161,7 +161,15 @@ body {
 /* INPUT */
 
 .field-container {
-  @apply relative w-full px-3 md:px-4 pt-3 pb-4;
+  @apply relative w-full;
+}
+
+.setting.field-container {
+  @apply px-3 md:px-4 pt-3 pb-4; 
+}
+
+.table.field-container {
+  @apply p-0 -translate-x-1;
 }
 
 .input-header-container {

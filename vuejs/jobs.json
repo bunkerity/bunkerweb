@@ -472,6 +472,8 @@
                         "tablet": 12,
                         "mobile": 12
                     },
+                    "overflowAttrEl": "data-table-body",
+                    "containerClass": "table",
                     "popovers": [
                         {
                             "iconColor": "info",
@@ -633,6 +635,8 @@
                         "tablet": 12,
                         "mobile": 12
                     },
+                    "overflowAttrEl": "data-table-body",
+                    "containerClass": "table",
                     "popovers": [
                         {
                             "iconColor": "info",
@@ -748,6 +752,8 @@
                         "tablet": 12,
                         "mobile": 12
                     },
+                    "overflowAttrEl": "data-table-body",
+                    "containerClass": "table",
                     "popovers": [
                         {
                             "iconColor": "info",
@@ -817,6 +823,8 @@
                         "tablet": 12,
                         "mobile": 12
                     },
+                    "overflowAttrEl": "data-table-body",
+                    "containerClass": "table",
                     "popovers": [
                         {
                             "iconColor": "info",
@@ -933,6 +941,8 @@
                         "tablet": 12,
                         "mobile": 12
                     },
+                    "overflowAttrEl": "data-table-body",
+                    "containerClass": "table",
                     "popovers": [
                         {
                             "iconColor": "info",

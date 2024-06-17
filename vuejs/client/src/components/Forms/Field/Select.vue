@@ -43,6 +43,7 @@ import { v4 as uuidv4 } from "uuid";
   @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
   @param {boolean} [hideLabel=false]
   @param {boolean} [onlyDown=false] - If the dropdown should check the bottom of the container
+  @param {boolean} [overflowAttrEl=""] - Attribut to select the container the element has to check for overflow
   @param {string} [containerClass=""]
   @param {string} [inpClass=""]
   @param {string} [headerClass=""]
@@ -105,6 +106,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  overflowAttrEl: {
+    type: String,
+    required: false,
+    default: "",
+  },
   hideLabel: {
     type: Boolean,
     required: false,
@@ -158,7 +164,9 @@ function toggleSelect() {
   if (select.isOpen) {
     // Get field container rect
     const fieldContainer = selectBtn.value.closest("[data-field-container]");
-    const parent = fieldContainer.parentElement;
+    const parent = props.overflowAttrEl
+      ? fieldContainer.closest(`[${props.overflowAttrEl}]`)
+      : fieldContainer.parentElement;
 
     // Update position only if parent has overflow
     const isOverflow = parent.scrollHeight > parent.clientHeight ? true : false;
@@ -177,11 +185,9 @@ function toggleSelect() {
       ? true
       : false;
 
-    console.log(canBeDown);
-
     if (!canBeDown) {
       selectDropdown.value.style.top = `-${
-        selectDropRect.height + selectBtnRect.height
+        selectDropRect.height + selectBtnRect.height - 16
       }px`;
     }
 

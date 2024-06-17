@@ -149,7 +149,7 @@ onUpdated(() => {
             </th>
           </tr>
         </thead>
-        <tbody ref="tableBody" class="table-content">
+        <tbody data-table-body ref="tableBody" class="table-content">
           <tr
             v-for="rowId in table.rowLength - 1"
             role="row"

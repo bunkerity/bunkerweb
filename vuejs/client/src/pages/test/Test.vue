@@ -53,7 +53,7 @@ const tableData = {
     "Interval",
     "Last run",
     "Success",
-    "Last run time",
+    "last run date",
     "Cache",
   ],
   positions: [2, 2, 1, 1, 1, 3, 2],
@@ -531,6 +531,8 @@ const tableData = {
               tablet: 12,
               mobile: 12,
             },
+            overflowAttrEl: "data-table-body",
+            containerClass: "table",
             popovers: [
               {
                 iconColor: "info",
@@ -689,6 +691,8 @@ const tableData = {
               tablet: 12,
               mobile: 12,
             },
+            overflowAttrEl: "data-table-body",
+            containerClass: "table",
             popovers: [
               {
                 iconColor: "info",
@@ -801,6 +805,8 @@ const tableData = {
               tablet: 12,
               mobile: 12,
             },
+            overflowAttrEl: "data-table-body",
+            containerClass: "table",
             popovers: [
               {
                 iconColor: "info",
@@ -867,6 +873,8 @@ const tableData = {
               tablet: 12,
               mobile: 12,
             },
+            overflowAttrEl: "data-table-body",
+            containerClass: "table",
             popovers: [
               {
                 iconColor: "info",
@@ -983,6 +991,8 @@ const tableData = {
               tablet: 12,
               mobile: 12,
             },
+            overflowAttrEl: "data-table-body",
+            containerClass: "table",
             popovers: [
               {
                 iconColor: "info",

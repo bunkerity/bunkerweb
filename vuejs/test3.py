@@ -48,6 +48,8 @@ def jobs_to_list(jobs):
                                                     "tablet": 12,
                                                     "mobile": 12,
                                                     },
+                                                    "overflowAttrEl" : "data-table-body",
+                                                    "containerClass" : "table",
                                                     "popovers": [
                                                     {
                                                         "iconColor": "info",
