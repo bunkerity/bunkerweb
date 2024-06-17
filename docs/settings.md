@@ -65,7 +65,7 @@ Bot detection by using a challenge.
 |`ANTIBOT_URI`              |`/challenge`|multisite|no      |Unused URI that clients will be redirected to to solve the challenge.                                                         |
 |`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
 |`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
-|`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge.                                                                               |
+|`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                           |
 |`ANTIBOT_RECAPTCHA_SITEKEY`|            |multisite|no      |Sitekey for reCAPTCHA challenge.                                                                                              |
 |`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                                                                               |
 |`ANTIBOT_HCAPTCHA_SITEKEY` |            |multisite|no      |Sitekey for hCaptcha challenge.                                                                                               |

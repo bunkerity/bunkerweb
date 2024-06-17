@@ -53,9 +53,9 @@
     "ANTIBOT_RECAPTCHA_SCORE": {
       "context": "multisite",
       "default": "0.7",
-      "help": "Minimum score required for reCAPTCHA challenge.",
+      "help": "Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).",
       "id": "antibot-recaptcha-score",
-      "label": "reCAPTCHA score",
+      "label": "reCAPTCHA v3 score",
       "regex": "^(0\\.[1-9]|1\\.0)$",
       "type": "text"
     },

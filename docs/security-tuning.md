@@ -330,7 +330,7 @@ Here is the list of related settings :
 | --------------------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `USE_ANTIBOT`               | `no`         | multisite | no       | Activate antibot feature.                                                                                                      |
 | `ANTIBOT_URI`               | `/challenge` | multisite | no       | Unused URI that clients will be redirected to to solve the challenge.                                                          |
-| `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`        | multisite | no       | Minimum score required for reCAPTCHA challenge.                                                                                |
+| `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`        | multisite | no       | Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                            |
 | `ANTIBOT_RECAPTCHA_SITEKEY` |              | multisite | no       | Sitekey for reCAPTCHA challenge.                                                                                               |
 | `ANTIBOT_RECAPTCHA_SECRET`  |              | multisite | no       | Secret for reCAPTCHA challenge.                                                                                                |
 | `ANTIBOT_HCAPTCHA_SITEKEY`  |              | multisite | no       | Sitekey for hCaptcha challenge.                                                                                                |
