@@ -394,9 +394,20 @@ class Database:
         """Check if the setting exists in the database and optionally if it's multisite"""
         with self.__db_session() as session:
             try:
-                if multisite:
-                    return session.query(Settings).filter_by(id=setting, context="multisite").first() is not None
-                return session.query(Settings).filter_by(id=setting).first() is not None
+                multiple = False
+                if self.suffix_rx.search(setting):
+                    setting = setting.rsplit("_", 1)[0]
+                    multiple = True
+
+                db_setting = session.query(Settings).filter_by(id=setting).first()
+
+                if not db_setting:
+                    return False
+                elif multisite and db_setting.context != "multisite":
+                    return False
+                elif multiple and db_setting.multiple is None:
+                    return False
+                return True
             except (ProgrammingError, OperationalError):
                 return False
 
