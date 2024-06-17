@@ -190,6 +190,7 @@ const comboboxPlugin = {
   name: uuidv4(),
   disabled: false,
   required: false,
+  onlyDown: true,
   label: "dashboard_plugins",
   popovers: [
     {
@@ -224,6 +225,7 @@ const selectType = {
   // add 'all' as first value
   values: ["all"].concat(plugin_types),
   name: uuidv4(),
+  onlyDown: true,
   label: "inp_select_plugin_type",
   popovers: [
     {
@@ -241,6 +243,7 @@ const selectContext = {
   // add 'all' as first value
   values: ["all", "multisite", "global"],
   name: uuidv4(),
+  onlyDown: true,
   label: "inp_select_plugin_context",
   popovers: [
     {

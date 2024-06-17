@@ -42,6 +42,7 @@ import { v4 as uuidv4 } from "uuid";
   @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
   @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
   @param {boolean} [hideLabel=false]
+  @param {boolean} [onlyDown=false] - If the dropdown should check the bottom of the container
   @param {string} [containerClass=""]
   @param {string} [inpClass=""]
   @param {string} [headerClass=""]
@@ -99,6 +100,11 @@ const props = defineProps({
     required: false,
     default: [],
   },
+  onlyDown: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   hideLabel: {
     type: Boolean,
     required: false,
@@ -153,7 +159,7 @@ function toggleSelect() {
     // Get field container rect
     const fieldContainer = selectBtn.value.closest("[data-field-container]");
     const parent = fieldContainer.parentElement;
-    console.log("dzq");
+
     // Update position only if parent has overflow
     const isOverflow = parent.scrollHeight > parent.clientHeight ? true : false;
     if (!isOverflow) return;
@@ -165,10 +171,11 @@ function toggleSelect() {
 
     const parentRect = parent.getBoundingClientRect();
 
-    const canBeDown =
-      fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
-        ? true
-        : false;
+    const canBeDown = props.onlyDown
+      ? true
+      : fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
+      ? true
+      : false;
 
     console.log(canBeDown);
 

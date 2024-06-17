@@ -58,6 +58,7 @@ const comboboxModes = {
   name: uuidv4(),
   disabled: false,
   required: false,
+  onlyDown: true,
   label: "dashboard_modes",
   columns: { pc: 4, tablet: 6, mobile: 12 },
 };
