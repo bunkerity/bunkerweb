@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.25">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.26">
     
     
       
@@ -312,7 +312,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -1578,7 +1578,7 @@
 <td><code>0.7</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Minimum score required for reCAPTCHA challenge.</td>
+<td>Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_RECAPTCHA_SITEKEY</code></td>
@@ -1959,70 +1959,70 @@
 <td><code>https://www.dan.me.uk/torlist/?exit</code></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing bad IP/network to block.</td>
+<td>List of URLs, separated with spaces, containing bad IP/network to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_RDNS_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing reverse DNS suffixes to block.</td>
+<td>List of URLs, separated with spaces, containing reverse DNS suffixes to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_ASN_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing ASN to block.</td>
+<td>List of URLs, separated with spaces, containing ASN to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_USER_AGENT_URLS</code></td>
 <td><code>https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list</code></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing bad User-Agent to block.</td>
+<td>List of URLs, separated with spaces, containing bad User-Agent to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_URI_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing bad URI to block.</td>
+<td>List of URLs, separated with spaces, containing bad URI to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_IGNORE_IP_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.</td>
+<td>List of URLs, separated with spaces, containing IP/network to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_IGNORE_RDNS_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.</td>
+<td>List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_IGNORE_ASN_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing ASN to ignore in the blacklist.</td>
+<td>List of URLs, separated with spaces, containing ASN to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_IGNORE_USER_AGENT_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.</td>
+<td>List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>BLACKLIST_IGNORE_URI_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing URI to ignore in the blacklist.</td>
+<td>List of URLs, separated with spaces, containing URI to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 </tbody>
 </table>
@@ -2483,35 +2483,35 @@
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing good IP/network to put into the greylist.</td>
+<td>List of URLs, separated with spaces, containing good IP/network to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>GREYLIST_RDNS_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.</td>
+<td>List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>GREYLIST_ASN_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing ASN to put into the greylist.</td>
+<td>List of URLs, separated with spaces, containing ASN to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>GREYLIST_USER_AGENT_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing good User-Agent to put into the greylist.</td>
+<td>List of URLs, separated with spaces, containing good User-Agent to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>GREYLIST_URI_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing bad URI to put into the greylist.</td>
+<td>List of URLs, separated with spaces, containing bad URI to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 </tbody>
 </table>
@@ -3347,7 +3347,7 @@
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.</td>
+<td>List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 </tbody>
 </table>
@@ -4051,35 +4051,35 @@
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing good IP/network to whitelist.</td>
+<td>List of URLs, separated with spaces, containing good IP/network to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>WHITELIST_RDNS_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.</td>
+<td>List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>WHITELIST_ASN_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing ASN to whitelist.</td>
+<td>List of URLs, separated with spaces, containing ASN to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>WHITELIST_USER_AGENT_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing good User-Agent to whitelist.</td>
+<td>List of URLs, separated with spaces, containing good User-Agent to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 <tr>
 <td><code>WHITELIST_URI_URLS</code></td>
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>List of URLs, separated with spaces, containing bad URI to whitelist.</td>
+<td>List of URLs, separated with spaces, containing bad URI to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.</td>
 </tr>
 </tbody>
 </table>
@@ -4182,7 +4182,7 @@
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
+      <script src="../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
