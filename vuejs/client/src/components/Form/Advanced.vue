@@ -5,14 +5,12 @@ import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
-import Input from "@components/Forms/Field/Input.vue";
-import Select from "@components/Forms/Field/Select.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
+import Filter from "@components/Widget/Filter.vue";
 import { v4 as uuidv4 } from "uuid";
 import { plugin_types } from "@utils/variables";
 import {
-  useFilter,
   useCheckPluginsValidity,
   useUpdateTempSettings,
   useListenTemp,
@@ -58,7 +56,11 @@ const props = defineProps({
     required: true,
     default: {},
   },
-
+  filters: {
+    type: Object,
+    required: false,
+    default: {},
+  },
   containerClass: {
     type: String,
     required: false,
@@ -74,80 +76,107 @@ const props = defineProps({
 const data = reactive({
   currPlugin: "",
   plugins: [],
-  keyword: "",
-  type: "all",
-  context: "all",
   base: JSON.parse(JSON.stringify(props.template)),
   isRegErr: false,
   isReqErr: false,
   settingErr: "",
   pluginErr: "",
   // Add filtering and check validity with regex and required
-  format: computed(() => {
-    // Check validity
-    setValidity();
-
-    // Deep copy
-    const template = JSON.parse(JSON.stringify(data.base));
-
-    // Add filter logic
-    const filterPlugin = [
-      {
-        type: "select",
-        value: data.type,
-        keys: ["type"],
-      },
-    ];
-
-    const filterSettings = [
-      {
-        type: "keyword",
-        value: data.keyword,
-        keys: [
-          "id",
-          "label",
-          "name",
-          "description",
-          "help",
-          "value",
-          "setting_name",
-        ],
-      },
-      {
-        type: "select",
-        value: data.context,
-        keys: ["context"],
-      },
-    ];
-
-    // Start plugin filtering
-    const filterPlugins = useFilter(template, filterPlugin);
-    // Filter settings
-    filterPlugins.forEach((plugin, id) => {
-      // loop on plugin settings dict
-      const settings = [];
-      for (const [key, value] of Object.entries(plugin.settings)) {
-        // add to value the key as setting_name
-        settings.push({ ...value, setting_name: key });
-      }
-      const filterSettingsData = useFilter(settings, filterSettings);
-      // Transform list of dict by a dict of dict with setting_name as key and add update plugin settings
-      const settingsData = {};
-      filterSettingsData.forEach((setting) => {
-        settingsData[setting.setting_name] = setting;
-      });
-      filterPlugins[id].settings = settingsData;
-    });
-
-    // Case no settings found, remove plugin
-    const filterData = filterPlugins.filter((plugin) => {
-      return Object.keys(plugin.settings).length > 0;
-    });
-    data.plugins = getPluginNames(filterData);
-    data.currPlugin = getFirstPlugin(filterData);
-    return filterData;
-  }),
+  format: JSON.parse(JSON.stringify(props.template)),
 });
+
+const filters = [
+  {
+    filter: "default",
+    filterName: "type",
+    type: "select",
+    value: "all",
+    keys: ["type"],
+    field: {
+      id: uuidv4(),
+      value: "all",
+      // add 'all' as first value
+      values: ["all"].concat(plugin_types),
+      name: uuidv4(),
+      onlyDown: true,
+      label: "inp_select_plugin_type",
+      containerClass: "setting",
+      popovers: [
+        {
+          text: "inp_select_plugin_type_desc",
+          iconName: "info",
+          iconColor: "info",
+        },
+      ],
+      columns: { pc: 3, tablet: 4, mobile: 12 },
+    },
+  },
+  {
+    filter: "settings",
+    filterName: "keyword",
+    type: "keyword",
+    value: "",
+    keys: [
+      "id",
+      "label",
+      "name",
+      "description",
+      "help",
+      "value",
+      "setting_name",
+    ],
+    field: {
+      id: uuidv4(),
+      value: "",
+      type: "text",
+      name: uuidv4(),
+      containerClass: "setting",
+      label: "inp_search_settings",
+      placeholder: "inp_keyword",
+      isClipboard: false,
+      popovers: [
+        {
+          text: "inp_search_settings_desc",
+          iconName: "info",
+          iconColor: "info",
+        },
+      ],
+      columns: { pc: 3, tablet: 4, mobile: 12 },
+    },
+  },
+  {
+    filter: "settings",
+    filterName: "context",
+    type: "select",
+    value: "all",
+    keys: ["context"],
+    field: {
+      id: uuidv4(),
+      value: "all",
+      // add 'all' as first value
+      values: ["all", "multisite", "global"],
+      name: uuidv4(),
+      onlyDown: true,
+      containerClass: "setting",
+      label: "inp_select_plugin_context",
+      popovers: [
+        {
+          text: "inp_select_plugin_context_desc",
+          iconName: "info",
+          iconColor: "info",
+        },
+      ],
+      columns: { pc: 3, tablet: 4, mobile: 12 },
+    },
+  },
+];
+
+function filter(filterData) {
+  setValidity();
+  data.format = filterData;
+  data.plugins = getPluginNames(filterData);
+  data.currPlugin = getFirstPlugin(filterData);
+}
 
 function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
@@ -202,59 +231,6 @@ const comboboxPlugin = {
   columns: { pc: 3, tablet: 4, mobile: 12 },
 };
 
-const inpKeyword = {
-  id: uuidv4(),
-  value: "",
-  type: "text",
-  name: uuidv4(),
-  label: "inp_search_settings",
-  placeholder: "inp_keyword",
-  popovers: [
-    {
-      text: "inp_search_settings_desc",
-      iconName: "info",
-      iconColor: "info",
-    },
-  ],
-  columns: { pc: 3, tablet: 4, mobile: 12 },
-};
-
-const selectType = {
-  id: uuidv4(),
-  value: "all",
-  // add 'all' as first value
-  values: ["all"].concat(plugin_types),
-  name: uuidv4(),
-  onlyDown: true,
-  label: "inp_select_plugin_type",
-  popovers: [
-    {
-      text: "inp_select_plugin_type_desc",
-      iconName: "info",
-      iconColor: "info",
-    },
-  ],
-  columns: { pc: 3, tablet: 4, mobile: 12 },
-};
-
-const selectContext = {
-  id: uuidv4(),
-  value: "all",
-  // add 'all' as first value
-  values: ["all", "multisite", "global"],
-  name: uuidv4(),
-  onlyDown: true,
-  label: "inp_select_plugin_context",
-  popovers: [
-    {
-      text: "inp_select_plugin_context_desc",
-      iconName: "info",
-      iconColor: "info",
-    },
-  ],
-  columns: { pc: 3, tablet: 4, mobile: 12 },
-};
-
 const buttonSave = {
   id: uuidv4(),
   text: "action_save",
@@ -293,17 +269,13 @@ onUnmounted(() => {
   >
     <Title type="card" :title="'dashboard_advanced_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_advanced_mode_subtitle'" />
-    <Container :containerClass="`grid grid-cols-12 col-span-12 w-full`">
-      <Combobox
-        v-bind="comboboxPlugin"
-        :value="data.currPlugin"
-        :values="data.plugins"
-        @inp="data.currPlugin = $event"
-      />
-      <Input @inp="(v) => (data.keyword = v)" v-bind="inpKeyword" />
-      <Select @inp="(v) => (data.type = v)" v-bind="selectType" />
-      <Select @inp="(v) => (data.context = v)" v-bind="selectContext" />
-    </Container>
+    <Combobox
+      v-bind="comboboxPlugin"
+      :value="data.currPlugin"
+      :values="data.plugins"
+      @inp="data.currPlugin = $event"
+    />
+    <Filter @filter="(v) => filter(v)" :data="data.base" :filters="filters" />
     <template v-for="plugin in data.format">
       <Container
         data-advanced-form-plugin

@@ -127,6 +127,7 @@ onUpdated(() => {
 
 <template>
   <Container :containerClass="`${props.containerClass} table-container`">
+    <slot></slot>
     <Container
       :containerClass="`${props.containerWrapClass} table-container-wrap`"
     >

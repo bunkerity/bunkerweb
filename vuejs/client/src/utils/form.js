@@ -89,12 +89,11 @@ function useSubmitForm(data) {
 }
 ];
   @param {object} plugins - Object with the plugins data.
-  @param {object} filters - Object with the filters data.
+  @param {array} filters - Array with the filters data.
 */
 function useFilter(items, filters) {
   // loop on filters to determine types
   filters = removeDefaultFilters(filters);
-
   // Case no filters, return items
   if (filters.length === 0) return items;
   // loop on filters to determine types
@@ -102,7 +101,6 @@ function useFilter(items, filters) {
   filters.forEach((filter) => {
     if (!filterTypes.includes(filter.type)) filterTypes.push(filter.type);
   });
-
   // Deepcopy
   const data = JSON.parse(JSON.stringify(items));
   const filterData = [];
