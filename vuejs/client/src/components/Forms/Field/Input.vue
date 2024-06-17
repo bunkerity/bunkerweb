@@ -253,7 +253,11 @@ onMounted(() => {
           </svg>
         </button>
       </div>
-      <ErrorField :isValid="inp.isValid" :isValue="!!inp.value" />
+      <ErrorField
+        :errorClass="'input'"
+        :isValid="inp.isValid"
+        :isValue="!!inp.value"
+      />
     </div>
   </Container>
 </template>

@@ -153,6 +153,7 @@ function toggleSelect() {
     // Get field container rect
     const fieldContainer = selectBtn.value.closest("[data-field-container]");
     const parent = fieldContainer.parentElement;
+    console.log("dzq");
     // Update position only if parent has overflow
     const isOverflow = parent.scrollHeight > parent.clientHeight ? true : false;
     if (!isOverflow) return;
@@ -168,6 +169,8 @@ function toggleSelect() {
       fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
         ? true
         : false;
+
+    console.log(canBeDown);
 
     if (!canBeDown) {
       selectDropdown.value.style.top = `-${
@@ -354,7 +357,11 @@ const emits = defineEmits(["inp"]);
           {{ value }}
         </button>
       </div>
-      <ErrorField :isValid="select.isValid" :isValue="true" />
+      <ErrorField
+        :errorClass="'select'"
+        :isValid="select.isValid"
+        :isValue="true"
+      />
       <!-- end dropdown-->
     </div>
     <!-- end custom-->

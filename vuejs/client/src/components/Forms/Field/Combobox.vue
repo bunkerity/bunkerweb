@@ -429,7 +429,11 @@ const emits = defineEmits(["inp"]);
           </template>
         </div>
       </div>
-      <ErrorField :isValid="select.isValid" :isValue="true" />
+      <ErrorField
+        :errorClass="'combobox'"
+        :isValid="select.isValid"
+        :isValue="true"
+      />
       <!-- end dropdown-->
     </div>
     <!-- end custom-->

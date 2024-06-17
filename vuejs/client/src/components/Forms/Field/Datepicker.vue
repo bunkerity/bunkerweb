@@ -693,7 +693,11 @@ function setIndex(calendarEl, tabindex) {
         :clipboardClass="'datepicker-clip'"
         :copyClass="'datepicker-clip'"
       />
-      <ErrorField :isValid="date.isValid" :isValue="!!date.value" />
+      <ErrorField
+        :errorClass="'picker'"
+        :isValid="date.isValid"
+        :isValue="!!date.value"
+      />
     </div>
   </Container>
 </template>

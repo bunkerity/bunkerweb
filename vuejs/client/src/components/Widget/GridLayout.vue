@@ -66,7 +66,7 @@ const containerClass = computed(() => {
 });
 
 const gridClass = computed(() => {
-  return `break-words grid grid-cols-12 w-full col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
+  return `overflow-hidden break-words grid grid-cols-12 w-full col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
 });
 
 const gridLayoutEl = ref();

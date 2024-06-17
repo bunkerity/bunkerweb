@@ -10,6 +10,7 @@
   }
   @param {boolean} [isValid=false] - Check if the field is valid
   @param {boolean} [isValue=false] - Check if the field has a value, display a different message if the field is empty or not
+  @param {string} [errorClass=""] - Additional class
 */
 
 const props = defineProps({
@@ -21,6 +22,11 @@ const props = defineProps({
     type: Boolean,
     required: false,
   },
+  errorClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
 });
 </script>
 
@@ -28,8 +34,7 @@ const props = defineProps({
   <p
     :aria-hidden="props.isValid ? 'true' : 'false'"
     role="alert"
-    :class="[props.isValid ? 'valid' : '']"
-    class="input-error-msg"
+    :class="[props.isValid ? 'valid' : '', 'input-error-msg', props.errorClass]"
   >
     {{
       props.isValid

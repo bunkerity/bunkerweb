@@ -151,13 +151,14 @@ onUpdated(() => {
         </thead>
         <tbody ref="tableBody" class="table-content">
           <tr
-            v-for="rowId in table.rowLength"
+            v-for="rowId in table.rowLength - 1"
             role="row"
             :aria-rowindex="rowId"
             class="table-content-item"
           >
             <template v-for="(col, id) in props.items[rowId]">
               <td
+                role="Scell"
                 :class="[
                   'table-content-item-wrap',
                   `col-span-${props.positions[id]}`,

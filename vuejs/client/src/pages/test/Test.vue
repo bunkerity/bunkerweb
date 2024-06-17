@@ -512,31 +512,33 @@ const tableData = {
         },
       },
       {
-        type: "select",
+        type: "Fields",
         data: {
-          id: "default-server-cert_cache",
-          label: "default-server-cert_cache",
-          hideLabel: true,
-          inpType: "select",
-          name: "default-server-cert_cache",
-          value: "none",
-          values: [
-            "none",
-            "default-server-cert.pem",
-            "default-server-cert.key",
-          ],
-          columns: {
-            pc: 12,
-            tablet: 12,
-            mobile: 12,
-          },
-          popovers: [
-            {
-              iconColor: "info",
-              iconName: "info",
-              text: "jobs_download_cache_file",
+          setting: {
+            id: "default-server-cert_cache",
+            label: "default-server-cert_cache",
+            hideLabel: true,
+            inpType: "select",
+            name: "default-server-cert_cache",
+            value: "none",
+            values: [
+              "none",
+              "default-server-cert.pem",
+              "default-server-cert.key",
+            ],
+            columns: {
+              pc: 12,
+              tablet: 12,
+              mobile: 12,
             },
-          ],
+            popovers: [
+              {
+                iconColor: "info",
+                iconName: "info",
+                text: "jobs_download_cache_file",
+              },
+            ],
+          },
         },
       },
     ],
@@ -672,27 +674,29 @@ const tableData = {
         },
       },
       {
-        type: "select",
+        type: "Fields",
         data: {
-          id: "failover-backup_cache",
-          label: "failover-backup_cache",
-          hideLabel: true,
-          inpType: "select",
-          name: "failover-backup_cache",
-          value: "none",
-          values: ["none", "folder:/var/tmp/bunkerweb/failover.tgz"],
-          columns: {
-            pc: 12,
-            tablet: 12,
-            mobile: 12,
-          },
-          popovers: [
-            {
-              iconColor: "info",
-              iconName: "info",
-              text: "jobs_download_cache_file",
+          setting: {
+            id: "failover-backup_cache",
+            label: "failover-backup_cache",
+            hideLabel: true,
+            inpType: "select",
+            name: "failover-backup_cache",
+            value: "none",
+            values: ["none", "folder:/var/tmp/bunkerweb/failover.tgz"],
+            columns: {
+              pc: 12,
+              tablet: 12,
+              mobile: 12,
             },
-          ],
+            popovers: [
+              {
+                iconColor: "info",
+                iconName: "info",
+                text: "jobs_download_cache_file",
+              },
+            ],
+          },
         },
       },
     ],
@@ -782,27 +786,29 @@ const tableData = {
         },
       },
       {
-        type: "select",
+        type: "Fields",
         data: {
-          id: "mmdb-asn_cache",
-          label: "mmdb-asn_cache",
-          hideLabel: true,
-          inpType: "select",
-          name: "mmdb-asn_cache",
-          value: "none",
-          values: ["none", "asn.mmdb"],
-          columns: {
-            pc: 12,
-            tablet: 12,
-            mobile: 12,
-          },
-          popovers: [
-            {
-              iconColor: "info",
-              iconName: "info",
-              text: "jobs_download_cache_file",
+          setting: {
+            id: "mmdb-asn_cache",
+            label: "mmdb-asn_cache",
+            hideLabel: true,
+            inpType: "select",
+            name: "mmdb-asn_cache",
+            value: "none",
+            values: ["none", "asn.mmdb"],
+            columns: {
+              pc: 12,
+              tablet: 12,
+              mobile: 12,
             },
-          ],
+            popovers: [
+              {
+                iconColor: "info",
+                iconName: "info",
+                text: "jobs_download_cache_file",
+              },
+            ],
+          },
         },
       },
     ],
@@ -846,27 +852,29 @@ const tableData = {
         },
       },
       {
-        type: "select",
+        type: "Fields",
         data: {
-          id: "mmdb-country_cache",
-          label: "mmdb-country_cache",
-          hideLabel: true,
-          inpType: "select",
-          name: "mmdb-country_cache",
-          value: "none",
-          values: ["none", "country.mmdb"],
-          columns: {
-            pc: 12,
-            tablet: 12,
-            mobile: 12,
-          },
-          popovers: [
-            {
-              iconColor: "info",
-              iconName: "info",
-              text: "jobs_download_cache_file",
+          setting: {
+            id: "mmdb-country_cache",
+            label: "mmdb-country_cache",
+            hideLabel: true,
+            inpType: "select",
+            name: "mmdb-country_cache",
+            value: "none",
+            values: ["none", "country.mmdb"],
+            columns: {
+              pc: 12,
+              tablet: 12,
+              mobile: 12,
             },
-          ],
+            popovers: [
+              {
+                iconColor: "info",
+                iconName: "info",
+                text: "jobs_download_cache_file",
+              },
+            ],
+          },
         },
       },
     ],
@@ -956,31 +964,33 @@ const tableData = {
         },
       },
       {
-        type: "select",
+        type: "Fields",
         data: {
-          id: "self-signed_cache",
-          label: "self-signed_cache",
-          hideLabel: true,
-          inpType: "select",
-          name: "self-signed_cache",
-          value: "none",
-          values: [
-            "none",
-            "www.example.com/cert.pem",
-            "www.example.com/key.pem",
-          ],
-          columns: {
-            pc: 12,
-            tablet: 12,
-            mobile: 12,
-          },
-          popovers: [
-            {
-              iconColor: "info",
-              iconName: "info",
-              text: "jobs_download_cache_file",
+          setting: {
+            id: "self-signed_cache",
+            label: "self-signed_cache",
+            hideLabel: true,
+            inpType: "select",
+            name: "self-signed_cache",
+            value: "none",
+            values: [
+              "none",
+              "www.example.com/cert.pem",
+              "www.example.com/key.pem",
+            ],
+            columns: {
+              pc: 12,
+              tablet: 12,
+              mobile: 12,
             },
-          ],
+            popovers: [
+              {
+                iconColor: "info",
+                iconName: "info",
+                text: "jobs_download_cache_file",
+              },
+            ],
+          },
         },
       },
     ],
@@ -1082,13 +1092,7 @@ const tableData = {
 
 <template>
   <DashboardLayout>
-    <GridLayout :columns="{ pc: 4, tablet: 6, mobile: 12 }">
-      <!-- widget grid -->
-      <Grid>
-        <Input v-bind="inputData" />
-      </Grid>
-    </GridLayout>
-    <GridLayout :columns="{ pc: 4, tablet: 6, mobile: 12 }">
+    <GridLayout :columns="{ pc: 12, tablet: 12, mobile: 12 }">
       <!-- widget grid -->
       <Grid>
         <Table v-bind="tableData" />

@@ -336,6 +336,10 @@ onUnmounted(() => {
         :valueToCopy="editor.value"
       />
     </div>
-    <ErrorField :isValid="editor.isValid" :isValue="!!editor.value" />
+    <ErrorField
+      :errorClass="'editor'"
+      :isValid="editor.isValid"
+      :isValue="!!editor.value"
+    />
   </Container>
 </template>

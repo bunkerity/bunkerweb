@@ -34,26 +34,28 @@ def jobs_to_list(jobs):
                     file_name = f"{cache['service_id']}/{cache['file_name']}" if cache['service_id'] else cache['file_name']
                     files.append(file_name)
                     
-                item.append({ 'type': 'select', 'data': {
-                                                "id": f"{key}_cache",
-                                                "label": f"{key}_cache",
-                                                "hideLabel": True,
-                                                "inpType": "select",
-                                                "name": f"{key}_cache",
-                                                "value": "none",
-                                                "values": files,
-                                                "columns": {
-                                                "pc": 12,
-                                                "tablet": 12,
-                                                "mobile": 12,
-                                                },
-                                                "popovers": [
-                                                {
-                                                    "iconColor": "info",
-                                                    "iconName": "info",
-                                                    "text": "jobs_download_cache_file",
-                                                },
-                                                ],
+                item.append({ 'type': 'Fields', 'data': {
+                                                'setting' : {
+                                                    "id": f"{key}_cache",
+                                                    "label": f"{key}_cache",
+                                                    "hideLabel": True,
+                                                    "inpType": "select",
+                                                    "name": f"{key}_cache",
+                                                    "value": "none",
+                                                    "values": files,
+                                                    "columns": {
+                                                    "pc": 12,
+                                                    "tablet": 12,
+                                                    "mobile": 12,
+                                                    },
+                                                    "popovers": [
+                                                    {
+                                                        "iconColor": "info",
+                                                        "iconName": "info",
+                                                        "text": "jobs_download_cache_file",
+                                                    },
+                                                    ],
+                                                }
                                             },
                                     })
                 continue

@@ -161,7 +161,7 @@ body {
 /* INPUT */
 
 .field-container {
-  @apply relative w-full px-3 md:px-4 pt-2 md:pt-3 pb-0.5 md:pb-1;
+  @apply relative w-full px-3 md:px-4 pt-3 pb-4;
 }
 
 .input-header-container {
@@ -185,15 +185,39 @@ body {
 }
 
 .input-error-msg {
-  @apply text-red-500 text-[0.75rem] font-semibold mb-0 mt-0.5;
+  @apply absolute text-red-500 text-[0.75rem] font-semibold mb-0 mt-0.5;
+}
+
+.input.input-error-msg {
+  @apply -bottom-5;
+}
+
+.picker.input-error-msg {
+  @apply -bottom-5;
+}
+
+.select.input-error-msg {
+  @apply -bottom-5;
+}
+
+.combobox.input-error-msg {
+  @apply -bottom-5;
+}
+
+.check.input-error-msg {
+  @apply -bottom-11;
+}
+
+.editor.input-error-msg {
+  @apply -bottom-3;
 }
 
 .valid.input-error-msg {
-  @apply pointer-events-none -z-10 opacity-0;
+  @apply pointer-events-none text-green-500 -z-10 opacity-0;
 }
 
 .checkbox-container {
-  @apply relative z-10 flex flex-col items-start mt-1;
+  @apply relative z-10 mt-1;
 }
 
 .checkbox {
@@ -228,8 +252,6 @@ body {
 .select-btn-svg {
   @apply pointer-events-none transition-transform h-4 w-4 fill-gray-600 dark:fill-gray-500;
 }
-
-
 
 .select-combobox-dropdown-container {
   @apply flex  w-fit mt-2;
