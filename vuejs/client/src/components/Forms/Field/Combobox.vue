@@ -42,6 +42,7 @@ import { v4 as uuidv4 } from "uuid";
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
   @param {array} values
+  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
   @param {array} [popovers] - List of popovers to display more information
   @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {boolean} [disabled=false]
@@ -77,6 +78,11 @@ const props = defineProps({
     type: Array,
     required: true,
     default: [],
+  },
+  maxBtnChars: {
+    type: [String, Number],
+    required: false,
+    default: "",
   },
   inpType: {
     type: String,
@@ -337,7 +343,15 @@ const emits = defineEmits(["inp"]);
         ]"
       >
         <span :id="`${props.id}-text`" class="select-btn-name">
-          {{ select.value || props.value }}
+          {{
+            (props.maxBtnChars && select.value) ||
+            props.value > props.maxBtnChars
+              ? `${
+                  select.value.substring(0, props.maxBtnChars) ||
+                  props.value.substring(0, props.maxBtnChars)
+                }...`
+              : select.value || props.value
+          }}
         </span>
         <!-- chevron -->
         <svg

@@ -1308,15 +1308,15 @@ body {
 /* TABLE */
 
 .table-container {
-  @apply appearance-none block col-span-12 overflow-x-auto overflow-y-hidden;
+  @apply w-full appearance-none block col-span-12 overflow-x-auto overflow-y-hidden;
 }
 
 .table-container-wrap {
-  @apply appearance-none block col-span-12 overflow-x-auto grid grid-cols-12;
+  @apply w-full appearance-none block col-span-12 overflow-x-auto grid grid-cols-12;
 }
 
 .table {
-  @apply appearance-none w-full grid grid-cols-12 block;
+  @apply appearance-none w-full grid grid-cols-12 col-span-12 block;
 }
 
 .sm.table {

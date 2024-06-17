@@ -37,6 +37,7 @@ import { v4 as uuidv4 } from "uuid";
   @param {array} values
   @param {array} [popovers] - List of popovers to display more information
   @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
   @param {boolean} [disabled=false]
   @param {boolean} [required=false]
   @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
@@ -74,6 +75,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "select",
+  },
+  maxBtnChars: {
+    type: [String, Number],
+    required: false,
+    default: "",
   },
   disabled: {
     type: Boolean,
@@ -313,7 +319,15 @@ const emits = defineEmits(["inp"]);
         ]"
       >
         <span :id="`${props.id}-text`" class="select-btn-name">
-          {{ select.value || props.value }}
+          {{
+            (props.maxBtnChars && select.value) ||
+            props.value > props.maxBtnChars
+              ? `${
+                  select.value.substring(0, props.maxBtnChars) ||
+                  props.value.substring(0, props.maxBtnChars)
+                }...`
+              : select.value || props.value
+          }}
         </span>
         <!-- chevron -->
         <svg

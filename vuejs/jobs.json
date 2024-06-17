@@ -474,6 +474,7 @@
                     },
                     "overflowAttrEl": "data-table-body",
                     "containerClass": "table",
+                    "maxBtnChars": 16,
                     "popovers": [
                         {
                             "iconColor": "info",
@@ -637,6 +638,7 @@
                     },
                     "overflowAttrEl": "data-table-body",
                     "containerClass": "table",
+                    "maxBtnChars": 16,
                     "popovers": [
                         {
                             "iconColor": "info",
@@ -754,6 +756,7 @@
                     },
                     "overflowAttrEl": "data-table-body",
                     "containerClass": "table",
+                    "maxBtnChars": 16,
                     "popovers": [
                         {
                             "iconColor": "info",
@@ -825,6 +828,7 @@
                     },
                     "overflowAttrEl": "data-table-body",
                     "containerClass": "table",
+                    "maxBtnChars": 16,
                     "popovers": [
                         {
                             "iconColor": "info",
@@ -943,6 +947,7 @@
                     },
                     "overflowAttrEl": "data-table-body",
                     "containerClass": "table",
+                    "maxBtnChars": 16,
                     "popovers": [
                         {
                             "iconColor": "info",

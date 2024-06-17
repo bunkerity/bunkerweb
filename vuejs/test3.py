@@ -50,6 +50,7 @@ def jobs_to_list(jobs):
                                                     },
                                                     "overflowAttrEl" : "data-table-body",
                                                     "containerClass" : "table",
+                                                    "maxBtnChars" : 12,
                                                     "popovers": [
                                                     {
                                                         "iconColor": "info",

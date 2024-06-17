@@ -533,6 +533,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
+            maxBtnChars: 16,
             popovers: [
               {
                 iconColor: "info",
@@ -693,6 +694,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
+            maxBtnChars: 16,
             popovers: [
               {
                 iconColor: "info",
@@ -807,6 +809,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
+            maxBtnChars: 16,
             popovers: [
               {
                 iconColor: "info",
@@ -875,6 +878,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
+            maxBtnChars: 16,
             popovers: [
               {
                 iconColor: "info",
@@ -993,6 +997,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
+            maxBtnChars: 16,
             popovers: [
               {
                 iconColor: "info",
