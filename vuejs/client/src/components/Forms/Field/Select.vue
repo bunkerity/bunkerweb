@@ -320,8 +320,8 @@ const emits = defineEmits(["inp"]);
       >
         <span :id="`${props.id}-text`" class="select-btn-name">
           {{
-            (props.maxBtnChars && select.value) ||
-            props.value > +props.maxBtnChars
+            props.maxBtnChars &&
+            (select.value || props.value).length > +props.maxBtnChars
               ? `${
                   select.value.substring(0, props.maxBtnChars) ||
                   props.value.substring(0, props.maxBtnChars)

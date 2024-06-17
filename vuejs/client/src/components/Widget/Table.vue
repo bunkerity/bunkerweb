@@ -6,6 +6,7 @@ import Text from "@components/Widget/Text.vue";
 import Icons from "@components/Widget/Icons.vue";
 import Fields from "@components/Form/Fields.vue";
 import Button from "@components/Widget/Button.vue";
+import Filter from "@components/Widget/Filter.vue";
 
 /**
   @name Widget/Table.vue
@@ -32,12 +33,41 @@ import Button from "@components/Widget/Button.vue";
       ],
       ...
     ],
+  
+  const  filters = [
+  {
+    filter: "default",
+    filterName: "type",
+    type: "select",
+    value: "all",
+    keys: ["type"],
+    field: {
+      id: uuidv4(),
+      value: "all",
+      // add 'all' as first value
+      values: ["all"].concat(plugin_types),
+      name: uuidv4(),
+      onlyDown: true,
+      label: "inp_select_plugin_type",
+      containerClass: "setting",
+      popovers: [
+        {
+          text: "inp_select_plugin_type_desc",
+          iconName: "info",
+          iconColor: "info",
+        },
+      ],
+      columns: { pc: 3, tablet: 4, mobile: 12 },
+    },
+  },
+  ...
   }
 
   @param {string} title - Determine the title of the table.
   @param {array} header - Determine the header of the table.
   @param {array} positions - Determine the position of each item in the table in a list of number based on 12 columns grid.
   @param {array} items - items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
+  @param {array} filters - Determine the filters of the table.
   @param {string} [minWidth="base"] - Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl".
   @param {string} [containerClass=""] - Container additional class.
   @param {string} [containerWrapClass=""] - Container wrap additional class.
@@ -49,10 +79,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  filter: {
-    type: Boolean,
+  filters: {
+    type: Object,
     required: false,
-    default: false,
+    default: {},
   },
   minWidth: {
     type: String,
@@ -102,6 +132,10 @@ const table = reactive({
   title: computed(() => {
     return props.title ? props.title : "dashboard_table";
   }),
+  // base items that never change
+  itemsBase: JSON.parse(JSON.stringify(props.items)),
+  // items that can be filtered
+  itemsFormat: JSON.parse(JSON.stringify(props.items)),
 });
 
 function getOverflow() {
@@ -127,7 +161,12 @@ onUpdated(() => {
 
 <template>
   <Container :containerClass="`${props.containerClass} table-container`">
-    <slot></slot>
+    <Filter
+      v-if="filters.length"
+      @filter="(v) => (table.itemsFormat = filterData)"
+      :data="table.itemsBase"
+      :filters="filters"
+    />
     <Container
       :containerClass="`${props.containerWrapClass} table-container-wrap`"
     >
@@ -162,7 +201,7 @@ onUpdated(() => {
             :aria-rowindex="rowId"
             class="table-content-item"
           >
-            <template v-for="(col, id) in props.items[rowId]">
+            <template v-for="(col, id) in table.itemsFormat[rowId]">
               <td
                 role="Scell"
                 :class="[

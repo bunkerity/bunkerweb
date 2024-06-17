@@ -56,11 +56,6 @@ const props = defineProps({
     required: true,
     default: {},
   },
-  filters: {
-    type: Object,
-    required: false,
-    default: {},
-  },
   containerClass: {
     type: String,
     required: false,
@@ -87,31 +82,6 @@ const data = reactive({
 
 const filters = [
   {
-    filter: "default",
-    filterName: "type",
-    type: "select",
-    value: "all",
-    keys: ["type"],
-    field: {
-      id: uuidv4(),
-      value: "all",
-      // add 'all' as first value
-      values: ["all"].concat(plugin_types),
-      name: uuidv4(),
-      onlyDown: true,
-      label: "inp_select_plugin_type",
-      containerClass: "setting",
-      popovers: [
-        {
-          text: "inp_select_plugin_type_desc",
-          iconName: "info",
-          iconColor: "info",
-        },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
-    },
-  },
-  {
     filter: "settings",
     filterName: "keyword",
     type: "keyword",
@@ -137,6 +107,31 @@ const filters = [
       popovers: [
         {
           text: "inp_search_settings_desc",
+          iconName: "info",
+          iconColor: "info",
+        },
+      ],
+      columns: { pc: 3, tablet: 4, mobile: 12 },
+    },
+  },
+  {
+    filter: "default",
+    filterName: "type",
+    type: "select",
+    value: "all",
+    keys: ["type"],
+    field: {
+      id: uuidv4(),
+      value: "all",
+      // add 'all' as first value
+      values: ["all"].concat(plugin_types),
+      name: uuidv4(),
+      onlyDown: true,
+      label: "inp_select_plugin_type",
+      containerClass: "setting",
+      popovers: [
+        {
+          text: "inp_select_plugin_type_desc",
           iconName: "info",
           iconColor: "info",
         },
@@ -220,6 +215,7 @@ const comboboxPlugin = {
   disabled: false,
   required: false,
   onlyDown: true,
+  containerClass: "setting",
   label: "dashboard_plugins",
   popovers: [
     {
@@ -275,7 +271,12 @@ onUnmounted(() => {
       :values="data.plugins"
       @inp="data.currPlugin = $event"
     />
-    <Filter @filter="(v) => filter(v)" :data="data.base" :filters="filters" />
+    <Filter
+      v-if="filters.length"
+      @filter="(v) => filter(v)"
+      :data="data.base"
+      :filters="filters"
+    />
     <template v-for="plugin in data.format">
       <Container
         data-advanced-form-plugin

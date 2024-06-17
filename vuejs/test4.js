@@ -1,55 +1,3 @@
-<script setup>
-import { reactive, onBeforeMount, onMounted } from "vue";
-import { v4 as uuidv4 } from "uuid";
-import { useGlobal } from "@utils/global.js";
-import { useForm } from "@utils/form.js";
-import DashboardLayout from "@components/Dashboard/Layout.vue";
-import GridLayout from "@components/Widget/GridLayout.vue";
-import Grid from "@components/Widget/Grid.vue";
-import Table from "@components/Widget/Table.vue";
-/**
-  @name Page/Jobs.vue
-  @description This component is the jobs page.
-  This page displays some useful information about the jobs.
-*/
-
-const services = reactive({
-  builder: "",
-});
-
-onBeforeMount(() => {
-  // Get builder data
-  const dataAtt = "data-server-builder";
-  const dataEl = document.querySelector(`[${dataAtt}]`);
-  const data =
-    dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
-      ? JSON.parse(dataEl.getAttribute(dataAtt))
-      : {};
-  services.builder = data;
-});
-
-onMounted(() => {
-  useGlobal();
-  useForm();
-});
-
-// const builder = [
-//   {
-//     type: "card",
-//     containerColumns: { pc: 12, tablet: 12, mobile: 12 },
-//     widgets: [
-//       {
-//         type: "Table",
-//         data: {
-//           title: "jobs_title",
-//           subtitleColor: "success" is is_pro_version else "warning",
-//           stat: "home_pro" if is_pro_version else "home_free",
-//           iconName: "crown" if is_pro_version else "core",
-//           iconColor: "amber",
-//         },
-//       },
-//     ],
-//   },
 const tableData = {
   title: "Table title",
   minWidth: "lg",
@@ -62,7 +10,7 @@ const tableData = {
     "last run date",
     "Cache",
   ],
-  positions: [2, 2, 1, 1, 1, 2, 3],
+  positions: [2, 2, 1, 1, 1, 3, 2],
   items: [
     [
       {
@@ -87,7 +35,7 @@ const tableData = {
         },
       },
       {
-        reload: "failed",
+        reload: "no",
         type: "Icons",
         data: {
           iconColor: "error",
@@ -95,7 +43,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -113,7 +61,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -140,7 +88,7 @@ const tableData = {
         },
       },
       {
-        reload: "failed",
+        reload: "no",
         type: "Icons",
         data: {
           iconColor: "error",
@@ -148,7 +96,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -166,7 +114,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -193,7 +141,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -201,7 +149,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -219,7 +167,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -246,7 +194,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -254,7 +202,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -272,7 +220,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -299,7 +247,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -307,7 +255,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -325,7 +273,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -352,7 +300,7 @@ const tableData = {
         },
       },
       {
-        reload: "failed",
+        reload: "no",
         type: "Icons",
         data: {
           iconColor: "error",
@@ -360,7 +308,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -378,7 +326,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -405,7 +353,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -413,7 +361,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -431,7 +379,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -458,7 +406,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -466,7 +414,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -484,7 +432,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -511,7 +459,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -519,7 +467,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -537,7 +485,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -564,7 +512,7 @@ const tableData = {
         },
       },
       {
-        reload: "failed",
+        reload: "no",
         type: "Icons",
         data: {
           iconColor: "error",
@@ -572,7 +520,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -609,7 +557,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
-            maxBtnChars: 30,
+            maxBtnChars: 12,
             popovers: [
               {
                 iconColor: "info",
@@ -644,7 +592,7 @@ const tableData = {
         },
       },
       {
-        reload: "failed",
+        reload: "no",
         type: "Icons",
         data: {
           iconColor: "error",
@@ -652,7 +600,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -670,7 +618,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -697,7 +645,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -705,7 +653,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -723,7 +671,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -750,7 +698,7 @@ const tableData = {
         },
       },
       {
-        reload: "failed",
+        reload: "no",
         type: "Icons",
         data: {
           iconColor: "error",
@@ -758,7 +706,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -791,7 +739,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
-            maxBtnChars: 30,
+            maxBtnChars: 12,
             popovers: [
               {
                 iconColor: "info",
@@ -826,7 +774,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -834,7 +782,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -852,7 +800,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -879,7 +827,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -887,7 +835,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -920,7 +868,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
-            maxBtnChars: 30,
+            maxBtnChars: 12,
             popovers: [
               {
                 iconColor: "info",
@@ -955,7 +903,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -963,7 +911,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -996,7 +944,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
-            maxBtnChars: 30,
+            maxBtnChars: 12,
             popovers: [
               {
                 iconColor: "info",
@@ -1031,7 +979,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -1039,7 +987,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -1057,7 +1005,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -1084,7 +1032,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -1092,7 +1040,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -1129,7 +1077,7 @@ const tableData = {
             },
             overflowAttrEl: "data-table-body",
             containerClass: "table",
-            maxBtnChars: 30,
+            maxBtnChars: 12,
             popovers: [
               {
                 iconColor: "info",
@@ -1164,7 +1112,7 @@ const tableData = {
         },
       },
       {
-        reload: "failed",
+        reload: "no",
         type: "Icons",
         data: {
           iconColor: "error",
@@ -1172,7 +1120,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -1190,7 +1138,7 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
@@ -1217,7 +1165,7 @@ const tableData = {
         },
       },
       {
-        reload: "success",
+        reload: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -1225,7 +1173,7 @@ const tableData = {
         },
       },
       {
-        success: "success",
+        success: "yes",
         type: "Icons",
         data: {
           iconColor: "success",
@@ -1243,146 +1191,27 @@ const tableData = {
         cache: [],
         type: "Text",
         data: {
-          text: "",
+          text: "No cache",
         },
       },
     ],
   ],
 };
 
-function getIntervals() {
-  const intervals = [];
-  // Loop on items
-  for (let i = 0; i < tableData.items.length; i++) {
-    // Loop on items[i]
-    for (let j = 0; j < tableData.items[i].length; j++) {
-      // Loop on object keys and
-      for (const key in tableData.items[i][j]) {
-        // Check if key is 'every'
-        if (
-          key === "every" &&
-          !intervals.includes(tableData.items[i][j][key])
-        ) {
-          // Push the value to intervals array
-          intervals.push(tableData.items[i][j][key]);
-        }
+const intervals = [];
+// Loop on items
+for (let i = 0; i < tableData.items.length; i++) {
+  // Loop on items[i]
+  for (let j = 0; j < tableData.items[i].length; j++) {
+    // Loop on object keys and
+    for (const key in tableData.items[i][j]) {
+      // Check if key is 'every'
+      if (key === "every" && !intervals.includes(tableData.items[i][j][key])) {
+        // Push the value to intervals array
+        intervals.push(tableData.items[i][j][key]);
       }
     }
   }
-  return intervals;
 }
 
-const filters = [
-  {
-    filter: "table",
-    filterName: "keyword",
-    type: "keyword",
-    value: "",
-    keys: ["name", "plugin_id", "last_run"],
-    field: {
-      id: uuidv4(),
-      value: "",
-      type: "text",
-      name: uuidv4(),
-      containerClass: "setting",
-      label: "jobs_search",
-      placeholder: "inp_keyword",
-      isClipboard: false,
-      popovers: [
-        {
-          text: "jobs_search_desc",
-          iconName: "info",
-          iconColor: "info",
-        },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
-    },
-  },
-  {
-    filter: "table",
-    filterName: "every",
-    type: "select",
-    value: "all",
-    keys: ["every"],
-    field: {
-      id: uuidv4(),
-      value: "all",
-      // add 'all' as first value
-      values: ["all"].concat(getIntervals()),
-      name: uuidv4(),
-      onlyDown: true,
-      label: "jobs_interval",
-      containerClass: "setting",
-      popovers: [
-        {
-          text: "jobs_interval_desc",
-          iconName: "info",
-          iconColor: "info",
-        },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
-    },
-  },
-  {
-    filter: "table",
-    filterName: "success",
-    type: "select",
-    value: "all",
-    keys: ["success"],
-    field: {
-      id: uuidv4(),
-      value: "all",
-      // add 'all' as first value
-      values: ["all", "success", "failed"],
-      name: uuidv4(),
-      onlyDown: true,
-      containerClass: "setting",
-      label: "jobs_success",
-      popovers: [
-        {
-          text: "jobs_success_desc",
-          iconName: "info",
-          iconColor: "info",
-        },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
-    },
-  },
-  {
-    filter: "table",
-    filterName: "last_run",
-    type: "select",
-    value: "all",
-    keys: ["last_run"],
-    field: {
-      id: uuidv4(),
-      value: "all",
-      // add 'all' as first value
-      values: ["all", "success", "failed"],
-      name: uuidv4(),
-      onlyDown: true,
-      containerClass: "setting",
-      label: "jobs_last_run",
-      popovers: [
-        {
-          text: "jobs_last_run_desc",
-          iconName: "info",
-          iconColor: "info",
-        },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
-    },
-  },
-];
-</script>
-
-<template>
-  <DashboardLayout>
-    <GridLayout :columns="{ pc: 12, tablet: 12, mobile: 12 }">
-      <!-- widget grid -->
-      <Grid>
-        <Table :filters="filters" v-bind="tableData" />
-      </Grid>
-    </GridLayout>
-  </DashboardLayout>
-</template>
+console.log(intervals);
