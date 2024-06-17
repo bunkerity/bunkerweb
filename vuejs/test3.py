@@ -9,18 +9,23 @@ def jobs_to_list(jobs):
     # loop on each dict
     for key, value in jobs.items():
         item = []
-        item.append({'name':  { 'type': 'Text', 'data': {'text' : key } }})
+        item.append({ 'type': 'Text', 'data': {'text' : key } })
         # loop on each value
         for k, v in value.items():
             # override widget type for some keys
             if k in ('reload', 'success'):
-                item.append({k : { 'type': 'Icons', 'data': {"iconColor": "success" if v else "error", "iconName": "check" if v else "cross" } }})
+                item.append({ 'type': 'Icons', 'data': {"iconColor": "success" if v else "error", "iconName": "check" if v else "cross" } })
+                continue
             
             if k in ("plugin_id", "every", "last_run"):
-                item.append({k : { 'type': 'Text', 'data': {'text' : v } }})
+                item.append({ 'type': 'Text', 'data': {'text' : v } })
+                continue
+
 
             if k in ("cache") and len(v) <= 0:
-                item.append({k : { 'type': 'Text', 'data': {'text' : "No cache" } }})
+                item.append({ 'type': 'Text', 'data': {'text' : "No cache" } })
+                continue
+
 
             if k in ("cache") and len(v) > 0:
                 files = ["none"]
@@ -29,7 +34,7 @@ def jobs_to_list(jobs):
                     file_name = f"{cache['service_id']}/{cache['file_name']}" if cache['service_id'] else cache['file_name']
                     files.append(file_name)
                     
-                item.append({k : { 'type': 'select', 'data': {
+                item.append({ 'type': 'select', 'data': {
                                                 "id": f"{key}_cache",
                                                 "label": f"{key}_cache",
                                                 "hideLabel": True,
@@ -50,7 +55,9 @@ def jobs_to_list(jobs):
                                                 },
                                                 ],
                                             },
-                                    }})
+                                    })
+                continue
+        
 
 
         data.append(item)

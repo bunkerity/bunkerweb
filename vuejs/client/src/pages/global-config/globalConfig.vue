@@ -8,7 +8,7 @@ import { useForm } from "@utils/form.js";
 /**
   @name Page/GlobalConfig.vue
   @description This component is the global config page.
-  This page displays an overview of multiple stats related to BunkerWeb.
+  This page displays the global configuration of the server and allow to manage it.
 */
 
 const globalConfig = reactive({
@@ -30,29 +30,6 @@ onMounted(() => {
   useGlobal();
   useForm();
 });
-
-// const data = [
-// {
-//         type: "Instance",
-//         data: {
-//           details: [
-//             { key: <instances_hostname="hostname">, value: "www.example.com" },
-//             { key: <instances_method="method">, value: <dashboard_ui> or <dashboard_scheduler>...},
-//             { key: <instances_port="port">, value: "1084" },
-//             { key: <instances_status="status">, value: <instances_active="active"> or <instances_inactive="inactive"> },
-//           ],
-//           status: "success",
-//           title: "www.example.com",
-//           buttons: [
-//             {
-//               text: <action_*>,
-//               color: "edit",
-//               size: "normal",
-//             },
-//           ],
-//         },
-//       },
-// ];
 
 const data = {
   advanced: {

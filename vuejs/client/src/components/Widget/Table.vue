@@ -1,11 +1,11 @@
 <script setup>
+import { reactive, computed, ref, onMounted, onUpdated } from "vue";
+import { v4 as uuidv4 } from "uuid";
 import Container from "@components/Widget/Container.vue";
 import Text from "@components/Widget/Text.vue";
 import Icons from "@components/Widget/Icons.vue";
 import Fields from "@components/Form/Fields.vue";
 import Button from "@components/Widget/Button.vue";
-import { reactive, computed, resolveComponent } from "vue";
-import { v4 as uuidv4 } from "uuid";
 
 /**
   @name Widget/Table.vue
@@ -25,7 +25,7 @@ import { v4 as uuidv4 } from "uuid";
           "type": "Text",
           "data": {
               "text": "whitelist-download"
-            
+
             }
         },
         ...
@@ -33,11 +33,11 @@ import { v4 as uuidv4 } from "uuid";
       ...
     ],
   }
-       
+
   @param {string} title - Determine the title of the table.
   @param {array} header - Determine the header of the table.
   @param {array} positions - Determine the position of each item in the table in a list of number based on 12 columns grid.
-  @param {array} items - items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget. 
+  @param {array} items - items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
   @param {string} [minWidth="base"] - Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl".
   @param {string} [containerClass=""] - Container additional class.
   @param {string} [containerWrapClass=""] - Container wrap additional class.
@@ -83,7 +83,11 @@ const props = defineProps({
   },
 });
 
+const tableBody = ref(null);
+const tableHeader = ref(null);
+
 const table = reactive({
+  id: uuidv4(),
   length: computed(() => {
     return props.header.length;
   }),
@@ -93,7 +97,26 @@ const table = reactive({
   title: computed(() => {
     return props.title ? props.title : "dashboard_table";
   }),
-  id: uuidv4(),
+});
+
+function getOverflow() {
+  const overflow =
+    tableBody.value.getBoundingClientRect().width - tableBody.value.clientWidth;
+
+  if (overflow > 0) {
+    return (tableHeader.value.style.paddingRight = `${overflow}px`);
+  }
+
+  // remove style
+  return tableHeader.value.removeAttribute("style");
+}
+
+onMounted(() => {
+  getOverflow();
+});
+
+onUpdated(() => {
+  getOverflow();
 });
 </script>
 
@@ -103,6 +126,7 @@ const table = reactive({
       :containerClass="`${props.containerWrapClass} table-container-wrap`"
     >
       <table
+        :aria-labelledby="table.id"
         :aria-colcount="table.length"
         :aria-rowcount="table.rowLength"
         :class="['table', props.minWidth, props.tableClass]"
@@ -111,7 +135,11 @@ const table = reactive({
         <span class="sr-only" :id="table.id">
           {{ $t(table.title, table.title) }}
         </span>
-        <thead class="table-header">
+        <thead
+          ref="tableHeader"
+          class="table-header"
+          :style="{ paddingRight: table.overflow }"
+        >
           <tr
             v-for="(head, id) in props.header"
             :class="['table-header-item', `col-span-${props.positions[id]}`]"
@@ -121,14 +149,14 @@ const table = reactive({
             </th>
           </tr>
         </thead>
-        <tbody class="table-content">
+        <tbody ref="tableBody" class="table-content">
           <tr
             v-for="rowId in table.rowLength"
             role="row"
             :aria-rowindex="rowId"
             class="table-content-item"
           >
-            <template v-for="(col, id) in props.items[rowId - 1]">
+            <template v-for="(col, id) in props.items[rowId]">
               <td
                 :class="[
                   'table-content-item-wrap',

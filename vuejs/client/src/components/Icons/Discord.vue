@@ -11,24 +11,24 @@
 */
 
 const props = defineProps({
-    iconClass : {
-        type: String,
-        required: false,
-        default : "default-svg"
-    },
-    iconColor : {
-        type: String,
-        required: false,
-        default: "discord",
-    }
-})
+  iconClass: {
+    type: String,
+    required: false,
+    default: "default-svg",
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: "discord",
+  },
+});
 </script>
 <template>
   <svg
     role="img"
-    aria-hidden="true"
     fill="none"
     :class="[props.iconClass, props.iconColor]"
+    :aria-description="$t('icons_discord_desc')"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 640 512"
   >

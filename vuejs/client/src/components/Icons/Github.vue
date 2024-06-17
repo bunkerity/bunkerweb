@@ -11,24 +11,24 @@
 */
 
 const props = defineProps({
-    iconClass : {
-        type: String,
-        required: false,
-        default : "default-svg"
-    },
-    iconColor : {
-        type: String,
-        required: false,
-        default: "github",
-    }
-})
+  iconClass: {
+    type: String,
+    required: false,
+    default: "default-svg",
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: "github",
+  },
+});
 </script>
 <template>
   <svg
     role="img"
-    aria-hidden="true"
     fill="none"
     :class="[props.iconClass, props.iconColor]"
+    :aria-description="$t('icons_github_desc')"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 496 512"
   >

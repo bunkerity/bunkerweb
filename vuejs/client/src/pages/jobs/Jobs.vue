@@ -6,9 +6,9 @@ import { useGlobal } from "@utils/global.js";
 import { useForm } from "@utils/form.js";
 
 /**
-  @name Page/Services.vue
-  @description This component is the services page.
-  This page displays services and forms to manage them.
+  @name Page/Jobs.vue
+  @description This component is the jobs page.
+  This page displays some useful information about the jobs.
 */
 
 const services = reactive({
@@ -31,28 +31,23 @@ onMounted(() => {
   useForm();
 });
 
-// const data = [
-// {
-//         type: "Instance",
+// const builder = [
+//   {
+//     type: "card",
+//     containerColumns: { pc: 12, tablet: 12, mobile: 12 },
+//     widgets: [
+//       {
+//         type: "Table",
 //         data: {
-//           details: [
-//             { key: <instances_hostname="hostname">, value: "www.example.com" },
-//             { key: <instances_method="method">, value: <dashboard_ui> or <dashboard_scheduler>...},
-//             { key: <instances_port="port">, value: "1084" },
-//             { key: <instances_status="status">, value: <instances_active="active"> or <instances_inactive="inactive"> },
-//           ],
-//           status: "success",
-//           title: "www.example.com",
-//           buttons: [
-//             {
-//               text: <action_*>,
-//               color: "edit",
-//               size: "normal",
-//             },
-//           ],
+//           title: "jobs_title",
+//           subtitleColor: "success" is is_pro_version else "warning",
+//           stat: "home_pro" if is_pro_version else "home_free",
+//           iconName: "crown" if is_pro_version else "core",
+//           iconColor: "amber",
 //         },
 //       },
-// ];
+//     ],
+//   },
 
 const data = {
   advanced: {

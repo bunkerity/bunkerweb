@@ -17,6 +17,8 @@ import Puzzle from "@components/Icons/Puzzle.vue";
 import Settings from "@components/Icons/Settings.vue";
 import Task from "@components/Icons/Task.vue";
 import Trespass from "@components/Icons/Trespass.vue";
+import Check from "@components/Icons/Check.vue";
+import Cross from "@components/Icons/Cross.vue";
 import Twitter from "@components/Icons/Twitter.vue";
 import Wire from "@components/Icons/Wire.vue";
 import Funnel from "@components/Icons/Funnel.vue";
@@ -189,6 +191,16 @@ const iconClass = computed(() => {
     />
     <Trespass
       v-if="props.iconName === 'trespass'"
+      :iconClass="iconClass"
+      :iconColor="iconColor"
+    />
+    <Check
+      v-if="props.iconName === 'check'"
+      :iconClass="iconClass"
+      :iconColor="iconColor"
+    />
+    <Cross
+      v-if="props.iconName === 'cross'"
       :iconClass="iconClass"
       :iconColor="iconColor"
     />

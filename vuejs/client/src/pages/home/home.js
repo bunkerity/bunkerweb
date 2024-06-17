@@ -7,5 +7,5 @@ const pinia = createPinia();
 
 createApp(Home)
   .use(pinia)
-  .use(getI18n(["dashboard", "action", "inp", "home"]))
+  .use(getI18n(["dashboard", "action", "inp", "icons", "home"]))
   .mount("#app");

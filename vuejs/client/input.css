@@ -1278,15 +1278,15 @@ body {
 /* TABLE */
 
 .table-container {
-  @apply col-span-12 overflow-x-auto overflow-y-hidden;
+  @apply appearance-none block col-span-12 overflow-x-auto overflow-y-hidden;
 }
 
 .table-container-wrap {
-  @apply col-span-12 overflow-x-auto grid grid-cols-12;
+  @apply appearance-none block col-span-12 overflow-x-auto grid grid-cols-12;
 }
 
 .table {
-  @apply w-full grid grid-cols-12 block;
+  @apply appearance-none w-full grid grid-cols-12 block;
 }
 
 .sm.table {
@@ -1310,25 +1310,24 @@ body {
 }
 
 .table-header {
-  @apply block w-full col-span-12 grid grid-cols-12 pl-2;
+  @apply appearance-none block w-full col-span-12 grid grid-cols-12;
 }
 
 .table-header-item {
-  @apply block dark:text-gray-300 pb-1 text-sm font-bold m-0 border-b border-gray-400;
+  @apply appearance-none block dark:text-gray-300 pb-1 text-sm font-bold m-0 border-b border-gray-400;
 }
 
 .table-content {
-  @apply dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
+  @apply appearance-none dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
 }
 
 .table-content-item {
-  @apply text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5 px-1;
+  @apply appearance-none text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5;
 }
 
 .table-content-item-wrap {
-  @apply py-2.5 px-1;
+  @apply appearance-none py-2.5 pl-1;
 }
-
 
 /** MISC **/
 
