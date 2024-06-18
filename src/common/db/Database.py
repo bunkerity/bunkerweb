@@ -6,9 +6,9 @@ from datetime import datetime
 from io import BytesIO
 from logging import Logger
 from os import _exit, getenv, listdir, sep
-from os.path import join
+from os.path import join as os_join
 from pathlib import Path
-from re import compile as re_compile
+from re import compile as re_compile, escape, search
 from sys import argv, path as sys_path
 from threading import Lock
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
@@ -34,14 +34,14 @@ from model import (
     Metadata,
 )
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
+for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from common_utils import bytes_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import create_engine, event, MetaData as sql_metadata, text, inspect
+from sqlalchemy import create_engine, event, MetaData as sql_metadata, join, select as db_select, text, inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import (
     ArgumentError,
@@ -304,11 +304,41 @@ class Database:
         """Check if the setting exists in the database and optionally if it's multisite"""
         with self.__db_session() as session:
             try:
-                if multisite:
-                    return session.query(Settings).filter_by(id=setting, context="multisite").first() is not None
-                return session.query(Settings).filter_by(id=setting).first() is not None
+                multiple = False
+                if self.suffix_rx.search(setting):
+                    setting = setting.rsplit("_", 1)[0]
+                    multiple = True
+
+                db_setting = session.query(Settings).filter_by(id=setting).first()
+
+                if not db_setting:
+                    return False
+                elif multisite and db_setting.context != "multisite":
+                    return False
+                elif multiple and db_setting.multiple is None:
+                    return False
+                return True
             except (ProgrammingError, OperationalError):
                 return False
+
+    def set_failover(self, value: bool = True) -> str:
+        """Set the failover value"""
+        with self.__db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.failover = value
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
 
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
@@ -338,16 +368,18 @@ class Database:
 
         return ""
 
-    def get_metadata(self) -> Dict[str, str]:
+    def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
             "is_initialized": False,
             "is_pro": "no",
+            "pro_license": "",
             "pro_expire": None,
             "pro_status": "invalid",
             "pro_services": 0,
             "pro_overlapped": False,
             "last_pro_check": None,
+            "failover": False,
             "first_config_saved": False,
             "autoconf_loaded": False,
             "scheduler_first_start": True,
@@ -1367,12 +1399,124 @@ class Database:
 
         return message
 
-    def get_config(self, global_only: bool = False, methods: bool = False, with_drafts: bool = False) -> Dict[str, Any]:
+    def get_non_default_settings(
+        self,
+        global_only: bool = False,
+        methods: bool = False,
+        with_drafts: bool = False,
+        filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+        *,
+        original_config: Optional[Dict[str, Any]] = None,
+        original_multisite: Optional[Set[str]] = None,
+    ) -> Dict[str, Any]:
+        """Get the config from the database"""
+        filtered_settings = set(filtered_settings or [])
+
+        if filtered_settings and not global_only:
+            filtered_settings.update(("SERVER_NAME", "MULTISITE"))
+
+        with self.__db_session() as session:
+            config = original_config or {}
+            multisite = original_multisite or set()
+
+            # Define the join operation
+            j = join(Settings, Global_values, Settings.id == Global_values.setting_id)
+
+            # Define the select statement
+            stmt = (
+                db_select(Settings.id.label("setting_id"), Settings.context, Settings.multiple, Global_values.value, Global_values.suffix, Global_values.method)
+                .select_from(j)
+                .order_by(Settings.order)
+            )
+
+            if filtered_settings:
+                stmt = stmt.where(Settings.id.in_(filtered_settings))
+
+            # Execute the query and fetch all results
+            results = session.execute(stmt).fetchall()
+
+            for global_value in results:
+                setting_id = global_value.setting_id + (f"_{global_value.suffix}" if global_value.multiple and global_value.suffix > 0 else "")
+                config[setting_id] = global_value.value if not methods else {"value": global_value.value, "global": True, "method": global_value.method}
+                if global_value.context == "multisite":
+                    multisite.add(setting_id)
+
+            is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"
+
+            services = session.query(Services).with_entities(Services.id, Services.is_draft)
+
+            if not with_drafts:
+                services = services.filter_by(is_draft=False)
+
+            if not global_only and is_multisite:
+                servers = ""
+                for service in services:
+                    config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
+                    if methods:
+                        config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
+                    for key in multisite:
+                        config[f"{service.id}_{key}"] = config[key]
+                    servers += f"{service.id} "
+                servers = servers.strip()
+
+                # Define the join operation
+                j = join(Services, Services_settings, Services.id == Services_settings.service_id)
+                j = j.join(Settings, Settings.id == Services_settings.setting_id)
+
+                # Define the select statement
+                stmt = (
+                    db_select(
+                        Services.id.label("service_id"),
+                        Settings.id.label("setting_id"),
+                        Settings.multiple,
+                        Services_settings.value,
+                        Services_settings.suffix,
+                        Services_settings.method,
+                    )
+                    .select_from(j)
+                    .order_by(Services.id, Settings.order)
+                )
+
+                if not with_drafts:
+                    stmt = stmt.where(Services.is_draft == False)  # noqa: E712
+
+                if filtered_settings:
+                    stmt = stmt.where(Settings.id.in_(filtered_settings))
+
+                # Execute the query and fetch all results
+                results = session.execute(stmt).fetchall()
+
+                for result in results:
+                    value = result.value
+
+                    if result.setting_id == "SERVER_NAME" and not search(r"^" + escape(result.service_id) + r"( |$)", value):
+                        split = set(value.split(" "))
+                        split.discard(result.service_id)
+                        value = result.service_id + " " + " ".join(split)
+
+                    config[f"{result.service_id}_{result.setting_id}" + (f"_{result.suffix}" if result.multiple and result.suffix else "")] = (
+                        value if not methods else {"value": value, "global": False, "method": result.method}
+                    )
+            else:
+                servers = " ".join(service.id for service in services)
+
+            config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
+
+            return config
+
+    def get_config(
+        self,
+        global_only: bool = False,
+        methods: bool = False,
+        with_drafts: bool = False,
+        filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+    ) -> Dict[str, Any]:
         """Get the config from the database"""
         with self.__db_session() as session:
             config = {}
-            multisite = []
-            for setting in (
+            multisite = set()
+
+            query = (
                 session.query(Settings)
                 .with_entities(
                     Settings.id,
@@ -1381,81 +1525,25 @@ class Database:
                     Settings.multiple,
                 )
                 .order_by(Settings.order)
-            ):
+            )
+
+            if filtered_settings:
+                query = query.filter(Settings.id.in_(filtered_settings))
+
+            for setting in query:
                 default = setting.default or ""
                 config[setting.id] = default if not methods else {"value": default, "global": True, "method": "default"}
-
-                for global_value in (
-                    session.query(Global_values).with_entities(Global_values.value, Global_values.suffix, Global_values.method).filter_by(setting_id=setting.id)
-                ):
-                    config[setting.id + (f"_{global_value.suffix}" if setting.multiple and global_value.suffix > 0 else "")] = (
-                        global_value.value
-                        if not methods
-                        else {
-                            "value": global_value.value,
-                            "global": True,
-                            "method": global_value.method,
-                        }
-                    )
-
                 if setting.context == "multisite":
-                    multisite.append(setting.id)
+                    multisite.add(setting.id)
 
-            is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"
-
-            services = session.query(Services).with_entities(Services.id, Services.is_draft)
-            if not with_drafts:
-                services = services.filter_by(is_draft=False)
-
-            if not global_only and is_multisite:
-                for service in services:
-                    config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
-                    if methods:
-                        config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
-
-                    checked_settings = []
-                    for key, value in config.copy().items():
-                        original_key = key
-                        if self.suffix_rx.search(key):
-                            key = key[: -len(str(key.split("_")[-1])) - 1]
-
-                        if key not in multisite:
-                            continue
-                        elif f"{service.id}_{original_key}" not in config:
-                            config[f"{service.id}_{original_key}"] = value
-
-                        if original_key not in checked_settings:
-                            checked_settings.append(original_key)
-                        else:
-                            continue
-
-                        for service_setting in (
-                            session.query(Services_settings)
-                            .with_entities(
-                                Services_settings.value,
-                                Services_settings.suffix,
-                                Services_settings.method,
-                            )
-                            .filter_by(service_id=service.id, setting_id=key)
-                        ):
-                            value = service_setting.value
-                            if key == "SERVER_NAME" and service.id not in value.split(" "):
-                                value = f"{service.id} {value}".strip()
-
-                            config[f"{service.id}_{key}" + (f"_{service_setting.suffix}" if service_setting.suffix > 0 else "")] = (
-                                value
-                                if not methods
-                                else {
-                                    "value": value,
-                                    "global": False,
-                                    "method": service_setting.method,
-                                }
-                            )
-
-            servers = " ".join(service.id for service in services)
-            config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
-
-            return config
+        return self.get_non_default_settings(
+            global_only=global_only,
+            methods=methods,
+            with_drafts=with_drafts,
+            filtered_settings=filtered_settings,
+            original_config=config,
+            original_multisite=multisite,
+        )
 
     def get_custom_configs(self) -> List[Dict[str, Any]]:
         """Get the custom configs from the database"""

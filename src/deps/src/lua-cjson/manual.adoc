@@ -1,6 +1,6 @@
 = Lua CJSON 2.1devel Manual =
 Mark Pulford <mark@kyne.com.au>
-:revdate: 1st March 2012
+:revdate: August 2016
 
 Overview
 --------
@@ -20,7 +20,7 @@ The Lua CJSON module provides JSON support for Lua.
 Lua CJSON is covered by the MIT license. Review the file +LICENSE+ for
 details.
 
-The latest version of this software is available from the
+The current stable version of this software is available from the
 http://www.kyne.com.au/%7Emark/software/lua-cjson.php[Lua CJSON website].
 
 Feel free to email me if you have any patches, suggestions, or comments.
@@ -29,8 +29,8 @@ Feel free to email me if you have any patches, suggestions, or comments.
 Installation
 ------------
 
-Lua CJSON requires either http://www.lua.org[Lua] 5.1, Lua 5.2, or
-http://www.luajit.org[LuaJIT] to build.
+Lua CJSON requires either http://www.lua.org[Lua] 5.1, Lua 5.2, Lua 5.3,
+or http://www.luajit.org[LuaJIT] to build.
 
 The build method can be selected from 4 options:
 
@@ -203,8 +203,8 @@ Import Lua CJSON via the Lua +require+ function. Lua CJSON does not
 register a global module table.
 
 The +cjson+ module will throw an error during JSON conversion if any
-invalid data is encountered. Refer to <<cjson_encode,+cjson.encode+>>
-and <<cjson_decode,+cjson.decode+>> for details.
+invalid data is encountered. Refer to <<encode,+cjson.encode+>> and
+<<decode,+cjson.decode+>> for details.
 
 The +cjson.safe+ module behaves identically to the +cjson+ module,
 except when errors are encountered during JSON conversion. On error, the
@@ -238,6 +238,7 @@ workaround if required. Lua CJSON should be reinitialised via
 different locale per thread is not supported.
 
 
+[[decode]]
 decode
 ~~~~~~
 

@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.9)
 
 project(maxminddb
   LANGUAGES C
-  VERSION 1.9.1
+  VERSION 1.10.0
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
 set(CMAKE_C_STANDARD 99)
@@ -13,6 +13,8 @@ if (WIN32)
 endif()
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
 option(BUILD_TESTING "Build test programs" ON)
+option(MAXMINDDB_BUILD_BINARIES "Build binaries" ON)
+option(MAXMINDDB_INSTALL "Generate the install target" ON)
 
 include(GNUInstallDirs)
 
@@ -90,17 +92,20 @@ set(MAXMINDB_HEADERS
 )
 set_target_properties(maxminddb PROPERTIES PUBLIC_HEADER "${MAXMINDB_HEADERS}")
 
-install(TARGETS maxminddb
-	EXPORT maxminddb)
+if (MAXMINDDB_INSTALL)
+  install(TARGETS maxminddb
+    EXPORT maxminddb)
 
-# This is required to work with FetchContent
-install(EXPORT maxminddb
-        FILE maxminddb-config.cmake
-        NAMESPACE maxminddb::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maxminddb)
+  # This is required to work with FetchContent
+  install(EXPORT maxminddb
+          FILE maxminddb-config.cmake
+          NAMESPACE maxminddb::
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/maxminddb)
+endif()
 
-# We always want to build mmdblookup
-add_subdirectory(bin)
+if (MAXMINDDB_BUILD_BINARIES)
+  add_subdirectory(bin)
+endif()
 
 if (BUILD_TESTING)
   enable_testing()
@@ -110,14 +115,16 @@ endif()
 # Generate libmaxminddb.pc file for pkg-config
 # Set the required variables as same with autotools
 set(prefix ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix \${prefix})
-set(libdir \${exec_prefix}/lib)
-set(includedir \${prefix}/include)
+set(exec_prefix ${CMAKE_INSTALL_PREFIX})
+set(libdir ${CMAKE_INSTALL_LIBDIR})
+set(includedir ${CMAKE_INSTALL_INCLUDEDIR})
 set(PACKAGE_VERSION ${maxminddb_VERSION})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/libmaxminddb.pc.in
-  ${CMAKE_CURRENT_BINARY_DIR}/src/libmaxminddb.pc
-  @ONLY)
+if (MAXMINDDB_INSTALL)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/libmaxminddb.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/src/libmaxminddb.pc
+    @ONLY)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/src/libmaxminddb.pc
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/src/libmaxminddb.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+endif()

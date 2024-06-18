@@ -9,7 +9,7 @@ from json import load as json_load
 from os import _exit, environ, getenv, getpid, sep
 from os.path import join
 from pathlib import Path
-from shutil import copy, rmtree
+from shutil import copy, rmtree, copytree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
@@ -31,14 +31,16 @@ from common_utils import bytes_hash, dict_to_frozenset, get_integration  # type:
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
+from jobs import Job  # type: ignore
 from API import API  # type: ignore
-from ApiCaller import ApiCaller  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore  # type: ignore
 
+APPLYING_CHANGES = Event()
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 
-CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
-Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)
+CACHE_PATH = Path(sep, "var", "cache", "bunkerweb")
+CACHE_PATH.mkdir(parents=True, exist_ok=True)
 
 CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
@@ -56,6 +58,8 @@ CUSTOM_CONFIGS_DIRS = (
 for custom_config_dir in CUSTOM_CONFIGS_DIRS:
     CUSTOM_CONFIGS_PATH.joinpath(custom_config_dir).mkdir(parents=True, exist_ok=True)
 
+CONFIG_PATH = Path(sep, "etc", "nginx")
+
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -64,6 +68,9 @@ PRO_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
 TMP_PATH = Path(sep, "var", "tmp", "bunkerweb")
 TMP_PATH.mkdir(parents=True, exist_ok=True)
+
+FAILOVER_PATH = TMP_PATH.joinpath("failover")
+FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
 
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
@@ -87,6 +94,14 @@ MASTER_MODE = getenv("MASTER_MODE", "no") == "yes"
 
 
 def handle_stop(signum, frame):
+    current_time = datetime.now()
+    while APPLYING_CHANGES.is_set() and (datetime.now() - current_time).seconds < 30:
+        LOGGER.warning("Waiting for the changes to be applied before stopping ...")
+        sleep(1)
+
+    if APPLYING_CHANGES.is_set():
+        LOGGER.warning("Timeout reached, stopping without waiting for the changes to be applied ...")
+
     if SCHEDULER is not None:
         SCHEDULER.clear()
     stop(0)
@@ -135,6 +150,41 @@ def stop(status):
     _exit(status)
 
 
+def send_nginx_configs(sent_path: Path = CONFIG_PATH):
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    LOGGER.info(f"Sending {sent_path} folder ...")
+    ret = SCHEDULER.send_files(sent_path.as_posix(), "/confs")
+    if not ret:
+        LOGGER.error("Sending nginx configs failed, configuration will not work as expected...")
+
+
+def send_nginx_cache(sent_path: Path = CACHE_PATH):
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    LOGGER.info(f"Sending {sent_path} folder ...")
+    if not SCHEDULER.send_files(sent_path.as_posix(), "/cache"):
+        LOGGER.error(f"Error while sending {sent_path} folder")
+    else:
+        LOGGER.info(f"Successfully sent {sent_path} folder")
+
+
+def send_nginx_custom_configs(sent_path: Path = CUSTOM_CONFIGS_PATH):
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    LOGGER.info(f"Sending {sent_path} folder ...")
+    if not SCHEDULER.send_files(sent_path.as_posix(), "/custom_configs"):
+        LOGGER.error(f"Error while sending {sent_path} folder")
+    else:
+        LOGGER.info(f"Successfully sent {sent_path} folder")
+
+
+def send_nginx_external_plugins(sent_path: Path = EXTERNAL_PLUGINS_PATH):
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    LOGGER.info(f"Sending {sent_path} folder ...")
+    if not SCHEDULER.send_files(sent_path.as_posix(), "/pro_plugins" if sent_path.as_posix().endswith("/pro/plugins") else "/plugins"):
+        LOGGER.error(f"Error while sending {sent_path} folder")
+    else:
+        LOGGER.info(f"Successfully sent {sent_path} folder")
+
+
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
@@ -179,22 +229,17 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                 )
 
     if SCHEDULER and SCHEDULER.apis:
-        LOGGER.info("Sending custom configs to BunkerWeb")
-        ret = SCHEDULER.send_files(original_path, "/custom_configs")
-
-        if not ret:
-            LOGGER.error("Sending custom configs failed, configuration will not work as expected...")
+        send_nginx_custom_configs(original_path)
 
 
-def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
+def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
-    pro = "pro" in original_path.parts
+    pro = original_path.as_posix().endswith("/pro/plugins")
 
-    if not plugins:
-        assert SCHEDULER is not None
-        plugins = SCHEDULER.db.get_plugins(_type="pro" if pro else "external", with_data=True)
-        assert plugins is not None, "Couldn't get plugins from database"
+    assert SCHEDULER is not None
+    plugins = SCHEDULER.db.get_plugins(_type="pro" if pro else "external", with_data=True)
+    assert plugins is not None, "Couldn't get plugins from database"
 
     # Remove old external/pro plugins files
     LOGGER.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
@@ -249,10 +294,7 @@ def generate_external_plugins(plugins: Optional[List[Dict[str, Any]]] = None, *,
 
     if SCHEDULER and SCHEDULER.apis:
         LOGGER.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
-        ret = SCHEDULER.send_files(original_path, "/pro_plugins" if original_path.as_posix().endswith("/pro/plugins") else "/plugins")
-
-        if not ret:
-            LOGGER.error(f"Sending {'pro ' if pro else ''}external plugins failed, configuration will not work as expected...")
+        send_nginx_external_plugins(original_path)
 
 
 def generate_caches():
@@ -334,7 +376,7 @@ def run_in_slave_mode():  # TODO: Refactor this feature
     threads = [
         Thread(target=generate_custom_configs),
         Thread(target=generate_external_plugins),
-        Thread(target=generate_external_plugins, kwargs={"original_path": PRO_PLUGINS_PATH}),
+        Thread(target=generate_external_plugins, args=(PRO_PLUGINS_PATH,)),
         Thread(target=generate_caches),
     ]
 
@@ -358,7 +400,7 @@ def run_in_slave_mode():  # TODO: Refactor this feature
             "--templates",
             join(sep, "usr", "share", "bunkerweb", "confs"),
             "--output",
-            join(sep, "etc", "nginx"),
+            CONFIG_PATH.as_posix(),
             "--variables",
             str(SCHEDULER_TMP_ENV_PATH),
         ],
@@ -456,10 +498,12 @@ if __name__ == "__main__":
 
         INTEGRATION = get_integration()
         tmp_variables_path = Path(args.variables or join(sep, "var", "tmp", "bunkerweb", "variables.env"))
-        nginx_variables_path = Path(sep, "etc", "nginx", "variables.env")
+        nginx_variables_path = CONFIG_PATH.joinpath("variables.env")
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
         SCHEDULER = JobScheduler(environ, LOGGER, INTEGRATION, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
+
+        JOB = Job(LOGGER, SCHEDULER.db)
 
         if SLAVE_MODE:
             run_in_slave_mode()
@@ -468,6 +512,8 @@ if __name__ == "__main__":
         schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
 
         db_metadata = SCHEDULER.db.get_metadata()
+
+        APPLYING_CHANGES.set()
 
         if (
             isinstance(db_metadata, str)
@@ -523,6 +569,7 @@ if __name__ == "__main__":
 
         def check_configs_changes():
             # Checking if any custom config has been created by the user
+            assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info("Checking if there are any changes in custom configs ...")
             custom_configs = []
             db_configs = SCHEDULER.db.get_custom_configs()
@@ -564,6 +611,7 @@ if __name__ == "__main__":
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
+            assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info(f"Checking if there are any changes in {_type} plugins ...")
             plugin_path = EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
@@ -603,6 +651,7 @@ if __name__ == "__main__":
                         | ({"jobs": jobs} if jobs else {})
                     )
 
+            changes = False
             if tmp_external_plugins:
                 changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
 
@@ -613,8 +662,10 @@ if __name__ == "__main__":
                             LOGGER.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
                     except BaseException as e:
                         LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
+                else:
+                    return send_nginx_external_plugins(plugin_path)
 
-            generate_external_plugins(SCHEDULER.db.get_plugins(_type=_type, with_data=True), original_path=plugin_path)
+            generate_external_plugins(plugin_path)
 
         threads.extend([Thread(target=check_plugin_changes, args=("external",)), Thread(target=check_plugin_changes, args=("pro",))])
 
@@ -638,7 +689,7 @@ if __name__ == "__main__":
             threads.clear()
 
             if db_metadata["pro_plugins_changed"]:
-                threads.append(Thread(target=generate_external_plugins, kwargs={"original_path": PRO_PLUGINS_PATH}))
+                threads.append(Thread(target=generate_external_plugins, args=(PRO_PLUGINS_PATH,)))
             if db_metadata["external_plugins_changed"]:
                 threads.append(Thread(target=generate_external_plugins))
 
@@ -679,19 +730,6 @@ if __name__ == "__main__":
         RUN_JOBS_ONCE = True
         CHANGES = []
 
-        def send_nginx_configs():
-            LOGGER.info(f"Sending {join(sep, 'etc', 'nginx')} folder ...")
-            ret = SCHEDULER.send_files(join(sep, "etc", "nginx"), "/confs")
-            if not ret:
-                LOGGER.error("Sending nginx configs failed, configuration will not work as expected...")
-
-        def send_nginx_cache():
-            LOGGER.info(f"Sending {CACHE_PATH} folder ...")
-            if not SCHEDULER.send_files(CACHE_PATH, "/cache"):
-                LOGGER.error(f"Error while sending {CACHE_PATH} folder")
-            else:
-                LOGGER.info(f"Successfully sent {CACHE_PATH} folder")
-
         changed_plugins = []
         old_changes = {}
 
@@ -722,7 +760,7 @@ if __name__ == "__main__":
                         "--templates",
                         join(sep, "usr", "share", "bunkerweb", "confs"),
                         "--output",
-                        join(sep, "etc", "nginx"),
+                        CONFIG_PATH.as_posix(),
                         "--variables",
                         str(SCHEDULER_TMP_ENV_PATH),
                     ]
@@ -746,6 +784,7 @@ if __name__ == "__main__":
                         LOGGER.warning("No BunkerWeb instance found, skipping nginx configs sending ...")
 
             try:
+                failed = False
                 if SCHEDULER.apis:
                     # send cache
                     thread = Thread(target=send_nginx_cache)
@@ -755,10 +794,7 @@ if __name__ == "__main__":
                     for thread in threads:
                         thread.join()
 
-                    if SCHEDULER.send_to_apis("POST", "/reload"):
-                        LOGGER.info("Successfully reloaded nginx")
-                    else:
-                        LOGGER.error("Error while reloading nginx")
+                    failed = not SCHEDULER.send_to_apis("POST", "/reload")
                 elif INTEGRATION == "Linux":
                     # Reload nginx
                     LOGGER.info("Reloading nginx ...")
@@ -770,14 +806,47 @@ if __name__ == "__main__":
                         check=False,
                         stdout=PIPE,
                     )
-                    if proc.returncode == 0:
-                        LOGGER.info("Successfully sent reload signal to nginx")
-                    else:
-                        LOGGER.error(
-                            f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}"
-                        )
+                    failed = proc.returncode != 0
                 else:
-                    LOGGER.warning("No BunkerWeb instance found, skipping nginx reload ...")
+                    LOGGER.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
+
+                try:
+                    SCHEDULER.db.set_failover(failed)
+                except BaseException as e:
+                    LOGGER.error(f"Error while setting failover to true in the database: {e}")
+
+                if failed:
+                    LOGGER.error("Error while reloading bunkerweb, failing over to last working configuration ...")
+                    if (
+                        not FAILOVER_PATH.joinpath("config").is_dir()
+                        or not FAILOVER_PATH.joinpath("custom_configs").is_dir()
+                        or not FAILOVER_PATH.joinpath("cache").is_dir()
+                    ):
+                        LOGGER.error("No failover configuration found, ignoring failover ...")
+                    else:
+                        # Failover to last working configuration
+                        if SCHEDULER.apis:
+                            tmp_threads = [
+                                Thread(target=send_nginx_configs, args=(FAILOVER_PATH.joinpath("config"),)),
+                                Thread(target=send_nginx_cache, args=(FAILOVER_PATH.joinpath("cache"),)),
+                                Thread(target=send_nginx_custom_configs, args=(FAILOVER_PATH.joinpath("custom_configs"),)),
+                            ]
+                            for thread in tmp_threads:
+                                thread.start()
+
+                            for thread in tmp_threads:
+                                thread.join()
+
+                        SCHEDULER.send_to_apis("POST", "/reload")
+                else:
+                    LOGGER.info("Successfully reloaded bunkerweb")
+                    # Update the failover path with the working configuration
+                    rmtree(FAILOVER_PATH, ignore_errors=True)
+                    FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
+                    copytree(CONFIG_PATH, FAILOVER_PATH.joinpath("config"))
+                    copytree(CUSTOM_CONFIGS_PATH, FAILOVER_PATH.joinpath("custom_configs"))
+                    copytree(CACHE_PATH, FAILOVER_PATH.joinpath("cache"))
+                    Thread(target=JOB.cache_dir, args=(FAILOVER_PATH,), kwargs={"job_name": "failover-backup"}).start()
             except:
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
@@ -812,6 +881,8 @@ if __name__ == "__main__":
 
             if not HEALTHY_PATH.is_file():
                 HEALTHY_PATH.write_text(datetime.now().isoformat(), encoding="utf-8")
+
+            APPLYING_CHANGES.clear()
 
             # infinite schedule for the jobs
             LOGGER.info("Executing job scheduler ...")
@@ -922,6 +993,7 @@ if __name__ == "__main__":
                     sleep(5)
 
             if NEED_RELOAD:
+                APPLYING_CHANGES.set()
                 LOGGER.debug(f"Changes: {changes}")
                 SCHEDULER.try_database_readonly(force=True)
                 CHANGES.clear()
@@ -938,12 +1010,12 @@ if __name__ == "__main__":
 
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")
-                    generate_external_plugins(SCHEDULER.db.get_plugins(_type="external", with_data=True))
+                    generate_external_plugins()
                     SCHEDULER.update_jobs()
 
                 if PRO_PLUGINS_NEED_GENERATION:
                     CHANGES.append("pro_plugins")
-                    generate_external_plugins(SCHEDULER.db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
+                    generate_external_plugins(PRO_PLUGINS_PATH)
                     SCHEDULER.update_jobs()
 
                 if CONFIG_NEED_GENERATION:

@@ -1,3 +1,7 @@
+/* The code comes from https://portal.ampl.com/~dmg/netlib/fp/dtoa.c
+ * Go to https://portal.ampl.com/~dmg/netlib/fp/changes for the detailed changes.
+ */
+
 /****************************************************************
  *
  * The author of this software is David M. Gay.
@@ -1533,12 +1537,18 @@ ThInfo {
 set_max_dtoa_threads(unsigned int n)
 {
 	size_t L;
+	ThInfo *newTI1;
 
 	if (n > maxthreads) {
 		L = n*sizeof(ThInfo);
 		if (TI1) {
-			TI1 = (ThInfo*)REALLOC(TI1, L);
-			memset(TI1 + maxthreads, 0, (n-maxthreads)*sizeof(ThInfo));
+			newTI1 = (ThInfo*)REALLOC(TI1, L);
+			if (newTI1) {
+				TI1 = newTI1;
+				memset(TI1 + maxthreads, 0, (n-maxthreads)*sizeof(ThInfo));
+				}
+			else
+				return;
 			}
 		else {
 			TI1 = (ThInfo*)MALLOC(L);
@@ -1871,7 +1881,7 @@ mult(Bigint *a, Bigint *b MTd)
 #else
 #ifdef Pack_32
 	for(; xb < xbe; xb++, xc0++) {
-		if (y = *xb & 0xffff) {
+		if ((y = *xb & 0xffff)) {
 			x = xa;
 			xc = xc0;
 			carry = 0;
@@ -1885,7 +1895,7 @@ mult(Bigint *a, Bigint *b MTd)
 				while(x < xae);
 			*xc = carry;
 			}
-		if (y = *xb >> 16) {
+		if ((y = *xb >> 16)) {
 			x = xa;
 			xc = xc0;
 			carry = 0;
@@ -2718,13 +2728,14 @@ enum {	/* rounding values: same as FLT_ROUNDS */
 	};
 
  void
-gethex( const char **sp, U *rvp, int rounding, int sign MTd)
+gethex(const char **sp, U *rvp, int rounding, int sign MTd)
 {
 	Bigint *b;
+	char d;
 	const unsigned char *decpt, *s0, *s, *s1;
 	Long e, e1;
 	ULong L, lostbits, *x;
-	int big, denorm, esign, havedig, k, n, nbits, up, zret;
+	int big, denorm, esign, havedig, k, n, nb, nbits, nz, up, zret;
 #ifdef IBM
 	int j;
 #endif
@@ -2742,6 +2753,9 @@ gethex( const char **sp, U *rvp, int rounding, int sign MTd)
 #endif
 #endif /*}}*/
 		};
+#ifdef IEEE_Arith
+	int check_denorm = 0;
+#endif
 #ifdef USE_LOCALE
 	int i;
 #ifdef NO_LOCALE_CACHE
@@ -2893,7 +2907,7 @@ gethex( const char **sp, U *rvp, int rounding, int sign MTd)
 		k++;
 	b = Balloc(k MTa);
 	x = b->x;
-	n = 0;
+	havedig = n = nz = 0;
 	L = 0;
 #ifdef USE_LOCALE
 	for(i = 0; decimalpoint[i+1]; ++i);
@@ -2908,22 +2922,28 @@ gethex( const char **sp, U *rvp, int rounding, int sign MTd)
 		if (*--s1 == '.')
 			continue;
 #endif
+		if ((d = hexdig[*s1]))
+			havedig = 1;
+		else if (!havedig) {
+			e += 4;
+			continue;
+			}
 		if (n == ULbits) {
 			*x++ = L;
 			L = 0;
 			n = 0;
 			}
-		L |= (hexdig[*s1] & 0x0f) << n;
+		L |= (d & 0x0f) << n;
 		n += 4;
 		}
 	*x++ = L;
 	b->wds = n = x - b->x;
-	n = ULbits*n - hi0bits(L);
+	nb = ULbits*n - hi0bits(L);
 	nbits = Nbits;
 	lostbits = 0;
 	x = b->x;
-	if (n > nbits) {
-		n -= nbits;
+	if (nb > nbits) {
+		n = nb - nbits;
 		if (any_on(b,n)) {
 			lostbits = 1;
 			k = n - 1;
@@ -2936,8 +2956,8 @@ gethex( const char **sp, U *rvp, int rounding, int sign MTd)
 		rshift(b, n);
 		e += n;
 		}
-	else if (n < nbits) {
-		n = nbits - n;
+	else if (nb < nbits) {
+		n = nbits - nb;
 		b = lshift(b, n MTa);
 		e -= n;
 		x = b->x;
@@ -2992,12 +3012,49 @@ gethex( const char **sp, U *rvp, int rounding, int sign MTd)
 			return;
 			}
 		k = n - 1;
+#ifdef IEEE_Arith
+		if (!k) {
+			switch(rounding) {
+			  case Round_near:
+				if (((b->x[0] & 3) == 3) || (lostbits && (b->x[0] & 1))) {
+					multadd(b, 1, 1 MTa);
+ emin_check:
+					if (b->x[1] == (1 << (Exp_shift + 1))) {
+						rshift(b,1);
+						e = emin;
+						goto normal;
+						}
+					}
+				break;
+			  case Round_up:
+				if (!sign && (lostbits || (b->x[0] & 1))) {
+ incr_denorm:
+					multadd(b, 1, 2 MTa);
+					check_denorm = 1;
+					lostbits = 0;
+					goto emin_check;
+					}
+				break;
+			  case Round_down:
+				if (sign && (lostbits || (b->x[0] & 1)))
+					goto incr_denorm;
+				break;
+			  }
+			}
+#endif
 		if (lostbits)
 			lostbits = 1;
 		else if (k > 0)
 			lostbits = any_on(b,k);
+#ifdef IEEE_Arith
+		else if (check_denorm)
+			goto no_lostbits;
+#endif
 		if (x[k>>kshift] & 1 << (k & kmask))
 			lostbits |= 2;
+#ifdef IEEE_Arith
+ no_lostbits:
+#endif
 		nbits -= n;
 		rshift(b,n);
 		e = emin;
@@ -3022,16 +3079,9 @@ gethex( const char **sp, U *rvp, int rounding, int sign MTd)
 			k = b->wds;
 			b = increment(b MTa);
 			x = b->x;
-			if (denorm) {
-#if 0
-				if (nbits == Nbits - 1
-				 && x[nbits >> kshift] & 1 << (nbits & kmask))
-					denorm = 0; /* not currently used */
-#endif
-				}
-			else if (b->wds > k
+			if (!denorm && (b->wds > k
 			 || ((n = nbits & kmask) !=0
-			     && hi0bits(x[k-1]) < 32-n)) {
+			     && hi0bits(x[k-1]) < 32-n))) {
 				rshift(b,1);
 				if (++e > Emax)
 					goto ovfl;
@@ -3041,8 +3091,10 @@ gethex( const char **sp, U *rvp, int rounding, int sign MTd)
 #ifdef IEEE_Arith
 	if (denorm)
 		word0(rvp) = b->wds > 1 ? b->x[1] & ~0x100000 : 0;
-	else
+	else {
+ normal:
 		word0(rvp) = (b->x[1] & ~0x100000) | ((e + 0x3ff + 52) << 20);
+		}
 	word1(rvp) = b->x[0];
 #endif
 #ifdef IBM
@@ -3409,6 +3461,7 @@ retlow1:
 		if ((j = ((word0(rv) & Exp_mask) >> Exp_shift) - bc->scale) <= 0) {
 			i = 1 - j;
 			if (i <= 31) {
+				/* cppcheck-suppress integerOverflowCond */
 				if (word1(rv) & (0x1 << i))
 					goto odd;
 				}
@@ -3619,10 +3672,11 @@ fpconv_strtod(const char *s00, char **se)
 				c = *++s;
 			if (c > '0' && c <= '9') {
 				L = c - '0';
-				s1 = s;
-				while((c = *++s) >= '0' && c <= '9')
-					L = 10*L + c - '0';
-				if (s - s1 > 8 || L > 19999)
+				while((c = *++s) >= '0' && c <= '9') {
+					if (L <= 19999)
+						L = 10*L + c - '0';
+					}
+				if (L > 19999)
 					/* Avoid confusion from exponents
 					 * so large that e might overflow.
 					 */
@@ -4884,6 +4938,7 @@ nrv_alloc(const char *s, char *s0, size_t s0len, char **rve, int n MTd)
 		s0 = rv_alloc(n MTa);
 	else if (s0len <= n) {
 		rv = 0;
+		/* cppcheck-suppress nullPointerArithmetic */
 		t = rv + n;
 		goto rve_chk;
 		}
@@ -5237,9 +5292,11 @@ dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve, char
 #ifndef SET_INEXACT
 #ifdef Check_FLT_ROUNDS
 	try_quick = Rounding == 1;
+#else
+	try_quick = 1;
 #endif
 #endif /*SET_INEXACT*/
-#endif
+#endif /*USE_BF96*/
 
 	if (mode > 5) {
 		mode -= 4;
@@ -5281,6 +5338,7 @@ dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve, char
 	else if (blen <= i) {
 		buf = 0;
 		if (rve)
+			/* cppcheck-suppress nullPointerArithmetic */
 			*rve = buf + i;
 		return buf;
 		}
@@ -5469,6 +5527,7 @@ dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve, char
 	res3 = p10->b1 * dbhi + (tv3 & 0xffffffffull);
 	res = p10->b0 * dbhi + (tv3>>32) + (res3>>32);
 	be += p10->e - 0x3fe;
+	/* cppcheck-suppress integerOverflowCond */
 	eulp = j1 = be - 54 + ulpadj;
 	if (!(res & 0x8000000000000000ull)) {
 		--be;

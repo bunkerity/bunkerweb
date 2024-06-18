@@ -31,6 +31,8 @@ Because the web UI is a web application, the recommended installation procedure 
     * Do not open the web UI on the Internet without any further restrictions
     * Apply settings listed in the [security tuning section](security-tuning.md) of the documentation
 
+    **Please note that using HTTPS in front the web UI is mandatory since version 1.5.8 of BunkerWeb.**
+
 !!! info "Multisite mode"
 
     The usage of the web UI implies enabling the [multisite mode](concepts.md#multisite-mode).
@@ -39,7 +41,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
 !!! info "Wizard"
 
-    The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`https://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
+    The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`http://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
 
 <figure markdown>
   ![Overview](assets/img/ui-wizard-account.webp){ align=center, width="350" }
@@ -70,7 +72,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address-or-fqdn/setup` URI of your server.
 
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
@@ -162,7 +164,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address-or-fqdn/setup` URI of your server.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -269,7 +271,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address-or-fqdn/setup` URI of your server.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -399,7 +401,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! tip "Accessing the setup wizard"
 
-        You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your server.
+        You can access the setup wizard by browsing the `https://your-ip-address-or-fqdn/setup` URI of your server.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -832,6 +834,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
+    - `OVERRIDE_ADMIN_CREDS` : force override the admin credentials even if we already have a user in the database (default = `no`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -953,6 +956,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
+    - `OVERRIDE_ADMIN_CREDS` : force override the admin credentials even if we already have a user in the database (default = `no`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -1088,6 +1092,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
+    - `OVERRIDE_ADMIN_CREDS` : force override the admin credentials even if we already have a user in the database (default = `no`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -1236,6 +1241,7 @@ After a successful login/password combination, you will be prompted to enter you
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
+    - `OVERRIDE_ADMIN_CREDS` : force override the admin credentials even if we already have a user in the database (default = `no`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
 
@@ -1590,6 +1596,7 @@ After a successful login/password combination, you will be prompted to enter you
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
+    OVERRIDE_ADMIN_CREDS=no
     ```
 
     Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :

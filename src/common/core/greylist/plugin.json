@@ -71,7 +71,7 @@
     "GREYLIST_IP_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
+      "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-ip-urls",
       "label": "Greylist IP/network URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
@@ -80,7 +80,7 @@
     "GREYLIST_RDNS_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
+      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-rdns-urls",
       "label": "Greylist reverse DNS URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
@@ -89,7 +89,7 @@
     "GREYLIST_ASN_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing ASN to put into the greylist.",
+      "help": "List of URLs, separated with spaces, containing ASN to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-asn-urls",
       "label": "Greylist ASN URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
@@ -98,7 +98,7 @@
     "GREYLIST_USER_AGENT_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
+      "help": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-user-agent-urls",
       "label": "Greylist User-Agent URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
@@ -107,7 +107,7 @@
     "GREYLIST_URI_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
+      "help": "List of URLs, separated with spaces, containing bad URI to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-uri-urls",
       "label": "Greylist URI URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",

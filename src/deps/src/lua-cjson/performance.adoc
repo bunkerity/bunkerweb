@@ -26,7 +26,7 @@ http://chiselapp.com/user/dhkolf/repository/dkjson/[DKJSON 2.1]::
 https://github.com/brimworks/lua-yajl[Lua YAJL 2.0]::
   - C wrapper for the YAJL library
 
-http://www.kyne.com.au/%7Emark/software/lua-cjson.php[Lua CSJON 2.0.0]::
+http://www.kyne.com.au/%7Emark/software/lua-cjson.php[Lua CJSON 2.0.0]::
   - C implementation with no dependencies on other libraries
 
 

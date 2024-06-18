@@ -947,7 +947,7 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
         return MMDB_UNKNOWN_DATABASE_FORMAT_ERROR;
     }
 
-    uint32_t value = 0;
+    uint64_t value = 0;
     uint16_t current_bit = 0;
     if (mmdb->metadata.ip_version == 6 && address_family == AF_INET) {
         value = mmdb->ipv4_start_node.node_value;
@@ -961,6 +961,7 @@ static int find_address_in_search_tree(const MMDB_s *const mmdb,
         uint8_t bit =
             1U & (address[current_bit >> 3] >> (7 - (current_bit % 8)));
 
+        // Note that value*record_info.record_length can be larger than 2**32
         record_pointer = &search_tree[value * record_info.record_length];
         if (record_pointer + record_info.record_length > mmdb->data_section) {
             return MMDB_CORRUPT_SEARCH_TREE_ERROR;

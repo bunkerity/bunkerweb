@@ -46,8 +46,12 @@ class Config:
             if not server_name:
                 continue
             for variable, value in service.items():
-                if self._db.is_setting(variable, multisite=True):
-                    config[f"{server_name}_{variable}"] = value
+                if variable.startswith("CUSTOM_CONF") or not variable.isupper():
+                    continue
+                if not self._db.is_setting(variable, multisite=True):
+                    self.__logger.warning(f"Variable {variable}: {value} is not a valid multisite setting, ignoring it")
+                    continue
+                config[f"{server_name}_{variable}"] = value
             config["SERVER_NAME"] += f" {server_name}"
         config["SERVER_NAME"] = config["SERVER_NAME"].strip()
         return config
@@ -143,6 +147,7 @@ class Config:
 
         # update instances in database
         if "instances" in changes:
+            self.__logger.debug(f"Updating instances in database: {self.__instances}")
             err = self._db.update_instances(self.__instances, "autoconf", changed=False)
             if err:
                 self.__logger.error(f"Failed to update instances: {err}")
@@ -150,6 +155,7 @@ class Config:
         # save config to database
         changed_plugins = []
         if "config" in changes:
+            self.__logger.debug(f"Saving config in database: {self.__config}")
             err = self._db.save_config(self.__config, "autoconf", changed=False)
             if isinstance(err, str):
                 success = False
@@ -158,6 +164,7 @@ class Config:
 
         # save custom configs to database
         if "custom_configs" in changes:
+            self.__logger.debug(f"Saving custom configs in database: {custom_configs}")
             err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False)
             if err:
                 success = False

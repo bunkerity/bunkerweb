@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse as dateutil_parse
-from flask import Flask, Response, flash, jsonify, redirect, render_template, request, send_file, session, url_for
+from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from hashlib import sha256
@@ -89,59 +89,67 @@ sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
 # Flask app
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
 
-PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
-app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
-app.logger = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+with app.app_context():
+    PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
+    app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
+    app.logger = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
-FLASK_SECRET = getenv("FLASK_SECRET")
+    FLASK_SECRET = getenv("FLASK_SECRET")
 
-if not FLASK_SECRET:
-    if not TMP_DIR.joinpath(".flask_secret").is_file():
-        app.logger.error("The .flask_secret file is missing")
+    if not FLASK_SECRET:
+        if not TMP_DIR.joinpath(".flask_secret").is_file():
+            app.logger.error("The .flask_secret file is missing")
+            stop(1)
+        FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
+
+    app.config["SECRET_KEY"] = FLASK_SECRET
+    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+    app.config["SESSION_COOKIE_PATH"] = "/"
+    app.config["SESSION_COOKIE_SECURE"] = True  # Required for __Host- prefix
+    app.config["SESSION_COOKIE_HTTPONLY"] = True  # Recommended for security
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Or 'Strict' for stricter settings
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
+    app.config["PREFERRED_URL_SCHEME"] = "https"
+
+    login_manager = LoginManager()
+    login_manager.session_protection = "strong"
+    login_manager.init_app(app)
+    login_manager.login_view = "login"
+    login_manager.anonymous_user = AnonymousUser
+    PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
+
+    db = Database(app.logger, ui=True, log=False)
+
+    USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+
+    bw_version = get_version()
+
+    if not TMP_DIR.joinpath(".ui.json").is_file():
+        TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
+
+    try:
+        app.config.update(
+            INSTANCES=Instances(db),
+            CONFIG=Config(db),
+            CONFIGFILES=ConfigFiles(),
+            WTF_CSRF_SSL_STRICT=False,
+            SEND_FILE_MAX_AGE_DEFAULT=86400,
+            SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
+            DB=db,
+            UI_TEMPLATES=get_ui_templates(),
+        )
+    except FileNotFoundError as e:
+        app.logger.error(repr(e), e.filename)
         stop(1)
-    FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
-app.config["SECRET_KEY"] = FLASK_SECRET
+    plugin_id_rx = re_compile(r"^[\w_-]{1,64}$")
 
-login_manager = LoginManager()
-login_manager.session_protection = "strong"
-login_manager.init_app(app)
-login_manager.login_view = "login"
-login_manager.anonymous_user = AnonymousUser
-PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
+    # Declare functions for jinja2
+    app.jinja_env.globals.update(check_settings=check_settings)
 
-db = Database(app.logger, ui=True, log=False)
-
-USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
-
-bw_version = get_version()
-
-if not TMP_DIR.joinpath(".ui.json").is_file():
-    TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
-
-try:
-    app.config.update(
-        INSTANCES=Instances(db),
-        CONFIG=Config(db),
-        CONFIGFILES=ConfigFiles(),
-        WTF_CSRF_SSL_STRICT=False,
-        SEND_FILE_MAX_AGE_DEFAULT=86400,
-        SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
-        DB=db,
-        UI_TEMPLATES=get_ui_templates(),
-    )
-except FileNotFoundError as e:
-    app.logger.error(repr(e), e.filename)
-    stop(1)
-
-plugin_id_rx = re_compile(r"^[\w_-]{1,64}$")
-
-# Declare functions for jinja2
-app.jinja_env.globals.update(check_settings=check_settings)
-
-# CSRF protection
-csrf = CSRFProtect()
-csrf.init_app(app)
+    # CSRF protection
+    csrf = CSRFProtect()
+    csrf.init_app(app)
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
@@ -212,7 +220,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     elif operation == "restart":
         operation = app.config["INSTANCES"].restart_instance(args[0])
     elif not error:
-        operation = "The scheduler will be in charge of reloading the instances."
+        operation = "The scheduler will be in charge of applying the changes."
 
     if operation:
         if isinstance(operation, list):
@@ -360,14 +368,28 @@ def inject_variables():
     ui_data = get_ui_data()
     metadata = app.config["DB"].get_metadata()
 
-    db_metadata = app.config["DB"].get_metadata()
-
-    if ui_data.get("PRO_LOADING") and not any(
+    changes_ongoing = any(
         v
-        for k, v in db_metadata.items()
+        for k, v in app.config["DB"].get_metadata().items()
         if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
-    ):
+    )
+    changes = False
+
+    if not changes_ongoing and ui_data.get("PRO_LOADING"):
         ui_data["PRO_LOADING"] = False
+        changes = True
+
+    if not changes_ongoing and metadata["failover"]:
+        flash(
+            "The last changes could not be applied because it creates a configuration error on NGINX, please check the logs for more information. The configured fell back to the last working one.",
+            "error",
+        )
+    elif not changes_ongoing and not metadata["failover"] and ui_data.get("CONFIG_CHANGED", False):
+        flash("The last changes have been applied successfully.", "success")
+        ui_data["CONFIG_CHANGED"] = False
+        changes = True
+
+    if changes:
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
@@ -424,8 +446,7 @@ def handle_csrf_error(_):
     :param e: The exception object
     :return: A template with the error message and a 401 status code.
     """
-    session.clear()
-    logout_user()
+    logout()
     flash("Wrong CSRF token !", "error")
     if not current_user:
         return render_template("setup.html"), 403
@@ -434,11 +455,16 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
+    ui_data = get_ui_data()
+
+    if ui_data.get("SERVER_STOPPING", False):
+        response = make_response(jsonify({"message": "Server is shutting down, try again later."}), 503)
+        response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
+        return response
+
     app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
 
     if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
-        ui_data = get_ui_data()
-
         if (
             app.config["DB"].database_uri
             and app.config["DB"].readonly
@@ -523,7 +549,7 @@ def check():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
-    db_config = app.config["CONFIG"].get_config(methods=False)
+    db_config = app.config["CONFIG"].get_config(methods=False, filtered_settings=("SERVER_NAME", "USE_UI", "UI_HOST"))
 
     for server_name in db_config["SERVER_NAME"].split(" "):
         if db_config.get(f"{server_name}_USE_UI", "no") == "yes":
@@ -620,6 +646,11 @@ def setup():
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
         random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}",
     )
+
+
+@app.route("/setup/loading", methods=["GET"])
+def setup_loading():
+    return render_template("setup_loading.html")
 
 
 @app.route("/totp", methods=["GET", "POST"])
@@ -798,7 +829,7 @@ def home():
     if r and r.status_code == 200:
         remote_version = basename(r.url).strip().replace("v", "")
 
-    config = app.config["CONFIG"].get_config(with_drafts=True)
+    config = app.config["CONFIG"].get_config(with_drafts=True, filtered_settings=("SERVER_NAME",))
     instances = app.config["INSTANCES"].get_instances()
 
     instance_health_count = 0
@@ -888,9 +919,9 @@ def account():
             variable = {}
             variable["PRO_LICENSE_KEY"] = request.form["license"]
 
-            error = app.config["CONFIG"].check_variables(variable)
+            variable = app.config["CONFIG"].check_variables(variable, {"PRO_LICENSE_KEY": request.form["license"]})
 
-            if error:
+            if not variable:
                 return redirect_flash_error("The license key variable checks returned error", "account", True)
 
             # Force job to contact PRO API
@@ -914,6 +945,7 @@ def account():
 
             ui_data = get_ui_data()
             ui_data["PRO_LOADING"] = True
+            ui_data["CONFIG_CHANGED"] = True
 
             if any(
                 v
@@ -949,8 +981,7 @@ def account():
 
             username = request.form["admin_username"]
 
-            session.clear()
-            logout_user()
+            logout()
 
         if request.form["operation"] == "password":
 
@@ -967,8 +998,7 @@ def account():
 
             password = request.form["admin_password"]
 
-            session.clear()
-            logout_user()
+            logout()
 
         if request.form["operation"] == "totp":
 
@@ -1153,7 +1183,7 @@ def services():
         if "SERVER_NAME" not in variables:
             variables["SERVER_NAME"] = variables["OLD_SERVER_NAME"]
 
-        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
+        config = app.config["DB"].get_config(methods=True, with_drafts=True)
         server_name = variables["SERVER_NAME"].split(" ")[0]
         was_draft = config.get(f"{server_name}_IS_DRAFT", {"value": "no"})["value"] == "yes"
         operation = request.form["operation"]
@@ -1187,22 +1217,15 @@ def services():
             del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
-            for variable, value in deepcopy(variables).items():
-                if variable == "IS_DRAFT" or variable.endswith("SCHEMA"):
-                    del variables[variable]
-                    continue
-
-                if value == "on":
-                    value = "yes"
-                elif value == "off":
-                    value = "no"
-
+            for variable, value in variables.copy().items():
                 if (
                     variable in variables
                     and variable != "SERVER_NAME"
                     and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, {"value": None})["value"]
                 ):
                     del variables[variable]
+
+            variables = app.config["CONFIG"].check_variables(variables, config)
 
             if (
                 was_draft == is_draft
@@ -1216,25 +1239,18 @@ def services():
             elif request.form["operation"] == "new" and not variables:
                 return redirect_flash_error("The service was not created because all values had the default value.", "services", True)
 
-            error = app.config["CONFIG"].check_variables(variables)
-
-            if error:
-                error_message("The config variable checks returned error")
-
         # Delete
         if request.form["operation"] == "delete":
 
             is_request_params(["SERVER_NAME"], "services", True)
 
-            error = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]})
+            variables = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
 
-            if error:
+            if not variables:
                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
 
             if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
                 return redirect_flash_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
-
-        error = 0
 
         db_metadata = app.config["DB"].get_metadata()
 
@@ -1255,20 +1271,23 @@ def services():
                 threaded=threaded,
             )
 
+        ui_data = get_ui_data()
+
         if any(
             v
             for k, v in db_metadata.items()
             if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         ):
-            ui_data = get_ui_data()
             ui_data["RELOADING"] = True
             ui_data["LAST_RELOAD"] = time()
             Thread(target=update_services, args=(True,)).start()
-
-            with LOCK:
-                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
         else:
             update_services()
+
+        ui_data["CONFIG_CHANGED"] = True
+
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         message = ""
 
@@ -1283,7 +1302,7 @@ def services():
 
     # Display services
     services = []
-    global_config = app.config["CONFIG"].get_config(with_drafts=True)
+    global_config = app.config["DB"].get_config(methods=True, with_drafts=True)
     service_names = global_config["SERVER_NAME"]["value"].split(" ")
     for service in service_names:
         service_settings = []
@@ -1342,29 +1361,18 @@ def global_config():
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(methods=True, with_drafts=True)
+        config = app.config["DB"].get_config(methods=True, with_drafts=True)
         services = config["SERVER_NAME"]["value"].split(" ")
         for variable, value in variables.copy().items():
-            if variable in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "SERVER_NAME", "IS_LOADING", "IS_DRAFT") or variable.endswith("SCHEMA"):
-                del variables[variable]
-                continue
-
-            if value == "on":
-                value = "yes"
-            elif value == "off":
-                value = "no"
-
             setting = config.get(variable, {"value": None, "global": True})
             if setting["global"] and value == setting["value"]:
                 del variables[variable]
+                continue
+
+        variables = app.config["CONFIG"].check_variables(variables, config)
 
         if not variables:
             return redirect_flash_error("The global configuration was not edited because no values were changed.", "global_config", True)
-
-        error = app.config["CONFIG"].check_variables(variables)
-
-        if error:
-            return redirect_flash_error("The global configuration variable checks returned error", "global_config", True)
 
         for variable, value in variables.copy().items():
             for service in services:
@@ -1395,6 +1403,8 @@ def global_config():
         else:
             update_global_config()
 
+        ui_data["CONFIG_CHANGED"] = True
+
         with LOCK:
             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
@@ -1411,7 +1421,7 @@ def global_config():
         )
 
     # Display global config
-    global_config = app.config["CONFIG"].get_config(global_only=True)
+    global_config = app.config["DB"].get_config(global_only=True, methods=True)
     return render_template("global_config.html", global_config=global_config, dumped_global_config=dumps(global_config))
 
 
@@ -1518,6 +1528,11 @@ def configs():
             app.logger.error(f"Could not save custom configs: {error}")
             return redirect_flash_error("Couldn't save custom configs", "configs", True)
 
+        ui_data = get_ui_data()
+        ui_data["CONFIG_CHANGED"] = True
+        with LOCK:
+            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
         flash(operation)
 
         return redirect(url_for("loading", next=url_for("configs")))
@@ -1528,7 +1543,7 @@ def configs():
             path_to_dict(
                 join(sep, "etc", "bunkerweb", "configs"),
                 db_data=db_configs,
-                services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
+                services=app.config["CONFIG"].get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
     )
@@ -1949,7 +1964,7 @@ def custom_plugin(plugin: str):
         if plugin_id is None:
             return error_message("Plugin not found"), 404
 
-        config = app.config["CONFIG"].get_config(methods=False)
+        config = app.config["DB"].get_config()
 
         # Check if we are using metrics
         for service in config.get("SERVER_NAME", "").split(" "):
@@ -2058,7 +2073,7 @@ def cache():
                 join(sep, "var", "cache", "bunkerweb"),
                 is_cache=True,
                 db_data=app.config["DB"].get_jobs_cache_files(),
-                services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
+                services=app.config["CONFIG"].get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
     )
@@ -2161,7 +2176,11 @@ def logs_linux():
         error_type = (
             "error"
             if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
-            else (("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message")))
+            else (
+                "emerg"
+                if "[emerg]" in log_lower
+                else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+            )
         )
 
         logs.append(
@@ -2290,7 +2309,11 @@ def logs_container(container_id):
                 "type": (
                     "error"
                     if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
-                    else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+                    else (
+                        "emerg"
+                        if "[emerg]" in log_lower
+                        else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+                    )
                 ),
             }
         )
@@ -2338,7 +2361,25 @@ def bans():
         return redirect_flash_error("Database is in read-only mode", "bans")
 
     redis_client = None
-    db_config = app.config["CONFIG"].get_config(methods=False)
+    db_config = app.config["CONFIG"].get_config(
+        global_only=True,
+        methods=False,
+        filtered_settings=(
+            "USE_REDIS",
+            "REDIS_HOST",
+            "REDIS_PORT",
+            "REDIS_DB",
+            "REDIS_TIMEOUT",
+            "REDIS_KEEPALIVE_POOL",
+            "REDIS_SSL",
+            "REDIS_USERNAME",
+            "REDIS_PASSWORD",
+            "REDIS_SENTINEL_HOSTS",
+            "REDIS_SENTINEL_USERNAME",
+            "REDIS_SENTINEL_PASSWORD",
+            "REDIS_SENTINEL_MASTER",
+        ),
+    )
     use_redis = db_config.get("USE_REDIS", "no") == "yes"
     redis_host = db_config.get("REDIS_HOST")
     if use_redis and redis_host:

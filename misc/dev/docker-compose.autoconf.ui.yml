@@ -110,6 +110,7 @@ services:
       - "bunkerweb.REVERSE_PROXY_URL=/admin"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
       - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+      - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
 
   bw-db:
     image: mariadb:11

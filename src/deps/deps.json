@@ -71,15 +71,15 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.9.1",
+      "name": "libmaxminddb v1.10.0",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "e26013e1d2b57eff0ed22b7364270358adb72205"
+      "commit": "7acfe43a72a5043d01cc3dd6429005acdf812cb3"
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.12",
+      "name": "lua-cjson v2.1.0.14",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "881accc8fadca5ec02aa34d364df2a1aa25cd2f9"
+      "commit": "f95cd9ea1e39221a36818772eb85f05b4164bbb1"
     },
     {
       "id": "lua-ffi-zlib",

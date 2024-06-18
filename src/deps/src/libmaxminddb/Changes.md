@@ -1,3 +1,15 @@
+## 1.10.0 - 2024-06-10
+
+* When building with CMake, it is now possible to disable the building
+  of binaries (e.g., `mmdblookup`) with the `MAXMINDDB_BUILD_BINARIES`
+  option and the install target generation with the `MAXMINDDB_INSTALL`
+  option. Pull request by Seena Fallah. GitHub #342.
+* CMake now makes greater use of GNUInstallDirs. Pull request by Maximilian
+  Downey Twiss. GitHub #346.
+* The reader can now lookup records on a database with a search tree
+  that is greater than 4 gigabytes without sometimes returning erroneous
+  results due to an integer overflow.
+
 ## 1.9.1 - 2024-01-09
 
 * `SSIZE_MAX` is now defined conditionally on Windows. The 1.9.0
@@ -230,7 +242,7 @@
   code to think it had found valid metadata when none existed. In addition,
   this could lead to an attempt to read past the end of the database
   entirely. Finally, if there are multiple metadata markers in the database,
-  we treat the final one as the start of the metdata, instead of the first.
+  we treat the final one as the start of the metadata, instead of the first.
   Implemented by Tobias Stoeckmann. GitHub #102.
 * Don't attempt to mmap a file that is too large to be mmapped on the
   system. Implemented by Tobias Stoeckmann. GitHub #101.
