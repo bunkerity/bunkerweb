@@ -1272,6 +1272,9 @@ class Database:
                         session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete()
                         session.query(Custom_configs).filter(Custom_configs.service_id.in_(missing_ids)).delete()
                         session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(missing_ids)).delete()
+                        session.query(Metadata).filter_by(id=1).update(
+                            {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now()}
+                        )
                         changed_services = True
 
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}

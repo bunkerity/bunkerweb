@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse as dateutil_parse
 from docker import DockerClient
 from docker.errors import NotFound as docker_NotFound, APIError as docker_APIError, DockerException
-from flask import Flask, Response, flash, jsonify, redirect, render_template, request, send_file, session, url_for
+from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from hashlib import sha256
@@ -212,14 +212,6 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
             operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
         elif operation == "delete":
             operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
-
-        if not error:
-            if was_draft != is_draft or not is_draft:
-                # update changes in db
-                ret = app.config["DB"].checked_changes(["config", "custom_configs"], value=True)
-                if ret:
-                    app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
-                    ui_data["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
     elif method == "global_config":
         operation, error = app.config["CONFIG"].edit_global_conf(args[0])
 
@@ -458,11 +450,16 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
+    ui_data = get_ui_data()
+
+    if ui_data.get("SERVER_STOPPING", False):
+        response = make_response(jsonify({"message": "Server is shutting down, try again later."}), 503)
+        response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
+        return response
+
     app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
 
     if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
-        ui_data = get_ui_data()
-
         if (
             app.config["DB"].database_uri
             and app.config["DB"].readonly
@@ -644,6 +641,11 @@ def setup():
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
         random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}",
     )
+
+
+@app.route("/setup/loading", methods=["GET"])
+def setup_loading():
+    return render_template("setup_loading.html")
 
 
 @app.route("/totp", methods=["GET", "POST"])
