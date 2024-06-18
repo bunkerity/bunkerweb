@@ -1,4 +1,5 @@
 <script setup>
+import { v4 as uuidv4 } from "uuid";
 /** 
   @name Icons/Plus.vue
   @description This component is a svg icon representing addition (+).
@@ -22,18 +23,21 @@ const props = defineProps({
     default: "info",
   },
 });
+
+const id = uuidv4();
 </script>
 
 <template>
   <svg
     data-svg="plus"
     role="img"
-    :aria-description="$t('icons_plus_desc')"
+    :aria-labelledby="id"
     :class="[props.iconClass, props.iconColor]"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
   >
+    <span :id="id" class="sr-only">{{ $t("icons_plus_desc") }}</span>
     <path
       fill-rule="evenodd"
       d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z"

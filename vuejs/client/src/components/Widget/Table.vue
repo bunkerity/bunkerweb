@@ -177,12 +177,12 @@ onMounted(() => {
       :containerClass="`${props.containerWrapClass} table-container-wrap`"
     >
       <table
-        :aria-labelledby="table.id"
         :aria-colcount="table.length"
         :aria-rowcount="table.rowLength"
         :class="['table', props.minWidth, props.tableClass]"
-        :aria-description="$t(table.title, table.title)"
+        :aria-labelledby="`${table.id}-title`"
       >
+        <span :id="`${table.id}-title`" class="sr-only"></span>
         <thead
           role="rowgroup"
           ref="tableHeader"

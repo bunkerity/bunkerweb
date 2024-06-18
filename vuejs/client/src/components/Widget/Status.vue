@@ -48,10 +48,10 @@ const statusDesc = computed(() => {
   <div :class="[props.statusClass, 'status-svg-container']">
     <div
       role="img"
-      :aria-description="$t(statusDesc[0], statusDesc[1])"
+      :aria-labelledby="`status-${props.id}`"
       :class="[props.status, 'status-icon']"
     ></div>
-    <p :id="`instance-status-${props.id}`" class="sr-only">
+    <p :id="`status-${props.id}`" class="sr-only">
       {{ $t(statusDesc[0], statusDesc[1]) }}
     </p>
   </div>
