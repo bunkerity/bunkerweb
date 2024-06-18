@@ -318,6 +318,7 @@ const emits = defineEmits(["inp"]);
       :popovers="props.popovers"
       :required="props.required"
       :name="props.name"
+      :id="props.id"
       :label="props.label"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"

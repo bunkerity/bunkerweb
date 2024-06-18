@@ -82,10 +82,12 @@ const props = defineProps({
   required: {
     type: Boolean,
     required: false,
+    default: false,
   },
   disabled: {
     type: Boolean,
     required: false,
+    default: false,
   },
   value: {
     type: String,
@@ -94,10 +96,12 @@ const props = defineProps({
   placeholder: {
     type: String,
     required: false,
+    default: "",
   },
   pattern: {
     type: String,
     required: false,
+    default: "(?s).*",
   },
   isClipboard: {
     type: Boolean,
@@ -107,6 +111,7 @@ const props = defineProps({
   readonly: {
     type: Boolean,
     required: false,
+    default: false,
   },
   label: {
     type: String,
@@ -120,6 +125,7 @@ const props = defineProps({
   hideLabel: {
     type: Boolean,
     required: false,
+    default: false,
   },
   containerClass: {
     type: String,
@@ -171,6 +177,7 @@ onMounted(() => {
       :required="props.required"
       :name="props.name"
       :label="props.label"
+      :id="props.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />

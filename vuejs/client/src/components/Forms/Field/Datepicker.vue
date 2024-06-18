@@ -64,11 +64,11 @@ const props = defineProps({
   },
   name: {
     type: String,
-    required: false,
+    required: true,
   },
   label: {
     type: String,
-    required: false,
+    required: true,
   },
   value: {
     type: [String, Number, Date],
@@ -117,10 +117,12 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     required: false,
+    default: false,
   },
   required: {
     type: Boolean,
     required: false,
+    default: false,
   },
   minDate: {
     type: [String, Number],
@@ -646,6 +648,7 @@ function setIndex(calendarEl, tabindex) {
       :required="props.required"
       :name="props.name"
       :label="props.label"
+      :id="props.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />

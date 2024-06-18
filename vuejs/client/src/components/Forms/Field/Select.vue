@@ -84,10 +84,12 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     required: false,
+    default: false,
   },
   required: {
     type: Boolean,
     required: false,
+    default: false,
   },
   requiredValues: {
     type: Array,
@@ -120,6 +122,7 @@ const props = defineProps({
   hideLabel: {
     type: Boolean,
     required: false,
+    default: false,
   },
   containerClass: {
     type: String,
@@ -294,6 +297,7 @@ const emits = defineEmits(["inp"]);
       :required="props.required"
       :name="props.name"
       :label="props.label"
+      :id="props.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />
