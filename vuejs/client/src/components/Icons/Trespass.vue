@@ -1,5 +1,6 @@
 <script setup>
 import { v4 as uuidv4 } from "uuid";
+import { defineProps, reactive } from "vue";
 /** 
   @name Icons/Trespass.vue
   @description This component is a svg icon representing no trespassing.

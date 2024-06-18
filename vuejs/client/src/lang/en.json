@@ -198,5 +198,5 @@
   "jobs_table_reload" : "Reload",
   "jobs_table_success" : "Success",
   "jobs_table_last_run_date" : "Last run date",
-  "jobs_table_cache" : "Cache"
+  "jobs_table_cache_downloadable" : "Cache (downloadable)"
 }

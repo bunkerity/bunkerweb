@@ -236,13 +236,13 @@ def get_jobs_list(jobs):
                 continue
 
             if k in ("cache") and len(v) > 0:
-                files = ["none"]
+                files = []
                 # loop on each cache item
                 for cache in v:
                     file_name = (
-                        f"{cache['service_id']}/{cache['file_name']}"
+                        f"{cache['file_name']} ({value['plugin_id']}) [{cache['service_id']}]"
                         if cache["service_id"]
-                        else cache["file_name"]
+                        else f"{cache['file_name']} ({value['plugin_id']})"
                     )
                     files.append(file_name)
 
@@ -257,7 +257,7 @@ def get_jobs_list(jobs):
                                 "hideLabel": True,
                                 "inpType": "select",
                                 "name": f"{key}_cache",
-                                "value": "none",
+                                "value": "download file",
                                 "values": files,
                                 "columns": {
                                     "pc": 12,
@@ -265,7 +265,7 @@ def get_jobs_list(jobs):
                                     "mobile": 12,
                                 },
                                 "overflowAttrEl": "data-table-body",
-                                "containerClass": "table",
+                                "containerClass": "table download-cache-file",
                                 "maxBtnChars": 12,
                                 "popovers": [
                                     {
@@ -320,7 +320,7 @@ def job_builder(jobs):
                             "jobs_table_reload",
                             "jobs_table_success",
                             "jobs_table_last_run_date",
-                            "jobs_table_cache",
+                            "jobs_table_cache_downloadable",
                         ],
                         "positions": [2, 2, 1, 1, 1, 2, 3],
                         "items": jobs_list,

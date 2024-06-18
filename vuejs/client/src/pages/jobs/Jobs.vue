@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, onBeforeMount, onMounted } from "vue";
 import { useGlobal } from "@utils/global.js";
-import { useForm } from "@utils/form.js";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderJobs from "@components/Builder/Jobs.vue";
 
@@ -26,9 +25,42 @@ onBeforeMount(() => {
   services.builder = data;
 });
 
+function getLastArrItem(startStr, endStr, array) {
+  return array[array.length - 1].startsWith(startStr) &&
+    array[array.length - 1].endsWith(endStr)
+    ? array.pop().replace(startStr, "").replace(endStr, "").trim()
+    : null;
+}
+
+function downloadCacheEvent() {
+  window.addEventListener(
+    "click",
+    (e) => {
+      // Case not wanted element
+      if (!e.target.hasAttribute("data-select-item")) return;
+      if (!e.target.closest("[data-table-body]")) return;
+
+      const value = e.target.getAttribute("data-setting-value");
+      // Get needed values to download the cache file
+      const values = value.split(" ");
+      // In case the last element start with "[" and end with "]", this is the serviceId
+      const serviceId = getLastArrItem("[", "]", values);
+      // In case the last element start with "(" and end with ")", this is the pluginId
+      const pluginId = getLastArrItem("(", ")", values);
+      // Merge the rest of the values and trim, this is the file name
+      const fileName = values.join(" ").trim();
+
+      window.open(
+        `${location.href}/download?plugin_id=${pluginId}&job_name=${serviceId}&file_name=${fileName}`
+      );
+    },
+    true
+  );
+}
+
 onMounted(() => {
   useGlobal();
-  useForm();
+  downloadCacheEvent();
 });
 
 // const builder = [
@@ -78,7 +110,7 @@ const builder = [
             "jobs_table_reload",
             "jobs_table_success",
             "jobs_table_last_run_date",
-            "jobs_table_cache",
+            "jobs_table_cache_downloadable",
           ],
           positions: [2, 2, 1, 1, 1, 2, 3],
           items: [
@@ -605,7 +637,8 @@ const builder = [
                 },
               },
               {
-                cache: "none default-server-cert.pem default-server-cert.key",
+                cache:
+                  "default-server-cert.pem (misc) default-server-cert.key (misc)",
                 type: "Fields",
                 data: {
                   setting: {
@@ -614,16 +647,10 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "default-server-cert_cache",
-                    value: "none",
+                    value: "download",
                     values: [
-                      "none",
-                      "default-server-cert.pem",
-                      "default-server-cert.key",
-                      "default-server-cert.key",
-                      "default-server-cert.key",
-                      "default-server-cert.key",
-                      "default-server-cert.key",
-                      "default-server-cert.key",
+                      "default-server-cert.pem (misc)",
+                      "default-server-cert.key (misc)",
                     ],
                     columns: {
                       pc: 12,
@@ -631,7 +658,7 @@ const builder = [
                       mobile: 12,
                     },
                     overflowAttrEl: "data-table-body",
-                    containerClass: "table",
+                    containerClass: "table download-cache-file",
                     maxBtnChars: 12,
                     popovers: [
                       {
@@ -796,7 +823,7 @@ const builder = [
                 },
               },
               {
-                cache: "none folder:/var/tmp/bunkerweb/failover.tgz",
+                cache: "folder:/var/tmp/bunkerweb/failover.tgz (jobs)",
                 type: "Fields",
                 data: {
                   setting: {
@@ -805,15 +832,15 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "failover-backup_cache",
-                    value: "none",
-                    values: ["none", "folder:/var/tmp/bunkerweb/failover.tgz"],
+                    value: "download",
+                    values: ["folder:/var/tmp/bunkerweb/failover.tgz (jobs)"],
                     columns: {
                       pc: 12,
                       tablet: 12,
                       mobile: 12,
                     },
                     overflowAttrEl: "data-table-body",
-                    containerClass: "table",
+                    containerClass: "table download-cache-file",
                     maxBtnChars: 12,
                     popovers: [
                       {
@@ -925,7 +952,7 @@ const builder = [
                 },
               },
               {
-                cache: "none asn.mmdb",
+                cache: "asn.mmdb (jobs)",
                 type: "Fields",
                 data: {
                   setting: {
@@ -934,15 +961,15 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "mmdb-asn_cache",
-                    value: "none",
-                    values: ["none", "asn.mmdb"],
+                    value: "download",
+                    values: ["asn.mmdb (jobs)"],
                     columns: {
                       pc: 12,
                       tablet: 12,
                       mobile: 12,
                     },
                     overflowAttrEl: "data-table-body",
-                    containerClass: "table",
+                    containerClass: "table download-cache-file",
                     maxBtnChars: 12,
                     popovers: [
                       {
@@ -1001,7 +1028,7 @@ const builder = [
                 },
               },
               {
-                cache: "none country.mmdb",
+                cache: "country.mmdb (jobs)",
                 type: "Fields",
                 data: {
                   setting: {
@@ -1010,15 +1037,15 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "mmdb-country_cache",
-                    value: "none",
-                    values: ["none", "country.mmdb"],
+                    value: "download",
+                    values: ["country.mmdb (jobs)"],
                     columns: {
                       pc: 12,
                       tablet: 12,
                       mobile: 12,
                     },
                     overflowAttrEl: "data-table-body",
-                    containerClass: "table",
+                    containerClass: "table download-cache-file",
                     maxBtnChars: 12,
                     popovers: [
                       {
@@ -1130,7 +1157,8 @@ const builder = [
                 },
               },
               {
-                cache: "none www.example.com/cert.pem www.example.com/key.pem",
+                cache:
+                  "cert.pem (selfsigned) [www.example.com] key.pem (selfsigned) [www.example.com]",
                 type: "Fields",
                 data: {
                   setting: {
@@ -1139,11 +1167,10 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "self-signed_cache",
-                    value: "none",
+                    value: "download",
                     values: [
-                      "none",
-                      "www.example.com/cert.pem",
-                      "www.example.com/key.pem",
+                      "cert.pem (selfsigned) [www.example.com]",
+                      "key.pem (selfsigned) [www.example.com]",
                     ],
                     columns: {
                       pc: 12,
@@ -1151,7 +1178,7 @@ const builder = [
                       mobile: 12,
                     },
                     overflowAttrEl: "data-table-body",
-                    containerClass: "table",
+                    containerClass: "table download-cache-file",
                     maxBtnChars: 12,
                     popovers: [
                       {

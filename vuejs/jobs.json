@@ -27,7 +27,7 @@
                         "jobs_table_reload",
                         "jobs_table_success",
                         "jobs_table_last_run_date",
-                        "jobs_table_cache"
+                        "jobs_table_cache_downloadable"
                     ],
                     "positions": [
                         2,
@@ -562,7 +562,7 @@
                                 }
                             },
                             {
-                                "cache": "none default-server-cert.pem default-server-cert.key",
+                                "cache": "default-server-cert.pem (misc) default-server-cert.key (misc)",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
@@ -571,11 +571,10 @@
                                         "hideLabel": true,
                                         "inpType": "select",
                                         "name": "default-server-cert_cache",
-                                        "value": "none",
+                                        "value": "download",
                                         "values": [
-                                            "none",
-                                            "default-server-cert.pem",
-                                            "default-server-cert.key"
+                                            "default-server-cert.pem (misc)",
+                                            "default-server-cert.key (misc)"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -583,7 +582,7 @@
                                             "mobile": 12
                                         },
                                         "overflowAttrEl": "data-table-body",
-                                        "containerClass": "table",
+                                        "containerClass": "table download-cache-file",
                                         "maxBtnChars": 12,
                                         "popovers": [
                                             {
@@ -748,7 +747,7 @@
                                 }
                             },
                             {
-                                "cache": "none folder:/var/tmp/bunkerweb/failover.tgz",
+                                "cache": "folder:/var/tmp/bunkerweb/failover.tgz (jobs)",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
@@ -757,10 +756,9 @@
                                         "hideLabel": true,
                                         "inpType": "select",
                                         "name": "failover-backup_cache",
-                                        "value": "none",
+                                        "value": "download",
                                         "values": [
-                                            "none",
-                                            "folder:/var/tmp/bunkerweb/failover.tgz"
+                                            "folder:/var/tmp/bunkerweb/failover.tgz (jobs)"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -768,7 +766,7 @@
                                             "mobile": 12
                                         },
                                         "overflowAttrEl": "data-table-body",
-                                        "containerClass": "table",
+                                        "containerClass": "table download-cache-file",
                                         "maxBtnChars": 12,
                                         "popovers": [
                                             {
@@ -880,7 +878,7 @@
                                 }
                             },
                             {
-                                "cache": "none asn.mmdb",
+                                "cache": "asn.mmdb (jobs)",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
@@ -889,10 +887,9 @@
                                         "hideLabel": true,
                                         "inpType": "select",
                                         "name": "mmdb-asn_cache",
-                                        "value": "none",
+                                        "value": "download",
                                         "values": [
-                                            "none",
-                                            "asn.mmdb"
+                                            "asn.mmdb (jobs)"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -900,7 +897,7 @@
                                             "mobile": 12
                                         },
                                         "overflowAttrEl": "data-table-body",
-                                        "containerClass": "table",
+                                        "containerClass": "table download-cache-file",
                                         "maxBtnChars": 12,
                                         "popovers": [
                                             {
@@ -959,7 +956,7 @@
                                 }
                             },
                             {
-                                "cache": "none country.mmdb",
+                                "cache": "country.mmdb (jobs)",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
@@ -968,10 +965,9 @@
                                         "hideLabel": true,
                                         "inpType": "select",
                                         "name": "mmdb-country_cache",
-                                        "value": "none",
+                                        "value": "download",
                                         "values": [
-                                            "none",
-                                            "country.mmdb"
+                                            "country.mmdb (jobs)"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -979,7 +975,7 @@
                                             "mobile": 12
                                         },
                                         "overflowAttrEl": "data-table-body",
-                                        "containerClass": "table",
+                                        "containerClass": "table download-cache-file",
                                         "maxBtnChars": 12,
                                         "popovers": [
                                             {
@@ -1091,7 +1087,7 @@
                                 }
                             },
                             {
-                                "cache": "none www.example.com/cert.pem www.example.com/key.pem",
+                                "cache": "cert.pem (selfsigned) [www.example.com] key.pem (selfsigned) [www.example.com]",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
@@ -1100,11 +1096,10 @@
                                         "hideLabel": true,
                                         "inpType": "select",
                                         "name": "self-signed_cache",
-                                        "value": "none",
+                                        "value": "download",
                                         "values": [
-                                            "none",
-                                            "www.example.com/cert.pem",
-                                            "www.example.com/key.pem"
+                                            "cert.pem (selfsigned) [www.example.com]",
+                                            "key.pem (selfsigned) [www.example.com]"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -1112,7 +1107,7 @@
                                             "mobile": 12
                                         },
                                         "overflowAttrEl": "data-table-body",
-                                        "containerClass": "table",
+                                        "containerClass": "table download-cache-file",
                                         "maxBtnChars": 12,
                                         "popovers": [
                                             {
