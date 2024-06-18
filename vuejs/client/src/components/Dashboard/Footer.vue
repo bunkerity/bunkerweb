@@ -10,7 +10,6 @@ const { t } = useI18n();
   You have all the links to the main website, the documentation, the privacy policy, the blog, the license and the sitemap.
 */
 
-
 const items = [
   {
     href: "https://www.bunkerweb.io?utm_campaign=self&utm_source=ui",
@@ -48,7 +47,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <footer role="contentinfo" class="footer-container">
+  <footer class="footer-container">
     <div class="footer-wrap">
       <div class="footer-items-container">
         <div class="footer-item-right-container">

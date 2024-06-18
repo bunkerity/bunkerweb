@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, onMounted, ref } from "vue";
 import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 
 /** 
@@ -56,6 +56,13 @@ const props = defineProps({
     required: false,
   },
 });
+
+const labelEl = ref(null);
+
+onMounted(() => {
+  // Check if label is child of a form
+  if (!labelEl.value.closest("form")) labelEl.value.removeAttribute("for");
+});
 </script>
 
 <template>
@@ -70,6 +77,7 @@ const props = defineProps({
   >
     <div>
       <label
+        ref="labelEl"
         :class="[props.label ? '' : 'sr-only']"
         :for="props.name"
         class="input-header-label"

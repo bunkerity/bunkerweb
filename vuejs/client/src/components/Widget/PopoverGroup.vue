@@ -25,17 +25,11 @@ import { v4 as uuidv4 } from "uuid";
       },
     ],
   }
-  @param {string} [id=uuidv4()] - Unique id of the popover group
   @param {string} [flexClass="justify-center align-center"] - Additional class for the flex container
   @param {array} popovers - List of popovers to display. Popover component is used.
 */
 
 const props = defineProps({
-  id: {
-    type: String,
-    required: false,
-    default: uuidv4(),
-  },
   popovers: {
     type: Array,
     required: true,

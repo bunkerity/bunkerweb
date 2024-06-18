@@ -282,7 +282,7 @@ body {
 }
 
 .close.select-dropdown-container {
-  @apply -z-10 fixed opacity-0 pointer-events-none;
+  @apply -z-10 hidden;
 }
 
 .select-dropdown-btn {
@@ -595,7 +595,7 @@ body {
 }
 
 .menu-account-title {
-  @apply mb-0.5 tracking-normal text-primary text-center text-lg break-words whitespace-normal dark:text-gray-300;
+  @apply font-bold mb-0.5 tracking-normal text-primary text-center text-lg break-words whitespace-normal dark:text-gray-300;
 }
 
 .menu-account-link {
@@ -948,6 +948,10 @@ body {
 
 .lang-switch-list {
   @apply max-h-[300px] overflow-auto;
+}
+
+.lang-switch-item {
+  @apply block;
 }
 
 /* STATUS COMPONENT */

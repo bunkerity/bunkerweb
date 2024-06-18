@@ -176,41 +176,29 @@ onMounted(() => {
     <Container
       :containerClass="`${props.containerWrapClass} table-container-wrap`"
     >
+      <span :id="`${table.id}-title`" class="sr-only"></span>
       <table
-        :aria-colcount="table.length"
-        :aria-rowcount="table.rowLength"
         :class="['table', props.minWidth, props.tableClass]"
         :aria-labelledby="`${table.id}-title`"
       >
-        <span :id="`${table.id}-title`" class="sr-only"></span>
         <thead
-          role="rowgroup"
           ref="tableHeader"
           class="table-header"
           :style="{ paddingRight: table.overflow }"
-          :aria-rowindex="1"
         >
           <tr
             v-for="(head, id) in props.header"
-            :aria-colindex="id + 1"
             :class="['table-header-item', `col-span-${props.positions[id]}`]"
           >
-            <th role="columnheader">
+            <th>
               {{ $t(head, head) }}
             </th>
           </tr>
         </thead>
-        <tbody
-          data-table-body
-          role="rowgroup"
-          ref="tableBody"
-          class="table-content"
-        >
+        <tbody data-table-body ref="tableBody" class="table-content">
           <tr
             v-for="rowId in table.rowLength"
             :key="rowId - 1"
-            role="row"
-            :aria-rowindex="rowId"
             class="table-content-item"
           >
             <template
@@ -218,8 +206,6 @@ onMounted(() => {
               :key="col"
             >
               <td
-                :aria-colindex="id + 1"
-                role="cell"
                 :class="[
                   'table-content-item-wrap',
                   `col-span-${props.positions[id]}`,

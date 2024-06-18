@@ -275,9 +275,9 @@ onBeforeMount(() => {
         </a>
       </div>
       <div class="menu-account-title-container">
-        <h1 class="menu-account-title">
-          {{ menu.username }}
-        </h1>
+        <p class="menu-account-title">
+          {{ menu.username.substring(0, 16) }}
+        </p>
         <a
           :tabindex="
             menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
@@ -387,17 +387,17 @@ onBeforeMount(() => {
       <!-- social-->
       <ul class="menu-social-list">
         <li v-for="(item, id) in socialList" class="menu-social-list-item">
+          <span :id="`menu-social-item-${id}`" class="sr-only">
+            {{ $t(`dashboard_menu_${item.tag}_label`) }}
+          </span>
           <a
             :tabindex="
               menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
             "
             :href="item.href"
             target="_blank"
-            :aria-labelledby="`${item}-id`"
+            :aria-labelledby="`menu-social-item-${id}`"
           >
-            <span :id="`${item}-id`" class="sr-only">
-              {{ $t(`dashboard_menu_${item.tag}_label`) }}
-            </span>
             <Icons
               :iconName="item.svg"
               :iconClass="'social-svg'"

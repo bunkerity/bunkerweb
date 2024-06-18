@@ -30,7 +30,7 @@ import { onMounted } from "vue";
   <News />
   <Header />
   <!-- info -->
-  <main role="main" class="content-container">
+  <main class="content-container">
     <div class="content-wrap">
       <slot></slot>
     </div>

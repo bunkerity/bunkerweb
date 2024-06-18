@@ -135,14 +135,16 @@ onMounted(() => {
       <p v-if="news.posts.length === 0" class="news-sidebar-no-posts-content">
         {{ $t("dashboard_news_fetch_error") }}
       </p>
-      <a
+      <div
         :tabindex="news.isActive ? newsIndex : '-1'"
-        :href="`https://www.bunkerweb.io/blog/post/bunkerweb/${post.slug}?utm_campaign=self&utm_source=ui`"
         class="news-sidebar-post"
         v-for="(post, index) in news.posts"
         :key="index"
       >
-        <div>
+        <a
+          target="_blank"
+          :href="`https://www.bunkerweb.io/blog/post/bunkerweb/${post.slug}?utm_campaign=self&utm_source=ui`"
+        >
           <img
             aria-hidden="true"
             class="news-sidebar-post-img"
@@ -150,14 +152,19 @@ onMounted(() => {
             alt="image"
           />
           <span class="news-sidebar-post-title">{{ post.title }}</span>
-        </div>
+        </a>
         <div class="h-full">
-          <div class="news-sidebar-post-excerpt">
+          <a
+            target="_blank"
+            :href="`https://www.bunkerweb.io/blog/post/bunkerweb/${post.slug}?utm_campaign=self&utm_source=ui`"
+            class="news-sidebar-post-excerpt"
+          >
             {{ post.excerpt }}
-          </div>
+          </a>
           <div class="news-sidebar-post-tags-container">
             <a
               v-for="tag in post.tags"
+              target="_blank"
               :href="`https://www.bunkerweb.io/blog/tag/${tag.slug}?utm_campaign=self&utm_source=ui`"
               class="news-sidebar-post-tag"
             >
@@ -171,7 +178,7 @@ onMounted(() => {
             </span>
           </div>
         </div>
-      </a>
+      </div>
     </div>
     <!-- end news-->
 

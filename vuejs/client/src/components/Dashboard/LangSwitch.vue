@@ -27,19 +27,16 @@ onMounted(() => {
 
 <template>
   <div class="lang-switch-container">
-    <ul
-      id="switch-lang"
+    <div
       role="radiogroup"
+      id="switch-lang"
       v-show="lang.isOpen"
       class="lang-switch-list"
     >
-      <li
-        v-for="(locale, id) in $i18n.availableLocales"
-        role="radio"
-        :key="`locale-${locale}`"
-        :aria-checked="$i18n.locale === locale ? 'true' : 'false'"
-      >
+      <template v-for="(locale, id) in $i18n.availableLocales" :key="locale">
         <button
+          :class="['lang-switch-item']"
+          role="radio"
           type="button"
           :tabindex="lang.isOpen ? langIndex : '-1'"
           :aria-labelledby="`${locale}-${id}`"
@@ -50,16 +47,16 @@ onMounted(() => {
             }
           "
           aria-controls="switch-lang-text"
-          :aria-selected="$i18n.locale === locale ? 'true' : 'false'"
+          :aria-checked="$i18n.locale === locale ? 'true' : 'false'"
         >
-          <span :id="`${locale}-${id}`" class="sr-only">{{ locale }}</span>
           <span
             :aria-labelledby="`${locale}-${id}`"
             :class="[`fi fi-${locale}`]"
           ></span>
+          <span :id="`${locale}-${id}`" class="sr-only">{{ locale }}</span>
         </button>
-      </li>
-    </ul>
+      </template>
+    </div>
     <!-- current -->
     <button
       :tabindex="langIndex"

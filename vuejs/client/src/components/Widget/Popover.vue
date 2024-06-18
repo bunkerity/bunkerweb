@@ -1,8 +1,9 @@
 <script setup>
-import { reactive, ref, watch, defineProps } from "vue";
+import { reactive, ref, watch, defineProps, onMounted } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { v4 as uuidv4 } from "uuid";
 import Icons from "@components/Widget/Icons.vue";
+import { set } from "@vueuse/core";
 
 /**
   @name Widget/Popover.vue
@@ -13,7 +14,6 @@ import Icons from "@components/Widget/Icons.vue";
     iconName: "info",
     iconColor: "info",
   }
-  @param {string} [id=uuidv4()] - Unique id of the button
   @param {string} text - Content of the button. Can be a translation key or by default raw text.
   @param {string} iconName - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
   @param {string} iconColor - Color of the icon between tailwind colors
@@ -23,11 +23,6 @@ import Icons from "@components/Widget/Icons.vue";
 */
 
 const props = defineProps({
-  id: {
-    type: String,
-    required: false,
-    default: uuidv4(),
-  },
   text: {
     type: String,
     required: false,
@@ -44,7 +39,7 @@ const props = defineProps({
   tag: {
     type: String,
     required: false,
-    default: "button",
+    default: "div",
   },
   popoverClass: {
     type: String,
@@ -62,6 +57,7 @@ const props = defineProps({
 const popover = reactive({
   isOpen: false,
   isHover: false,
+  id: uuidv4(),
 });
 
 const popoverContainer = ref();
@@ -130,15 +126,36 @@ watch(popover, () => {
     window.removeEventListener("scroll", hidePopover, true);
   }
 });
+
+onMounted(() => {
+  // Close select dropdown when clicked outside element
+  window.addEventListener("click", (e) => {
+    if (
+      popover.isOpen &&
+      !popoverContainer.value.contains(e.target) &&
+      !popoverBtn.value.contains(e.target)
+    ) {
+      hidePopover();
+    }
+  });
+});
+
+onMounted(() => {
+  // random num between 0 and 100 with floats
+  const randomNum = Math.random() * 10;
+  setTimeout(() => {
+    popover.id = uuidv4();
+  }, randomNum);
+});
 </script>
 
 <template>
   <component
     ref="popoverBtn"
     :tabindex="props.tabId"
-    :aria-controls="`${props.id}-popover-text`"
+    :aria-controls="`${popover.id}-popover-text`"
     :aria-expanded="popover.isOpen ? 'true' : 'false'"
-    :aria-labelledby="`${props.id}-popover-text`"
+    :aria-labelledby="`${popover.id}-popover-text`"
     :is="props.tag"
     role="button"
     @click.prevent
@@ -156,7 +173,7 @@ watch(popover, () => {
   </component>
   <div
     ref="popoverContainer"
-    :id="`${props.id}-popover-container`"
+    :id="`${popover.id}-popover-container`"
     role="status"
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
     :class="[
@@ -166,7 +183,7 @@ watch(popover, () => {
     ]"
     :aria-description="$t('dashboard_popover_detail_desc')"
   >
-    <p :id="`${props.id}-popover-text`" class="popover-text">
+    <p :id="`${popover.id}-popover-text`" class="popover-text">
       {{ $t(props.text, props.text) }}
     </p>
   </div>

@@ -54,7 +54,7 @@ onBeforeMount(() => {
   >
     <button
       :tabindex="feedbackIndex"
-      aria-controls="feedback-sidebar group group-hover"
+      aria-controls="feedback-sidebar"
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       @click="dropdown.isOpen = dropdown.isOpen ? false : true"
       class="feedback-float-btn"
@@ -81,7 +81,7 @@ onBeforeMount(() => {
       </p>
     </div>
   </div>
-  <!-- end float button-->
+  <!-- end float button -->
 
   <!-- right sidebar -->
   <aside
