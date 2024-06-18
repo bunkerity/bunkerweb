@@ -180,6 +180,7 @@
   "instances_status": "status",
   "instances_active": "active",
   "instances_inactive": "inactive",
+  "jobs_title": "Jobs list",
   "jobs_download_cache_file": "download cache files",
   "jobs_search": "search jobs",
   "jobs_search_desc": "Search within job name, plugin id or last run.",
@@ -187,6 +188,14 @@
   "jobs_interval_desc": "Choose interval between available options.",
   "jobs_success": "success",
   "jobs_success_desc": "Choose the job success state.",
-  "jobs_last_run": "last run",
-  "jobs_last_run_desc": "Choose the job last run state."
+  "jobs_reload": "reload",
+  "jobs_reload_desc": "Choose the job reload state.",
+  "jobs_table_title" :"Jobs list with plugin id, name, last run, interval and success state.",
+  "jobs_table_name" : "Name",
+  "jobs_table_plugin_id" : "Plugin id",
+  "jobs_table_interval" : "Interval",
+  "jobs_table_reload" : "Reload",
+  "jobs_table_success" : "Success",
+  "jobs_table_last_run_date" : "Last run date",
+  "jobs_table_cache" : "Cache"
 }

@@ -1,12 +1,10 @@
 <script setup>
 import { reactive, onBeforeMount, onMounted } from "vue";
-import { v4 as uuidv4 } from "uuid";
 import { useGlobal } from "@utils/global.js";
 import { useForm } from "@utils/form.js";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
-import GridLayout from "@components/Widget/GridLayout.vue";
-import Grid from "@components/Widget/Grid.vue";
-import Table from "@components/Widget/Table.vue";
+import BuilderJobs from "@components/Builder/Jobs.vue";
+
 /**
   @name Page/Jobs.vue
   @description This component is the jobs page.
@@ -50,1339 +48,1348 @@ onMounted(() => {
 //       },
 //     ],
 //   },
-const tableData = {
-  title: "Table title",
-  minWidth: "lg",
-  header: [
-    "Name",
-    "Plugin id",
-    "Interval",
-    "Last run",
-    "Success",
-    "last run date",
-    "Cache",
-  ],
-  positions: [2, 2, 1, 1, 1, 2, 3],
-  items: [
-    [
-      {
-        name: "anonymous-report",
-        type: "Text",
-        data: {
-          text: "anonymous-report",
-        },
-      },
-      {
-        plugin_id: "misc",
-        type: "Text",
-        data: {
-          text: "misc",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "failed",
-        type: "Icons",
-        data: {
-          iconColor: "error",
-          iconName: "cross",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:11 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:11 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "backup-data",
-        type: "Text",
-        data: {
-          text: "backup-data",
-        },
-      },
-      {
-        plugin_id: "backup",
-        type: "Text",
-        data: {
-          text: "backup",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "failed",
-        type: "Icons",
-        data: {
-          iconColor: "error",
-          iconName: "cross",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:10 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:10 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "blacklist-download",
-        type: "Text",
-        data: {
-          text: "blacklist-download",
-        },
-      },
-      {
-        plugin_id: "blacklist",
-        type: "Text",
-        data: {
-          text: "blacklist",
-        },
-      },
-      {
-        every: "hour",
-        type: "Text",
-        data: {
-          text: "hour",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:09 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:09 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "bunkernet-data",
-        type: "Text",
-        data: {
-          text: "bunkernet-data",
-        },
-      },
-      {
-        plugin_id: "bunkernet",
-        type: "Text",
-        data: {
-          text: "bunkernet",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:11 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:11 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "bunkernet-register",
-        type: "Text",
-        data: {
-          text: "bunkernet-register",
-        },
-      },
-      {
-        plugin_id: "bunkernet",
-        type: "Text",
-        data: {
-          text: "bunkernet",
-        },
-      },
-      {
-        every: "hour",
-        type: "Text",
-        data: {
-          text: "hour",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:09 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:09 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "certbot-new",
-        type: "Text",
-        data: {
-          text: "certbot-new",
-        },
-      },
-      {
-        plugin_id: "letsencrypt",
-        type: "Text",
-        data: {
-          text: "letsencrypt",
-        },
-      },
-      {
-        every: "once",
-        type: "Text",
-        data: {
-          text: "once",
-        },
-      },
-      {
-        reload: "failed",
-        type: "Icons",
-        data: {
-          iconColor: "error",
-          iconName: "cross",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:08 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:08 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "certbot-renew",
-        type: "Text",
-        data: {
-          text: "certbot-renew",
-        },
-      },
-      {
-        plugin_id: "letsencrypt",
-        type: "Text",
-        data: {
-          text: "letsencrypt",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:09 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:09 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "coreruleset-nightly",
-        type: "Text",
-        data: {
-          text: "coreruleset-nightly",
-        },
-      },
-      {
-        plugin_id: "modsecurity",
-        type: "Text",
-        data: {
-          text: "modsecurity",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:09 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:09 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "custom-cert",
-        type: "Text",
-        data: {
-          text: "custom-cert",
-        },
-      },
-      {
-        plugin_id: "customcert",
-        type: "Text",
-        data: {
-          text: "customcert",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:10 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:10 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "default-server-cert",
-        type: "Text",
-        data: {
-          text: "default-server-cert",
-        },
-      },
-      {
-        plugin_id: "misc",
-        type: "Text",
-        data: {
-          text: "misc",
-        },
-      },
-      {
-        every: "once",
-        type: "Text",
-        data: {
-          text: "once",
-        },
-      },
-      {
-        reload: "failed",
-        type: "Icons",
-        data: {
-          iconColor: "error",
-          iconName: "cross",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:10 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:10 PM",
-        },
-      },
-      {
-        cache: "none default-server-cert.pem default-server-cert.key",
-        type: "Fields",
-        data: {
-          setting: {
-            id: "default-server-cert_cache",
-            label: "default-server-cert_cache",
-            hideLabel: true,
-            inpType: "select",
-            name: "default-server-cert_cache",
-            value: "none",
-            values: [
-              "none",
-              "default-server-cert.pem",
-              "default-server-cert.key",
-            ],
-            columns: {
-              pc: 12,
-              tablet: 12,
-              mobile: 12,
-            },
-            overflowAttrEl: "data-table-body",
-            containerClass: "table",
-            maxBtnChars: 30,
-            popovers: [
-              {
-                iconColor: "info",
-                iconName: "info",
-                text: "jobs_download_cache_file",
-              },
-            ],
-          },
-        },
-      },
-    ],
-    [
-      {
-        name: "download-plugins",
-        type: "Text",
-        data: {
-          text: "download-plugins",
-        },
-      },
-      {
-        plugin_id: "misc",
-        type: "Text",
-        data: {
-          text: "misc",
-        },
-      },
-      {
-        every: "once",
-        type: "Text",
-        data: {
-          text: "once",
-        },
-      },
-      {
-        reload: "failed",
-        type: "Icons",
-        data: {
-          iconColor: "error",
-          iconName: "cross",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:13 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:13 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "download-pro-plugins",
-        type: "Text",
-        data: {
-          text: "download-pro-plugins",
-        },
-      },
-      {
-        plugin_id: "pro",
-        type: "Text",
-        data: {
-          text: "pro",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:10 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:10 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "failover-backup",
-        type: "Text",
-        data: {
-          text: "failover-backup",
-        },
-      },
-      {
-        plugin_id: "jobs",
-        type: "Text",
-        data: {
-          text: "jobs",
-        },
-      },
-      {
-        every: "once",
-        type: "Text",
-        data: {
-          text: "once",
-        },
-      },
-      {
-        reload: "failed",
-        type: "Icons",
-        data: {
-          iconColor: "error",
-          iconName: "cross",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:16 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:16 PM",
-        },
-      },
-      {
-        cache: "none folder:/var/tmp/bunkerweb/failover.tgz",
-        type: "Fields",
-        data: {
-          setting: {
-            id: "failover-backup_cache",
-            label: "failover-backup_cache",
-            hideLabel: true,
-            inpType: "select",
-            name: "failover-backup_cache",
-            value: "none",
-            values: ["none", "folder:/var/tmp/bunkerweb/failover.tgz"],
-            columns: {
-              pc: 12,
-              tablet: 12,
-              mobile: 12,
-            },
-            overflowAttrEl: "data-table-body",
-            containerClass: "table",
-            maxBtnChars: 30,
-            popovers: [
-              {
-                iconColor: "info",
-                iconName: "info",
-                text: "jobs_download_cache_file",
-              },
-            ],
-          },
-        },
-      },
-    ],
-    [
-      {
-        name: "greylist-download",
-        type: "Text",
-        data: {
-          text: "greylist-download",
-        },
-      },
-      {
-        plugin_id: "greylist",
-        type: "Text",
-        data: {
-          text: "greylist",
-        },
-      },
-      {
-        every: "hour",
-        type: "Text",
-        data: {
-          text: "hour",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:09 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:09 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "mmdb-asn",
-        type: "Text",
-        data: {
-          text: "mmdb-asn",
-        },
-      },
-      {
-        plugin_id: "jobs",
-        type: "Text",
-        data: {
-          text: "jobs",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:14 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:14 PM",
-        },
-      },
-      {
-        cache: "none asn.mmdb",
-        type: "Fields",
-        data: {
-          setting: {
-            id: "mmdb-asn_cache",
-            label: "mmdb-asn_cache",
-            hideLabel: true,
-            inpType: "select",
-            name: "mmdb-asn_cache",
-            value: "none",
-            values: ["none", "asn.mmdb"],
-            columns: {
-              pc: 12,
-              tablet: 12,
-              mobile: 12,
-            },
-            overflowAttrEl: "data-table-body",
-            containerClass: "table",
-            maxBtnChars: 30,
-            popovers: [
-              {
-                iconColor: "info",
-                iconName: "info",
-                text: "jobs_download_cache_file",
-              },
-            ],
-          },
-        },
-      },
-    ],
-    [
-      {
-        name: "mmdb-country",
-        type: "Text",
-        data: {
-          text: "mmdb-country",
-        },
-      },
-      {
-        plugin_id: "jobs",
-        type: "Text",
-        data: {
-          text: "jobs",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:12 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:12 PM",
-        },
-      },
-      {
-        cache: "none country.mmdb",
-        type: "Fields",
-        data: {
-          setting: {
-            id: "mmdb-country_cache",
-            label: "mmdb-country_cache",
-            hideLabel: true,
-            inpType: "select",
-            name: "mmdb-country_cache",
-            value: "none",
-            values: ["none", "country.mmdb"],
-            columns: {
-              pc: 12,
-              tablet: 12,
-              mobile: 12,
-            },
-            overflowAttrEl: "data-table-body",
-            containerClass: "table",
-            maxBtnChars: 30,
-            popovers: [
-              {
-                iconColor: "info",
-                iconName: "info",
-                text: "jobs_download_cache_file",
-              },
-            ],
-          },
-        },
-      },
-    ],
-    [
-      {
-        name: "realip-download",
-        type: "Text",
-        data: {
-          text: "realip-download",
-        },
-      },
-      {
-        plugin_id: "realip",
-        type: "Text",
-        data: {
-          text: "realip",
-        },
-      },
-      {
-        every: "hour",
-        type: "Text",
-        data: {
-          text: "hour",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:09 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:09 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "self-signed",
-        type: "Text",
-        data: {
-          text: "self-signed",
-        },
-      },
-      {
-        plugin_id: "selfsigned",
-        type: "Text",
-        data: {
-          text: "selfsigned",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:10 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:10 PM",
-        },
-      },
-      {
-        cache: "none www.example.com/cert.pem www.example.com/key.pem",
-        type: "Fields",
-        data: {
-          setting: {
-            id: "self-signed_cache",
-            label: "self-signed_cache",
-            hideLabel: true,
-            inpType: "select",
-            name: "self-signed_cache",
-            value: "none",
-            values: [
-              "none",
-              "www.example.com/cert.pem",
-              "www.example.com/key.pem",
-            ],
-            columns: {
-              pc: 12,
-              tablet: 12,
-              mobile: 12,
-            },
-            overflowAttrEl: "data-table-body",
-            containerClass: "table",
-            maxBtnChars: 30,
-            popovers: [
-              {
-                iconColor: "info",
-                iconName: "info",
-                text: "jobs_download_cache_file",
-              },
-            ],
-          },
-        },
-      },
-    ],
-    [
-      {
-        name: "update-check",
-        type: "Text",
-        data: {
-          text: "update-check",
-        },
-      },
-      {
-        plugin_id: "jobs",
-        type: "Text",
-        data: {
-          text: "jobs",
-        },
-      },
-      {
-        every: "day",
-        type: "Text",
-        data: {
-          text: "day",
-        },
-      },
-      {
-        reload: "failed",
-        type: "Icons",
-        data: {
-          iconColor: "error",
-          iconName: "cross",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:15 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:15 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-    [
-      {
-        name: "whitelist-download",
-        type: "Text",
-        data: {
-          text: "whitelist-download",
-        },
-      },
-      {
-        plugin_id: "whitelist",
-        type: "Text",
-        data: {
-          text: "whitelist",
-        },
-      },
-      {
-        every: "hour",
-        type: "Text",
-        data: {
-          text: "hour",
-        },
-      },
-      {
-        reload: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        success: "success",
-        type: "Icons",
-        data: {
-          iconColor: "success",
-          iconName: "check",
-        },
-      },
-      {
-        last_run: "2024/06/14, 01:33:09 PM",
-        type: "Text",
-        data: {
-          text: "2024/06/14, 01:33:09 PM",
-        },
-      },
-      {
-        cache: [],
-        type: "Text",
-        data: {
-          text: "",
-        },
-      },
-    ],
-  ],
-};
 
-function getIntervals() {
-  const intervals = [];
-  // Loop on items
-  for (let i = 0; i < tableData.items.length; i++) {
-    // Loop on items[i]
-    for (let j = 0; j < tableData.items[i].length; j++) {
-      // Loop on object keys and
-      for (const key in tableData.items[i][j]) {
-        // Check if key is 'every'
-        if (
-          key === "every" &&
-          !intervals.includes(tableData.items[i][j][key])
-        ) {
-          // Push the value to intervals array
-          intervals.push(tableData.items[i][j][key]);
-        }
-      }
-    }
-  }
-  return intervals;
-}
-
-const filters = [
+const builder = [
   {
-    filter: "table",
-    filterName: "keyword",
-    type: "keyword",
-    value: "",
-    keys: ["name", "plugin_id", "last_run"],
-    field: {
-      id: uuidv4(),
-      value: "",
-      type: "text",
-      name: uuidv4(),
-      containerClass: "setting",
-      label: "jobs_search",
-      placeholder: "inp_keyword",
-      isClipboard: false,
-      popovers: [
-        {
-          text: "jobs_search_desc",
-          iconName: "info",
-          iconColor: "info",
-        },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
+    type: "card",
+    containerColumns: {
+      pc: 12,
+      tablet: 12,
+      mobile: 12,
     },
-  },
-  {
-    filter: "table",
-    filterName: "every",
-    type: "select",
-    value: "all",
-    keys: ["every"],
-    field: {
-      id: uuidv4(),
-      value: "all",
-      // add 'all' as first value
-      values: ["all"].concat(getIntervals()),
-      name: uuidv4(),
-      onlyDown: true,
-      label: "jobs_interval",
-      containerClass: "setting",
-      popovers: [
-        {
-          text: "jobs_interval_desc",
-          iconName: "info",
-          iconColor: "info",
+    widgets: [
+      {
+        type: "Title",
+        data: {
+          title: "jobs_title",
+          tag: "h1",
+          type: "card",
         },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
-    },
-  },
-  {
-    filter: "table",
-    filterName: "success",
-    type: "select",
-    value: "all",
-    keys: ["success"],
-    field: {
-      id: uuidv4(),
-      value: "all",
-      // add 'all' as first value
-      values: ["all", "success", "failed"],
-      name: uuidv4(),
-      onlyDown: true,
-      containerClass: "setting",
-      label: "jobs_success",
-      popovers: [
-        {
-          text: "jobs_success_desc",
-          iconName: "info",
-          iconColor: "info",
+      },
+      {
+        type: "Table",
+        data: {
+          title: "jobs_table_title",
+          minWidth: "lg",
+          header: [
+            "jobs_table_name",
+            "jobs_table_plugin_id",
+            "jobs_table_interval",
+            "jobs_table_reload",
+            "jobs_table_success",
+            "jobs_table_last_run_date",
+            "jobs_table_cache",
+          ],
+          positions: [2, 2, 1, 1, 1, 2, 3],
+          items: [
+            [
+              {
+                name: "anonymous-report",
+                type: "Text",
+                data: {
+                  text: "anonymous-report",
+                },
+              },
+              {
+                plugin_id: "misc",
+                type: "Text",
+                data: {
+                  text: "misc",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "failed",
+                type: "Icons",
+                data: {
+                  iconColor: "error",
+                  iconName: "cross",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:11 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:11 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "backup-data",
+                type: "Text",
+                data: {
+                  text: "backup-data",
+                },
+              },
+              {
+                plugin_id: "backup",
+                type: "Text",
+                data: {
+                  text: "backup",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "failed",
+                type: "Icons",
+                data: {
+                  iconColor: "error",
+                  iconName: "cross",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:10 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:10 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "blacklist-download",
+                type: "Text",
+                data: {
+                  text: "blacklist-download",
+                },
+              },
+              {
+                plugin_id: "blacklist",
+                type: "Text",
+                data: {
+                  text: "blacklist",
+                },
+              },
+              {
+                every: "hour",
+                type: "Text",
+                data: {
+                  text: "hour",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:09 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:09 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "bunkernet-data",
+                type: "Text",
+                data: {
+                  text: "bunkernet-data",
+                },
+              },
+              {
+                plugin_id: "bunkernet",
+                type: "Text",
+                data: {
+                  text: "bunkernet",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:11 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:11 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "bunkernet-register",
+                type: "Text",
+                data: {
+                  text: "bunkernet-register",
+                },
+              },
+              {
+                plugin_id: "bunkernet",
+                type: "Text",
+                data: {
+                  text: "bunkernet",
+                },
+              },
+              {
+                every: "hour",
+                type: "Text",
+                data: {
+                  text: "hour",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:09 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:09 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "certbot-new",
+                type: "Text",
+                data: {
+                  text: "certbot-new",
+                },
+              },
+              {
+                plugin_id: "letsencrypt",
+                type: "Text",
+                data: {
+                  text: "letsencrypt",
+                },
+              },
+              {
+                every: "once",
+                type: "Text",
+                data: {
+                  text: "once",
+                },
+              },
+              {
+                reload: "failed",
+                type: "Icons",
+                data: {
+                  iconColor: "error",
+                  iconName: "cross",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:08 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:08 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "certbot-renew",
+                type: "Text",
+                data: {
+                  text: "certbot-renew",
+                },
+              },
+              {
+                plugin_id: "letsencrypt",
+                type: "Text",
+                data: {
+                  text: "letsencrypt",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:09 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:09 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "coreruleset-nightly",
+                type: "Text",
+                data: {
+                  text: "coreruleset-nightly",
+                },
+              },
+              {
+                plugin_id: "modsecurity",
+                type: "Text",
+                data: {
+                  text: "modsecurity",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:09 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:09 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "custom-cert",
+                type: "Text",
+                data: {
+                  text: "custom-cert",
+                },
+              },
+              {
+                plugin_id: "customcert",
+                type: "Text",
+                data: {
+                  text: "customcert",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:10 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:10 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "default-server-cert",
+                type: "Text",
+                data: {
+                  text: "default-server-cert",
+                },
+              },
+              {
+                plugin_id: "misc",
+                type: "Text",
+                data: {
+                  text: "misc",
+                },
+              },
+              {
+                every: "once",
+                type: "Text",
+                data: {
+                  text: "once",
+                },
+              },
+              {
+                reload: "failed",
+                type: "Icons",
+                data: {
+                  iconColor: "error",
+                  iconName: "cross",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:10 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:10 PM",
+                },
+              },
+              {
+                cache: "none default-server-cert.pem default-server-cert.key",
+                type: "Fields",
+                data: {
+                  setting: {
+                    id: "default-server-cert_cache",
+                    label: "default-server-cert_cache",
+                    hideLabel: true,
+                    inpType: "select",
+                    name: "default-server-cert_cache",
+                    value: "none",
+                    values: [
+                      "none",
+                      "default-server-cert.pem",
+                      "default-server-cert.key",
+                    ],
+                    columns: {
+                      pc: 12,
+                      tablet: 12,
+                      mobile: 12,
+                    },
+                    overflowAttrEl: "data-table-body",
+                    containerClass: "table",
+                    maxBtnChars: 12,
+                    popovers: [
+                      {
+                        iconColor: "info",
+                        iconName: "info",
+                        text: "jobs_download_cache_file",
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            [
+              {
+                name: "download-plugins",
+                type: "Text",
+                data: {
+                  text: "download-plugins",
+                },
+              },
+              {
+                plugin_id: "misc",
+                type: "Text",
+                data: {
+                  text: "misc",
+                },
+              },
+              {
+                every: "once",
+                type: "Text",
+                data: {
+                  text: "once",
+                },
+              },
+              {
+                reload: "failed",
+                type: "Icons",
+                data: {
+                  iconColor: "error",
+                  iconName: "cross",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:13 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:13 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "download-pro-plugins",
+                type: "Text",
+                data: {
+                  text: "download-pro-plugins",
+                },
+              },
+              {
+                plugin_id: "pro",
+                type: "Text",
+                data: {
+                  text: "pro",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:10 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:10 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "failover-backup",
+                type: "Text",
+                data: {
+                  text: "failover-backup",
+                },
+              },
+              {
+                plugin_id: "jobs",
+                type: "Text",
+                data: {
+                  text: "jobs",
+                },
+              },
+              {
+                every: "once",
+                type: "Text",
+                data: {
+                  text: "once",
+                },
+              },
+              {
+                reload: "failed",
+                type: "Icons",
+                data: {
+                  iconColor: "error",
+                  iconName: "cross",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:16 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:16 PM",
+                },
+              },
+              {
+                cache: "none folder:/var/tmp/bunkerweb/failover.tgz",
+                type: "Fields",
+                data: {
+                  setting: {
+                    id: "failover-backup_cache",
+                    label: "failover-backup_cache",
+                    hideLabel: true,
+                    inpType: "select",
+                    name: "failover-backup_cache",
+                    value: "none",
+                    values: ["none", "folder:/var/tmp/bunkerweb/failover.tgz"],
+                    columns: {
+                      pc: 12,
+                      tablet: 12,
+                      mobile: 12,
+                    },
+                    overflowAttrEl: "data-table-body",
+                    containerClass: "table",
+                    maxBtnChars: 12,
+                    popovers: [
+                      {
+                        iconColor: "info",
+                        iconName: "info",
+                        text: "jobs_download_cache_file",
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            [
+              {
+                name: "greylist-download",
+                type: "Text",
+                data: {
+                  text: "greylist-download",
+                },
+              },
+              {
+                plugin_id: "greylist",
+                type: "Text",
+                data: {
+                  text: "greylist",
+                },
+              },
+              {
+                every: "hour",
+                type: "Text",
+                data: {
+                  text: "hour",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:09 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:09 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "mmdb-asn",
+                type: "Text",
+                data: {
+                  text: "mmdb-asn",
+                },
+              },
+              {
+                plugin_id: "jobs",
+                type: "Text",
+                data: {
+                  text: "jobs",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:14 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:14 PM",
+                },
+              },
+              {
+                cache: "none asn.mmdb",
+                type: "Fields",
+                data: {
+                  setting: {
+                    id: "mmdb-asn_cache",
+                    label: "mmdb-asn_cache",
+                    hideLabel: true,
+                    inpType: "select",
+                    name: "mmdb-asn_cache",
+                    value: "none",
+                    values: ["none", "asn.mmdb"],
+                    columns: {
+                      pc: 12,
+                      tablet: 12,
+                      mobile: 12,
+                    },
+                    overflowAttrEl: "data-table-body",
+                    containerClass: "table",
+                    maxBtnChars: 12,
+                    popovers: [
+                      {
+                        iconColor: "info",
+                        iconName: "info",
+                        text: "jobs_download_cache_file",
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            [
+              {
+                name: "mmdb-country",
+                type: "Text",
+                data: {
+                  text: "mmdb-country",
+                },
+              },
+              {
+                plugin_id: "jobs",
+                type: "Text",
+                data: {
+                  text: "jobs",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:12 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:12 PM",
+                },
+              },
+              {
+                cache: "none country.mmdb",
+                type: "Fields",
+                data: {
+                  setting: {
+                    id: "mmdb-country_cache",
+                    label: "mmdb-country_cache",
+                    hideLabel: true,
+                    inpType: "select",
+                    name: "mmdb-country_cache",
+                    value: "none",
+                    values: ["none", "country.mmdb"],
+                    columns: {
+                      pc: 12,
+                      tablet: 12,
+                      mobile: 12,
+                    },
+                    overflowAttrEl: "data-table-body",
+                    containerClass: "table",
+                    maxBtnChars: 12,
+                    popovers: [
+                      {
+                        iconColor: "info",
+                        iconName: "info",
+                        text: "jobs_download_cache_file",
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            [
+              {
+                name: "realip-download",
+                type: "Text",
+                data: {
+                  text: "realip-download",
+                },
+              },
+              {
+                plugin_id: "realip",
+                type: "Text",
+                data: {
+                  text: "realip",
+                },
+              },
+              {
+                every: "hour",
+                type: "Text",
+                data: {
+                  text: "hour",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:09 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:09 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "self-signed",
+                type: "Text",
+                data: {
+                  text: "self-signed",
+                },
+              },
+              {
+                plugin_id: "selfsigned",
+                type: "Text",
+                data: {
+                  text: "selfsigned",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:10 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:10 PM",
+                },
+              },
+              {
+                cache: "none www.example.com/cert.pem www.example.com/key.pem",
+                type: "Fields",
+                data: {
+                  setting: {
+                    id: "self-signed_cache",
+                    label: "self-signed_cache",
+                    hideLabel: true,
+                    inpType: "select",
+                    name: "self-signed_cache",
+                    value: "none",
+                    values: [
+                      "none",
+                      "www.example.com/cert.pem",
+                      "www.example.com/key.pem",
+                    ],
+                    columns: {
+                      pc: 12,
+                      tablet: 12,
+                      mobile: 12,
+                    },
+                    overflowAttrEl: "data-table-body",
+                    containerClass: "table",
+                    maxBtnChars: 12,
+                    popovers: [
+                      {
+                        iconColor: "info",
+                        iconName: "info",
+                        text: "jobs_download_cache_file",
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            [
+              {
+                name: "update-check",
+                type: "Text",
+                data: {
+                  text: "update-check",
+                },
+              },
+              {
+                plugin_id: "jobs",
+                type: "Text",
+                data: {
+                  text: "jobs",
+                },
+              },
+              {
+                every: "day",
+                type: "Text",
+                data: {
+                  text: "day",
+                },
+              },
+              {
+                reload: "failed",
+                type: "Icons",
+                data: {
+                  iconColor: "error",
+                  iconName: "cross",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:15 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:15 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+            [
+              {
+                name: "whitelist-download",
+                type: "Text",
+                data: {
+                  text: "whitelist-download",
+                },
+              },
+              {
+                plugin_id: "whitelist",
+                type: "Text",
+                data: {
+                  text: "whitelist",
+                },
+              },
+              {
+                every: "hour",
+                type: "Text",
+                data: {
+                  text: "hour",
+                },
+              },
+              {
+                reload: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                success: "success",
+                type: "Icons",
+                data: {
+                  iconColor: "success",
+                  iconName: "check",
+                },
+              },
+              {
+                last_run: "2024/06/14, 01:33:09 PM",
+                type: "Text",
+                data: {
+                  text: "2024/06/14, 01:33:09 PM",
+                },
+              },
+              {
+                cache: [],
+                type: "Text",
+                data: {
+                  text: "",
+                },
+              },
+            ],
+          ],
+          filters: [
+            {
+              filter: "table",
+              filterName: "keyword",
+              type: "keyword",
+              value: "",
+              keys: ["name", "plugin_id", "last_run"],
+              field: {
+                id: "jobs-keyword",
+                value: "",
+                type: "text",
+                name: "jobs-keyword",
+                containerClass: "setting",
+                label: "jobs_search",
+                placeholder: "inp_keyword",
+                isClipboard: false,
+                popovers: [
+                  {
+                    text: "jobs_search_desc",
+                    iconName: "info",
+                    iconColor: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+            {
+              filter: "table",
+              filterName: "every",
+              type: "select",
+              value: "all",
+              keys: ["every"],
+              field: {
+                id: "jobs-every",
+                value: "all",
+                values: ["all", "day", "hour", "once"],
+                name: "jobs-every",
+                onlyDown: true,
+                label: "jobs_interval",
+                containerClass: "setting",
+                popovers: [
+                  {
+                    text: "jobs_interval_desc",
+                    iconName: "info",
+                    iconColor: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+            {
+              filter: "table",
+              filterName: "success",
+              type: "select",
+              value: "all",
+              keys: ["success"],
+              field: {
+                id: "jobs-success",
+                value: "all",
+                values: ["all", "success", "failed"],
+                name: "jobs-success",
+                onlyDown: true,
+                containerClass: "setting",
+                label: "jobs_success",
+                popovers: [
+                  {
+                    text: "jobs_success_desc",
+                    iconName: "info",
+                    iconColor: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+            {
+              filter: "table",
+              filterName: "reload",
+              type: "select",
+              value: "all",
+              keys: ["reload"],
+              field: {
+                id: "jobs-last-run",
+                value: "all",
+                values: ["all", "success", "failed"],
+                name: "jobs-last-run",
+                onlyDown: true,
+                containerClass: "setting",
+                label: "jobs_reload",
+                popovers: [
+                  {
+                    text: "jobs_reload_desc",
+                    iconName: "info",
+                    iconColor: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+          ],
         },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
-    },
-  },
-  {
-    filter: "table",
-    filterName: "last_run",
-    type: "select",
-    value: "all",
-    keys: ["last_run"],
-    field: {
-      id: uuidv4(),
-      value: "all",
-      // add 'all' as first value
-      values: ["all", "success", "failed"],
-      name: uuidv4(),
-      onlyDown: true,
-      containerClass: "setting",
-      label: "jobs_last_run",
-      popovers: [
-        {
-          text: "jobs_last_run_desc",
-          iconName: "info",
-          iconColor: "info",
-        },
-      ],
-      columns: { pc: 3, tablet: 4, mobile: 12 },
-    },
+      },
+    ],
   },
 ];
 </script>
 
 <template>
   <DashboardLayout>
-    <GridLayout :columns="{ pc: 12, tablet: 12, mobile: 12 }">
-      <!-- widget grid -->
-      <Grid>
-        <Table :filters="filters" v-bind="tableData" />
-      </Grid>
-    </GridLayout>
+    <BuilderJobs v-if="builder" :builder="builder" />
   </DashboardLayout>
 </template>

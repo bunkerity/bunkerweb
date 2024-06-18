@@ -205,7 +205,7 @@ jobs = {
 }
 
 
-def jobs_to_list(jobs):
+def get_jobs_list(jobs):
     data = []
     # loop on each dict
     for key, value in jobs.items():
@@ -282,9 +282,156 @@ def jobs_to_list(jobs):
 
         data.append(item)
 
-        # store on a file
+    return data
+
+
+def job_builder(jobs):
+
+    jobs_list = get_jobs_list(jobs)
+
+    intervals = ["all"]
+
+    # loop on each job
+    for job in jobs_list:
+        # loop on each item
+        for item in job:
+            # get the interval if not already in intervals
+            if item.get("every") and item.get("every") not in intervals:
+                intervals.append(item.get("every"))
+
+    builder = [
+        {
+            "type": "card",
+            "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
+            "widgets": [
+                {
+                    "type": "Title",
+                    "data": {"title": "jobs_title", "tag": "h1", "type": "card"},
+                },
+                {
+                    "type": "Table",
+                    "data": {
+                        "title": "jobs_table_title",
+                        "minWidth": "lg",
+                        "header": [
+                            "jobs_table_name",
+                            "jobs_table_plugin_id",
+                            "jobs_table_interval",
+                            "jobs_table_reload",
+                            "jobs_table_success",
+                            "jobs_table_last_run_date",
+                            "jobs_table_cache",
+                        ],
+                        "positions": [2, 2, 1, 1, 1, 2, 3],
+                        "items": jobs_list,
+                        "filters": [
+                            {
+                                "filter": "table",
+                                "filterName": "keyword",
+                                "type": "keyword",
+                                "value": "",
+                                "keys": ["name", "plugin_id", "last_run"],
+                                "field": {
+                                    "id": "jobs-keyword",
+                                    "value": "",
+                                    "type": "text",
+                                    "name": "jobs-keyword",
+                                    "containerClass": "setting",
+                                    "label": "jobs_search",
+                                    "placeholder": "inp_keyword",
+                                    "isClipboard": False,
+                                    "popovers": [
+                                        {
+                                            "text": "jobs_search_desc",
+                                            "iconName": "info",
+                                            "iconColor": "info",
+                                        },
+                                    ],
+                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                },
+                            },
+                            {
+                                "filter": "table",
+                                "filterName": "every",
+                                "type": "select",
+                                "value": "all",
+                                "keys": ["every"],
+                                "field": {
+                                    "id": "jobs-every",
+                                    "value": "all",
+                                    "values": intervals,
+                                    "name": "jobs-every",
+                                    "onlyDown": True,
+                                    "label": "jobs_interval",
+                                    "containerClass": "setting",
+                                    "popovers": [
+                                        {
+                                            "text": "jobs_interval_desc",
+                                            "iconName": "info",
+                                            "iconColor": "info",
+                                        },
+                                    ],
+                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                },
+                            },
+                            {
+                                "filter": "table",
+                                "filterName": "success",
+                                "type": "select",
+                                "value": "all",
+                                "keys": ["success"],
+                                "field": {
+                                    "id": "jobs-success",
+                                    "value": "all",
+                                    "values": ["all", "success", "failed"],
+                                    "name": "jobs-success",
+                                    "onlyDown": True,
+                                    "containerClass": "setting",
+                                    "label": "jobs_success",
+                                    "popovers": [
+                                        {
+                                            "text": "jobs_success_desc",
+                                            "iconName": "info",
+                                            "iconColor": "info",
+                                        },
+                                    ],
+                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                },
+                            },
+                            {
+                                "filter": "table",
+                                "filterName": "reload",
+                                "type": "select",
+                                "value": "all",
+                                "keys": ["reload"],
+                                "field": {
+                                    "id": "jobs-last-run",
+                                    "value": "all",
+                                    "values": ["all", "success", "failed"],
+                                    "name": "jobs-last-run",
+                                    "onlyDown": True,
+                                    "containerClass": "setting",
+                                    "label": "jobs_reload",
+                                    "popovers": [
+                                        {
+                                            "text": "jobs_reload_desc",
+                                            "iconName": "info",
+                                            "iconColor": "info",
+                                        },
+                                    ],
+                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        }
+    ]
+
+    # store on a file
     with open("jobs.json", "w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(builder, f, indent=4)
 
 
-jobs_to_list(jobs)
+job_builder(jobs)

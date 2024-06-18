@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, ref, onMounted, onUpdated } from "vue";
+import { reactive, computed, ref, onMounted, watch } from "vue";
 import { v4 as uuidv4 } from "uuid";
 import Container from "@components/Widget/Container.vue";
 import Text from "@components/Widget/Text.vue";
@@ -33,7 +33,7 @@ import Filter from "@components/Widget/Filter.vue";
       ],
       ...
     ],
-  
+
   const  filters = [
   {
     filter: "default",
@@ -123,11 +123,12 @@ const tableHeader = ref(null);
 
 const table = reactive({
   id: uuidv4(),
+  overflow: "0px",
   length: computed(() => {
     return props.header.length;
   }),
   rowLength: computed(() => {
-    return props.items.length;
+    return table.itemsFormat.length;
   }),
   title: computed(() => {
     return props.title ? props.title : "dashboard_table";
@@ -139,22 +140,27 @@ const table = reactive({
 });
 
 function getOverflow() {
-  const overflow =
-    tableBody.value.getBoundingClientRect().width - tableBody.value.clientWidth;
+  setTimeout(() => {
+    const overflow =
+      +tableBody.value.getBoundingClientRect().width -
+      +tableBody.value.clientWidth;
 
-  if (overflow > 0) {
-    return (tableHeader.value.style.paddingRight = `${overflow}px`);
-  }
-
-  // remove style
-  return tableHeader.value.removeAttribute("style");
+    table.overflow = tableHeader.value.style.paddingRight = `${overflow}px`;
+    if (overflow <= 0) {
+      return tableHeader.value.removeAttribute("style");
+    }
+  }, 10);
 }
 
-onMounted(() => {
-  getOverflow();
-});
+// whatch itemsFormat changes
+watch(
+  () => table.itemsFormat,
+  () => {
+    getOverflow();
+  }
+);
 
-onUpdated(() => {
+onMounted(() => {
   getOverflow();
 });
 </script>
@@ -163,7 +169,7 @@ onUpdated(() => {
   <Container :containerClass="`${props.containerClass} table-container`">
     <Filter
       v-if="filters.length"
-      @filter="(v) => (table.itemsFormat = filterData)"
+      @filter="(v) => (table.itemsFormat = v)"
       :data="table.itemsBase"
       :filters="filters"
     />
@@ -190,20 +196,24 @@ onUpdated(() => {
             :class="['table-header-item', `col-span-${props.positions[id]}`]"
           >
             <th role="columnheader">
-              {{ head }}
+              {{ $t(head, head) }}
             </th>
           </tr>
         </thead>
         <tbody data-table-body ref="tableBody" class="table-content">
           <tr
-            v-for="rowId in table.rowLength - 1"
+            v-for="rowId in table.rowLength"
+            :key="rowId - 1"
             role="row"
             :aria-rowindex="rowId"
             class="table-content-item"
           >
-            <template v-for="(col, id) in table.itemsFormat[rowId]">
+            <template
+              v-for="(col, id) in table.itemsFormat[rowId - 1]"
+              :key="col"
+            >
               <td
-                role="Scell"
+                role="cell"
                 :class="[
                   'table-content-item-wrap',
                   `col-span-${props.positions[id]}`,

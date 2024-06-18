@@ -13,13 +13,14 @@ import { useFilter } from "@utils/form.js";
   We have default values that avoid filter ("all" for select and "" for keyword).
   Filters are fields so we need to provide a "field" key with same structure as a Field.
   We have to define "keys" that will be the keys the filter value will check.
-  We can set filter :"default" in order to filter the base keys of an object.
-  We can set filter :"settings" in order to filter settings, data must be an advanced template.
+  We can set filter "default" in order to filter the base keys of an object.
+  We can set filter "settings" in order to filter settings, data must be an advanced template.
+  We can set filter "table" in order to filter table items.
   Check example for more details.
   @example
     [
       {
-        filter: "default", // or "settings" 
+        filter: "default", // or "settings"  or "table"
         type: "select",
         value: "all",
         keys: ["type"],
@@ -85,8 +86,6 @@ function filterData(filter, value) {
   let template = JSON.parse(JSON.stringify(props.data));
   const getFilters = JSON.parse(JSON.stringify(filters.base));
 
-  // Filter order for template : plugins, settings
-
   // Base keys filtering (like plugin)
   const defaultFilters = getFilters.filter((f) => f.filter === "default");
   template = useFilter(template, defaultFilters);
@@ -115,6 +114,28 @@ function filterData(filter, value) {
     template = template.filter((plugin) => {
       return Object.keys(plugin.settings).length > 0;
     });
+  }
+
+  // Base keys filtering (like plugin)
+  const tableFilters = getFilters.filter((f) => f.filter === "table");
+  if (tableFilters.length) {
+    // Loop on each array of array
+    for (let i = 0; i < template.length; i++) {
+      const row = template[i];
+      // We need to check one complete row on filter
+      // So we need to merge all keys of each column
+      const mergeRow = {};
+      row.forEach((item) => {
+        Object.keys(item).forEach((key) => {
+          mergeRow[key] = item[key];
+        });
+      });
+      const newRow = useFilter([mergeRow], tableFilters);
+      // Case newRow is empty array, didn't pass filter
+      if (Array.isArray(newRow) && newRow.length <= 0) template[i] = [];
+    }
+    // Remove empty row
+    template = template.filter((row) => row.length > 0);
   }
 
   emits("filter", template);
