@@ -246,14 +246,27 @@ function closeScroll(e) {
   select.isOpen = false;
 }
 
+// Check after a key is pressed if the current active element is the select button
+// If not close the select
+function closeTab(e) {
+  if (e.key !== "Tab" && e.key !== "Shift-Tab") return;
+  setTimeout(() => {
+    const activeEl = document.activeElement;
+    if (activeEl.closest("[data-select-dropdown]") !== selectDropdown.value)
+      return (select.isOpen = false);
+  }, 10);
+}
+
 // Close select dropdown when clicked outside element
 watch(select, () => {
   if (select.isOpen) {
     window.addEventListener("click", closeOutside);
     window.addEventListener("scroll", closeScroll, true);
+    window.addEventListener("keydown", closeTab);
   } else {
     window.removeEventListener("click", closeOutside);
     window.removeEventListener("scroll", closeScroll, true);
+    window.removeEventListener("keydown", closeTab);
   }
 });
 
@@ -374,6 +387,7 @@ const emits = defineEmits(["inp"]);
               : '',
             'select-dropdown-btn',
           ]"
+          data-select-item
           :data-setting-id="props.id"
           :data-setting-value="value"
           :aria-controls="`${props.id}-text`"
