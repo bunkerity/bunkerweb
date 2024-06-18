@@ -619,6 +619,11 @@ const builder = [
                       "none",
                       "default-server-cert.pem",
                       "default-server-cert.key",
+                      "default-server-cert.key",
+                      "default-server-cert.key",
+                      "default-server-cert.key",
+                      "default-server-cert.key",
+                      "default-server-cert.key",
                     ],
                     columns: {
                       pc: 12,
@@ -1326,34 +1331,6 @@ const builder = [
             },
             {
               filter: "table",
-              filterName: "success",
-              type: "select",
-              value: "all",
-              keys: ["success"],
-              field: {
-                id: "jobs-success",
-                value: "all",
-                values: ["all", "success", "failed"],
-                name: "jobs-success",
-                onlyDown: true,
-                containerClass: "setting",
-                label: "jobs_success",
-                popovers: [
-                  {
-                    text: "jobs_success_desc",
-                    iconName: "info",
-                    iconColor: "info",
-                  },
-                ],
-                columns: {
-                  pc: 3,
-                  tablet: 4,
-                  mobile: 12,
-                },
-              },
-            },
-            {
-              filter: "table",
               filterName: "reload",
               type: "select",
               value: "all",
@@ -1369,6 +1346,34 @@ const builder = [
                 popovers: [
                   {
                     text: "jobs_reload_desc",
+                    iconName: "info",
+                    iconColor: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+            {
+              filter: "table",
+              filterName: "success",
+              type: "select",
+              value: "all",
+              keys: ["success"],
+              field: {
+                id: "jobs-success",
+                value: "all",
+                values: ["all", "success", "failed"],
+                name: "jobs-success",
+                onlyDown: true,
+                containerClass: "setting",
+                label: "jobs_success",
+                popovers: [
+                  {
+                    text: "jobs_success_desc",
                     iconName: "info",
                     iconColor: "info",
                   },
