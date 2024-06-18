@@ -168,38 +168,41 @@ function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
   // Check if parent has overflow
   if (select.isOpen) {
-    // Get field container rect
-    const fieldContainer = selectBtn.value.closest("[data-field-container]");
-    const parent = props.overflowAttrEl
-      ? fieldContainer.closest(`[${props.overflowAttrEl}]`)
-      : fieldContainer.parentElement;
+    setTimeout(() => {
+      // Get field container rect
+      const fieldContainer = selectBtn.value.closest("[data-field-container]");
+      const parent = props.overflowAttrEl
+        ? fieldContainer.closest(`[${props.overflowAttrEl}]`)
+        : fieldContainer.parentElement;
 
-    // Update position only if parent has overflow
-    const isOverflow = parent.scrollHeight > parent.clientHeight ? true : false;
-    if (!isOverflow) return;
+      // Update position only if parent has overflow
+      const isOverflow =
+        parent.scrollHeight > parent.clientHeight ? true : false;
+      if (!isOverflow) return;
 
-    // Get all rect
-    const selectBtnRect = selectBtn.value.getBoundingClientRect();
-    const fieldContainerRect = fieldContainer.getBoundingClientRect();
-    const selectDropRect = selectDropdown.value.getBoundingClientRect();
+      // Get all rect
+      const selectBtnRect = selectBtn.value.getBoundingClientRect();
+      const fieldContainerRect = fieldContainer.getBoundingClientRect();
+      const selectDropRect = selectDropdown.value.getBoundingClientRect();
 
-    const parentRect = parent.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
 
-    const canBeDown = props.onlyDown
-      ? true
-      : fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
-      ? true
-      : false;
+      const canBeDown = props.onlyDown
+        ? true
+        : fieldContainerRect.bottom + selectDropRect.height < parentRect.bottom
+        ? true
+        : false;
 
-    if (!canBeDown) {
-      selectDropdown.value.style.top = `-${
-        selectDropRect.height + selectBtnRect.height - 16
-      }px`;
-    }
+      if (!canBeDown) {
+        selectDropdown.value.style.top = `-${
+          selectDropRect.height + selectBtnRect.height - 16
+        }px`;
+      }
 
-    if (canBeDown) {
-      selectDropdown.value.style.top = `${selectBtnRect.height}px`;
-    }
+      if (canBeDown) {
+        selectDropdown.value.style.top = `${selectBtnRect.height}px`;
+      }
+    }, 10);
   }
 }
 

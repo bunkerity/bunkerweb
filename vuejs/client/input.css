@@ -278,11 +278,15 @@ body {
 }
 
 .open.select-dropdown-container {
-  @apply absolute z-[20] opacity-100;
+  @apply absolute z-[2000];
+}
+
+.open.select-dropdown-container {
+  animation: dropOpen 0.1s linear;
 }
 
 .close.select-dropdown-container {
-  @apply -z-10 hidden;
+  @apply hidden;
 }
 
 .select-dropdown-btn {
@@ -2783,4 +2787,16 @@ body {
 }
 .z-80 {
   @apply z-[80];
+}
+
+
+
+@keyframes dropOpen {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
