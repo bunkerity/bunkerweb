@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from "uuid";
   We can used it as a fixed alert or we can use it in a container as a list.
   @example
   {
-    id: "flash-alert-1",
     position : "fixed",
     type: "success",
     title: "Success",
@@ -26,11 +25,6 @@ import { v4 as uuidv4 } from "uuid";
 */
 
 const props = defineProps({
-  id: {
-    type: [Number, String],
-    required: false,
-    default: uuidv4(),
-  },
   isFixed: {
     type: Boolean,
     required: false,
@@ -68,6 +62,7 @@ const props = defineProps({
 
 const alert = reactive({
   visible: true,
+  id: uuidv4(),
 });
 
 onMounted(() => {
@@ -83,7 +78,7 @@ onMounted(() => {
   <div
     v-if="alert.visible"
     :class="['feedback-alert-container', props.isFixed ? 'is-fixed' : '']"
-    :id="props.id || `feedback-alert-${props.message.substring(0, 10)}`"
+    :id="alert.id"
     :role="props.type === 'success' ? 'status' : 'alert'"
     :aria-description="$t('dashboard_feedback_alert_desc')"
   >
@@ -98,9 +93,9 @@ onMounted(() => {
           data-close-flash-message
           type="button"
           class="feedback-alert-btn"
-          :aria-labelledby="`${props.id}-close`"
+          :aria-labelledby="`${alert.id}-close`"
         >
-          <span class="sr-only" :id="`${props.id}-close`">
+          <span class="sr-only" :id="`${alert.id}-close`">
             {{ $t("dashboard_feedback_alert_close") }}
           </span>
           <svg

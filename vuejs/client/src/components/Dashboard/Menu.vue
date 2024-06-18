@@ -291,8 +291,8 @@ onBeforeMount(() => {
       <!-- end logo version -->
     </div>
 
-    <div :class="['menu-nav-list-container', bannerStore.bannerClass]">
-      <ul role="navigation" class="menu-nav-list">
+    <nav :class="['menu-nav-list-container', bannerStore.bannerClass]">
+      <ul class="menu-nav-list">
         <!-- item -->
         <li v-for="(item, id) in navList" :key="id" class="menu-nav-list-item">
           <a
@@ -354,7 +354,7 @@ onBeforeMount(() => {
         </li>
       </ul>
       <!-- end plugins -->
-    </div>
+    </nav>
 
     <!-- bottom sidebar  -->
     <div class="menu-bottom-content">

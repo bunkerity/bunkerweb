@@ -50,7 +50,6 @@ onMounted(() => {
     <p id="loader-text" class="sr-only">{{ $t("dashboard_loading") }}</p>
     <img
       ref="logo"
-      role="img"
       aria-hidden="true"
       :src="logoMenu2"
       class="loader-container-img"

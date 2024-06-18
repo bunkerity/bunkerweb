@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from "vue";
+import { onMounted, reactive } from "vue";
 import { langIndex } from "@utils/tabindex.js";
 
 /** 
@@ -11,12 +11,18 @@ import { langIndex } from "@utils/tabindex.js";
 
 const lang = reactive({
   isOpen: false,
+  curr: "",
 });
 
 function updateLangStorage(lang) {
   sessionStorage.setItem("lang", lang);
   document.location.reload();
 }
+
+onMounted(() => {
+  lang.curr = document.querySelector("#current-lang").textContent;
+  document.querySelector("html").setAttribute("lang", lang.curr);
+});
 </script>
 
 <template>
@@ -34,8 +40,10 @@ function updateLangStorage(lang) {
         :aria-checked="$i18n.locale === locale ? 'true' : 'false'"
       >
         <button
+          type="button"
           :tabindex="lang.isOpen ? langIndex : '-1'"
-          @click="
+          :aria-labelledby="`${locale}-${id}`"
+          @click.prevent="
             () => {
               lang.isOpen = false;
               updateLangStorage(locale);

@@ -19,9 +19,9 @@ import { onMounted } from "vue";
 </script>
 
 <template>
-  <noscript class="no-script"
-    >Your browser does not support JavaScript!</noscript
-  >
+  <noscript class="no-script">
+    Your browser does not support JavaScript!
+  </noscript>
   <Loader />
   <LangSwitch />
   <Banner />
