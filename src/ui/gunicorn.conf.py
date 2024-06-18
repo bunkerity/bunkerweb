@@ -1,8 +1,11 @@
 from contextlib import suppress
 from hashlib import sha256
+from json import JSONDecodeError, dumps, loads
 from os import cpu_count, getenv, getpid, sep, urandom
 from os.path import join
 from pathlib import Path
+from signal import SIGINT, SIGTERM, signal
+from threading import Lock
 from regex import compile as re_compile
 from sys import path as sys_path
 from time import sleep
@@ -36,7 +39,7 @@ workers = MAX_WORKERS
 worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests_jitter = min(8, MAX_WORKERS)
-graceful_timeout = 5
+graceful_timeout = 30
 
 DEBUG = getenv("DEBUG", False)
 
@@ -46,11 +49,15 @@ if DEBUG:
     reload = True
     reload_extra_files = [file.as_posix() for file in Path(sep, "usr", "share", "bunkerweb", "ui", "templates").iterdir()]
 
+LOCK = Lock()
+
 
 def on_starting(server):
+    TMP_DIR.mkdir(parents=True, exist_ok=True)
     if not getenv("FLASK_SECRET") and not TMP_DIR.joinpath(".flask_secret").is_file():
-        TMP_DIR.mkdir(parents=True, exist_ok=True)
         TMP_DIR.joinpath(".flask_secret").write_text(sha256(urandom(32)).hexdigest(), encoding="utf-8")
+
+    TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
 
     LOGGER = setup_logger("UI")
 
@@ -125,6 +132,29 @@ def on_starting(server):
     LOGGER.info("UI is ready")
 
 
+def handle_stop(signum=None, frame=None):
+    if not TMP_DIR.joinpath(".ui.json").is_file():
+        return
+
+    ui_data = "Error"
+    while ui_data == "Error":
+        with suppress(JSONDecodeError):
+            ui_data = loads(TMP_DIR.joinpath(".ui.json").read_text(encoding="utf-8"))
+
+    ui_data["SERVER_STOPPING"] = True
+
+    with LOCK:
+        TMP_DIR.joinpath(".ui.json").write_text(dumps(ui_data), encoding="utf-8")
+
+
+signal(SIGINT, handle_stop)
+signal(SIGTERM, handle_stop)
+
+
+def on_reload(server):
+    handle_stop()
+
+
 def when_ready(server):
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.joinpath("ui.pid").write_text(str(getpid()), encoding="utf-8")
@@ -135,3 +165,4 @@ def on_exit(server):
     RUN_DIR.joinpath("ui.pid").unlink(missing_ok=True)
     TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
     TMP_DIR.joinpath(".flask_secret").unlink(missing_ok=True)
+    TMP_DIR.joinpath(".ui.json").unlink(missing_ok=True)
