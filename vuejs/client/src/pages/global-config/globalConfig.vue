@@ -86,7 +86,7 @@ const data = {
             type: "text",
             containerClass: "z-32 setting",
             pattern: "^(\\/[\\-\\w.\\s]+)*\\/$",
-            inpType: "input",
+            inpType: "datepicker",
             name: "nginx prefix",
             columns: {
               pc: 4,

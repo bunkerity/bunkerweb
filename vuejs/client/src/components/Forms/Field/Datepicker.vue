@@ -9,9 +9,8 @@ import Clipboard from "@components/Forms/Feature/Clipboard.vue";
 
 import flatpickr from "flatpickr";
 
-import "@assets/css/datepicker-foundation.css";
-import "@assets/css/flatpickr.css";
-import "@assets/css/flatpickr.dark.css";
+import "@assets/css/flatpickr.min.css";
+import "@assets/css/flatpickr.dark.min.css";
 
 /** 
   @name Forms/Field/Datepicker.vue
