@@ -138,7 +138,7 @@ watch(popover, () => {
     :tabindex="props.tabId"
     :aria-controls="`${props.id}-popover-text`"
     :aria-expanded="popover.isOpen ? 'true' : 'false'"
-    :aria-describedby="`${props.id}-popover-text`"
+    :aria-description="$t(props.text, props.text)"
     :is="props.tag"
     role="button"
     @click.prevent
@@ -148,6 +148,7 @@ watch(popover, () => {
     @pointerleave="hidePopover()"
     :class="['popover-btn', props.popoverClass]"
   >
+    <span class="sr-only">{{ $t(props.text, props.text) }}</span>
     <Icons
       :iconClass="'popover-svg'"
       :iconName="props.iconName"

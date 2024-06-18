@@ -181,18 +181,18 @@ onMounted(() => {
         :aria-colcount="table.length"
         :aria-rowcount="table.rowLength"
         :class="['table', props.minWidth, props.tableClass]"
-        :aria-describedby="table.id"
+        :aria-description="$t(table.title, table.title)"
       >
-        <span class="sr-only" :id="table.id">
-          {{ $t(table.title, table.title) }}
-        </span>
         <thead
+          role="rowgroup"
           ref="tableHeader"
           class="table-header"
           :style="{ paddingRight: table.overflow }"
+          :aria-rowindex="1"
         >
           <tr
             v-for="(head, id) in props.header"
+            :aria-colindex="id + 1"
             :class="['table-header-item', `col-span-${props.positions[id]}`]"
           >
             <th role="columnheader">
@@ -200,7 +200,12 @@ onMounted(() => {
             </th>
           </tr>
         </thead>
-        <tbody data-table-body ref="tableBody" class="table-content">
+        <tbody
+          data-table-body
+          role="rowgroup"
+          ref="tableBody"
+          class="table-content"
+        >
           <tr
             v-for="rowId in table.rowLength"
             :key="rowId - 1"
@@ -213,6 +218,7 @@ onMounted(() => {
               :key="col"
             >
               <td
+                :aria-colindex="id + 1"
                 role="cell"
                 :class="[
                   'table-content-item-wrap',

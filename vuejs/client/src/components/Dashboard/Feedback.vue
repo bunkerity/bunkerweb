@@ -4,6 +4,7 @@ import Alert from "@components/Widget/Alert.vue";
 import { feedbackIndex } from "@utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
 import { onBeforeMount } from "vue";
+import { v4 as uuidv4 } from "uuid";
 /**
   @name Dashboard/Feedback.vue
   @description This component will display server feedbacks from the user.
@@ -13,6 +14,7 @@ import { onBeforeMount } from "vue";
 
 const feedback = reactive({
   data: [],
+  id: uuidv4(),
 });
 
 // Handle feedback history panel
@@ -24,15 +26,17 @@ const dropdown = reactive({
 const bannerStore = useBannerStore();
 
 onBeforeMount(() => {
-    const dataAtt = 'data-server-flash';
-    const dataEl = document.querySelector(`[${dataAtt}]`);
-    const data = dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt) ? JSON.parse(dataEl.getAttribute(dataAtt)) : [];
-    feedback.data = data;
-})
+  const dataAtt = "data-server-flash";
+  const dataEl = document.querySelector(`[${dataAtt}]`);
+  const data =
+    dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
+      ? JSON.parse(dataEl.getAttribute(dataAtt))
+      : [];
+  feedback.data = data;
+});
 </script>
 
 <template>
-
   <Alert
     v-for="(item, id) in feedback.data"
     :title="feedback.data[id].title"
@@ -54,7 +58,7 @@ onBeforeMount(() => {
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       @click="dropdown.isOpen = dropdown.isOpen ? false : true"
       class="feedback-float-btn"
-      :aria-describedby="`feedback-sidebar-toggle-btn-text`"
+      :aria-labelledby="`feedback-sidebar-toggle-btn-text`"
     >
       <span class="sr-only" id="feedback-sidebar-toggle-btn-text">
         {{ $t("dashboard_feedback_toggle_sidebar") }}
@@ -92,7 +96,7 @@ onBeforeMount(() => {
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       class="feedback-header-close-btn"
       @click="dropdown.isOpen = false"
-      :aria-describedby="`feedback-sidebar-close-btn-text`"
+      :aria-labelledby="`feedback-sidebar-close-btn-text`"
     >
       <span class="sr-only" id="feedback-sidebar-close-btn-text">
         {{ $t("dashboard_feedback_close_sidebar") }}
@@ -126,13 +130,13 @@ onBeforeMount(() => {
     <!-- end header -->
 
     <Alert
-        v-for="(item, id) in feedback.data"
-        :type="item.type"
-        :id="item.id"
-        :title="item.title"
-        :message="item.message"
-        :tabId="dropdown.isOpen ? feedbackIndex : '-1'"
-      />
+      v-for="(item, id) in feedback.data"
+      :type="item.type"
+      :id="item.id"
+      :title="item.title"
+      :message="item.message"
+      :tabId="dropdown.isOpen ? feedbackIndex : '-1'"
+    />
   </aside>
   <!-- end right sidebar -->
 </template>

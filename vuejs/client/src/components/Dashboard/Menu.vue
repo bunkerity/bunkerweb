@@ -183,9 +183,9 @@ onBeforeMount(() => {
     :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
     @click="toggleMenu()"
     :class="['menu-float-btn', bannerStore.bannerClass]"
-    aria-describedby="sidebar-menu-toggle"
+    :aria-labelledby="'float-btn-sidebar'"
   >
-    <span class="sr-only" id="sidebar-menu-toggle">
+    <span id="float-btn-sidebar" class="sr-only">
       {{ $t("dashboard_menu_toggle_sidebar") }}
     </span>
     <svg
@@ -224,9 +224,9 @@ onBeforeMount(() => {
       @click="closeMenu()"
       class="menu-close-btn"
       :class="[menu.isDesktop ? 'hidden' : '']"
-      aria-describedby="sidebar-menu-close"
+      :aria-labelledby="'float-btn-close-menu'"
     >
-      <span class="sr-only" id="sidebar-menu-close">
+      <span id="float-btn-close-menu" class="sr-only">
         {{ $t("dashboard_menu_close_sidebar") }}
       </span>
       <svg
@@ -262,12 +262,14 @@ onBeforeMount(() => {
             :aria-hidden="'true'"
             v-if="menu.darkMode"
             :src="logoMenu2"
+            :alt="$t('dashboard_logo_alt')"
             class="menu-logo-dark"
           />
           <img
             :aria-hidden="'true'"
             v-if="!menu.darkMode"
             :src="logoMenu"
+            :alt="$t('dashboard_logo_alt')"
             class="menu-logo-light"
           />
         </a>

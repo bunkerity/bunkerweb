@@ -64,7 +64,7 @@ const props = defineProps({
       :class="['input-clipboard-button', copied ? 'copied' : 'not-copied']"
       :tabindex="contentIndex"
       @click.prevent="copy(valueToCopy)"
-      :aria-describedby="`${props.id}-clipboard-text`"
+      :aria-labelledby="`${props.id}-clipboard-text`"
     >
       <span :id="`${props.id}-clipboard-text`" class="sr-only">
         {{ $t("inp_input_clipboard_desc") }}

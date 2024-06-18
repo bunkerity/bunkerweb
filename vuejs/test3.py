@@ -376,30 +376,6 @@ def job_builder(jobs):
                             },
                             {
                                 "filter": "table",
-                                "filterName": "success",
-                                "type": "select",
-                                "value": "all",
-                                "keys": ["success"],
-                                "field": {
-                                    "id": "jobs-success",
-                                    "value": "all",
-                                    "values": ["all", "success", "failed"],
-                                    "name": "jobs-success",
-                                    "onlyDown": True,
-                                    "containerClass": "setting",
-                                    "label": "jobs_success",
-                                    "popovers": [
-                                        {
-                                            "text": "jobs_success_desc",
-                                            "iconName": "info",
-                                            "iconColor": "info",
-                                        },
-                                    ],
-                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                },
-                            },
-                            {
-                                "filter": "table",
                                 "filterName": "reload",
                                 "type": "select",
                                 "value": "all",
@@ -415,6 +391,30 @@ def job_builder(jobs):
                                     "popovers": [
                                         {
                                             "text": "jobs_reload_desc",
+                                            "iconName": "info",
+                                            "iconColor": "info",
+                                        },
+                                    ],
+                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
+                                },
+                            },
+                            {
+                                "filter": "table",
+                                "filterName": "success",
+                                "type": "select",
+                                "value": "all",
+                                "keys": ["success"],
+                                "field": {
+                                    "id": "jobs-success",
+                                    "value": "all",
+                                    "values": ["all", "success", "failed"],
+                                    "name": "jobs-success",
+                                    "onlyDown": True,
+                                    "containerClass": "setting",
+                                    "label": "jobs_success",
+                                    "popovers": [
+                                        {
+                                            "text": "jobs_success_desc",
                                             "iconName": "info",
                                             "iconColor": "info",
                                         },

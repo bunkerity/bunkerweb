@@ -143,7 +143,7 @@ function setAttrs() {
       :tabindex="props.tabId"
       :class="[buttonClass]"
       :disabled="props.disabled || false"
-      :aria-describedby="`text-${props.id}`"
+      :aria-labelledby="`text-${props.id}`"
     >
       <span
         :class="[
@@ -152,8 +152,8 @@ function setAttrs() {
           'pointer-events-none',
         ]"
         :id="`text-${props.id}`"
-        >{{ $t(props.text, props.text) }}</span
-      >
+        >{{ $t(props.text, props.text) }}
+      </span>
       <Icons
         v-if="props.iconName"
         :iconName="props.iconName"

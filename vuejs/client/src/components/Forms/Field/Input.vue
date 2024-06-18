@@ -221,12 +221,15 @@ onMounted(() => {
       <div v-if="props.type === 'password'" class="input-pw-container">
         <button
           :tabindex="contentIndex"
-          :aria-description="$t('inp_input_password_desc')"
           :aria-controls="props.id"
           @click.prevent="inp.showInp = inp.showInp ? false : true"
           :class="[props.disabled ? 'disabled' : 'enabled']"
           class="input-pw-button"
+          :aria-labelledby="`${props.id}-password-text`"
         >
+          <span :id="`${props.id}-password-text`" class="sr-only">{{
+            $t("inp_input_password_desc")
+          }}</span>
           <svg
             role="img"
             aria-hidden="true"

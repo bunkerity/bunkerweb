@@ -19,43 +19,42 @@ const news = reactive({
 });
 
 function loadNews() {
-      // Check if data, and if case, that data is not older than one hour
-      // Case it is, refetch
-      if (sessionStorage.getItem("lastRefetch") !== null) {
-        const storeStamp = sessionStorage.getItem("lastRefetch");
-        const nowStamp = Math.round(new Date().getTime() / 1000);
-        if (+nowStamp > storeStamp) {
-          sessionStorage.removeItem("lastRefetch");
-          sessionStorage.removeItem("lastNews");
-        }
+  // Check if data, and if case, that data is not older than one hour
+  // Case it is, refetch
+  if (sessionStorage.getItem("lastRefetch") !== null) {
+    const storeStamp = sessionStorage.getItem("lastRefetch");
+    const nowStamp = Math.round(new Date().getTime() / 1000);
+    if (+nowStamp > storeStamp) {
+      sessionStorage.removeItem("lastRefetch");
+      sessionStorage.removeItem("lastNews");
+    }
+  }
+
+  // Case we already have the data
+  if (sessionStorage.getItem("lastNews") !== null)
+    return (news.posts = JSON.parse(sessionStorage.getItem("lastNews")));
+
+  // Try to fetch api data
+  fetch("https://www.bunkerweb.io/api/posts/0/2")
+    .then((res) => {
+      return res.json();
+    })
+    .then((res) => {
+      const reverseData = res.data.reverse();
+      if (
+        !sessionStorage.getItem("lastNews") &&
+        !sessionStorage.getItem("lastRefetch")
+      ) {
+        sessionStorage.setItem(
+          "lastRefetch",
+          Math.round(new Date().getTime() / 1000) + 3600
+        );
+        sessionStorage.setItem("lastNews", JSON.stringify(reverseData));
       }
-
-      // Case we already have the data
-      if (sessionStorage.getItem("lastNews") !== null)
-        return news.posts = JSON.parse(sessionStorage.getItem("lastNews"));
-
-      // Try to fetch api data
-      fetch("https://www.bunkerweb.io/api/posts/0/2")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          const reverseData = res.data.reverse();
-          if (
-            !sessionStorage.getItem("lastNews") &&
-            !sessionStorage.getItem("lastRefetch")
-          ) {
-            sessionStorage.setItem(
-              "lastRefetch",
-              Math.round(new Date().getTime() / 1000) + 3600,
-            );
-            sessionStorage.setItem("lastNews", JSON.stringify(reverseData));
-          }
-          news.posts = reverseData;
-        })
-        .catch((e) => {});
+      news.posts = reverseData;
+    })
+    .catch((e) => {});
 }
-
 
 onMounted(() => {
   loadNews();
@@ -70,9 +69,9 @@ onMounted(() => {
     :aria-expanded="news.isActive ? 'true' : 'false'"
     @click="news.isActive = news.isActive ? false : true"
     :class="['news-float-btn', bannerStore.bannerClass]"
-    aria-describedby="sidebar-news-toggle"
+    :aria-labelledby="'float-btn-news'"
   >
-    <span class="sr-only" id="sidebar-news-toggle">
+    <span id="float-btn-news" class="sr-only">
       {{ $t("dashboard_news_toggle_sidebar") }}
     </span>
     <svg
@@ -102,9 +101,9 @@ onMounted(() => {
       aria-controls="sidebar-news"
       :aria-expanded="news.isActive ? 'true' : 'false'"
       @click="news.isActive = false"
-      aria-describedby="sidebar-news-close"
+      :aria-labelledby="'float-btn-close-news'"
     >
-      <span class="sr-only" id="sidebar-news-close">
+      <span id="float-btn-close-news" class="sr-only">
         {{ $t("dashboard_news_close_sidebar") }}
       </span>
       <svg
@@ -136,39 +135,43 @@ onMounted(() => {
       <p v-if="news.posts.length === 0" class="news-sidebar-no-posts-content">
         {{ $t("dashboard_news_fetch_error") }}
       </p>
-      <a :tabindex="news.isActive ? newsIndex : '-1'"  :href="`https://www.bunkerweb.io/blog/post/bunkerweb/${post.slug}?utm_campaign=self&utm_source=ui`" class="news-sidebar-post"
-       v-for="(post, index) in news.posts" :key="index"
+      <a
+        :tabindex="news.isActive ? newsIndex : '-1'"
+        :href="`https://www.bunkerweb.io/blog/post/bunkerweb/${post.slug}?utm_campaign=self&utm_source=ui`"
+        class="news-sidebar-post"
+        v-for="(post, index) in news.posts"
+        :key="index"
       >
         <div>
-            <img  aria-hidden="true"
-                class="news-sidebar-post-img"
-                :src="post.photo.url"
-                alt="image"
-            />
-            <span 
-            class="news-sidebar-post-title">{{post.title}}</span>
+          <img
+            aria-hidden="true"
+            class="news-sidebar-post-img"
+            :src="post.photo.url"
+            alt="image"
+          />
+          <span class="news-sidebar-post-title">{{ post.title }}</span>
         </div>
         <div class="h-full">
-            <div  
-            class="news-sidebar-post-excerpt">
-                {{post.excerpt}}
-            </div>
-            <div class="news-sidebar-post-tags-container">
-                <a v-for="tag in post.tags"
-                :href="`https://www.bunlerweb.io/blog/tag/${tag.slug}?utm_campaign=self&utm_source=ui`"
-                class="news-sidebar-post-tag"
-                >
-                {{ tag.name }}
-                </a>
-            </div>
+          <div class="news-sidebar-post-excerpt">
+            {{ post.excerpt }}
+          </div>
+          <div class="news-sidebar-post-tags-container">
+            <a
+              v-for="tag in post.tags"
+              :href="`https://www.bunkerweb.io/blog/tag/${tag.slug}?utm_campaign=self&utm_source=ui`"
+              class="news-sidebar-post-tag"
+            >
+              {{ tag.name }}
+            </a>
+          </div>
 
-            <div class="news-sidebar-post-date-container">
-                <span class="news-sidebar-post-date"
-                >Posted on : {{post.date}}
-                </span>
-            </div>
+          <div class="news-sidebar-post-date-container">
+            <span class="news-sidebar-post-date"
+              >Posted on : {{ post.date }}
+            </span>
+          </div>
         </div>
-      </a> 
+      </a>
     </div>
     <!-- end news-->
 

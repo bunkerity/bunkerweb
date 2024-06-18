@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from "vue";
 import { defineProps, defineEmits, reactive } from "vue";
-
+import { v4 as uuidv4 } from "uuid";
 /** 
   @name Forms/Error/Field.vue
   @description This component is an alert type to send feedback to the user.
@@ -29,17 +29,17 @@ const props = defineProps({
   id: {
     type: [Number, String],
     required: false,
-    default: "",
+    default: uuidv4(),
   },
-  isFixed : {
+  isFixed: {
     type: Boolean,
     required: false,
-    default : false
+    default: false,
   },
   type: {
     type: String,
     required: false,
-    default : "info"
+    default: "info",
   },
   title: {
     type: [Number, String],
@@ -62,13 +62,13 @@ const props = defineProps({
   tabId: {
     type: [String, Number],
     required: false,
-    default: "-1"
+    default: "-1",
   },
 });
 
 const alert = reactive({
   visible: true,
-})
+});
 
 onMounted(() => {
   if (props.delayToClose > 0) {
@@ -80,43 +80,43 @@ onMounted(() => {
 </script>
 
 <template>
-    <div v-if="alert.visible"
+  <div
+    v-if="alert.visible"
     :class="['feedback-alert-container', props.isFixed ? 'is-fixed' : '']"
     :id="props.id || `feedback-alert-${props.message.substring(0, 10)}`"
     :role="props.type === 'success' ? 'status' : 'alert'"
     :aria-description="$t('dashboard_feedback_alert_desc')"
   >
-  <div 
-    :class="[
-      props.type,
-        'feedback-alert-wrap',
-    ]"
-  >
-    <div class="feedback-alert-header">
-      <h5 class="feedback-alert-title">
-        {{ $t(props.title, props.title)  }}
-      </h5>
-      <button
-        :tabindex="props.tabId"
-        @click="alert.visible = false"
-        data-close-flash-message
-        type="button"
-        class="feedback-alert-btn"
-      >
-        <svg
-          aria-hidden="true"
-          role="img"
-          class="feedback-alert-svg"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 320 512"
+    <div :class="[props.type, 'feedback-alert-wrap']">
+      <div class="feedback-alert-header">
+        <h5 class="feedback-alert-title">
+          {{ $t(props.title, props.title) }}
+        </h5>
+        <button
+          :tabindex="props.tabId"
+          @click="alert.visible = false"
+          data-close-flash-message
+          type="button"
+          class="feedback-alert-btn"
+          :aria-labelledby="`${props.id}-close`"
         >
-          <path
-            d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-          ></path>
-        </svg>
-      </button>
+          <span class="sr-only" :id="`${props.id}-close`">
+            {{ $t("dashboard_feedback_alert_close") }}
+          </span>
+          <svg
+            aria-hidden="true"
+            role="img"
+            class="feedback-alert-svg"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 320 512"
+          >
+            <path
+              d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <p class="feedback-alert-text">{{ $t(props.message, props.message) }}</p>
     </div>
-    <p class="feedback-alert-text">{{ $t(props.message, props.message) }}</p>
-  </div>
   </div>
 </template>

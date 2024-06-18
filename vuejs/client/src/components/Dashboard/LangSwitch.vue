@@ -57,12 +57,13 @@ function updateLangStorage(lang) {
       :tabindex="langIndex"
       aria-controls="switch-lang"
       :aria-expanded="lang.isOpen ? 'true' : 'false'"
-      :aria-description="$t('dashboard_lang_dropdown_button_desc')"
+      :aria-labelledby="'current-lang'"
       @click="lang.isOpen = lang.isOpen ? false : true"
     >
       <span id="current-lang" class="sr-only">{{ $i18n.locale }}</span>
       <span
-        :aria-labelledby="`current-lang`"
+        role="img"
+        aria-hidden="true"
         id="switch-lang-text"
         :class="[`fi fi-${$i18n.locale}`]"
       ></span>
