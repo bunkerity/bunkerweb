@@ -186,11 +186,11 @@ onMounted(() => {
           class="table-header"
           :style="{ paddingRight: table.overflow }"
         >
-          <tr
-            v-for="(head, id) in props.header"
-            :class="['table-header-item', `col-span-${props.positions[id]}`]"
-          >
-            <th>
+          <tr class="table-header-row">
+            <th
+              v-for="(head, id) in props.header"
+              :class="['table-header-item', `col-span-${props.positions[id]}`]"
+            >
               {{ $t(head, head) }}
             </th>
           </tr>
