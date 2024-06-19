@@ -4,7 +4,7 @@ import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 import Text from "@components/Widget/Text.vue";
 
 /** 
-  @name List/Popovers.vue
+  @name List/Details.vue
   @description This component is a list of items separate on two columns : one for the title, and other for a list of popovers related to the plugin (type, link...)
   @example
   {
