@@ -11,7 +11,7 @@
 #
 # Small post-processing is needed to remove numbers coming from a column,
 # and `*` chars (e.g. `pdo.dsn.*`).
-# Also removed single words like `engine`, `extension`, `from` and `precision`, to prevent FP.
+# Also removed single words like `from` to prevent FP.
 #
 # Example usage:
 # `xidel https://www.php.net/manual/en/ini.core.php https://www.php.net/manual/en/ini.list.php --xpath '//table/tbody/tr/td[1]' | sort | uniq`

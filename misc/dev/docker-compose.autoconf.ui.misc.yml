@@ -10,8 +10,9 @@ services:
       context: ../..
       dockerfile: ./src/bw/Dockerfile
     ports:
-      - 80:8080
-      - 443:8443
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
@@ -30,6 +31,7 @@ services:
       - USE_GZIP=yes
       - EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/dev.zip
       - CUSTOM_CONF_MODSEC_CRS_reqbody-rule=SecRuleRemoveById 200002
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -47,6 +49,7 @@ services:
       - bw-docker
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -67,6 +70,7 @@ services:
       - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -82,6 +86,7 @@ services:
     environment:
       - CONTAINERS=1
       - LOG_LEVEL=warning
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -105,6 +110,7 @@ services:
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
       DEBUG: "1"
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -119,6 +125,7 @@ services:
       - "bunkerweb.REVERSE_PROXY_URL=/admin"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
       - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+      - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
       - bunkerweb.CUSTOM_CONF_MODSEC_CRS_ip-host=SecRuleRemoveById 920350
 
   bw-db:
@@ -130,6 +137,7 @@ services:
       - MYSQL_PASSWORD=secret
     volumes:
       - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -137,6 +145,7 @@ services:
 
   app1:
     image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
     networks:
       bw-services:
         aliases:

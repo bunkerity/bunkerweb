@@ -20,7 +20,7 @@ try:
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[6]/a", "plugins")
 
     for _ in range(5):
-        get(f"http://www.example.com{UI_URL}/?id=/etc/passwd")
+        get(f"http://www.example.com{UI_URL}/?id=/etc/passwd", verify=False)
         sleep(1)
 
     sleep(7)
@@ -110,7 +110,7 @@ try:
     DEACTIVATED_PLUGINS = ("antibot", "blacklist", "bunkernet", "cors", "country", "greylist", "redis", "reversescan")
     for plugin in DEACTIVATED_PLUGINS:
         log_info(f"Trying {plugin} plugin page ...")
-        DRIVER.get(f"http://www.example.com{UI_URL}/plugins/{plugin}")
+        DRIVER.get(f"https://www.example.com{UI_URL}/plugins/{plugin}")
         first_card = safe_get_element(DRIVER, By.XPATH, "/html/body/main/div/div/div/div[1]/h5")
         assert isinstance(first_card, WebElement), "First card is not a WebElement"
 
@@ -122,7 +122,7 @@ try:
         DRIVER.back()
 
     log_info("Trying bad behavior plugin page ...")
-    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/badbehavior")
+    DRIVER.get(f"https://www.example.com{UI_URL}/plugins/badbehavior")
 
     sleep(5)
 
@@ -143,7 +143,7 @@ try:
     DRIVER.back()
 
     log_info("Trying dnsbl plugin page ...")
-    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/dnsbl")
+    DRIVER.get(f"https://www.example.com{UI_URL}/plugins/dnsbl")
 
     sleep(5)
 
@@ -158,7 +158,7 @@ try:
     DRIVER.back()
 
     log_info("Trying errors plugin page ...")
-    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/errors")
+    DRIVER.get(f"https://www.example.com{UI_URL}/plugins/errors")
 
     sleep(5)
 
@@ -179,7 +179,7 @@ try:
     DRIVER.back()
 
     log_info("Trying limit plugin page ...")
-    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/limit")
+    DRIVER.get(f"https://www.example.com{UI_URL}/plugins/limit")
 
     limit_info_elem = safe_get_element(DRIVER, By.XPATH, "/html/body/main/div/div/div[1]/h5")
     assert isinstance(limit_info_elem, WebElement), "Limit info element is not a WebElement"
@@ -192,7 +192,7 @@ try:
     DRIVER.back()
 
     log_info("Trying miscellaneous plugin page ...")
-    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/misc")
+    DRIVER.get(f"https://www.example.com{UI_URL}/plugins/misc")
 
     sleep(5)
 
@@ -209,7 +209,7 @@ try:
     DRIVER.back()
 
     log_info("Trying whitelist plugin page ...")
-    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/whitelist")
+    DRIVER.get(f"https://www.example.com{UI_URL}/plugins/whitelist")
 
     sleep(5)
 

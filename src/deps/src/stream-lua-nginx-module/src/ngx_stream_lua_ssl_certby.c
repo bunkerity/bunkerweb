@@ -986,8 +986,8 @@ ngx_stream_lua_ffi_ssl_raw_client_addr(ngx_stream_lua_request_t *r, char **addr,
 
 
 int
-ngx_stream_lua_ffi_cert_pem_to_der(const u_char *pem, size_t pem_len, u_char *der,
-    char **err)
+ngx_stream_lua_ffi_cert_pem_to_der(const u_char *pem, size_t pem_len,
+    u_char *der, char **err)
 {
     int       total, len;
     BIO      *bio;
@@ -1079,7 +1079,7 @@ ngx_stream_lua_ffi_priv_key_pem_to_der(const u_char *pem, size_t pem_len,
         return NGX_ERROR;
     }
 
-    pkey = PEM_read_bio_PrivateKey(in, NULL, NULL, (void *)passphrase);
+    pkey = PEM_read_bio_PrivateKey(in, NULL, NULL, (void *) passphrase);
     if (pkey == NULL) {
         BIO_free(in);
         *err = "PEM_read_bio_PrivateKey() failed";
@@ -1186,6 +1186,75 @@ ngx_stream_lua_ffi_parse_pem_cert(const u_char *pem, size_t pem_len,
 }
 
 
+void *
+ngx_stream_lua_ffi_parse_der_cert(const char *data, size_t len,
+    char **err)
+{
+    BIO             *bio;
+    X509            *x509;
+    STACK_OF(X509)  *chain;
+
+    bio = BIO_new_mem_buf((char *) data, len);
+    if (bio == NULL) {
+        *err = "BIO_new_mem_buf() failed";
+        ERR_clear_error();
+        return NULL;
+    }
+
+    x509 = d2i_X509_bio(bio, NULL);
+    if (x509 == NULL) {
+        *err = "d2i_X509_bio() failed";
+        BIO_free(bio);
+        ERR_clear_error();
+        return NULL;
+    }
+
+    chain = sk_X509_new_null();
+    if (chain == NULL) {
+        *err = "sk_X509_new_null() failed";
+        X509_free(x509);
+        BIO_free(bio);
+        ERR_clear_error();
+        return NULL;
+    }
+
+    if (sk_X509_push(chain, x509) == 0) {
+        *err = "sk_X509_push() failed";
+        sk_X509_free(chain);
+        X509_free(x509);
+        BIO_free(bio);
+        ERR_clear_error();
+        return NULL;
+    }
+
+    /* read rest of the chain */
+
+    while (!BIO_eof(bio)) {
+        x509 = d2i_X509_bio(bio, NULL);
+        if (x509 == NULL) {
+            *err = "d2i_X509_bio() failed in rest of chain";
+            sk_X509_pop_free(chain, X509_free);
+            BIO_free(bio);
+            ERR_clear_error();
+            return NULL;
+        }
+
+        if (sk_X509_push(chain, x509) == 0) {
+            *err = "sk_X509_push() failed in rest of chain";
+            sk_X509_pop_free(chain, X509_free);
+            X509_free(x509);
+            BIO_free(bio);
+            ERR_clear_error();
+            return NULL;
+        }
+    }
+
+    BIO_free(bio);
+
+    return chain;
+}
+
+
 void
 ngx_stream_lua_ffi_free_cert(void *cdata)
 {
@@ -1218,6 +1287,35 @@ ngx_stream_lua_ffi_parse_pem_priv_key(const u_char *pem, size_t pem_len,
     }
 
     BIO_free(in);
+
+    return pkey;
+}
+
+
+void *
+ngx_stream_lua_ffi_parse_der_priv_key(const char *data, size_t len,
+    char **err)
+{
+    BIO               *bio = NULL;
+    EVP_PKEY          *pkey = NULL;
+
+    bio = BIO_new_mem_buf((char *) data, len);
+    if (bio == NULL) {
+        *err = "BIO_new_mem_buf() failed";
+        BIO_free(bio);
+        ERR_clear_error();
+        return NULL;
+    }
+
+    pkey = d2i_PrivateKey_bio(bio, NULL);
+    if (pkey == NULL) {
+        *err = "d2i_PrivateKey_bio() failed";
+        BIO_free(bio);
+        ERR_clear_error();
+        return NULL;
+    }
+
+    BIO_free(bio);
 
     return pkey;
 }
@@ -1385,7 +1483,11 @@ ngx_stream_lua_ffi_ssl_verify_client(ngx_stream_lua_request_t *r,
 
     ngx_stream_lua_ctx_t        *ctx;
     ngx_ssl_conn_t              *ssl_conn;
+#if defined(nginx_version) && nginx_version >= 1025005
+    ngx_stream_ssl_srv_conf_t   *sscf;
+#else
     ngx_stream_ssl_conf_t       *sscf;
+#endif
     STACK_OF(X509)              *chain = ca_certs;
     STACK_OF(X509_NAME)         *name_chain = NULL;
     X509                        *x509 = NULL;
@@ -1502,6 +1604,29 @@ failed:
 
     return NGX_ERROR;
 #endif
+}
+
+
+int
+ngx_stream_lua_ffi_ssl_client_random(ngx_stream_lua_request_t *r,
+    unsigned char *out, size_t *outlen, char **err)
+{
+    ngx_ssl_conn_t          *ssl_conn;
+
+    if (r->connection == NULL || r->connection->ssl == NULL) {
+        *err = "bad request";
+        return NGX_ERROR;
+    }
+
+    ssl_conn = r->connection->ssl->connection;
+    if (ssl_conn == NULL) {
+        *err = "bad ssl conn";
+        return NGX_ERROR;
+    }
+
+    *outlen = SSL_get_client_random(ssl_conn, out, *outlen);
+
+    return NGX_OK;
 }
 
 

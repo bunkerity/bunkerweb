@@ -10,3 +10,6 @@ src/ui/templates/settings_plugins.html:hashicorp-tf-password:297
 src/ui/templates/settings_plugins.html:hashicorp-tf-password:106
 src/ui/templates/account.html:hashicorp-tf-password:154
 src/ui/templates/account.html:hashicorp-tf-password:162
+src/common/core/errors/files/error.html:aws-access-token:20
+src/deps/src/nginx/src/event/quic/ngx_event_quic_protection.c:generic-api-key:164
+src/deps/src/nginx/src/event/quic/ngx_event_quic_protection.c:generic-api-key:165

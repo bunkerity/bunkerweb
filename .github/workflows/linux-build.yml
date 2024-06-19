@@ -37,7 +37,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
         run: ./misc/update-version.sh ${{ inputs.RELEASE }}
@@ -81,12 +81,12 @@ jobs:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7,linux/arm/v6
       - name: Login to Docker Hub
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -94,7 +94,7 @@ jobs:
       # Build testing package image
       - name: Build package image
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
-        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
+        uses: docker/build-push-action@c382f710d39a5bb4e430307530a720f50c2d3318 # v6.0.0
         with:
           context: .
           load: true
@@ -106,7 +106,7 @@ jobs:
       # Build non-testing package image
       - name: Build package image
         if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev'
-        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
+        uses: docker/build-push-action@c382f710d39a5bb4e430307530a720f50c2d3318 # v6.0.0
         with:
           context: .
           load: true
@@ -142,7 +142,7 @@ jobs:
           images: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
       - name: Build test image
         if: inputs.TEST == true
-        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
+        uses: docker/build-push-action@c382f710d39a5bb4e430307530a720f50c2d3318 # v6.0.0
         with:
           context: .
           file: tests/linux/Dockerfile-${{ inputs.LINUX }}

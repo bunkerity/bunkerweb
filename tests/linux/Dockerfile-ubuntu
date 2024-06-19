@@ -1,9 +1,9 @@
-FROM ubuntu:22.04@sha256:6042500cf4b44023ea1894effe7890666b0c5c7871ed83a97c36c76ae560bb9b
+FROM ubuntu:24.04@sha256:562456a05a0dbd62a671c1854868862a4687bf979a96d48ae8e766642cd911e8
 
 ENV container docker
 ENV LC_ALL C
 ENV DEBIAN_FRONTEND noninteractive
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.1
 
 RUN apt-get update \
     && apt-get install -y systemd systemd-sysv \
@@ -25,11 +25,11 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 
 RUN apt update && \
     apt-get install php-fpm curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common python3-pip -y && \
-    echo "deb https://nginx.org/packages/ubuntu/ jammy nginx" > /etc/apt/sources.list.d/nginx.list && \
-    echo "deb-src https://nginx.org/packages/ubuntu/ jammy nginx" >> /etc/apt/sources.list.d/nginx.list && \
+    echo "deb https://nginx.org/packages/ubuntu/ noble nginx" > /etc/apt/sources.list.d/nginx.list && \
+    echo "deb-src https://nginx.org/packages/ubuntu/ noble nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~jammy
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-2~noble
 
 COPY ./package-ubuntu/*.deb /opt
 

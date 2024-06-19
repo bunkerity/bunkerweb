@@ -65,7 +65,7 @@ Bot detection by using a challenge.
 |`ANTIBOT_URI`              |`/challenge`|multisite|no      |Unused URI that clients will be redirected to to solve the challenge.                                                         |
 |`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
 |`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
-|`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge.                                                                               |
+|`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).                                           |
 |`ANTIBOT_RECAPTCHA_SITEKEY`|            |multisite|no      |Sitekey for reCAPTCHA challenge.                                                                                              |
 |`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                                                                               |
 |`ANTIBOT_HCAPTCHA_SITEKEY` |            |multisite|no      |Sitekey for hCaptcha challenge.                                                                                               |
@@ -140,30 +140,30 @@ STREAM support :warning:
 
 Deny access based on internal and external IP/network/rDNS/ASN blacklists.
 
-|             Setting              |                                                           Default                                                            | Context |Multiple|                                          Description                                           |
-|----------------------------------|------------------------------------------------------------------------------------------------------------------------------|---------|--------|------------------------------------------------------------------------------------------------|
-|`USE_BLACKLIST`                   |`yes`                                                                                                                         |multisite|no      |Activate blacklist feature.                                                                     |
-|`BLACKLIST_IP`                    |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to block.                                            |
-|`BLACKLIST_RDNS`                  |`.shodan.io .censys.io`                                                                                                       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to block.                                  |
-|`BLACKLIST_RDNS_GLOBAL`           |`yes`                                                                                                                         |multisite|no      |Only perform RDNS blacklist checks on global IP addresses.                                      |
-|`BLACKLIST_ASN`                   |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to block.                                           |
-|`BLACKLIST_USER_AGENT`            |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to block.                               |
-|`BLACKLIST_URI`                   |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to block.                                      |
-|`BLACKLIST_IGNORE_IP`             |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to ignore in the blacklist.                          |
-|`BLACKLIST_IGNORE_RDNS`           |                                                                                                                              |multisite|no      |List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.                |
-|`BLACKLIST_IGNORE_ASN`            |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to ignore in the blacklist.                         |
-|`BLACKLIST_IGNORE_USER_AGENT`     |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.             |
-|`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.                    |
-|`BLACKLIST_IP_URLS`               |`https://www.dan.me.uk/torlist/?exit`                                                                                         |global   |no      |List of URLs, separated with spaces, containing bad IP/network to block.                        |
-|`BLACKLIST_RDNS_URLS`             |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to block.                  |
-|`BLACKLIST_ASN_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to block.                                   |
-|`BLACKLIST_USER_AGENT_URLS`       |`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|global   |no      |List of URLs, separated with spaces, containing bad User-Agent to block.                        |
-|`BLACKLIST_URI_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing bad URI to block.                               |
-|`BLACKLIST_IGNORE_IP_URLS`        |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.          |
-|`BLACKLIST_IGNORE_RDNS_URLS`      |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.|
-|`BLACKLIST_IGNORE_ASN_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to ignore in the blacklist.                 |
-|`BLACKLIST_IGNORE_USER_AGENT_URLS`|                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.          |
-|`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing URI to ignore in the blacklist.                 |
+|             Setting              |                                                           Default                                                            | Context |Multiple|                                                                                   Description                                                                                   |
+|----------------------------------|------------------------------------------------------------------------------------------------------------------------------|---------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`USE_BLACKLIST`                   |`yes`                                                                                                                         |multisite|no      |Activate blacklist feature.                                                                                                                                                      |
+|`BLACKLIST_IP`                    |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to block.                                                                                                                             |
+|`BLACKLIST_RDNS`                  |`.shodan.io .censys.io`                                                                                                       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to block.                                                                                                                   |
+|`BLACKLIST_RDNS_GLOBAL`           |`yes`                                                                                                                         |multisite|no      |Only perform RDNS blacklist checks on global IP addresses.                                                                                                                       |
+|`BLACKLIST_ASN`                   |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to block.                                                                                                                            |
+|`BLACKLIST_USER_AGENT`            |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to block.                                                                                                                |
+|`BLACKLIST_URI`                   |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to block.                                                                                                                       |
+|`BLACKLIST_IGNORE_IP`             |                                                                                                                              |multisite|no      |List of IP/network, separated with spaces, to ignore in the blacklist.                                                                                                           |
+|`BLACKLIST_IGNORE_RDNS`           |                                                                                                                              |multisite|no      |List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.                                                                                                 |
+|`BLACKLIST_IGNORE_ASN`            |                                                                                                                              |multisite|no      |List of ASN numbers, separated with spaces, to ignore in the blacklist.                                                                                                          |
+|`BLACKLIST_IGNORE_USER_AGENT`     |                                                                                                                              |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.                                                                                              |
+|`BLACKLIST_IGNORE_URI`            |                                                                                                                              |multisite|no      |List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.                                                                                                     |
+|`BLACKLIST_IP_URLS`               |`https://www.dan.me.uk/torlist/?exit`                                                                                         |global   |no      |List of URLs, separated with spaces, containing bad IP/network to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                        |
+|`BLACKLIST_RDNS_URLS`             |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                  |
+|`BLACKLIST_ASN_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                                   |
+|`BLACKLIST_USER_AGENT_URLS`       |`https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`|global   |no      |List of URLs, separated with spaces, containing bad User-Agent to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                        |
+|`BLACKLIST_URI_URLS`              |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing bad URI to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                               |
+|`BLACKLIST_IGNORE_IP_URLS`        |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing IP/network to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.          |
+|`BLACKLIST_IGNORE_RDNS_URLS`      |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.|
+|`BLACKLIST_IGNORE_ASN_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing ASN to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                 |
+|`BLACKLIST_IGNORE_USER_AGENT_URLS`|                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.          |
+|`BLACKLIST_IGNORE_URI_URLS`       |                                                                                                                              |global   |no      |List of URLs, separated with spaces, containing URI to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                 |
 
 ## Brotli
 
@@ -253,10 +253,11 @@ STREAM support :white_check_mark:
 
 Integrate easily the Database.
 
-|      Setting       |                 Default                 |Context|Multiple|                   Description                    |
-|--------------------|-----------------------------------------|-------|--------|--------------------------------------------------|
-|`DATABASE_URI`      |`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.|
-|`DATABASE_LOG_LEVEL`|`warning`                                |global |no      |The level to use for database logs.               |
+|        Setting        |                 Default                 |Context|Multiple|                                                               Description                                                               |
+|-----------------------|-----------------------------------------|-------|--------|-----------------------------------------------------------------------------------------------------------------------------------------|
+|`DATABASE_URI`         |`sqlite:////var/lib/bunkerweb/db.sqlite3`|global |no      |The database URI, following the sqlalchemy format.                                                                                       |
+|`DATABASE_URI_READONLY`|                                         |global |no      |The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.|
+|`DATABASE_LOG_LEVEL`   |`warning`                                |global |no      |The level to use for database logs.                                                                                                      |
 
 ## DNSBL
 
@@ -286,20 +287,20 @@ STREAM support :warning:
 
 Allow access while keeping security features based on internal and external IP/network/rDNS/ASN greylists.
 
-|         Setting          |Default| Context |Multiple|                                         Description                                          |
-|--------------------------|-------|---------|--------|----------------------------------------------------------------------------------------------|
-|`USE_GREYLIST`            |`no`   |multisite|no      |Activate greylist feature.                                                                    |
-|`GREYLIST_IP`             |       |multisite|no      |List of IP/network, separated with spaces, to put into the greylist.                          |
-|`GREYLIST_RDNS`           |       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to put into the greylist.                |
-|`GREYLIST_RDNS_GLOBAL`    |`yes`  |multisite|no      |Only perform RDNS greylist checks on global IP addresses.                                     |
-|`GREYLIST_ASN`            |       |multisite|no      |List of ASN numbers, separated with spaces, to put into the greylist.                         |
-|`GREYLIST_USER_AGENT`     |       |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.             |
-|`GREYLIST_URI`            |       |multisite|no      |List of URI (PCRE regex), separated with spaces, to put into the greylist.                    |
-|`GREYLIST_IP_URLS`        |       |global   |no      |List of URLs, separated with spaces, containing good IP/network to put into the greylist.     |
-|`GREYLIST_RDNS_URLS`      |       |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.|
-|`GREYLIST_ASN_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing ASN to put into the greylist.                 |
-|`GREYLIST_USER_AGENT_URLS`|       |global   |no      |List of URLs, separated with spaces, containing good User-Agent to put into the greylist.     |
-|`GREYLIST_URI_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing bad URI to put into the greylist.             |
+|         Setting          |Default| Context |Multiple|                                                                                  Description                                                                                  |
+|--------------------------|-------|---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`USE_GREYLIST`            |`no`   |multisite|no      |Activate greylist feature.                                                                                                                                                     |
+|`GREYLIST_IP`             |       |multisite|no      |List of IP/network, separated with spaces, to put into the greylist.                                                                                                           |
+|`GREYLIST_RDNS`           |       |multisite|no      |List of reverse DNS suffixes, separated with spaces, to put into the greylist.                                                                                                 |
+|`GREYLIST_RDNS_GLOBAL`    |`yes`  |multisite|no      |Only perform RDNS greylist checks on global IP addresses.                                                                                                                      |
+|`GREYLIST_ASN`            |       |multisite|no      |List of ASN numbers, separated with spaces, to put into the greylist.                                                                                                          |
+|`GREYLIST_USER_AGENT`     |       |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.                                                                                              |
+|`GREYLIST_URI`            |       |multisite|no      |List of URI (PCRE regex), separated with spaces, to put into the greylist.                                                                                                     |
+|`GREYLIST_IP_URLS`        |       |global   |no      |List of URLs, separated with spaces, containing good IP/network to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.     |
+|`GREYLIST_RDNS_URLS`      |       |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.|
+|`GREYLIST_ASN_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing ASN to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                 |
+|`GREYLIST_USER_AGENT_URLS`|       |global   |no      |List of URLs, separated with spaces, containing good User-Agent to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.     |
+|`GREYLIST_URI_URLS`       |       |global   |no      |List of URLs, separated with spaces, containing bad URI to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.             |
 
 ## Gzip
 
@@ -368,16 +369,16 @@ STREAM support :white_check_mark:
 
 Automatic creation, renewal and configuration of Let's Encrypt certificates using DNS challenges.
 
-|             Setting              | Default | Context |Multiple|                                      Description                                      |
-|----------------------------------|---------|---------|--------|---------------------------------------------------------------------------------------|
-|`AUTO_LETS_ENCRYPT_DNS`           |`no`     |multisite|no      |Activate automatic Let's Encrypt DNS.                                                  |
-|`LETS_ENCRYPT_DNS_EMAIL`          |         |multisite|no      |The email address to use for Let's Encrypt notifications.                              |
-|`USE_LETS_ENCRYPT_DNS_STAGING`    |`no`     |multisite|no      |Use the Let's Encrypt staging environment.                                             |
-|`LETS_ENCRYPT_DNS_PROVIDER`       |         |multisite|no      |The DNS provider to use for DNS challenges.                                            |
-|`USE_LETS_ENCRYPT_DNS_WILDCARD`   |`yes`    |multisite|no      |Create wildcard certificates for all domains using DNS challenges.                     |
-|`LETS_ENCRYPT_DNS_PROPAGATION`    |`default`|multisite|no      |The time to wait for DNS propagation in seconds.                                       |
-|`LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`|         |multisite|yes     |Configuration item that will be added to the credentials.ini file for the DNS provider.|
-|`LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS`|`no`     |global   |no      |Clear old certificates when renewing.                                                  |
+|             Setting              | Default | Context |Multiple|                                                        Description                                                         |
+|----------------------------------|---------|---------|--------|----------------------------------------------------------------------------------------------------------------------------|
+|`AUTO_LETS_ENCRYPT_DNS`           |`no`     |multisite|no      |Activate automatic Let's Encrypt DNS.                                                                                       |
+|`LETS_ENCRYPT_DNS_EMAIL`          |         |multisite|no      |The email address to use for Let's Encrypt notifications.                                                                   |
+|`USE_LETS_ENCRYPT_DNS_STAGING`    |`no`     |multisite|no      |Use the Let's Encrypt staging environment.                                                                                  |
+|`LETS_ENCRYPT_DNS_PROVIDER`       |         |multisite|no      |The DNS provider to use for DNS challenges.                                                                                 |
+|`USE_LETS_ENCRYPT_DNS_WILDCARD`   |`yes`    |multisite|no      |Create wildcard certificates for all domains using DNS challenges.                                                          |
+|`LETS_ENCRYPT_DNS_PROPAGATION`    |`default`|multisite|no      |The time to wait for DNS propagation in seconds.                                                                            |
+|`LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`|         |multisite|yes     |Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456').|
+|`LETS_ENCRYPT_DNS_CLEAR_OLD_CERTS`|`no`     |global   |no      |Clear old certificates when renewing.                                                                                       |
 
 ## Limit
 
@@ -432,6 +433,8 @@ Miscellaneous settings.
 |`ROOT_FOLDER`                      |                       |multisite|no      |Root folder containing files to serve (/var/www/html/{server_name} if unset).                                                |
 |`SSL_PROTOCOLS`                    |`TLSv1.2 TLSv1.3`      |multisite|no      |The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.                      |
 |`HTTP2`                            |`yes`                  |multisite|no      |Support HTTP2 protocol when HTTPS is enabled.                                                                                |
+|`HTTP3`                            |`no`                   |multisite|no      |Support HTTP3 protocol when HTTPS is enabled.                                                                                |
+|`HTTP3_ALT_SVC_PORT`               |`443`                  |multisite|no      |HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.                                         |
 |`LISTEN_HTTP`                      |`yes`                  |multisite|no      |Respond to (insecure) HTTP requests.                                                                                         |
 |`USE_OPEN_FILE_CACHE`              |`no`                   |multisite|no      |Enable open file cache feature                                                                                               |
 |`OPEN_FILE_CACHE`                  |`max=1000 inactive=20s`|multisite|no      |Open file cache directive                                                                                                    |
@@ -448,14 +451,14 @@ STREAM support :x:
 
 Management of the ModSecurity WAF.
 
-|             Setting             |   Default    | Context |Multiple|               Description                |
-|---------------------------------|--------------|---------|--------|------------------------------------------|
-|`USE_MODSECURITY`                |`yes`         |multisite|no      |Enable ModSecurity WAF.                   |
-|`USE_MODSECURITY_CRS`            |`yes`         |multisite|no      |Enable OWASP Core Rule Set.               |
-|`MODSECURITY_CRS_VERSION`        |`3`           |multisite|no      |Version of the OWASP Core Rule Set to use.|
-|`MODSECURITY_SEC_AUDIT_ENGINE`   |`RelevantOnly`|multisite|no      |SecAuditEngine directive of ModSecurity.  |
-|`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.   |
-|`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.|
+|             Setting             |   Default    | Context |Multiple|                                 Description                                 |
+|---------------------------------|--------------|---------|--------|-----------------------------------------------------------------------------|
+|`USE_MODSECURITY`                |`yes`         |multisite|no      |Enable ModSecurity WAF.                                                      |
+|`USE_MODSECURITY_CRS`            |`yes`         |multisite|no      |Enable OWASP Core Rule Set.                                                  |
+|`MODSECURITY_CRS_VERSION`        |`3`           |multisite|no      |Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).|
+|`MODSECURITY_SEC_AUDIT_ENGINE`   |`RelevantOnly`|multisite|no      |SecAuditEngine directive of ModSecurity.                                     |
+|`MODSECURITY_SEC_RULE_ENGINE`    |`On`          |multisite|no      |SecRuleEngine directive of ModSecurity.                                      |
+|`MODSECURITY_SEC_AUDIT_LOG_PARTS`|`ABCFHZ`      |multisite|no      |SecAuditLogParts directive of ModSecurity.                                   |
 
 ## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -464,10 +467,11 @@ STREAM support :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-|           Setting            |Default|Context|Multiple|                 Description                 |
-|------------------------------|-------|-------|--------|---------------------------------------------|
-|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
-|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
+|           Setting            |Default|Context|Multiple|                                Description                                |
+|------------------------------|-------|-------|--------|---------------------------------------------------------------------------|
+|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.                                            |
+|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.                              |
+|`MONITORING_IGNORE_URLS`      |       |global |no      |List of URLs to ignore when monitoring separated with spaces (e.g. /health)|
 
 ## PHP
 
@@ -513,14 +517,14 @@ STREAM support :warning:
 
 Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.
 
-|      Setting       |                 Default                 | Context |Multiple|                                              Description                                               |
-|--------------------|-----------------------------------------|---------|--------|--------------------------------------------------------------------------------------------------------|
-|`USE_REAL_IP`       |`no`                                     |multisite|no      |Retrieve the real IP of client.                                                                         |
-|`USE_PROXY_PROTOCOL`|`no`                                     |multisite|no      |Enable PROXY protocol communication.                                                                    |
-|`REAL_IP_FROM`      |`192.168.0.0/16 172.16.0.0/12 10.0.0.0/8`|multisite|no      |List of trusted IPs / networks, separated with spaces, where proxied requests come from.                |
-|`REAL_IP_HEADER`    |`X-Forwarded-For`                        |multisite|no      |HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.                  |
-|`REAL_IP_RECURSIVE` |`yes`                                    |multisite|no      |Perform a recursive search in the header container IP address.                                          |
-|`REAL_IP_FROM_URLS` |                                         |global   |no      |List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.|
+|      Setting       |                 Default                 | Context |Multiple|                                                                                       Description                                                                                       |
+|--------------------|-----------------------------------------|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`USE_REAL_IP`       |`no`                                     |multisite|no      |Retrieve the real IP of client.                                                                                                                                                          |
+|`USE_PROXY_PROTOCOL`|`no`                                     |multisite|no      |Enable PROXY protocol communication.                                                                                                                                                     |
+|`REAL_IP_FROM`      |`192.168.0.0/16 172.16.0.0/12 10.0.0.0/8`|multisite|no      |List of trusted IPs / networks, separated with spaces, where proxied requests come from.                                                                                                 |
+|`REAL_IP_HEADER`    |`X-Forwarded-For`                        |multisite|no      |HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.                                                                                                   |
+|`REAL_IP_RECURSIVE` |`yes`                                    |multisite|no      |Perform a recursive search in the header container IP address.                                                                                                                           |
+|`REAL_IP_FROM_URLS` |                                         |global   |no      |List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.|
 
 ## Redirect
 
@@ -673,17 +677,18 @@ STREAM support :warning:
 
 Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 
-|          Setting          |                                                                                  Default                                                                                   | Context |Multiple|                                   Description                                    |
-|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|----------------------------------------------------------------------------------|
-|`USE_WHITELIST`            |`yes`                                                                                                                                                                       |multisite|no      |Activate whitelist feature.                                                       |
-|`WHITELIST_IP`             |`20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247`         |multisite|no      |List of IP/network, separated with spaces, to put into the whitelist.             |
-|`WHITELIST_RDNS`           |`.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com`|multisite|no      |List of reverse DNS suffixes, separated with spaces, to whitelist.                |
-|`WHITELIST_RDNS_GLOBAL`    |`yes`                                                                                                                                                                       |multisite|no      |Only perform RDNS whitelist checks on global IP addresses.                        |
-|`WHITELIST_ASN`            |`32934`                                                                                                                                                                     |multisite|no      |List of ASN numbers, separated with spaces, to whitelist.                         |
-|`WHITELIST_USER_AGENT`     |                                                                                                                                                                            |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to whitelist.             |
-|`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
-|`WHITELIST_IP_URLS`        |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good IP/network to whitelist.     |
-|`WHITELIST_RDNS_URLS`      |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.|
-|`WHITELIST_ASN_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing ASN to whitelist.                 |
-|`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
-|`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
+|          Setting          |                                                                                  Default                                                                                   | Context |Multiple|                                                                            Description                                                                            |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`USE_WHITELIST`            |`yes`                                                                                                                                                                       |multisite|no      |Activate whitelist feature.                                                                                                                                        |
+|`WHITELIST_IP`             |`20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247`         |multisite|no      |List of IP/network, separated with spaces, to put into the whitelist.                                                                                              |
+|`WHITELIST_RDNS`           |`.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com`|multisite|no      |List of reverse DNS suffixes, separated with spaces, to whitelist.                                                                                                 |
+|`WHITELIST_RDNS_GLOBAL`    |`yes`                                                                                                                                                                       |multisite|no      |Only perform RDNS whitelist checks on global IP addresses.                                                                                                         |
+|`WHITELIST_ASN`            |`32934`                                                                                                                                                                     |multisite|no      |List of ASN numbers, separated with spaces, to whitelist.                                                                                                          |
+|`WHITELIST_USER_AGENT`     |                                                                                                                                                                            |multisite|no      |List of User-Agent (PCRE regex), separated with spaces, to whitelist.                                                                                              |
+|`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                                                                                                     |
+|`WHITELIST_IP_URLS`        |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good IP/network to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.     |
+|`WHITELIST_RDNS_URLS`      |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.|
+|`WHITELIST_ASN_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing ASN to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                 |
+|`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.     |
+|`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.             |
+

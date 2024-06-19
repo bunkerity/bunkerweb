@@ -31,7 +31,9 @@ else
     MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes --no-deps -r requirements.txt
 
     echo "⌨️ Installing Redis ..."
-    sudo apt install --no-install-recommends -y redis
+    export NEEDRESTART_SUSPEND=1
+    export DEBIAN_FRONTEND=noninteractive
+    sudo -E apt install --no-install-recommends -y redis
     redis-server --daemonize yes
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then

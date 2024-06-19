@@ -1,27 +1,26 @@
-FROM redhat/ubi9:9.4@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052951021caf429494 as builder
+FROM redhat/ubi9:9.4@sha256:d98fdae16212df566150ac975cab860cd8d2cb1b322ed9966d09a13e219112e9 as builder
 
 ENV OS=rhel
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.1
 
-# Copy centos repo
-COPY src/linux/centos-9.repo /etc/yum.repos.d/centos.repo
-RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/centos.repo
+# Copy rocky repo
+COPY src/linux/rocky-9.repo /etc/yum.repos.d/rocky.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/rocky.repo
 
-# Copy RPM-GPG-KEY-CentOS-Official
-COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+# Copy RPM-GPG-KEY-Rocky-9
+COPY src/linux/RPM-GPG-KEY-Rocky-9 /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 
-# Import RPM-GPG-KEY-CentOS-Official
-RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+# Import RPM-GPG-KEY-Rocky-9
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 
 # Install Nginx, fpm and dependencies
 RUN dnf install -y wget make yum-utils && \
-  wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
-  rpm -Uvh epel-release*rpm && \
+  dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   dnf install -y --skip-broken --setopt=install_weak_deps=False --nobest openssl-libs openssl-devel && \
   dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel python39 brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
-  wget https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm && \
-  dnf install nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm -y && \
-  rm -rf nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
+  wget https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-2.el9.ngx.$(uname -m).rpm && \
+  dnf install nginx-${NGINX_VERSION}-2.el9.ngx.$(uname -m).rpm -y && \
+  rm -rf nginx-${NGINX_VERSION}-2.el9.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
 
@@ -69,7 +68,7 @@ COPY src/scheduler scheduler
 COPY src/ui ui
 COPY src/VERSION VERSION
 
-FROM redhat/ubi9:9.4@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052951021caf429494
+FROM redhat/ubi9:9.4@sha256:d98fdae16212df566150ac975cab860cd8d2cb1b322ed9966d09a13e219112e9
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -81,10 +80,11 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Install fpm
-RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils && \
+RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
+  dnf install -y ruby-devel && \
   gem install fpm
 
 # Setup BW

@@ -25,13 +25,13 @@
       "name": "ModSecurity-nginx v1.0.3",
       "url": "https://github.com/SpiderLabs/ModSecurity-nginx.git",
       "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
-      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/config.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch"
+      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch"
     },
     {
       "id": "nginx",
-      "name": "Nginx v1.24.0",
+      "name": "Nginx v1.26.1",
       "url": "https://github.com/nginx/nginx.git",
-      "commit": "84cd7217778b8b3a2e395194b641ea14050344f1"
+      "commit": "02725ce722bc7b34fa307d611eac3956ef744efa"
     },
     {
       "id": "ngx_brotli",
@@ -71,15 +71,15 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.9.1",
+      "name": "libmaxminddb v1.10.0",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "e26013e1d2b57eff0ed22b7364270358adb72205"
+      "commit": "7acfe43a72a5043d01cc3dd6429005acdf812cb3"
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.12",
+      "name": "lua-cjson v2.1.0.14",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "881accc8fadca5ec02aa34d364df2a1aa25cd2f9"
+      "commit": "f95cd9ea1e39221a36818772eb85f05b4164bbb1"
     },
     {
       "id": "lua-ffi-zlib",
@@ -151,9 +151,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.3.1",
+      "name": "lua-resty-openssl v1.4.0",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "643956d990b3ef4d9b52d0b77ba4d69d7e912dcc",
+      "commit": "e56da6c5f285ff0e40fce703b870e83ee8eac321",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -225,9 +225,9 @@
     },
     {
       "id": "stream-lua-nginx-module",
-      "name": "stream-lua-nginx-module v0.0.14",
+      "name": "stream-lua-nginx-module v0.0.14+ (10 commits after to include nginx 1.26.0 fixes)",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "cafa6f55333541d1c78767a286fa434c97574a4c"
+      "commit": "bea8a0c0de94cede71554f53818ac0267d675d63"
     },
     {
       "id": "zlib",

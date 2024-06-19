@@ -17,7 +17,7 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/psf/black
-    rev: 8fe627072f15ff2e3d380887b92f7868efaf6d05 # frozen: 24.4.0
+    rev: 3702ba224ecffbcec30af640c149f231d90aebdb # frozen: 24.4.2
     hooks:
       - id: black
         name: Black Python Formatter
@@ -36,7 +36,7 @@ repos:
         exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
 
   - repo: https://github.com/lunarmodules/luacheck
-    rev: 418f48976c73be697fe64b0eba9ea9821ac9bca8 # frozen: v1.1.2
+    rev: cc089e3f65acdd1ef8716cc73a3eca24a6b845e4 # frozen: v1.2.0
     hooks:
       - id: luacheck
         exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
@@ -57,11 +57,11 @@ repos:
         exclude: ^tests/
 
   - repo: https://github.com/codespell-project/codespell
-    rev: 6e41aba91fb32e9feb741a6258eefeb9c6e4a482 # frozen: v2.2.6
+    rev: 193cd7d27cd571f79358af09a8fb8997e54f8fff # frozen: v2.3.0
     hooks:
       - id: codespell
         name: Codespell Spell Checker
-        exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*)$
+        exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/static/js/lottie-web.min.js)$
         entry: codespell --ignore-regex="(tabEl|Widgits)" --skip src/ui/static/js/utils/flatpickr.js,src/ui/static/css/style.css,CHANGELOG.md
         language: python
         types: [text]

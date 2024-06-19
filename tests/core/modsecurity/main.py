@@ -79,13 +79,17 @@ try:
             bw_instance = bw_instances[0]
 
             for log in bw_instance.logs(since=current_time).split(b"\n"):
-                if f'[ver "OWASP_CRS/{modsecurity_crs_version}'.encode() in log:
+                if (
+                    modsecurity_crs_version == "nightly" and b'[file "/var/cache/bunkerweb/modsecurity/crs/crs-nightly' in log
+                ) or f'[ver "OWASP_CRS/{modsecurity_crs_version}'.encode() in log:
                     found = True
                     break
         else:
             with open("/var/log/bunkerweb/error.log", "r") as f:
                 for line in f.readlines():
-                    if search(r'\[ver "OWASP_CRS/' + modsecurity_crs_version, line):
+                    if (modsecurity_crs_version == "nightly" and search(r'\[file "/var/cache/bunkerweb/modsecurity/crs/crs-nightly', line)) or search(
+                        r'\[ver "OWASP_CRS/' + modsecurity_crs_version, line
+                    ):
                         found = True
                         break
 

@@ -71,7 +71,7 @@
     "WHITELIST_IP_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing good IP/network to whitelist.",
+      "help": "List of URLs, separated with spaces, containing good IP/network to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-ip-urls",
       "label": "Whitelist IP/network URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
@@ -80,7 +80,7 @@
     "WHITELIST_RDNS_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.",
+      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-rdns-urls",
       "label": "Whitelist reverse DNS URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
@@ -89,7 +89,7 @@
     "WHITELIST_ASN_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing ASN to whitelist.",
+      "help": "List of URLs, separated with spaces, containing ASN to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-asn-urls",
       "label": "Whitelist ASN URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
@@ -98,7 +98,7 @@
     "WHITELIST_USER_AGENT_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing good User-Agent to whitelist.",
+      "help": "List of URLs, separated with spaces, containing good User-Agent to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-user-agent-urls",
       "label": "Whitelist User-Agent URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
@@ -107,7 +107,7 @@
     "WHITELIST_URI_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing bad URI to whitelist.",
+      "help": "List of URLs, separated with spaces, containing bad URI to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "whitelist-uri-urls",
       "label": "Whitelist URI URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",

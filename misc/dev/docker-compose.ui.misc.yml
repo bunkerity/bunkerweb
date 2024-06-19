@@ -9,8 +9,9 @@ services:
       context: ../..
       dockerfile: ./src/bw/Dockerfile
     ports:
-      - 80:8080
-      - 443:8443
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
@@ -33,10 +34,12 @@ services:
       - www.example.com_REVERSE_PROXY_URL=/admin
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
       - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+      - www.example.com_GENERATE_SELF_SIGNED_SSL=yes
       - www.example.com_CUSTOM_CONF_MODSEC_CRS_ip-host=SecRuleRemoveById 920350
       - app1.example.com_USE_REVERSE_PROXY=yes
       - app1.example.com_REVERSE_PROXY_URL=/
       - app1.example.com_REVERSE_PROXY_HOST=http://app1:8080
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -57,6 +60,7 @@ services:
       - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -72,6 +76,7 @@ services:
     environment:
       - CONTAINERS=1
       - LOG_LEVEL=warning
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -95,6 +100,7 @@ services:
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
       DEBUG: "1"
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -112,6 +118,7 @@ services:
       - MYSQL_PASSWORD=secret
     volumes:
       - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -119,6 +126,7 @@ services:
 
   app1:
     image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
     networks:
       bw-services:
         aliases:

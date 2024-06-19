@@ -3,7 +3,7 @@ FROM debian:bookworm@sha256:b16cef8cbcb20935c0f052e37fc3d38dc92bfec0bcfb894c3285
 ENV container docker
 ENV LC_ALL C
 ENV DEBIAN_FRONTEND noninteractive
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.1
 
 RUN apt-get update \
     && apt-get install -y systemd systemd-sysv \
@@ -29,7 +29,7 @@ RUN apt update && \
     echo "deb-src https://nginx.org/packages/debian/ bookworm nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~bookworm
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-2~bookworm
 
 COPY ./package-debian/*.deb /opt
 

@@ -158,6 +158,8 @@ function _M.set_parameters(ec_key_st, opts)
     end
   end
 
+  return true
+
 end
 
 return _M

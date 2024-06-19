@@ -1,8 +1,11 @@
 from contextlib import suppress
 from hashlib import sha256
+from json import JSONDecodeError, dumps, loads
 from os import cpu_count, getenv, getpid, sep, urandom
 from os.path import join
 from pathlib import Path
+from signal import SIGINT, SIGTERM, signal
+from threading import Lock
 from regex import compile as re_compile
 from sys import path as sys_path
 from time import sleep
@@ -36,7 +39,7 @@ workers = MAX_WORKERS
 worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests_jitter = min(8, MAX_WORKERS)
-graceful_timeout = 5
+graceful_timeout = 30
 
 DEBUG = getenv("DEBUG", False)
 
@@ -46,10 +49,12 @@ if DEBUG:
     reload = True
     reload_extra_files = [file.as_posix() for file in Path(sep, "usr", "share", "bunkerweb", "ui", "templates").iterdir()]
 
+LOCK = Lock()
+
 
 def on_starting(server):
+    TMP_DIR.mkdir(parents=True, exist_ok=True)
     if not getenv("FLASK_SECRET") and not TMP_DIR.joinpath(".flask_secret").is_file():
-        TMP_DIR.mkdir(parents=True, exist_ok=True)
         TMP_DIR.joinpath(".flask_secret").write_text(sha256(urandom(32)).hexdigest(), encoding="utf-8")
 
     LOGGER = setup_logger("UI")
@@ -78,21 +83,29 @@ def on_starting(server):
         USER = User(**USER)
 
         if getenv("ADMIN_USERNAME") or getenv("ADMIN_PASSWORD"):
-            if USER.method == "manual":
+            override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
+            if USER.method == "manual" or override_admin_creds:
                 updated = False
                 if getenv("ADMIN_USERNAME", "") and USER.get_id() != getenv("ADMIN_USERNAME", ""):
                     USER.id = getenv("ADMIN_USERNAME", "")
                     updated = True
                 if getenv("ADMIN_PASSWORD", "") and not USER.check_password(getenv("ADMIN_PASSWORD", "")):
-                    USER.update_password(getenv("ADMIN_PASSWORD", ""))
-                    updated = True
+                    if not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "")):
+                        LOGGER.warning(
+                            "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). It will not be updated."
+                        )
+                    else:
+                        USER.update_password(getenv("ADMIN_PASSWORD", ""))
+                        updated = True
 
                 if updated:
-                    ret = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token)
-                    if ret:
-                        LOGGER.error(f"Couldn't update the admin user in the database: {ret}")
-                        exit(1)
-                    LOGGER.info("The admin user was updated successfully")
+                    if override_admin_creds:
+                        LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
+                    err = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token, method="manual")
+                    if err:
+                        LOGGER.error(f"Couldn't update the admin user in the database: {err}")
+                    else:
+                        LOGGER.info("The admin user was updated successfully")
             else:
                 LOGGER.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
     elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
@@ -117,6 +130,29 @@ def on_starting(server):
     LOGGER.info("UI is ready")
 
 
+def handle_stop(signum=None, frame=None):
+    if not TMP_DIR.joinpath(".ui.json").is_file():
+        return
+
+    ui_data = "Error"
+    while ui_data == "Error":
+        with suppress(JSONDecodeError):
+            ui_data = loads(TMP_DIR.joinpath(".ui.json").read_text(encoding="utf-8"))
+
+    ui_data["SERVER_STOPPING"] = True
+
+    with LOCK:
+        TMP_DIR.joinpath(".ui.json").write_text(dumps(ui_data), encoding="utf-8")
+
+
+signal(SIGINT, handle_stop)
+signal(SIGTERM, handle_stop)
+
+
+def on_reload(server):
+    handle_stop()
+
+
 def when_ready(server):
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.joinpath("ui.pid").write_text(str(getpid()), encoding="utf-8")
@@ -126,3 +162,5 @@ def when_ready(server):
 def on_exit(server):
     RUN_DIR.joinpath("ui.pid").unlink(missing_ok=True)
     TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
+    TMP_DIR.joinpath(".flask_secret").unlink(missing_ok=True)
+    TMP_DIR.joinpath(".ui.json").unlink(missing_ok=True)

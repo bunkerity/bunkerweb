@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
     {% set attribute_name = "logs" %}
-
     <!-- settings -->
-    <div data-{{attribute_name}}-settings
-         class="col-span-12 lg:col-span-8 2xl:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div data-{{ attribute_name }}-settings class="col-span-12 lg:col-span-8 2xl:col-span-6 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <h5 class="mb-2 font-bold dark:text-white/90">SETTINGS</h5>
         <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
             <!-- select instance -->
@@ -12,12 +10,8 @@
                 <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                     Select instance
                 </h5>
-                <button data-{{attribute_name}}-setting-select="instances"
-                        class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                    <span id="logs-instance"
-                          data-name="logs-instance"
-                          class="overflow-hidden break-all"
-                          data-{{attribute_name}}-setting-select-text="instances">
+                <button data-{{ attribute_name }}-setting-select="instances" class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
+                    <span id="logs-instance" data-name="logs-instance" class="overflow-hidden break-all" data-{{ attribute_name }}-setting-select-text="instances">
                         {% for instance in instances %}
                             {% if loop.first %}
                                 {% if
@@ -30,22 +24,15 @@
                         {% endfor %}
                     </span>
                     <!-- chevron -->
-                    <svg data-{{attribute_name}}-setting-select="instances"
-                         class="min-w-4 ml-2 transition-transform h-4 w-4 fill-gray-500"
-                         xmlns="http://www.w3.org/2000/svg"
-                         viewBox="0 0 512 512">
+                    <svg data-{{ attribute_name }}-setting-select="instances" class="min-w-4 ml-2 transition-transform h-4 w-4 fill-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                         <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
                     </svg>
                 </button>
                 <!-- end chevron -->
                 <!-- dropdown-->
-                <div data-{{attribute_name}}-setting-select-dropdown="instances"
-                     class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
+                <div data-{{ attribute_name }}-setting-select-dropdown="instances" class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
                     {% for instance in instances %}
-                        <button data-{{attribute_name}}-setting-select-dropdown-btn="instances"
-                                value="{{ instance.name }}"
-                                data-_type="{{ instance._type }}"
-                                class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                        <button data-{{ attribute_name }}-setting-select-dropdown-btn="instances" value="{{ instance.name }}" data-_type="{{ instance._type }}" class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
                             {{ instance.name }}
                         </button>
                     {% endfor %}
@@ -172,6 +159,7 @@
             "values": [
                 "all",
                 "message",
+                "emerg",
                 "error",
                 "warn",
                 "info",
@@ -179,8 +167,7 @@
             ]
         }
     ] %}
-    <div data-{{attribute_name}}-filter
-         class="h-fit col-span-12 lg:col-span-4 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div data-{{ attribute_name }}-filter class="h-fit col-span-12 lg:col-span-4 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <h5 class="mb-2 font-bold dark:text-white/90">FILTERS</h5>
         <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
             {% for filter in filters %}
@@ -207,32 +194,18 @@
                         <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                             {{ filter['name'] }}
                         </h5>
-                        <button aria-controls="filter-{{ filter['id'] }}"
-                                data-{{attribute_name}}-setting-select="{{ filter['id'] }}"
-                                class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
-                            <span aria-description="current filter state value"
-                                  id="logs-{{ filter['id'] }}"
-                                  data-name="logs-{{ filter['id'] }}"
-                                  data-{{attribute_name}}-setting-select-text="{{ filter['id'] }}">all</span>
+                        <button aria-controls="filter-{{ filter['id'] }}" data-{{ attribute_name }}-setting-select="{{ filter['id'] }}" class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
+                            <span aria-description="current filter state value" id="logs-{{ filter['id'] }}" data-name="logs-{{ filter['id'] }}" data-{{ attribute_name }}-setting-select-text="{{ filter['id'] }}">all</span>
                             <!-- chevron -->
-                            <svg data-{{attribute_name}}-setting-select="{{ filter['id'] }}"
-                                 class="transition-transform h-4 w-4 fill-gray-500"
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 viewBox="0 0 512 512">
+                            <svg data-{{ attribute_name }}-setting-select="{{ filter['id'] }}" class="transition-transform h-4 w-4 fill-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                                 <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
                             </svg>
                         </button>
                         <!-- end chevron -->
                         <!-- dropdown-->
-                        <div id="filter-{{ filter['id'] }}"
-                             role="listbox"
-                             data-{{attribute_name}}-setting-select-dropdown="{{ filter['id'] }}"
-                             class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
+                        <div id="filter-{{ filter['id'] }}" role="listbox" data-{{ attribute_name }}-setting-select-dropdown="{{ filter['id'] }}" class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
                             {% for value in filter['values'] %}
-                                <button role="option"
-                                        data-{{attribute_name}}-setting-select-dropdown-btn="{{ filter['id'] }}"
-                                        value="{{ value }}"
-                                        class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                                <button role="option" data-{{ attribute_name }}-setting-select-dropdown-btn="{{ filter['id'] }}" value="{{ value }}" class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
                                     {{ value }}
                                 </button>
                             {% endfor %}
@@ -245,8 +218,7 @@
         </div>
     </div>
     <!-- end filter -->
-    <div data-{{attribute_name}}-no-run
-         class="w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
+    <div data-{{ attribute_name }}-no-run class="w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
         <div class="col-span-12 flex flex-col justify-center items-center h-fit">
             <svg xmlns="http://www.w3.org/2000/svg"
                  fill="none"
@@ -259,14 +231,12 @@
             <h5 class="font-bold dark:text-white/90 mx-2 text-white">No logs to show</h5>
         </div>
     </div>
-
-    <div data-{{attribute_name}}-card
-         class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div data-{{ attribute_name }}-card class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
         <div class="col-span-12">
             <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">LOGS</h5>
         </div>
         <div class="col-span-12 overflow-y-auto overflow-x-auto">
-            <div data-{{attribute_name}}-bans-list>
+            <div data-{{ attribute_name }}-bans-list>
                 <!-- list container-->
                 <div class="overflow-hidden min-w-[800px] w-full grid grid-cols-12 rounded p-2">
                     <!-- header-->
@@ -274,7 +244,7 @@
                     <p class="dark:text-gray-100 h-8 text-sm font-bold col-span-9 m-0 pb-2 border-b border-gray-400">Description</p>
                     <!-- end header-->
                     <!-- list -->
-                    <ul class="col-span-12 w-full" data-{{attribute_name}}-list>
+                    <ul class="col-span-12 w-full" data-{{ attribute_name }}-list>
                     </ul>
                     <!-- end list-->
                 </div>

@@ -7,7 +7,7 @@ from flask import flash
 from json import loads as json_loads
 from pathlib import Path
 from re import error as RegexError, search as re_search
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Set, Tuple, Union
 
 
 class Config:
@@ -15,7 +15,9 @@ class Config:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
 
-    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None) -> None:
+    def __gen_conf(
+        self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None
+    ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
 
         Parameters
@@ -49,10 +51,7 @@ class Config:
         conf["SERVER_NAME"] = " ".join(servers)
         conf["DATABASE_URI"] = self.__db.database_uri
 
-        err = self.__db.save_config(conf, "ui", changed=check_changes)
-
-        if err:
-            self.__db.logger.warning(f"Couldn't save config to database : {err}, config may not work as expected")
+        return self.__db.save_config(conf, "ui", changed=check_changes)
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -79,7 +78,13 @@ class Config:
     def get_settings(self) -> dict:
         return self.__settings
 
-    def get_config(self, methods: bool = True, with_drafts: bool = False) -> dict:
+    def get_config(
+        self,
+        global_only: bool = False,
+        methods: bool = True,
+        with_drafts: bool = False,
+        filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+    ) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
         Returns
@@ -87,7 +92,7 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__db.get_config(methods=methods, with_drafts=with_drafts)
+        return self.__db.get_non_default_settings(global_only=global_only, methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings)
 
     def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services
@@ -99,7 +104,7 @@ class Config:
         """
         return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
-    def check_variables(self, variables: dict) -> int:
+    def check_variables(self, variables: dict, config: dict) -> dict:
         """Testify that the variables passed are valid
 
         Parameters
@@ -112,35 +117,44 @@ class Config:
         int
             Return the error code
         """
-        error = 0
         plugins_settings = self.get_plugins_settings()
-        for k, v in variables.items():
+        for k, v in variables.copy().items():
             check = False
+
+            if k.endswith("SCHEMA"):
+                variables.pop(k)
+                continue
 
             if k in plugins_settings:
                 setting = k
             else:
                 setting = k[0 : k.rfind("_")]  # noqa: E203
                 if setting not in plugins_settings or "multiple" not in plugins_settings[setting]:
-                    error = 1
                     flash(f"Variable {k} is not valid.", "error")
+                    variables.pop(k)
                     continue
+
+            if setting in ("AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "IS_LOADING", "IS_DRAFT"):
+                flash(f"Variable {k} is not editable, ignoring it", "error")
+                variables.pop(k)
+                continue
+            elif setting not in config and plugins_settings[setting]["default"] == v:
+                variables.pop(k)
+                continue
 
             try:
                 if re_search(plugins_settings[setting]["regex"], v):
                     check = True
-            except RegexError:
-                self.__db.logger.warning(f"Invalid regex for setting {setting} : {plugins_settings[setting]['regex']}, ignoring regex check")
-
-            if not check:
-                error = 1
-                flash(f"Variable {k} is not valid.", "error")
+            except RegexError as e:
+                flash(f"Invalid regex for setting {setting} : {plugins_settings[setting]['regex']}, ignoring regex check:{e}", "error")
+                variables.pop(k)
                 continue
 
-        return error
+            if not check:
+                flash(f"Variable {k} is not valid.", "error")
+                variables.pop(k)
 
-    def reload_config(self) -> None:
-        self.__gen_conf(self.get_config(methods=False), self.get_services(methods=False))
+        return variables
 
     def new_service(self, variables: dict, is_draft: bool = False) -> Tuple[str, int]:
         """Creates a new service from the given variables
@@ -167,7 +181,9 @@ class Config:
                 return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
-        self.__gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
+        ret = self.__gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
+        if isinstance(ret, str):
+            return ret, 1
         return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
 
     def edit_service(self, old_server_name: str, variables: dict, *, check_changes: bool = True, is_draft: bool = False) -> Tuple[str, int]:
@@ -205,10 +221,12 @@ class Config:
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        self.__gen_conf(config, services, check_changes=check_changes, changed_service=variables["SERVER_NAME"])
+        ret = self.__gen_conf(config, services, check_changes=check_changes, changed_service=server_name_splitted[0])
+        if isinstance(ret, str):
+            return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
-    def edit_global_conf(self, variables: dict) -> str:
+    def edit_global_conf(self, variables: dict) -> Tuple[str, int]:
         """Edits the global conf
 
         Parameters
@@ -221,8 +239,10 @@ class Config:
         str
             the confirmation message
         """
-        self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
-        return "The global configuration has been edited."
+        ret = self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
+        if isinstance(ret, str):
+            return ret, 1
+        return "The global configuration has been edited.", 0
 
     def delete_service(self, service_name: str, *, check_changes: bool = True) -> Tuple[str, int]:
         """Deletes a service
@@ -269,5 +289,7 @@ class Config:
                     if k in service:
                         service.pop(k)
 
-        self.__gen_conf(new_env, new_services, check_changes=check_changes)
+        ret = self.__gen_conf(new_env, new_services, check_changes=check_changes)
+        if isinstance(ret, str):
+            return ret, 1
         return f"Configuration for {service_name} has been deleted.", 0

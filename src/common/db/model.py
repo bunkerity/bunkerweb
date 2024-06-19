@@ -58,6 +58,8 @@ class Plugins(Base):
     method = Column(METHODS_ENUM, default="manual", nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     checksum = Column(String(128), nullable=True)
+    config_changed = Column(Boolean, default=False, nullable=True)
+    last_config_change = Column(DateTime, nullable=True)
 
     settings = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
     jobs = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
@@ -88,6 +90,15 @@ class Settings(Base):
     services = relationship("Services_settings", back_populates="setting", cascade="all")
     global_value = relationship("Global_values", back_populates="setting", cascade="all")
     plugin = relationship("Plugins", back_populates="settings")
+
+
+class Selects(Base):
+    __tablename__ = "bw_selects"
+
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    value = Column(String(256), primary_key=True)
+
+    setting = relationship("Settings", back_populates="selects")
 
 
 class Global_values(Base):
@@ -186,15 +197,6 @@ class Custom_configs(Base):
     service = relationship("Services", back_populates="custom_configs")
 
 
-class Selects(Base):
-    __tablename__ = "bw_selects"
-
-    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
-    value = Column(String(256), primary_key=True)
-
-    setting = relationship("Settings", back_populates="selects")
-
-
 class Instances(Base):
     __tablename__ = "bw_instances"
 
@@ -232,6 +234,7 @@ class Metadata(Base):
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
     is_pro = Column(Boolean, default=False, nullable=False)
+    pro_license = Column(String(128), default="", nullable=True)
     pro_expire = Column(DateTime, nullable=True)
     pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
     pro_services = Column(Integer, default=0, nullable=False)
@@ -241,9 +244,13 @@ class Metadata(Base):
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
     scheduler_first_start = Column(Boolean, nullable=True)
     custom_configs_changed = Column(Boolean, default=False, nullable=True)
+    last_custom_configs_change = Column(DateTime, nullable=True)
     external_plugins_changed = Column(Boolean, default=False, nullable=True)
+    last_external_plugins_change = Column(DateTime, nullable=True)
     pro_plugins_changed = Column(Boolean, default=False, nullable=True)
-    config_changed = Column(Boolean, default=False, nullable=True)
+    last_pro_plugins_change = Column(DateTime, nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
+    last_instances_change = Column(DateTime, nullable=True)
+    failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.5.7", nullable=False)
+    version = Column(String(32), default="1.5.8", nullable=False)

@@ -5,6 +5,12 @@ class FolderNav {
       `[data-${this.prefix}-breadcrumb]`,
     );
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
+    this.isReadonly =
+      document
+        .querySelector(`[data-${this.prefix}-container]`)
+        .getAttribute(`data-readonly`) === "true"
+        ? true
+        : false;
     this.listContainer = document.querySelector(
       `[data-${this.prefix}-folders]`,
     );
@@ -95,6 +101,9 @@ class FolderNav {
   updateActions(folder) {
     // for root
     if (!folder) return this.addFileEl.setAttribute("disabled", "");
+
+    if (folder && this.isReadonly)
+      return this.addFileEl.setAttribute("disabled", "");
     //check if folder allow add file/folder
     const isAddFile = folder.getAttribute("data-can-create-file") || "False";
     isAddFile === "True"
@@ -282,6 +291,12 @@ class FolderDropdown {
 
 class FolderEditor {
   constructor() {
+    this.isReadonly =
+      document
+        .querySelector(`[data-global-is-readonly]`)
+        .getAttribute(`data-global-is-readonly`) === "true"
+        ? true
+        : false;
     this.editor = ace.edit("editor");
     this.darkMode = document.querySelector("[data-dark-toggle]");
     this.initEditor();
@@ -291,6 +306,7 @@ class FolderEditor {
   initEditor() {
     //editor options
     this.editor.setShowPrintMargin(false);
+    this.editor.setReadOnly(this.isReadonly);
     this.setDarkMode();
   }
 
@@ -315,10 +331,6 @@ class FolderEditor {
       ? this.editor.setTheme("ace/theme/dracula")
       : this.editor.setTheme("ace/theme/dawn");
   }
-
-  readOnlyBool(bool) {
-    this.editor.setReadOnly(bool);
-  }
 }
 
 class FolderModal {
@@ -326,6 +338,12 @@ class FolderModal {
     this.prefix = prefix;
     //container
     this.container = document.querySelector(`[data-${this.prefix}-container]`);
+    this.isReadonly =
+      document
+        .querySelector(`[data-${this.prefix}-container]`)
+        .getAttribute(`data-readonly`) === "true"
+        ? true
+        : false;
     //add service/file elements
     this.breadContainer = document.querySelector(
       `[data-${this.prefix}-breadcrumb]`,
@@ -362,6 +380,9 @@ class FolderModal {
     this.modalInpType = this.modalEl.querySelector("#_type");
     this.modalInpOldName = this.modalEl.querySelector("#old_name");
     this.modalTxtarea = this.modalEl.querySelector("#content");
+    this.modalDelMsg = this.modalEl.querySelector(
+      `[data-${this.prefix}-modal-delete]`,
+    );
     //HANDLERS
     //modal and values logic after clicking add file/folder button
     this.initAddConfig();
@@ -515,7 +536,7 @@ class FolderModal {
     //title
     this.modalTitle.textContent = `${action} ${type}`;
     this.setInpt(action, path, type, name);
-    this.setEditor(type, content);
+    this.setEditor(action, type, content);
     this.setSubmitTxt(action);
     this.setPath(action, path, type, name, level);
     this.setDisabled(action);
@@ -541,8 +562,8 @@ class FolderModal {
   setPath(action, path, type) {
     let [prevPath, name] = this.separatePath(path);
     //remove conf if file type
-    this.modalPathSuffix.textContent =
-      type === "file" && this.prefix === "configs" ? ".conf" : "";
+    const suffix = type === "file" && this.prefix === "configs" ? ".conf" : "";
+    this.modalPathSuffix.textContent = suffix;
     name =
       type === "file" && this.prefix === "configs"
         ? name.replace(".conf", "")
@@ -556,6 +577,21 @@ class FolderModal {
     if (action !== "new") {
       this.modalPathPrev.textContent = `${prevPath}`;
       this.modalPathName.value = `${name}`;
+    }
+
+    if (action === "delete") {
+      this.modalDelMsg.textContent = `Are you sure to delete ${prevPath}${name}${suffix} ?`;
+      this.modalDelMsg.classList.remove("hidden");
+      this.modalPathPrev.classList.add("hidden");
+      this.modalPathName.classList.add("hidden");
+      this.modalPathSuffix.classList.add("hidden");
+    }
+
+    if (action !== "delete") {
+      this.modalPathName.classList.remove("hidden");
+      this.modalPathPrev.classList.remove("hidden");
+      this.modalPathSuffix.classList.remove("hidden");
+      this.modalDelMsg.classList.add("hidden");
     }
   }
 
@@ -580,28 +616,30 @@ class FolderModal {
     if (action === "new") {
       this.modalSubmit.textContent = "add";
       this.setSubmitBtnType("valid-btn");
-      return;
     }
     if (action === "view") {
       this.modalSubmit.textContent = "ok";
       this.setSubmitBtnType("valid-btn");
-      return;
     }
     if (action === "edit") {
       this.setSubmitBtnType("edit-btn");
       this.modalSubmit.textContent = "edit";
-      return;
     }
 
     if (action === "delete") {
       this.setSubmitBtnType("delete-btn");
       this.modalSubmit.textContent = "delete";
-      return;
     }
     if (action === "download") {
       this.setSubmitBtnType("info-btn");
       this.modalSubmit.textContent = "download";
-      return;
+    }
+
+    // readonly logic
+    if (["new", "edit", "delete"].includes(action) && this.isReadonly) {
+      this.modalSubmit.setAttribute("disabled", "true");
+    } else {
+      this.modalSubmit.removeAttribute("disabled");
     }
   }
 
@@ -619,8 +657,10 @@ class FolderModal {
   }
 
   //show only if type file and display text
-  setEditor(type, content) {
+  setEditor(action, type, content) {
     //SHOW LOGIC
+    if (action === "delete") return this.modalEditor.classList.add("hidden");
+
     if (type === "folder") this.modalEditor.classList.add("hidden");
 
     if (type === "file") this.modalEditor.classList.remove("hidden");
@@ -649,8 +689,10 @@ class FolderModal {
 
   //UTILS
   disabledDOMInpt(bool) {
-    this.modalPathName.disabled = bool;
-    ace.edit("editor").setReadOnly(bool);
+    if (this.isReadonly) ace.edit("editor").setReadOnly(true);
+    if (this.isReadonly) this.modalPathName.disabled = true;
+    if (!this.isReadonly) this.modalPathName.disabled = bool;
+    if (!this.isReadonly) ace.edit("editor").setReadOnly(bool);
   }
 
   closeModal() {

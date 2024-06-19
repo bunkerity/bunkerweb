@@ -122,42 +122,88 @@
 2. **Upgrade BunkerWeb**:
       - Upgrade BunkerWeb to the latest version.
 
-    === "Docker"
+        === "Docker"
 
-        1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
-            ```yaml
-            services:
-                bunkerweb:
-                    image: bunkerity/bunkerweb:1.5.7
-                    ...
-                bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.5.7
-                    ...
-                bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.5.7
-                    ...
-                bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.5.7
-                    ...
-            ```
+            1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
+                ```yaml
+                services:
+                    bunkerweb:
+                        image: bunkerity/bunkerweb:1.5.8
+                        ...
+                    bw-scheduler:
+                        image: bunkerity/bunkerweb-scheduler:1.5.8
+                        ...
+                    bw-autoconf:
+                        image: bunkerity/bunkerweb-autoconf:1.5.8
+                        ...
+                    bw-ui:
+                        image: bunkerity/bunkerweb-ui:1.5.8
+                        ...
+                ```
 
-        2. **Restart the containers**: Restart the containers to apply the changes.
-            ```bash
-            docker compose down
-            docker compose up -d
-            ```
+            2. **Restart the containers**: Restart the containers to apply the changes.
+                ```bash
+                docker compose down
+                docker compose up -d
+                ```
 
-    === "Linux"
+        === "Linux"
 
-        3. **Stop the services**:
-            ```bash
-            systemctl stop bunkerweb
-            systemctl stop bunkerweb-ui
-            ```
+            3. **Stop the services**:
+                ```bash
+                systemctl stop bunkerweb
+                systemctl stop bunkerweb-ui
+                ```
 
-        4. **Update BunkerWeb**:
-            - Update BunkerWeb to the latest version by following the instructions in the [integration Linux page](integrations.md#linux).
+            4. **Update BunkerWeb**:
 
+                === "Debian/Ubuntu"
+
+                    First, if you have previously hold the BunkerWeb package, unhold it :
+
+                    You can print a list of packages on hold with `apt-mark showhold`
+
+                    ```shell
+                    sudo apt-mark unhold bunkerweb
+                    ```
+
+                    Them, you can update BunkerWeb package :
+
+                    ```shell
+                    sudo apt install -y bunkerweb=1.5.8
+                    ```
+
+                    To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
+
+                    ```shell
+                    sudo apt-mark hold bunkerweb
+                    ```
+
+                    More details in the [integration Linux page](integrations.md#__tabbed_1_1).
+
+                === "Fedora/RedHat"
+
+                    First, if you have previously hold the BunkerWeb package, unhold it :
+
+                    You can print a list of packages on hold with `dnf versionlock list`
+
+                    ```shell
+                    sudo dnf versionlock delete package bunkerweb
+                    ```
+
+                    Them, you can update BunkerWeb package :
+
+                    ```shell
+                    sudo dnf install -y bunkerweb-1.5.8
+                    ```
+
+                    To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
+
+                    ```shell
+                    sudo dnf versionlock add bunkerweb
+                    ```
+
+                    More details in the [integration Linux page](integrations.md#__tabbed_1_3).
 
 3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
 
@@ -183,7 +229,7 @@
 
     Get support and more information :
 
-    - [Order professionnal support](https://panel.bunkerweb.io/?utm_source=doc&utm_campaign=self)
+    - [Order professional support](https://panel.bunkerweb.io/?utm_source=doc&utm_campaign=self)
     - [Create an issue on GitHub](https://github.com/bunkerity/bunkerweb/issues)
     - [Join the BunkerWeb Discord server](https://discord.bunkerity.com)
 
@@ -193,27 +239,40 @@
 
         === "SQLite"
 
-            1. **Remove the existing database file.**
+            1. **Stop the Stack.**
+
+                ```bash
+                docker compose down
+                ```
+
+            2. **Remove the existing database file.**
 
                 ```bash
                 docker exec -u 0 -i <scheduler_container> rm -f /var/lib/bunkerweb/db.sqlite3
                 ```
 
-            2. **Restore the backup.**
+            3. **Restore the backup.**
 
                 ```bash
                 docker exec -i -T <scheduler_container> sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
                 ```
 
-        === "MySQL/MariaDB"
-
-            3. **Stop the Scheduler container.**
+            4. **Fix permissions.**
 
                 ```bash
-                docker compose down <scheduler_container>
+                docker exec -u 0 -i <scheduler_container> chown root:nginx /var/lib/bunkerweb/db.sqlite3
+                docker exec -u 0 -i <scheduler_container> chmod 770 /var/lib/bunkerweb/db.sqlite3
                 ```
 
-            4. **Restore the backup.**
+        === "MySQL/MariaDB"
+
+            5. **Stop the Stack.**
+
+                ```bash
+                docker compose down
+                ```
+
+            6. **Restore the backup.**
 
                 ```bash
                 docker exec -e MYSQL_PWD=<your_password> -i -T <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
@@ -221,25 +280,25 @@
 
         === "PostgreSQL"
 
-            5. **Stop the Scheduler container.**
+            7. **Stop the Stack.**
 
                 ```bash
-                docker compose down <scheduler_container>
+                docker compose down
                 ```
 
-            6. **Remove the existing database.**
+            8. **Remove the existing database.**
 
                 ```bash
                 docker exec -i <database_container> dropdb -U <username> --force <database_name>
                 ```
 
-            7. **Recreate the database.**
+            9. **Recreate the database.**
 
                 ```bash
                 docker exec -i <database_container> createdb -U <username> <database_name>
                 ```
 
-            8. **Restore the backup.**
+            10. **Restore the backup.**
 
                 ```bash
                 docker exec -i -T <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
@@ -263,10 +322,9 @@
                 ...
         ```
 
-    3. **Restart the containers**.
+    3. **Start the containers**.
 
         ```bash
-        docker compose down
         docker compose up -d
         ```
 
@@ -275,8 +333,7 @@
     4. **Stop the services**.
 
         ```bash
-        systemctl stop bunkerweb
-        systemctl stop bunkerweb-ui
+        systemctl stop bunkerweb bunkerweb-ui
         ```
 
     5. **Restore the backup**.
@@ -284,8 +341,10 @@
         === "SQLite"
 
             ```bash
-            rm -f /var/lib/bunkerweb/db.sqlite3
-            sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+            sudo rm -f /var/lib/bunkerweb/db.sqlite3
+            sudo sqlite3 /var/lib/bunkerweb/db.sqlite3 < /path/to/backup/directory/backup.sql
+            sudo chown root:nginx /var/lib/bunkerweb/db.sqlite3
+            sudo chmod 770 /var/lib/bunkerweb/db.sqlite3
             ```
 
         === "MySQL/MariaDB"
@@ -321,7 +380,7 @@
 
 !!! warning "Read this if you were a 1.4.X user"
 
-    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.5.7/misc/integrations) folder of the repository.
+    A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.5.8/misc/integrations) folder of the repository.
 
 ### Scheduler
 

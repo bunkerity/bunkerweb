@@ -30,14 +30,38 @@ def get_pr(repository: str, number: int) -> dict:
 
 
 def get_prs(
-    repository: str, start_date: datetime.date, end_date: datetime.date
+    repository: str, start_date: datetime.date, end_date: datetime.date, dry_run: bool
 ) -> (list, list):
-    print(f"Fetching PRs from {start_date} through {end_date}")
+    print(f"Fetching merged PRs from {start_date} through {end_date}")
+    options = ['--merged-at "{start_date}..{end_date}"']
+    all_prs = fetch_prs(repository, options, dry_run)
+
+    print(f"Fetching open changelog PRs from {start_date} through {end_date}")
+    options = ["--state open"]
+    all_prs.extend(fetch_prs(repository, options, dry_run))
+    prs = []
+    changelog_prs = []
+    for result in all_prs:
+        if CHANGELOG_LABEL in [label["name"] for label in result["labels"]]:
+            changelog_prs.append(get_pr(repository, result["number"]))
+        else:
+            prs.append(get_pr(repository, result["number"]))
+
+    return (prs, changelog_prs)
+
+
+def fetch_prs(repository: str, options: list[str], dry_run: bool) -> list[dict]:
     command = f"""gh search prs \
         --repo "{repository}" \
-        --merged-at "{start_date}..{end_date}" \
-        --json number,labels
+        --json number,labels \
     """
+    for option in options:
+        command += " " + option
+
+    if dry_run:
+        print(command)
+        return []
+
     with subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     ) as proc:
@@ -45,15 +69,7 @@ def get_prs(
         if proc.returncode != 0:
             print_errors(errors)
             sys.exit(1)
-        prs = []
-        changelog_prs = []
-        for result in json.loads(prs_json):
-            if CHANGELOG_LABEL in [label["name"] for label in result["labels"]]:
-                changelog_prs.append(get_pr(repository, result["number"]))
-            else:
-                prs.append(get_pr(repository, result["number"]))
-
-        return (prs, changelog_prs)
+        return json.loads(prs_json)
 
 
 def parse_prs(prs: list) -> dict:
@@ -277,7 +293,7 @@ def run_workflow(
     end_date: datetime.date,
     dry_run: bool,
 ):
-    prs, changelog_prs = get_prs(source_repository, start_date, end_date)
+    prs, changelog_prs = get_prs(source_repository, start_date, end_date, dry_run)
     prs_length = len(prs)
     print(f"Found {prs_length} PRs")
     if prs_length == 0:

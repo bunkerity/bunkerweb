@@ -41,8 +41,7 @@ try:
             retries += 1
             log_warning("Error while reloading, retrying...")
 
-    if TEST_TYPE == "linux":
-        wait_for_service()
+    wait_for_service()
 
     log_info("Trying to stop instance ...")
 

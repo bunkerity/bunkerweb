@@ -33,6 +33,9 @@ class SwarmTest(Test):
                 data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
             data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
             data["services"]["bunkerweb"]["environment"].append("LOG_LEVEL=info")
+            data["services"]["bunkerweb"]["environment"].append("USE_BUNKERNET=no")
+            data["services"]["bunkerweb"]["environment"].append("SEND_ANONYMOUS_REPORT=no")
+            data["services"]["bunkerweb"]["environment"].append("USE_DNSBL=no")
             del data["services"]["bunkerweb"]["deploy"]["placement"]
             with open(compose, "w") as f:
                 f.write(dump(data))

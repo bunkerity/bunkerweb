@@ -11,7 +11,6 @@
     {% set global_config_method = global_config.get(inp_name, {'method' : inp_method }).get('method') %}
     {% set global_config_value = global_config.get(inp_name, {'value' : inp_value }).get('value') %}
     {% set is_read_only = True if setting_input['is_pro_plugin'] and not is_pro_version else False %}
-
     <!-- default hidden-->
     <select data-default-method="{{ global_config_method }}"
             data-default-value="{{ inp_default }}"
@@ -20,8 +19,7 @@
             data-setting-select-default="{{ inp_id }}"
             data-type="form-select"
             class="hidden"
-            {% if is_multiple %} data-is-multiple {% endif %}
-            >
+            {% if is_multiple %}data-is-multiple{% endif %}>
         {% for item in inp_items %}
             <option {% if not item %}label="empty"{% endif %}
                     value="{{ item }}"
@@ -33,7 +31,8 @@
     <!-- end default hidden-->
     <!--custom-->
     <div data-select-container class="relative">
-        <button {% if global_config_method != 'ui' and global_config_method != 'default' or is_read_only %}disabled{% endif %}
+        <button {% if is_readonly %}disabled{% endif %}
+                {% if global_config_method != 'ui' and global_config_method != 'default' or is_read_only %}disabled{% endif %}
                 data-setting-select="{{ inp_id }}"
                 data-default-value="{{ global_config_value }}"
                 data-default-method="{{ global_config_method }}"
@@ -44,27 +43,27 @@
                 {% if global_config_value and
                     global_config_value == item %}
                     <span data-setting-select-text="{{ inp_id }}"
-                            data-value="{{ global_config_value }}">{{ global_config_value }}</span>
+                          data-value="{{ global_config_value }}">{{ global_config_value }}</span>
                 {% elif not global_config_value and inp_default == item %}
                     <span aria-description="current value"
-                            data-setting-select-text="{{ inp_id }}"
-                            data-value="{{ inp_default }}">{{ inp_default }}</span>
+                          data-setting-select-text="{{ inp_id }}"
+                          data-value="{{ inp_default }}">{{ inp_default }}</span>
                 {% endif %}
             {% endfor %}
             <!-- chevron -->
             <svg data-setting-select="{{ inp_id }}"
-                    class="transition-transform h-4 w-4 fill-gray-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512 512">
+                 class="transition-transform h-4 w-4 fill-gray-500"
+                 xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 512 512">
                 <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
             </svg>
             <!-- end chevron -->
         </button>
         <!-- dropdown-->
         <div id="{{ inp_id }}-dropdown"
-                role="listbox"
-                data-setting-select-dropdown="{{ inp_id }}"
-                class="hidden z-[20] fixed h-full flex-col mt-2 max-h-[200px] overflow-auto">
+             role="listbox"
+             data-setting-select-dropdown="{{ inp_id }}"
+             class="hidden z-[20] fixed h-full flex-col mt-2 max-h-[200px] overflow-auto">
             {% for item in inp_items %}
                 {% if global_config_value and
                     global_config_value == item or not global_config_value

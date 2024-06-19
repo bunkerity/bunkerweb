@@ -22,6 +22,22 @@ import {
   objectHasOwnProperty,
 } from './utils.js';
 
+// https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
+const NODE_TYPE = {
+  element: 1,
+  attribute: 2,
+  text: 3,
+  cdataSection: 4,
+  entityReference: 5, // Deprecated
+  entityNode: 6, // Deprecated
+  progressingInstruction: 7,
+  comment: 8,
+  document: 9,
+  documentType: 10,
+  documentFragment: 11,
+  notation: 12, // Deprecated
+};
+
 const getGlobal = function () {
   return typeof window === 'undefined' ? null : window;
 };
@@ -88,7 +104,11 @@ function createDOMPurify(window = getGlobal()) {
    */
   DOMPurify.removed = [];
 
-  if (!window || !window.document || window.document.nodeType !== 9) {
+  if (
+    !window ||
+    !window.document ||
+    window.document.nodeType !== NODE_TYPE.document
+  ) {
     // Not running in a browser, provide a factory function
     // so that you can pass your own Window
     DOMPurify.isSupported = false;
@@ -387,9 +407,6 @@ function createDOMPurify(window = getGlobal()) {
 
   /* Keep a reference to config to pass to hooks */
   let CONFIG = null;
-
-  /* Specify the maximum element nesting depth to prevent mXSS */
-  const MAX_NESTING_DEPTH = 255;
 
   /* Ideally, do not touch anything below this line */
   /* ______________________________________________ */
@@ -935,13 +952,7 @@ function createDOMPurify(window = getGlobal()) {
   const _isClobbered = function (elm) {
     return (
       elm instanceof HTMLFormElement &&
-      // eslint-disable-next-line unicorn/no-typeof-undefined
-      ((typeof elm.__depth !== 'undefined' &&
-        typeof elm.__depth !== 'number') ||
-        // eslint-disable-next-line unicorn/no-typeof-undefined
-        (typeof elm.__removalCount !== 'undefined' &&
-          typeof elm.__removalCount !== 'number') ||
-        typeof elm.nodeName !== 'string' ||
+      (typeof elm.nodeName !== 'string' ||
         typeof elm.textContent !== 'string' ||
         typeof elm.removeChild !== 'function' ||
         !(elm.attributes instanceof NamedNodeMap) ||
@@ -1024,7 +1035,7 @@ function createDOMPurify(window = getGlobal()) {
     }
 
     /* Remove any ocurrence of processing instructions */
-    if (currentNode.nodeType === 7) {
+    if (currentNode.nodeType === NODE_TYPE.progressingInstruction) {
       _forceRemove(currentNode);
       return true;
     }
@@ -1032,7 +1043,7 @@ function createDOMPurify(window = getGlobal()) {
     /* Remove any kind of possibly harmful comments */
     if (
       SAFE_FOR_XML &&
-      currentNode.nodeType === 8 &&
+      currentNode.nodeType === NODE_TYPE.comment &&
       regExpTest(/<[/\w]/g, currentNode.data)
     ) {
       _forceRemove(currentNode);
@@ -1096,7 +1107,7 @@ function createDOMPurify(window = getGlobal()) {
     }
 
     /* Sanitize element content to be template-safe */
-    if (SAFE_FOR_TEMPLATES && currentNode.nodeType === 3) {
+    if (SAFE_FOR_TEMPLATES && currentNode.nodeType === NODE_TYPE.text) {
       /* Get the element's text content */
       content = currentNode.textContent;
 
@@ -1288,6 +1299,12 @@ function createDOMPurify(window = getGlobal()) {
         continue;
       }
 
+      /* Work around a security issue with comments inside attributes */
+      if (SAFE_FOR_XML && regExpTest(/((--!?|])>)|<\/(style|title)/i, value)) {
+        _removeAttribute(name, currentNode);
+        continue;
+      }
+
       /* Sanitize attribute content to be template-safe */
       if (SAFE_FOR_TEMPLATES) {
         arrayForEach([MUSTACHE_EXPR, ERB_EXPR, TMPLIT_EXPR], (expr) => {
@@ -1348,7 +1365,11 @@ function createDOMPurify(window = getGlobal()) {
           currentNode.setAttribute(name, value);
         }
 
-        arrayPop(DOMPurify.removed);
+        if (_isClobbered(currentNode)) {
+          _forceRemove(currentNode);
+        } else {
+          arrayPop(DOMPurify.removed);
+        }
       } catch (_) {}
     }
 
@@ -1377,30 +1398,8 @@ function createDOMPurify(window = getGlobal()) {
         continue;
       }
 
-      const parentNode = getParentNode(shadowNode);
-
-      /* Set the nesting depth of an element */
-      if (shadowNode.nodeType === 1) {
-        if (parentNode && parentNode.__depth) {
-          /*
-            We want the depth of the node in the original tree, which can
-            change when it's removed from its parent.
-          */
-          shadowNode.__depth =
-            (shadowNode.__removalCount || 0) + parentNode.__depth + 1;
-        } else {
-          shadowNode.__depth = 1;
-        }
-      }
-
-      /* Remove an element if nested too deeply to avoid mXSS */
-      if (shadowNode.__depth >= MAX_NESTING_DEPTH) {
-        _forceRemove(shadowNode);
-      }
-
       /* Deep shadow DOM detected */
       if (shadowNode.content instanceof DocumentFragment) {
-        shadowNode.content.__depth = shadowNode.__depth;
         _sanitizeShadowDOM(shadowNode.content);
       }
 
@@ -1478,7 +1477,10 @@ function createDOMPurify(window = getGlobal()) {
          elements being stripped by the parser */
       body = _initDocument('<!---->');
       importedNode = body.ownerDocument.importNode(dirty, true);
-      if (importedNode.nodeType === 1 && importedNode.nodeName === 'BODY') {
+      if (
+        importedNode.nodeType === NODE_TYPE.element &&
+        importedNode.nodeName === 'BODY'
+      ) {
         /* Node is already a body, use as is */
         body = importedNode;
       } else if (importedNode.nodeName === 'HTML') {
@@ -1525,30 +1527,8 @@ function createDOMPurify(window = getGlobal()) {
         continue;
       }
 
-      const parentNode = getParentNode(currentNode);
-
-      /* Set the nesting depth of an element */
-      if (currentNode.nodeType === 1) {
-        if (parentNode && parentNode.__depth) {
-          /*
-            We want the depth of the node in the original tree, which can
-            change when it's removed from its parent.
-          */
-          currentNode.__depth =
-            (currentNode.__removalCount || 0) + parentNode.__depth + 1;
-        } else {
-          currentNode.__depth = 1;
-        }
-      }
-
-      /* Remove an element if nested too deeply to avoid mXSS */
-      if (currentNode.__depth >= MAX_NESTING_DEPTH) {
-        _forceRemove(currentNode);
-      }
-
       /* Shadow DOM detected, sanitize it */
       if (currentNode.content instanceof DocumentFragment) {
-        currentNode.content.__depth = currentNode.__depth;
         _sanitizeShadowDOM(currentNode.content);
       }
 

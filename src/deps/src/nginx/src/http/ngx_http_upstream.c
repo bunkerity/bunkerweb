@@ -521,6 +521,13 @@ ngx_http_upstream_init(ngx_http_request_t *r)
     }
 #endif
 
+#if (NGX_HTTP_V3)
+    if (c->quic) {
+        ngx_http_upstream_init_request(r);
+        return;
+    }
+#endif
+
     if (c->read->timer_set) {
         ngx_del_timer(c->read);
     }
@@ -1352,6 +1359,19 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
     if (r->stream) {
         return;
     }
+#endif
+
+#if (NGX_HTTP_V3)
+
+    if (c->quic) {
+        if (c->write->error) {
+            ngx_http_upstream_finalize_request(r, u,
+                                               NGX_HTTP_CLIENT_CLOSED_REQUEST);
+        }
+
+        return;
+    }
+
 #endif
 
 #if (NGX_HAVE_KQUEUE)
@@ -3929,6 +3949,8 @@ ngx_http_upstream_thread_handler(ngx_thread_task_t *task, ngx_file_t *file)
     r->aio = 1;
     p->aio = 1;
 
+    ngx_add_timer(&task->event, 60000);
+
     return NGX_OK;
 }
 
@@ -3947,6 +3969,17 @@ ngx_http_upstream_thread_event_handler(ngx_event_t *ev)
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "http upstream thread: \"%V?%V\"", &r->uri, &r->args);
 
+    if (ev->timedout) {
+        ngx_log_error(NGX_LOG_ALERT, c->log, 0,
+                      "thread operation took too long");
+        ev->timedout = 0;
+        return;
+    }
+
+    if (ev->timer_set) {
+        ngx_del_timer(ev);
+    }
+
     r->main->blocked--;
     r->aio = 0;
 
@@ -3964,11 +3997,11 @@ ngx_http_upstream_thread_event_handler(ngx_event_t *ev)
 
 #endif
 
-    if (r->done) {
+    if (r->done || r->main->terminated) {
         /*
          * trigger connection event handler if the subrequest was
-         * already finalized; this can happen if the handler is used
-         * for sendfile() in threads
+         * already finalized (this can happen if the handler is used
+         * for sendfile() in threads), or if the request was terminated
          */
 
         c->write->handler(c->write);
@@ -4540,6 +4573,10 @@ ngx_http_upstream_finalize_request(ngx_http_request_t *r,
     }
 
     u->peer.connection = NULL;
+
+    if (u->pipe) {
+        u->pipe->upstream = NULL;
+    }
 
     if (u->pipe && u->pipe->temp_file) {
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,

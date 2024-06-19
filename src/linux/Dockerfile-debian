@@ -1,7 +1,7 @@
 FROM debian:bookworm-slim@sha256:d02c76d82364cedca16ba3ed6f9102406fa9fa8833076a609cabf14270f43dfc as builder
 
 ENV OS=debian
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.1
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -11,7 +11,7 @@ RUN apt update && \
     echo "deb-src https://nginx.org/packages/debian/ bookworm nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~bookworm
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-2~bookworm
 
 WORKDIR /tmp/bunkerweb/deps
 

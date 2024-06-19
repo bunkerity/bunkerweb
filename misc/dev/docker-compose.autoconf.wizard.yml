@@ -10,8 +10,9 @@ services:
       context: ../..
       dockerfile: ./src/bw/Dockerfile
     ports:
-      - 80:8080
-      - 443:8443
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
@@ -28,6 +29,7 @@ services:
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - UI_HOST=http://bw-ui:7000
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -45,6 +47,7 @@ services:
       - bw-docker
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -64,6 +67,7 @@ services:
       - bw-data:/data
     environment:
       <<: *env
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -79,6 +83,7 @@ services:
     environment:
       - CONTAINERS=1
       - LOG_LEVEL=warning
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -100,6 +105,7 @@ services:
     environment:
       <<: *env
       DEBUG: "1"
+    restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
@@ -117,6 +123,7 @@ services:
       - MYSQL_PASSWORD=secret
     volumes:
       - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
       bw-docker:
         aliases:
@@ -124,6 +131,7 @@ services:
 
   app1:
     image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
     networks:
       bw-services:
         aliases:

@@ -66,25 +66,21 @@ class Controller(Config):
     def _to_services(self, controller_service):
         pass
 
-    @abstractmethod
-    def _get_static_services(self):
-        pass
-
     def _set_autoconf_load_db(self):
         if not self._loaded:
             ret = self._db.set_autoconf_load(True)
             if ret:
-                self._logger.warning(
-                    f"Can't set autoconf loaded metadata to true in database: {ret}",
-                )
+                self._logger.warning(f"Can't set autoconf loaded metadata to true in database: {ret}")
             else:
                 self._loaded = True
 
     def get_services(self):
+        while not self._get_controller_services():
+            sleep(1)
+
         services = []
         for controller_service in self._get_controller_services():
             services.extend(self._to_services(controller_service))
-        services.extend(self._get_static_services())
         return services
 
     @abstractmethod

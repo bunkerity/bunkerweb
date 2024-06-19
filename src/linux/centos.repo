@@ -1,6 +1,0 @@
-[centos8-base]
-name = CentOS 8 Base OS
-baseurl = http://mirror.centos.org/centos/8-stream/BaseOS/%ARCH%/os/
-gpgcheck = 1
-enabled = 1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial

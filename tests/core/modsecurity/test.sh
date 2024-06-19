@@ -47,7 +47,7 @@ cleanup_stack () {
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_MODSECURITY: "no"@USE_MODSECURITY: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_MODSECURITY_CRS: "no"@USE_MODSECURITY_CRS: "yes"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@MODSECURITY_CRS_VERSION: "4"@MODSECURITY_CRS_VERSION: "3"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@MODSECURITY_CRS_VERSION: ".*"@MODSECURITY_CRS_VERSION: "3"@' {} \;
         else
             sudo sed -i 's@USE_MODSECURITY=.*$@USE_MODSECURITY=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@USE_MODSECURITY_CRS=.*$@USE_MODSECURITY_CRS=yes@' /etc/bunkerweb/variables.env
@@ -80,7 +80,7 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
-for test in "activated" "crs_deactivated" "crs_v4" "deactivated"
+for test in "activated" "crs_deactivated" "crs_v4" "crs_nightly" "deactivated"
 do
     if [ "$test" = "activated" ] ; then
         echo "👮 Running tests with modsecurity activated ..."
@@ -95,10 +95,18 @@ do
     elif [ "$test" = "crs_v4" ] ; then
         echo "👮 Running tests with the CRS v4 ..."
         if [ "$integration" == "docker" ] ; then
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@MODSECURITY_CRS_VERSION: "3"@MODSECURITY_CRS_VERSION: "4"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@MODSECURITY_CRS_VERSION: ".*"@MODSECURITY_CRS_VERSION: "4"@' {} \;
         else
             sudo sed -i 's@MODSECURITY_CRS_VERSION=.*$@MODSECURITY_CRS_VERSION=4@' /etc/bunkerweb/variables.env
             export MODSECURITY_CRS_VERSION="4"
+        fi
+    elif [ "$test" = "crs_nightly" ] ; then
+        echo "👮 Running tests with the CRS nightly ..."
+        if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@MODSECURITY_CRS_VERSION: ".*"@MODSECURITY_CRS_VERSION: "nightly"@' {} \;
+        else
+            sudo sed -i 's@MODSECURITY_CRS_VERSION=.*$@MODSECURITY_CRS_VERSION=nightly@' /etc/bunkerweb/variables.env
+            export MODSECURITY_CRS_VERSION="nightly"
         fi
     elif [ "$test" = "deactivated" ] ; then
         echo "👮 Running tests without modsecurity ..."

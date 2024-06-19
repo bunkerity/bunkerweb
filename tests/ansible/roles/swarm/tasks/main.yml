@@ -18,7 +18,14 @@
     name: docker
     state: forcereinstall
     executable: pip3
-    version: "6.1.3"
+    version: "7.1.0"
+
+- name: Install requests for py3
+  pip:
+    name: requests
+    state: forcereinstall
+    executable: pip3
+    version: "2.31.0"
 
 - name: Add IP address of all hosts to all hosts
   lineinfile:
@@ -33,8 +40,6 @@
   community.docker.docker_swarm:
     advertise_addr: "{{ local_ip }}"
     listen_addr: "{{ local_ip }}"
-    ssl_version: "1.3"
-    validate_certs: yes
     state: present
   register: result
   when: inventory_hostname == groups['managers'][0]
@@ -64,8 +69,6 @@
   community.docker.docker_swarm:
     advertise_addr: "{{ local_ip }}"
     listen_addr: "{{ local_ip }}"
-    ssl_version: 1.3
-    validate_certs: yes
     state: join
     join_token: "{{ join_token_worker }}"
     remote_addrs: ["{{ hostvars[groups['managers'][0]].local_ip }}:2377"]

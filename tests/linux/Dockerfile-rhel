@@ -1,20 +1,20 @@
-FROM redhat/ubi8-init:8.9-7.1715071668@sha256:3bcb1434ddc595236a1e45b9c4d4722ab8f1348a371c6239973bbf4d67b24c96
+FROM redhat/ubi8-init:8.10-2.1717585302@sha256:0a87a84de9b4fe211a0623cf7b1431895c9c6590d345e20bb5483f09629d53d3
 
-ENV NGINX_VERSION 1.24.0
+ENV NGINX_VERSION 1.26.1
 
-# Copy centos repo
-COPY src/linux/centos.repo /etc/yum.repos.d/centos.repo
-RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/centos.repo
+# Copy rocky repo
+COPY src/linux/rocky-8.repo /etc/yum.repos.d/rocky.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/rocky.repo
 
-# Copy RPM-GPG-KEY-CentOS-Official
-COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+# Copy RPM-GPG-KEY-Rocky-8
+COPY src/linux/RPM-GPG-KEY-Rocky-8 /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
 
-# Import RPM-GPG-KEY-CentOS-Official
-RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+# Import RPM-GPG-KEY-Rocky-8
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
 
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
-RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     dnf install php-fpm curl yum-utils -y && \
     dnf install nginx-${NGINX_VERSION} -y
 

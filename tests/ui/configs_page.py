@@ -38,6 +38,8 @@ try:
     log_info("Navigating to the configs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[2]/ul[1]/li[5]/a", "configs")
 
+    DRIVER.refresh()
+
     log_info("Trying to create a new config ...")
 
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
@@ -66,7 +68,7 @@ location /hello {
 
     assert_alert_message(DRIVER, "Created")
 
-    sleep(30)
+    sleep(5)
 
     DRIVER.execute_script("window.open('http://www.example.com/hello','_blank');")
     DRIVER.switch_to.window(DRIVER.window_handles[1])
@@ -165,9 +167,9 @@ location /hello {
 
     assert_alert_message(DRIVER, "Deleted")
 
-    sleep(30)
+    sleep(5)
 
-    resp = get("http://www.example.com/hello")
+    resp = get("http://www.example.com/hello", verify=False)
 
     if resp.status_code != 404:
         log_error("The config hasn't been deleted correctly, exiting ...")
@@ -202,7 +204,7 @@ location /hello {
 
     assert_alert_message(DRIVER, "Created")
 
-    sleep(30)
+    sleep(5)
 
     DRIVER.execute_script("window.open('http://app1.example.com/hello','_blank');")
     DRIVER.switch_to.window(DRIVER.window_handles[1])
@@ -221,7 +223,7 @@ location /hello {
     DRIVER.close()
     DRIVER.switch_to.window(DRIVER.window_handles[0])
 
-    resp = get("http://www.example.com/hello")
+    resp = get("http://www.example.com/hello", verify=False)
 
     if resp.status_code != 404:
         log_error("The config didn't get created only for the app1.example.com service, exiting ...")

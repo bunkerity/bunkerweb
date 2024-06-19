@@ -10,6 +10,7 @@
             <link rel="stylesheet" href="css/dashboard.css" />
             <link rel="stylesheet" href="css/login.css" />
             <script defer src="./js/totp.js" nonce="{{ script_nonce }}"></script>
+            <script src="js/lottie-web.min.js" defer nonce="{{ script_nonce }}"></script>
         </head>
         <body>
             <div data-loader
@@ -108,10 +109,11 @@
                 <!-- end form -->
                 <!-- particles -->
                 <div class="-z-10 fixed bg-primary">
-                    <div id="particles-js" class="login-img [&>*]:bg-primary"></div>
+                    <div id="lottie-particles"
+                         data-lottie="/lotties/PARTICLES.json"
+                         class="fixed top-0 left-0 w-full h-full login-img [&>*]:bg-primary"></div>
                 </div>
             </main>
-            <script src="js/tsparticles.bundle.min.js" nonce="{{ script_nonce }}"></script>
             <script nonce="{{ script_nonce }}">
       class Loader {
         constructor() {
@@ -187,7 +189,16 @@
 
       const setLoader = new Loader();
       const setFlash = new FlashMsg();
-      tsParticles.loadJSON("particles-js", "json/particles.json");
+
+      window.addEventListener("load", () => {
+        lottie.loadAnimation({
+          container: document.querySelector("#lottie-particles"), // the dom element that will contain the animation
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: "json/particles.json" // the path to the animation json
+          });
+      });
             </script>
         </body>
     </html>

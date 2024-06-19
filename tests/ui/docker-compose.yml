@@ -5,14 +5,16 @@ x-env: &env
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.7
+    image: bunkerity/bunkerweb:1.5.8
     pull_policy: never
     ports:
       - 80:80
+      - 443:443
     environment:
       SERVER_NAME: ""
       MULTISITE: "yes"
       HTTP_PORT: "80"
+      HTTPS_PORT: "443"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       LOG_LEVEL: "info"
       USE_BUNKERNET: "no"
@@ -41,7 +43,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.7
+    image: bunkerity/bunkerweb-scheduler:1.5.8
     pull_policy: never
     depends_on:
       - bw
@@ -55,7 +57,7 @@ services:
       - bw-universe
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.7
+    image: bunkerity/bunkerweb-ui:1.5.8
     pull_policy: never
     depends_on:
       - bw

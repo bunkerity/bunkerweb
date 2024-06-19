@@ -29,7 +29,7 @@ LETS_ENCRYPT_WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LETS_ENCRYPT_LOGS_DIR = join(sep, "var", "log", "bunkerweb")
 
 
-def certbot_new(domains: str, email: str, use_letsencrypt_staging: bool = False) -> int:
+def certbot_new(domains: str, email: str, use_letsencrypt_staging: bool = False, *, force: bool = False) -> int:
     process = Popen(
         [
             CERTBOT_BIN,
@@ -54,7 +54,8 @@ def certbot_new(domains: str, email: str, use_letsencrypt_staging: bool = False)
             "--agree-tos",
             "--expand",
         ]
-        + (["--staging"] if use_letsencrypt_staging else []),
+        + (["--staging"] if use_letsencrypt_staging else [])
+        + (["--force-renewal"] if force else []),
         stdin=DEVNULL,
         stderr=PIPE,
         universal_newlines=True,
@@ -73,7 +74,7 @@ try:
     # Check if we're using let's encrypt
     use_letsencrypt = False
     is_multisite = getenv("MULTISITE", "no") == "yes"
-    all_domains = getenv("SERVER_NAME", "")
+    all_domains = getenv("SERVER_NAME", "").lower()
     server_names = all_domains.split(" ")
 
     if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
@@ -87,7 +88,7 @@ try:
     if not use_letsencrypt:
         LOGGER.info("Let's Encrypt is not activated, skipping generation...")
         sys_exit(0)
-    elif not getenv("SERVER_NAME"):
+    elif not all_domains:
         LOGGER.warning("There are no server names, skipping generation...")
         sys_exit(0)
 
@@ -96,7 +97,7 @@ try:
     # Restore Let's Encrypt data from db cache
     JOB.restore_cache(job_name="certbot-renew")
 
-    domains_to_ask = []
+    domains_to_ask = {}
     # Multisite case
     if is_multisite:
         domains_server_names = {}
@@ -104,7 +105,7 @@ try:
         for first_server in server_names:
             if not first_server or getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
                 continue
-            domains_server_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server)
+            domains_server_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server).lower()
     # Singlesite case
     else:
         domains_server_names = {server_names[0]: all_domains}
@@ -133,18 +134,18 @@ try:
 
     if proc.returncode != 0:
         LOGGER.error(f"Error while checking certificates :\n{proc.stdout}")
-        domains_to_ask = server_names
+        domains_to_ask = {domain: True for domain in server_names}
     else:
         for first_server, domains in domains_server_names.items():
             generated_domains.update(domains.split(" "))
 
             current_domains = search(rf"Domains: {first_server}(?P<domains>.*)$", stdout, MULTILINE)
             if not current_domains:
-                domains_to_ask.append(first_server)
+                domains_to_ask[first_server] = False
                 continue
             elif set(f"{first_server}{current_domains.groupdict()['domains']}".strip().split(" ")) != set(domains.split(" ")):
                 LOGGER.warning(f"Domains for {first_server} are not the same as in the certificate, asking new certificate...")
-                domains_to_ask.append(first_server)
+                domains_to_ask[first_server] = True
                 continue
             LOGGER.info(f"Certificates already exists for domain(s) {domains}")
 
@@ -159,7 +160,7 @@ try:
         use_letsencrypt_staging = getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes"
 
         LOGGER.info(f"Asking certificates for domain(s) : {domains} (email = {real_email}) to Let's Encrypt {'staging ' if use_letsencrypt_staging else ''}...")
-        if certbot_new(domains.replace(" ", ","), real_email, use_letsencrypt_staging) != 0:
+        if certbot_new(domains.replace(" ", ","), real_email, use_letsencrypt_staging, force=domains_to_ask[first_server]) != 0:
             status = 2
             LOGGER.error(f"Certificate generation failed for domain(s) {domains} ...")
             continue
@@ -171,7 +172,7 @@ try:
     if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
         LOGGER.info("Clear old certificates is activated, removing old / no longer used certificates...")
         for elem in chain(DATA_PATH.glob("archive/*"), DATA_PATH.glob("live/*"), DATA_PATH.glob("renewal/*")):
-            if elem.name.replace(".conf", "") not in generated_domains:
+            if elem.name.replace(".conf", "") not in generated_domains and elem.name != "README":
                 LOGGER.warning(f"Removing old certificate {elem}")
                 if elem.is_dir():
                     rmtree(elem, ignore_errors=True)

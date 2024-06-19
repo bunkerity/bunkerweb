@@ -7,11 +7,29 @@ local original = "original text"
 
 -- same as nodejs: crypto.privateEncrypt
 --            php: openssl_private_encrypt
-local digested = assert(priv:sign_raw(original))
+local signed = assert(priv:sign_raw(original))
 
-print("Digested message: " .. ngx.encode_base64(digested))
+print("Signed message: " .. ngx.encode_base64(signed))
 
 -- same as nodejs: crypto.publicDecrypt
 --            php: openssl_public_decrypt
-local recovered = assert(pub:verify_recover(digested))
+local recovered = assert(pub:verify_recover(signed))
 print("Recovered message: " .. recovered)
+
+
+local priv = assert(pkey.new({
+    type = "EC",
+}))
+local pub = assert(pkey.new(priv:to_PEM("public")))
+local md_alg = "sha512"
+
+local hashed = require "resty.openssl.digest".new(md_alg):final(original)
+
+local signed = assert(priv:sign_raw(hashed))
+
+print("Signed message: " .. ngx.encode_base64(signed))
+
+-- same as nodejs: crypto.publicDecrypt
+--            php: openssl_public_decrypt
+local verified = assert(pub:verify_raw(signed, hashed, md_alg))
+print("Verification result: ", verified)

@@ -47,6 +47,9 @@
   @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
+.btn-disabled-style {
+  @apply disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+}
 /*----------------------------------------------*/
 /*---------------SETTINGS_PLUGINS---------------*/
 /*----------------------------------------------*/
@@ -187,7 +190,7 @@
 /*---------------------------------------------*/
 
 .home-card {
-  @apply break-all break-words dark:brightness-110 sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply break-all break-words dark:brightness-110 sm:max-h-28 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .home-card-name {
@@ -279,11 +282,19 @@
 }
 
 .core-card {
-  @apply ml-2 mr-2 mb-2 mt-2 h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit transition col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-list-large {
+  @apply overflow-x-auto overflow-y-hidden ml-2 mr-2 mt-2 h-fit lg:h-full mb-2 lg:mb-0 transition col-span-12 lg:col-span-6 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-filter {
+  @apply col-span-12 md:col-span-6 2xl:col-span-4 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-lg {
-  @apply ml-2 mr-2 mb-2 mt-2 h-fit transition hover:scale-102 col-span-12 md:col-span-6 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit transition col-span-12 md:col-span-6 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-wrap {
@@ -331,7 +342,7 @@
 }
 
 .core-card-status {
-  @apply ml-2 mr-2 mb-2 mt-2 col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 h-fit transition hover:scale-102 p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 h-fit transition p-4 relative min-w-0 break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-status-container {
@@ -427,7 +438,7 @@
 }
 
 .core-card-metrics {
-  @apply ml-2 mr-2 mb-2 mt-2 h-fit sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply ml-2 mr-2 mb-2 mt-2 h-fit sm:max-h-28 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between break-words dark:brightness-110 bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .core-card-metrics-name {
@@ -663,11 +674,15 @@
 }
 
 .plugins-list-items-delete {
-  @apply z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px;
+  @apply z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px disabled:cursor-not-allowed;
 }
 
 .plugins-list-items-delete-svg {
   @apply h-5 w-5 fill-red-500 dark:brightness-90;
+}
+
+.readonly.plugins-list-items-delete-svg {
+  @apply cursor-not-allowed opacity-[0.5];
 }
 
 .plugins-list-items-link {

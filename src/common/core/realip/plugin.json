@@ -53,7 +53,7 @@
     "REAL_IP_FROM_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
+      "help": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "real-ip-from-urls",
       "label": "Real IP from URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
