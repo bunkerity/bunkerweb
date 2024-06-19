@@ -17,7 +17,7 @@
     },
     "REMOVE_HEADERS": {
       "context": "multisite",
-      "default": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
+      "default": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins",
       "help": "Headers to remove (Header1 Header2 Header3 ...)",
       "id": "remove-headers",
       "label": "Remove headers",
@@ -35,7 +35,7 @@
     },
     "STRICT_TRANSPORT_SECURITY": {
       "context": "multisite",
-      "default": "max-age=31536000",
+      "default": "max-age=31536000; includeSubDomains; preload",
       "help": "Value for the Strict-Transport-Security header.",
       "id": "strict-transport-security",
       "label": "Strict-Transport-Security",
@@ -90,12 +90,21 @@
     },
     "PERMISSIONS_POLICY": {
       "context": "multisite",
-      "default": "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
+      "default": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",
       "help": "Value for the Permissions-Policy header.",
       "id": "permissions-policy",
       "label": "Permissions-Policy",
       "regex": "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
       "type": "text"
+    },
+    "DISABLE_FLOC": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Disable FLoC (Federated Learning of Cohorts) by adding the interest-cohort=() directive to the Permissions-Policy header.",
+      "id": "disable-floc",
+      "label": "Disable FLoC (Federated Learning of Cohorts)",
+      "regex": "^(yes|no)$",
+      "type": "check"
     },
     "X_FRAME_OPTIONS": {
       "context": "multisite",
@@ -125,6 +134,16 @@
       "label": "X-XSS-Protection",
       "regex": "^0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?$",
       "type": "text"
+    },
+    "X_DNS_PREFETCH_CONTROL": {
+      "context": "multisite",
+      "default": "off",
+      "help": "Value for the X-DNS-Prefetch-Control header.",
+      "id": "x-dns-prefetch-control",
+      "label": "X-DNS-Prefetch-Control",
+      "regex": "^(on|off)$",
+      "type": "select",
+      "select": ["on", "off"]
     }
   }
 }

@@ -22,6 +22,7 @@ function headers:initialize(ctx)
 		["X_FRAME_OPTIONS"] = "X-Frame-Options",
 		["X_CONTENT_TYPE_OPTIONS"] = "X-Content-Type-Options",
 		["X_XSS_PROTECTION"] = "X-XSS-Protection",
+		["X_DNS_PREFETCH_CONTROL"] = "X-DNS-Prefetch-Control",
 	}
 	-- Load data from datastore if needed
 	if get_phase() ~= "init" then
@@ -95,6 +96,11 @@ function headers:header()
 					and self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes"
 				then
 					ngx_header["Content-Security-Policy-Report-Only"] = self.variables[variable]
+				elseif header == "Permissions-Policy" then
+					ngx_header[header] = self.variables[variable]
+					if self.variables["DISABLE_FLOC"] == "yes" then
+						ngx_header[header] = ngx_header[header] .. "; interest-cohort=()"
+					end
 				else
 					ngx_header[header] = self.variables[variable]
 				end
