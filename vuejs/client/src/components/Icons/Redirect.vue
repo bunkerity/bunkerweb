@@ -1,9 +1,7 @@
 <script setup>
-import { defineProps, reactive, onMounted } from "vue";
-import { useUUID } from "@utils/global.js";
 /** 
-  @name Icons/Cross.vue
-  @description This component is a svg icon representing a cross mark.
+  @name Icons/Redirect.vue
+  @description This component is a svg icon representing redirect.
   @example
   {
     iconColor: 'info',
@@ -24,29 +22,20 @@ const props = defineProps({
     default: "info",
   },
 });
-
-const icon = reactive({
-  id: "",
-});
-
-onMounted(() => {
-  icon.id = useUUID(icon.id);
-});
 </script>
 <template>
-  <span :id="icon.id" class="sr-only">{{ $t("icons_cross_desc") }}</span>
   <svg
-    data-svg="cross"
+    data-svg="redirect"
     role="img"
+    aria-hidden="true"
+    :class="[props.iconClass, props.iconColor]"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
-    :aria-labelledby="icon.id"
-    :class="[props.iconClass, props.iconColor]"
   >
     <path
       fill-rule="evenodd"
-      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+      d="M15.75 2.25H21a.75.75 0 0 1 .75.75v5.25a.75.75 0 0 1-1.5 0V4.81L8.03 17.03a.75.75 0 0 1-1.06-1.06L19.19 3.75h-3.44a.75.75 0 0 1 0-1.5Zm-10.5 4.5a1.5 1.5 0 0 0-1.5 1.5v10.5a1.5 1.5 0 0 0 1.5 1.5h10.5a1.5 1.5 0 0 0 1.5-1.5V10.5a.75.75 0 0 1 1.5 0v8.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V8.25a3 3 0 0 1 3-3h8.25a.75.75 0 0 1 0 1.5H5.25Z"
       clip-rule="evenodd"
     />
   </svg>

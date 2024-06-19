@@ -510,7 +510,15 @@ body {
 }
 
 .popover-svg {
-  @apply pointer-events-none z-0 hover:brightness-95 fill-blue-500 h-5 w-5;
+  @apply pointer-events-none z-0 hover:brightness-95 fill-blue-500;
+}
+
+.default.popover-svg {
+  @apply h-7 w-7;
+}
+
+.setting.popover-svg {
+  @apply h-5 w-5;
 }
 
 /* TABS */
@@ -974,27 +982,44 @@ body {
   @apply leading-normal mb-0 ;
 }
 
-/* CONTENT DETAIL LSIT COMPONENT */
+.text-stat {
+  @apply my-1 font-bold dark:text-white/90 text-black uppercase;
+}
+/* LIST COMPONENT */
 
-.content-detail-list-container {
+.list-pairs-container {
   @apply grid grid-cols-12 gap-2 my-4;
 }
 
-.content-detail-list-item {
+.list-pairs-item {
   @apply flex items-center col-span-1 py-1 sm:py-0;
 }
 
-.content-detail-list-title {
+.list-pairs-title {
   @apply min-w-fit transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500;
 }
 
-.content-detail-list-subtitle {
+.list-pairs-subtitle {
   @apply min-w-[2rem] break-all transition duration-300 ease-in-out pl-3 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-100;
 }
 
-.content-stat {
-  @apply my-1 font-bold dark:text-white/90 text-black uppercase;
+.list-details-container {
+  @apply grid grid-cols-12 gap-2 my-4;
 }
+
+.list-details {
+  @apply py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded;
+ }
+ 
+.enabled.list-details  {
+  @apply bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800;
+}
+
+.disabled.list-details  {
+  @apply cursor-not-allowed bg-gray-300 dark:bg-gray-800;
+}
+
+
 
 /* TITLE */
 

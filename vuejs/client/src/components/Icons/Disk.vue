@@ -19,7 +19,7 @@ const props = defineProps({
   iconColor: {
     type: String,
     required: false,
-    default: "info",
+    default: "orange",
   },
 });
 </script>

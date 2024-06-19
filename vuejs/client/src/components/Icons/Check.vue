@@ -1,6 +1,6 @@
 <script setup>
-import { v4 as uuidv4 } from "uuid";
-import { defineProps, reactive } from "vue";
+import { useUUID } from "@utils/global.js";
+import { defineProps, reactive, onMounted } from "vue";
 /** 
   @name Icons/Check.vue
   @description This component is a svg icon representing a check mark.
@@ -21,12 +21,16 @@ const props = defineProps({
   iconColor: {
     type: String,
     required: false,
-    default: "info",
+    default: "success",
   },
 });
 
 const icon = reactive({
-  id: uuidv4(),
+  id: "",
+});
+
+onMounted(() => {
+  icon.id = useUUID(icon.id);
 });
 </script>
 <template>

@@ -3,6 +3,7 @@ import { reactive, defineProps, computed, onBeforeMount } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
+import Select from "@components/Forms/Field/Select.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
 import Advanced from "@components/Form/Advanced.vue";
 import Raw from "@components/Form/Raw.vue";
@@ -113,7 +114,7 @@ onBeforeMount(() => {
         :values="data.templates"
         @inp="data.currTemplateName = $event"
       />
-      <Combobox
+      <Select
         v-if="data.modes.length > 1"
         v-bind="comboboxModes"
         :value="data.currModeName"

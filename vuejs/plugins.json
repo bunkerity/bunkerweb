@@ -33,11 +33,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Internal use : set to yes when BW is loading."
                             }
@@ -65,11 +67,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Where nginx will search for configurations."
                             }
@@ -97,11 +101,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "HTTP port number which bunkerweb binds to."
                             }
@@ -129,11 +135,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "HTTPS port number which bunkerweb binds to."
                             }
@@ -161,11 +169,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Multi site activation."
                             }
@@ -193,11 +203,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of the virtual hosts served by bunkerweb."
                             }
@@ -225,11 +237,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Number of worker processes."
                             }
@@ -257,11 +271,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum number of open files for worker processes."
                             }
@@ -289,11 +305,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum number of connections per worker."
                             }
@@ -321,11 +339,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The format to use for access logs."
                             }
@@ -363,11 +383,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The level to use for error logs."
                             }
@@ -395,11 +417,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "DNS addresses of resolvers to use."
                             }
@@ -427,11 +451,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Size of the internal datastore."
                             }
@@ -459,11 +485,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Size of the internal cachestore."
                             }
@@ -491,11 +519,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Size of the internal cachestore (ipc)."
                             }
@@ -523,11 +553,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Size of the internal cachestore (miss)."
                             }
@@ -555,11 +587,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Size of the internal cachestore (locks)."
                             }
@@ -587,11 +621,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate the API to control BunkerWeb."
                             }
@@ -619,11 +655,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Listen port number for the API."
                             }
@@ -651,11 +689,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Listen IP address for the API."
                             }
@@ -683,11 +723,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Server name (virtual host) for the API."
                             }
@@ -715,11 +757,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of IP/network allowed to contact the API."
                             }
@@ -747,11 +791,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable Autoconf Docker integration."
                             }
@@ -779,11 +825,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable Docker Swarm integration."
                             }
@@ -811,11 +859,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable Kubernetes integration."
                             }
@@ -847,11 +897,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Server type : http or stream."
                             }
@@ -879,11 +931,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable listening for non-ssl (passthrough)."
                             }
@@ -911,11 +965,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Listening port for non-ssl (passthrough)."
                             }
@@ -943,11 +999,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Listening port for ssl (passthrough)."
                             }
@@ -975,11 +1033,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "UDP listen instead of TCP (stream)."
                             }
@@ -1007,11 +1067,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable IPv6 connectivity."
                             }
@@ -1039,11 +1101,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Internal use : set to yes when the service is in draft mode."
                             }
@@ -1081,11 +1145,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Log level for timers."
                             }
@@ -1113,11 +1179,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
                             }
@@ -1167,11 +1235,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate antibot feature."
                             }
@@ -1199,11 +1269,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Unused URI that clients will be redirected to to solve the challenge."
                             }
@@ -1231,11 +1303,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated."
                             }
@@ -1263,11 +1337,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one."
                             }
@@ -1295,11 +1371,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Minimum score required for reCAPTCHA challenge."
                             }
@@ -1327,11 +1405,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Sitekey for reCAPTCHA challenge."
                             }
@@ -1359,11 +1439,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Secret for reCAPTCHA challenge."
                             }
@@ -1391,11 +1473,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Sitekey for hCaptcha challenge."
                             }
@@ -1423,11 +1507,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Secret for hCaptcha challenge."
                             }
@@ -1455,11 +1541,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Sitekey for Turnstile challenge."
                             }
@@ -1487,11 +1575,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Secret for Turnstile challenge."
                             }
@@ -1532,11 +1622,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use HTTP basic auth"
                             }
@@ -1564,11 +1656,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "URL of the protected resource or sitewide value."
                             }
@@ -1596,11 +1690,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Username"
                             }
@@ -1628,11 +1724,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Password"
                             }
@@ -1660,11 +1758,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Text to display"
                             }
@@ -1705,11 +1805,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable or disable the backup feature"
                             }
@@ -1742,11 +1844,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The frequency of the backup (daily, weekly or monthly)"
                             }
@@ -1774,11 +1878,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The number of backups to keep"
                             }
@@ -1806,11 +1912,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The directory where the backup will be stored"
                             }
@@ -1856,11 +1964,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate Bad behavior feature."
                             }
@@ -1888,11 +1998,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of HTTP status codes considered as 'bad'."
                             }
@@ -1920,11 +2032,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum number of 'bad' HTTP status codes within the period of time before IP is banned."
                             }
@@ -1952,11 +2066,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Period of time (in seconds) during which we count 'bad' HTTP status codes."
                             }
@@ -1984,11 +2100,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold."
                             }
@@ -2029,11 +2147,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate blacklist feature."
                             }
@@ -2061,11 +2181,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of IP/network, separated with spaces, to block."
                             }
@@ -2093,11 +2215,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of reverse DNS suffixes, separated with spaces, to block."
                             }
@@ -2125,11 +2249,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Only perform RDNS blacklist checks on global IP addresses."
                             }
@@ -2157,11 +2283,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of ASN numbers, separated with spaces, to block."
                             }
@@ -2189,11 +2317,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of User-Agent (PCRE regex), separated with spaces, to block."
                             }
@@ -2221,11 +2351,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URI (PCRE regex), separated with spaces, to block."
                             }
@@ -2253,11 +2385,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of IP/network, separated with spaces, to ignore in the blacklist."
                             }
@@ -2285,11 +2419,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist."
                             }
@@ -2317,11 +2453,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of ASN numbers, separated with spaces, to ignore in the blacklist."
                             }
@@ -2349,11 +2487,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist."
                             }
@@ -2381,11 +2521,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URI (PCRE regex), separated with spaces, to ignore in the blacklist."
                             }
@@ -2413,11 +2555,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing bad IP/network to block."
                             }
@@ -2445,11 +2589,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing reverse DNS suffixes to block."
                             }
@@ -2477,11 +2623,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing ASN to block."
                             }
@@ -2509,11 +2657,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing bad User-Agent to block."
                             }
@@ -2541,11 +2691,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing bad URI to block."
                             }
@@ -2573,11 +2725,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist."
                             }
@@ -2605,11 +2759,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist."
                             }
@@ -2637,11 +2793,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing ASN to ignore in the blacklist."
                             }
@@ -2669,11 +2827,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist."
                             }
@@ -2701,11 +2861,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing URI to ignore in the blacklist."
                             }
@@ -2746,11 +2908,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use brotli"
                             }
@@ -2778,11 +2942,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of MIME types that will be compressed with brotli."
                             }
@@ -2810,11 +2976,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Minimum length for brotli compression."
                             }
@@ -2856,11 +3024,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The compression level of the brotli algorithm."
                             }
@@ -2901,11 +3071,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate BunkerNet feature."
                             }
@@ -2933,11 +3105,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Address of the BunkerNet API."
                             }
@@ -2979,15 +3153,18 @@
                             {
                                 "iconColor": "red",
                                 "iconName": "trespass",
+                                "svgClass": "setting",
                                 "text": "inp_popover_method_disabled"
                             },
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use CORS"
                             }
@@ -3015,11 +3192,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Allowed origins to make CORS requests : PCRE regex or *."
                             }
@@ -3047,11 +3226,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value of the Access-Control-Allow-Methods header."
                             }
@@ -3079,11 +3260,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value of the Access-Control-Allow-Headers header."
                             }
@@ -3111,11 +3294,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Send the Access-Control-Allow-Credentials header."
                             }
@@ -3143,11 +3328,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value of the Access-Control-Expose-Headers header."
                             }
@@ -3181,11 +3368,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the Cross-Origin-Opener-Policy header."
                             }
@@ -3219,11 +3408,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the Cross-Origin-Embedder-Policy header."
                             }
@@ -3257,11 +3448,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the Cross-Origin-Resource-Policy header."
                             }
@@ -3289,11 +3482,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value of the Access-Control-Max-Age header."
                             }
@@ -3321,11 +3516,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Deny request and don't send it to backend if Origin is not allowed."
                             }
@@ -3366,11 +3563,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Tell client to store locally static files."
                             }
@@ -3398,11 +3597,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of file extensions, separated with pipes that should be cached."
                             }
@@ -3430,11 +3631,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Send the HTTP ETag header for static resources."
                             }
@@ -3462,11 +3665,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value of the Cache-Control HTTP header."
                             }
@@ -3507,11 +3712,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces)."
                             }
@@ -3539,11 +3746,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces)."
                             }
@@ -3584,11 +3793,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use custom HTTPS certificate."
                             }
@@ -3616,11 +3827,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Full path of the certificate or bundle file (must be readable by the scheduler)."
                             }
@@ -3648,11 +3861,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Full path of the key file (must be readable by the scheduler)."
                             }
@@ -3680,11 +3895,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Certificate data encoded in base64."
                             }
@@ -3712,11 +3929,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Key data encoded in base64."
                             }
@@ -3757,11 +3976,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The database URI, following the sqlalchemy format."
                             }
@@ -3789,11 +4010,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format."
                             }
@@ -3828,11 +4051,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The level to use for database logs."
                             }
@@ -3873,11 +4098,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate DNSBL feature."
                             }
@@ -3905,11 +4132,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of DNSBL servers."
                             }
@@ -3951,15 +4180,18 @@
                             {
                                 "iconColor": "red",
                                 "iconName": "trespass",
+                                "svgClass": "setting",
                                 "text": "inp_popover_method_disabled"
                             },
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...)."
                             }
@@ -3987,11 +4219,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of HTTP error code intercepted by BunkerWeb"
                             }
@@ -4032,11 +4266,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate greylist feature."
                             }
@@ -4064,11 +4300,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of IP/network, separated with spaces, to put into the greylist."
                             }
@@ -4096,11 +4334,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of reverse DNS suffixes, separated with spaces, to put into the greylist."
                             }
@@ -4128,11 +4368,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Only perform RDNS greylist checks on global IP addresses."
                             }
@@ -4160,11 +4402,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of ASN numbers, separated with spaces, to put into the greylist."
                             }
@@ -4192,11 +4436,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist."
                             }
@@ -4224,11 +4470,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URI (PCRE regex), separated with spaces, to put into the greylist."
                             }
@@ -4256,11 +4504,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing good IP/network to put into the greylist."
                             }
@@ -4288,11 +4538,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist."
                             }
@@ -4320,11 +4572,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing ASN to put into the greylist."
                             }
@@ -4352,11 +4606,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist."
                             }
@@ -4384,11 +4640,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing bad URI to put into the greylist."
                             }
@@ -4429,11 +4687,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use gzip"
                             }
@@ -4461,11 +4721,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of MIME types that will be compressed with gzip."
                             }
@@ -4493,11 +4755,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Minimum length for gzip compression."
                             }
@@ -4536,11 +4800,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The compression level of the gzip algorithm."
                             }
@@ -4568,11 +4834,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Which kind of proxied requests we should compress."
                             }
@@ -4613,11 +4881,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The HTML code to inject."
                             }
@@ -4659,11 +4929,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Custom header to add (HeaderName: HeaderValue)."
                             }
@@ -4691,11 +4963,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Headers to remove (Header1 Header2 Header3 ...)"
                             }
@@ -4723,11 +4997,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all)."
                             }
@@ -4755,11 +5031,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the Strict-Transport-Security header."
                             }
@@ -4788,11 +5066,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module)."
                             }
@@ -4820,11 +5100,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Automatically add the Secure flag to all cookies."
                             }
@@ -4852,11 +5134,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the Content-Security-Policy header."
                             }
@@ -4884,11 +5168,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Send reports for violations of the Content-Security-Policy header instead of blocking them."
                             }
@@ -4916,11 +5202,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the Referrer-Policy header."
                             }
@@ -4948,11 +5236,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the Permissions-Policy header."
                             }
@@ -4980,11 +5270,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the Feature-Policy header."
                             }
@@ -5017,11 +5309,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the X-Frame-Options header."
                             }
@@ -5053,11 +5347,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the X-Content-Type-Options header."
                             }
@@ -5085,11 +5381,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Value for the X-XSS-Protection header."
                             }
@@ -5142,11 +5440,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate automatic Let's Encrypt mode."
                             }
@@ -5174,11 +5474,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Email used for Let's Encrypt notification and in certificate."
                             }
@@ -5206,11 +5508,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use the staging environment for Let\u2019s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment."
                             }
@@ -5238,11 +5542,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Clear old certificates when renewing."
                             }
@@ -5283,11 +5589,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate limit requests feature."
                             }
@@ -5316,11 +5624,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "URL (PCRE regex) where the limit request will be applied or special value / for all requests."
                             }
@@ -5349,11 +5659,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day)."
                             }
@@ -5381,11 +5693,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate limit connections feature."
                             }
@@ -5413,11 +5727,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum number of connections per IP when using HTTP/1.X protocol."
                             }
@@ -5445,11 +5761,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum number of streams per IP when using HTTP/2 protocol."
                             }
@@ -5477,11 +5795,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum number of connections per IP when using stream."
                             }
@@ -5522,11 +5842,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable collection and retrieval of internal metrics."
                             }
@@ -5554,11 +5876,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Size of the internal storage for metrics."
                             }
@@ -5586,11 +5910,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum number of blocked requests to store (per worker)."
                             }
@@ -5631,11 +5957,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Deny HTTP request if the request vhost is unknown."
                             }
@@ -5663,11 +5991,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Close SSL/TLS connection if the SNI is unknown."
                             }
@@ -5695,11 +6025,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redirect all HTTP request to HTTPS."
                             }
@@ -5727,11 +6059,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case."
                             }
@@ -5759,11 +6093,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients."
                             }
@@ -5791,11 +6127,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum body size (0 for infinite)."
                             }
@@ -5823,11 +6161,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Serve files from the local folder."
                             }
@@ -5855,11 +6195,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Root folder containing files to serve (/var/www/html/{server_name} if unset)."
                             }
@@ -5887,11 +6229,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons."
                             }
@@ -5919,11 +6263,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Support HTTP2 protocol when HTTPS is enabled."
                             }
@@ -5951,11 +6297,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Support HTTP3 protocol when HTTPS is enabled."
                             }
@@ -5983,11 +6331,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header."
                             }
@@ -6015,11 +6365,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Respond to (insecure) HTTP requests."
                             }
@@ -6047,11 +6399,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable open file cache feature"
                             }
@@ -6079,11 +6433,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Open file cache directive"
                             }
@@ -6111,11 +6467,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable open file cache for errors"
                             }
@@ -6143,11 +6501,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable open file cache minimum uses"
                             }
@@ -6175,11 +6535,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Open file cache valid time"
                             }
@@ -6207,11 +6569,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space)."
                             }
@@ -6243,11 +6607,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection."
                             }
@@ -6275,11 +6641,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Send anonymous report to BunkerWeb maintainers."
                             }
@@ -6320,11 +6688,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable ModSecurity WAF."
                             }
@@ -6352,11 +6722,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable OWASP Core Rule Set."
                             }
@@ -6389,11 +6761,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly)."
                             }
@@ -6426,11 +6800,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "SecAuditEngine directive of ModSecurity."
                             }
@@ -6463,11 +6839,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "SecRuleEngine directive of ModSecurity."
                             }
@@ -6495,11 +6873,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "SecAuditLogParts directive of ModSecurity."
                             }
@@ -6540,11 +6920,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Hostname of the remote PHP-FPM instance."
                             }
@@ -6572,11 +6954,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Root folder containing files in the remote PHP-FPM instance."
                             }
@@ -6604,11 +6988,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Path to the PHP-FPM socket file."
                             }
@@ -6636,11 +7022,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Root folder containing files in the local PHP-FPM instance."
                             }
@@ -6681,11 +7069,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The License Key for the Pro version of BunkerWeb."
                             }
@@ -6726,11 +7116,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Retrieve the real IP of client."
                             }
@@ -6758,11 +7150,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable PROXY protocol communication."
                             }
@@ -6790,11 +7184,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of trusted IPs / networks, separated with spaces, where proxied requests come from."
                             }
@@ -6822,11 +7218,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol."
                             }
@@ -6854,11 +7252,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Perform a recursive search in the header container IP address."
                             }
@@ -6886,11 +7286,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from."
                             }
@@ -6931,11 +7333,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redirect a whole site to another one."
                             }
@@ -6963,11 +7367,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Append the requested URI to the redirect address."
                             }
@@ -6999,11 +7405,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Status code to send to client when redirecting."
                             }
@@ -7044,11 +7452,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate Redis."
                             }
@@ -7076,11 +7486,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis server IP or hostname."
                             }
@@ -7108,11 +7520,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis server port."
                             }
@@ -7140,11 +7554,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis database number."
                             }
@@ -7172,11 +7588,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use SSL/TLS connection with Redis server."
                             }
@@ -7204,11 +7622,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Verify the certificate of Redis server."
                             }
@@ -7236,11 +7656,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis server timeout (in ms) for connect, read and write."
                             }
@@ -7268,11 +7690,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis username used in AUTH command."
                             }
@@ -7300,11 +7724,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis password used in AUTH command."
                             }
@@ -7332,11 +7758,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis sentinel hosts with format host:[port] separated with spaces."
                             }
@@ -7364,11 +7792,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis sentinel username."
                             }
@@ -7396,11 +7826,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis sentinel password."
                             }
@@ -7428,11 +7860,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redis sentinel master name."
                             }
@@ -7460,11 +7894,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Max idle time (in ms) before closing redis connection in the pool."
                             }
@@ -7492,11 +7928,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Max number of redis connection(s) kept in the pool."
                             }
@@ -7537,11 +7975,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate reverse proxy mode."
                             }
@@ -7569,11 +8009,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Intercept and rewrite errors."
                             }
@@ -7601,11 +8043,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Override Host header sent to upstream server."
                             }
@@ -7634,11 +8078,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Full URL of the proxied resource (proxy_pass)."
                             }
@@ -7667,11 +8113,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Location URL that will be proxied."
                             }
@@ -7700,11 +8148,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable websocket on the proxied resource."
                             }
@@ -7733,11 +8183,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive)."
                             }
@@ -7766,11 +8218,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of HTTP headers to send to client separated with semicolons (values for add_header directive)."
                             }
@@ -7799,11 +8253,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable or disable buffering of responses from proxied resource."
                             }
@@ -7832,11 +8288,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable or disable keepalive connections with the proxied resource."
                             }
@@ -7865,11 +8323,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable authentication using an external provider (value of auth_request directive)."
                             }
@@ -7898,11 +8358,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
                             }
@@ -7931,11 +8393,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives)."
                             }
@@ -7964,11 +8428,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Timeout when connecting to the proxied resource."
                             }
@@ -7997,11 +8463,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Timeout when reading from the proxied resource."
                             }
@@ -8030,11 +8498,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Timeout when sending to the proxied resource."
                             }
@@ -8063,11 +8533,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Additional configuration to include in the location block, separated with spaces."
                             }
@@ -8095,11 +8567,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable or disable caching of the proxied resources."
                             }
@@ -8127,11 +8601,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Hierarchy levels of the cache."
                             }
@@ -8159,11 +8635,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum size of cached metadata when caching proxied resources."
                             }
@@ -8191,11 +8669,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Additional parameters to add to the proxy_cache directive."
                             }
@@ -8223,11 +8703,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "HTTP methods that should trigger a cache operation."
                             }
@@ -8255,11 +8737,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The minimum number of requests before a response is cached."
                             }
@@ -8287,11 +8771,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "The key used to uniquely identify a cached response."
                             }
@@ -8319,11 +8805,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces."
                             }
@@ -8351,11 +8839,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Conditions to disable caching of responses."
                             }
@@ -8383,11 +8873,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Conditions to bypass caching of responses."
                             }
@@ -8428,11 +8920,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Enable scanning of clients ports and deny access if one is opened."
                             }
@@ -8460,11 +8954,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of port to scan when using reverse scan feature."
                             }
@@ -8492,11 +8988,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Specify the maximum timeout (in ms) when scanning a port."
                             }
@@ -8537,11 +9035,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Generate and use self-signed certificate."
                             }
@@ -8569,11 +9069,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Self-signed certificate expiry in days."
                             }
@@ -8601,11 +9103,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Self-signed certificate subject."
                             }
@@ -8646,11 +9150,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Secret used to encrypt sessions variables for storing data related to challenges."
                             }
@@ -8678,11 +9184,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Name of the cookie given to clients."
                             }
@@ -8710,11 +9218,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum time (in seconds) of inactivity before the session is invalidated."
                             }
@@ -8742,11 +9252,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum time (in seconds) before a session must be renewed."
                             }
@@ -8774,11 +9286,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Maximum time (in seconds) before a session is destroyed."
                             }
@@ -8806,11 +9320,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Destroy session if IP address is different than original one."
                             }
@@ -8838,11 +9354,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Destroy session if User-Agent is different than original one."
                             }
@@ -8883,11 +9401,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use UI"
                             }
@@ -8915,11 +9435,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Address of the web UI used for initial setup"
                             }
@@ -8960,11 +9482,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Activate whitelist feature."
                             }
@@ -8992,11 +9516,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of IP/network, separated with spaces, to put into the whitelist."
                             }
@@ -9024,11 +9550,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of reverse DNS suffixes, separated with spaces, to whitelist."
                             }
@@ -9056,11 +9584,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Only perform RDNS whitelist checks on global IP addresses."
                             }
@@ -9088,11 +9618,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of ASN numbers, separated with spaces, to whitelist."
                             }
@@ -9120,11 +9652,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of User-Agent (PCRE regex), separated with spaces, to whitelist."
                             }
@@ -9152,11 +9686,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URI (PCRE regex), separated with spaces, to whitelist."
                             }
@@ -9184,11 +9720,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing good IP/network to whitelist."
                             }
@@ -9216,11 +9754,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist."
                             }
@@ -9248,11 +9788,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing ASN to whitelist."
                             }
@@ -9280,11 +9822,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing good User-Agent to whitelist."
                             }
@@ -9312,11 +9856,13 @@
                         "popovers": [
                             {
                                 "iconColor": "blue",
+                                "svgClass": "setting",
                                 "iconName": "globe",
                                 "text": "inp_popover_global"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "List of URLs, separated with spaces, containing bad URI to whitelist."
                             }
@@ -9355,11 +9901,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use UI"
                             }
@@ -9388,15 +9936,18 @@
                             {
                                 "iconColor": "red",
                                 "iconName": "trespass",
+                                "svgClass": "setting",
                                 "text": "inp_popover_method_disabled"
                             },
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use CORS"
                             }
@@ -9430,11 +9981,13 @@
                         "popovers": [
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use UI"
                             }
@@ -9463,15 +10016,18 @@
                             {
                                 "iconColor": "red",
                                 "iconName": "trespass",
+                                "svgClass": "setting",
                                 "text": "inp_popover_method_disabled"
                             },
                             {
                                 "iconColor": "orange",
+                                "svgClass": "setting",
                                 "iconName": "disk",
                                 "text": "inp_popover_multisite"
                             },
                             {
                                 "iconColor": "info",
+                                "svgClass": "setting",
                                 "iconName": "info",
                                 "text": "Use CORS"
                             }

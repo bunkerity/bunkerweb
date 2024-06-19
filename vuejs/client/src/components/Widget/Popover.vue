@@ -1,9 +1,8 @@
 <script setup>
 import { reactive, ref, watch, defineProps, onMounted } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
-import { v4 as uuidv4 } from "uuid";
+import { useUUID } from "@utils/global.js";
 import Icons from "@components/Widget/Icons.vue";
-import { set } from "@vueuse/core";
 
 /**
   @name Widget/Popover.vue
@@ -11,14 +10,17 @@ import { set } from "@vueuse/core";
   @example
   {
     text: "This is a popover text",
+    href: "#",
     iconName: "info",
     iconColor: "info",
   }
-  @param {string} text - Content of the button. Can be a translation key or by default raw text.
+  @param {string} text - Content of the popover. Can be a translation key or by default raw text.
+  @param {string} [href="#"] - Link of the anchor. By default it is a # link.
   @param {string} iconName - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
   @param {string} iconColor - Color of the icon between tailwind colors
-  @param {string} [tag="button"] - By default it is a button tag, but we can use other tag like div in case of popover on another button
+  @param {string} [tag="a"] - By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor
   @param {string} [popoverClass=""] - Additional class for the popover container
+  @param {string} [svgClass="default"] - Additional class for the svg icon. "default" or "setting" will change the icon size.
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
 
@@ -26,6 +28,11 @@ const props = defineProps({
   text: {
     type: String,
     required: false,
+  },
+  href: {
+    type: String,
+    required: false,
+    default: "#",
   },
   iconName: {
     type: String,
@@ -35,16 +42,21 @@ const props = defineProps({
     type: String,
     required: false,
   },
-  // Sometimes we can't have a button tag (like popover on another btn)
+  // Sometimes we can't have an anchor tag
   tag: {
     type: String,
     required: false,
-    default: "div",
+    default: "a",
   },
   popoverClass: {
     type: String,
     required: false,
     default: "",
+  },
+  svgClass: {
+    type: String,
+    required: false,
+    default: "default",
   },
   tabId: {
     type: String,
@@ -55,9 +67,9 @@ const props = defineProps({
 
 // Determine popover need to be display
 const popover = reactive({
+  id: "",
   isOpen: false,
   isHover: false,
-  id: uuidv4(),
 });
 
 const popoverContainer = ref();
@@ -68,10 +80,9 @@ function showPopover() {
 
   // Position popover relative to btn
   const popoverBtnRect = popoverBtn.value.getBoundingClientRect();
-  const popoverContainerRect = popoverContainer.value.getBoundingClientRect();
 
   popoverContainer.value.style.right = `${
-    window.innerWidth - popoverBtnRect.left - popoverBtnRect.width
+    window.innerWidth - popoverBtnRect.left - popoverBtnRect.width / 1.5
   }px`;
 
   // We need to take care of parent padding and margin that will affect dropdown position but aren't calculate in rect
@@ -103,7 +114,7 @@ function showPopover() {
     window.scrollY +
     popoverBtnRect.top -
     noRectParentHeight -
-    popoverBtnRect.height * 2 -
+    popoverBtnRect.height * 1.5 -
     80
   }px`;
 
@@ -128,6 +139,12 @@ watch(popover, () => {
 });
 
 onMounted(() => {
+  popover.id = useUUID(popover.id);
+  // Remove href if tag is not an anchor
+  if (props.tag !== "a") {
+    popoverBtn.value.removeAttribute("href");
+  }
+
   // Close select dropdown when clicked outside element
   window.addEventListener("click", (e) => {
     if (
@@ -139,14 +156,6 @@ onMounted(() => {
     }
   });
 });
-
-onMounted(() => {
-  // random num between 0 and 100 with floats
-  const randomNum = Math.random() * 10;
-  setTimeout(() => {
-    popover.id = uuidv4();
-  }, randomNum);
-});
 </script>
 
 <template>
@@ -157,7 +166,7 @@ onMounted(() => {
     :aria-expanded="popover.isOpen ? 'true' : 'false'"
     :aria-labelledby="`${popover.id}-popover-text`"
     :is="props.tag"
-    role="button"
+    href="#"
     @click.prevent
     @focusin="showPopover()"
     @focusout="hidePopover()"
@@ -166,7 +175,7 @@ onMounted(() => {
     :class="['popover-btn', props.popoverClass]"
   >
     <Icons
-      :iconClass="'popover-svg'"
+      :iconClass="`popover-svg ${props.svgClass}`"
       :iconName="props.iconName"
       :iconColor="props.iconColor"
     />

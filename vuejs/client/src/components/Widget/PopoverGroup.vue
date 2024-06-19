@@ -10,8 +10,7 @@ import { v4 as uuidv4 } from "uuid";
   We need a list of popovers to display.
   @example
   {
-    id: "group-popover",
-    popoverClass : "justify-center",
+    flexClass : "justify-center",
     popovers: [
       {
         text: "This is a popover text",
@@ -25,7 +24,7 @@ import { v4 as uuidv4 } from "uuid";
       },
     ],
   }
-  @param {string} [flexClass="justify-center align-center"] - Additional class for the flex container
+  @param {string} [flexClass="justify-center items-start"] - Additional class for the flex container
   @param {array} popovers - List of popovers to display. Popover component is used.
 */
 
@@ -38,7 +37,7 @@ const props = defineProps({
   flexClass: {
     type: String,
     required: false,
-    default: "justify-center align-center",
+    default: "justify-center items-start",
   },
 });
 </script>

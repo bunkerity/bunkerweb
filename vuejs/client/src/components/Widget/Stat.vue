@@ -2,7 +2,7 @@
 import Container from "@components/Widget/Container.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
-import ContentStat from "@components/Content/Stat.vue";
+import Text from "@components/Widget/Text.vue";
 import Icons from "@components/Widget/Icons.vue";
 
 /** 
@@ -75,7 +75,7 @@ const props = defineProps({
       ]"
     >
       <Title :tag="'h3'" type="stat" :title="props.title" />
-      <ContentStat :stat="props.stat" />
+      <Text :text="props.stat" :textClass="'text-stat'" />
       <Subtitle
         type="stat"
         v-if="props.subtitle"

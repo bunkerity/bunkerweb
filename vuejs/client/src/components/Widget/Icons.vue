@@ -25,6 +25,8 @@ import Funnel from "@components/Icons/Funnel.vue";
 import Disks from "@components/Icons/Disks.vue";
 import Globe from "@components/Icons/Globe.vue";
 import Info from "@components/Icons/Info.vue";
+import Redirect from "@components/Icons/Redirect.vue";
+import External from "@components/Icons/External.vue";
 
 import { computed } from "vue";
 
@@ -101,6 +103,11 @@ const iconClass = computed(() => {
     />
     <Core
       v-if="props.iconName === 'core'"
+      :iconClass="iconClass"
+      :iconColor="iconColor"
+    />
+    <External
+      v-if="props.iconName === 'external'"
       :iconClass="iconClass"
       :iconColor="iconColor"
     />
@@ -216,6 +223,11 @@ const iconClass = computed(() => {
     />
     <Funnel
       v-if="props.iconName === 'funnel'"
+      :iconClass="iconClass"
+      :iconColor="iconColor"
+    />
+    <Redirect
+      v-if="props.iconName === 'redirect'"
       :iconClass="iconClass"
       :iconColor="iconColor"
     />

@@ -126,6 +126,7 @@
   "icons_cross_desc": "Cross icon representing a close, delete, error or cancel state.",
   "icons_check_desc": "Check icon representing a success, valid or active state.",
   "icons_core_desc": "Core icon representing a core setting or plugin.",
+  "icons_external_desc": "External icon representing an external setting or plugin.",
   "icons_crown_desc": "Crown icon representing premium feature like a pro plugin.",
   "icons_plus_desc": "Plus icon representing an add, create or new state.",
   "icons_trespass_desc": "Trespass icon representing a ban, disable, lock or negative state.",

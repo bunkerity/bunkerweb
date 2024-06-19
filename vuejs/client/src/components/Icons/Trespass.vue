@@ -1,7 +1,7 @@
 <script setup>
-import { v4 as uuidv4 } from "uuid";
-import { defineProps, reactive } from "vue";
-/** 
+import { defineProps, reactive, onMounted } from "vue";
+import { useUUID } from "@utils/global.js";
+/**
   @name Icons/Trespass.vue
   @description This component is a svg icon representing no trespassing.
   @example
@@ -21,12 +21,16 @@ const props = defineProps({
   iconColor: {
     type: String,
     required: false,
-    default: "info",
+    default: "error",
   },
 });
 
 const icon = reactive({
-  id: uuidv4(),
+  id: "",
+});
+
+onMounted(() => {
+  icon.id = useUUID(icon.id);
 });
 </script>
 

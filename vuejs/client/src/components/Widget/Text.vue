@@ -8,7 +8,7 @@
     textClass: "text-3xl"
   }
   @param {string} text - The text value. Can be a translation key or by default raw text.
-  @param {string} [textClass=""] - Additional class if needed
+  @param {string} [textClass="text-content"] - Style of text. Can be replace by any class starting by 'text-' like 'text-stat'.
   @param {string} [tag="p"] - The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6
 */
 
@@ -20,7 +20,7 @@ const props = defineProps({
   textClass: {
     type: String,
     required: false,
-    default: "",
+    default: "text-content",
   },
   tag: {
     type: String,
@@ -31,7 +31,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <component :is="props.tag" :class="['text-content', props.textClass]">
+  <component :is="props.tag" :class="[props.textClass]">
     {{ $t(props.text, props.text) }}
   </component>
 </template>

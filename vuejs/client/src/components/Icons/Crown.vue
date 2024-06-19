@@ -1,6 +1,6 @@
 <script setup>
-import { v4 as uuidv4 } from "uuid";
-import { defineProps, reactive } from "vue";
+import { defineProps, reactive, onMounted } from "vue";
+import { useUUID } from "@utils/global.js";
 
 /** 
   @name Icons/Crown.vue
@@ -22,12 +22,16 @@ const props = defineProps({
   iconColor: {
     type: String,
     required: false,
-    default: "info",
+    default: "amber",
   },
 });
 
 const icon = reactive({
-  id: uuidv4(),
+  id: "",
+});
+
+onMounted(() => {
+  icon.id = useUUID(icon.id);
 });
 </script>
 <template>

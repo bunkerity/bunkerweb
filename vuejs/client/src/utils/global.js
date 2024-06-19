@@ -67,7 +67,10 @@ function isElHidden(el) {
 
 /**
   @name useUUID
-  @description   This function return a unique identifier uuidv4 after waiting some random time.
+  @description This function return a unique identifier using uuidv4 and a random number.
+  Adding random number to avoid duplicate uuids when some components are rendered at the same time.
+  We can pass a possible existing id, the function will only generate one if the id is empty.
+  @param {String} [id=""] - Possible existing id, check if it's empty to generate a new one.
 */
 function useUUID(id = "") {
   if (id) return id;
