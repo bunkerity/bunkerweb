@@ -200,14 +200,6 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
             operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
         elif operation == "delete":
             operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
-
-        if not error:
-            if was_draft != is_draft or not is_draft:
-                # update changes in db
-                ret = app.config["DB"].checked_changes(["config", "custom_configs"], value=True)
-                if ret:
-                    app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
-                    ui_data["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
     elif method == "global_config":
         operation, error = app.config["CONFIG"].edit_global_conf(args[0])
 

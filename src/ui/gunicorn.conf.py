@@ -56,8 +56,6 @@ def on_starting(server):
     if not getenv("FLASK_SECRET") and not TMP_DIR.joinpath(".flask_secret").is_file():
         TMP_DIR.joinpath(".flask_secret").write_text(sha256(urandom(32)).hexdigest(), encoding="utf-8")
 
-    TMP_DIR.joinpath(".ui.json").write_text("{}", encoding="utf-8")
-
     LOGGER = setup_logger("UI")
 
     db = Database(LOGGER, ui=True)

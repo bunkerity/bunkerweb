@@ -467,10 +467,11 @@ STREAM support :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-|           Setting            |Default|Context|Multiple|                 Description                 |
-|------------------------------|-------|-------|--------|---------------------------------------------|
-|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.              |
-|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.|
+|           Setting            |Default|Context|Multiple|                                Description                                |
+|------------------------------|-------|-------|--------|---------------------------------------------------------------------------|
+|`USE_MONITORING`              |`yes`  |global |no      |Enable monitoring of BunkerWeb.                                            |
+|`MONITORING_METRICS_DICT_SIZE`|`10M`  |global |no      |Size of the dict to store monitoring metrics.                              |
+|`MONITORING_IGNORE_URLS`      |       |global |no      |List of URLs to ignore when monitoring separated with spaces (e.g. /health)|
 
 ## PHP
 
@@ -690,3 +691,4 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_ASN_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing ASN to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.                 |
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.     |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.             |
+

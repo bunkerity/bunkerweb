@@ -336,6 +336,7 @@ requests==2.32.3 \
     #   -r requirements.in
     #   acme
 schedule==1.2.2 \
+    --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
     # via importlib-metadata
 
