@@ -12,7 +12,7 @@ import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
-import { v4 as uuidv4 } from "uuid";
+import { useUUID } from "@utils/global.js";
 
 /**
   @name Forms/Field/Combobox.vue
@@ -63,7 +63,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: uuidv4(),
+    default: "",
   },
   columns: {
     type: [Object, Boolean],
@@ -152,6 +152,7 @@ const props = defineProps({
 });
 
 const inp = reactive({
+  id: props.id,
   value: "",
   isValid: true,
   isMatching: computed(() => {
@@ -295,6 +296,7 @@ watch(select, () => {
 });
 
 onMounted(() => {
+  inp.id = useUUID(inp.id);
   inp.isValid = inputEl.value.checkValidity();
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
   window.addEventListener("resize", () => {
@@ -318,13 +320,13 @@ const emits = defineEmits(["inp"]);
       :popovers="props.popovers"
       :required="props.required"
       :name="props.name"
-      :id="props.id"
+      :id="inp.id"
       :label="props.label"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />
 
-    <select aria-hidden="true" :name="props.name" class="hidden">
+    <select :id="inp.id" aria-hidden="true" :name="props.name" class="hidden">
       <option
         v-for="(value, id) in props.values"
         :key="id"
@@ -348,7 +350,7 @@ const emits = defineEmits(["inp"]);
         :name="`${props.name}-custom`"
         :tabindex="props.tabId"
         ref="selectBtn"
-        :aria-controls="`${props.id}-custom`"
+        :aria-controls="`${inp.id}-custom`"
         :aria-expanded="select.isOpen ? 'true' : 'false'"
         :aria-description="$t('inp_select_dropdown_button_desc')"
         :disabled="props.disabled || false"
@@ -359,7 +361,7 @@ const emits = defineEmits(["inp"]);
           props.inpClass,
         ]"
       >
-        <span :id="`${props.id}-text`" class="select-btn-name">
+        <span :id="`${inp.id}-text`" class="select-btn-name">
           {{
             props.maxBtnChars &&
             (select.value || props.value).length > +props.maxBtnChars
@@ -389,15 +391,16 @@ const emits = defineEmits(["inp"]);
       <div
         ref="selectDropdown"
         :style="{ width: selectWidth }"
-        :id="`${props.id}-custom`"
+        :id="`${inp.id}-custom`"
         :class="[select.isOpen ? 'open' : 'close']"
         class="select-dropdown-container"
         :aria-hidden="select.isOpen ? 'false' : 'true'"
+        role="combobox"
         :aria-expanded="select.isOpen ? 'true' : 'false'"
         :aria-description="$t('inp_select_dropdown_desc')"
       >
         <div>
-          <label :class="['sr-only']" :for="`${props.id}-combobox`">
+          <label :class="['sr-only']" :for="`${inp.id}-combobox`">
             {{ $t("inp_combobox") }}
           </label>
           <input
@@ -406,15 +409,15 @@ const emits = defineEmits(["inp"]);
             v-model="inp.value"
             :placeholder="$t('inp_combobox_placeholder')"
             @input="inp.isValid = inputEl.checkValidity()"
-            :aria-controls="`${props.id}-list`"
-            :id="`${props.id}-combobox`"
+            :aria-controls="`${inp.id}-list`"
+            :id="`${inp.id}-combobox`"
             :class="[
               'input-combobox',
               inp.isValid ? 'valid' : 'invalid',
               props.inpClass,
             ]"
             :pattern="props.pattern || '(?s).*'"
-            :name="`${props.id}-combobox`"
+            :name="`${inp.id}-combobox`"
             :value="inp.value"
             :type="'text'"
           />
@@ -431,7 +434,7 @@ const emits = defineEmits(["inp"]);
         </div>
         <div
           data-select-dropdown
-          :id="`${props.id}-list`"
+          :id="`${inp.id}-list`"
           :aria-hidden="select.isOpen ? 'false' : 'true'"
           role="radiogroup"
           class="select-combobox-list"
@@ -461,9 +464,9 @@ const emits = defineEmits(["inp"]);
                 'select-dropdown-btn',
               ]"
               data-select-item
-              :data-setting-id="props.id"
+              :data-setting-id="inp.id"
               :data-setting-value="value"
-              :aria-controls="`${props.id}-text`"
+              :aria-controls="`${inp.id}-text`"
               :aria-checked="
                 (select.value && select.value === value) ||
                 (!select.value && value === props.value)

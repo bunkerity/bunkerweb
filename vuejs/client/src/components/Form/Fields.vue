@@ -1,11 +1,11 @@
 <script setup>
-import { reactive, defineProps, onMounted, ref, readonly } from "vue";
+import { defineProps } from "vue";
 import Checkbox from "@components/Forms/Field/Checkbox.vue";
 import Input from "@components/Forms/Field/Input.vue";
 import Select from "@components/Forms/Field/Select.vue";
 import Datepicker from "@components/Forms/Field/Datepicker.vue";
 import Editor from "@components/Forms/Field/Editor.vue";
-
+import { contentIndex } from "@utils/tabindex.js";
 /** 
   @name Form/Fields.vue
   @description This component wraps all available fields for a form.
@@ -73,8 +73,8 @@ const props = defineProps({
     :label="props.setting.label"
     :name="props.setting.name"
     :popovers="props.setting.popovers || []"
-    :onlyDownload="props.setting.onlyDownload || false"
-    :overflowAttrEl="props.setting.overflowAttrEl || false"
+    :onlyDown="props.setting.onlyDown || false"
+    :overflowAttrEl="props.setting.overflowAttrEl || ''"
     :hideLabel="props.setting.hideLabel || false"
     :containerClass="props.setting.containerClass || ''"
     :headerClass="props.setting.headerClass || ''"

@@ -1,8 +1,8 @@
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, onMounted, reactive } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useClipboard } from "@vueuse/core";
-import { v4 as uuidv4 } from "uuid";
+import { useUUID } from "@utils/global.js";
 
 /**
   @name Forms/Feature/Clipboard.vue
@@ -29,7 +29,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: uuidv4(),
+    default: "",
   },
   isClipboard: {
     type: Boolean,
@@ -37,7 +37,7 @@ const props = defineProps({
     default: false,
   },
   valueToCopy: {
-    type: String,
+    type: [String, Number],
     required: false,
     default: "",
   },
@@ -52,6 +52,14 @@ const props = defineProps({
     default: "",
   },
 });
+
+const clip = reactive({
+  id: props.id,
+});
+
+onMounted(() => {
+  clip.id = useUUID();
+});
 </script>
 
 <template>
@@ -63,10 +71,10 @@ const props = defineProps({
       type="button"
       :class="['input-clipboard-button', copied ? 'copied' : 'not-copied']"
       :tabindex="contentIndex"
-      @click.prevent="copy(valueToCopy)"
-      :aria-labelledby="`${props.id}-clipboard-text`"
+      @click.prevent="copy(`${valueToCopy}`)"
+      :aria-labelledby="`${clip.id}-clipboard-text`"
     >
-      <span :id="`${props.id}-clipboard-text`" class="sr-only">
+      <span :id="`${clip.id}-clipboard-text`" class="sr-only">
         {{ $t("inp_input_clipboard_desc") }}
       </span>
       <svg

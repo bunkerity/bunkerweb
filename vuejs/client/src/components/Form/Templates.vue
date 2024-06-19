@@ -46,16 +46,16 @@ const props = defineProps({
 });
 
 const comboboxTemplate = {
-  id: uuidv4(),
-  name: uuidv4(),
+  id: `combobox-template-${uuidv4()}`,
+  name: `combobox-template-${uuidv4()}`,
   disabled: false,
   label: "dashboard_templates",
   columns: { pc: 4, tablet: 6, mobile: 12 },
 };
 
 const comboboxModes = {
-  id: uuidv4(),
-  name: uuidv4(),
+  id: `combobox-modes-${uuidv4()}`,
+  name: `combobox-modes-${uuidv4()}`,
   disabled: false,
   required: false,
   onlyDown: true,
@@ -97,8 +97,6 @@ onBeforeMount(() => {
 <template>
   <Container
     v-if="data.currModeName && data.currTemplateName"
-    :tag="'form'"
-    method="POST"
     :containerClass="`col-span-12 w-full m-1 p-1`"
     :columns="props.columns"
   >

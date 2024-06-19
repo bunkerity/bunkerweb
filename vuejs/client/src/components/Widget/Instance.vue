@@ -5,7 +5,6 @@ import Title from "@components/Widget/Title.vue";
 import Status from "@components/Widget/Status.vue";
 import ContentDetailList from "@components/Content/DetailList.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
-import { v4 as uuidv4 } from "uuid";
 /** 
   @name Widget/Instance.vue
   @description This component is an instance widget.
@@ -33,7 +32,6 @@ import { v4 as uuidv4 } from "uuid";
       },
     ]
   }
-  @param {string} [id=uuid()] - Unique id of the instance 
   @param {string} title
   @param {string} status
   @param {array} details - List of details to display
@@ -41,11 +39,6 @@ import { v4 as uuidv4 } from "uuid";
 */
 
 const props = defineProps({
-  id: {
-    type: String,
-    required: false,
-    default: uuidv4(),
-  },
   title: {
     type: String,
     required: true,
@@ -74,7 +67,6 @@ const props = defineProps({
     <Title type="card" :title="props.title" />
     <ContentDetailList :details="props.details" />
     <ButtonGroup
-      :id="props.id"
       :buttons="props.buttons"
       :groupClass="'justify-end align-center'"
     />

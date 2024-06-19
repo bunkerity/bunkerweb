@@ -1,7 +1,6 @@
 <script setup>
 import Flex from "@components/Widget/Flex.vue";
 import Button from "@components/Widget/Button.vue";
-import { v4 as uuidv4 } from "uuid";
 
 /** 
   @name Widget/ButtonGroup.vue
@@ -37,17 +36,11 @@ import { v4 as uuidv4 } from "uuid";
       },
     ],
   }
-  @param {string} [id=uuidv4()] - Unique id of the button group
   @param {string} [groupClass="justify-center align-center"] - Additional class for the flex container
   @param {array} buttons - List of buttons to display. Button component is used.
 */
 
 const props = defineProps({
-  id: {
-    type: String,
-    required: false,
-    default: uuidv4(),
-  },
   groupClass: {
     type: String,
     required: false,

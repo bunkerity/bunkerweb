@@ -1,9 +1,9 @@
 <script setup>
-import { computed, ref, watch, onBeforeMount, onMounted } from "vue";
+import { computed, ref, reactive, onMounted } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Icons from "@components/Widget/Icons.vue";
-import { v4 as uuidv4 } from "uuid";
+import { useUUID } from "@utils/global.js";
 
 /** 
   @name Widget/Button.vue
@@ -38,7 +38,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: uuidv4(),
+    default: "",
   },
   // valid || delete || info
   text: {
@@ -103,6 +103,10 @@ const props = defineProps({
   },
 });
 
+const btn = reactive({
+  id: props.id,
+});
+
 const btnEl = ref();
 
 const buttonClass = computed(() => {
@@ -110,6 +114,7 @@ const buttonClass = computed(() => {
 });
 
 onMounted(() => {
+  btn.id = useUUID(btn.id);
   setAttrs();
 });
 
@@ -134,7 +139,7 @@ function setAttrs() {
     <button
       :type="props.type"
       ref="btnEl"
-      :id="props.id"
+      :id="btn.id"
       @click="
         (e) => {
           if (e.target.getAttribute('type') !== 'submit') e.preventDefault();
@@ -143,7 +148,7 @@ function setAttrs() {
       :tabindex="props.tabId"
       :class="[buttonClass]"
       :disabled="props.disabled || false"
-      :aria-labelledby="`text-${props.id}`"
+      :aria-labelledby="`text-${btn.id}`"
     >
       <span
         :class="[
@@ -151,7 +156,7 @@ function setAttrs() {
           props.iconName ? 'mr-2' : '',
           'pointer-events-none',
         ]"
-        :id="`text-${props.id}`"
+        :id="`text-${btn.id}`"
         >{{ $t(props.text, props.text) }}
       </span>
       <Icons

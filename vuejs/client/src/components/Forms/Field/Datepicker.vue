@@ -1,14 +1,13 @@
 <script setup>
-import { reactive, defineEmits, defineProps, onMounted } from "vue";
+import { reactive, defineProps, onMounted, onUnmounted } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
-import { v4 as uuidv4 } from "uuid";
 import Clipboard from "@components/Forms/Feature/Clipboard.vue";
+import { useUUID } from "@utils/global";
 
 import flatpickr from "flatpickr";
-
 import "@assets/css/flatpickr.min.css";
 import "@assets/css/flatpickr.dark.min.css";
 
@@ -60,7 +59,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: uuidv4(),
+    default: "",
   },
   name: {
     type: String,
@@ -142,6 +141,7 @@ const props = defineProps({
 });
 
 const date = reactive({
+  id: props.id,
   isValid: true,
   format: "m/d/Y H:i:S",
   currStamp: "",
@@ -152,67 +152,6 @@ const picker = reactive({
 });
 
 let datepicker;
-onMounted(() => {
-  datepicker = flatpickr(`#${props.id}`, {
-    locale: "en",
-    dateFormat: date.format,
-    defaultDate: +props.value,
-    maxDate: +props.maxDate ? +props.maxDate : "",
-    minDate: +props.minDate ? +props.minDate : "",
-    enableTime: true,
-    enableSeconds: true,
-    time_24hr: true,
-    minuteIncrement: 1,
-    onChange(selectedDates, dateStr, instance) {
-      if (!dateStr && props.required) return (date.isValid = false);
-      //Check if date is in interval
-      try {
-        const currStamp = Date.parse(dateStr);
-
-        date.currStamp = currStamp;
-        // Run whatever, if invalid this will override
-        date.isValid = true;
-      } catch (err) {}
-    },
-    onOpen(selectedDates, dateStr, instance) {
-      picker.isOpen = true;
-      // Focus on current date and update tabindex
-      try {
-        setIndex(instance.calendarContainer, contentIndex);
-        const baseFocus =
-          instance.calendarContainer.querySelector(".flatpickr-day.today") ||
-          instance.calendarContainer.querySelector(".flatpickr-day");
-        baseFocus.setAttribute("data-tabindex-active", true);
-        setTimeout(() => {
-          baseFocus.focus();
-        }, 50);
-      } catch (err) {}
-    },
-    onClose(selectedDates, dateStr, instance) {
-      picker.isOpen = false;
-      setIndex(instance.calendarContainer, "-1");
-    },
-  });
-  // Check if multiple or not
-  let datepickerEl = null;
-  if (Array.isArray(datepicker)) {
-    datepickerEl = datepicker[datepicker.length - 1];
-  } else {
-    datepickerEl = datepicker;
-  }
-  // Set valid date state
-  if (!datepickerEl.selectedDates[0] && props.required) date.isValid = false;
-  if (!datepickerEl.selectedDates[0] && !props.required) date.isValid = true;
-
-  const calendar = datepickerEl.calendarContainer;
-  // Impossible to use default select month dropdown with keyboard
-  // We need to create our own and link calendar to it
-  setMonthSelect(calendar, props.id);
-  // Override default behavior that go to input el instead of previous calendat element on tab + maj
-  handleEvents(calendar, props.id, datepickerEl);
-
-  setPickerAtt(calendar, props.id);
-});
 
 function setMonthSelect(calendar, id) {
   // Hide default select and optionss
@@ -287,10 +226,6 @@ function setMonthSelect(calendar, id) {
 
 function setPickerAtt(calendarEl, id = false) {
   // change error non-standard attributes
-  if (id) {
-    calendarEl.setAttribute("id", id);
-  }
-
   const inps = calendarEl.querySelectorAll(
     'input.numInput[type="number"][maxlength]'
   );
@@ -312,6 +247,10 @@ function setPickerAtt(calendarEl, id = false) {
   calendarEl.querySelectorAll("svg").forEach((svg) => {
     svg.classList.add("pointer-events-none");
   });
+
+  if (id) {
+    calendarEl.setAttribute("id", `${id}-calendar`);
+  }
 }
 
 function handleEvents(calendarEl, id, datepicker) {
@@ -634,6 +573,73 @@ function setIndex(calendarEl, tabindex) {
     second.setAttribute("tabindex", tabindex);
   } catch (e) {}
 }
+
+onMounted(() => {
+  date.id = useUUID(date.id);
+  datepicker = flatpickr(`#${date.id}`, {
+    locale: "en",
+    dateFormat: date.format,
+    defaultDate: +props.value,
+    maxDate: +props.maxDate ? +props.maxDate : "",
+    minDate: +props.minDate ? +props.minDate : "",
+    enableTime: true,
+    enableSeconds: true,
+    time_24hr: true,
+    minuteIncrement: 1,
+    onChange(selectedDates, dateStr, instance) {
+      if (!dateStr && props.required) return (date.isValid = false);
+      //Check if date is in interval
+      try {
+        const currStamp = Date.parse(dateStr);
+
+        date.currStamp = currStamp;
+        // Run whatever, if invalid this will override
+        date.isValid = true;
+      } catch (err) {}
+    },
+    onOpen(selectedDates, dateStr, instance) {
+      picker.isOpen = true;
+      // Focus on current date and update tabindex
+      try {
+        setIndex(instance.calendarContainer, contentIndex);
+        const baseFocus =
+          instance.calendarContainer.querySelector(".flatpickr-day.today") ||
+          instance.calendarContainer.querySelector(".flatpickr-day");
+        baseFocus.setAttribute("data-tabindex-active", true);
+        setTimeout(() => {
+          baseFocus.focus();
+        }, 50);
+      } catch (err) {}
+    },
+    onClose(selectedDates, dateStr, instance) {
+      picker.isOpen = false;
+      setIndex(instance.calendarContainer, "-1");
+    },
+  });
+  // Check if multiple or not
+  let datepickerEl = null;
+  if (Array.isArray(datepicker)) {
+    datepickerEl = datepicker[datepicker.length - 1];
+  } else {
+    datepickerEl = datepicker;
+  }
+  // Set valid date state
+  if (!datepickerEl.selectedDates[0] && props.required) date.isValid = false;
+  if (!datepickerEl.selectedDates[0] && !props.required) date.isValid = true;
+
+  const calendar = datepickerEl.calendarContainer;
+  // Impossible to use default select month dropdown with keyboard
+  // We need to create our own and link calendar to it
+  setMonthSelect(calendar, date.id);
+  // Override default behavior that go to input el instead of previous calendat element on tab + maj
+  handleEvents(calendar, date.id, datepickerEl);
+
+  setPickerAtt(calendar, date.id);
+});
+
+onUnmounted(() => {
+  datepicker.destroy();
+});
 </script>
 
 <template>
@@ -648,7 +654,7 @@ function setIndex(calendarEl, tabindex) {
       :required="props.required"
       :name="props.name"
       :label="props.label"
-      :id="props.id"
+      :id="date.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />
@@ -657,8 +663,7 @@ function setIndex(calendarEl, tabindex) {
       <input
         :data-timestamp="date.currStamp"
         :tabindex="props.tabId"
-        :aria-controls="props.id"
-        :aria-selected="picker.isOpen ? 'true' : 'false'"
+        :aria-controls="`${date.id}-calendar`"
         type="text"
         :class="[
           date.isValid ? 'valid' : 'invalid',
@@ -666,7 +671,7 @@ function setIndex(calendarEl, tabindex) {
           props.inpClass,
           props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
         ]"
-        :id="props.id"
+        :id="date.id"
         :required="props.required || false"
         :disabled="props.disabled || false"
         :name="props.name"

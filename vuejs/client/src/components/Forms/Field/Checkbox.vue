@@ -4,7 +4,7 @@ import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
-import { v4 as uuidv4 } from "uuid";
+import { useUUID } from "@utils/global.js";
 
 /** 
   @name Forms/Field/Checkbox.vue
@@ -51,7 +51,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: uuidv4(),
+    default: "",
   },
   columns: {
     type: [Object, Boolean],
@@ -120,6 +120,7 @@ const props = defineProps({
 const checkboxEl = ref(null);
 
 const checkbox = reactive({
+  id: props.id,
   value: props.value,
   isValid: true,
 });
@@ -134,6 +135,7 @@ function updateValue() {
 
 onMounted(() => {
   checkbox.isValid = checkboxEl.value.checkValidity();
+  checkbox.id = useUUID(checkbox.id);
 });
 </script>
 
@@ -147,7 +149,7 @@ onMounted(() => {
       :required="props.required"
       :name="props.name"
       :label="props.label"
-      :id="props.id"
+      :id="checkbox.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />
@@ -158,7 +160,7 @@ onMounted(() => {
         :tabindex="props.tabId"
         @keyup.enter="$emit('inp', updateValue())"
         @click="$emit('inp', updateValue())"
-        :id="props.id"
+        :id="checkbox.id"
         :name="props.name"
         :disabled="props.disabled || false"
         :checked="checkbox.value === 'yes' ? true : false"

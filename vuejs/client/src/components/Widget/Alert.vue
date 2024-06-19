@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from "vue";
 import { defineProps, defineEmits, reactive } from "vue";
-import { v4 as uuidv4 } from "uuid";
+import { useUUID } from "@utils/global.js";
 /** 
   @name Forms/Error/Field.vue
   @description This component is an alert type to send feedback to the user.
@@ -62,7 +62,7 @@ const props = defineProps({
 
 const alert = reactive({
   visible: true,
-  id: uuidv4(),
+  id: "",
 });
 
 onMounted(() => {
@@ -71,6 +71,8 @@ onMounted(() => {
       alert.visible = false;
     }, props.delayToClose);
   }
+
+  alert.id = useUUID(alert.id);
 });
 </script>
 

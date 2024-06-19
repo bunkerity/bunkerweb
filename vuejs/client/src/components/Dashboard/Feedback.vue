@@ -1,10 +1,9 @@
 <script setup>
-import { reactive, watch, onMounted, computed } from "vue";
+import { reactive } from "vue";
 import Alert from "@components/Widget/Alert.vue";
 import { feedbackIndex } from "@utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
 import { onBeforeMount } from "vue";
-import { v4 as uuidv4 } from "uuid";
 /**
   @name Dashboard/Feedback.vue
   @description This component will display server feedbacks from the user.
@@ -14,7 +13,6 @@ import { v4 as uuidv4 } from "uuid";
 
 const feedback = reactive({
   data: [],
-  id: uuidv4(),
 });
 
 // Handle feedback history panel

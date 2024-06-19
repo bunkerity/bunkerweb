@@ -6,13 +6,14 @@ import {
   onMounted,
   defineProps,
   onUnmounted,
+  onUpdated,
 } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 import Clipboard from "@components/Forms/Feature/Clipboard.vue";
-import { v4 as uuidv4 } from "uuid";
+import { useUUID } from "@utils/global.js";
 
 import "@assets/script/editor/ace.js";
 import "@assets/script/editor/theme-dracula.js";
@@ -58,7 +59,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: uuidv4(),
+    default: useUUID(),
   },
   columns: {
     type: [Object, Boolean],
@@ -135,6 +136,7 @@ const props = defineProps({
 });
 
 const editor = reactive({
+  id: props.id,
   value: props.value,
   showInp: false,
   isValid: computed(() => {
@@ -154,7 +156,7 @@ let editorEl = null;
 // Ace editor vanilla logic
 class Editor {
   constructor() {
-    this.editor = ace.edit(props.id);
+    this.editor = ace.edit(editor.id);
     this.darkMode = document.querySelector("[data-dark-toggle]");
     this.initEditor();
     this.listenDarkToggle();
@@ -269,8 +271,52 @@ class Editor {
   }
 }
 
+function removeErrCSS() {
+  setTimeout(() => {
+    try {
+      const editorArea = document.querySelector("textarea.ace_text-input");
+
+      const dictStyle = JSON.parse(
+        JSON.stringify(
+          document.querySelector('[style*="font-optical-sizing"]').style
+        )
+      );
+      // Loop and remove key if value is 'font-optical-sizing'
+      for (const [key, value] of Object.entries(dictStyle)) {
+        if (value === "font-optical-sizing") {
+          delete dictStyle[key];
+        }
+      }
+      document.querySelector('[style*="font-optical-sizing"]').style =
+        dictStyle;
+    } catch (e) {}
+  }, 100);
+}
+
+function setEditorAttrs() {
+  // Add tabindex to editor
+  try {
+    const editorArea = document.querySelector("textarea.ace_text-input");
+    // Set attributes
+    editorArea.removeAttribute("wrap");
+    editorArea.removeAttribute("autocorrect");
+
+    editorArea.tabIndex = contentIndex;
+    editorArea.setAttribute("id", `${editor.id}-editor`);
+    editorArea.setAttribute("name", props.name);
+    // Focus on editor
+    editorArea.addEventListener("focus", (e) => {
+      const editorRange = editorEl.editor.getSelectionRange();
+      editorEl.editor.gotoLine(editorRange.start.row, editorRange.start.column);
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 // Use ace editor
 onMounted(() => {
+  editor.id = useUUID(editor.id);
   // Default value
   editorEl = new Editor();
   editorEl.setValue(editor.value);
@@ -280,16 +326,9 @@ onMounted(() => {
     // emit inp
     emits("inp", editor.value);
   });
-  // Add tabindex to editor
-  try {
-    const editorArea = document.querySelector("textarea.ace_text-input");
-    editorArea.tabIndex = contentIndex;
-    editorArea.setAttribute("name", props.name);
-    editorArea.addEventListener("focus", (e) => {
-      const editorRange = editorEl.editor.getSelectionRange();
-      editorEl.editor.gotoLine(editorRange.start.row, editorRange.start.column);
-    });
-  } catch (e) {}
+
+  setEditorAttrs();
+  removeErrCSS();
 });
 
 onUnmounted(() => {
@@ -301,7 +340,7 @@ onUnmounted(() => {
 
 <template>
   <Container
-    :containerClass="`field-container ${props.containerClass}`"
+    :containerClass="`field-container setting ${props.containerClass}`"
     :columns="props.columns"
   >
     <Header
@@ -309,7 +348,7 @@ onUnmounted(() => {
       :required="props.required"
       :name="props.name"
       :label="props.label"
-      :id="props.id"
+      :id="`${editor.id}-editor`"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />
@@ -331,7 +370,7 @@ onUnmounted(() => {
           props.editorClass,
         ]"
         :aria-description="$t('inp_editor_desc')"
-        :id="props.id"
+        :id="editor.id"
       ></div>
       <Clipboard
         :isClipboard="props.isClipboard"

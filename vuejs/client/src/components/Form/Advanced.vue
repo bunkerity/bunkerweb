@@ -8,7 +8,6 @@ import Combobox from "@components/Forms/Field/Combobox.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import Filter from "@components/Widget/Filter.vue";
-import { v4 as uuidv4 } from "uuid";
 import { plugin_types } from "@utils/variables";
 import {
   useCheckPluginsValidity,
@@ -16,6 +15,7 @@ import {
   useListenTemp,
   useUnlistenTemp,
 } from "@utils/form.js";
+import { v4 as uuidv4 } from "uuid";
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
@@ -64,7 +64,7 @@ const props = defineProps({
   columns: {
     type: Object,
     required: false,
-    default: {},
+    default: { pc: 12, tablet: 12, mobile: 12 },
   },
 });
 
@@ -96,10 +96,10 @@ const filters = [
       "setting_name",
     ],
     field: {
-      id: uuidv4(),
+      id: `advanced-filter-keyword-${uuidv4()}`,
       value: "",
       type: "text",
-      name: uuidv4(),
+      name: `advanced-filter-keyword-${uuidv4()}`,
       containerClass: "setting",
       label: "inp_search_settings",
       placeholder: "inp_keyword",
@@ -121,11 +121,11 @@ const filters = [
     value: "all",
     keys: ["type"],
     field: {
-      id: uuidv4(),
+      id: `advanced-filter-type-${uuidv4()}`,
       value: "all",
       // add 'all' as first value
       values: ["all"].concat(plugin_types),
-      name: uuidv4(),
+      name: `advanced-filter-type-${uuidv4()}`,
       onlyDown: true,
       label: "inp_select_plugin_type",
       containerClass: "setting",
@@ -146,11 +146,11 @@ const filters = [
     value: "all",
     keys: ["context"],
     field: {
-      id: uuidv4(),
+      id: `advanced-filter-context-${uuidv4()}`,
       value: "all",
       // add 'all' as first value
       values: ["all", "multisite", "global"],
-      name: uuidv4(),
+      name: `advanced-filter-context-${uuidv4()}`,
       onlyDown: true,
       containerClass: "setting",
       label: "inp_select_plugin_context",
@@ -210,8 +210,8 @@ function updateTemplate(e) {
 }
 
 const comboboxPlugin = {
-  id: uuidv4(),
-  name: uuidv4(),
+  id: `advanced-combobox-${uuidv4()}`,
+  name: `advanced-combobox-${uuidv4()}`,
   disabled: false,
   required: false,
   onlyDown: true,
@@ -228,11 +228,11 @@ const comboboxPlugin = {
 };
 
 const buttonSave = {
-  id: uuidv4(),
+  id: `advanced-save-${uuidv4()}`,
   text: "action_save",
   color: "success",
   size: "normal",
-  type: "bouton",
+  type: "button",
   attrs: {
     "data-submit-form": JSON.stringify(data.base),
   },

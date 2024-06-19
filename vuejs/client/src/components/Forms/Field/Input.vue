@@ -5,7 +5,7 @@ import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 import Clipboard from "@components/Forms/Feature/Clipboard.vue";
-import { v4 as uuidv4 } from "uuid";
+import { useUUID } from "@utils/global.js";
 
 /**
   @name Forms/Field/Input.vue
@@ -59,7 +59,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: uuidv4(),
+    default: "",
   },
   columns: {
     type: [Object, Boolean],
@@ -152,6 +152,7 @@ const props = defineProps({
 const inputEl = ref(null);
 
 const inp = reactive({
+  id: props.id,
   value: props.value,
   showInp: false,
   isValid: true,
@@ -160,6 +161,7 @@ const inp = reactive({
 const emits = defineEmits(["inp"]);
 
 onMounted(() => {
+  inp.id = useUUID(inp.id);
   inp.isValid = inputEl.value.checkValidity();
 
   // Clipboard not allowed on http
@@ -177,7 +179,7 @@ onMounted(() => {
       :required="props.required"
       :name="props.name"
       :label="props.label"
-      :id="props.id"
+      :id="inp.id"
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />
@@ -193,7 +195,7 @@ onMounted(() => {
             $emit('inp', inp.value);
           }
         "
-        :id="props.id"
+        :id="inp.id"
         :class="[
           'input-regular',
           inp.isValid ? 'valid' : 'invalid',
@@ -228,13 +230,13 @@ onMounted(() => {
       <div v-if="props.type === 'password'" class="input-pw-container">
         <button
           :tabindex="contentIndex"
-          :aria-controls="props.id"
+          :aria-controls="inp.id"
           @click.prevent="inp.showInp = inp.showInp ? false : true"
           :class="[props.disabled ? 'disabled' : 'enabled']"
           class="input-pw-button"
-          :aria-labelledby="`${props.id}-password-text`"
+          :aria-labelledby="`${inp.id}-password-text`"
         >
-          <span :id="`${props.id}-password-text`" class="sr-only">{{
+          <span :id="`${inp.id}-password-text`" class="sr-only">{{
             $t("inp_input_password_desc")
           }}</span>
           <svg

@@ -113,15 +113,15 @@ const data = reactive({
 
 const editorData = {
   value: data.inp || data.entry,
-  name: uuidv4(),
-  label: uuidv4(),
+  name: `raw-editor-${uuidv4()}`,
+  label: `raw-editor-${uuidv4()}`,
   hideLabel: true,
   columns: { pc: 12, tablet: 12, mobile: 12 },
   editorClass: "min-h-96",
 };
 
 const buttonSave = {
-  id: uuidv4(),
+  id: `raw-save-${uuidv4()}`,
   text: "action_save",
   color: "success",
   size: "normal",

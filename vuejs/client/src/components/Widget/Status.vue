@@ -1,5 +1,6 @@
 <script setup>
-import { defineProps, computed } from "vue";
+import { defineProps, computed, onMounted } from "vue";
+import { useUUID } from "@utils/global.js";
 
 /**
   @name Icon/Status.vue
@@ -19,7 +20,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: "1",
+    default: "",
   },
   status: {
     type: String,
@@ -33,6 +34,10 @@ const props = defineProps({
   },
 });
 
+const status = reactive({
+  id: props.id,
+});
+
 const statusDesc = computed(() => {
   if (props.status === "success")
     return ["dashboard_status_success", "status active or success."];
@@ -43,15 +48,19 @@ const statusDesc = computed(() => {
   if (props.status === "info")
     return ["dashboard_status_info", "status loading or waiting or unknown."];
 });
+
+onMounted(() => {
+  status.id = useUUID(status.id);
+});
 </script>
 <template>
   <div :class="[props.statusClass, 'status-svg-container']">
     <div
       role="img"
-      :aria-labelledby="`status-${props.id}`"
+      :aria-labelledby="`status-${status.id}`"
       :class="[props.status, 'status-icon']"
     ></div>
-    <p :id="`status-${props.id}`" class="sr-only">
+    <p :id="`status-${status.id}`" class="sr-only">
       {{ $t(statusDesc[0], statusDesc[1]) }}
     </p>
   </div>

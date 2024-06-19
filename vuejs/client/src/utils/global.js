@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 /**
   @name utils/global.js
   @description This file contains global utils that will be used in the application by default.
@@ -63,4 +65,16 @@ function isElHidden(el) {
     : false;
 }
 
-export { useGlobal };
+/**
+  @name useUUID
+  @description   This function return a unique identifier uuidv4 after waiting some random time.
+*/
+function useUUID(id = "") {
+  if (id) return id;
+  // Generate a random number between 0 and 10000 to avoid duplicate uuids when some components are rendered at the same time
+  const random = Math.floor(Math.random() * 10000);
+
+  return uuidv4() + random;
+}
+
+export { useGlobal, useUUID };
