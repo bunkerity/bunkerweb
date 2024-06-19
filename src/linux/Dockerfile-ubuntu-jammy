@@ -1,4 +1,4 @@
-FROM ubuntu:22.04@sha256:2af372c1e2645779643284c7dc38775e3dbbc417b2d784a27c5a9eb784014fb8 as builder
+FROM ubuntu:22.04@sha256:19478ce7fc2ffbce89df29fea5725a8d12e57de52eb9ea570890dc5852aac1ac as builder
 
 ENV OS=ubuntu
 ENV NGINX_VERSION 1.26.1
@@ -58,7 +58,7 @@ COPY src/scheduler scheduler
 COPY src/ui ui
 COPY src/VERSION VERSION
 
-FROM ubuntu:22.04@sha256:2af372c1e2645779643284c7dc38775e3dbbc417b2d784a27c5a9eb784014fb8
+FROM ubuntu:22.04@sha256:19478ce7fc2ffbce89df29fea5725a8d12e57de52eb9ea570890dc5852aac1ac
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
