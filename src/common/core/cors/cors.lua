@@ -6,7 +6,6 @@ local cors = class("cors", plugin)
 
 local ngx = ngx
 local HTTP_NO_CONTENT = ngx.HTTP_NO_CONTENT
-local WARN = ngx.WARN
 local regex_match = utils.regex_match
 local get_deny_status = utils.get_deny_status
 
@@ -49,20 +48,16 @@ function cors:header()
 	else
 		ngx_header.Vary = "Origin"
 	end
-	-- Check if Origin is allowed
-	if
-		self.ctx.bw.http_origin
-		and self.variables["CORS_DENY_REQUEST"] == "yes"
-		and self.variables["CORS_ALLOW_ORIGIN"] ~= "*"
-		and not regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
-	then
-		self:set_metric("counters", "failed_cors", 1)
-		self.logger:log(WARN, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
-		return self:ret(true, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
-	end
+
 	-- Set headers
 	if self.variables["CORS_ALLOW_ORIGIN"] == "*" then
 		ngx_header["Access-Control-Allow-Origin"] = "*"
+	elseif self.variables["CORS_ALLOW_ORIGIN"] == "self" then
+		if self.ctx.bw.https_configured == "yes" then
+			ngx_header["Access-Control-Allow-Origin"] = "https://" .. self.ctx.bw.server_name
+		else
+			ngx_header["Access-Control-Allow-Origin"] = "http://" .. self.ctx.bw.server_name
+		end
 	else
 		ngx_header["Access-Control-Allow-Origin"] = self.ctx.bw.http_origin
 	end
@@ -93,13 +88,25 @@ function cors:access()
 	if self.variables["USE_CORS"] ~= "yes" then
 		return self:ret(true, "service doesn't use CORS")
 	end
+
+	-- Set the allow origin
+	local allow_origin = self.variables["CORS_ALLOW_ORIGIN"]
+	if allow_origin == "self" then
+		if self.ctx.bw.https_configured == "yes" then
+			allow_origin = "https://" .. self.ctx.bw.server_name
+		else
+			allow_origin = "http://" .. self.ctx.bw.server_name
+		end
+	end
+
 	-- Deny as soon as possible if needed
 	if
 		self.ctx.bw.http_origin
 		and self.variables["CORS_DENY_REQUEST"] == "yes"
-		and self.variables["CORS_ALLOW_ORIGIN"] ~= "*"
-		and not regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
+		and allow_origin ~= "*"
+		and not regex_match(self.ctx.bw.http_origin, allow_origin)
 	then
+		self:set_metric("counters", "failed_cors", 1)
 		return self:ret(
 			true,
 			"origin " .. self.ctx.bw.http_origin .. " is not allowed, denying access",
