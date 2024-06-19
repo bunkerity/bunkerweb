@@ -19,7 +19,6 @@ function headers:initialize(ctx)
 		["CONTENT_SECURITY_POLICY"] = "Content-Security-Policy",
 		["REFERRER_POLICY"] = "Referrer-Policy",
 		["PERMISSIONS_POLICY"] = "Permissions-Policy",
-		["FEATURE_POLICY"] = "Feature-Policy",
 		["X_FRAME_OPTIONS"] = "X-Frame-Options",
 		["X_CONTENT_TYPE_OPTIONS"] = "X-Content-Type-Options",
 		["X_XSS_PROTECTION"] = "X-XSS-Protection",
