@@ -162,7 +162,7 @@ onUnmounted(() => {
         />
         <Subtitle type="content" :subtitle="step.subtitle" />
 
-        <Container class="form-easy-step-settings-container">
+        <Container class="layout-settings">
           <template
             v-for="(setting, name, index) in step.settings"
             :key="index"

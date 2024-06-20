@@ -143,10 +143,7 @@ function filterData(filter, value) {
 </script>
 
 <template>
-  <Container
-    v-if="filters.base"
-    :containerClass="`grid grid-cols-12 col-span-12 w-full`"
-  >
+  <Container v-if="filters.base" :containerClass="'layout-settings'">
     <slot></slot>
     <template v-for="filter in filters.base">
       <Input

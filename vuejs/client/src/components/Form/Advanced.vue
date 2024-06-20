@@ -293,7 +293,7 @@ onUnmounted(() => {
         <Title type="content" :title="plugin.name" />
         <Subtitle type="content" :subtitle="plugin.description" />
 
-        <Container class="form-advanced-settings-container">
+        <Container class="layout-settings">
           <template
             v-for="(setting, name, index) in plugin.settings"
             :key="index"

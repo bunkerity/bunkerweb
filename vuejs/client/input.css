@@ -168,14 +168,6 @@ body {
   @apply relative w-full;
 }
 
-.setting.field-container {
-  @apply px-3 md:px-4 mt-3 mb-4; 
-}
-
-.table.field-container {
-  @apply p-0 m-0 -translate-x-1;
-}
-
 .input-header-container {
   @apply z-20;
 }
@@ -500,6 +492,9 @@ body {
   @apply col-span-12 grid grid-cols-12 w-full relative;
 }
 
+.layout-settings {
+  @apply py-4 gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
+}
 
 /* POPOVER */
 
@@ -1030,11 +1025,11 @@ body {
 }
 
 .list-details-container {
-  @apply col-span-12 grid grid-cols-12 gap-2 my-4;
+  @apply col-span-12 grid grid-cols-12 gap-3 py-2;
 }
 
 .list-details-item {
-  @apply z-0 px-3 py-2 m-1 min-h-12 relative flex justify-between items-center transition rounded;
+  @apply z-0 px-3 py-2 min-h-12 relative flex justify-between items-center transition rounded;
  }
  
 .enabled.list-details-item  {
@@ -1132,6 +1127,8 @@ body {
   @apply absolute top-0 right-0 min-w-12 dark:brightness-90 flex justify-center items-center w-12 h-12 text-center rounded-circle;
 }
 
+
+
 /* FORM */
 
 .form-advanced-container {
@@ -1142,9 +1139,6 @@ body {
   @apply col-span-12 w-full;
 }
 
-.form-advanced-settings-container {
-  @apply grid grid-cols-12 w-full relative;
-}
 
 .form-easy-container {
   @apply col-span-12 w-full;
@@ -1152,10 +1146,6 @@ body {
 
 .form-easy-step-container {
   @apply col-span-12 w-full mt-3 mb-2;
-}
-
-.form-easy-step-settings-container {
-  @apply grid grid-cols-12 w-full relative;
 }
 
 .form-raw-container {
