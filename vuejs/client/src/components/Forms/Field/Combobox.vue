@@ -267,7 +267,11 @@ function closeScroll(e) {
   // Case not a DOM element (like the document itself)
   if (e.target.nodeType !== 1) return (select.isOpen = false);
   // Case DOM, check if it is the select dropdown
-  if (e.target.hasAttribute("data-select-dropdown")) return;
+  if (
+    e.target.hasAttribute("data-select-dropdown") ||
+    e.target.hasAttribute("data-select-dropdown-items")
+  )
+    return;
   select.isOpen = false;
 }
 
@@ -285,6 +289,7 @@ function closeTab(e) {
 // Close select dropdown when clicked outside element
 watch(select, () => {
   if (select.isOpen) {
+    inputEl.value.focus();
     window.addEventListener("click", closeOutside);
     window.addEventListener("scroll", closeScroll, true);
     window.addEventListener("keydown", closeTab);
@@ -347,6 +352,7 @@ const emits = defineEmits(["inp"]);
     <!--custom-->
     <div class="relative">
       <button
+        data-toggle-dropdown
         :name="`${props.name}-custom`"
         :tabindex="props.tabId"
         ref="selectBtn"
@@ -389,6 +395,7 @@ const emits = defineEmits(["inp"]);
       </button>
       <!-- dropdown-->
       <div
+        data-select-dropdown
         ref="selectDropdown"
         :style="{ width: selectWidth }"
         :id="`${inp.id}-custom`"
@@ -433,7 +440,7 @@ const emits = defineEmits(["inp"]);
           </div>
         </div>
         <div
-          data-select-dropdown
+          data-select-dropdown-items
           :id="`${inp.id}-list`"
           :aria-hidden="select.isOpen ? 'false' : 'true'"
           role="radiogroup"
