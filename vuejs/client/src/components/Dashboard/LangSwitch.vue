@@ -64,6 +64,7 @@ onMounted(() => {
       :aria-expanded="lang.isOpen ? 'true' : 'false'"
       :aria-labelledby="'current-lang'"
       @click="lang.isOpen = lang.isOpen ? false : true"
+      class="lang-switch-item"
     >
       <span id="current-lang" class="sr-only">{{ $i18n.locale }}</span>
       <span

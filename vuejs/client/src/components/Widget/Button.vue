@@ -115,20 +115,7 @@ const buttonClass = computed(() => {
 
 onMounted(() => {
   btn.id = useUUID(btn.id);
-  setAttrs();
 });
-
-function setAttrs() {
-  for (const [key, value] of Object.entries(props.attrs)) {
-    // stringify if object
-    if (typeof value === "object") {
-      btnEl.value.setAttribute(key, JSON.stringify(value));
-      continue;
-    }
-
-    btnEl.value.setAttribute(key, value);
-  }
-}
 </script>
 
 <template>
@@ -145,6 +132,7 @@ function setAttrs() {
           if (e.target.getAttribute('type') !== 'submit') e.preventDefault();
         }
       "
+      v-bind="props.attrs || {}"
       :tabindex="props.tabId"
       :class="[buttonClass]"
       :disabled="props.disabled || false"

@@ -294,7 +294,7 @@ body {
 }
 
 .select-dropdown-btn {
-  @apply border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
+  @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
 }
 
 .active.select-dropdown-btn {
@@ -504,7 +504,7 @@ body {
 /* POPOVER */
 
 .popover-btn {
-  @apply cursor-pointer flex justify-start w-full;
+  @apply outline-offset-1 cursor-pointer flex justify-start w-full;
 }
 
 .popover-container {
@@ -689,7 +689,7 @@ body {
 }
 
 .menu-logo-link-container {
-  @apply flex justify-center px-8 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700;
+  @apply outline-offset-0 flex justify-center px-8 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700;
 }
 
 .menu-logo-dark {
@@ -729,7 +729,7 @@ body {
 }
 
 .menu-nav-item-anchor {
-  @apply hover:bg-slate-100/50 dark:hover:bg-gray-700 dark:text-white dark:opacity-80 pb-0.5 my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm;
+  @apply outline-offset-0 hover:bg-slate-100/50 dark:hover:bg-gray-700 dark:text-white dark:opacity-80 pb-0.5 my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm;
 }
 
 .active.menu-nav-item-anchor {
@@ -867,7 +867,7 @@ body {
 }
 
 .news-sidebar-post {
-  @apply block min-h-[350px] w-full col-span-12 transition dark:bg-slate-700 dark:brightness-[0.885] bg-gray-100 rounded px-6 py-4 my-4 mx-0 flex flex-col justify-between;
+  @apply outline-offset-[-4px] block min-h-[350px] w-full col-span-12 transition dark:bg-slate-700 dark:brightness-[0.885] bg-gray-100 rounded px-6 py-4 my-4 mx-0 flex flex-col justify-between;
 }
 
 .news-sidebar-post-img {
@@ -975,7 +975,7 @@ body {
 }
 
 .footer-list-item {
-  @apply capitalize-first hover:italic hover:brightness-90 block sm:px-4 py-1 lg:pt-1 lg:pb-1 text-sm tracking-wide font-normal transition duration-300 ease-in-out text-white dark:text-white;
+  @apply outline-offset-0 capitalize-first hover:italic hover:brightness-90 block sm:px-4 py-1 lg:pt-1 lg:pb-1 text-sm tracking-wide font-normal transition duration-300 ease-in-out text-white dark:text-white;
 }
 
 /* LANG */
@@ -989,7 +989,7 @@ body {
 }
 
 .lang-switch-item {
-  @apply block;
+  @apply outline-offset-0 block;
 }
 
 /* STATUS COMPONENT */
@@ -1582,7 +1582,7 @@ body {
 }
 
 .feedback-alert-btn {
-  @apply absolute right-2 top-1 h-5 w-5;
+  @apply outline-offset-0 absolute right-2 top-1 h-5 w-5;
 }
 
 .feedback-alert-svg {
