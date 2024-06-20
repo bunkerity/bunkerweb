@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, computed, onMounted } from "vue";
+import { defineProps, computed, onMounted, reactive } from "vue";
 import { useUUID } from "@utils/global.js";
 
 /**

@@ -80,6 +80,38 @@ const data = reactive({
   format: JSON.parse(JSON.stringify(props.template)),
 });
 
+const comboboxPlugin = {
+  id: `advanced-combobox-${uuidv4()}`,
+  name: `advanced-combobox-${uuidv4()}`,
+  disabled: false,
+  required: false,
+  onlyDown: true,
+  maxBtnChars: 24,
+  containerClass: "setting",
+  label: "dashboard_plugins",
+  popovers: [
+    {
+      text: "inp_combobox_advanced_desc",
+      iconName: "info",
+      iconColor: "info",
+      svgSize: "sm",
+    },
+  ],
+  columns: { pc: 3, tablet: 12, mobile: 12 },
+};
+
+const buttonSave = {
+  id: `advanced-save-${uuidv4()}`,
+  text: "action_save",
+  color: "success",
+  size: "normal",
+  type: "button",
+  attrs: {
+    "data-submit-form": JSON.stringify(data.base),
+  },
+  containerClass: "flex justify-center",
+};
+
 const filters = [
   {
     filter: "settings",
@@ -109,6 +141,7 @@ const filters = [
           text: "inp_search_settings_desc",
           iconName: "info",
           iconColor: "info",
+          svgSize: "sm",
         },
       ],
       columns: { pc: 3, tablet: 4, mobile: 12 },
@@ -129,11 +162,13 @@ const filters = [
       onlyDown: true,
       label: "inp_select_plugin_type",
       containerClass: "setting",
+      maxBtnChars: 24,
       popovers: [
         {
           text: "inp_select_plugin_type_desc",
           iconName: "info",
           iconColor: "info",
+          svgSize: "sm",
         },
       ],
       columns: { pc: 3, tablet: 4, mobile: 12 },
@@ -154,11 +189,13 @@ const filters = [
       onlyDown: true,
       containerClass: "setting",
       label: "inp_select_plugin_context",
+      maxBtnChars: 24,
       popovers: [
         {
           text: "inp_select_plugin_context_desc",
           iconName: "info",
           iconColor: "info",
+          svgSize: "sm",
         },
       ],
       columns: { pc: 3, tablet: 4, mobile: 12 },
@@ -209,36 +246,6 @@ function updateTemplate(e) {
   useUpdateTempSettings(e, data.base);
 }
 
-const comboboxPlugin = {
-  id: `advanced-combobox-${uuidv4()}`,
-  name: `advanced-combobox-${uuidv4()}`,
-  disabled: false,
-  required: false,
-  onlyDown: true,
-  containerClass: "setting",
-  label: "dashboard_plugins",
-  popovers: [
-    {
-      text: "inp_combobox_advanced_desc",
-      iconName: "info",
-      iconColor: "info",
-    },
-  ],
-  columns: { pc: 3, tablet: 4, mobile: 12 },
-};
-
-const buttonSave = {
-  id: `advanced-save-${uuidv4()}`,
-  text: "action_save",
-  color: "success",
-  size: "normal",
-  type: "button",
-  attrs: {
-    "data-submit-form": JSON.stringify(data.base),
-  },
-  containerClass: "flex justify-center",
-};
-
 onMounted(() => {
   // Get first props.forms template name
   data.currPlugin = getFirstPlugin(props.template);
@@ -260,33 +267,33 @@ onUnmounted(() => {
     data-advanced-form
     :tag="'form'"
     method="POST"
-    :containerClass="`col-span-12 w-full m-1 p-1`"
+    :containerClass="`form-advanced-container`"
     :columns="props.columns"
   >
     <Title type="card" :title="'dashboard_advanced_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_advanced_mode_subtitle'" />
-    <Combobox
-      v-bind="comboboxPlugin"
-      :value="data.currPlugin"
-      :values="data.plugins"
-      @inp="data.currPlugin = $event"
-    />
     <Filter
       v-if="filters.length"
       @filter="(v) => filter(v)"
       :data="data.base"
       :filters="filters"
-    />
+    >
+      <Combobox
+        v-bind="comboboxPlugin"
+        :value="data.currPlugin"
+        :values="data.plugins"
+        @inp="data.currPlugin = $event"
+    /></Filter>
     <template v-for="plugin in data.format">
       <Container
         data-advanced-form-plugin
         v-if="plugin.name === data.currPlugin"
-        class="col-span-12 w-full"
+        class="form-advanced-plugin-container"
       >
-        <Title type="card" :title="plugin.name" />
-        <Subtitle type="card" :subtitle="plugin.description" />
+        <Title type="content" :title="plugin.name" />
+        <Subtitle type="content" :subtitle="plugin.description" />
 
-        <Container class="grid grid-cols-12 w-full relative">
+        <Container class="form-advanced-settings-container">
           <template
             v-for="(setting, name, index) in plugin.settings"
             :key="index"
@@ -302,7 +309,7 @@ onUnmounted(() => {
     />
     <Text
       v-if="data.isRegErr || data.isReqErr"
-      :textClass="'setting-error'"
+      :textClass="'form-setting-error'"
       :text="
         data.isReqErr
           ? $t('dashboard_advanced_required', {

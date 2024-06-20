@@ -147,6 +147,7 @@ function filterData(filter, value) {
     v-if="filters.base"
     :containerClass="`grid grid-cols-12 col-span-12 w-full`"
   >
+    <slot></slot>
     <template v-for="filter in filters.base">
       <Input
         v-if="filter.type === 'keyword'"

@@ -138,7 +138,7 @@ onUnmounted(() => {
     data-easy-form
     :tag="'form'"
     method="POST"
-    :containerClass="`col-span-12 w-full m-1 p-1`"
+    :containerClass="`form-easy-container`"
     :columns="props.columns"
   >
     <Title type="card" :title="'dashboard_easy_mode'" />
@@ -148,10 +148,10 @@ onUnmounted(() => {
       <Container
         data-easy-form-step
         v-if="data.currStep === id"
-        class="col-span-12 w-full"
+        class="form-easy-step-container"
       >
         <Title
-          type="card"
+          type="content"
           :title="
             $t('dashboard_easy_mode_title', {
               step: id + 1,
@@ -160,9 +160,9 @@ onUnmounted(() => {
             })
           "
         />
-        <Subtitle type="card" :subtitle="step.subtitle" />
+        <Subtitle type="content" :subtitle="step.subtitle" />
 
-        <Container class="grid grid-cols-12 w-full relative">
+        <Container class="form-easy-step-settings-container">
           <template
             v-for="(setting, name, index) in step.settings"
             :key="index"
@@ -192,7 +192,7 @@ onUnmounted(() => {
     </Flex>
     <Text
       v-if="data.isRegErr || data.isReqErr"
-      :textClass="'setting-error'"
+      :textClass="'form-setting-error'"
       :text="
         data.isReqErr
           ? $t('dashboard_easy_required', {

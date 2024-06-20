@@ -20,7 +20,7 @@ import Icons from "@components/Widget/Icons.vue";
   @param {string} iconColor - Color of the icon between tailwind colors
   @param {string} [tag="a"] - By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor
   @param {string} [popoverClass=""] - Additional class for the popover container
-  @param {string} [svgClass="default"] - Additional class for the svg icon. "default" or "setting" will change the icon size.
+  @param {string} [svgSize="base"] - Determine svg size between sm, md, base and lg.
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
 
@@ -53,10 +53,10 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  svgClass: {
+  svgSize: {
     type: String,
     required: false,
-    default: "default",
+    default: "base",
   },
   tabId: {
     type: String,
@@ -175,7 +175,7 @@ onMounted(() => {
     :class="['popover-btn', props.popoverClass]"
   >
     <Icons
-      :iconClass="`popover-svg ${props.svgClass}`"
+      :iconClass="`popover-svg ${props.svgSize}`"
       :iconName="props.iconName"
       :iconColor="props.iconColor"
     />

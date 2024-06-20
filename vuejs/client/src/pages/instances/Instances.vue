@@ -58,6 +58,5 @@ onMounted(() => {
 <template>
   <DashboardLayout>
     <BuilderInstances v-if="instances.builder" :builder="instances.builder" />
-    <div id="test-el"></div>
   </DashboardLayout>
 </template>

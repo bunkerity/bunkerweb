@@ -25,7 +25,7 @@ const props = defineProps({
 <template>
   <div
     data-grid
-    :class="[props.gridClass, 'col-span-12 grid grid-cols-12 w-full  relative']"
+    :class="[props.gridClass, 'col-span-12 grid grid-cols-12 w-full relative']"
   >
     <slot></slot>
   </div>

@@ -3,12 +3,12 @@ import { defineProps } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Title from "@components/Widget/Title.vue";
 import Status from "@components/Widget/Status.vue";
-import ContentDetailList from "@components/Content/DetailList.vue";
+import ListPairs from "@components/List/Pairs.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 /** 
   @name Widget/Instance.vue
   @description This component is an instance widget.
-  This component is using the Container, TitleCard, IconStatus, ContentDetailList and ButtonGroup components.
+  This component is using the Container, TitleCard, IconStatus, ListPairs and ButtonGroup components.
   @example
   {
     id: "instance-1",
@@ -48,7 +48,7 @@ const props = defineProps({
     required: true,
     default: "",
   },
-  details: {
+  pairs: {
     type: Array,
     required: true,
     default: [],
@@ -65,7 +65,7 @@ const props = defineProps({
   <Container :columns="{ pc: 12, tablet: 12, mobile: 12 }">
     <Status :id="props.title" :status="props.status" />
     <Title type="card" :title="props.title" />
-    <ContentDetailList :details="props.details" />
+    <ListPairs :pairs="props.pairs" />
     <ButtonGroup
       :buttons="props.buttons"
       :groupClass="'justify-end align-center'"

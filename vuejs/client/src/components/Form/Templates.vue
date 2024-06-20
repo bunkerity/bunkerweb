@@ -1,8 +1,7 @@
 <script setup>
 import { reactive, defineProps, computed, onBeforeMount } from "vue";
 import Container from "@components/Widget/Container.vue";
-import Title from "@components/Widget/Title.vue";
-import Subtitle from "@components/Widget/Subtitle.vue";
+import Grid from "@components/Widget/Grid.vue";
 import Select from "@components/Forms/Field/Select.vue";
 import Combobox from "@components/Forms/Field/Combobox.vue";
 import Advanced from "@components/Form/Advanced.vue";
@@ -28,17 +27,6 @@ import { v4 as uuidv4 } from "uuid";
 */
 
 const props = defineProps({
-  // id && value && method
-  title: {
-    type: String,
-    required: false,
-    default: "dashboard_templates_title_default",
-  },
-  subtitle: {
-    type: String,
-    required: false,
-    default: "dashboard_templates_subtitle_default",
-  },
   templates: {
     type: Object,
     required: true,
@@ -50,8 +38,10 @@ const comboboxTemplate = {
   id: `combobox-template-${uuidv4()}`,
   name: `combobox-template-${uuidv4()}`,
   disabled: false,
+  maxBtnChars: 24,
   label: "dashboard_templates",
-  columns: { pc: 4, tablet: 6, mobile: 12 },
+  columns: { pc: 3, tablet: 12, mobile: 12 },
+  containerClass: "setting",
 };
 
 const comboboxModes = {
@@ -60,8 +50,10 @@ const comboboxModes = {
   disabled: false,
   required: false,
   onlyDown: true,
+  maxBtnChars: 24,
   label: "dashboard_modes",
-  columns: { pc: 4, tablet: 6, mobile: 12 },
+  columns: { pc: 3, tablet: 12, mobile: 12 },
+  containerClass: "setting",
 };
 
 const data = reactive({
@@ -98,15 +90,10 @@ onBeforeMount(() => {
 <template>
   <Container
     v-if="data.currModeName && data.currTemplateName"
-    :containerClass="`col-span-12 w-full m-1 p-1`"
+    :containerClass="`col-span-12 w-full`"
     :columns="props.columns"
   >
-    <Title type="container" :title="props.title" />
-    <Subtitle type="container" :subtitle="props.subtitle" />
-    <Container
-      v-if="data.modes.length > 1 || data.templates.length > 1"
-      :containerClass="`col-span-12 grid grid-cols-12`"
-    >
+    <Grid v-if="data.modes.length > 1 || data.templates.length > 1">
       <Combobox
         v-if="data.templates.length > 1"
         v-bind="comboboxTemplate"
@@ -121,7 +108,7 @@ onBeforeMount(() => {
         :values="data.modes"
         @inp="data.currModeName = $event"
       />
-    </Container>
+    </Grid>
     <Advanced
       v-if="data.currModeName === 'advanced'"
       :template="props.templates[data.currModeName][data.currTemplateName]"

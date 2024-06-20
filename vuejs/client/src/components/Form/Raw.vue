@@ -140,12 +140,13 @@ const buttonSave = {
     data-raw-form
     :tag="'form'"
     method="POST"
-    :containerClass="`col-span-12 w-full m-1 p-1`"
+    :containerClass="'form-raw-container'"
     :columns="props.columns"
   >
     <Title type="card" :title="'dashboard_raw_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_raw_mode_subtitle'" />
-    <Container class="col-span-12 w-full">
+
+    <Container class="form-raw-editor-container">
       <Editor @inp="(v) => (data.inp = v)" v-bind="editorData" />
     </Container>
     <Button :disabled="data.isValid ? false : true" v-bind="buttonSave" />
@@ -153,7 +154,7 @@ const buttonSave = {
     <Text
       v-if="!data.isValid"
       :text="'dashboard_raw_invalid'"
-      :textClass="'setting-error'"
+      :textClass="'form-setting-error'"
     />
   </Container>
 </template>

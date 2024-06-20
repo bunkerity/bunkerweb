@@ -3,6 +3,7 @@
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import Title from "@components/Widget/Title.vue";
+import Subtitle from "@components/Widget/Subtitle.vue";
 import Templates from "@components/Form/Templates.vue";
 
 /**
@@ -62,6 +63,7 @@ const props = defineProps({
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
         <Title v-if="widget.type === 'Title'" v-bind="widget.data" />
+        <Subtitle v-if="widget.type === 'Subtitle'" v-bind="widget.data" />
         <Templates v-if="widget.type === 'Templates'" v-bind="widget.data" />
       </template>
     </Grid>

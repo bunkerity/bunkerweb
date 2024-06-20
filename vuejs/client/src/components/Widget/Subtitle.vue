@@ -12,7 +12,7 @@ import { computed } from "vue";
     tag: "h2"
   }
   @param {string} subtitle -  Can be a translation key or by default raw text.
-  @param {string} type - The type of subtitle between "card", "container" or "stat"
+  @param {string} [type="card"] - The type of title between "container", "card", "content", "min" or "stat"
   @param {string} [tag=""] - The tag of the subtitle. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of subtitle.
   @param {string} [subtitleColor=""] - The color of the subtitle between error, success, warning, info or tailwind color
   @param {string} [subtitleClass=""] - Additional class, useful when component is used directly on a grid system
@@ -47,21 +47,22 @@ const props = defineProps({
 
 const tag = computed(() => {
   if (props.tag) return props.tag;
-  if (props.type === "container") return "p";
-  if (props.type === "card") return "p";
-  if (props.type === "stat") return "p";
+  return "p";
 });
 
 const baseClass = computed(() => {
   if (props.type === "container") return "subtitle-container";
   if (props.type === "card") return "subtitle-card";
   if (props.type === "stat") return "subtitle-stat";
+  if (props.type === "min") return "subtitle-min";
+  if (props.type === "content") return "subtitle-content";
   return "subtitle-card";
 });
 </script>
 
 <template>
   <component
+    data-subtitle
     :is="tag"
     v-if="props.subtitle"
     :class="[props.subtitleClass, props.subtitleColor, baseClass]"

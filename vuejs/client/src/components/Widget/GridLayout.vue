@@ -72,15 +72,14 @@ const gridClass = computed(() => {
 const gridLayoutEl = ref();
 
 onMounted(() => {
-  if (props.link) {
-    gridLayoutEl.value.setAttribute("href", props.link);
-    gridLayoutEl.value.setAttribute("rel", "noopener");
-    gridLayoutEl.value.setAttribute("tabindex", props.tabId);
-  }
+  if (!props.link) return;
+  gridLayoutEl.value.setAttribute("href", props.link);
+  gridLayoutEl.value.setAttribute("rel", "noopener");
+  gridLayoutEl.value.setAttribute("tabindex", props.tabId);
 
-  if (props.link && props.link.startsWith("http")) {
-    gridLayoutEl.value.setAttribute("target", "_blank");
-  }
+  if (!props.link.startsWith("http")) return;
+
+  gridLayoutEl.value.setAttribute("target", "_blank");
 });
 </script>
 
