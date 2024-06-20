@@ -41,7 +41,7 @@ const builder = [
         data: {
           filters: [
             {
-              filter: "details",
+              filter: "default",
               filterName: "keyword",
               type: "keyword",
               value: "",
@@ -67,7 +67,7 @@ const builder = [
               },
             },
             {
-              filter: "details",
+              filter: "default",
               filterName: "type",
               type: "select",
               value: "all",

@@ -1173,9 +1173,8 @@ body {
 /* CARD */
 
 .card {
-  @apply relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
+  @apply overflow-visible relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
 }
-
 
 .card-info-text {
   @apply col-span-12 mb-0 leading-normal text-sm text-gray-700 dark:text-gray-500 ml-2 mr-1.5;
