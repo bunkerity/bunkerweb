@@ -1,7 +1,10 @@
 <script setup>
+import { defineProps, computed, reactive } from "vue";
 import Flex from "@components/Widget/Flex.vue";
 import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 import Text from "@components/Widget/Text.vue";
+import Filter from "@components/Widget/Filter.vue";
+import Grid from "@components/Widget/Grid.vue";
 
 /** 
   @name List/Details.vue
@@ -9,7 +12,7 @@ import Text from "@components/Widget/Text.vue";
   @example
   {
   details : [{
-    title: "name",
+    text: "name",
     disabled : false,
     popovers: [
       {
@@ -24,7 +27,8 @@ import Text from "@components/Widget/Text.vue";
       },
     ],
 }]
-  @param {string}  details  - List of details item that contains a title and a list of popovers. We can also add a disabled key to disable the item.
+  @param {string} details  - List of details item that contains a text and a list of popovers. We can also add a disabled key to disable the item.
+  @param {array} [filters=[]] - List of filters to apply on the list of items.
   @param {columns} [columns={pc: 4, tablet: 6, mobile: 12}] - Determine the position of the items in the grid system.
 */
 
@@ -32,6 +36,11 @@ const props = defineProps({
   details: {
     type: Array,
     required: true,
+  },
+  filters: {
+    type: Array,
+    required: false,
+    default: [],
   },
   columns: {
     type: [Object, Boolean],
@@ -43,24 +52,37 @@ const props = defineProps({
 const gridClass = computed(() => {
   return `col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
 });
+
+const data = reactive({
+  base: JSON.parse(JSON.stringify(props.details)),
+  format: JSON.parse(JSON.stringify(props.details)),
+});
 </script>
 
 <template>
-  <ul v-if="props.details" :class="['list-details-container']">
-    <li
-      v-for="item in props.details"
-      :class="[
-        'list-details-item',
-        gridClass,
-        item.disabled ? 'disabled' : 'enabled',
-      ]"
-    >
-      <Flex :flexClass="'justify-between items-center'">
-        <Text :tag="'p'" :text="props.name" />
-        <div>
-          <PopoverGroup :popovers="props.popovers" />
-        </div>
-      </Flex>
-    </li>
-  </ul>
+  <Grid>
+    <Filter
+      v-if="props.filters.length"
+      @filter="(v) => (data.format = v)"
+      :data="data.base"
+      :filters="props.filters"
+    />
+    <ul v-if="data.format" :class="['list-details-container']">
+      <li
+        v-for="item in data.format"
+        :class="[
+          'list-details-item',
+          gridClass,
+          item.disabled ? 'disabled' : 'enabled',
+        ]"
+      >
+        <Flex :flexClass="'justify-between items-center'">
+          <Text :tag="'p'" :text="item.text" />
+          <div>
+            <PopoverGroup :popovers="item.popovers" />
+          </div>
+        </Flex>
+      </li>
+    </ul>
+  </Grid>
 </template>

@@ -32,6 +32,10 @@
   text-transform: uppercase;
 }
 
+.break-word {
+  word-break: break-word;
+}
+
 /* LOGIN */
 
 .login-main {
@@ -484,6 +488,16 @@ body {
 
 .input-pw-svg-invisible {
   @apply flex scale-110 h-5 w-5 items-center align-middle;
+}
+
+/* LAYOUT */
+
+.layout-grid-layout {
+  @apply px-6 py-4 overflow-hidden break-words grid grid-cols-12 w-full;
+}
+
+.layout-grid {
+  @apply col-span-12 grid grid-cols-12 w-full relative;
 }
 
 
@@ -991,11 +1005,11 @@ body {
 /* CONTENT COMPONENT */
 
 .text-content {
-  @apply leading-normal mb-0 ;
+  @apply leading-normal mb-0 break-word;
 }
 
 .text-stat {
-  @apply my-1 font-bold dark:text-white/90 text-black uppercase;
+  @apply my-1 font-bold dark:text-white/90 text-black uppercase break-word;
 }
 /* LIST COMPONENT */
 
@@ -1016,42 +1030,41 @@ body {
 }
 
 .list-details-container {
-  @apply grid grid-cols-12 gap-2 my-4;
+  @apply col-span-12 grid grid-cols-12 gap-2 my-4;
 }
 
-.list-details {
-  @apply py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded;
+.list-details-item {
+  @apply z-0 px-3 py-2 m-1 min-h-12 relative flex justify-between items-center transition rounded;
  }
  
-.enabled.list-details  {
-  @apply bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800;
+.enabled.list-details-item  {
+  @apply bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-800;
 }
 
-.disabled.list-details  {
+.disabled.list-details-item  {
   @apply cursor-not-allowed bg-gray-300 dark:bg-gray-800;
 }
-
 
 /* TITLE */
 
 .title-container {
-  @apply capitalize-first w-full max-w-[80%] sm:max-w-[800px] col-span-12 break-words font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
+  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
 }
 
 .title-card {
-  @apply capitalize-first w-full max-w-[80%] sm:max-w-[700px] col-span-12  break-words font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
+  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12  font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
 }
 
 .title-content {
-  @apply capitalize-first w-full max-w-[80%] sm:max-w-[700px] col-span-12  break-words font-bold dark:text-white/90 transition duration-300 ease-in-out text-lg text-[#344767];
+  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12  font-bold dark:text-white/90 transition duration-300 ease-in-out text-lg text-[#344767];
 }
 
 .title-min {
-  @apply capitalize-first w-full max-w-[80%] sm:max-w-[700px] col-span-12  break-words font-bold dark:text-white/90 transition duration-300 ease-in-out text-[0.95rem] text-[#344767];
+  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12  font-bold dark:text-white/90 transition duration-300 ease-in-out text-[0.95rem] text-[#344767];
 }
 
 .title-stat {
-  @apply capitalize-first w-full max-w-[80%] sm:max-w-[600px] col-span-12 font-sans text-sm font-semibold leading-normal uppercase dark:text-white/90 text-[#344767];
+  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[600px] col-span-12 font-sans text-sm font-semibold leading-normal uppercase dark:text-white/90 text-[#344767];
 }
 
 .no-subtitle.title-container { 
@@ -1082,23 +1095,23 @@ body {
 
 
 .subtitle-container {
-  @apply capitalize-first dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0 lowercase;
+  @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0 lowercase;
 }
 
 .subtitle-card {
-  @apply capitalize-first dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-base mb-0 lowercase;
+  @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-base mb-0 lowercase;
 }
 
 .subtitle-content {
-  @apply capitalize-first dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-[0.975rem] mb-0 lowercase;
+  @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-[0.975rem] mb-0 lowercase;
 }
 
 .subtitle-min {
-  @apply capitalize-first dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-[0.9rem] mb-0 lowercase;
+  @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-[0.9rem] mb-0 lowercase;
 }
 
 .subtitle-stat {
-  @apply capitalize-first dark:text-gray-300  col-span-12 break-words w-full max-w-[80%] sm:max-w-[600px] font-bold leading-normal text-sm mb-0 lowercase;
+  @apply capitalize-first break-word dark:text-gray-300  col-span-12 break-words w-full max-w-[80%] sm:max-w-[600px] font-bold leading-normal text-sm mb-0 lowercase;
 }
 
 /* STAT COMPONENT */

@@ -236,6 +236,8 @@ export default {
     "sm:p-2",
     "md:p-2",
     "lg:p-2",
+    "scale-90",
+    "scale-95",
   ],
   important: true,
   darkMode: "class",

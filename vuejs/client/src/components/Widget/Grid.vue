@@ -23,10 +23,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div
-    data-grid
-    :class="[props.gridClass, 'col-span-12 grid grid-cols-12 w-full relative']"
-  >
+  <div data-grid :class="[props.gridClass, 'layout-grid']">
     <slot></slot>
   </div>
 </template>

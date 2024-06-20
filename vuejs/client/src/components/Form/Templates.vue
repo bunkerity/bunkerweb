@@ -42,6 +42,14 @@ const comboboxTemplate = {
   label: "dashboard_templates",
   columns: { pc: 3, tablet: 12, mobile: 12 },
   containerClass: "setting",
+  popovers: [
+    {
+      text: "inp_templates_desc",
+      iconName: "info",
+      iconColor: "info",
+      svgSize: "sm",
+    },
+  ],
 };
 
 const comboboxModes = {

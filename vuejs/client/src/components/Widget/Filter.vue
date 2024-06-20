@@ -45,16 +45,16 @@ import { useFilter } from "@utils/form.js";
       },
       ...
     ]
-  @param {object} filters - Fields with additional data to be used as filters.
-  @param {object|array} data - Data object or array to filter. Emit a filter event with the filtered data.
-  @param {string} containerClass - Additional class for the container.
+  @param {array} [filters=[]] - Fields with additional data to be used as filters.
+  @param {object|array} [data={}] - Data object or array to filter. Emit a filter event with the filtered data.
+  @param {string} [containerClass=""] - Additional class for the container.
   */
 
 const props = defineProps({
   filters: {
-    type: Object,
+    type: Array,
     required: false,
-    default: {},
+    default: [],
   },
   data: {
     type: Object,

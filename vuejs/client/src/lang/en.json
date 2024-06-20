@@ -108,8 +108,8 @@
   "inp_select_dropdown_desc": "Radio group (dropdown) to change value.",
   "inp_input_password_desc": "Toggle hide/show password.",
   "inp_combobox_placeholder": "Search",
-  "inp_search_settings": "Search settings",
   "inp_keyword": "keyword",
+  "inp_search_settings": "Search settings",
   "inp_search_settings_desc": "Search within description, setting name or setting id (SETTING_ID)",
   "inp_combobox_advanced_desc": "Switch between available plugins.",
   "inp_select_plugin_type": "plugin type",
@@ -200,5 +200,13 @@
   "jobs_table_reload" : "Reload",
   "jobs_table_success" : "Success",
   "jobs_table_last_run_date" : "Last run date",
-  "jobs_table_cache_downloadable" : "Cache (downloadable)"
+  "jobs_table_cache_downloadable" : "Cache (downloadable)",
+  "plugins_pro_plugin": "Pro plugin",
+  "plugins_core_plugin": "Core plugin",
+  "plugins_external_plugin": "External plugin",
+  "plugins_redirect_page": "Redirect to plugin page",
+  "plugins_search": "Search plugin",
+  "plugins_search_desc": "Search the plugin by his name",
+  "plugins_type": "Plugin type",
+  "plugins_type_desc": "Only show plugins of the chosen type"
 }

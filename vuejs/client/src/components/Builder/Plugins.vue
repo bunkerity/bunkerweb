@@ -2,7 +2,7 @@
 // Containers
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
-import PluginBox from "@components/Widget/PluginBox.vue";
+import ListDetails from "@components/List/Details.vue";
 import Title from "@components/Widget/Title.vue";
 
 /**
@@ -22,12 +22,9 @@ import Title from "@components/Widget/Title.vue";
     },
     },
       {
-        type: "PluginBox",
+        type: "ListDetails",
         data:   {
-            name: "Plugin name",
-            flexClass : "justify-center",
-            columns: { pc: 4, tablet: 6, mobile: 12 },
-            containerClass: "mb-4",
+            text: "Plugin name",
             popovers: [
               {
                 text: "This is a popover text",
@@ -72,7 +69,10 @@ const props = defineProps({
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
         <Title v-if="widget.type === 'Title'" v-bind="widget.data" />
-        <PluginBox v-if="widget.type === 'PluginBox'" v-bind="widget.data" />
+        <ListDetails
+          v-if="widget.type === 'ListDetails'"
+          v-bind="widget.data"
+        />
       </template>
     </Grid>
   </GridLayout>

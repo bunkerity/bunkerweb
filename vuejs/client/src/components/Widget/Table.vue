@@ -67,7 +67,7 @@ import Filter from "@components/Widget/Filter.vue";
   @param {array} header - Determine the header of the table.
   @param {array} positions - Determine the position of each item in the table in a list of number based on 12 columns grid.
   @param {array} items - items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
-  @param {array} filters - Determine the filters of the table.
+  @param {array} [filters=[]] - Determine the filters of the table.
   @param {string} [minWidth="base"] - Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl".
   @param {string} [containerClass=""] - Container additional class.
   @param {string} [containerWrapClass=""] - Container wrap additional class.
@@ -80,9 +80,9 @@ const props = defineProps({
     required: true,
   },
   filters: {
-    type: Object,
+    type: Array,
     required: false,
-    default: {},
+    default: [],
   },
   minWidth: {
     type: String,
