@@ -429,9 +429,11 @@ def job_builder(jobs):
         }
     ]
 
-    # store on a file
-    with open("jobs.json", "w") as f:
-        json.dump(builder, f, indent=4)
+    return builder
 
 
-job_builder(jobs)
+output = job_builder(jobs)
+
+# store on a file
+with open("jobs.json", "w") as f:
+    json.dump(output, f, indent=4)

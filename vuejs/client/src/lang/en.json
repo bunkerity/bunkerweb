@@ -201,12 +201,13 @@
   "jobs_table_success" : "Success",
   "jobs_table_last_run_date" : "Last run date",
   "jobs_table_cache_downloadable" : "Cache (downloadable)",
-  "plugins_pro_plugin": "Pro plugin",
-  "plugins_core_plugin": "Core plugin",
-  "plugins_external_plugin": "External plugin",
-  "plugins_redirect_page": "Redirect to plugin page",
+  "plugins_pro_plugin_desc": "Pro plugin",
+  "plugins_core_plugin_desc": "Core plugin",
+  "plugins_external_plugin_desc": "External plugin",
+  "plugins_redirect_page_desc": "Redirect to plugin page",
   "plugins_search": "Search plugin",
   "plugins_search_desc": "Search the plugin by his name",
   "plugins_type": "Plugin type",
-  "plugins_type_desc": "Only show plugins of the chosen type"
+  "plugins_type_desc": "Only show plugins of the chosen type",
+  "plugins_delete_desc": "Delete plugin"
 }

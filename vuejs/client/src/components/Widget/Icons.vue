@@ -27,6 +27,8 @@ import Globe from "@components/Icons/Globe.vue";
 import Info from "@components/Icons/Info.vue";
 import Redirect from "@components/Icons/Redirect.vue";
 import External from "@components/Icons/External.vue";
+import Trash from "@components/Icons/Trash.vue";
+import Lock from "@components/Icons/Lock.vue";
 
 import { computed } from "vue";
 
@@ -108,6 +110,16 @@ const iconClass = computed(() => {
     />
     <External
       v-if="props.iconName === 'external'"
+      :iconClass="iconClass"
+      :iconColor="iconColor"
+    />
+    <Trash
+      v-if="props.iconName === 'trash'"
+      :iconClass="iconClass"
+      :iconColor="iconColor"
+    />
+    <Lock
+      v-if="props.iconName === 'lock'"
       :iconClass="iconClass"
       :iconColor="iconColor"
     />

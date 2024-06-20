@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, computed, reactive } from "vue";
+import { defineProps, computed, reactive, onMounted } from "vue";
 import Flex from "@components/Widget/Flex.vue";
 import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 import Text from "@components/Widget/Text.vue";
@@ -14,6 +14,10 @@ import Grid from "@components/Widget/Grid.vue";
   details : [{
     text: "name",
     disabled : false,
+    attrs: {
+      id: "id",
+      value: "value",
+    },
     popovers: [
       {
         text: "This is a popover text",
@@ -27,7 +31,7 @@ import Grid from "@components/Widget/Grid.vue";
       },
     ],
 }]
-  @param {string} details  - List of details item that contains a text and a list of popovers. We can also add a disabled key to disable the item.
+  @param {string} details  - List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
   @param {array} [filters=[]] - List of filters to apply on the list of items.
   @param {columns} [columns={pc: 4, tablet: 6, mobile: 12}] - Determine the position of the items in the grid system.
 */
@@ -69,12 +73,13 @@ const data = reactive({
     />
     <ul v-if="data.format" :class="['list-details-container']">
       <li
-        v-for="item in data.format"
+        v-for="(item, id) in data.format"
         :class="[
           'list-details-item',
           gridClass,
           item.disabled ? 'disabled' : 'enabled',
         ]"
+        v-bind="item.attrs || {}"
       >
         <Flex :flexClass="'justify-between items-center'">
           <Text :tag="'p'" :text="item.text" />
