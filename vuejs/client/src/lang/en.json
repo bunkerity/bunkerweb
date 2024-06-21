@@ -212,5 +212,6 @@
   "plugins_search_desc": "Search the plugin by his name",
   "plugins_type": "Plugin type",
   "plugins_type_desc": "Only show plugins of the chosen type",
-  "plugins_delete_desc": "Delete plugin"
+  "plugins_delete_desc": "Delete plugin",
+  "plugins_modal_delete": "Delete plugin"
 }

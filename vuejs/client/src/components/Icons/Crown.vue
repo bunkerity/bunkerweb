@@ -31,7 +31,7 @@ const icon = reactive({
 });
 
 onMounted(() => {
-  icon.id = useUUID(icon.id);
+  icon.id = useUUID();
 });
 </script>
 <template>

@@ -72,7 +72,7 @@ onMounted(() => {
     }, props.delayToClose);
   }
 
-  alert.id = useUUID(alert.id);
+  alert.id = useUUID();
 });
 </script>
 

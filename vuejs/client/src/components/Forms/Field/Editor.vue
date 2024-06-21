@@ -59,7 +59,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: useUUID(),
+    default: "",
   },
   columns: {
     type: [Object, Boolean],
@@ -136,7 +136,7 @@ const props = defineProps({
 });
 
 const editor = reactive({
-  id: props.id,
+  id: "",
   value: props.value,
   showInp: false,
   isValid: computed(() => {
@@ -316,7 +316,7 @@ function setEditorAttrs() {
 
 // Use ace editor
 onMounted(() => {
-  editor.id = useUUID(editor.id);
+  editor.id = useUUID(props.id);
   // Default value
   editorEl = new Editor();
   editorEl.setValue(editor.value);

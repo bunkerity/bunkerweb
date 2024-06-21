@@ -54,11 +54,11 @@ const props = defineProps({
 });
 
 const clip = reactive({
-  id: props.id,
+  id: "",
 });
 
 onMounted(() => {
-  clip.id = useUUID();
+  clip.id = useUUID(props.id);
 });
 </script>
 

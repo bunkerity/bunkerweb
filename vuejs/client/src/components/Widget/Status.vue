@@ -35,7 +35,7 @@ const props = defineProps({
 });
 
 const status = reactive({
-  id: props.id,
+  id: "",
 });
 
 const statusDesc = computed(() => {
@@ -50,7 +50,7 @@ const statusDesc = computed(() => {
 });
 
 onMounted(() => {
-  status.id = useUUID(status.id);
+  status.id = useUUID(props.id);
 });
 </script>
 <template>

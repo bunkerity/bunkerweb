@@ -30,7 +30,7 @@ const icon = reactive({
 });
 
 onMounted(() => {
-  icon.id = useUUID(icon.id);
+  icon.id = useUUID();
 });
 </script>
 <template>
@@ -42,7 +42,7 @@ onMounted(() => {
     viewBox="0 0 24 24"
     fill="currentColor"
     :aria-labelledby="icon.id"
-    :class="['icon-svg', props.iconClass, props.iconColor]"
+    :class="[props.iconClass, props.iconColor]"
   >
     <path
       fill-rule="evenodd"

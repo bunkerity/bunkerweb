@@ -24,7 +24,8 @@ function redirectPlugin() {
       if (
         e.target
           .closest("[data-plugin-redirect]")
-          .getAttribute("data-plugin-redirect") !== "true"
+          .getAttribute("data-plugin-redirect") !== "true" ||
+        !e.target.querySelector('[data-svg="redirect"]')
       )
         return;
       // Prepare redirect
@@ -90,6 +91,16 @@ onMounted(() => {
 const builder = [
   {
     type: "modal",
+    id: "modal-delete-plugin",
+    widgets: [
+      {
+        type: "Title",
+        data: {
+          title: "plugins_modal_delete",
+          type: "card",
+        },
+      },
+    ],
   },
   {
     type: "card",

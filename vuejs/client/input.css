@@ -507,13 +507,12 @@ body {
 }
 
 .layout-modal {
-  @apply relative min-w-[50vw] w-full max-w-screen-xl max-h-[80vh] min-h-[200px] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out; 
+  @apply relative min-w-[300px] sm:min-w-[450px] max-w-screen-xl max-h-[80vh] min-h-[200px] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out  px-6 py-4 overflow-hidden break-words grid grid-cols-12; 
 }
 
 .layout-modal-button-container {
-  @apply absolute right-2 top-2 z-[30];
+  @apply absolute right-4 top-4 z-[30];
 }
-
 
 .layout-settings {
   @apply py-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;

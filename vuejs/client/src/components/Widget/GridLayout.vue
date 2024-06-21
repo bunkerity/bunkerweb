@@ -34,7 +34,7 @@ const props = defineProps({
   },
   id: {
     type: String,
-    required: true,
+    required: false,
     default: "",
   },
   title: {
@@ -69,7 +69,7 @@ const props = defineProps({
 });
 
 const container = reactive({
-  id: props.id,
+  id: "",
 });
 
 const containerClass = computed(() => {
@@ -85,7 +85,7 @@ const gridClass = computed(() => {
 const flowEl = ref();
 
 onMounted(() => {
-  container.id = useUUID(container.id);
+  container.id = useUUID(props.id);
   if (!props.link) return;
   flowEl.value.setAttribute("href", props.link);
   flowEl.value.setAttribute("rel", "noopener");
@@ -115,6 +115,7 @@ onMounted(() => {
               :color="'transparent'"
             />
           </div>
+          <slot></slot>
         </div>
       </div>
     </div>
@@ -138,6 +139,5 @@ onMounted(() => {
       <slot></slot>
     </component>
   </template>
-
   <!-- end card or elements on the document flow -->
 </template>

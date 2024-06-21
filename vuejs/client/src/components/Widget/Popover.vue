@@ -139,7 +139,7 @@ watch(popover, () => {
 });
 
 onMounted(() => {
-  popover.id = useUUID(popover.id);
+  popover.id = useUUID();
   // Remove href if tag is not an anchor
   if (props.tag !== "a") {
     popoverBtn.value.removeAttribute("href");

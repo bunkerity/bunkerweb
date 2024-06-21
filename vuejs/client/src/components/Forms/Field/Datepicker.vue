@@ -141,7 +141,7 @@ const props = defineProps({
 });
 
 const date = reactive({
-  id: props.id,
+  id: "",
   isValid: true,
   format: "m/d/Y H:i:S",
   currStamp: "",
@@ -575,7 +575,7 @@ function setIndex(calendarEl, tabindex) {
 }
 
 onMounted(() => {
-  date.id = useUUID(date.id);
+  date.id = useUUID(props.id);
   datepicker = flatpickr(`#${date.id}`, {
     locale: "en",
     dateFormat: date.format,

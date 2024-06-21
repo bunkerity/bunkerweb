@@ -120,7 +120,7 @@ const props = defineProps({
 const checkboxEl = ref(null);
 
 const checkbox = reactive({
-  id: props.id,
+  id: "",
   value: props.value,
   isValid: true,
 });
@@ -135,7 +135,7 @@ function updateValue() {
 
 onMounted(() => {
   checkbox.isValid = checkboxEl.value.checkValidity();
-  checkbox.id = useUUID(checkbox.id);
+  checkbox.id = useUUID(props.id);
 });
 </script>
 

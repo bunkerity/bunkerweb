@@ -12,16 +12,37 @@ import { v4 as uuidv4 } from "uuid";
   This function will for example update the aria-expanded attribute of an element in case we have an aria-controls attribute.
 */
 function useGlobal() {
+  setShowHideElA11y();
   window.addEventListener(
     "click",
     (e) => {
-      console.log("click", e.target);
       // Update some states
       useShowEl(e);
       useHideEl(e);
     },
     true
   );
+}
+
+/**
+  @name setShowHideElA11y
+  @description  This function will check if aria-controls and aria-expanded attributes are present on elements that controls an element visibility.
+  Case they are not present, the function will create them.
+*/
+function setShowHideElA11y() {
+  // Wait that elements are mounted and ids are set
+  setTimeout(() => {
+    const els = document.querySelectorAll("[data-show-el], [data-hide-el]");
+    els.forEach((el) => {
+      const id =
+        el.getAttribute("data-show-el") || el.getAttribute("data-hide-el");
+      // Check current state of the element target
+      const targetEl = document.getElementById(id);
+      if (!targetEl) return;
+      el.setAttribute("aria-controls", id);
+      el.setAttribute("aria-expanded", isElHidden(targetEl) ? "false" : "true");
+    });
+  }, 200);
 }
 
 /**

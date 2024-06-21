@@ -109,18 +109,19 @@ const props = defineProps({
 });
 
 const btn = reactive({
-  id: props.id,
+  id: "",
 });
 
 const btnEl = ref();
 
 const buttonClass = computed(() => {
+  // transparent useful when we only want to display icon without background or shadow style
   if (props.color === "transparent") return `${props.size}`;
   return `btn ${props.color} ${props.size}`;
 });
 
 onMounted(() => {
-  btn.id = useUUID(btn.id);
+  btn.id = useUUID(props.id);
 });
 </script>
 

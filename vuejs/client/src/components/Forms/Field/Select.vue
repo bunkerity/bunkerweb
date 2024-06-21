@@ -147,7 +147,7 @@ const props = defineProps({
 });
 
 const select = reactive({
-  id: props.id,
+  id: "",
   isOpen: false,
   // On mounted value is null to display props value
   // Then on new select we will switch to select.value
@@ -275,7 +275,7 @@ watch(select, () => {
 });
 
 onMounted(() => {
-  select.id = useUUID(select.id);
+  select.id = useUUID(props.id);
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
   window.addEventListener("resize", () => {
     try {

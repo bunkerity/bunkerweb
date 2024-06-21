@@ -152,7 +152,7 @@ const props = defineProps({
 });
 
 const inp = reactive({
-  id: props.id,
+  id: "",
   value: "",
   isValid: true,
   isMatching: computed(() => {
@@ -301,7 +301,7 @@ watch(select, () => {
 });
 
 onMounted(() => {
-  inp.id = useUUID(inp.id);
+  inp.id = useUUID(props.id);
   inp.isValid = inputEl.value.checkValidity();
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
   window.addEventListener("resize", () => {

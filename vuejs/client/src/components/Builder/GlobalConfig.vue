@@ -57,6 +57,7 @@ const props = defineProps({
     :title="container.title"
     :link="container.link"
     :columns="container.containerColumns"
+    :id="container.id"
   >
     <!-- widget grid -->
     <Grid>

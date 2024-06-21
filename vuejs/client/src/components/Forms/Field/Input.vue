@@ -152,7 +152,7 @@ const props = defineProps({
 const inputEl = ref(null);
 
 const inp = reactive({
-  id: props.id,
+  id: "",
   value: props.value,
   showInp: false,
   isValid: true,
@@ -161,7 +161,7 @@ const inp = reactive({
 const emits = defineEmits(["inp"]);
 
 onMounted(() => {
-  inp.id = useUUID(inp.id);
+  inp.id = useUUID(props.id);
   inp.isValid = inputEl.value.checkValidity();
 
   // Clipboard not allowed on http
