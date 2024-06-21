@@ -80,6 +80,7 @@ onMounted(() => {
       'input-header-container',
       props.popovers.length ? 'popover' : 'no-popover',
     ]"
+    data-is="header-field"
   >
     <div>
       <label

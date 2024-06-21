@@ -274,6 +274,7 @@ onUnmounted(() => {
 <template>
   <Container
     data-advanced-form
+    data-is="form"
     :tag="'form'"
     method="POST"
     :containerClass="`form-advanced-container`"
@@ -299,6 +300,7 @@ onUnmounted(() => {
     </div>
     <template v-for="plugin in data.format">
       <Container
+        data-is="content"
         data-advanced-form-plugin
         v-if="plugin.name === data.currPlugin"
         class="form-advanced-plugin-container"

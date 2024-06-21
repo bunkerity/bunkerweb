@@ -137,7 +137,8 @@ const buttonSave = {
 
 <template>
   <Container
-    data-raw-form
+    data-raw-
+    data-is="form"
     :tag="'form'"
     method="POST"
     :containerClass="'form-raw-container'"

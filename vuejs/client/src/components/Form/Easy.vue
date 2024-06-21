@@ -136,6 +136,7 @@ onUnmounted(() => {
 <template>
   <Container
     data-easy-form
+    data-is="form"
     :tag="'form'"
     method="POST"
     :containerClass="`form-easy-container`"
@@ -146,6 +147,7 @@ onUnmounted(() => {
 
     <template v-for="(step, id) in data.base">
       <Container
+        data-is="content"
         data-easy-form-step
         v-if="data.currStep === id"
         class="form-easy-step-container"

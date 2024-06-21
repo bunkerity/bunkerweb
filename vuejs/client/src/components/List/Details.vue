@@ -74,7 +74,7 @@ const unmatch = {
 </script>
 
 <template>
-  <Grid>
+  <Grid data-is="list-details">
     <Filter
       v-if="props.filters.length"
       @filter="(v) => (data.format = v)"
@@ -94,7 +94,7 @@ const unmatch = {
         ]"
         v-bind="item.attrs || {}"
       >
-        <Flex :flexClass="'justify-between items-center'">
+        <Flex :flexClass="'list-details-flex'">
           <Text :tag="'p'" :text="item.text" />
           <div>
             <PopoverGroup :popovers="item.popovers" />

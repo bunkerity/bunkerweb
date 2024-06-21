@@ -131,6 +131,7 @@ onMounted(() => {
     :columns="props.columns"
   >
     <button
+      data-is="button"
       :type="props.type"
       ref="btnEl"
       :id="btn.id"

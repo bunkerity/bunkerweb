@@ -8,13 +8,13 @@ import { computed, onMounted, reactive, ref } from "vue";
     title: "Total Users",
     type: "card",
     titleClass: "text-lg",
-    titleColor : "info",
+    color : "info",
     tag: "h2"
   }
   @param {string} title -  Can be a translation key or by default raw text.
   @param {string} [type="card"] - The type of title between "container", "card", "content", "min" or "stat"
   @param {string} [tag=""] - The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title.
-  @param {string} [titleColor=""] - The color of the title between error, success, warning, info or tailwind color
+  @param {string} [color=""] - The color of the title between error, success, warning, info or tailwind color
   @param {string} [titleClass=""] - Additional class, useful when component is used directly on a grid system
 */
 
@@ -33,7 +33,7 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  titleColor: {
+  color: {
     type: String,
     required: false,
     default: "",
@@ -47,6 +47,7 @@ const props = defineProps({
 
 const title = reactive({
   isSubtitle: false,
+  class: "",
 });
 
 const titleEl = ref(null);
@@ -56,16 +57,6 @@ const tag = computed(() => {
   if (props.type === "container") return "h1";
   if (props.type === "card") return "h2";
   return "p";
-});
-
-const baseClass = computed(() => {
-  if (props.type === "container") return "title-container";
-  if (props.type === "card") return "title-card";
-  if (props.type === "content") return "title-content";
-  if (props.type === "min") return "title-min";
-  if (props.type === "stat") return "title-stat";
-  if (props.type === "modal") return "title-modal";
-  return "title-card";
 });
 
 // Add or remove margin bottom
@@ -78,6 +69,11 @@ onMounted(() => {
   const nextSibling = titleEl.value.nextElementSibling;
   title.isSubtitle =
     !nextSibling || !nextSibling.hasAttribute("data-subtitle") ? false : true;
+
+  title.class =
+    props.titleClass || titleEl.value.closest("[data-is]")
+      ? `title-${titleEl.value.closest("[data-is]").getAttribute("data-is")}`
+      : "title-card";
 });
 </script>
 
@@ -87,7 +83,7 @@ onMounted(() => {
     data-title
     :is="tag"
     v-if="props.title"
-    :class="[props.titleClass, props.titleColor, isSubtitleClass, baseClass]"
+    :class="[props.color, isSubtitleClass, title.class]"
   >
     {{ $t(props.title, props.title) }}
   </component>

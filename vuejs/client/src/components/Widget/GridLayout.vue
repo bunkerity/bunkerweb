@@ -100,7 +100,12 @@ onMounted(() => {
 <template>
   <!-- modal -->
   <template v-if="props.type === 'modal'">
-    <div data-modal class="layout-modal-container hidden" :id="container.id">
+    <div
+      :data-is="`${props.type}`"
+      data-modal
+      class="layout-modal-container hidden"
+      :id="container.id"
+    >
       <div class="layout-backdrop"></div>
       <div class="layout-modal-wrap" :data-hide-el="container.id">
         <div class="layout-modal">
@@ -128,7 +133,7 @@ onMounted(() => {
       ref="flowEl"
       :id="container.id"
       :is="props.link ? 'a' : 'div'"
-      data-grid-layout
+      :data-is="`${props.type}`"
       :class="[
         containerClass,
         gridClass,

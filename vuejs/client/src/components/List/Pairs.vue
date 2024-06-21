@@ -29,7 +29,7 @@ const gridClass = computed(() => {
 });
 </script>
 <template>
-  <ul v-if="props.pairs" :class="['list-pairs-container']">
+  <ul data-is="list-pairs" v-if="props.pairs" :class="['list-pairs-container']">
     <li v-for="item in props.pairs" :class="['list-pairs-item', gridClass]">
       <span class="list-pairs-title">
         {{ $t(item["key"], item["key"]) }}
