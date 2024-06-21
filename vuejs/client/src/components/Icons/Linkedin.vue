@@ -8,7 +8,7 @@ import { useUUID } from "@utils/global.js";
   {
     iconColor: 'info',
   }
-  @param {string} [iconClass=""]
+  @param {string} [iconClass="base"] - The class of the icon. "base" is the default size.
   @param {string} [iconColor="linkedin"]
 */
 
@@ -16,7 +16,7 @@ const props = defineProps({
   iconClass: {
     type: String,
     required: false,
-    default: "default-svg",
+    default: "base",
   },
   iconColor: {
     type: String,
@@ -38,7 +38,7 @@ onMounted(() => {
   <svg
     data-svg="key"
     role="img"
-    :class="[props.iconClass, props.iconColor]"
+    :class="['icon-svg', props.iconClass, props.iconColor]"
     fill="none"
     class="hover:opacity-80 dark:brightness-110"
     xmlns="http://www.w3.org/2000/svg"

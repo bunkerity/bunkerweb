@@ -96,6 +96,8 @@
   "dashboard_easy_invalid": "{setting} in step {step} is invalid",
   "dashboard_easy_required": "{setting} in step {step} is required",
   "dashboard_table": "Table element",
+  "dashboard_no_match" : "No match found",
+  "dashboard_no_match_filter" : "No match found with filter",
   "inp_input_valid": "input valid",
   "inp_input_error_required": "input is required",
   "inp_input_error": "input is invalid",

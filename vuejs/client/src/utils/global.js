@@ -12,36 +12,57 @@ import { v4 as uuidv4 } from "uuid";
   This function will for example update the aria-expanded attribute of an element in case we have an aria-controls attribute.
 */
 function useGlobal() {
-  window.addEventListener("click", (e) => {
-    updateExpanded();
-  });
+  window.addEventListener(
+    "click",
+    (e) => {
+      // Update some states
+      useShowEl(e);
+      useHideEl(e);
+    },
+    true
+  );
 }
 
 /**
-  @name useGlobal
-  @description   This function updates the aria-expanded attribute of an element in case we have an aria-controls attribute.
+  @name useShowEl
+  @description   This function will check if an element controls an element visibility and show it if it's the case.
+  The element handler need to have a data-show-el attribute with the id of the target element as value.
+  This function needs to be link to an event listener to work.
+  This function will check if aria-controls and aria-expanded attributes are present, else will create them.
+  @example
+  <button data-show-el="modal">Open modal</button>
+  <div id="modal" class="hidden">Modal content</div>
+  @param {Event} e - The event object.
 */
-function updateExpanded() {
-  // Wait for previous event and element visibility update
-  setTimeout(() => {
-    // Check state for all elements that have aria-controls and aria-expanded attributes
-    const controlEls = document.querySelectorAll(
-      "[aria-controls][aria-expanded]"
-    );
-    if (!controlEls) return;
-    controlEls.forEach((el) => {
-      try {
-        const targetEl = document.getElementById(
-          el.getAttribute("aria-controls")
-        );
-        if (!targetEl) return el.setAttribute("aria-expanded", "false");
-        el.setAttribute(
-          "aria-expanded",
-          isElHidden(targetEl) ? "false" : "true"
-        );
-      } catch (err) {}
-    });
-  }, 50);
+function useShowEl(e) {
+  if (!e.target.closest("button").hasAttribute("data-show-el")) return;
+  // show
+  const showElId = e.target.closest("button").getAttribute("data-show-el");
+  document.getElementById(showElId).classList.remove("hidden");
+  // Update a11y attributes
+  e.target.closest("button").setAttribute("aria-controls", showElId);
+  e.target.closest("button").setAttribute("aria-expanded", "true");
+}
+
+/**
+  @name useHideEl
+  @description  This function will check if an element controls an element visibility and close it if it's the case.
+  The element handler need to have a data-show-el attribute with the id of the target element as value.
+  This function needs to be link to an event listener to work.
+  This function will check if aria-controls and aria-expanded attributes are present, else will create them.
+  @example
+  <button data-close-el="modal">Close modal</button>
+  <div id="modal" class="">Modal content</div>
+  @param {Event} e - The event object.
+*/
+function useHideEl(e) {
+  if (!e.target.closest("button").hasAttribute("data-show-close")) return;
+  // hide
+  const hideElId = e.target.closest("button").getAttribute("data-show-close");
+  document.getElementById(hideElId).classList.add("hidden");
+  // Update a11y attributes
+  e.target.closest("button").setAttribute("aria-controls", hideElId);
+  e.target.closest("button").setAttribute("aria-expanded", "false");
 }
 
 /**

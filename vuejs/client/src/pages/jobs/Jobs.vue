@@ -1319,6 +1319,7 @@ const builder = [
                     text: "jobs_search_desc",
                     iconName: "info",
                     iconColor: "info",
+                    svgSize: "sm",
                   },
                 ],
                 columns: {
@@ -1347,6 +1348,7 @@ const builder = [
                     text: "jobs_interval_desc",
                     iconName: "info",
                     iconColor: "info",
+                    svgSize: "sm",
                   },
                 ],
                 columns: {
@@ -1375,6 +1377,7 @@ const builder = [
                     text: "jobs_reload_desc",
                     iconName: "info",
                     iconColor: "info",
+                    svgSize: "sm",
                   },
                 ],
                 columns: {
@@ -1403,6 +1406,7 @@ const builder = [
                     text: "jobs_success_desc",
                     iconName: "info",
                     iconColor: "info",
+                    svgSize: "sm",
                   },
                 ],
                 columns: {

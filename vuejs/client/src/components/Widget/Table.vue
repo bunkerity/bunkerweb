@@ -120,6 +120,8 @@ const props = defineProps({
 
 const tableBody = ref(null);
 const tableHeader = ref(null);
+const unmatchEl = ref(null);
+const unmatchWidth = ref("");
 
 const table = reactive({
   id: uuidv4(),
@@ -139,6 +141,20 @@ const table = reactive({
   itemsFormat: JSON.parse(JSON.stringify(props.items)),
 });
 
+const unmatch = {
+  text: "dashboard_no_match",
+  textClass: "text-unmatch",
+  icons: {
+    iconName: "search",
+    iconColor: "info",
+  },
+};
+
+function setUnmatchWidth() {
+  const value = tableBody.value.closest("[data-grid-layout]").clientWidth - 60;
+  unmatchWidth.value = `${value}px`;
+}
+
 function getOverflow() {
   setTimeout(() => {
     const overflow =
@@ -157,11 +173,13 @@ watch(
   () => table.itemsFormat,
   () => {
     getOverflow();
+    setUnmatchWidth();
   }
 );
 
 onMounted(() => {
   getOverflow();
+  setUnmatchWidth();
 });
 </script>
 
@@ -196,6 +214,14 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody data-table-body ref="tableBody" class="table-content">
+          <tr
+            v-if="!table.itemsFormat.length"
+            :style="{ maxWidth: unmatchWidth }"
+            ref="unmatchEl"
+            class="layout-unmatch-table"
+          >
+            <Text v-bind="unmatch" />
+          </tr>
           <tr
             v-for="rowId in table.rowLength"
             :key="rowId - 1"

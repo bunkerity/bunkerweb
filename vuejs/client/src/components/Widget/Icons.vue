@@ -29,6 +29,7 @@ import Redirect from "@components/Icons/Redirect.vue";
 import External from "@components/Icons/External.vue";
 import Trash from "@components/Icons/Trash.vue";
 import Lock from "@components/Icons/Lock.vue";
+import Search from "@components/Icons/Search.vue";
 
 import { computed } from "vue";
 
@@ -40,12 +41,12 @@ import { computed } from "vue";
   @example
   {
     iconName: 'box',
-    iconClass: 'stat-svg',
+    iconClass: 'base',
     iconColor: 'amber',
   }
   @param {string} iconName - The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
   @param {string} [iconType="default"] - The type of the icon between default and stat. Default is used for regular icons, stat is used for icons inside a stat widget.
-  @param {string} [iconClass="default-svg"] - Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically.
+  @param {string} [iconClass="base"] - Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically.
   @param {string} [iconColor="info"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
   */
 
@@ -62,7 +63,7 @@ const props = defineProps({
   iconClass: {
     type: String,
     required: false,
-    default: "default-svg",
+    default: "base",
   },
   iconColor: {
     type: String,
@@ -110,6 +111,11 @@ const iconClass = computed(() => {
     />
     <External
       v-if="props.iconName === 'external'"
+      :iconClass="iconClass"
+      :iconColor="iconColor"
+    />
+    <Search
+      v-if="props.iconName === 'search'"
       :iconClass="iconClass"
       :iconColor="iconColor"
     />

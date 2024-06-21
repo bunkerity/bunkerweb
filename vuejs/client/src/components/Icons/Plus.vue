@@ -8,7 +8,7 @@ import { useUUID } from "@utils/global.js";
   {
     iconColor: 'info',
   }
-  @param {string} [iconClass=""]
+  @param {string} [iconClass="base"] - The class of the icon. "base" is the default size.
    @param {string} [iconColor="info"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
 */
 
@@ -16,7 +16,7 @@ const props = defineProps({
   iconClass: {
     type: String,
     required: false,
-    default: "default-svg",
+    default: "base",
   },
   iconColor: {
     type: String,
@@ -40,7 +40,7 @@ onMounted(() => {
     data-svg="plus"
     role="img"
     :aria-labelledby="icon.id"
-    :class="[props.iconClass, props.iconColor]"
+    :class="['icon-svg', props.iconClass, props.iconColor]"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"

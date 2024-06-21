@@ -8,7 +8,7 @@ import { useUUID } from "@utils/global.js";
   {
     iconColor: 'info',
   }
-  @param {string} [iconClass=""]
+  @param {string} [iconClass="base"] - The class of the icon. "base" is the default size.
   @param {string} [iconColor="twitter"]
 */
 
@@ -16,7 +16,7 @@ const props = defineProps({
   iconClass: {
     type: String,
     required: false,
-    default: "default-svg",
+    default: "base",
   },
   iconColor: {
     type: String,
@@ -39,7 +39,7 @@ onMounted(() => {
     data-svg="twitter"
     role="img"
     :aria-labelledby="icon.id"
-    :class="[props.iconClass, props.iconColor]"
+    :class="['icon-svg', props.iconClass, props.iconColor]"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 512 512"

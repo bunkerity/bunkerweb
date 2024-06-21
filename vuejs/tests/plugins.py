@@ -3021,6 +3021,8 @@ def plugins_builder(plugins, data={}):
             "attrs": {
                 "data-plugin-id": plugin.get("id"),
                 "data-plugin-delete": "true" if can_be_delete else "false",
+                "data-plugin-redirect" : "true" if plugin.get("page", False) else "false",
+                "data-plugin-type": plugin.get("type", "").lower(),
             },
             "disabled": (
                 True

@@ -203,6 +203,15 @@ const filters = [
   },
 ];
 
+const unmatch = {
+  text: "dashboard_no_match",
+  textClass: "text-unmatch",
+  icons: {
+    iconName: "search",
+    iconColor: "info",
+  },
+};
+
 function filter(filterData) {
   setValidity();
   data.format = filterData;
@@ -283,7 +292,11 @@ onUnmounted(() => {
         :value="data.currPlugin"
         :values="data.plugins"
         @inp="data.currPlugin = $event"
-    /></Filter>
+      />
+    </Filter>
+    <div v-if="!data.format.length" class="layout-unmatch">
+      <Text v-bind="unmatch" />
+    </div>
     <template v-for="plugin in data.format">
       <Container
         data-advanced-form-plugin
@@ -304,11 +317,15 @@ onUnmounted(() => {
       </Container>
     </template>
     <Button
+      v-if="data.format.length"
       v-bind="buttonSave"
       :disabled="data.isReqErr || data.isRegErr ? true : false"
     />
     <Text
-      v-if="data.isRegErr || data.isReqErr"
+      v-if="
+        (data.format.length && data.isRegErr) ||
+        (data.format.length && data.isReqErr)
+      "
       :textClass="'form-setting-error'"
       :text="
         data.isReqErr

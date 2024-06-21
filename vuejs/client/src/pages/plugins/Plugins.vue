@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, onBeforeMount } from "vue";
+import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderPlugins from "@components/Builder/Plugins.vue";
 
@@ -13,6 +13,63 @@ const plugins = reactive({
   builder: "",
 });
 
+// Case we click on redirect icon, go to the redirect plugin page
+function redirectPlugin() {
+  window.addEventListener(
+    "click",
+    (e) => {
+      // Case avoid redirect
+      if (!e.target.closest("[data-plugin-redirect]")) return;
+      if (
+        e.target
+          .closest("[data-plugin-redirect]")
+          .getAttribute("data-plugin-redirect") !== "true"
+      )
+        return;
+      // Prepare redirect
+      const pluginId = e.target
+        .closest("[data-plugin-id]")
+        .getAttribute("data-plugin-id");
+      // Redirect
+      window.location.href = `./${pluginId}`;
+    },
+    true
+  );
+}
+
+// Case we click on redirect icon, go to the redirect plugin page
+function deletePlugin() {
+  const deleteData = {
+    name: "pluginName",
+    type: "pluginType",
+    operation: "delete",
+  };
+  window.addEventListener(
+    "click",
+    (e) => {
+      // Case avoid redirect
+      if (!e.target.closest("[data-plugin-delete]")) return;
+      if (
+        e.target
+          .closest("[data-plugin-delete]")
+          .getAttribute("data-plugin-delete") !== "true"
+      )
+        return;
+      // Update data
+      deleteData.name = e.target
+        .closest("[data-plugin-id]")
+        .getAttribute("data-plugin-id");
+      deleteData.type = e.target
+        .closest("[data-plugin-type]")
+        .getAttribute("data-plugin-type");
+      // Attach data to submit button (need to check attributs data-delete-plugin)
+      const submitBtn = document.querySelector("[data-delete-plugin]");
+      submitBtn.setAttribute("data-delete-plugin", JSON.stringify(deleteData));
+    },
+    true
+  );
+}
+
 onBeforeMount(() => {
   // Get builder data
   const dataAtt = "data-server-builder";
@@ -24,6 +81,10 @@ onBeforeMount(() => {
   plugins.builder = data;
 });
 
+onMounted(() => {
+  redirectPlugin();
+  deletePlugin();
+});
 const builder = [
   {
     type: "card",
@@ -107,6 +168,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "general",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: true,
               popovers: [
@@ -123,6 +185,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "antibot",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -139,6 +202,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "authbasic",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -149,6 +213,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "backup",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: true,
               popovers: [
@@ -170,6 +235,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "badbehavior",
                 "data-plugin-delete": "true",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -191,6 +257,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "blacklist",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -207,6 +274,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "brotli",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -217,6 +285,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "bunkernet",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -233,6 +302,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "cors",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -249,6 +319,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "clientcache",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -259,6 +330,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "country",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -275,6 +347,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "customcert",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -285,6 +358,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "db",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -295,6 +369,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "dnsbl",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -311,6 +386,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "errors",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -327,6 +403,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "greylist",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -343,6 +420,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "gzip",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -353,6 +431,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "inject",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -363,6 +442,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "headers",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -373,6 +453,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "jobs",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -383,6 +464,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "letsencrypt",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -393,6 +475,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "limit",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -409,6 +492,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "metrics",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -419,6 +503,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "misc",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -435,6 +520,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "modsecurity",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -445,6 +531,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "php",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -455,6 +542,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "pro",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -465,6 +553,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "realip",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -475,6 +564,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "redirect",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -485,6 +575,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "redis",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -501,6 +592,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "reverseproxy",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -511,6 +603,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "reversescan",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [
@@ -527,6 +620,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "selfsigned",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -537,6 +631,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "sessions",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -547,6 +642,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "ui",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "false",
               },
               disabled: false,
               popovers: [],
@@ -557,6 +653,7 @@ const builder = [
               attrs: {
                 "data-plugin-id": "whitelist",
                 "data-plugin-delete": "false",
+                "data-plugin-redirect": "true",
               },
               disabled: false,
               popovers: [

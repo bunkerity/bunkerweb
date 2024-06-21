@@ -1,6 +1,7 @@
 <script setup>
-import { defineProps, computed, reactive, onMounted } from "vue";
+import { defineProps, computed, reactive } from "vue";
 import Flex from "@components/Widget/Flex.vue";
+import Container from "@components/Widget/Container.vue";
 import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 import Text from "@components/Widget/Text.vue";
 import Filter from "@components/Widget/Filter.vue";
@@ -53,14 +54,23 @@ const props = defineProps({
   },
 });
 
-const gridClass = computed(() => {
-  return `col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
-});
-
 const data = reactive({
   base: JSON.parse(JSON.stringify(props.details)),
   format: JSON.parse(JSON.stringify(props.details)),
 });
+
+const gridClass = computed(() => {
+  return `col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
+});
+
+const unmatch = {
+  text: "dashboard_no_match",
+  textClass: "text-unmatch",
+  icons: {
+    iconName: "search",
+    iconColor: "info",
+  },
+};
 </script>
 
 <template>
@@ -71,7 +81,10 @@ const data = reactive({
       :data="data.base"
       :filters="props.filters"
     />
-    <ul v-if="data.format" :class="['list-details-container']">
+    <div v-if="!data.format.length" class="layout-unmatch">
+      <Text v-bind="unmatch" />
+    </div>
+    <ul v-if="data.format.length" :class="['list-details-container']">
       <li
         v-for="(item, id) in data.format"
         :class="[

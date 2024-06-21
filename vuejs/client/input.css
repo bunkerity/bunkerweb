@@ -16,9 +16,7 @@
   @apply focus:outline-4 focus:outline-secondary focus:outline-offset-4;
 }
 
-.default-svg {
-  @apply w-6 h-6;
-}
+
 
 .ace_editor,
 .ace_editor * {
@@ -110,7 +108,7 @@ body {
 }
 
 .content-container {
-  @apply xl:pl-72 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-3 min-h-[85vh] flex flex-col justify-between;
+  @apply xl:pl-72 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-3 min-h-[85vh] flex flex-col justify-between overflow-hidden;
 }
 
 .content-wrap {
@@ -493,13 +491,22 @@ body {
 }
 
 .layout-settings {
-  @apply py-4 gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
+  @apply py-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
+}
+
+.layout-unmatch {
+  @apply col-span-12 flex mx-2 my-4;
+}
+
+.layout-unmatch-table {
+  @apply fixed col-span-12 flex mx-2 my-8 w-full;
+
 }
 
 /* POPOVER */
 
 .popover-btn {
-  @apply outline-offset-1 cursor-pointer flex justify-start w-full;
+  @apply outline-offset-1 cursor-pointer flex justify-start;
 }
 
 .popover-container {
@@ -522,25 +529,10 @@ body {
   @apply pointer-events-none z-0 hover:brightness-95 fill-blue-500;
 }
 
-.lg.popover-svg {
-  @apply h-8 w-8;
+.icon-svg {
+  @apply block;
 }
 
-.base.popover-svg {
-  @apply h-7 w-7;
-}
-
-.md.popover-svg {
-  @apply h-6 w-6;
-}
-
-.sm.popover-svg {
-  @apply h-5 w-5;
-}
-
-.sm.popover-svg {
-  @apply h-5 w-5;
-}
 
 /* TABS */
 
@@ -1000,7 +992,12 @@ body {
 /* CONTENT COMPONENT */
 
 .text-content {
-  @apply leading-normal mb-0 break-word;
+  @apply  mb-0 break-word;
+}
+
+.text-unmatch {
+  @apply  text-lg mb-0 break-word;
+
 }
 
 .text-stat {
@@ -1025,11 +1022,11 @@ body {
 }
 
 .list-details-container {
-  @apply col-span-12 grid grid-cols-12 gap-3 py-2;
+  @apply min-h-[200px] col-span-12 grid grid-cols-12 gap-3 py-2;
 }
 
 .list-details-item {
-  @apply z-0 px-3 py-2 min-h-12 relative flex justify-between items-center transition rounded;
+  @apply z-0 px-3 py-2 min-h-12 h-fit relative flex justify-between items-center transition rounded;
  }
  
 .enabled.list-details-item  {
@@ -1038,6 +1035,10 @@ body {
 
 .disabled.list-details-item  {
   @apply cursor-not-allowed bg-gray-300 dark:bg-gray-800;
+}
+
+.list-details-unmatch-container {
+  @apply col-span-12 grid grid-cols-12 gap-3 py-2;
 }
 
 /* TITLE */
@@ -1468,7 +1469,7 @@ body {
 }
 
 .table-content {
-  @apply  appearance-none dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[600px] min-h-[460px];
+  @apply relative appearance-none dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[600px] min-h-[460px];
 }
 
 .table-content-item {
@@ -1582,6 +1583,34 @@ body {
 .feedback-alert-text {
   @apply text-white mt-2 mb-0 text-sm;
 }
+
+/* SIZE MODIFIER */
+
+.lg.popover-svg,
+.lg.icon-svg {
+  @apply h-8 w-8;
+}
+
+.base.popover-svg,
+.base.icon-svg {
+  @apply h-7 w-7;
+}
+
+.md.popover-svg,
+.md.icon-svg {
+  @apply h-6 w-6;
+}
+
+.sm.popover-svg,
+.sm.icon-svg {
+  @apply h-5 w-5;
+}
+
+.sm.popover-svg,
+.sm.icon-svg {
+  @apply h-5 w-5;
+}
+
 
 /* TEXT COLOR MODIFIER */
 
@@ -2133,7 +2162,7 @@ body {
 
 /* SVG COLOR MODIFIER */
 
-.success.default-svg,
+.success.icon-svg,
 .success.btn-svg,
 .success.menu-svg,
 .success.social-svg,
@@ -2142,7 +2171,7 @@ body {
   @apply fill-green-500;
 }
 
-.error.default-svg,
+.error.icon-svg,
 .error.btn-svg,
 .error.menu-svg,
 .error.social-svg,
@@ -2151,7 +2180,7 @@ body {
   @apply fill-red-500;
 }
 
-.warning.default-svg,
+.warning.icon-svg,
 .warning.btn-svg,
 .warning.menu-svg,
 .warning.social-svg,
@@ -2160,7 +2189,7 @@ body {
   @apply fill-yellow-500;
 }
 
-.info.default-svg,
+.info.icon-svg,
 .info.btn-svg,
 .info.menu-svg,
 .info.social-svg,
@@ -2169,7 +2198,7 @@ body {
   @apply fill-sky-500;
 }
 
-.white.default-svg,
+.white.icon-svg,
 .white.btn-svg,
 .white.menu-svg,
 .white.social-svg,
@@ -2178,7 +2207,7 @@ body {
   @apply fill-white;
 }
 
-.purple.default-svg,
+.purple.icon-svg,
 .purple.btn-svg,
 .purple.menu-svg,
 .purple.social-svg,
@@ -2187,7 +2216,7 @@ body {
   @apply fill-purple-500;
 }
 
-.green.default-svg,
+.green.icon-svg,
 .green.btn-svg,
 .green.menu-svg,
 .green.social-svg,
@@ -2196,7 +2225,7 @@ body {
   @apply fill-green-500;
 }
 
-.red.default-svg,
+.red.icon-svg,
 .red.btn-svg,
 .red.menu-svg,
 .red.social-svg,
@@ -2205,7 +2234,7 @@ body {
   @apply fill-red-500;
 }
 
-.orange.default-svg,
+.orange.icon-svg,
 .orange.btn-svg,
 .orange.menu-svg,
 .orange.social-svg,
@@ -2214,7 +2243,7 @@ body {
   @apply fill-orange-500;
 }
 
-.blue.default-svg,
+.blue.icon-svg,
 .blue.btn-svg,
 .blue.menu-svg,
 .blue.social-svg,
@@ -2223,7 +2252,7 @@ body {
   @apply fill-blue-500;
 }
 
-.yellow.default-svg,
+.yellow.icon-svg,
 .yellow.btn-svg,
 .yellow.menu-svg,
 .yellow.social-svg,
@@ -2232,7 +2261,7 @@ body {
   @apply fill-yellow-500;
 }
 
-.gray.default-svg,
+.gray.icon-svg,
 .gray.btn-svg,
 .gray.menu-svg,
 .gray.social-svg,
@@ -2241,7 +2270,7 @@ body {
   @apply fill-gray-500;
 }
 
-.dark.default-svg,
+.dark.icon-svg,
 .dark.btn-svg,
 .dark.menu-svg,
 .dark.social-svg,
@@ -2250,7 +2279,7 @@ body {
   @apply fill-slate-500;
 }
 
-.amber.default-svg,
+.amber.icon-svg,
 .amber.btn-svg,
 .amber.menu-svg,
 .amber.social-svg,
@@ -2259,7 +2288,7 @@ body {
   @apply fill-amber-500;
 }
 
-.emerald.default-svg,
+.emerald.icon-svg,
 .emerald.btn-svg,
 .emerald.menu-svg,
 .emerald.social-svg,
@@ -2268,7 +2297,7 @@ body {
   @apply fill-emerald-500;
 }
 
-.teal.default-svg,
+.teal.icon-svg,
 .teal.btn-svg,
 .teal.menu-svg,
 .teal.social-svg,
@@ -2277,7 +2306,7 @@ body {
   @apply fill-teal-500;
 }
 
-.indigo.default-svg,
+.indigo.icon-svg,
 .indigo.btn-svg,
 .indigo.menu-svg,
 .indigo.social-svg,
@@ -2286,7 +2315,7 @@ body {
   @apply fill-indigo-500;
 }
 
-.cyan.default-svg,
+.cyan.icon-svg,
 .cyan.btn-svg,
 .cyan.menu-svg,
 .cyan.social-svg,
@@ -2295,7 +2324,7 @@ body {
   @apply fill-cyan-500;
 }
 
-.sky.default-svg,
+.sky.icon-svg,
 .sky.btn-svg,
 .sky.menu-svg,
 .sky.social-svg,
@@ -2304,7 +2333,7 @@ body {
   @apply fill-sky-500;
 }
 
-.pink.default-svg,
+.pink.icon-svg,
 .pink.btn-svg,
 .pink.menu-svg,
 .pink.social-svg,
@@ -2313,7 +2342,7 @@ body {
   @apply fill-pink-500;
 }
 
-.lime.default-svg,
+.lime.icon-svg,
 .lime.btn-svg,
 .lime.menu-svg,
 .lime.social-svg,
@@ -2322,7 +2351,7 @@ body {
   @apply fill-lime-500;
 }
 
-.twitter.default-svg,
+.twitter.icon-svg,
 .twitter.btn-svg,
 .twitter.menu-svg,
 .twitter.social-svg,
@@ -2331,7 +2360,7 @@ body {
   @apply fill-[#1DA1F2];
 }
 
-.linkedin.default-svg,
+.linkedin.icon-svg,
 .linkedin.btn-svg,
 .linkedin.menu-svg,
 .linkedin.social-svg,
@@ -2340,7 +2369,7 @@ body {
   @apply fill-[#0A63BC];
 }
 
-.discord.default-svg,
+.discord.icon-svg,
 .discord.btn-svg,
 .discord.menu-svg,
 .discord.social-svg,
@@ -2349,7 +2378,7 @@ body {
   @apply fill-[#5562EA];
 }
 
-.github.default-svg,
+.github.icon-svg,
 .github.btn-svg,
 .github.menu-svg,
 .github.social-svg,
@@ -2358,7 +2387,7 @@ body {
   @apply fill-[#171A1F] dark:fill-gray-300;
 }
 
-.purple-darker.default-svg,
+.purple-darker.icon-svg,
 .purle-darker.btn-svg,
 .purple-darker.menu-svg,
 .purple-darker.social-svg,
@@ -2367,7 +2396,7 @@ body {
   @apply fill-purple-600;
 }
 
-.green-darker.default-svg,
+.green-darker.icon-svg,
 .green-darker.btn-svg,
 .green-darker.menu-svg,
 .green-darker.social-svg,
@@ -2376,7 +2405,7 @@ body {
   @apply fill-green-700;
 }
 
-.red-darker.default-svg,
+.red-darker.icon-svg,
 .red-darker.btn-svg,
 .red-darker.menu-svg,
 .red-darker.social-svg,
@@ -2385,7 +2414,7 @@ body {
   @apply fill-red-700;
 }
 
-.orange-darker.default-svg,
+.orange-darker.icon-svg,
 .orange-darker.btn-svg,
 .orange-darker.menu-svg,
 .orange-darker.social-svg,
@@ -2394,7 +2423,7 @@ body {
   @apply fill-orange-600;
 }
 
-.blue-darker.default-svg,
+.blue-darker.icon-svg,
 .blue-darker.btn-svg,
 .blue-darker.menu-svg,
 .blue-darker.social-svg,
@@ -2403,7 +2432,7 @@ body {
   @apply fill-blue-600;
 }
 
-.yellow-darker.default-svg,
+.yellow-darker.icon-svg,
 .yellow-darker.btn-svg,
 .yellow-darker.menu-svg,
 .yellow-darker.social-svg,
@@ -2412,7 +2441,7 @@ body {
   @apply fill-yellow-600;
 }
 
-.gray-darker.default-svg,
+.gray-darker.icon-svg,
 .gray-darker.btn-svg,
 .gray-darker.menu-svg,
 .gray-darker.social-svg,
@@ -2421,7 +2450,7 @@ body {
   @apply fill-gray-600;
 }
 
-.dark-darker.default-svg,
+.dark-darker.icon-svg,
 .dark-darker.btn-svg,
 .dark-darker.menu-svg,
 .dark-darker.social-svg,
@@ -2430,7 +2459,7 @@ body {
   @apply fill-slate-600;
 }
 
-.amber-darker.default-svg,
+.amber-darker.icon-svg,
 .amber-darker.btn-svg,
 .amber-darker.menu-svg,
 .amber-darker.social-svg,
@@ -2439,7 +2468,7 @@ body {
   @apply fill-amber-600;
 }
 
-.emerald-darker.default-svg,
+.emerald-darker.icon-svg,
 .emerald-darker.btn-svg,
 .emerald-darker.menu-svg,
 .emerald-darker.social-svg,
@@ -2448,7 +2477,7 @@ body {
   @apply fill-emerald-600;
 }
 
-.teal-darker.default-svg,
+.teal-darker.icon-svg,
 .teal-darker.btn-svg,
 .teal-darker.menu-svg,
 .teal-darker.social-svg,
@@ -2457,7 +2486,7 @@ body {
   @apply fill-teal-600;
 }
 
-.indigo-darker.default-svg,
+.indigo-darker.icon-svg,
 .indigo-darker.btn-svg,
 .indigo-darker.menu-svg,
 .indigo-darker.social-svg,
@@ -2466,7 +2495,7 @@ body {
   @apply fill-indigo-600;
 }
 
-.cyan-darker.default-svg,
+.cyan-darker.icon-svg,
 .cyan-darker.btn-svg,
 .cyan-darker.menu-svg,
 .cyan-darker.social-svg,
@@ -2475,7 +2504,7 @@ body {
   @apply fill-cyan-600;
 }
 
-.sky-darker.default-svg,
+.sky-darker.icon-svg,
 .sky-darker.btn-svg,
 .sky-darker.menu-svg,
 .sky-darker.social-svg,
@@ -2484,7 +2513,7 @@ body {
   @apply fill-sky-700;
 }
 
-.pink-darker.default-svg,
+.pink-darker.icon-svg,
 .pink-darker.btn-svg,
 .pink-darker.menu-svg,
 .pink-darker.social-svg,
@@ -2493,7 +2522,7 @@ body {
   @apply fill-pink-600;
 }
 
-.lime-darker.default-svg,
+.lime-darker.icon-svg,
 .lime-darker.btn-svg,
 .lime-darker.menu-svg,
 .lime-darker.social-svg,

@@ -89,7 +89,8 @@
                             "type": "pro",
                             "attrs": {
                                 "data-plugin-id": "general",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": true,
                             "popovers": [
@@ -105,7 +106,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "antibot",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -121,7 +123,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "authbasic",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -131,7 +134,8 @@
                             "type": "pro",
                             "attrs": {
                                 "data-plugin-id": "backup",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": true,
                             "popovers": [
@@ -152,7 +156,8 @@
                             "type": "external",
                             "attrs": {
                                 "data-plugin-id": "badbehavior",
-                                "data-plugin-delete": "true"
+                                "data-plugin-delete": "true",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -173,7 +178,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "blacklist",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -189,7 +195,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "brotli",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -199,7 +206,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "bunkernet",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -215,7 +223,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "cors",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -231,7 +240,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "clientcache",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -241,7 +251,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "country",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -257,7 +268,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "customcert",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -267,7 +279,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "db",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -277,7 +290,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "dnsbl",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -293,7 +307,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "errors",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -309,7 +324,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "greylist",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -325,7 +341,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "gzip",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -335,7 +352,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "inject",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -345,7 +363,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "headers",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -355,7 +374,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "jobs",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -365,7 +385,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "letsencrypt",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -375,7 +396,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "limit",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -391,7 +413,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "metrics",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -401,7 +424,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "misc",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -417,7 +441,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "modsecurity",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -427,7 +452,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "php",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -437,7 +463,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "pro",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -447,7 +474,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "realip",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -457,7 +485,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "redirect",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -467,7 +496,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "redis",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -483,7 +513,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "reverseproxy",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -493,7 +524,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "reversescan",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
@@ -509,7 +541,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "selfsigned",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -519,7 +552,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "sessions",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -529,7 +563,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "ui",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "false"
                             },
                             "disabled": false,
                             "popovers": []
@@ -539,7 +574,8 @@
                             "type": "core",
                             "attrs": {
                                 "data-plugin-id": "whitelist",
-                                "data-plugin-delete": "false"
+                                "data-plugin-delete": "false",
+                                "data-plugin-redirect": "true"
                             },
                             "disabled": false,
                             "popovers": [
