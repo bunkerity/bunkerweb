@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 /**
   @name useGlobal
   @description   This function is a wrapper that contains all the global utils functions.
-  This function will for example update the aria-expanded attribute of an element in case we have an aria-controls attribute.
+  This function handle global click and keydown events to manage some states like show/hide elements, focus modals, and close modals.
 */
 function useGlobal() {
   setShowHideElA11y();
@@ -19,6 +19,16 @@ function useGlobal() {
       // Update some states
       useShowEl(e);
       useHideEl(e);
+      useFocusModal();
+    },
+    true
+  );
+
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key === "Escape") useCloseModal();
+      if (e.key === "Tab" || e.key === "Shift-Tab") useFocusModal();
     },
     true
   );
@@ -46,6 +56,27 @@ function setShowHideElA11y() {
 }
 
 /**
+  @name useHideEl
+  @description  This function will check if an element controls an element visibility and close it if it's the case.
+  The element handler need to have a data-show-el attribute with the id of the target element as value.
+  This function needs to be link to an event listener to work.
+  This function will check if aria-controls and aria-expanded attributes are present, else will create them.
+  @example
+  <button data-close-el="modal">Close modal</button>
+  <div id="modal" class="">Modal content</div>
+  @param {Event} e - The event object.
+*/
+function useHideEl(e) {
+  if (!e.target.hasAttribute("data-hide-el")) return;
+  // hide
+  const hideElId = e.target.getAttribute("data-hide-el");
+  document.getElementById(hideElId).classList.add("hidden");
+  // Update a11y attributes
+  e.target.setAttribute("aria-controls", hideElId);
+  e.target.setAttribute("aria-expanded", "false");
+}
+
+/**
   @name useShowEl
   @description   This function will check if an element controls an element visibility and show it if it's the case.
   The element handler need to have a data-show-el attribute with the id of the target element as value.
@@ -67,24 +98,38 @@ function useShowEl(e) {
 }
 
 /**
-  @name useHideEl
-  @description  This function will check if an element controls an element visibility and close it if it's the case.
-  The element handler need to have a data-show-el attribute with the id of the target element as value.
-  This function needs to be link to an event listener to work.
-  This function will check if aria-controls and aria-expanded attributes are present, else will create them.
-  @example
-  <button data-close-el="modal">Close modal</button>
-  <div id="modal" class="">Modal content</div>
-  @param {Event} e - The event object.
+  @name useFocusModal
+  @description This function check if a modal is present and a focusable element is present inside it.
+  If it's the case, the function will focus the element.
+  Case there is already a focused element inside the modal, avoid to focus it again.
+  @param {String} modalId - The id of the modal element.
 */
-function useHideEl(e) {
-  if (!e.target.hasAttribute("data-hide-el")) return;
-  // hide
-  const hideElId = e.target.getAttribute("data-hide-el");
-  document.getElementById(hideElId).classList.add("hidden");
-  // Update a11y attributes
-  e.target.setAttribute("aria-controls", hideElId);
-  e.target.setAttribute("aria-expanded", "false");
+function useFocusModal() {
+  setTimeout(() => {
+    // Check if a data-modal element without hidden class is present
+    const modalEl = document.querySelector("[data-modal]:not(.hidden)");
+    if (!modalEl) return;
+    // Get the current active element
+    const activeEl = document.activeElement;
+    // Check if the active element is inside the modal
+    if (modalEl.contains(activeEl)) return;
+    // Case not, focus first focusable element inside the modal
+    const focusable = modalEl.querySelector("[tabindex]");
+    if (focusable) focusable.focus();
+  }, 1);
+}
+
+/**
+  @name useCloseModal
+  @description This function check if a modal is present and will close it.
+  This is a shortcut to close a modal when the escape key is pressed, for example.
+*/
+function useCloseModal() {
+  // Check if a data-modal element without hidden class is present
+  const modalEl = document.querySelector("[data-modal]:not(.hidden)");
+  if (!modalEl) return;
+  // Close the modal
+  modalEl.classList.add("hidden");
 }
 
 /**

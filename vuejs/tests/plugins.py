@@ -3021,8 +3021,11 @@ def plugins_builder(plugins, data={}):
             "attrs": {
                 "data-plugin-id": plugin.get("id"),
                 "data-plugin-delete": "true" if can_be_delete else "false",
-                "data-plugin-redirect" : "true" if plugin.get("page", False) else "false",
+                "data-plugin-redirect": (
+                    "true" if plugin.get("page", False) else "false"
+                ),
                 "data-plugin-type": plugin.get("type", "").lower(),
+                "data-plugin-name": plugin.get("name"),
             },
             "disabled": (
                 True
@@ -3116,7 +3119,67 @@ def plugins_builder(plugins, data={}):
         },
     ]
 
+    modal = {
+        "type": "modal",
+        "id": "modal-delete-plugin",
+        "widgets": [
+            {
+                "type": "Title",
+                "data": {
+                    "title": "plugins_modal_delete_title",
+                    "type": "modal",
+                },
+            },
+            {
+                "type": "Text",
+                "data": {
+                    "text": "plugins_modal_delete_confirm",
+                    "textClass": "text-modal",
+                },
+            },
+            {
+                "type": "Text",
+                "data": {
+                    "text": "",
+                    "textClass": "text-modal bold",
+                    "attrs": {
+                        "data-modal-plugin-name": "true",
+                    },
+                },
+            },
+            {
+                "type": "ButtonGroup",
+                "data": {
+                    "buttons": [
+                        {
+                            "id": "delete-plugin-btn",
+                            "text": "action_close",
+                            "disabled": False,
+                            "color": "close",
+                            "size": "normal",
+                            "attrs": {
+                                "data-hide-el": "modal-delete-plugin",
+                            },
+                        },
+                        {
+                            "id": "delete-plugin-btn",
+                            "text": "action_delete",
+                            "disabled": False,
+                            "color": "delete",
+                            "size": "normal",
+                            "attrs": {
+                                "data-delete-plugin-submit": "",
+                            },
+                        },
+                    ],
+                    "groupClass": "btn-group-modal",
+                },
+            },
+        ],
+    }
+
     builder = [
+        modal,
         {
             "type": "card",
             "widgets": [

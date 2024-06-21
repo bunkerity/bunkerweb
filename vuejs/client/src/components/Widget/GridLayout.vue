@@ -100,7 +100,7 @@ onMounted(() => {
 <template>
   <!-- modal -->
   <template v-if="props.type === 'modal'">
-    <div class="layout-modal-container" :id="container.id">
+    <div data-modal class="layout-modal-container hidden" :id="container.id">
       <div class="layout-backdrop"></div>
       <div class="layout-modal-wrap" :data-hide-el="container.id">
         <div class="layout-modal">

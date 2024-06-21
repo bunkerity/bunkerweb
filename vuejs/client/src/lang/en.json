@@ -213,5 +213,6 @@
   "plugins_type": "Plugin type",
   "plugins_type_desc": "Only show plugins of the chosen type",
   "plugins_delete_desc": "Delete plugin",
-  "plugins_modal_delete": "Delete plugin"
+  "plugins_modal_delete_title": "Delete plugin",
+  "plugins_modal_delete_confirm": "Are you sure you want to delete the plugin below ?"
 }

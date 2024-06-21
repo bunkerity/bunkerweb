@@ -4,6 +4,8 @@ import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import ListDetails from "@components/List/Details.vue";
 import Title from "@components/Widget/Title.vue";
+import Text from "@components/Widget/Text.vue";
+import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 
 /**
   @name Builder/pLugin.vue
@@ -72,6 +74,11 @@ const props = defineProps({
         <Title v-if="widget.type === 'Title'" v-bind="widget.data" />
         <ListDetails
           v-if="widget.type === 'ListDetails'"
+          v-bind="widget.data"
+        />
+        <Text v-if="widget.type === 'Text'" v-bind="widget.data" />
+        <ButtonGroup
+          v-if="widget.type === 'ButtonGroup'"
           v-bind="widget.data"
         />
       </template>

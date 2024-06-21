@@ -36,7 +36,7 @@ import Button from "@components/Widget/Button.vue";
       },
     ],
   }
-  @param {string} [groupClass="justify-center align-center"] - Additional class for the flex container
+  @param {string} [groupClass="justify-center items-center"] - Additional class for the flex container
   @param {array} buttons - List of buttons to display. Button component is used.
 */
 
@@ -44,7 +44,7 @@ const props = defineProps({
   groupClass: {
     type: String,
     required: false,
-    default: "justify-center align-center",
+    default: "justify-center items-center",
   },
   buttons: {
     type: Array,

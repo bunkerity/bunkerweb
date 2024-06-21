@@ -13,11 +13,13 @@ import Icons from "@components/Widget/Icons.vue";
     href: "#",
     iconName: "info",
     iconColor: "info",
+    attrs: { "data-popover": "test" },
   }
   @param {string} text - Content of the popover. Can be a translation key or by default raw text.
   @param {string} [href="#"] - Link of the anchor. By default it is a # link.
   @param {string} iconName - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
   @param {string} iconColor - Color of the icon between tailwind colors
+  @param {object} [attrs={}] - List of attributs to add to the text.
   @param {string} [tag="a"] - By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor
   @param {string} [popoverClass=""] - Additional class for the popover container
   @param {string} [svgSize="base"] - Determine svg size between sm, md, base and lg.
@@ -160,6 +162,7 @@ onMounted(() => {
 
 <template>
   <component
+    v-bind="props.attrs"
     ref="popoverBtn"
     :tabindex="props.tabId"
     :aria-controls="`${popover.id}-popover-text`"

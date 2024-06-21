@@ -507,7 +507,7 @@ body {
 }
 
 .layout-modal {
-  @apply relative min-w-[300px] sm:min-w-[450px] max-w-screen-xl max-h-[80vh] min-h-[200px] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out  px-6 py-4 overflow-hidden break-words grid grid-cols-12; 
+  @apply relative min-w-[300px] sm:min-w-[450px] max-w-screen-xl max-h-[80vh] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out  px-6 py-4 overflow-hidden break-words grid grid-cols-12; 
 }
 
 .layout-modal-button-container {
@@ -1016,16 +1016,20 @@ body {
 /* CONTENT COMPONENT */
 
 .text-content {
-  @apply  mb-0 break-word;
+  @apply col-span-12 mb-0 break-word;
+}
+
+.text-modal {
+  @apply col-span-12 mb-2 text-center break-word;
 }
 
 .text-unmatch {
-  @apply  text-lg mb-0 break-word;
+  @apply col-span-12 text-lg mb-0 break-word;
 
 }
 
 .text-stat {
-  @apply my-1 font-bold dark:text-white/90 text-black uppercase break-word;
+  @apply col-span-12 my-1 font-bold dark:text-white/90 text-black uppercase break-word;
 }
 /* LIST COMPONENT */
 
@@ -1087,6 +1091,14 @@ body {
   @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[600px] col-span-12 font-sans text-sm font-semibold leading-normal uppercase dark:text-white/90 text-[#344767];
 }
 
+.title-modal {
+  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
+}
+
+.no-subtitle.title-modal { 
+  @apply mb-6;
+}
+
 .no-subtitle.title-container { 
   @apply mb-2.5;
 }
@@ -1105,6 +1117,7 @@ body {
 
 .is-subtitle.title-container,
 .is-subtitle.title-card,
+.is-subtitle.title-modal,
 .is-subtitle.title-stat,
 .is-subtitle.title-content,
 .is-subtitle.title-min {
@@ -1281,6 +1294,12 @@ body {
 
 .btn-svg {
   @apply w-6.5 h-6.5;
+}
+
+/* BTN GROUP */
+
+.btn-group-modal {
+  @apply col-span-12 justify-center items-center mt-4;
 }
 
 /* FILE MANAGER */
@@ -2553,6 +2572,10 @@ body {
 }
 
 /* UTILS */
+
+.bold {
+  @apply font-bold;
+}
 
 .-z-0 {
   @apply -z-[0];

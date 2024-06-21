@@ -3,6 +3,7 @@ import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderPlugins from "@components/Builder/Plugins.vue";
 import { useGlobal } from "@utils/global.js";
+import { useForm } from "@utils/form.js";
 
 /**
   @name Page/PLugins.vue
@@ -43,6 +44,7 @@ function redirectPlugin() {
 function deletePlugin() {
   const deleteData = {
     name: "pluginName",
+    id: "pluginId",
     type: "pluginType",
     operation: "delete",
   };
@@ -59,14 +61,23 @@ function deletePlugin() {
         return;
       // Update data
       deleteData.name = e.target
+        .closest("[data-plugin-name]")
+        .getAttribute("data-plugin-name");
+      deleteData.id = e.target
         .closest("[data-plugin-id]")
         .getAttribute("data-plugin-id");
       deleteData.type = e.target
         .closest("[data-plugin-type]")
         .getAttribute("data-plugin-type");
-      // Attach data to submit button (need to check attributs data-delete-plugin)
-      const submitBtn = document.querySelector("[data-delete-plugin]");
-      submitBtn.setAttribute("data-delete-plugin", JSON.stringify(deleteData));
+      // Attach data to submit button (need to check attributs data-delete-plugin-submit)
+      const submitBtn = document.querySelector("[data-delete-plugin-submit]");
+      submitBtn.setAttribute("data-submit-form", JSON.stringify(deleteData));
+
+      // Prepare and show modal
+      const modal = document.querySelector("#modal-delete-plugin");
+      const modalPluginName = modal.querySelector("[data-modal-plugin-name]");
+      modalPluginName.textContent = deleteData.name;
+      modal.classList.remove("hidden");
     },
     true
   );
@@ -85,9 +96,11 @@ onBeforeMount(() => {
 
 onMounted(() => {
   useGlobal();
+  useForm();
   redirectPlugin();
   deletePlugin();
 });
+
 const builder = [
   {
     type: "modal",
@@ -96,8 +109,53 @@ const builder = [
       {
         type: "Title",
         data: {
-          title: "plugins_modal_delete",
-          type: "card",
+          title: "plugins_modal_delete_title",
+          type: "modal",
+        },
+      },
+      {
+        type: "Text",
+        data: {
+          text: "plugins_modal_delete_confirm",
+          textClass: "text-modal",
+        },
+      },
+      {
+        type: "Text",
+        data: {
+          text: "",
+          textClass: "text-modal bold",
+          attrs: {
+            "data-modal-plugin-name": "true",
+          },
+        },
+      },
+      {
+        type: "ButtonGroup",
+        data: {
+          buttons: [
+            {
+              id: "delete-plugin-btn",
+              text: "action_close",
+              disabled: false,
+              color: "close",
+              size: "normal",
+              attrs: {
+                "data-hide-el": "modal-delete-plugin",
+              },
+            },
+            {
+              id: "delete-plugin-btn",
+              text: "action_delete",
+              disabled: false,
+              color: "delete",
+              size: "normal",
+              attrs: {
+                "data-delete-plugin-submit": "",
+              },
+            },
+          ],
+          groupClass: "btn-group-modal",
         },
       },
     ],
@@ -185,6 +243,8 @@ const builder = [
                 "data-plugin-id": "general",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "pro",
+                "data-plugin-name": "General",
               },
               disabled: true,
               popovers: [
@@ -202,6 +262,8 @@ const builder = [
                 "data-plugin-id": "antibot",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Antibot",
               },
               disabled: false,
               popovers: [
@@ -219,6 +281,8 @@ const builder = [
                 "data-plugin-id": "authbasic",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Auth basic",
               },
               disabled: false,
               popovers: [],
@@ -230,6 +294,8 @@ const builder = [
                 "data-plugin-id": "backup",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "pro",
+                "data-plugin-name": "Backup",
               },
               disabled: true,
               popovers: [
@@ -252,6 +318,8 @@ const builder = [
                 "data-plugin-id": "badbehavior",
                 "data-plugin-delete": "true",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "external",
+                "data-plugin-name": "Bad behavior",
               },
               disabled: false,
               popovers: [
@@ -274,6 +342,8 @@ const builder = [
                 "data-plugin-id": "blacklist",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Blacklist",
               },
               disabled: false,
               popovers: [
@@ -291,6 +361,8 @@ const builder = [
                 "data-plugin-id": "brotli",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Brotli",
               },
               disabled: false,
               popovers: [],
@@ -302,6 +374,8 @@ const builder = [
                 "data-plugin-id": "bunkernet",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "BunkerNet",
               },
               disabled: false,
               popovers: [
@@ -319,6 +393,8 @@ const builder = [
                 "data-plugin-id": "cors",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "CORS",
               },
               disabled: false,
               popovers: [
@@ -336,6 +412,8 @@ const builder = [
                 "data-plugin-id": "clientcache",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Client cache",
               },
               disabled: false,
               popovers: [],
@@ -347,6 +425,8 @@ const builder = [
                 "data-plugin-id": "country",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Country",
               },
               disabled: false,
               popovers: [
@@ -364,6 +444,8 @@ const builder = [
                 "data-plugin-id": "customcert",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Custom HTTPS certificate",
               },
               disabled: false,
               popovers: [],
@@ -375,6 +457,8 @@ const builder = [
                 "data-plugin-id": "db",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "DB",
               },
               disabled: false,
               popovers: [],
@@ -386,6 +470,8 @@ const builder = [
                 "data-plugin-id": "dnsbl",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "DNSBL",
               },
               disabled: false,
               popovers: [
@@ -403,6 +489,8 @@ const builder = [
                 "data-plugin-id": "errors",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Errors",
               },
               disabled: false,
               popovers: [
@@ -420,6 +508,8 @@ const builder = [
                 "data-plugin-id": "greylist",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Greylist",
               },
               disabled: false,
               popovers: [
@@ -437,6 +527,8 @@ const builder = [
                 "data-plugin-id": "gzip",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Gzip",
               },
               disabled: false,
               popovers: [],
@@ -448,6 +540,8 @@ const builder = [
                 "data-plugin-id": "inject",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "HTML injection",
               },
               disabled: false,
               popovers: [],
@@ -459,6 +553,8 @@ const builder = [
                 "data-plugin-id": "headers",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Headers",
               },
               disabled: false,
               popovers: [],
@@ -470,6 +566,8 @@ const builder = [
                 "data-plugin-id": "jobs",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Jobs",
               },
               disabled: false,
               popovers: [],
@@ -481,6 +579,8 @@ const builder = [
                 "data-plugin-id": "letsencrypt",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Let's Encrypt",
               },
               disabled: false,
               popovers: [],
@@ -492,6 +592,8 @@ const builder = [
                 "data-plugin-id": "limit",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Limit",
               },
               disabled: false,
               popovers: [
@@ -509,6 +611,8 @@ const builder = [
                 "data-plugin-id": "metrics",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Metrics",
               },
               disabled: false,
               popovers: [],
@@ -520,6 +624,8 @@ const builder = [
                 "data-plugin-id": "misc",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Miscellaneous",
               },
               disabled: false,
               popovers: [
@@ -537,6 +643,8 @@ const builder = [
                 "data-plugin-id": "modsecurity",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "ModSecurity",
               },
               disabled: false,
               popovers: [],
@@ -548,6 +656,8 @@ const builder = [
                 "data-plugin-id": "php",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "PHP",
               },
               disabled: false,
               popovers: [],
@@ -559,6 +669,8 @@ const builder = [
                 "data-plugin-id": "pro",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Pro",
               },
               disabled: false,
               popovers: [],
@@ -570,6 +682,8 @@ const builder = [
                 "data-plugin-id": "realip",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Real IP",
               },
               disabled: false,
               popovers: [],
@@ -581,6 +695,8 @@ const builder = [
                 "data-plugin-id": "redirect",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Redirect",
               },
               disabled: false,
               popovers: [],
@@ -592,6 +708,8 @@ const builder = [
                 "data-plugin-id": "redis",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Redis",
               },
               disabled: false,
               popovers: [
@@ -609,6 +727,8 @@ const builder = [
                 "data-plugin-id": "reverseproxy",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Reverse proxy",
               },
               disabled: false,
               popovers: [],
@@ -620,6 +740,8 @@ const builder = [
                 "data-plugin-id": "reversescan",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Reverse scan",
               },
               disabled: false,
               popovers: [
@@ -637,6 +759,8 @@ const builder = [
                 "data-plugin-id": "selfsigned",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Self-signed certificate",
               },
               disabled: false,
               popovers: [],
@@ -648,6 +772,8 @@ const builder = [
                 "data-plugin-id": "sessions",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Sessions",
               },
               disabled: false,
               popovers: [],
@@ -659,6 +785,8 @@ const builder = [
                 "data-plugin-id": "ui",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "false",
+                "data-plugin-type": "core",
+                "data-plugin-name": "UI",
               },
               disabled: false,
               popovers: [],
@@ -670,6 +798,8 @@ const builder = [
                 "data-plugin-id": "whitelist",
                 "data-plugin-delete": "false",
                 "data-plugin-redirect": "true",
+                "data-plugin-type": "core",
+                "data-plugin-name": "Whitelist",
               },
               disabled: false,
               popovers: [

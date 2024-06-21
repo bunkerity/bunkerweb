@@ -68,7 +68,7 @@ const props = defineProps({
     <ListPairs :pairs="props.pairs" />
     <ButtonGroup
       :buttons="props.buttons"
-      :groupClass="'justify-end align-center'"
+      :groupClass="'justify-end item-center'"
     />
   </Container>
 </template>

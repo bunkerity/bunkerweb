@@ -64,6 +64,7 @@ const baseClass = computed(() => {
   if (props.type === "content") return "title-content";
   if (props.type === "min") return "title-min";
   if (props.type === "stat") return "title-stat";
+  if (props.type === "modal") return "title-modal";
   return "title-card";
 });
 
