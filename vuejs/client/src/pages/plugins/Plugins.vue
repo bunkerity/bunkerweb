@@ -2,6 +2,7 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderPlugins from "@components/Builder/Plugins.vue";
+import { useGlobal } from "@utils/global.js";
 
 /**
   @name Page/PLugins.vue
@@ -82,10 +83,14 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
+  useGlobal();
   redirectPlugin();
   deletePlugin();
 });
 const builder = [
+  {
+    type: "modal",
+  },
   {
     type: "card",
     widgets: [

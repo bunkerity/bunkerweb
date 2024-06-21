@@ -1,6 +1,8 @@
 <script setup>
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, onMounted, reactive } from "vue";
+import Button from "@components/Widget/Button.vue";
 import { contentIndex } from "@utils/tabindex.js";
+import { useUUID } from "@utils/global.js";
 
 /** 
   @name Widget/GridLayout.vue
@@ -15,7 +17,8 @@ import { contentIndex } from "@utils/tabindex.js";
     columns: { pc: 12, tablet: 12, mobile: 12},
     gridLayoutClass: "items-start"
   }
-  @param {string} [type="card"] - Type of layout component, we can have : card, table, modal and others
+  @param {string} [type="card"] - Type of layout component, we can have "card" or "modal"
+  @param {string} [id=uuidv4()] - Id of the layout component, will be used to identify the component.
   @param {string} [title=""] - Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title.
   @param {string} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
   @param {object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
@@ -28,6 +31,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "card",
+  },
+  id: {
+    type: String,
+    required: true,
+    default: "",
   },
   title: {
     type: String,
@@ -60,8 +68,13 @@ const props = defineProps({
   },
 });
 
+const container = reactive({
+  id: props.id,
+});
+
 const containerClass = computed(() => {
-  if (props.type === "card") return "card";
+  if (props.type === "card") return "layout-card";
+  if (props.type === "modal") return "layout-modal";
   return "";
 });
 
@@ -69,32 +82,62 @@ const gridClass = computed(() => {
   return ` col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
 });
 
-const gridLayoutEl = ref();
+const flowEl = ref();
 
 onMounted(() => {
+  container.id = useUUID(container.id);
   if (!props.link) return;
-  gridLayoutEl.value.setAttribute("href", props.link);
-  gridLayoutEl.value.setAttribute("rel", "noopener");
-  gridLayoutEl.value.setAttribute("tabindex", props.tabId);
+  flowEl.value.setAttribute("href", props.link);
+  flowEl.value.setAttribute("rel", "noopener");
+  flowEl.value.setAttribute("tabindex", props.tabId);
 
   if (!props.link.startsWith("http")) return;
 
-  gridLayoutEl.value.setAttribute("target", "_blank");
+  flowEl.value.setAttribute("target", "_blank");
 });
 </script>
 
 <template>
-  <component
-    ref="gridLayoutEl"
-    :is="props.link ? 'a' : 'div'"
-    data-grid-layout
-    :class="[
-      containerClass,
-      gridClass,
-      props.gridLayoutClass,
-      'layout-grid-layout',
-    ]"
-  >
-    <slot></slot>
-  </component>
+  <!-- modal -->
+  <template v-if="props.type === 'modal'">
+    <div class="layout-modal-container" :id="container.id">
+      <div class="layout-backdrop"></div>
+      <div class="layout-modal-wrap" :data-hide-el="container.id">
+        <div class="layout-modal">
+          <div class="layout-modal-button-container">
+            <Button
+              :attrs="{ 'data-hide-el': container.id }"
+              :text="'action_close_modal'"
+              :hideText="true"
+              :iconName="'cross'"
+              :iconColor="'dark'"
+              :iconClass="'lg'"
+              :color="'transparent'"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  <!-- end modal -->
+
+  <!-- card or elements on the document flow -->
+  <template v-if="props.type !== 'modal'">
+    <component
+      ref="flowEl"
+      :id="container.id"
+      :is="props.link ? 'a' : 'div'"
+      data-grid-layout
+      :class="[
+        containerClass,
+        gridClass,
+        props.gridLayoutClass,
+        'layout-grid-layout',
+      ]"
+    >
+      <slot></slot>
+    </component>
+  </template>
+
+  <!-- end card or elements on the document flow -->
 </template>

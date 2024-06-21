@@ -15,6 +15,7 @@ function useGlobal() {
   window.addEventListener(
     "click",
     (e) => {
+      console.log("click", e.target);
       // Update some states
       useShowEl(e);
       useHideEl(e);
@@ -35,13 +36,13 @@ function useGlobal() {
   @param {Event} e - The event object.
 */
 function useShowEl(e) {
-  if (!e.target.closest("button").hasAttribute("data-show-el")) return;
+  if (!e.target.hasAttribute("data-show-el")) return;
   // show
-  const showElId = e.target.closest("button").getAttribute("data-show-el");
+  const showElId = e.target.getAttribute("data-show-el");
   document.getElementById(showElId).classList.remove("hidden");
   // Update a11y attributes
-  e.target.closest("button").setAttribute("aria-controls", showElId);
-  e.target.closest("button").setAttribute("aria-expanded", "true");
+  e.target.setAttribute("aria-controls", showElId);
+  e.target.setAttribute("aria-expanded", "true");
 }
 
 /**
@@ -56,13 +57,13 @@ function useShowEl(e) {
   @param {Event} e - The event object.
 */
 function useHideEl(e) {
-  if (!e.target.closest("button").hasAttribute("data-show-close")) return;
+  if (!e.target.hasAttribute("data-hide-el")) return;
   // hide
-  const hideElId = e.target.closest("button").getAttribute("data-show-close");
+  const hideElId = e.target.getAttribute("data-hide-el");
   document.getElementById(hideElId).classList.add("hidden");
   // Update a11y attributes
-  e.target.closest("button").setAttribute("aria-controls", hideElId);
-  e.target.closest("button").setAttribute("aria-expanded", "false");
+  e.target.setAttribute("aria-controls", hideElId);
+  e.target.setAttribute("aria-expanded", "false");
 }
 
 /**

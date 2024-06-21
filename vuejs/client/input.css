@@ -490,6 +490,31 @@ body {
   @apply col-span-12 grid grid-cols-12 w-full relative;
 }
 
+.layout-card {
+  @apply overflow-visible relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
+}
+
+.layout-modal-container {
+  @apply z-[9999] fixed top-0 left-0 w-full h-full;
+}
+
+.layout-backdrop {
+  @apply z-[10] fixed top-0 left-0 w-full h-full bg-black bg-opacity-50;
+}
+
+.layout-modal-wrap {
+  @apply relative z-[20] flex justify-center items-center w-full h-full;
+}
+
+.layout-modal {
+  @apply relative min-w-[50vw] w-full max-w-screen-xl max-h-[80vh] min-h-[200px] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out; 
+}
+
+.layout-modal-button-container {
+  @apply absolute right-2 top-2 z-[30];
+}
+
+
 .layout-settings {
   @apply py-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
 }
@@ -1163,9 +1188,6 @@ body {
 
 /* CARD */
 
-.card {
-  @apply overflow-visible relative transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out;
-}
 
 .card-info-text {
   @apply col-span-12 mb-0 leading-normal text-sm text-gray-700 dark:text-gray-500 ml-2 mr-1.5;

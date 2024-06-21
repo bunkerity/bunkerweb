@@ -142,6 +142,7 @@
   "action_save": "save {name}",
   "action_add": "add {name}",
   "action_close": "close {name}",
+  "action_close_modal": "close modal",
   "action_delete": "delete {name}",
   "action_link": "link",
   "action_edit": "edit {name}",

@@ -86,6 +86,11 @@ const props = defineProps({
     required: false,
     default: "",
   },
+  iconClass: {
+    type: String,
+    required: false,
+    default: "sm",
+  },
   attrs: {
     type: Object,
     required: false,
@@ -110,6 +115,7 @@ const btn = reactive({
 const btnEl = ref();
 
 const buttonClass = computed(() => {
+  if (props.color === "transparent") return `${props.size}`;
   return `btn ${props.color} ${props.size}`;
 });
 
@@ -150,7 +156,7 @@ onMounted(() => {
       <Icons
         v-if="props.iconName"
         :iconName="props.iconName"
-        :iconClass="'btn-svg'"
+        :iconClass="`${props.iconClass} pointer-events-none`"
         :iconColor="props.iconColor"
       />
     </button>
