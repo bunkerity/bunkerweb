@@ -17,12 +17,10 @@ import Icons from "@components/Widget/Icons.vue";
   }
   @param {string} text - Content of the popover. Can be a translation key or by default raw text.
   @param {string} [href="#"] - Link of the anchor. By default it is a # link.
-  @param {string} iconName - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
-  @param {string} iconColor - Color of the icon between tailwind colors
+  @param {string} color - Color of the icon between tailwind colors
   @param {object} [attrs={}] - List of attributs to add to the text.
   @param {string} [tag="a"] - By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor
-  @param {string} [popoverClass=""] - Additional class for the popover container
-  @param {string} [svgSize="base"] - Determine svg size between sm, md, base and lg.
+  @param {string} [iconClass="icon-default"]
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
 
@@ -40,7 +38,7 @@ const props = defineProps({
     type: String,
     required: false,
   },
-  iconColor: {
+  color: {
     type: String,
     required: false,
   },
@@ -50,15 +48,10 @@ const props = defineProps({
     required: false,
     default: "a",
   },
-  popoverClass: {
+  iconClass: {
     type: String,
     required: false,
-    default: "",
-  },
-  svgSize: {
-    type: String,
-    required: false,
-    default: "base",
+    default: "icon-default",
   },
   tabId: {
     type: String,
@@ -72,6 +65,7 @@ const popover = reactive({
   id: "",
   isOpen: false,
   isHover: false,
+  color: "",
 });
 
 const popoverContainer = ref();
@@ -142,6 +136,7 @@ watch(popover, () => {
 
 onMounted(() => {
   popover.id = useUUID();
+
   // Remove href if tag is not an anchor
   if (props.tag !== "a") {
     popoverBtn.value.removeAttribute("href");
@@ -175,13 +170,9 @@ onMounted(() => {
     @focusout="hidePopover()"
     @pointerover="showPopover()"
     @pointerleave="hidePopover()"
-    :class="['popover-btn', props.popoverClass]"
+    :class="['popover-btn']"
   >
-    <Icons
-      :iconClass="`popover-svg ${props.svgSize}`"
-      :iconName="props.iconName"
-      :iconColor="props.iconColor"
-    />
+    <Icons :iconName="props.iconName" />
   </component>
   <div
     ref="popoverContainer"
@@ -189,7 +180,7 @@ onMounted(() => {
     role="status"
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
     :class="[
-      'popover-container',
+      'popover-container bg-el',
       props.iconColor,
       popover.isOpen ? 'open' : 'close',
     ]"

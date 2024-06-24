@@ -141,7 +141,7 @@ onMounted(() => {
 
 <template>
   <Container
-    :containerClass="`field-container ${props.containerClass}`"
+    :containerClass="`${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

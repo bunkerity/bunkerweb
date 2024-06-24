@@ -318,7 +318,7 @@ const emits = defineEmits(["inp"]);
   <Container
     data-field-container
     :class="[select.isOpen ? 'z-[100]' : '']"
-    :containerClass="`field-container ${props.containerClass}`"
+    :containerClass="`${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

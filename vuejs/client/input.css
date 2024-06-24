@@ -161,11 +161,6 @@ body {
 }
 
 /* INPUT */
-
-.field-container {
-  @apply relative w-full;
-}
-
 .input-header-container {
   @apply z-20;
 }
@@ -530,11 +525,11 @@ body {
 /* POPOVER */
 
 .popover-btn {
-  @apply outline-offset-1 cursor-pointer flex justify-start;
+  @apply outline-offset-1 cursor-pointer;
 }
 
 .popover-container {
-  @apply pointer-events-none fixed max-w-[80vw] sm:max-w-[200px] opacity-100 justify-center items-center dark:brightness-90 transition rounded-md p-3;
+  @apply pointer-events-none fixed max-w-[80vw] sm:max-w-[200px]  justify-center items-center dark:brightness-90 transition rounded-md p-3;
 }
 
 .open.popover-container {
@@ -549,14 +544,41 @@ body {
   @apply whitespace-normal pointer-events-none text-center transition duration-300 ease-in-out font-semibold text-sm text-white dark:text-white m-0;
 }
 
-.popover-svg {
-  @apply pointer-events-none z-0 hover:brightness-95 fill-blue-500;
+.icon-container {
+  @apply block w-full h-full;
 }
 
-.icon-svg {
-  @apply block;
+.stick.icon-container {
+  @apply absolute top-0 right-0 min-w-12 dark:brightness-90 flex justify-center items-center w-12 h-12 text-center rounded-circle;
 }
 
+.icon-social {
+  @apply hover:opacity-80;
+}
+
+.icon-header-field {
+  @apply ml-1 pointer-events-none z-0 hover:brightness-95 fill-blue-500 h-5 w-5;
+}
+
+.icon-stat {
+  @apply block w-10 h-10;
+}
+
+.icon-base {
+  @apply block w-8 h-8
+}
+
+.icon-menu {
+  @apply h-6 w-6 relative;
+}
+
+.icon-table {
+  @apply h-6 w-6 relative;
+}
+
+.icon-list-details {
+  @apply mx-1 h-7 w-7 relative;
+}
 
 /* TABS */
 
@@ -635,9 +657,7 @@ body {
 }
 /* MENU */
 
-.menu-svg {
-  @apply h-6 w-6 relative;
-}
+
 
 .menu-account-title-container {
   @apply mt-2 w-full px-1;
@@ -803,9 +823,6 @@ body {
   @apply dark:text-gray-200 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700;
 }
 
-.social-svg {
-  @apply hover:opacity-80;
-}
 
 .menu-social-list {
   @apply mb-3 flex justify-center align-middle w-full;
@@ -1028,8 +1045,17 @@ body {
 
 }
 
+.text-table {
+  @apply col-span-12 mb-0 break-word;
+
+}
+
 .text-stat {
   @apply col-span-12 my-1 font-bold dark:text-white/90 text-black uppercase break-word;
+}
+
+.text-list-details {
+  @apply w-full col-span-12 mb-0 break-word;
 }
 /* LIST COMPONENT */
 
@@ -1070,7 +1096,7 @@ body {
 }
 
 .list-details-flex {
-  @apply justify-between items-center;
+  @apply justify-end items-center;
 }
 
 /* TITLE */
@@ -1131,8 +1157,6 @@ body {
 
 /* SUBTITLE */
 
-
-
 .subtitle-card {
   @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0 lowercase;
 }
@@ -1162,16 +1186,6 @@ body {
 .stat-content-container.is-icon {
   @apply mr-12;
 }
-
-.stat-svg {
-  @apply leading-none text-lg relative w-6 h-6;
-}
-
-.stat-svg-container {
-  @apply absolute top-0 right-0 min-w-12 dark:brightness-90 flex justify-center items-center w-12 h-12 text-center rounded-circle;
-}
-
-
 
 /* FORM */
 
@@ -1519,11 +1533,11 @@ body {
 }
 
 .table-content-item {
-  @apply appearance-none text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5;
+  @apply appearance-none text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 min-h-[65px];
 }
 
 .table-content-item-wrap {
-  @apply appearance-none py-2.5 pl-1;
+  @apply appearance-none pl-1;
 }
 
 /** MISC **/
@@ -1629,34 +1643,6 @@ body {
 .feedback-alert-text {
   @apply text-white mt-2 mb-0 text-sm;
 }
-
-/* SIZE MODIFIER */
-
-.lg.popover-svg,
-.lg.icon-svg {
-  @apply h-8 w-8;
-}
-
-.base.popover-svg,
-.base.icon-svg {
-  @apply h-7 w-7;
-}
-
-.md.popover-svg,
-.md.icon-svg {
-  @apply h-6 w-6;
-}
-
-.sm.popover-svg,
-.sm.icon-svg {
-  @apply h-5 w-5;
-}
-
-.sm.popover-svg,
-.sm.icon-svg {
-  @apply h-5 w-5;
-}
-
 
 /* TEXT COLOR MODIFIER */
 
@@ -1986,594 +1972,324 @@ body {
 
 /* BACKGROUND COLOR MODIFIER */
 
-.success.status-icon,
-.success.stat-svg-container,
-.success.feedback-alert-wrap,
-.success.popover-container {
+.bg-el {
+  @apply bg-current;
+
+}
+
+.success.bg-el {
   @apply bg-green-500;
 }
 
-.error.status-icon,
-.error.stat-svg-container,
-.error.feedback-alert-wrap,
-.error.popover-container {
+.error.bg-el{
   @apply bg-red-500;
 }
 
-.warning.status-icon,
-.warning.stat-svg-container,
-.warning.feedback-alert-wrap,
-.warning.popover-container {
+.warning.bg-el {
   @apply bg-yellow-500;
 }
 
-.info.status-icon,
-.info.stat-svg-container,
-.info.feedback-alert-wrap,
-.info.popover-container {
+.info.bg-el{
   @apply bg-sky-500;
 }
 
-.purple.stat-svg-container,
-.purple.feedback-alert-wrap,
-.purple.popover-container {
+.purple.bg-el {
   @apply bg-purple-500;
 }
 
-.green.stat-svg-container,
-.green.feedback-alert-wrap,
-.green.popover-container {
+.green.bg-el {
   @apply bg-green-500;
 }
 
-.red.stat-svg-container,
-.red.feedback-alert-wrap,
-.red.popover-container {
+.red.bg-el {
   @apply bg-red-500;
 }
 
-.orange.stat-svg-container,
-.orange.feedback-alert-wrap,
-.orange.popover-container {
+.orange.bg-el {
   @apply bg-orange-500;
 }
 
-.blue.stat-svg-container,
-.blue.feedback-alert-wrap,
-.blue.popover-container {
+.blue.bg-el {
   @apply bg-blue-500;
 }
 
-.yellow.stat-svg-container,
-.yellow.feedback-alert-wrap,
-.yellow.popover-container {
+.yellow.bg-el {
   @apply bg-yellow-500;
 }
 
-.gray.stat-svg-container,
-.gray.feedback-alert-wrap,
-.gray.popover-container {
+.gray.bg-el {
   @apply bg-gray-500;
 }
 
-.dark.stat-svg-container,
-.dark.feedback-alert-wrap,
-.dark.popover-container {
+.dark.bg-el {
   @apply bg-slate-500;
 }
 
-.amber.stat-svg-container,
-.amber.feedback-alert-wrap,
-.amber.popover-container {
+.amber.bg-el {
   @apply bg-amber-500;
 }
 
-.emerald.stat-svg-container,
-.emerald.feedback-alert-wrap,
-.emerald.popover-container {
+.emerald.bg-el {
   @apply bg-emerald-500;
 }
 
-.teal.stat-svg-container,
-.teal.feedback-alert-wrap,
-.teal.popover-container {
+.teal.bg-el {
   @apply bg-teal-500;
 }
 
-.indigo.stat-svg-container,
-.indigo.feedback-alert-wrap,
-.indigo.popover-container {
+.indigo.bg-el {
   @apply bg-indigo-500;
 }
 
-.cyan.stat-svg-container,
-.cyan.feedback-alert-wrap,
-.cyan.popover-container {
+.cyan.bg-el {
   @apply bg-cyan-500;
 }
 
-.sky.stat-svg-container,
-.sky.feedback-alert-wrap,
-.sky.popover-container {
+.sky.bg-el {
   @apply bg-sky-500;
 }
 
-.pink.stat-svg-container,
-.pink.feedback-alert-wrap,
-.pink.popover-container {
+.pink.bg-el {
   @apply bg-pink-500;
 }
 
-.lime.stat-svg-container,
-.lime.feedback-alert-wrap,
-.lime.popover-container {
+.lime.bg-el{
   @apply bg-lime-500;
 }
 
-.purple-darker.stat-svg-container,
-.purle-darker.feedback-alert-wrap,
-.purple-darker.popover-container {
+.purple-darker.bg-el {
   @apply bg-purple-600;
 }
 
-.green-darker.stat-svg-container,
-.green-darker.feedback-alert-wrap,
-.green-darker.popover-container {
+.green-darker.bg-el {
   @apply bg-green-700;
 }
 
-.red-darker.stat-svg-container,
-.red-darker.feedback-alert-wrap,
-.red-darker.popover-container {
+.red-darker.bg-el {
   @apply bg-red-700;
 }
 
-.orange-darker.stat-svg-container,
-.orange-darker.feedback-alert-wrap,
-.orange-darker.popover-container {
+.orange-darker.bg-el {
   @apply bg-orange-600;
 }
 
-.blue-darker.stat-svg-container,
-.blue-darker.feedback-alert-wrap,
-.blue-darker.popover-container {
+.blue-darker.bg-el {
   @apply bg-blue-600;
 }
 
-.yellow-darker.stat-svg-container,
-.yellow-darker.feedback-alert-wrap,
-.yellow-darker.popover-container {
+.yellow-darker.bg-el {
   @apply bg-yellow-600;
 }
 
-.gray-darker.stat-svg-container,
-.gray-darker.feedback-alert-wrap,
-.gray-darker.popover-container {
+.gray-darker.bg-el{
   @apply bg-gray-600;
 }
 
-.dark-darker.stat-svg-container,
-.dark-darker.feedback-alert-wrap,
-.dark-darker.popover-container {
+.dark-darker.bg-el {
   @apply bg-slate-600;
 }
 
-.amber-darker.stat-svg-container,
-.amber-darker.feedback-alert-wrap,
-.amber-darker.popover-container {
+.amber-darker.bg-el {
   @apply bg-amber-600;
 }
 
-.emerald-darker.stat-svg-container,
-.emerald-darker.feedback-alert-wrap,
-.emerald-darker.popover-container {
+.emerald-darker.bg-el {
   @apply bg-emerald-600;
 }
 
-.teal-darker.stat-svg-container,
-.teal-darker.feedback-alert-wrap,
-.teal-darker.popover-container {
+.teal-darker.bg-el {
   @apply bg-teal-600;
 }
 
-.indigo-darker.stat-svg-container,
-.indigo-darker.feedback-alert-wrap,
-.indigo-darker.popover-container {
+.indigo-darker.bg-el {
   @apply bg-indigo-600;
 }
 
-.cyan-darker.stat-svg-container,
-.cyan-darker.feedback-alert-wrap,
-.cyan-darker.popover-container {
+.cyan-darker.bg-el {
   @apply bg-cyan-600;
 }
 
-.sky-darker.stat-svg-container,
-.sky-darker.feedback-alert-wrap,
-.sky-darker.popover-container {
+.sky-darker.bg-el {
   @apply bg-sky-700;
 }
 
-.pink-darker.stat-svg-container,
-.pink-darker.feedback-alert-wrap,
-.pink-darker.popover-container {
+.pink-darker.bg-el {
   @apply bg-pink-600;
 }
 
-.lime-darker.stat-svg-container,
-.lime-darker.feedback-alert-wrap,
-.lime-darker.popover-container {
+.lime-darker.bg-el {
   @apply bg-lime-600;
 }
 
 /* SVG COLOR MODIFIER */
 
-.success.icon-svg,
-.success.btn-svg,
-.success.menu-svg,
-.success.social-svg,
-.success.stat-svg,
-.success.popover-svg {
+.fill {
+  @apply fill-current;
+}
+
+.success.fill {
   @apply fill-green-500;
 }
 
-.error.icon-svg,
-.error.btn-svg,
-.error.menu-svg,
-.error.social-svg,
-.error.stat-svg,
-.error.popover-svg {
+.error.fill{
   @apply fill-red-500;
 }
 
-.warning.icon-svg,
-.warning.btn-svg,
-.warning.menu-svg,
-.warning.social-svg,
-.warning.stat-svg,
-.warning.popover-svg {
+.warning.fill {
   @apply fill-yellow-500;
 }
 
-.info.icon-svg,
-.info.btn-svg,
-.info.menu-svg,
-.info.social-svg,
-.info.stat-svg,
-.info.popover-svg {
+.info.fill {
   @apply fill-sky-500;
 }
 
-.white.icon-svg,
-.white.btn-svg,
-.white.menu-svg,
-.white.social-svg,
-.white.stat-svg,
-.white.popover-svg {
+.white.fill {
   @apply fill-white;
 }
 
-.purple.icon-svg,
-.purple.btn-svg,
-.purple.menu-svg,
-.purple.social-svg,
-.purple.stat-svg,
-.purple.popover-svg {
+.purple.fill {
   @apply fill-purple-500;
 }
 
-.green.icon-svg,
-.green.btn-svg,
-.green.menu-svg,
-.green.social-svg,
-.green.stat-svg,
-.green.popover-svg {
+.green.fill {
   @apply fill-green-500;
 }
 
-.red.icon-svg,
-.red.btn-svg,
-.red.menu-svg,
-.red.social-svg,
-.red.stat-svg,
-.red.popover-svg {
+.red.fill{
   @apply fill-red-500;
 }
 
-.orange.icon-svg,
-.orange.btn-svg,
-.orange.menu-svg,
-.orange.social-svg,
-.orange.stat-svg,
-.orange.popover-svg {
+.orange.fill {
   @apply fill-orange-500;
 }
 
-.blue.icon-svg,
-.blue.btn-svg,
-.blue.menu-svg,
-.blue.social-svg,
-.blue.stat-svg,
-.blue.popover-svg {
+.blue.fill {
   @apply fill-blue-500;
 }
 
-.yellow.icon-svg,
-.yellow.btn-svg,
-.yellow.menu-svg,
-.yellow.social-svg,
-.yellow.stat-svg,
-.yellow.popover-svg {
+.yellow.fill {
   @apply fill-yellow-500;
 }
 
-.gray.icon-svg,
-.gray.btn-svg,
-.gray.menu-svg,
-.gray.social-svg,
-.gray.stat-svg,
-.gray.popover-svg {
+.gray.fill {
   @apply fill-gray-500;
 }
 
-.dark.icon-svg,
-.dark.btn-svg,
-.dark.menu-svg,
-.dark.social-svg,
-.dark.stat-svg,
-.dark.popover-svg {
+.dark.fill {
   @apply fill-slate-500;
 }
 
-.amber.icon-svg,
-.amber.btn-svg,
-.amber.menu-svg,
-.amber.social-svg,
-.amber.stat-svg,
-.amber.popover-svg {
+.amber.fill {
   @apply fill-amber-500;
 }
 
-.emerald.icon-svg,
-.emerald.btn-svg,
-.emerald.menu-svg,
-.emerald.social-svg,
-.emerald.stat-svg,
-.emerald.popover-svg {
+.emerald.fill {
   @apply fill-emerald-500;
 }
 
-.teal.icon-svg,
-.teal.btn-svg,
-.teal.menu-svg,
-.teal.social-svg,
-.teal.stat-svg,
-.teal.popover-svg {
+.teal.fill {
   @apply fill-teal-500;
 }
 
-.indigo.icon-svg,
-.indigo.btn-svg,
-.indigo.menu-svg,
-.indigo.social-svg,
-.indigo.stat-svg,
-.indigo.popover-svg {
+.indigo.fill {
   @apply fill-indigo-500;
 }
 
-.cyan.icon-svg,
-.cyan.btn-svg,
-.cyan.menu-svg,
-.cyan.social-svg,
-.cyan.stat-svg,
-.cyan.popover-svg {
+.cyan.fill {
   @apply fill-cyan-500;
 }
 
-.sky.icon-svg,
-.sky.btn-svg,
-.sky.menu-svg,
-.sky.social-svg,
-.sky.stat-svg,
-.sky.popover-svg {
+.sky.fill {
   @apply fill-sky-500;
 }
 
-.pink.icon-svg,
-.pink.btn-svg,
-.pink.menu-svg,
-.pink.social-svg,
-.pink.stat-svg,
-.pink.popover-svg {
+.pink.fill {
   @apply fill-pink-500;
 }
 
-.lime.icon-svg,
-.lime.btn-svg,
-.lime.menu-svg,
-.lime.social-svg,
-.lime.stat-svg,
-.lime.popover-svg {
+.lime.fill {
   @apply fill-lime-500;
 }
 
-.twitter.icon-svg,
-.twitter.btn-svg,
-.twitter.menu-svg,
-.twitter.social-svg,
-.twitter.stat-svg,
-.twitter.popover-svg {
+.twitter.fill {
   @apply fill-[#1DA1F2];
 }
 
-.linkedin.icon-svg,
-.linkedin.btn-svg,
-.linkedin.menu-svg,
-.linkedin.social-svg,
-.linkedin.stat-svg,
-.linkedin.popover-svg {
+.linkedin.fill {
   @apply fill-[#0A63BC];
 }
 
-.discord.icon-svg,
-.discord.btn-svg,
-.discord.menu-svg,
-.discord.social-svg,
-.discord.stat-svg,
-.discord.popover-svg {
+.discord.fill {
   @apply fill-[#5562EA];
 }
 
-.github.icon-svg,
-.github.btn-svg,
-.github.menu-svg,
-.github.social-svg,
-.github.stat-svg,
-.github.popover-svg {
+.github.fill {
   @apply fill-[#171A1F] dark:fill-gray-300;
 }
 
-.purple-darker.icon-svg,
-.purle-darker.btn-svg,
-.purple-darker.menu-svg,
-.purple-darker.social-svg,
-.purple-darker.stat-svg,
-.purple-darker.popover-svg {
+.purple-darker.fill {
   @apply fill-purple-600;
 }
 
-.green-darker.icon-svg,
-.green-darker.btn-svg,
-.green-darker.menu-svg,
-.green-darker.social-svg,
-.green-darker.stat-svg,
-.green-darker.popover-svg {
+.green-darker.fill {
   @apply fill-green-700;
 }
 
-.red-darker.icon-svg,
-.red-darker.btn-svg,
-.red-darker.menu-svg,
-.red-darker.social-svg,
-.red-darker.stat-svg,
-.red-darker.popover-svg {
+.red-darker.fill {
   @apply fill-red-700;
 }
 
-.orange-darker.icon-svg,
-.orange-darker.btn-svg,
-.orange-darker.menu-svg,
-.orange-darker.social-svg,
-.orange-darker.stat-svg,
-.orange-darker.popover-svg {
+.orange-darker.fill {
   @apply fill-orange-600;
 }
 
-.blue-darker.icon-svg,
-.blue-darker.btn-svg,
-.blue-darker.menu-svg,
-.blue-darker.social-svg,
-.blue-darker.stat-svg,
-.blue-darker.popover-svg {
+.blue-darker.fill{
   @apply fill-blue-600;
 }
 
-.yellow-darker.icon-svg,
-.yellow-darker.btn-svg,
-.yellow-darker.menu-svg,
-.yellow-darker.social-svg,
-.yellow-darker.stat-svg,
-.yellow-darker.popover-svg {
+.yellow-darker.fill-default {
   @apply fill-yellow-600;
 }
 
-.gray-darker.icon-svg,
-.gray-darker.btn-svg,
-.gray-darker.menu-svg,
-.gray-darker.social-svg,
-.gray-darker.stat-svg,
-.gray-darker.popover-svg {
+.gray-darker.fill {
   @apply fill-gray-600;
 }
 
-.dark-darker.icon-svg,
-.dark-darker.btn-svg,
-.dark-darker.menu-svg,
-.dark-darker.social-svg,
-.dark-darker.stat-svg,
-.dark-darker.popover-svg {
+.dark-darker.fill
+ {
   @apply fill-slate-600;
 }
 
-.amber-darker.icon-svg,
-.amber-darker.btn-svg,
-.amber-darker.menu-svg,
-.amber-darker.social-svg,
-.amber-darker.stat-svg,
-.amber-darker.popover-svg {
+.amber-darker.fill {
   @apply fill-amber-600;
 }
 
-.emerald-darker.icon-svg,
-.emerald-darker.btn-svg,
-.emerald-darker.menu-svg,
-.emerald-darker.social-svg,
-.emerald-darker.stat-svg,
-.emerald-darker.popover-svg {
+.emerald-darker.fill
+ {
   @apply fill-emerald-600;
 }
 
-.teal-darker.icon-svg,
-.teal-darker.btn-svg,
-.teal-darker.menu-svg,
-.teal-darker.social-svg,
-.teal-darker.stat-svg,
-.teal-darker.popover-svg {
+.teal-darker.fill {
   @apply fill-teal-600;
 }
 
-.indigo-darker.icon-svg,
-.indigo-darker.btn-svg,
-.indigo-darker.menu-svg,
-.indigo-darker.social-svg,
-.indigo-darker.stat-svg,
-.indigo-darker.popover-svg {
+.indigo-darker.fill {
   @apply fill-indigo-600;
 }
 
-.cyan-darker.icon-svg,
-.cyan-darker.btn-svg,
-.cyan-darker.menu-svg,
-.cyan-darker.social-svg,
-.cyan-darker.stat-svg,
-.cyan-darker.popover-svg {
+.cyan-darker.fill {
   @apply fill-cyan-600;
 }
 
-.sky-darker.icon-svg,
-.sky-darker.btn-svg,
-.sky-darker.menu-svg,
-.sky-darker.social-svg,
-.sky-darker.stat-svg,
-.sky-darker.popover-svg {
+.sky-darker.fill {
   @apply fill-sky-700;
 }
 
-.pink-darker.icon-svg,
-.pink-darker.btn-svg,
-.pink-darker.menu-svg,
-.pink-darker.social-svg,
-.pink-darker.stat-svg,
-.pink-darker.popover-svg {
+.pink-darker.fill {
   @apply fill-pink-600;
 }
 
-.lime-darker.icon-svg,
-.lime-darker.btn-svg,
-.lime-darker.menu-svg,
-.lime-darker.social-svg,
-.lime-darker.stat-svg,
-.lime-darker.popover-svg {
+.lime-darker.fill {
   @apply fill-lime-600;
 }
 

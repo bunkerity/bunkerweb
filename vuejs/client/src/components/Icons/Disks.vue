@@ -1,37 +1,43 @@
 <script setup>
+import { defineProps, reactive } from "vue";
 /** 
   @name Icons/Disks.vue
   @description This component is a svg icon representing disks.
   @example
   {
-    iconColor: 'info',
+    color: 'info',
   }
-  @param {string} [iconClass="base"] - The class of the icon. "base" is the default size.
-   @param {string} [iconColor="info"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
+  @param {string} [iconClass="icon-default"] - The class of the icon.
+   @param {string} [color="orange"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
 */
 
 const props = defineProps({
   iconClass: {
     type: String,
     required: false,
-    default: "base",
+    default: "icon-default",
   },
-  iconColor: {
+  color: {
     type: String,
     required: false,
     default: "orange",
   },
 });
+
+const icon = reactive({
+  color: props.color || "orange",
+});
 </script>
 <template>
   <svg
+    :data-color="icon.color"
     data-svg="disks"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
     role="img"
     aria-hidden="true"
-    :class="['icon-svg', props.iconClass, props.iconColor]"
+    :class="[props.iconClass, icon.color, 'fill']"
   >
     <path
       d="M5.507 4.048A3 3 0 0 1 7.785 3h8.43a3 3 0 0 1 2.278 1.048l1.722 2.008A4.533 4.533 0 0 0 19.5 6h-15c-.243 0-.482.02-.715.056l1.722-2.008Z"

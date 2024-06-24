@@ -205,6 +205,7 @@ onBeforeMount(() => {
 
   <!-- left sidebar  -->
   <aside
+    data-is="menu"
     id="sidebar-menu"
     data-sidebar-menu
     :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
@@ -308,11 +309,7 @@ onBeforeMount(() => {
             "
           >
             <div class="menu-nav-item-container">
-              <Icons
-                :iconName="item.svg"
-                :iconClass="'menu-svg'"
-                :iconColor="item.svgColor"
-              />
+              <Icons :iconName="item.svg" />
             </div>
             <span class="menu-nav-item-title">
               {{ $t(`dashboard_${item.tag}`) }}
@@ -345,8 +342,7 @@ onBeforeMount(() => {
             <div aria-hidden="true" class="menu-page-plugin-svg-container">
               <Icons
                 :iconName="plugin.type === 'pro' ? 'crown' : 'free'"
-                :iconClass="'menu-svg'"
-                :iconColor="plugin.type === 'pro' ? 'amber' : 'dark'"
+                :color="plugin.type === 'pro' ? 'amber' : 'dark'"
               />
             </div>
             <span class="menu-page-plugin-name">{{ plugin.name }}</span>
@@ -385,7 +381,7 @@ onBeforeMount(() => {
       <!-- end dark/light mode -->
 
       <!-- social-->
-      <ul class="menu-social-list">
+      <ul data-is="social" class="menu-social-list">
         <li v-for="(item, id) in socialList" class="menu-social-list-item">
           <span :id="`menu-social-item-${id}`" class="sr-only">
             {{ $t(`dashboard_menu_${item.tag}_label`) }}
@@ -398,11 +394,7 @@ onBeforeMount(() => {
             target="_blank"
             :aria-labelledby="`menu-social-item-${id}`"
           >
-            <Icons
-              :iconName="item.svg"
-              :iconClass="'social-svg'"
-              :iconColor="item.svgColor"
-            />
+            <Icons :iconName="item.svg" :color="item.svgColor" />
           </a>
         </li>
       </ul>

@@ -6,19 +6,19 @@ import { useUUID } from "@utils/global.js";
   @description This component is a svg icon representing Twiiter.
   @example
   {
-    iconColor: 'info',
+    color: 'info',
   }
-  @param {string} [iconClass="base"] - The class of the icon. "base" is the default size.
-  @param {string} [iconColor="twitter"]
+  @param {string} [iconClass="icon-default"] - The class of the icon.
+  @param {string} [color="twitter"]
 */
 
 const props = defineProps({
   iconClass: {
     type: String,
     required: false,
-    default: "base",
+    default: "icon-default",
   },
-  iconColor: {
+  color: {
     type: String,
     required: false,
     default: "twitter",
@@ -27,6 +27,7 @@ const props = defineProps({
 
 const icon = reactive({
   id: "",
+  color: props.color || "twitter",
 });
 
 onMounted(() => {
@@ -36,10 +37,11 @@ onMounted(() => {
 <template>
   <span :id="icon.id" class="sr-only">{{ $t("icons_twitter_desc") }}</span>
   <svg
+    :data-color="icon.color"
     data-svg="twitter"
     role="img"
     :aria-labelledby="icon.id"
-    :class="['icon-svg', props.iconClass, props.iconColor]"
+    :class="[props.iconClass, icon.color, 'fill']"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 512 512"

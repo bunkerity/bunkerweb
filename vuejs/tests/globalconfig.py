@@ -3173,7 +3173,7 @@ def format_setting(
     Format a setting in ordert to be used with form builder.
     """
     # add zindex for container
-    setting_value["containerClass"] = f"z-{total_settings - loop_id} setting"
+    setting_value["containerClass"] = f"z-{total_settings - loop_id}"
 
     # regex by pattern
     setting_value["pattern"] = setting_value.get("regex", "")

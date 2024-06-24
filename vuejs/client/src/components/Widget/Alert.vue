@@ -84,7 +84,7 @@ onMounted(() => {
     :role="props.type === 'success' ? 'status' : 'alert'"
     :aria-description="$t('dashboard_feedback_alert_desc')"
   >
-    <div :class="[props.type, 'feedback-alert-wrap']">
+    <div :class="[props.type, 'feedback-alert-wrap bg-el']">
       <div class="feedback-alert-header">
         <h5 class="feedback-alert-title">
           {{ $t(props.title, props.title) }}

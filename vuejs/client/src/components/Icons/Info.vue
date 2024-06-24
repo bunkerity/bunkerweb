@@ -1,37 +1,43 @@
 <script setup>
+import { defineProps, reactive } from "vue";
 /** 
   @name Icons/Info.vue
   @description This component is a svg icon representing info.
   @example
   {
-    iconColor: 'info',
+    color: 'info',
   }
-  @param {string} [iconClass="base"] - The class of the icon. "base" is the default size.
-   @param {string} [iconColor="info"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
+  @param {string} [iconClass="icon-default"] - The class of the icon.
+   @param {string} [color="info"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
 */
 
 const props = defineProps({
   iconClass: {
     type: String,
     required: false,
-    default: "base",
+    default: "icon-default",
   },
-  iconColor: {
+  color: {
     type: String,
     required: false,
     default: "info",
   },
 });
+
+const icon = reactive({
+  color: props.color || "info",
+});
 </script>
 <template>
   <svg
+    :data-color="icon.color"
     data-svg="info"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
     role="img"
     aria-hidden="true"
-    :class="['icon-svg', props.iconClass, props.iconColor]"
+    :class="[props.iconClass, icon.color, 'fill']"
   >
     <path
       fill-rule="evenodd"

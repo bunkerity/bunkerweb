@@ -646,7 +646,7 @@ onUnmounted(() => {
   <Container
     :class="[picker.isOpen ? 'z-[100]' : '']"
     v-if="props.inpType === 'datepicker'"
-    :containerClass="`field-container ${props.containerClass}`"
+    :containerClass="`${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

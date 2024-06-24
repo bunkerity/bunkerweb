@@ -1,8 +1,9 @@
 <script setup>
 import Icons from "@components/Widget/Icons.vue";
 import Flex from "@components/Widget/Flex.vue";
+import { onMounted, reactive, ref } from "vue";
 
-/** 
+/**
   @name Widget/Text.vue
   @description This component is used for regular paragraph.
     @example
@@ -12,7 +13,8 @@ import Flex from "@components/Widget/Flex.vue";
     attrs: { id: "paragraph" },
   }
   @param {string} text - The text value. Can be a translation key or by default raw text.
-  @param {string} [textClass="text-content"] - Style of text. Can be replace by any class starting by 'text-' like 'text-stat'.
+  @param {string} [textClass=""] - Style of text. Can be replace by any class starting by 'text-' like 'text-stat'.
+  @param {string} [color=""] - The color of the text between error, success, warning, info or tailwind color
   @param {string} [tag="p"] - The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6
   @param {boolean|object} [icons=false] - The popover to display with the text. Check Popover component for more details.
   @param {object} [attrs={}] - List of attributs to add to the text.
@@ -26,7 +28,12 @@ const props = defineProps({
   textClass: {
     type: String,
     required: false,
-    default: "text-content",
+    default: "",
+  },
+  color: {
+    type: String,
+    required: false,
+    default: "",
   },
   tag: {
     type: String,
@@ -44,6 +51,24 @@ const props = defineProps({
     default: {},
   },
 });
+
+// Add or remove margin bottom
+const text = reactive({
+  class: "",
+});
+
+const textEl = ref(null);
+const textIconEl = ref(null);
+
+onMounted(() => {
+  // Check if next sibling is a
+  text.class =
+    props.textClass || (textEl.value && textEl.value.closest("[data-is]"))
+      ? `text-${textEl.value.closest("[data-is]").getAttribute("data-is")}`
+      : textIconEl.value && textIconEl.value.closest("[data-is]")
+      ? `text-${textIconEl.value.closest("[data-is]").getAttribute("data-is")}`
+      : "text-content";
+});
 </script>
 
 <template>
@@ -51,7 +76,8 @@ const props = defineProps({
     v-if="!props.icons"
     :is="props.tag"
     v-bind="props.attrs"
-    :class="[props.textClass]"
+    ref="textEl"
+    :class="[text.class, props.color]"
   >
     {{ $t(props.text, props.text) }}
   </component>
@@ -59,9 +85,10 @@ const props = defineProps({
   <Flex :flexClass="'justify-center'" v-if="props.icons">
     <Icons v-if="props.icons" v-bind="props.icons" />
     <component
+      ref="textIconEl"
       :is="props.tag"
       v-bind="props.attrs"
-      :class="[props.textClass, 'ml-2']"
+      :class="[text.class, props.color, 'ml-2']"
     >
       {{ $t(props.text, props.text) }}
     </component>

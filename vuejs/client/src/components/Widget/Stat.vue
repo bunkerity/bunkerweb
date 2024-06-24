@@ -66,7 +66,7 @@ const props = defineProps({
 });
 </script>
 <template>
-  <Container :columns="{ pc: 12, tablet: 12, mobile: 12 }">
+  <Container data-is="stat" :columns="{ pc: 12, tablet: 12, mobile: 12 }">
     <!-- text -->
     <div
       :class="[
@@ -74,20 +74,14 @@ const props = defineProps({
         props.iconName ? 'is-icon' : 'no-icon',
       ]"
     >
-      <Title :tag="'h3'" type="stat" :title="props.title" />
-      <Text :text="props.stat" :textClass="'text-stat'" />
+      <Title :tag="'h3'" :title="props.title" />
+      <Text :text="props.stat" />
       <Subtitle
-        type="stat"
         v-if="props.subtitle"
         :subtitle="props.subtitle"
-        :subtitleColor="props.subtitleColor"
+        :color="props.subtitleColor"
       />
     </div>
-    <Icons
-      v-if="props.iconName"
-      :iconName="props.iconName"
-      :iconColor="props.iconColor"
-      :iconType="'stat'"
-    />
+    <Icons v-if="props.iconName" :iconName="props.iconName" :isStick="true" />
   </Container>
 </template>

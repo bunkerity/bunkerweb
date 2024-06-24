@@ -26,7 +26,9 @@ function redirectPlugin() {
         e.target
           .closest("[data-plugin-redirect]")
           .getAttribute("data-plugin-redirect") !== "true" ||
-        !e.target.querySelector('[data-svg="redirect"]')
+        !e.target.querySelector(
+          '[:data-color="icon.color" data-svg="redirect"]'
+        )
       )
         return;
       // Prepare redirect
@@ -185,7 +187,6 @@ const builder = [
                 value: "",
                 type: "text",
                 name: "filter-plugin-name",
-                containerClass: "setting",
                 label: "plugins_search",
                 placeholder: "inp_keyword",
                 isClipboard: false,
@@ -193,8 +194,6 @@ const builder = [
                   {
                     text: "plugins_search_desc",
                     iconName: "info",
-                    iconColor: "info",
-                    svgSize: "sm",
                   },
                 ],
                 columns: {
@@ -217,14 +216,11 @@ const builder = [
                 name: "filter-plugin-type",
                 onlyDown: true,
                 label: "plugins_type",
-                containerClass: "setting",
                 maxBtnChars: 24,
                 popovers: [
                   {
                     text: "plugins_type_desc",
                     iconName: "info",
-                    iconColor: "info",
-                    svgSize: "sm",
                   },
                 ],
                 columns: {
@@ -251,7 +247,6 @@ const builder = [
                 {
                   text: "plugins_pro_plugin_desc",
                   iconName: "crown",
-                  iconColor: "amber",
                 },
               ],
             },
@@ -270,7 +265,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -302,12 +296,10 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
                 {
                   text: "plugins_pro_plugin_desc",
                   iconName: "crown",
-                  iconColor: "amber",
                 },
               ],
             },
@@ -326,12 +318,10 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
                 {
                   text: "plugins_delete_desc",
                   iconName: "trash",
-                  iconColor: "red",
                 },
               ],
             },
@@ -350,7 +340,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -382,7 +371,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -401,7 +389,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -433,7 +420,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -478,7 +464,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -497,7 +482,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -516,7 +500,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -600,7 +583,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -632,7 +614,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -716,7 +697,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -748,7 +728,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },
@@ -806,7 +785,6 @@ const builder = [
                 {
                   text: "plugins_redirect_page_desc",
                   iconName: "redirect",
-                  iconColor: "blue",
                 },
               ],
             },

@@ -84,16 +84,13 @@
                                 "value": "",
                                 "type": "text",
                                 "name": "filter-plugin-name",
-                                "containerClass": "setting",
                                 "label": "plugins_search",
                                 "placeholder": "inp_keyword",
                                 "isClipboard": false,
                                 "popovers": [
                                     {
                                         "text": "plugins_search_desc",
-                                        "iconName": "info",
-                                        "iconColor": "info",
-                                        "svgSize": "sm"
+                                        "iconName": "info"
                                     }
                                 ],
                                 "columns": {
@@ -123,14 +120,11 @@
                                 "name": "filter-plugin-type",
                                 "onlyDown": true,
                                 "label": "plugins_type",
-                                "containerClass": "setting",
                                 "maxBtnChars": 24,
                                 "popovers": [
                                     {
                                         "text": "plugins_type_desc",
-                                        "iconName": "info",
-                                        "iconColor": "info",
-                                        "svgSize": "sm"
+                                        "iconName": "info"
                                     }
                                 ],
                                 "columns": {
@@ -156,8 +150,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_pro_plugin_desc",
-                                    "iconName": "crown",
-                                    "iconColor": "amber"
+                                    "iconName": "crown"
                                 }
                             ]
                         },
@@ -175,8 +168,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -207,13 +199,11 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 },
                                 {
                                     "text": "plugins_pro_plugin_desc",
-                                    "iconName": "crown",
-                                    "iconColor": "amber"
+                                    "iconName": "crown"
                                 }
                             ]
                         },
@@ -231,13 +221,11 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 },
                                 {
                                     "text": "plugins_delete_desc",
-                                    "iconName": "trash",
-                                    "iconColor": "red"
+                                    "iconName": "trash"
                                 }
                             ]
                         },
@@ -255,8 +243,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -287,8 +274,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -306,8 +292,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -338,8 +323,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -383,8 +367,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -402,8 +385,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -421,8 +403,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -505,8 +486,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -537,8 +517,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -621,8 +600,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -653,8 +631,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         },
@@ -711,8 +688,7 @@
                             "popovers": [
                                 {
                                     "text": "plugins_redirect_page_desc",
-                                    "iconName": "redirect",
-                                    "iconColor": "blue"
+                                    "iconName": "redirect"
                                 }
                             ]
                         }

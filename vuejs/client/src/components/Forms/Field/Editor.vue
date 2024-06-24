@@ -340,7 +340,7 @@ onUnmounted(() => {
 
 <template>
   <Container
-    :containerClass="`field-container setting ${props.containerClass}`"
+    :containerClass="`${props.containerClass}`"
     :columns="props.columns"
   >
     <Header

@@ -74,7 +74,7 @@ const unmatch = {
 </script>
 
 <template>
-  <Grid data-is="list-details">
+  <Grid>
     <Filter
       v-if="props.filters.length"
       @filter="(v) => (data.format = v)"
@@ -84,7 +84,11 @@ const unmatch = {
     <div v-if="!data.format.length" class="layout-unmatch">
       <Text v-bind="unmatch" />
     </div>
-    <ul v-if="data.format.length" :class="['list-details-container']">
+    <ul
+      data-is="list-details"
+      v-if="data.format.length"
+      :class="['list-details-container']"
+    >
       <li
         v-for="(item, id) in data.format"
         :class="[

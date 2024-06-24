@@ -143,16 +143,17 @@ const table = reactive({
 
 const unmatch = {
   text: "dashboard_no_match",
-  textClass: "text-unmatch",
   icons: {
     iconName: "search",
-    iconColor: "info",
+    color: "info",
   },
 };
 
 function setUnmatchWidth() {
-  const value = tableBody.value.closest("[data-grid-layout]").clientWidth - 60;
-  unmatchWidth.value = `${value}px`;
+  try {
+    const value = tableBody.value.closest("[data-is='card']").clientWidth - 60;
+    unmatchWidth.value = `${value}px`;
+  } catch (e) {}
 }
 
 function getOverflow() {
@@ -196,6 +197,7 @@ onMounted(() => {
     >
       <span :id="`${table.id}-title`" class="sr-only"></span>
       <table
+        data-is="table"
         :class="['table', props.minWidth, props.tableClass]"
         :aria-labelledby="`${table.id}-title`"
       >

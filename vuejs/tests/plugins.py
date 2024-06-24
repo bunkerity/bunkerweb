@@ -3041,7 +3041,6 @@ def plugins_builder(plugins, data={}):
                 {
                     "text": "plugins_redirect_page_desc",
                     "iconName": "redirect",
-                    "iconColor": "blue",
                 }
             )
 
@@ -3050,7 +3049,6 @@ def plugins_builder(plugins, data={}):
                 {
                     "text": "plugins_delete_desc",
                     "iconName": "trash",
-                    "iconColor": "red",
                 }
             )
 
@@ -3059,7 +3057,6 @@ def plugins_builder(plugins, data={}):
                 {
                     "text": "plugins_pro_plugin_desc",
                     "iconName": "crown",
-                    "iconColor": "amber",
                 }
             )
         plugins_details.append(plugin_detail)
@@ -3076,7 +3073,6 @@ def plugins_builder(plugins, data={}):
                 "value": "",
                 "type": "text",
                 "name": "filter-plugin-name",
-                "containerClass": "setting",
                 "label": "plugins_search",
                 "placeholder": "inp_keyword",
                 "isClipboard": False,
@@ -3084,8 +3080,6 @@ def plugins_builder(plugins, data={}):
                     {
                         "text": "plugins_search_desc",
                         "iconName": "info",
-                        "iconColor": "info",
-                        "svgSize": "sm",
                     },
                 ],
                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
@@ -3104,14 +3098,11 @@ def plugins_builder(plugins, data={}):
                 "name": "filter-plugin-type",
                 "onlyDown": True,
                 "label": "plugins_type",
-                "containerClass": "setting",
                 "maxBtnChars": 24,
                 "popovers": [
                     {
                         "text": "plugins_type_desc",
                         "iconName": "info",
-                        "iconColor": "info",
-                        "svgSize": "sm",
                     },
                 ],
                 "columns": {"pc": 3, "tablet": 4, "mobile": 12},
