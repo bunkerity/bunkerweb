@@ -51,14 +51,6 @@ try:
         + " execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(),"
         + " navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
     )
-    feature_policy = getenv(
-        "FEATURE_POLICY",
-        "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none';"
-        + " execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none';"
-        + " legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none';"
-        + " publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none';"
-        + " xr-spatial-tracking 'none';",
-    )
     x_frame_options = getenv("X_FRAME_OPTIONS", "SAMEORIGIN")
     x_content_type_options = getenv("X_CONTENT_TYPE_OPTIONS", "nosniff")
     x_xss_protection = getenv("X_XSS_PROTECTION", "1; mode=block")
@@ -117,12 +109,6 @@ try:
     elif response.headers.get("Permissions-Policy") != permissions_policy:
         print(
             f'❌ Header "Permissions-Policy" doesn\'t have the right value. {response.headers.get("Permissions-Policy", "missing header")} (header) != {permissions_policy} (env), exiting ...\nheaders: {response.headers}',
-            flush=True,
-        )
-        exit(1)
-    elif response.headers.get("Feature-Policy") != feature_policy:
-        print(
-            f'❌ Header "Feature-Policy" doesn\'t have the right value. {response.headers.get("Feature-Policy", "missing header")} (header) != {feature_policy} (env), exiting ...\nheaders: {response.headers}',
             flush=True,
         )
         exit(1)

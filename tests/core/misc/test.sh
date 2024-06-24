@@ -14,12 +14,6 @@ echo "🗃️ Building misc stack for integration \"$integration\" ..."
 
 # Starting stack
 if [ "$integration" == "docker" ] ; then
-    docker compose pull bw-docker
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
-        echo "🗃️ Pull failed ❌"
-        exit 1
-    fi
     docker compose -f docker-compose.test.yml build
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then

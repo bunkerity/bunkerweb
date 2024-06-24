@@ -14,13 +14,6 @@ echo "🏁 Building greylist stack for integration \"$integration\" ..."
 
 # Starting stack
 if [ "$integration" == "docker" ] ; then
-    docker compose pull bw-docker
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
-        echo "🏁 Pull failed ❌"
-        exit 1
-    fi
-
     echo "🏁 Building custom api image ..."
     docker compose build greylist-api
     # shellcheck disable=SC2181

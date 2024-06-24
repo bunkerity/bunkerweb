@@ -3,9 +3,10 @@ version: "3.5"
 services:
   tests:
     build: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       PYTHONUNBUFFERED: "1"
-      DOCKER_HOST: "tcp://bw-docker:2375"
       USE_MODSECURITY: "yes"
       USE_MODSECURITY_CRS: "yes"
       MODSECURITY_CRS_VERSION: "3"
@@ -17,10 +18,7 @@ services:
     networks:
       bw-services:
         ipv4_address: 192.168.0.3
-      bw-docker:
 
 networks:
   bw-services:
-    external: true
-  bw-docker:
     external: true

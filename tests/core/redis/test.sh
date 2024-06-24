@@ -61,13 +61,6 @@ if [ "$integration" == "docker" ] ; then
     sudo chmod -R 777 acl
     echo "🧰 Redis acl files generated ✅"
 
-    docker compose pull bw-docker
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
-        echo "🧰 Pull failed ❌"
-        exit 1
-    fi
-
     echo "🧰 Building custom redis image ..."
     docker compose build bw-redis
     # shellcheck disable=SC2181

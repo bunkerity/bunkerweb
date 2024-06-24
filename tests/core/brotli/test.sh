@@ -14,7 +14,7 @@ echo "📦 Building brotli stack for integration \"$integration\" ..."
 
 # Starting stack
 if [ "$integration" == "docker" ] ; then
-    docker compose pull bw-docker app1
+    docker compose pull app1
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "📦 Pull failed ❌"

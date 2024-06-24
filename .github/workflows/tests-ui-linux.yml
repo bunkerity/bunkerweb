@@ -71,7 +71,7 @@ jobs:
           sudo apt update
           sudo -E apt install -y nginx=1.26.1-2~noble
       - name: Fix version without a starting number
-        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.6'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
       - name: Edit configuration files
         run: |
@@ -82,7 +82,8 @@ jobs:
           echo "127.0.0.1 app3.example.com" | sudo tee -a /etc/hosts
           # BunkerWeb
           sudo mkdir -p /etc/bunkerweb
-          echo "SERVER_NAME=" | sudo tee /etc/bunkerweb/variables.env
+          echo "BUNKERWEB_INSTANCES=127.0.0.1" | sudo tee /etc/bunkerweb/variables.env
+          echo "SERVER_NAME=" | sudo tee -a /etc/bunkerweb/variables.env
           echo "HTTP_PORT=80" | sudo tee -a /etc/bunkerweb/variables.env
           echo "HTTPS_PORT=443" | sudo tee -a /etc/bunkerweb/variables.env
           echo "BAD_BEHAVIOR_THRESHOLD=20" | sudo tee -a /etc/bunkerweb/variables.env

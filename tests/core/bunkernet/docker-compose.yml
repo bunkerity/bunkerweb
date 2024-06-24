@@ -10,10 +10,24 @@ services:
       - ./index.html:/var/www/html/index.html
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 1.0.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.8
+    pull_policy: never
+    depends_on:
+      - bw
+    environment:
+      BUNKERWEB_INSTANCES: "bw"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       HTTP_PORT: "80"
       USE_BLACKLIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
       LOG_LEVEL: "info"
+      CUSTOM_LOG_LEVEL: "debug"
 
       # ? BUNKERNET settings
       USE_BUNKERNET: "yes"
@@ -28,31 +42,7 @@ services:
           }
         }
     networks:
-      bw-universe:
-      bw-services:
-        ipv4_address: 1.0.0.2
-
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.8
-    pull_policy: never
-    depends_on:
-      - bw
-      - bw-docker
-    environment:
-      DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "debug"
-    networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      CONTAINERS: "1"
-    networks:
-      - bw-docker
 
   bunkernet-api:
     build: api
@@ -74,5 +64,3 @@ networks:
       driver: default
       config:
         - subnet: 1.0.0.0/24
-  bw-docker:
-    name: bw-docker

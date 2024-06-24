@@ -14,7 +14,7 @@ echo "🎛️ Building headers stack for integration \"$integration\" ..."
 
 # Starting stack
 if [ "$integration" == "docker" ] ; then
-    docker compose pull bw-docker bw-php
+    docker compose pull bw-php
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🎛️ Pull failed ❌"
@@ -44,7 +44,6 @@ else
     echo "CONTENT_SECURITY_POLICY=object-src 'none'; form-action 'self'; frame-ancestors 'self';" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REFERRER_POLICY=strict-origin-when-cross-origin" | sudo tee -a /etc/bunkerweb/variables.env
     echo "PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "FEATURE_POLICY=accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_FRAME_OPTIONS=SAMEORIGIN" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_CONTENT_TYPE_OPTIONS=nosniff" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_XSS_PROTECTION=1; mode=block" | sudo tee -a /etc/bunkerweb/variables.env
@@ -66,7 +65,6 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY: ".*"$@CONTENT_SECURITY_POLICY: "object-src '"'"'none'"'"'; form-action '"'"'self'"'"'; frame-ancestors '"'"'self'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "no-referrer"@REFERRER_POLICY: "strict-origin-when-cross-origin"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@FEATURE_POLICY: ".*"$@FEATURE_POLICY: "accelerometer '"'"'none'"'"'; ambient-light-sensor '"'"'none'"'"'; autoplay '"'"'none'"'"'; battery '"'"'none'"'"'; camera '"'"'none'"'"'; display-capture '"'"'none'"'"'; document-domain '"'"'none'"'"'; encrypted-media '"'"'none'"'"'; execution-while-not-rendered '"'"'none'"'"'; execution-while-out-of-viewport '"'"'none'"'"'; fullscreen '"'"'none'"'"'; geolocation '"'"'none'"'"'; gyroscope '"'"'none'"'"'; layout-animation '"'"'none'"'"'; legacy-image-formats '"'"'none'"'"'; magnetometer '"'"'none'"'"'; microphone '"'"'none'"'"'; midi '"'"'none'"'"'; navigation-override '"'"'none'"'"'; payment '"'"'none'"'"'; picture-in-picture '"'"'none'"'"'; publickey-credentials-get '"'"'none'"'"'; speaker-selection '"'"'none'"'"'; sync-xhr '"'"'none'"'"'; unoptimized-images '"'"'none'"'"'; unsized-media '"'"'none'"'"'; usb '"'"'none'"'"'; screen-wake-lock '"'"'none'"'"'; web-share '"'"'none'"'"'; xr-spatial-tracking '"'"'none'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
@@ -88,7 +86,6 @@ cleanup_stack () {
             sudo sed -i 's@CONTENT_SECURITY_POLICY=.*$@CONTENT_SECURITY_POLICY=object-src '"'"'none'"'"'; form-action '"'"'self'"'"'; frame-ancestors '"'"'self'"'"';@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REFERRER_POLICY=.*$@REFERRER_POLICY=strict-origin-when-cross-origin@' /etc/bunkerweb/variables.env
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@FEATURE_POLICY=.*$@FEATURE_POLICY=accelerometer '"'"'none'"'"'; ambient-light-sensor '"'"'none'"'"'; autoplay '"'"'none'"'"'; battery '"'"'none'"'"'; camera '"'"'none'"'"'; display-capture '"'"'none'"'"'; document-domain '"'"'none'"'"'; encrypted-media '"'"'none'"'"'; execution-while-not-rendered '"'"'none'"'"'; execution-while-out-of-viewport '"'"'none'"'"'; fullscreen '"'"'none'"'"'; geolocation '"'"'none'"'"'; gyroscope '"'"'none'"'"'; layout-animation '"'"'none'"'"'; legacy-image-formats '"'"'none'"'"'; magnetometer '"'"'none'"'"'; microphone '"'"'none'"'"'; midi '"'"'none'"'"'; navigation-override '"'"'none'"'"'; payment '"'"'none'"'"'; picture-in-picture '"'"'none'"'"'; publickey-credentials-get '"'"'none'"'"'; speaker-selection '"'"'none'"'"'; sync-xhr '"'"'none'"'"'; unoptimized-images '"'"'none'"'"'; unsized-media '"'"'none'"'"'; usb '"'"'none'"'"'; screen-wake-lock '"'"'none'"'"'; web-share '"'"'none'"'"'; xr-spatial-tracking '"'"'none'"'"';@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env
@@ -101,7 +98,6 @@ cleanup_stack () {
             unset CONTENT_SECURITY_POLICY
             unset REFERRER_POLICY
             unset PERMISSIONS_POLICY
-            unset FEATURE_POLICY
             unset X_FRAME_OPTIONS
             unset X_CONTENT_TYPE_OPTIONS
             unset X_XSS_PROTECTION
@@ -148,7 +144,6 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY: ".*"$@CONTENT_SECURITY_POLICY: "object-src '"'"'none'"'"'; frame-ancestors '"'"'self'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "strict-origin-when-cross-origin"@REFERRER_POLICY: "no-referrer"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "geolocation=(self), microphone=()"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@FEATURE_POLICY: ".*"$@FEATURE_POLICY: "geolocation '"'"'self'"'"'; microphone '"'"'none'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "SAMEORIGIN"@X_FRAME_OPTIONS: "DENY"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: "nosniff"@X_CONTENT_TYPE_OPTIONS: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "1; mode=block"@X_XSS_PROTECTION: "0"@' {} \;
@@ -159,7 +154,6 @@ do
             sudo sed -i 's@CONTENT_SECURITY_POLICY=.*$@CONTENT_SECURITY_POLICY=object-src '"'"'none'"'"'; frame-ancestors '"'"'self'"'"';@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REFERRER_POLICY=.*$@REFERRER_POLICY=no-referrer@' /etc/bunkerweb/variables.env
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=geolocation=(self), microphone=()@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@FEATURE_POLICY=.*$@FEATURE_POLICY=geolocation '"'"'self'"'"'; microphone '"'"'none'"'"';@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=DENY@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=0@' /etc/bunkerweb/variables.env
@@ -169,7 +163,6 @@ do
             export CONTENT_SECURITY_POLICY="object-src 'none'; frame-ancestors 'self';"
             export REFERRER_POLICY="no-referrer"
             export PERMISSIONS_POLICY="geolocation=(self), microphone=()"
-            export FEATURE_POLICY="geolocation 'self'; microphone 'none';"
             export X_FRAME_OPTIONS="DENY"
             export X_CONTENT_TYPE_OPTIONS=""
             export X_XSS_PROTECTION="0"
@@ -185,7 +178,6 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY: ".*"$@CONTENT_SECURITY_POLICY: "object-src '"'"'none'"'"'; form-action '"'"'self'"'"'; frame-ancestors '"'"'self'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "no-referrer"@REFERRER_POLICY: "strict-origin-when-cross-origin"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@FEATURE_POLICY: ".*"$@FEATURE_POLICY: "accelerometer '"'"'none'"'"'; ambient-light-sensor '"'"'none'"'"'; autoplay '"'"'none'"'"'; battery '"'"'none'"'"'; camera '"'"'none'"'"'; display-capture '"'"'none'"'"'; document-domain '"'"'none'"'"'; encrypted-media '"'"'none'"'"'; execution-while-not-rendered '"'"'none'"'"'; execution-while-out-of-viewport '"'"'none'"'"'; fullscreen '"'"'none'"'"'; geolocation '"'"'none'"'"'; gyroscope '"'"'none'"'"'; layout-animation '"'"'none'"'"'; legacy-image-formats '"'"'none'"'"'; magnetometer '"'"'none'"'"'; microphone '"'"'none'"'"'; midi '"'"'none'"'"'; navigation-override '"'"'none'"'"'; payment '"'"'none'"'"'; picture-in-picture '"'"'none'"'"'; publickey-credentials-get '"'"'none'"'"'; speaker-selection '"'"'none'"'"'; sync-xhr '"'"'none'"'"'; unoptimized-images '"'"'none'"'"'; unsized-media '"'"'none'"'"'; usb '"'"'none'"'"'; screen-wake-lock '"'"'none'"'"'; web-share '"'"'none'"'"'; xr-spatial-tracking '"'"'none'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
@@ -198,7 +190,6 @@ do
             sudo sed -i 's@CONTENT_SECURITY_POLICY=.*$@CONTENT_SECURITY_POLICY=object-src '"'"'none'"'"'; form-action '"'"'self'"'"'; frame-ancestors '"'"'self'"'"';@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REFERRER_POLICY=.*$@REFERRER_POLICY=strict-origin-when-cross-origin@' /etc/bunkerweb/variables.env
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@FEATURE_POLICY=.*$@FEATURE_POLICY=accelerometer '"'"'none'"'"'; ambient-light-sensor '"'"'none'"'"'; autoplay '"'"'none'"'"'; battery '"'"'none'"'"'; camera '"'"'none'"'"'; display-capture '"'"'none'"'"'; document-domain '"'"'none'"'"'; encrypted-media '"'"'none'"'"'; execution-while-not-rendered '"'"'none'"'"'; execution-while-out-of-viewport '"'"'none'"'"'; fullscreen '"'"'none'"'"'; geolocation '"'"'none'"'"'; gyroscope '"'"'none'"'"'; layout-animation '"'"'none'"'"'; legacy-image-formats '"'"'none'"'"'; magnetometer '"'"'none'"'"'; microphone '"'"'none'"'"'; midi '"'"'none'"'"'; navigation-override '"'"'none'"'"'; payment '"'"'none'"'"'; picture-in-picture '"'"'none'"'"'; publickey-credentials-get '"'"'none'"'"'; speaker-selection '"'"'none'"'"'; sync-xhr '"'"'none'"'"'; unoptimized-images '"'"'none'"'"'; unsized-media '"'"'none'"'"'; usb '"'"'none'"'"'; screen-wake-lock '"'"'none'"'"'; web-share '"'"'none'"'"'; xr-spatial-tracking '"'"'none'"'"';@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env
@@ -209,7 +200,6 @@ do
             unset CONTENT_SECURITY_POLICY
             unset REFERRER_POLICY
             unset PERMISSIONS_POLICY
-            unset FEATURE_POLICY
             unset X_FRAME_OPTIONS
             unset X_CONTENT_TYPE_OPTIONS
             unset X_XSS_PROTECTION

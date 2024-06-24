@@ -9,6 +9,19 @@ services:
     volumes:
       - ./www:/var/www/html
     environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.8
+    pull_policy: never
+    depends_on:
+      - bw
+    environment:
+      BUNKERWEB_INSTANCES: "bw"
       SERVER_NAME: "www.example.com app1.example.com"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       MULTISITE: "yes"
@@ -22,6 +35,7 @@ services:
       LOG_LEVEL: "info"
       GENERATE_SELF_SIGNED_SSL: "no"
       ALLOWED_METHODS: "GET|POST|HEAD|OPTIONS"
+      CUSTOm_LOG_LEVEL: "debug"
 
       # ? CORS settings
       USE_CORS: "no"
@@ -41,31 +55,7 @@ services:
           }
         }
     networks:
-      bw-universe:
-      bw-services:
-        ipv4_address: 192.168.0.2
-
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.8
-    pull_policy: never
-    depends_on:
-      - bw
-      - bw-docker
-    environment:
-      DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "debug"
-    networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      CONTAINERS: "1"
-    networks:
-      - bw-docker
 
   app1:
     image: php:fpm
@@ -88,4 +78,3 @@ networks:
       driver: default
       config:
         - subnet: 192.168.0.0/24
-  bw-docker:

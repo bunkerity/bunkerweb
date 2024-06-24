@@ -10,21 +10,6 @@ services:
       - "bunkerweb.INSTANCE=yes"
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-      USE_BUNKERNET: "no"
-      USE_BLACKLIST: "no"
-      SEND_ANONYMOUS_REPORT: "no"
-      LOG_LEVEL: "info"
-      USE_REDIS: "yes"
-      REDIS_HOST: "bw-redis"
-      CUSTOM_CONF_SERVER_HTTP_ready: |
-        location /ready {
-          default_type 'text/plain';
-          rewrite_by_lua_block {
-            ngx.print('ready')
-            ngx.flush(true)
-            ngx.exit(ngx.HTTP_OK)
-          }
-        }
     networks:
       - bw-universe
 
@@ -37,20 +22,27 @@ services:
     labels:
       - "bunkerweb.SCHEDULER=yes"
     environment:
-      DOCKER_HOST: "tcp://bw-docker:2375"
-      LOG_LEVEL: "debug"
+      BUNKERWEB_INSTANCES: "bw"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      USE_REDIS: "yes"
+      REDIS_HOST: "bw-redis"
+      CUSTOM_LOG_LEVEL: "debug"
+
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      CONTAINERS: "1"
-    networks:
-      - bw-docker
 
   bw-redis:
     image: redis:7-alpine
@@ -64,4 +56,3 @@ networks:
       driver: default
       config:
         - subnet: 10.20.30.0/24
-  bw-docker:
