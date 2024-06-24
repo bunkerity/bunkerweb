@@ -72,7 +72,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunker
 RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
 
 LABEL maintainer "Bunkerity <contact@bunkerity.com>"
-LABEL version "1.5.8"
+LABEL version "1.6.0-beta"
 LABEL url "https://www.bunkerweb.io"
 LABEL bunkerweb.type "scheduler"
 
