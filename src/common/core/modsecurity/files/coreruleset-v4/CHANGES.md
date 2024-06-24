@@ -8,6 +8,16 @@
 ## Nightly builds
 New changelog entries are written to `.changes-pending.md`. They will be moved to the main changelog before a release.
 
+## Version 4.4.0 - 2024-06-23
+
+### 🆕 New features and detections 🎉
+* fix: ignore checking compressed response body by @azurit in https://github.com/coreruleset/coreruleset/pull/3712
+
+### 🧰 Other Changes
+* fix(934140): update regex by @fzipi in https://github.com/coreruleset/coreruleset/pull/3731
+* fix: replacing t:UrlDecode with t:UrlDecodeUni (921240 PL1, 932170 PL1, 932171 PL1, 932190 PL3, 932190 PL1, 933211 PL3, 941310 PL1, 941350 PL1) by @azurit in https://github.com/coreruleset/coreruleset/pull/3713
+* feat: skip response rules if data are compressed by @azurit in https://github.com/coreruleset/coreruleset/pull/3742
+
 ## Version 4.3.0 - 2024-05-24
 
 ### 🆕 New features and detections 🎉
