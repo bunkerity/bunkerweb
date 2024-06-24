@@ -141,9 +141,9 @@ requests==2.32.3 \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
     # via -r requirements.in
-selenium==4.21.0 \
-    --hash=sha256:4770ffe5a5264e609de7dc914be6b89987512040d5a8efb2abb181330d097993 \
-    --hash=sha256:650dbfa5159895ff00ad16e5ddb6ceecb86b90c7ed2012b3f041f64e6e4904fe
+selenium==4.22.0 \
+    --hash=sha256:903c8c9d61b3eea6fcc9809dc7d9377e04e2ac87709876542cc8f863e482c4ce \
+    --hash=sha256:e424991196e9857e19bf04fe5c1c0a4aac076794ff5e74615b1124e729d93104
     # via -r requirements.in
 sniffio==1.3.1 \
     --hash=sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2 \
@@ -173,6 +173,10 @@ urllib3==2.2.2 \
     # via
     #   requests
     #   selenium
+websocket-client==1.8.0 \
+    --hash=sha256:17b44cc997f5c498e809b22cdf2d9c7a9e71c02c8cc2b6c56e7c2d1239bfa526 \
+    --hash=sha256:3239df9f44da632f96012472805d40a23281a991027ce11d2f45a6f24ac4c3da
+    # via selenium
 wsproto==1.2.0 \
     --hash=sha256:ad565f26ecb92588a3e43bc3d96164de84cd9902482b130d0ddbaa9664a85065 \
     --hash=sha256:b9acddd652b585d75b20477888c56642fdade28bdfd3579aa24a4d2c037dd736

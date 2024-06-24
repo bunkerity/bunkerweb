@@ -1,4 +1,4 @@
-pip==24.0
+pip==24.1
 pip-tools==7.4.1
-setuptools==70.0.0
+setuptools==70.1.0
 wheel==0.43.0
