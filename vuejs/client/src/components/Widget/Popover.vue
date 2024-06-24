@@ -12,7 +12,6 @@ import Icons from "@components/Widget/Icons.vue";
     text: "This is a popover text",
     href: "#",
     iconName: "info",
-    iconColor: "info",
     attrs: { "data-popover": "test" },
   }
   @param {string} text - Content of the popover. Can be a translation key or by default raw text.
@@ -136,6 +135,11 @@ watch(popover, () => {
 
 onMounted(() => {
   popover.id = useUUID();
+  // Set props color or the default icon color
+  popover.color =
+    props.color || popoverBtn.value.querySelector("[data-svg]")
+      ? popoverBtn.value.querySelector("[data-svg]").getAttribute("data-color")
+      : "info";
 
   // Remove href if tag is not an anchor
   if (props.tag !== "a") {
@@ -181,7 +185,7 @@ onMounted(() => {
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
     :class="[
       'popover-container bg-el',
-      props.iconColor,
+      popover.color,
       popover.isOpen ? 'open' : 'close',
     ]"
     :aria-description="$t('dashboard_popover_detail_desc')"

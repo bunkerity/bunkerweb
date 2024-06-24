@@ -1,6 +1,6 @@
 <script setup>
-import Flex from "@components/Widget/Flex.vue";
 import Button from "@components/Widget/Button.vue";
+import { onMounted, reactive, ref } from "vue";
 
 /** 
   @name Widget/ButtonGroup.vue
@@ -20,7 +20,6 @@ import Button from "@components/Widget/Button.vue";
         color: "green",
         size: "normal",
         iconName: "modal",
-        iconColor: "white",
         eventAttr: {"store" : "modal", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},
       },
       {
@@ -31,36 +30,54 @@ import Button from "@components/Widget/Button.vue";
         color: "red",
         size: "normal",
         iconName: "modal",
-        iconColor: "white",
         eventAttr: {"store" : "modal", "value" : "close", "target" : "modal_id", "valueExpanded" : "close"},
       },
     ],
   }
-  @param {string} [groupClass="justify-center items-center"] - Additional class for the flex container
   @param {array} buttons - List of buttons to display. Button component is used.
+  @param {string} [groupClass=""] - Additional class for the flex container
 */
 
 const props = defineProps({
-  groupClass: {
-    type: String,
-    required: false,
-    default: "justify-center items-center",
-  },
   buttons: {
     type: Array,
     required: true,
     default: [],
   },
+  groupClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+});
+
+const group = reactive({
+  class: "",
+});
+
+const groupEl = ref(null);
+
+onMounted(() => {
+  group.class =
+    props.groupClass || groupEl.value.closest("[data-is]")
+      ? `button-group-${groupEl.value
+          .closest("[data-is]")
+          .getAttribute("data-is")}`
+      : "button-group-default";
 });
 </script>
 
 <template>
-  <Flex v-if="props.buttons.length > 0" :flexClass="props.groupClass">
+  <div
+    ref="groupEl"
+    :class="[group.class, props.groupClass]"
+    v-if="props.buttons.length > 0"
+  >
     <Button
       v-for="(button, id) in props.buttons"
       :key="button"
       v-bind="button"
       :class="[id === props.buttons.length - 1 ? '' : 'mr-2']"
     />
-  </Flex>
+  </div>
 </template>

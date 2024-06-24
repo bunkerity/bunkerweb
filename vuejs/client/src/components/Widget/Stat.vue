@@ -16,7 +16,6 @@ import Icons from "@components/Widget/Icons.vue";
     value: 100,
     subtitle : "Last 30 days",
     iconName: "user",
-    iconColor: "sky",
     link: "/users",
     subtitleColor: "info",
   }
@@ -24,7 +23,6 @@ import Icons from "@components/Widget/Icons.vue";
   @param {string|number} value - The value of the stat
   @param {string} [subtitle=""] - The subtitle of the stat. Can be a translation key or by default raw text.
   @param {string} [iconName=""] - A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase.
-  @param {string} [iconColor="sky"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink, lime, rose, fuchsia, violet, lightBlue, warmGray, trueGray, coolGray, blueGray, white, black)
   @param {string} [subtitleColor="info"] - The color of the subtitle between error, success, warning, info
   @param {string} [statClass=""] - Additional class
 */
@@ -48,10 +46,10 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  iconColor: {
+  color: {
     type: String,
     required: false,
-    default: "sky",
+    default: "",
   },
   subtitleColor: {
     type: String,

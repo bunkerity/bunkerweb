@@ -1,5 +1,6 @@
 <script setup>
-import { defineProps, reactive, onMounted, computed, onUnmounted } from "vue";
+import { defineProps, reactive, onMounted, onUnmounted } from "vue";
+import MessageUnmatch from "@components/Message/Unmatch.vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
@@ -93,8 +94,6 @@ const comboboxPlugin = {
     {
       text: "inp_combobox_advanced_desc",
       iconName: "info",
-      iconColor: "info",
-      svgSize: "sm",
     },
   ],
   columns: { pc: 3, tablet: 12, mobile: 12 },
@@ -110,6 +109,7 @@ const buttonSave = {
     "data-submit-form": JSON.stringify(data.base),
   },
   containerClass: "flex justify-center",
+  iconName: "plus",
 };
 
 const filters = [
@@ -140,8 +140,6 @@ const filters = [
         {
           text: "inp_search_settings_desc",
           iconName: "info",
-          iconColor: "info",
-          svgSize: "sm",
         },
       ],
       columns: { pc: 3, tablet: 4, mobile: 12 },
@@ -167,8 +165,6 @@ const filters = [
         {
           text: "inp_select_plugin_type_desc",
           iconName: "info",
-          iconColor: "info",
-          svgSize: "sm",
         },
       ],
       columns: { pc: 3, tablet: 4, mobile: 12 },
@@ -194,8 +190,6 @@ const filters = [
         {
           text: "inp_select_plugin_context_desc",
           iconName: "info",
-          iconColor: "info",
-          svgSize: "sm",
         },
       ],
       columns: { pc: 3, tablet: 4, mobile: 12 },
@@ -205,10 +199,8 @@ const filters = [
 
 const unmatch = {
   text: "dashboard_no_match",
-  textClass: "text-unmatch",
-  icons: {
+  icon: {
     iconName: "search",
-    iconColor: "info",
   },
 };
 
@@ -295,9 +287,7 @@ onUnmounted(() => {
         @inp="data.currPlugin = $event"
       />
     </Filter>
-    <div v-if="!data.format.length" class="layout-unmatch">
-      <Text v-bind="unmatch" />
-    </div>
+    <MessageUnmatch v-if="!data.format.length" />
     <template v-for="plugin in data.format">
       <Container
         data-is="content"
@@ -323,23 +313,24 @@ onUnmounted(() => {
       v-bind="buttonSave"
       :disabled="data.isReqErr || data.isRegErr ? true : false"
     />
-    <Text
-      v-if="
-        (data.format.length && data.isRegErr) ||
-        (data.format.length && data.isReqErr)
-      "
-      :textClass="'form-setting-error'"
-      :text="
-        data.isReqErr
-          ? $t('dashboard_advanced_required', {
-              plugin: data.pluginErr,
-              setting: data.settingErr,
-            })
-          : $t('dashboard_advanced_invalid', {
-              plugin: data.pluginErr,
-              setting: data.settingErr,
-            })
-      "
-    />
+    <div class="flex justify-center items-center" data-is="form-error">
+      <Text
+        v-if="
+          (data.format.length && data.isRegErr) ||
+          (data.format.length && data.isReqErr)
+        "
+        :text="
+          data.isReqErr
+            ? $t('dashboard_advanced_required', {
+                plugin: data.pluginErr,
+                setting: data.settingErr,
+              })
+            : $t('dashboard_advanced_invalid', {
+                plugin: data.pluginErr,
+                setting: data.settingErr,
+              })
+        "
+      />
+    </div>
   </Container>
 </template>

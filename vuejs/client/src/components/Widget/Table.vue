@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, ref, onMounted, watch } from "vue";
 import { v4 as uuidv4 } from "uuid";
+import MessageUnmatch from "@components/Message/Unmatch.vue";
 import Container from "@components/Widget/Container.vue";
 import Text from "@components/Widget/Text.vue";
 import Icons from "@components/Widget/Icons.vue";
@@ -54,7 +55,6 @@ import Filter from "@components/Widget/Filter.vue";
         {
           text: "inp_select_plugin_type_desc",
           iconName: "info",
-          iconColor: "info",
         },
       ],
       columns: { pc: 3, tablet: 4, mobile: 12 },
@@ -215,15 +215,14 @@ onMounted(() => {
             </th>
           </tr>
         </thead>
-        <tbody data-table-body ref="tableBody" class="table-content">
-          <tr
-            v-if="!table.itemsFormat.length"
-            :style="{ maxWidth: unmatchWidth }"
-            ref="unmatchEl"
-            class="layout-unmatch-table"
-          >
-            <Text v-bind="unmatch" />
-          </tr>
+
+        <tbody
+          v-show="table.itemsFormat.length"
+          :aria-hidden="!table.itemsFormat.length ? 'true' : 'false'"
+          data-table-body
+          ref="tableBody"
+          class="table-content"
+        >
           <tr
             v-for="rowId in table.rowLength"
             :key="rowId - 1"
@@ -248,6 +247,17 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
+      <div
+        v-show="!table.itemsFormat.length"
+        :aria-hidden="table.itemsFormat.length ? 'true' : 'false'"
+        class="table-unmatch"
+      >
+        <MessageUnmatch
+          v-if="!table.itemsFormat.length"
+          :style="{ maxWidth: unmatchWidth }"
+          ref="unmatchEl"
+        />
+      </div>
     </Container>
   </Container>
 </template>

@@ -75,7 +75,6 @@ onMounted(() => {
 //           subtitleColor: "success" is is_pro_version else "warning",
 //           stat: "home_pro" if is_pro_version else "home_free",
 //           iconName: "crown" if is_pro_version else "core",
-//           iconColor: "amber",
 //         },
 //       },
 //     ],
@@ -140,7 +139,6 @@ const builder = [
                 reload: "failed",
                 type: "Icons",
                 data: {
-                  iconColor: "error",
                   iconName: "cross",
                 },
               },
@@ -148,7 +146,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -193,7 +190,6 @@ const builder = [
                 reload: "failed",
                 type: "Icons",
                 data: {
-                  iconColor: "error",
                   iconName: "cross",
                 },
               },
@@ -201,7 +197,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -246,7 +241,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -254,7 +248,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -299,7 +292,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -307,7 +299,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -352,7 +343,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -360,7 +350,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -405,7 +394,6 @@ const builder = [
                 reload: "failed",
                 type: "Icons",
                 data: {
-                  iconColor: "error",
                   iconName: "cross",
                 },
               },
@@ -413,7 +401,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -458,7 +445,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -466,7 +452,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -511,7 +496,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -519,7 +503,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -564,7 +547,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -572,7 +554,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -617,7 +598,6 @@ const builder = [
                 reload: "failed",
                 type: "Icons",
                 data: {
-                  iconColor: "error",
                   iconName: "cross",
                 },
               },
@@ -625,7 +605,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -647,7 +626,7 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "default-server-cert_cache",
-                    value: "download",
+                    value: "download file",
                     values: [
                       "default-server-cert.pem (misc)",
                       "default-server-cert.key (misc)",
@@ -662,7 +641,6 @@ const builder = [
                     maxBtnChars: 12,
                     popovers: [
                       {
-                        iconColor: "info",
                         iconName: "info",
                         text: "jobs_download_cache_file",
                       },
@@ -697,7 +675,6 @@ const builder = [
                 reload: "failed",
                 type: "Icons",
                 data: {
-                  iconColor: "error",
                   iconName: "cross",
                 },
               },
@@ -705,7 +682,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -750,7 +726,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -758,7 +733,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -803,7 +777,6 @@ const builder = [
                 reload: "failed",
                 type: "Icons",
                 data: {
-                  iconColor: "error",
                   iconName: "cross",
                 },
               },
@@ -811,7 +784,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -832,7 +804,7 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "failover-backup_cache",
-                    value: "download",
+                    value: "download file",
                     values: ["folder:/var/tmp/bunkerweb/failover.tgz (jobs)"],
                     columns: {
                       pc: 12,
@@ -844,7 +816,6 @@ const builder = [
                     maxBtnChars: 12,
                     popovers: [
                       {
-                        iconColor: "info",
                         iconName: "info",
                         text: "jobs_download_cache_file",
                       },
@@ -879,7 +850,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -887,7 +857,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -932,7 +901,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -940,7 +908,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -961,7 +928,7 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "mmdb-asn_cache",
-                    value: "download",
+                    value: "download file",
                     values: ["asn.mmdb (jobs)"],
                     columns: {
                       pc: 12,
@@ -973,7 +940,6 @@ const builder = [
                     maxBtnChars: 12,
                     popovers: [
                       {
-                        iconColor: "info",
                         iconName: "info",
                         text: "jobs_download_cache_file",
                       },
@@ -1008,7 +974,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1016,7 +981,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1037,7 +1001,7 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "mmdb-country_cache",
-                    value: "download",
+                    value: "download file",
                     values: ["country.mmdb (jobs)"],
                     columns: {
                       pc: 12,
@@ -1049,7 +1013,6 @@ const builder = [
                     maxBtnChars: 12,
                     popovers: [
                       {
-                        iconColor: "info",
                         iconName: "info",
                         text: "jobs_download_cache_file",
                       },
@@ -1084,7 +1047,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1092,7 +1054,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1137,7 +1098,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1145,7 +1105,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1167,7 +1126,7 @@ const builder = [
                     hideLabel: true,
                     inpType: "select",
                     name: "self-signed_cache",
-                    value: "download",
+                    value: "download file",
                     values: [
                       "cert.pem (selfsigned) [www.example.com]",
                       "key.pem (selfsigned) [www.example.com]",
@@ -1182,7 +1141,6 @@ const builder = [
                     maxBtnChars: 12,
                     popovers: [
                       {
-                        iconColor: "info",
                         iconName: "info",
                         text: "jobs_download_cache_file",
                       },
@@ -1217,7 +1175,6 @@ const builder = [
                 reload: "failed",
                 type: "Icons",
                 data: {
-                  iconColor: "error",
                   iconName: "cross",
                 },
               },
@@ -1225,7 +1182,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1270,7 +1226,6 @@ const builder = [
                 reload: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1278,7 +1233,6 @@ const builder = [
                 success: "success",
                 type: "Icons",
                 data: {
-                  iconColor: "success",
                   iconName: "check",
                 },
               },
@@ -1318,8 +1272,6 @@ const builder = [
                   {
                     text: "jobs_search_desc",
                     iconName: "info",
-                    iconColor: "info",
-                    svgSize: "sm",
                   },
                 ],
                 columns: {
@@ -1347,8 +1299,6 @@ const builder = [
                   {
                     text: "jobs_interval_desc",
                     iconName: "info",
-                    iconColor: "info",
-                    svgSize: "sm",
                   },
                 ],
                 columns: {
@@ -1376,8 +1326,6 @@ const builder = [
                   {
                     text: "jobs_reload_desc",
                     iconName: "info",
-                    iconColor: "info",
-                    svgSize: "sm",
                   },
                 ],
                 columns: {
@@ -1405,8 +1353,6 @@ const builder = [
                   {
                     text: "jobs_success_desc",
                     iconName: "info",
-                    iconColor: "info",
-                    svgSize: "sm",
                   },
                 ],
                 columns: {

@@ -1,6 +1,5 @@
 <script setup>
 import Icons from "@components/Widget/Icons.vue";
-import Flex from "@components/Widget/Flex.vue";
 import { onMounted, reactive, ref } from "vue";
 
 /**
@@ -16,7 +15,7 @@ import { onMounted, reactive, ref } from "vue";
   @param {string} [textClass=""] - Style of text. Can be replace by any class starting by 'text-' like 'text-stat'.
   @param {string} [color=""] - The color of the text between error, success, warning, info or tailwind color
   @param {string} [tag="p"] - The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6
-  @param {boolean|object} [icons=false] - The popover to display with the text. Check Popover component for more details.
+  @param {boolean|object} [icon=false] - The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color.
   @param {object} [attrs={}] - List of attributs to add to the text.
 */
 
@@ -40,7 +39,7 @@ const props = defineProps({
     required: false,
     default: "p",
   },
-  icons: {
+  icon: {
     type: [Boolean, Object],
     required: false,
     default: false,
@@ -62,35 +61,35 @@ const textIconEl = ref(null);
 
 onMounted(() => {
   // Check if next sibling is a
+  const renderEl = textEl.value || textIconEl.value || null;
+
   text.class =
-    props.textClass || (textEl.value && textEl.value.closest("[data-is]"))
-      ? `text-${textEl.value.closest("[data-is]").getAttribute("data-is")}`
-      : textIconEl.value && textIconEl.value.closest("[data-is]")
-      ? `text-${textIconEl.value.closest("[data-is]").getAttribute("data-is")}`
-      : "text-content";
+    props.textClass || renderEl.closest("[data-is]")
+      ? `text-${renderEl.closest("[data-is]").getAttribute("data-is")}`
+      : "text-card";
 });
 </script>
 
 <template>
   <component
-    v-if="!props.icons"
+    v-if="!props.icon"
     :is="props.tag"
     v-bind="props.attrs"
     ref="textEl"
-    :class="[text.class, props.color]"
+    :class="[text.class, props.color, 'text-el']"
   >
     {{ $t(props.text, props.text) }}
   </component>
 
-  <Flex :flexClass="'justify-center'" v-if="props.icons">
-    <Icons v-if="props.icons" v-bind="props.icons" />
+  <div :class="['flex justify-center items-center']" v-if="props.icon">
+    <Icons v-if="props.icon" v-bind="props.icon" />
     <component
       ref="textIconEl"
       :is="props.tag"
       v-bind="props.attrs"
-      :class="[text.class, props.color, 'ml-2']"
+      :class="[text.class, props.color, 'text-el', 'ml-2']"
     >
       {{ $t(props.text, props.text) }}
     </component>
-  </Flex>
+  </div>
 </template>

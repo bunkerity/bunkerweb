@@ -10,7 +10,8 @@ import { useUUID } from "@utils/global.js";
   }
   @param {string} [iconClass="icon-default"] - The class of the icon.
    @param {string} [color="blue"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
-*/
+  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+  */
 
 const props = defineProps({
   iconClass: {
@@ -23,6 +24,7 @@ const props = defineProps({
     required: false,
     default: "blue",
   },
+  disabled: { type: Boolean, required: false, default: false },
 });
 
 const icon = reactive({
@@ -41,6 +43,7 @@ onMounted(() => {
     viewBox="0 0 24 24"
     fill="currentColor"
     :data-color="icon.color"
+    :disabled="props.disabled"
     data-svg="external"
     role="img"
     :class="[props.iconClass, icon.color, 'fill']"

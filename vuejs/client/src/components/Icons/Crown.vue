@@ -11,7 +11,8 @@ import { useUUID } from "@utils/global.js";
   }
   @param {string} [iconClass="icon-default"] - The class of the icon.
    @param {string} [color="amber"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
-*/
+  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+  */
 
 const props = defineProps({
   iconClass: {
@@ -24,6 +25,7 @@ const props = defineProps({
     required: false,
     default: "amber",
   },
+  disabled: { type: Boolean, required: false, default: false },
 });
 
 const icon = reactive({
@@ -39,6 +41,7 @@ onMounted(() => {
   <span :id="icon.id" class="sr-only">{{ $t("icons_crown_desc") }}</span>
   <svg
     :data-color="icon.color"
+    :disabled="props.disabled"
     data-svg="crown"
     role="img"
     :aria-labelledby="icon.id"

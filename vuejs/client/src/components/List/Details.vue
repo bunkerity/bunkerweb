@@ -1,7 +1,5 @@
 <script setup>
 import { defineProps, computed, reactive } from "vue";
-import Flex from "@components/Widget/Flex.vue";
-import Container from "@components/Widget/Container.vue";
 import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 import Text from "@components/Widget/Text.vue";
 import Filter from "@components/Widget/Filter.vue";
@@ -23,12 +21,10 @@ import Grid from "@components/Widget/Grid.vue";
       {
         text: "This is a popover text",
         iconName: "info",
-        iconColor: "info",
       },
       {
         text: "This is a popover text",
         iconName: "info",
-        iconColor: "info",
       },
     ],
 }]
@@ -66,9 +62,8 @@ const gridClass = computed(() => {
 const unmatch = {
   text: "dashboard_no_match",
   textClass: "text-unmatch",
-  icons: {
+  icon: {
     iconName: "search",
-    iconColor: "info",
   },
 };
 </script>
@@ -81,7 +76,7 @@ const unmatch = {
       :data="data.base"
       :filters="props.filters"
     />
-    <div v-if="!data.format.length" class="layout-unmatch">
+    <div data-is="unmatch" v-if="!data.format.length" class="layout-unmatch">
       <Text v-bind="unmatch" />
     </div>
     <ul
@@ -98,12 +93,12 @@ const unmatch = {
         ]"
         v-bind="item.attrs || {}"
       >
-        <Flex :flexClass="'list-details-flex'">
+        <div class="list-details-item-wrap">
           <Text :tag="'p'" :text="item.text" />
           <div>
             <PopoverGroup :popovers="item.popovers" />
           </div>
-        </Flex>
+        </div>
       </li>
     </ul>
   </Grid>

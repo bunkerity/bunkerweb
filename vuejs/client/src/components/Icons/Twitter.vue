@@ -10,7 +10,8 @@ import { useUUID } from "@utils/global.js";
   }
   @param {string} [iconClass="icon-default"] - The class of the icon.
   @param {string} [color="twitter"]
-*/
+  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+  */
 
 const props = defineProps({
   iconClass: {
@@ -23,6 +24,7 @@ const props = defineProps({
     required: false,
     default: "twitter",
   },
+  disabled: { type: Boolean, required: false, default: false },
 });
 
 const icon = reactive({
@@ -38,6 +40,7 @@ onMounted(() => {
   <span :id="icon.id" class="sr-only">{{ $t("icons_twitter_desc") }}</span>
   <svg
     :data-color="icon.color"
+    :disabled="props.disabled"
     data-svg="twitter"
     role="img"
     :aria-labelledby="icon.id"

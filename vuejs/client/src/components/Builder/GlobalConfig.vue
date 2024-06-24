@@ -30,7 +30,6 @@ import Templates from "@components/Form/Templates.vue";
           subtitleColor: "success" is is_pro_version else "warning",
           stat: "home_pro" if is_pro_version else "home_free",
           iconName: "crown" if is_pro_version else "core",
-          iconColor: "amber",
         },
       },
     ],

@@ -29,7 +29,6 @@ import { useUUID } from "@utils/global.js";
       {
         text: "This is a popover text",
         iconName: "info",
-        iconColor: "info",
       },
     ],
   }

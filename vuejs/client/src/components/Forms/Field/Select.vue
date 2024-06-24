@@ -27,7 +27,6 @@ import { useUUID } from "@utils/global";
       {
         text: "This is a popover text",
         iconName: "info",
-        iconColor: "info",
       },]
   }
   @param {string} [id=uuidv4()] - Unique id

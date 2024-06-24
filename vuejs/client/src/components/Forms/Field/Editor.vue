@@ -6,13 +6,13 @@ import {
   onMounted,
   defineProps,
   onUnmounted,
-  onUpdated,
 } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 import Clipboard from "@components/Forms/Feature/Clipboard.vue";
+import { v4 as uuidv4 } from "uuid";
 import { useUUID } from "@utils/global.js";
 
 import "@assets/script/editor/ace.js";
@@ -59,7 +59,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: "",
+    default: uuidv4(),
   },
   columns: {
     type: [Object, Boolean],
@@ -274,22 +274,23 @@ class Editor {
 function removeErrCSS() {
   setTimeout(() => {
     try {
-      const editorArea = document.querySelector("textarea.ace_text-input");
-
-      const dictStyle = JSON.parse(
-        JSON.stringify(
-          document.querySelector('[style*="font-optical-sizing"]').style
-        )
+      const styleEditors = document.querySelectorAll(
+        '[style*="font-optical-sizing"]'
       );
-      // Loop and remove key if value is 'font-optical-sizing'
-      for (const [key, value] of Object.entries(dictStyle)) {
-        if (value === "font-optical-sizing") {
-          delete dictStyle[key];
+
+      styleEditors.forEach((editor) => {
+        const dictStyle = JSON.parse(JSON.stringify(editor.style));
+        // Loop and remove key if value is 'font-optical-sizing'
+        for (const [key, value] of Object.entries(dictStyle)) {
+          if (value === "font-optical-sizing") {
+            delete dictStyle[key];
+          }
         }
-      }
-      document.querySelector('[style*="font-optical-sizing"]').style =
-        dictStyle;
-    } catch (e) {}
+        editor.style = dictStyle;
+      });
+    } catch (e) {
+      console.log(e);
+    }
   }, 100);
 }
 
@@ -317,18 +318,20 @@ function setEditorAttrs() {
 // Use ace editor
 onMounted(() => {
   editor.id = useUUID(props.id);
-  // Default value
-  editorEl = new Editor();
-  editorEl.setValue(editor.value);
-  editorEl.readOnlyBool(props.disabled);
-  editorEl.editor.on("change", () => {
-    editor.value = editorEl.getValue();
-    // emit inp
-    emits("inp", editor.value);
-  });
+  setTimeout(() => {
+    // Default value
+    editorEl = new Editor();
+    editorEl.setValue(editor.value);
+    editorEl.readOnlyBool(props.disabled);
+    editorEl.editor.on("change", () => {
+      editor.value = editorEl.getValue();
+      // emit inp
+      emits("inp", editor.value);
+    });
 
-  setEditorAttrs();
-  removeErrCSS();
+    setEditorAttrs();
+    removeErrCSS();
+  }, 10);
 });
 
 onUnmounted(() => {

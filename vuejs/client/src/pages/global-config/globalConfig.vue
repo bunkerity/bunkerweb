@@ -71,7 +71,7 @@ const builder = [
                       label: "internal use loading",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-33 setting",
+                      containerClass: "z-33",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "internal use loading",
@@ -84,14 +84,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Internal use : set to yes when BW is loading.",
                         },
@@ -105,7 +101,7 @@ const builder = [
                       label: "nginx prefix",
                       regex: "^(\\/[\\-\\w.\\s]+)*\\/$",
                       type: "text",
-                      containerClass: "z-32 setting",
+                      containerClass: "z-32",
                       pattern: "^(\\/[\\-\\w.\\s]+)*\\/$",
                       inpType: "input",
                       name: "nginx prefix",
@@ -118,14 +114,10 @@ const builder = [
                       value: "/etc/nginx/",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Where nginx will search for configurations.",
                         },
@@ -139,7 +131,7 @@ const builder = [
                       label: "HTTP port",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-31 setting",
+                      containerClass: "z-31",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "HTTP port",
@@ -152,14 +144,10 @@ const builder = [
                       value: "8080",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "HTTP port number which bunkerweb binds to.",
                         },
@@ -173,7 +161,7 @@ const builder = [
                       label: "HTTPS port",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-30 setting",
+                      containerClass: "z-30",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "HTTPS port",
@@ -186,14 +174,10 @@ const builder = [
                       value: "8443",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "HTTPS port number which bunkerweb binds to.",
                         },
@@ -207,7 +191,7 @@ const builder = [
                       label: "Multisite",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-29 setting",
+                      containerClass: "z-29",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Multisite",
@@ -220,14 +204,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Multi site activation.",
                         },
@@ -242,7 +222,7 @@ const builder = [
                       regex:
                         "^((\\S{1,255})(?!.*\\s\\2(\\s|$)))?(\\s(\\S{1,255})(?!.*\\s\\5(\\s|$)))*$",
                       type: "text",
-                      containerClass: "z-28 setting",
+                      containerClass: "z-28",
                       pattern:
                         "^((\\S{1,255})(?!.*\\s\\2(\\s|$)))?(\\s(\\S{1,255})(?!.*\\s\\5(\\s|$)))*$",
                       inpType: "input",
@@ -256,14 +236,10 @@ const builder = [
                       value: "www.example.com",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of the virtual hosts served by bunkerweb.",
                         },
@@ -277,7 +253,7 @@ const builder = [
                       label: "Worker processes",
                       regex: "^(auto|\\d+)$",
                       type: "text",
-                      containerClass: "z-27 setting",
+                      containerClass: "z-27",
                       pattern: "^(auto|\\d+)$",
                       inpType: "input",
                       name: "Worker processes",
@@ -290,14 +266,10 @@ const builder = [
                       value: "auto",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Number of worker processes.",
                         },
@@ -311,7 +283,7 @@ const builder = [
                       label: "Open files per worker",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-26 setting",
+                      containerClass: "z-26",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Open files per worker",
@@ -324,14 +296,10 @@ const builder = [
                       value: "2048",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum number of open files for worker processes.",
                         },
@@ -345,7 +313,7 @@ const builder = [
                       label: "Connections per worker",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-25 setting",
+                      containerClass: "z-25",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Connections per worker",
@@ -358,14 +326,10 @@ const builder = [
                       value: "1024",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum number of connections per worker.",
                         },
@@ -380,7 +344,7 @@ const builder = [
                       label: "Log format",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-24 setting",
+                      containerClass: "z-24",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Log format",
@@ -394,14 +358,10 @@ const builder = [
                         '$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"',
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The format to use for access logs.",
                         },
@@ -416,7 +376,7 @@ const builder = [
                       regex:
                         "^(debug|info|notice|warn|error|crit|alert|emerg)$",
                       type: "select",
-                      containerClass: "z-23 setting",
+                      containerClass: "z-23",
                       pattern:
                         "^(debug|info|notice|warn|error|crit|alert|emerg)$",
                       inpType: "select",
@@ -440,14 +400,10 @@ const builder = [
                       value: "notice",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The level to use for error logs.",
                         },
@@ -461,7 +417,7 @@ const builder = [
                       label: "DNS resolvers",
                       regex: "^(?! )(( *[^ ]+)(?!.*\\2))*$",
                       type: "text",
-                      containerClass: "z-22 setting",
+                      containerClass: "z-22",
                       pattern: "^(?! )(( *[^ ]+)(?!.*\\2))*$",
                       inpType: "input",
                       name: "DNS resolvers",
@@ -474,14 +430,10 @@ const builder = [
                       value: "127.0.0.11",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "DNS addresses of resolvers to use.",
                         },
@@ -495,7 +447,7 @@ const builder = [
                       label: "Datastore memory size",
                       regex: "^\\d+[kKmMgG]?$",
                       type: "text",
-                      containerClass: "z-21 setting",
+                      containerClass: "z-21",
                       pattern: "^\\d+[kKmMgG]?$",
                       inpType: "input",
                       name: "Datastore memory size",
@@ -508,14 +460,10 @@ const builder = [
                       value: "64m",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Size of the internal datastore.",
                         },
@@ -529,7 +477,7 @@ const builder = [
                       label: "Cachestore memory size",
                       regex: "^\\d+[kKmMgG]?$",
                       type: "text",
-                      containerClass: "z-20 setting",
+                      containerClass: "z-20",
                       pattern: "^\\d+[kKmMgG]?$",
                       inpType: "input",
                       name: "Cachestore memory size",
@@ -542,14 +490,10 @@ const builder = [
                       value: "64m",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Size of the internal cachestore.",
                         },
@@ -563,7 +507,7 @@ const builder = [
                       label: "Cachestore ipc memory size",
                       regex: "^\\d+[kKmMgG]?$",
                       type: "text",
-                      containerClass: "z-19 setting",
+                      containerClass: "z-19",
                       pattern: "^\\d+[kKmMgG]?$",
                       inpType: "input",
                       name: "Cachestore ipc memory size",
@@ -576,14 +520,10 @@ const builder = [
                       value: "16m",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Size of the internal cachestore (ipc).",
                         },
@@ -597,7 +537,7 @@ const builder = [
                       label: "Cachestore miss memory size",
                       regex: "^\\d+[kKmMgG]?$",
                       type: "text",
-                      containerClass: "z-18 setting",
+                      containerClass: "z-18",
                       pattern: "^\\d+[kKmMgG]?$",
                       inpType: "input",
                       name: "Cachestore miss memory size",
@@ -610,14 +550,10 @@ const builder = [
                       value: "16m",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Size of the internal cachestore (miss).",
                         },
@@ -631,7 +567,7 @@ const builder = [
                       label: "Cachestore locks memory size",
                       regex: "^\\d+[kKmMgG]?$",
                       type: "text",
-                      containerClass: "z-17 setting",
+                      containerClass: "z-17",
                       pattern: "^\\d+[kKmMgG]?$",
                       inpType: "input",
                       name: "Cachestore locks memory size",
@@ -644,14 +580,10 @@ const builder = [
                       value: "16m",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Size of the internal cachestore (locks).",
                         },
@@ -665,7 +597,7 @@ const builder = [
                       label: "Activate API",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-16 setting",
+                      containerClass: "z-16",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate API",
@@ -678,14 +610,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate the API to control BunkerWeb.",
                         },
@@ -699,7 +627,7 @@ const builder = [
                       label: "API port number",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-15 setting",
+                      containerClass: "z-15",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "API port number",
@@ -712,14 +640,10 @@ const builder = [
                       value: "5000",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Listen port number for the API.",
                         },
@@ -733,7 +657,7 @@ const builder = [
                       label: "API listen IP",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-14 setting",
+                      containerClass: "z-14",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "API listen IP",
@@ -746,14 +670,10 @@ const builder = [
                       value: "0.0.0.0",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Listen IP address for the API.",
                         },
@@ -767,7 +687,7 @@ const builder = [
                       label: "API server name",
                       regex: "^[^ ]{1,255}$",
                       type: "text",
-                      containerClass: "z-13 setting",
+                      containerClass: "z-13",
                       pattern: "^[^ ]{1,255}$",
                       inpType: "input",
                       name: "API server name",
@@ -780,14 +700,10 @@ const builder = [
                       value: "bwapi",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Server name (virtual host) for the API.",
                         },
@@ -802,7 +718,7 @@ const builder = [
                       regex:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       type: "text",
-                      containerClass: "z-12 setting",
+                      containerClass: "z-12",
                       pattern:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       inpType: "input",
@@ -816,14 +732,10 @@ const builder = [
                       value: "127.0.0.0/8",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of IP/network allowed to contact the API.",
                         },
@@ -837,7 +749,7 @@ const builder = [
                       label: "Autoconf mode",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-11 setting",
+                      containerClass: "z-11",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Autoconf mode",
@@ -850,14 +762,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable Autoconf Docker integration.",
                         },
@@ -871,7 +779,7 @@ const builder = [
                       label: "Swarm mode",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Swarm mode",
@@ -884,14 +792,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable Docker Swarm integration.",
                         },
@@ -905,7 +809,7 @@ const builder = [
                       label: "Kubernetes mode",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Kubernetes mode",
@@ -918,14 +822,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable Kubernetes integration.",
                         },
@@ -939,7 +839,7 @@ const builder = [
                       label: "Server type",
                       regex: "^(http|stream)$",
                       type: "select",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern: "^(http|stream)$",
                       inpType: "select",
                       name: "Server type",
@@ -953,14 +853,10 @@ const builder = [
                       value: "http",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Server type : http or stream.",
                         },
@@ -974,7 +870,7 @@ const builder = [
                       label: "Listen stream",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Listen stream",
@@ -987,14 +883,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable listening for non-ssl (passthrough).",
                         },
@@ -1008,7 +900,7 @@ const builder = [
                       label: "Listen stream port",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Listen stream port",
@@ -1021,14 +913,10 @@ const builder = [
                       value: "1337",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Listening port for non-ssl (passthrough).",
                         },
@@ -1042,7 +930,7 @@ const builder = [
                       label: "Listen stream port ssl",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Listen stream port ssl",
@@ -1055,14 +943,10 @@ const builder = [
                       value: "4242",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Listening port for ssl (passthrough).",
                         },
@@ -1076,7 +960,7 @@ const builder = [
                       label: "Listen UDP",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Listen UDP",
@@ -1089,14 +973,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "UDP listen instead of TCP (stream).",
                         },
@@ -1110,7 +990,7 @@ const builder = [
                       label: "Use IPv6",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use IPv6",
@@ -1123,14 +1003,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable IPv6 connectivity.",
                         },
@@ -1144,7 +1020,7 @@ const builder = [
                       label: "internal use draft",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "internal use draft",
@@ -1157,14 +1033,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Internal use : set to yes when the service is in draft mode.",
                         },
@@ -1178,7 +1050,7 @@ const builder = [
                       label: "Timers log level",
                       regex: "^(debug|info|notice|warn|err|crit|alert|emerg)$",
                       type: "select",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern:
                         "^(debug|info|notice|warn|err|crit|alert|emerg)$",
                       inpType: "select",
@@ -1202,14 +1074,10 @@ const builder = [
                       value: "debug",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Log level for timers.",
                         },
@@ -1223,7 +1091,7 @@ const builder = [
                       label: "BunkerWeb instances",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "BunkerWeb instances",
@@ -1236,14 +1104,10 @@ const builder = [
                       value: "127.0.0.1",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 http://fqdn-or-ip:5000)",
                         },
@@ -1271,7 +1135,7 @@ const builder = [
                       regex:
                         "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile)$",
                       type: "select",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern:
                         "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile)$",
                       inpType: "select",
@@ -1294,14 +1158,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate antibot feature.",
                         },
@@ -1315,7 +1175,7 @@ const builder = [
                       label: "Antibot URL",
                       regex: "^\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*$",
                       type: "text",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern: "^\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*$",
                       inpType: "input",
                       name: "Antibot URL",
@@ -1328,14 +1188,10 @@ const builder = [
                       value: "/challenge",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Unused URI that clients will be redirected to to solve the challenge.",
                         },
@@ -1349,7 +1205,7 @@ const builder = [
                       label: "Time to resolve",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Time to resolve",
@@ -1362,14 +1218,10 @@ const builder = [
                       value: "60",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
                         },
@@ -1383,7 +1235,7 @@ const builder = [
                       label: "Time valid",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Time valid",
@@ -1396,14 +1248,10 @@ const builder = [
                       value: "86400",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
                         },
@@ -1417,7 +1265,7 @@ const builder = [
                       label: "reCAPTCHA score",
                       regex: "^(0\\.[1-9]|1\\.0)$",
                       type: "text",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^(0\\.[1-9]|1\\.0)$",
                       inpType: "input",
                       name: "reCAPTCHA score",
@@ -1430,14 +1278,10 @@ const builder = [
                       value: "0.7",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Minimum score required for reCAPTCHA challenge.",
                         },
@@ -1451,7 +1295,7 @@ const builder = [
                       label: "reCAPTCHA sitekey",
                       regex: "^[\\w\\-]*$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^[\\w\\-]*$",
                       inpType: "input",
                       name: "reCAPTCHA sitekey",
@@ -1464,14 +1308,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Sitekey for reCAPTCHA challenge.",
                         },
@@ -1485,7 +1325,7 @@ const builder = [
                       label: "reCAPTCHA secret",
                       regex: "^[\\w\\-]*$",
                       type: "password",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^[\\w\\-]*$",
                       inpType: "input",
                       name: "reCAPTCHA secret",
@@ -1498,14 +1338,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Secret for reCAPTCHA challenge.",
                         },
@@ -1519,7 +1355,7 @@ const builder = [
                       label: "hCaptcha sitekey",
                       regex: "^[a-zA-Z0-9\\-]*$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^[a-zA-Z0-9\\-]*$",
                       inpType: "input",
                       name: "hCaptcha sitekey",
@@ -1532,14 +1368,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Sitekey for hCaptcha challenge.",
                         },
@@ -1553,7 +1385,7 @@ const builder = [
                       label: "hCaptcha secret",
                       regex: "^\\w*$",
                       type: "password",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^\\w*$",
                       inpType: "input",
                       name: "hCaptcha secret",
@@ -1566,14 +1398,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Secret for hCaptcha challenge.",
                         },
@@ -1587,7 +1415,7 @@ const builder = [
                       label: "Turnstile sitekey",
                       regex: "^(0x[\\w\\-]+)?$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(0x[\\w\\-]+)?$",
                       inpType: "input",
                       name: "Turnstile sitekey",
@@ -1600,14 +1428,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Sitekey for Turnstile challenge.",
                         },
@@ -1621,7 +1445,7 @@ const builder = [
                       label: "Turnstile secret",
                       regex: "^(0x[\\w\\-]+)?$",
                       type: "password",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(0x[\\w\\-]+)?$",
                       inpType: "input",
                       name: "Turnstile secret",
@@ -1634,14 +1458,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Secret for Turnstile challenge.",
                         },
@@ -1669,7 +1489,7 @@ const builder = [
                       label: "Use HTTP basic auth",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use HTTP basic auth",
@@ -1682,14 +1502,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use HTTP basic auth",
                         },
@@ -1703,7 +1519,7 @@ const builder = [
                       label: "Auth basic Location",
                       regex: "^(sitewide|/[a-zA-Z0-9.\\/\\-]*)$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(sitewide|/[a-zA-Z0-9.\\/\\-]*)$",
                       inpType: "input",
                       name: "Auth basic Location",
@@ -1716,14 +1532,10 @@ const builder = [
                       value: "sitewide",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "URL of the protected resource or sitewide value.",
                         },
@@ -1737,7 +1549,7 @@ const builder = [
                       label: "Auth basic Username",
                       regex: "^[\\w\\-]+",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^[\\w\\-]+",
                       inpType: "input",
                       name: "Auth basic Username",
@@ -1750,14 +1562,10 @@ const builder = [
                       value: "changeme",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Username",
                         },
@@ -1771,7 +1579,7 @@ const builder = [
                       label: "Password",
                       regex: "^.+",
                       type: "password",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^.+",
                       inpType: "input",
                       name: "Password",
@@ -1784,14 +1592,10 @@ const builder = [
                       value: "changeme",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Password",
                         },
@@ -1805,7 +1609,7 @@ const builder = [
                       label: "Text",
                       regex: "^.+",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.+",
                       inpType: "input",
                       name: "Text",
@@ -1818,14 +1622,10 @@ const builder = [
                       value: "Restricted area",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Text to display",
                         },
@@ -1853,7 +1653,7 @@ const builder = [
                       label: "Activate automatic backup",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate automatic backup",
@@ -1866,14 +1666,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable or disable the backup feature",
                         },
@@ -1887,7 +1683,7 @@ const builder = [
                       label: "Backup schedule",
                       regex: "^(daily|weekly|monthly)$",
                       type: "select",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(daily|weekly|monthly)$",
                       inpType: "select",
                       name: "Backup schedule",
@@ -1901,14 +1697,10 @@ const builder = [
                       value: "daily",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The frequency of the backup (daily, weekly or monthly)",
                         },
@@ -1922,7 +1714,7 @@ const builder = [
                       label: "Backup rotation",
                       regex: "^[1-9][0-9]*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^[1-9][0-9]*$",
                       inpType: "input",
                       name: "Backup rotation",
@@ -1935,14 +1727,10 @@ const builder = [
                       value: "7",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The number of backups to keep",
                         },
@@ -1956,7 +1744,7 @@ const builder = [
                       label: "Backup directory",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Backup directory",
@@ -1969,14 +1757,10 @@ const builder = [
                       value: "/var/lib/bunkerweb/backups",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The directory where the backup will be stored",
                         },
@@ -2009,7 +1793,7 @@ const builder = [
                       label: "Activate bad behavior",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate bad behavior",
@@ -2022,14 +1806,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate Bad behavior feature.",
                         },
@@ -2043,7 +1823,7 @@ const builder = [
                       label: "Bad status codes",
                       regex: "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
                       inpType: "input",
                       name: "Bad status codes",
@@ -2056,14 +1836,10 @@ const builder = [
                       value: "400 401 403 404 405 429 444",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of HTTP status codes considered as 'bad'.",
                         },
@@ -2077,7 +1853,7 @@ const builder = [
                       label: "Threshold",
                       regex: "^[1-9][0-9]*",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^[1-9][0-9]*",
                       inpType: "input",
                       name: "Threshold",
@@ -2090,14 +1866,10 @@ const builder = [
                       value: "10",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.",
                         },
@@ -2111,7 +1883,7 @@ const builder = [
                       label: "Period (in seconds)",
                       regex: "^\\d+",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^\\d+",
                       inpType: "input",
                       name: "Period (in seconds)",
@@ -2124,14 +1896,10 @@ const builder = [
                       value: "60",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Period of time (in seconds) during which we count 'bad' HTTP status codes.",
                         },
@@ -2145,7 +1913,7 @@ const builder = [
                       label: "Ban duration (in seconds)",
                       regex: "^\\d+",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^\\d+",
                       inpType: "input",
                       name: "Ban duration (in seconds)",
@@ -2158,14 +1926,10 @@ const builder = [
                       value: "86400",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.",
                         },
@@ -2193,7 +1957,7 @@ const builder = [
                       label: "Activate blacklisting",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-21 setting",
+                      containerClass: "z-21",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate blacklisting",
@@ -2206,14 +1970,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate blacklist feature.",
                         },
@@ -2228,7 +1988,7 @@ const builder = [
                       regex:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       type: "text",
-                      containerClass: "z-20 setting",
+                      containerClass: "z-20",
                       pattern:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       inpType: "input",
@@ -2242,14 +2002,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of IP/network, separated with spaces, to block.",
                         },
@@ -2263,7 +2019,7 @@ const builder = [
                       label: "Blacklist reverse DNS",
                       regex: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
                       type: "text",
-                      containerClass: "z-19 setting",
+                      containerClass: "z-19",
                       pattern: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
                       inpType: "input",
                       name: "Blacklist reverse DNS",
@@ -2276,14 +2032,10 @@ const builder = [
                       value: ".shodan.io .censys.io",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of reverse DNS suffixes, separated with spaces, to block.",
                         },
@@ -2297,7 +2049,7 @@ const builder = [
                       label: "Blacklist reverse DNS global IPs",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-18 setting",
+                      containerClass: "z-18",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Blacklist reverse DNS global IPs",
@@ -2310,14 +2062,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Only perform RDNS blacklist checks on global IP addresses.",
                         },
@@ -2331,7 +2079,7 @@ const builder = [
                       label: "Blacklist ASN",
                       regex: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
                       type: "text",
-                      containerClass: "z-17 setting",
+                      containerClass: "z-17",
                       pattern: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
                       inpType: "input",
                       name: "Blacklist ASN",
@@ -2344,14 +2092,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of ASN numbers, separated with spaces, to block.",
                         },
@@ -2365,7 +2109,7 @@ const builder = [
                       label: "Blacklist User-Agent",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-16 setting",
+                      containerClass: "z-16",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Blacklist User-Agent",
@@ -2378,14 +2122,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of User-Agent (PCRE regex), separated with spaces, to block.",
                         },
@@ -2399,7 +2139,7 @@ const builder = [
                       label: "Blacklist URI",
                       regex: "^( *(.*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-15 setting",
+                      containerClass: "z-15",
                       pattern: "^( *(.*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
                       name: "Blacklist URI",
@@ -2412,14 +2152,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URI (PCRE regex), separated with spaces, to block.",
                         },
@@ -2434,7 +2170,7 @@ const builder = [
                       regex:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       type: "text",
-                      containerClass: "z-14 setting",
+                      containerClass: "z-14",
                       pattern:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       inpType: "input",
@@ -2448,14 +2184,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of IP/network, separated with spaces, to ignore in the blacklist.",
                         },
@@ -2469,7 +2201,7 @@ const builder = [
                       label: "Blacklist ignore reverse DNS",
                       regex: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
                       type: "text",
-                      containerClass: "z-13 setting",
+                      containerClass: "z-13",
                       pattern: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
                       inpType: "input",
                       name: "Blacklist ignore reverse DNS",
@@ -2482,14 +2214,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.",
                         },
@@ -2503,7 +2231,7 @@ const builder = [
                       label: "Blacklist ignore ASN",
                       regex: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
                       type: "text",
-                      containerClass: "z-12 setting",
+                      containerClass: "z-12",
                       pattern: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
                       inpType: "input",
                       name: "Blacklist ignore ASN",
@@ -2516,14 +2244,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of ASN numbers, separated with spaces, to ignore in the blacklist.",
                         },
@@ -2537,7 +2261,7 @@ const builder = [
                       label: "Blacklist ignore User-Agent",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-11 setting",
+                      containerClass: "z-11",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Blacklist ignore User-Agent",
@@ -2550,14 +2274,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.",
                         },
@@ -2571,7 +2291,7 @@ const builder = [
                       label: "Blacklist ignore URI",
                       regex: "^( *(.*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern: "^( *(.*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
                       name: "Blacklist ignore URI",
@@ -2584,14 +2304,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.",
                         },
@@ -2606,7 +2322,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2620,14 +2336,10 @@ const builder = [
                       value: "https://www.dan.me.uk/torlist/?exit",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing bad IP/network to block.",
                         },
@@ -2642,7 +2354,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2656,14 +2368,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing reverse DNS suffixes to block.",
                         },
@@ -2678,7 +2386,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2692,14 +2400,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing ASN to block.",
                         },
@@ -2715,7 +2419,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2730,14 +2434,10 @@ const builder = [
                         "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing bad User-Agent to block.",
                         },
@@ -2752,7 +2452,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2766,14 +2466,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing bad URI to block.",
                         },
@@ -2788,7 +2484,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2802,14 +2498,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.",
                         },
@@ -2824,7 +2516,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2838,14 +2530,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.",
                         },
@@ -2860,7 +2548,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2874,14 +2562,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing ASN to ignore in the blacklist.",
                         },
@@ -2896,7 +2580,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2910,14 +2594,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.",
                         },
@@ -2932,7 +2612,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -2946,14 +2626,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing URI to ignore in the blacklist.",
                         },
@@ -2981,7 +2657,7 @@ const builder = [
                       label: "Use brotli",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use brotli",
@@ -2994,14 +2670,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use brotli",
                         },
@@ -3017,7 +2689,7 @@ const builder = [
                       regex:
                         "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
                       inpType: "input",
@@ -3032,14 +2704,10 @@ const builder = [
                         "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of MIME types that will be compressed with brotli.",
                         },
@@ -3053,7 +2721,7 @@ const builder = [
                       label: "Minimum length",
                       regex: "^\\d+",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^\\d+",
                       inpType: "input",
                       name: "Minimum length",
@@ -3066,14 +2734,10 @@ const builder = [
                       value: "1000",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Minimum length for brotli compression.",
                         },
@@ -3087,7 +2751,7 @@ const builder = [
                       label: "Compression level",
                       regex: "^([02-9]|1[01]?)$",
                       type: "select",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^([02-9]|1[01]?)$",
                       inpType: "select",
                       name: "Compression level",
@@ -3114,14 +2778,10 @@ const builder = [
                       value: "6",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The compression level of the brotli algorithm.",
                         },
@@ -3149,7 +2809,7 @@ const builder = [
                       label: "Activate BunkerNet",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate BunkerNet",
@@ -3162,14 +2822,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate BunkerNet feature.",
                         },
@@ -3184,7 +2840,7 @@ const builder = [
                       regex:
                         "^https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern:
                         "^https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*$",
                       inpType: "input",
@@ -3198,14 +2854,10 @@ const builder = [
                       value: "https://api.bunkerweb.io",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Address of the BunkerNet API.",
                         },
@@ -3232,7 +2884,7 @@ const builder = [
                       label: "Use CORS",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use CORS",
@@ -3245,20 +2897,14 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "red",
                           iconName: "trespass",
-                          svgSize: "sm",
                           text: "inp_popover_method_disabled",
                         },
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use CORS",
                         },
@@ -3272,7 +2918,7 @@ const builder = [
                       label: "Allowed origins",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Allowed origins",
@@ -3285,14 +2931,10 @@ const builder = [
                       value: "*",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Allowed origins to make CORS requests : PCRE regex or *.",
                         },
@@ -3307,7 +2949,7 @@ const builder = [
                       regex:
                         "^(\\*|(?![, ])(,? ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\3))*)?$",
                       type: "text",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern:
                         "^(\\*|(?![, ])(,? ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\3))*)?$",
                       inpType: "input",
@@ -3321,14 +2963,10 @@ const builder = [
                       value: "GET, POST, OPTIONS",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value of the Access-Control-Allow-Methods header.",
                         },
@@ -3344,7 +2982,7 @@ const builder = [
                       regex:
                         "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
                       type: "text",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern:
                         "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
                       inpType: "input",
@@ -3359,14 +2997,10 @@ const builder = [
                         "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value of the Access-Control-Allow-Headers header.",
                         },
@@ -3380,7 +3014,7 @@ const builder = [
                       label: "Send Access-Control-Allow-Credentials",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Send Access-Control-Allow-Credentials",
@@ -3393,14 +3027,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Send the Access-Control-Allow-Credentials header.",
                         },
@@ -3415,7 +3045,7 @@ const builder = [
                       regex:
                         "^(\\*|(?![, ]+)(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern:
                         "^(\\*|(?![, ]+)(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
                       inpType: "input",
@@ -3429,14 +3059,10 @@ const builder = [
                       value: "Content-Length,Content-Range",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value of the Access-Control-Expose-Headers header.",
                         },
@@ -3451,7 +3077,7 @@ const builder = [
                       regex:
                         "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
                       type: "select",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern:
                         "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
                       inpType: "select",
@@ -3471,14 +3097,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the Cross-Origin-Opener-Policy header.",
                         },
@@ -3492,7 +3114,7 @@ const builder = [
                       label: "Cross-Origin-Embedder-Policy",
                       regex: "^(unsafe-none|require-corp|credentialless)?$",
                       type: "select",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(unsafe-none|require-corp|credentialless)?$",
                       inpType: "select",
                       name: "Cross-Origin-Embedder-Policy",
@@ -3511,14 +3133,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the Cross-Origin-Embedder-Policy header.",
                         },
@@ -3532,7 +3150,7 @@ const builder = [
                       label: "Cross-Origin-Resource-Policy",
                       regex: "^(same-site|same-origin|cross-origin)?$",
                       type: "select",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(same-site|same-origin|cross-origin)?$",
                       inpType: "select",
                       name: "Cross-Origin-Resource-Policy",
@@ -3546,14 +3164,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the Cross-Origin-Resource-Policy header.",
                         },
@@ -3567,7 +3181,7 @@ const builder = [
                       label: "Access-Control-Max-Age value",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Access-Control-Max-Age value",
@@ -3580,14 +3194,10 @@ const builder = [
                       value: "86400",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value of the Access-Control-Max-Age header.",
                         },
@@ -3601,7 +3211,7 @@ const builder = [
                       label: "Deny request",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Deny request",
@@ -3614,14 +3224,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Deny request and don't send it to backend if Origin is not allowed.",
                         },
@@ -3648,7 +3254,7 @@ const builder = [
                       label: "Use client cache",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use client cache",
@@ -3661,14 +3267,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Tell client to store locally static files.",
                         },
@@ -3683,7 +3285,7 @@ const builder = [
                       label: "Extensions that should be cached by the client",
                       regex: "^(?!\\|)(\\|?([a-z0-9]+)(?!.*\\2(?!.)))+$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(?!\\|)(\\|?([a-z0-9]+)(?!.*\\2(?!.)))+$",
                       inpType: "input",
                       name: "Extensions that should be cached by the client",
@@ -3697,14 +3299,10 @@ const builder = [
                         "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of file extensions, separated with pipes that should be cached.",
                         },
@@ -3718,7 +3316,7 @@ const builder = [
                       label: "ETag",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "ETag",
@@ -3731,14 +3329,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Send the HTTP ETag header for static resources.",
                         },
@@ -3753,7 +3347,7 @@ const builder = [
                       regex:
                         "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+(?!.*\\6))|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform))(?!.*\\4))+$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern:
                         "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+(?!.*\\6))|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform))(?!.*\\4))+$",
                       inpType: "input",
@@ -3767,14 +3361,10 @@ const builder = [
                       value: "public, max-age=15552000",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value of the Cache-Control HTTP header.",
                         },
@@ -3802,7 +3392,7 @@ const builder = [
                       label: "Country blacklist",
                       regex: "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
                       inpType: "input",
                       name: "Country blacklist",
@@ -3815,14 +3405,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).",
                         },
@@ -3836,7 +3422,7 @@ const builder = [
                       label: "Country whitelist",
                       regex: "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
                       inpType: "input",
                       name: "Country whitelist",
@@ -3849,14 +3435,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).",
                         },
@@ -3883,7 +3465,7 @@ const builder = [
                       label: "Use custom certificate",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use custom certificate",
@@ -3896,14 +3478,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use custom HTTPS certificate.",
                         },
@@ -3917,7 +3495,7 @@ const builder = [
                       label: "Certificate path",
                       regex: "^(/[\\w. \\-]+)*/?$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(/[\\w. \\-]+)*/?$",
                       inpType: "input",
                       name: "Certificate path",
@@ -3930,14 +3508,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Full path of the certificate or bundle file (must be readable by the scheduler).",
                         },
@@ -3951,7 +3525,7 @@ const builder = [
                       label: "Key path",
                       regex: "^(/[\\w. \\-]+)*/?$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(/[\\w. \\-]+)*/?$",
                       inpType: "input",
                       name: "Key path",
@@ -3964,14 +3538,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Full path of the key file (must be readable by the scheduler).",
                         },
@@ -3985,7 +3555,7 @@ const builder = [
                       label: "Certificate data (base64)",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Certificate data (base64)",
@@ -3998,14 +3568,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Certificate data encoded in base64.",
                         },
@@ -4019,7 +3585,7 @@ const builder = [
                       label: "Key data (base64)",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Key data (base64)",
@@ -4032,14 +3598,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Key data encoded in base64.",
                         },
@@ -4067,7 +3629,7 @@ const builder = [
                       regex:
                         "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
                       inpType: "input",
@@ -4081,14 +3643,10 @@ const builder = [
                       value: "sqlite:////var/lib/bunkerweb/db.sqlite3",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The database URI, following the sqlalchemy format.",
                         },
@@ -4103,7 +3661,7 @@ const builder = [
                       regex:
                         "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern:
                         "^((postgresql|mysql|mariadb|sqlite)(\\+[\\w\\-]+)?:.+)?$",
                       inpType: "input",
@@ -4117,14 +3675,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.",
                         },
@@ -4138,7 +3692,7 @@ const builder = [
                       label: "Database log level",
                       regex: "^(debug|info|warn|warning|error)$",
                       type: "select",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(debug|info|warn|warning|error)$",
                       inpType: "select",
                       name: "Database log level",
@@ -4152,14 +3706,10 @@ const builder = [
                       value: "warning",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The level to use for database logs.",
                         },
@@ -4186,7 +3736,7 @@ const builder = [
                       label: "Activate DNSBL",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate DNSBL",
@@ -4199,14 +3749,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate DNSBL feature.",
                         },
@@ -4221,7 +3767,7 @@ const builder = [
                       label: "DNSBL list",
                       regex: "^(?! )( ?((?!\\.)[\\w.]+)(?!.*\\2(?!.)))*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(?! )( ?((?!\\.)[\\w.]+)(?!.*\\2(?!.)))*$",
                       inpType: "input",
                       name: "DNSBL list",
@@ -4235,14 +3781,10 @@ const builder = [
                         "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of DNSBL servers.",
                         },
@@ -4270,7 +3812,7 @@ const builder = [
                       regex:
                         "^(?! )( ?([1-5]\\d{2})(?!.*\\2(?![^=]))=(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*)(?!.*\\3(?!.)))*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern:
                         "^(?! )( ?([1-5]\\d{2})(?!.*\\2(?![^=]))=(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*)(?!.*\\3(?!.)))*$",
                       inpType: "input",
@@ -4284,20 +3826,14 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "red",
                           iconName: "trespass",
-                          svgSize: "sm",
                           text: "inp_popover_method_disabled",
                         },
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
                         },
@@ -4312,7 +3848,7 @@ const builder = [
                       label: "Intercepted error codes",
                       regex: "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
                       inpType: "input",
                       name: "Intercepted error codes",
@@ -4325,14 +3861,10 @@ const builder = [
                       value: "400 401 403 404 405 413 429 500 501 502 503 504",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of HTTP error code intercepted by BunkerWeb",
                         },
@@ -4360,7 +3892,7 @@ const builder = [
                       label: "Activate greylisting",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-11 setting",
+                      containerClass: "z-11",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate greylisting",
@@ -4373,14 +3905,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate greylist feature.",
                         },
@@ -4395,7 +3923,7 @@ const builder = [
                       regex:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       type: "text",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       inpType: "input",
@@ -4409,14 +3937,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of IP/network, separated with spaces, to put into the greylist.",
                         },
@@ -4430,7 +3954,7 @@ const builder = [
                       label: "Greylist reverse DNS",
                       regex: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
                       type: "text",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
                       inpType: "input",
                       name: "Greylist reverse DNS",
@@ -4443,14 +3967,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
                         },
@@ -4464,7 +3984,7 @@ const builder = [
                       label: "Greylist reverse DNS global IPs",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Greylist reverse DNS global IPs",
@@ -4477,14 +3997,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Only perform RDNS greylist checks on global IP addresses.",
                         },
@@ -4498,7 +4014,7 @@ const builder = [
                       label: "Greylist ASN",
                       regex: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
                       type: "text",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
                       inpType: "input",
                       name: "Greylist ASN",
@@ -4511,14 +4027,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of ASN numbers, separated with spaces, to put into the greylist.",
                         },
@@ -4532,7 +4044,7 @@ const builder = [
                       label: "Greylist User-Agent",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Greylist User-Agent",
@@ -4545,14 +4057,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
                         },
@@ -4566,7 +4074,7 @@ const builder = [
                       label: "Greylist URI",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Greylist URI",
@@ -4579,14 +4087,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
                         },
@@ -4601,7 +4105,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -4615,14 +4119,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
                         },
@@ -4637,7 +4137,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -4651,14 +4151,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
                         },
@@ -4673,7 +4169,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -4687,14 +4183,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing ASN to put into the greylist.",
                         },
@@ -4709,7 +4201,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -4723,14 +4215,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
                         },
@@ -4745,7 +4233,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -4759,14 +4247,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
                         },
@@ -4794,7 +4278,7 @@ const builder = [
                       label: "Use gzip",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use gzip",
@@ -4807,14 +4291,10 @@ const builder = [
                       value: "dsfrgrdgrdgrdhgd",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use gzip",
                         },
@@ -4830,7 +4310,7 @@ const builder = [
                       regex:
                         "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern:
                         "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
                       inpType: "input",
@@ -4845,14 +4325,10 @@ const builder = [
                         "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of MIME types that will be compressed with gzip.",
                         },
@@ -4866,7 +4342,7 @@ const builder = [
                       label: "Minimum length",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Minimum length",
@@ -4879,14 +4355,10 @@ const builder = [
                       value: "1000",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Minimum length for gzip compression.",
                         },
@@ -4900,7 +4372,7 @@ const builder = [
                       label: "Compression level",
                       regex: "^[1-9]$",
                       type: "select",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^[1-9]$",
                       inpType: "select",
                       name: "Compression level",
@@ -4914,14 +4386,10 @@ const builder = [
                       value: "5",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The compression level of the gzip algorithm.",
                         },
@@ -4935,7 +4403,7 @@ const builder = [
                       label: "Proxied requests",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Proxied requests",
@@ -4948,14 +4416,10 @@ const builder = [
                       value: "no-cache no-store private expired auth",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Which kind of proxied requests we should compress.",
                         },
@@ -4983,7 +4447,7 @@ const builder = [
                       label: "HTML code",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "HTML code",
@@ -4996,14 +4460,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The HTML code to inject.",
                         },
@@ -5031,7 +4491,7 @@ const builder = [
                       regex: "^([\\w\\-]+: .+)?$",
                       type: "text",
                       multiple: "custom-headers",
-                      containerClass: "z-13 setting",
+                      containerClass: "z-13",
                       pattern: "^([\\w\\-]+: .+)?$",
                       inpType: "input",
                       name: "Custom header (HeaderName: HeaderValue)",
@@ -5044,14 +4504,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Custom header to add (HeaderName: HeaderValue).",
                         },
@@ -5066,7 +4522,7 @@ const builder = [
                       label: "Remove headers",
                       regex: "^(?! )( ?[\\w\\-]+)*$",
                       type: "text",
-                      containerClass: "z-12 setting",
+                      containerClass: "z-12",
                       pattern: "^(?! )( ?[\\w\\-]+)*$",
                       inpType: "input",
                       name: "Remove headers",
@@ -5080,14 +4536,10 @@ const builder = [
                         "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Headers to remove (Header1 Header2 Header3 ...)",
                         },
@@ -5102,7 +4554,7 @@ const builder = [
                       label: "Keep upstream headers",
                       regex: "^((?! )( ?[\\w\\-]+)+|\\*)?$",
                       type: "text",
-                      containerClass: "z-11 setting",
+                      containerClass: "z-11",
                       pattern: "^((?! )( ?[\\w\\-]+)+|\\*)?$",
                       inpType: "input",
                       name: "Keep upstream headers",
@@ -5116,14 +4568,10 @@ const builder = [
                         "Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
                         },
@@ -5137,7 +4585,7 @@ const builder = [
                       label: "Strict-Transport-Security",
                       regex: "^max-age=\\d+(; includeSubDomains(; preload)?)?$",
                       type: "text",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern:
                         "^max-age=\\d+(; includeSubDomains(; preload)?)?$",
                       inpType: "input",
@@ -5151,14 +4599,10 @@ const builder = [
                       value: "max-age=31536000",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the Strict-Transport-Security header.",
                         },
@@ -5174,7 +4618,7 @@ const builder = [
                         "^(\\*|[^;]+)( (HttpOnly|(SameSite)(?!.*\\4)(=(Lax|Strict))?)(?!.*\\3))*$",
                       type: "text",
                       multiple: "cookie-flags",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern:
                         "^(\\*|[^;]+)( (HttpOnly|(SameSite)(?!.*\\4)(=(Lax|Strict))?)(?!.*\\3))*$",
                       inpType: "input",
@@ -5188,14 +4632,10 @@ const builder = [
                       value: "* HttpOnly SameSite=Lax",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
                         },
@@ -5209,7 +4649,7 @@ const builder = [
                       label: "Cookie auto Secure flag",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Cookie auto Secure flag",
@@ -5222,14 +4662,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Automatically add the Secure flag to all cookies.",
                         },
@@ -5244,7 +4680,7 @@ const builder = [
                       label: "Content-Security-Policy",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Content-Security-Policy",
@@ -5258,14 +4694,10 @@ const builder = [
                         "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the Content-Security-Policy header.",
                         },
@@ -5279,7 +4711,7 @@ const builder = [
                       label: "Content-Security-Policy-Report-Only",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Content-Security-Policy-Report-Only",
@@ -5292,14 +4724,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
                         },
@@ -5314,7 +4742,7 @@ const builder = [
                       regex:
                         "^(?!^(,| ))((, )?(no-referrer-when-downgrade|no-referrer|origin-when-cross-origin|same-origin|strict-origin-when-cross-origin|strict-origin|origin|unsafe-url)(?!\\b.*, \\4\\b))*$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern:
                         "^(?!^(,| ))((, )?(no-referrer-when-downgrade|no-referrer|origin-when-cross-origin|same-origin|strict-origin-when-cross-origin|strict-origin|origin|unsafe-url)(?!\\b.*, \\4\\b))*$",
                       inpType: "input",
@@ -5328,14 +4756,10 @@ const builder = [
                       value: "strict-origin-when-cross-origin",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the Referrer-Policy header.",
                         },
@@ -5351,7 +4775,7 @@ const builder = [
                       regex:
                         "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
                       type: "text",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern:
                         "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
                       inpType: "input",
@@ -5366,14 +4790,10 @@ const builder = [
                         "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the Permissions-Policy header.",
                         },
@@ -5389,7 +4809,7 @@ const builder = [
                       regex:
                         "^(?![; ])( ?([\\w\\-]+)(?!.*[^\\-]\\2 )( ('(none|self|strict-dynamic|report-sample|unsafe-inline|unsafe-eval|unsafe-hashes|unsafe-allow-redirects)'|https?:\\/\\/[\\w@:%.+~#=\\-]+[\\w\\(\\)!@:%+.~#?&\\/=$\\-]*))+;)*$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern:
                         "^(?![; ])( ?([\\w\\-]+)(?!.*[^\\-]\\2 )( ('(none|self|strict-dynamic|report-sample|unsafe-inline|unsafe-eval|unsafe-hashes|unsafe-allow-redirects)'|https?:\\/\\/[\\w@:%.+~#=\\-]+[\\w\\(\\)!@:%+.~#?&\\/=$\\-]*))+;)*$",
                       inpType: "input",
@@ -5404,14 +4824,10 @@ const builder = [
                         "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the Feature-Policy header.",
                         },
@@ -5425,7 +4841,7 @@ const builder = [
                       label: "X-Frame-Options",
                       regex: "^(DENY|SAMEORIGIN)?$",
                       type: "select",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(DENY|SAMEORIGIN)?$",
                       inpType: "select",
                       name: "X-Frame-Options",
@@ -5439,14 +4855,10 @@ const builder = [
                       value: "SAMEORIGIN",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the X-Frame-Options header.",
                         },
@@ -5460,7 +4872,7 @@ const builder = [
                       label: "X-Content-Type-Options",
                       regex: "^(nosniff)?$",
                       type: "select",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(nosniff)?$",
                       inpType: "select",
                       name: "X-Content-Type-Options",
@@ -5474,14 +4886,10 @@ const builder = [
                       value: "nosniff",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the X-Content-Type-Options header.",
                         },
@@ -5496,7 +4904,7 @@ const builder = [
                       regex:
                         "^0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern:
                         "^0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?$",
                       inpType: "input",
@@ -5510,14 +4918,10 @@ const builder = [
                       value: "1; mode=block",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Value for the X-XSS-Protection header.",
                         },
@@ -5557,7 +4961,7 @@ const builder = [
                       label: "Automatic Let's Encrypt",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Automatic Let's Encrypt",
@@ -5570,14 +4974,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate automatic Let's Encrypt mode.",
                         },
@@ -5592,7 +4992,7 @@ const builder = [
                       regex:
                         "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
                       inpType: "input",
@@ -5606,14 +5006,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Email used for Let's Encrypt notification and in certificate.",
                         },
@@ -5627,7 +5023,7 @@ const builder = [
                       label: "Use Let's Encrypt Staging",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use Let's Encrypt Staging",
@@ -5640,14 +5036,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use the staging environment for Let\u2019s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
                         },
@@ -5662,7 +5054,7 @@ const builder = [
                         "Clear old certificates when they are no longer needed",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Clear old certificates when they are no longer needed",
@@ -5675,14 +5067,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Clear old certificates when renewing.",
                         },
@@ -5710,7 +5098,7 @@ const builder = [
                       label: "Activate limit requests",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate limit requests",
@@ -5723,14 +5111,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate limit requests feature.",
                         },
@@ -5745,7 +5129,7 @@ const builder = [
                       regex: "^.+$",
                       type: "text",
                       multiple: "limit-req",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^.+$",
                       inpType: "input",
                       name: "Limit request URL",
@@ -5758,14 +5142,10 @@ const builder = [
                       value: "/",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
                         },
@@ -5780,7 +5160,7 @@ const builder = [
                       regex: "^\\d+r/[smhd]$",
                       type: "text",
                       multiple: "limit-req",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^\\d+r/[smhd]$",
                       inpType: "input",
                       name: "Limit request Rate",
@@ -5793,14 +5173,10 @@ const builder = [
                       value: "2r/s",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
                         },
@@ -5814,7 +5190,7 @@ const builder = [
                       label: "Activate limit connections",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate limit connections",
@@ -5827,14 +5203,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate limit connections feature.",
                         },
@@ -5848,7 +5220,7 @@ const builder = [
                       label: "Maximum number of HTTP/1.X connections",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Maximum number of HTTP/1.X connections",
@@ -5861,14 +5233,10 @@ const builder = [
                       value: "10",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum number of connections per IP when using HTTP/1.X protocol.",
                         },
@@ -5882,7 +5250,7 @@ const builder = [
                       label: "Maximum number of HTTP/2 streams",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Maximum number of HTTP/2 streams",
@@ -5895,14 +5263,10 @@ const builder = [
                       value: "100",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum number of streams per IP when using HTTP/2 protocol.",
                         },
@@ -5916,7 +5280,7 @@ const builder = [
                       label: "Maximum number of stream connections",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Maximum number of stream connections",
@@ -5929,14 +5293,10 @@ const builder = [
                       value: "10",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum number of connections per IP when using stream.",
                         },
@@ -5963,7 +5323,7 @@ const builder = [
                       label: "Use metrics",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use metrics",
@@ -5976,14 +5336,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable collection and retrieval of internal metrics.",
                         },
@@ -5997,7 +5353,7 @@ const builder = [
                       label: "Metrics memory size",
                       regex: "^\\d+[kKmMgG]?$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^\\d+[kKmMgG]?$",
                       inpType: "input",
                       name: "Metrics memory size",
@@ -6010,14 +5366,10 @@ const builder = [
                       value: "16m",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Size of the internal storage for metrics.",
                         },
@@ -6031,7 +5383,7 @@ const builder = [
                       label: "Metrics max blocked requests",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Metrics max blocked requests",
@@ -6044,14 +5396,10 @@ const builder = [
                       value: "100",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum number of blocked requests to store (per worker).",
                         },
@@ -6078,7 +5426,7 @@ const builder = [
                       label: "Disable default server",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-20 setting",
+                      containerClass: "z-20",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Disable default server",
@@ -6091,14 +5439,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Deny HTTP request if the request vhost is unknown.",
                         },
@@ -6112,7 +5456,7 @@ const builder = [
                       label: "Disable default server strict SNI",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-19 setting",
+                      containerClass: "z-19",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Disable default server strict SNI",
@@ -6125,14 +5469,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Close SSL/TLS connection if the SNI is unknown.",
                         },
@@ -6146,7 +5486,7 @@ const builder = [
                       label: "Redirect HTTP to HTTPS",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-18 setting",
+                      containerClass: "z-18",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Redirect HTTP to HTTPS",
@@ -6159,14 +5499,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redirect all HTTP request to HTTPS.",
                         },
@@ -6180,7 +5516,7 @@ const builder = [
                       label: "Auto redirect HTTP to HTTPS",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-17 setting",
+                      containerClass: "z-17",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Auto redirect HTTP to HTTPS",
@@ -6193,14 +5529,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
                         },
@@ -6214,7 +5546,7 @@ const builder = [
                       label: "Allowed methods",
                       regex: "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
                       type: "text",
-                      containerClass: "z-16 setting",
+                      containerClass: "z-16",
                       pattern: "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
                       inpType: "input",
                       name: "Allowed methods",
@@ -6227,14 +5559,10 @@ const builder = [
                       value: "GET|POST|HEAD",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
                         },
@@ -6248,7 +5576,7 @@ const builder = [
                       label: "Maximum body size",
                       regex: "^\\d+[kKmMgG]?$",
                       type: "text",
-                      containerClass: "z-15 setting",
+                      containerClass: "z-15",
                       pattern: "^\\d+[kKmMgG]?$",
                       inpType: "input",
                       name: "Maximum body size",
@@ -6261,14 +5589,10 @@ const builder = [
                       value: "10m",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum body size (0 for infinite).",
                         },
@@ -6282,7 +5606,7 @@ const builder = [
                       label: "Serve files",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-14 setting",
+                      containerClass: "z-14",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Serve files",
@@ -6295,14 +5619,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Serve files from the local folder.",
                         },
@@ -6316,7 +5636,7 @@ const builder = [
                       label: "Root folder",
                       regex: "^(/[\\w. \\-]+)*/?$",
                       type: "text",
-                      containerClass: "z-13 setting",
+                      containerClass: "z-13",
                       pattern: "^(/[\\w. \\-]+)*/?$",
                       inpType: "input",
                       name: "Root folder",
@@ -6329,14 +5649,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
                         },
@@ -6350,7 +5666,7 @@ const builder = [
                       label: "HTTPS protocols",
                       regex: "^(?! )( ?TLSv1\\.[0-3])*$",
                       type: "text",
-                      containerClass: "z-12 setting",
+                      containerClass: "z-12",
                       pattern: "^(?! )( ?TLSv1\\.[0-3])*$",
                       inpType: "input",
                       name: "HTTPS protocols",
@@ -6363,14 +5679,10 @@ const builder = [
                       value: "TLSv1.2 TLSv1.3",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
                         },
@@ -6384,7 +5696,7 @@ const builder = [
                       label: "HTTP2",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-11 setting",
+                      containerClass: "z-11",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "HTTP2",
@@ -6397,14 +5709,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Support HTTP2 protocol when HTTPS is enabled.",
                         },
@@ -6418,7 +5726,7 @@ const builder = [
                       label: "HTTP3",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "HTTP3",
@@ -6431,14 +5739,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Support HTTP3 protocol when HTTPS is enabled.",
                         },
@@ -6452,7 +5756,7 @@ const builder = [
                       label: "HTTP3 Alt-Svc port",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "HTTP3 Alt-Svc port",
@@ -6465,14 +5769,10 @@ const builder = [
                       value: "443",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.",
                         },
@@ -6486,7 +5786,7 @@ const builder = [
                       label: "HTTP listen",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "HTTP listen",
@@ -6499,14 +5799,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Respond to (insecure) HTTP requests.",
                         },
@@ -6520,7 +5816,7 @@ const builder = [
                       label: "Use open file cache",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use open file cache",
@@ -6533,14 +5829,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable open file cache feature",
                         },
@@ -6554,7 +5846,7 @@ const builder = [
                       label: "Use open file cache",
                       regex: "^(off|max=\\d+( inactive=\\d+(ms?|[shdwMy]))?)$",
                       type: "text",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern:
                         "^(off|max=\\d+( inactive=\\d+(ms?|[shdwMy]))?)$",
                       inpType: "input",
@@ -6568,14 +5860,10 @@ const builder = [
                       value: "max=1000 inactive=20s",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Open file cache directive",
                         },
@@ -6589,7 +5877,7 @@ const builder = [
                       label: "Open file cache errors",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Open file cache errors",
@@ -6602,14 +5890,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable open file cache for errors",
                         },
@@ -6623,7 +5907,7 @@ const builder = [
                       label: "Open file cache min uses",
                       regex: "^[1-9]\\d*$",
                       type: "text",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^[1-9]\\d*$",
                       inpType: "input",
                       name: "Open file cache min uses",
@@ -6636,14 +5920,10 @@ const builder = [
                       value: "2",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable open file cache minimum uses",
                         },
@@ -6657,7 +5937,7 @@ const builder = [
                       label: "Open file cache valid time",
                       regex: "^\\d+(ms?|[shdwMy])$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^\\d+(ms?|[shdwMy])$",
                       inpType: "input",
                       name: "Open file cache valid time",
@@ -6670,14 +5950,10 @@ const builder = [
                       value: "30s",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Open file cache valid time",
                         },
@@ -6692,7 +5968,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -6706,14 +5982,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
                         },
@@ -6727,7 +5999,7 @@ const builder = [
                       label: "Deny HTTP status",
                       regex: "^(403|444)$",
                       type: "select",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(403|444)$",
                       inpType: "select",
                       name: "Deny HTTP status",
@@ -6741,14 +6013,10 @@ const builder = [
                       value: "403",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
                         },
@@ -6762,7 +6030,7 @@ const builder = [
                       label: "Send anonymous report",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Send anonymous report",
@@ -6775,14 +6043,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Send anonymous report to BunkerWeb maintainers.",
                         },
@@ -6809,7 +6073,7 @@ const builder = [
                       label: "Use ModSecurity",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use ModSecurity",
@@ -6822,14 +6086,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable ModSecurity WAF.",
                         },
@@ -6843,7 +6103,7 @@ const builder = [
                       label: "Use Core Rule Set",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use Core Rule Set",
@@ -6856,14 +6116,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable OWASP Core Rule Set.",
                         },
@@ -6877,7 +6133,7 @@ const builder = [
                       label: "Core Rule Set Version",
                       regex: "^(3|4|nightly)$",
                       type: "select",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(3|4|nightly)$",
                       inpType: "select",
                       name: "Core Rule Set Version",
@@ -6891,14 +6147,10 @@ const builder = [
                       value: "3",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
                         },
@@ -6912,7 +6164,7 @@ const builder = [
                       label: "SecAuditEngine",
                       regex: "^(On|RelevantOnly|Off)$",
                       type: "select",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(On|RelevantOnly|Off)$",
                       inpType: "select",
                       name: "SecAuditEngine",
@@ -6926,14 +6178,10 @@ const builder = [
                       value: "RelevantOnly",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "SecAuditEngine directive of ModSecurity.",
                         },
@@ -6947,7 +6195,7 @@ const builder = [
                       label: "SecRuleEngine",
                       regex: "^(On|DetectionOnly|Off)$",
                       type: "select",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(On|DetectionOnly|Off)$",
                       inpType: "select",
                       name: "SecRuleEngine",
@@ -6961,14 +6209,10 @@ const builder = [
                       value: "On",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "SecRuleEngine directive of ModSecurity.",
                         },
@@ -6982,7 +6226,7 @@ const builder = [
                       label: "SecAuditLogParts",
                       regex: "^A(([B-K])(?!.*\\2))+Z$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^A(([B-K])(?!.*\\2))+Z$",
                       inpType: "input",
                       name: "SecAuditLogParts",
@@ -6995,14 +6239,10 @@ const builder = [
                       value: "ABCFHZ",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "SecAuditLogParts directive of ModSecurity.",
                         },
@@ -7030,7 +6270,7 @@ const builder = [
                       regex:
                         "^((?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?)?$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern:
                         "^((?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?)?$",
                       inpType: "input",
@@ -7044,14 +6284,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Hostname of the remote PHP-FPM instance.",
                         },
@@ -7065,7 +6301,7 @@ const builder = [
                       label: "Remote PHP path",
                       regex: "^(/[\\w. \\-]+)*/?$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(/[\\w. \\-]+)*/?$",
                       inpType: "input",
                       name: "Remote PHP path",
@@ -7078,14 +6314,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Root folder containing files in the remote PHP-FPM instance.",
                         },
@@ -7099,7 +6331,7 @@ const builder = [
                       label: "Local PHP",
                       regex: "^(/[\\w. \\-]+)*/?$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(/[\\w. \\-]+)*/?$",
                       inpType: "input",
                       name: "Local PHP",
@@ -7112,14 +6344,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Path to the PHP-FPM socket file.",
                         },
@@ -7133,7 +6361,7 @@ const builder = [
                       label: "Local PHP path",
                       regex: "^(/[\\w. \\-]+)*/?$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(/[\\w. \\-]+)*/?$",
                       inpType: "input",
                       name: "Local PHP path",
@@ -7146,14 +6374,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Root folder containing files in the local PHP-FPM instance.",
                         },
@@ -7180,7 +6404,7 @@ const builder = [
                       label: "Pro License Key",
                       regex: "^.*$",
                       type: "password",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Pro License Key",
@@ -7193,14 +6417,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The License Key for the Pro version of BunkerWeb.",
                         },
@@ -7228,7 +6448,7 @@ const builder = [
                       label: "Use real ip",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use real ip",
@@ -7241,14 +6461,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Retrieve the real IP of client.",
                         },
@@ -7262,7 +6478,7 @@ const builder = [
                       label: "Use PROXY protocol",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use PROXY protocol",
@@ -7275,14 +6491,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable PROXY protocol communication.",
                         },
@@ -7297,7 +6509,7 @@ const builder = [
                       regex:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       inpType: "input",
@@ -7311,14 +6523,10 @@ const builder = [
                       value: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
                         },
@@ -7333,7 +6541,7 @@ const builder = [
                       regex:
                         "^(?! )(( ?(?!proxy_protocol)[\\w\\-]+)*|proxy_protocol)$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^(?! )(( ?(?!proxy_protocol)[\\w\\-]+)*|proxy_protocol)$",
                       inpType: "input",
@@ -7347,14 +6555,10 @@ const builder = [
                       value: "X-Forwarded-For",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
                         },
@@ -7368,7 +6572,7 @@ const builder = [
                       label: "Real IP recursive",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Real IP recursive",
@@ -7381,14 +6585,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Perform a recursive search in the header container IP address.",
                         },
@@ -7403,7 +6603,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -7417,14 +6617,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
                         },
@@ -7452,7 +6648,7 @@ const builder = [
                       regex:
                         "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
                       inpType: "input",
@@ -7466,14 +6662,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redirect a whole site to another one.",
                         },
@@ -7487,7 +6679,7 @@ const builder = [
                       label: "Append request URI",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Append request URI",
@@ -7500,14 +6692,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Append the requested URI to the redirect address.",
                         },
@@ -7521,7 +6709,7 @@ const builder = [
                       label: "Append request URI",
                       regex: "^(301|302)$",
                       type: "select",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(301|302)$",
                       inpType: "select",
                       name: "Append request URI",
@@ -7535,14 +6723,10 @@ const builder = [
                       value: "301",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Status code to send to client when redirecting.",
                         },
@@ -7570,7 +6754,7 @@ const builder = [
                       label: "Activate Redis",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-14 setting",
+                      containerClass: "z-14",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate Redis",
@@ -7583,14 +6767,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate Redis.",
                         },
@@ -7605,7 +6785,7 @@ const builder = [
                       regex:
                         "^((?!-)[a-zA-Z0-9\\-]{1,63}(.[a-zA-Z]{2,})+|(\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3}|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)))?$",
                       type: "text",
-                      containerClass: "z-13 setting",
+                      containerClass: "z-13",
                       pattern:
                         "^((?!-)[a-zA-Z0-9\\-]{1,63}(.[a-zA-Z]{2,})+|(\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3}|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)))?$",
                       inpType: "input",
@@ -7619,14 +6799,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis server IP or hostname.",
                         },
@@ -7640,7 +6816,7 @@ const builder = [
                       label: "Redis port",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-12 setting",
+                      containerClass: "z-12",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Redis port",
@@ -7653,14 +6829,10 @@ const builder = [
                       value: "6379",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis server port.",
                         },
@@ -7674,7 +6846,7 @@ const builder = [
                       label: "Redis database",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-11 setting",
+                      containerClass: "z-11",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Redis database",
@@ -7687,14 +6859,10 @@ const builder = [
                       value: "0",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis database number.",
                         },
@@ -7708,7 +6876,7 @@ const builder = [
                       label: "Redis SSL/TLS",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Redis SSL/TLS",
@@ -7721,14 +6889,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use SSL/TLS connection with Redis server.",
                         },
@@ -7742,7 +6906,7 @@ const builder = [
                       label: "Redis SSL/TLS verify",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Redis SSL/TLS verify",
@@ -7755,14 +6919,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Verify the certificate of Redis server.",
                         },
@@ -7776,7 +6936,7 @@ const builder = [
                       label: "Redis timeout (ms)",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Redis timeout (ms)",
@@ -7789,14 +6949,10 @@ const builder = [
                       value: "1000",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis server timeout (in ms) for connect, read and write.",
                         },
@@ -7810,7 +6966,7 @@ const builder = [
                       label: "Redis username",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Redis username",
@@ -7823,14 +6979,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis username used in AUTH command.",
                         },
@@ -7844,7 +6996,7 @@ const builder = [
                       label: "Redis password",
                       regex: "^.*$",
                       type: "password",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Redis password",
@@ -7857,14 +7009,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis password used in AUTH command.",
                         },
@@ -7878,7 +7026,7 @@ const builder = [
                       label: "Redis sentinel hosts",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Redis sentinel hosts",
@@ -7891,14 +7039,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis sentinel hosts with format host:[port] separated with spaces.",
                         },
@@ -7912,7 +7056,7 @@ const builder = [
                       label: "Redis sentinel username",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Redis sentinel username",
@@ -7925,14 +7069,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis sentinel username.",
                         },
@@ -7946,7 +7086,7 @@ const builder = [
                       label: "Redis sentinel password",
                       regex: "^.*$",
                       type: "password",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Redis sentinel password",
@@ -7959,14 +7099,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis sentinel password.",
                         },
@@ -7980,7 +7116,7 @@ const builder = [
                       label: "Redis sentinel master",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Redis sentinel master",
@@ -7993,14 +7129,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redis sentinel master name.",
                         },
@@ -8014,7 +7146,7 @@ const builder = [
                       label: "Redis keepalive idle (ms)",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Redis keepalive idle (ms)",
@@ -8027,14 +7159,10 @@ const builder = [
                       value: "30000",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Max idle time (in ms) before closing redis connection in the pool.",
                         },
@@ -8048,7 +7176,7 @@ const builder = [
                       label: "Redis keepalive pool",
                       regex: "^[0-9]+$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^[0-9]+$",
                       inpType: "input",
                       name: "Redis keepalive pool",
@@ -8061,14 +7189,10 @@ const builder = [
                       value: "10",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Max number of redis connection(s) kept in the pool.",
                         },
@@ -8095,7 +7219,7 @@ const builder = [
                       label: "Use reverse proxy",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-26 setting",
+                      containerClass: "z-26",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use reverse proxy",
@@ -8108,14 +7232,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate reverse proxy mode.",
                         },
@@ -8129,7 +7249,7 @@ const builder = [
                       label: "Intercept errors",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-25 setting",
+                      containerClass: "z-25",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Intercept errors",
@@ -8142,14 +7262,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Intercept and rewrite errors.",
                         },
@@ -8163,7 +7279,7 @@ const builder = [
                       label: "Reverse proxy custom host",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-24 setting",
+                      containerClass: "z-24",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Reverse proxy custom host",
@@ -8176,14 +7292,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Override Host header sent to upstream server.",
                         },
@@ -8198,7 +7310,7 @@ const builder = [
                       regex: "^.*$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-23 setting",
+                      containerClass: "z-23",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Reverse proxy host",
@@ -8211,14 +7323,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Full URL of the proxied resource (proxy_pass).",
                         },
@@ -8233,7 +7341,7 @@ const builder = [
                       regex: "^.*$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-22 setting",
+                      containerClass: "z-22",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Reverse proxy url",
@@ -8246,14 +7354,10 @@ const builder = [
                       value: "/",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Location URL that will be proxied.",
                         },
@@ -8268,7 +7372,7 @@ const builder = [
                       regex: "^(yes|no)$",
                       type: "check",
                       multiple: "reverse-proxy",
-                      containerClass: "z-21 setting",
+                      containerClass: "z-21",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Reverse proxy WS",
@@ -8281,14 +7385,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable websocket on the proxied resource.",
                         },
@@ -8303,7 +7403,7 @@ const builder = [
                       regex: "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-20 setting",
+                      containerClass: "z-20",
                       pattern: "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
                       inpType: "input",
                       name: "Reverse proxy headers",
@@ -8316,14 +7416,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
                         },
@@ -8338,7 +7434,7 @@ const builder = [
                       regex: "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-19 setting",
+                      containerClass: "z-19",
                       pattern: "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
                       inpType: "input",
                       name: "Reverse proxy headers-client",
@@ -8351,14 +7447,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
                         },
@@ -8373,7 +7465,7 @@ const builder = [
                       regex: "^(yes|no)$",
                       type: "check",
                       multiple: "reverse-proxy",
-                      containerClass: "z-18 setting",
+                      containerClass: "z-18",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Reverse proxy buffering",
@@ -8386,14 +7478,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable or disable buffering of responses from proxied resource.",
                         },
@@ -8408,7 +7496,7 @@ const builder = [
                       regex: "^(yes|no)$",
                       type: "check",
                       multiple: "reverse-proxy",
-                      containerClass: "z-17 setting",
+                      containerClass: "z-17",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Reverse proxy keepalive",
@@ -8421,14 +7509,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable or disable keepalive connections with the proxied resource.",
                         },
@@ -8444,7 +7528,7 @@ const builder = [
                         "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-16 setting",
+                      containerClass: "z-16",
                       pattern:
                         "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
                       inpType: "input",
@@ -8458,14 +7542,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable authentication using an external provider (value of auth_request directive).",
                         },
@@ -8481,7 +7561,7 @@ const builder = [
                         "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-15 setting",
+                      containerClass: "z-15",
                       pattern:
                         "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
                       inpType: "input",
@@ -8495,14 +7575,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
                         },
@@ -8517,7 +7593,7 @@ const builder = [
                       regex: "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-14 setting",
+                      containerClass: "z-14",
                       pattern: "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
                       inpType: "input",
                       name: "Reverse proxy auth request set",
@@ -8530,14 +7606,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
                         },
@@ -8552,7 +7624,7 @@ const builder = [
                       regex: "^\\d+(ms?|[shdwMy])$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-13 setting",
+                      containerClass: "z-13",
                       pattern: "^\\d+(ms?|[shdwMy])$",
                       inpType: "input",
                       name: "Reverse proxy connect timeout",
@@ -8565,14 +7637,10 @@ const builder = [
                       value: "60s",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Timeout when connecting to the proxied resource.",
                         },
@@ -8587,7 +7655,7 @@ const builder = [
                       regex: "^\\d+(ms?|[shdwMy])$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-12 setting",
+                      containerClass: "z-12",
                       pattern: "^\\d+(ms?|[shdwMy])$",
                       inpType: "input",
                       name: "Reverse proxy read timeout",
@@ -8600,14 +7668,10 @@ const builder = [
                       value: "60s",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Timeout when reading from the proxied resource.",
                         },
@@ -8622,7 +7686,7 @@ const builder = [
                       regex: "^\\d+(ms?|[shdwMy])$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-11 setting",
+                      containerClass: "z-11",
                       pattern: "^\\d+(ms?|[shdwMy])$",
                       inpType: "input",
                       name: "Reverse proxy send timeout",
@@ -8635,14 +7699,10 @@ const builder = [
                       value: "60s",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Timeout when sending to the proxied resource.",
                         },
@@ -8657,7 +7717,7 @@ const builder = [
                       regex: "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
                       type: "text",
                       multiple: "reverse-proxy",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern: "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
                       inpType: "input",
                       name: "Reverse proxy includes",
@@ -8670,14 +7730,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Additional configuration to include in the location block, separated with spaces.",
                         },
@@ -8691,7 +7747,7 @@ const builder = [
                       label: "Reverse proxy cache",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Reverse proxy cache",
@@ -8704,14 +7760,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable or disable caching of the proxied resources.",
                         },
@@ -8725,7 +7777,7 @@ const builder = [
                       label: "Hierarchy levels",
                       regex: "^(:?[12]){1,3}$",
                       type: "text",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern: "^(:?[12]){1,3}$",
                       inpType: "input",
                       name: "Hierarchy levels",
@@ -8738,14 +7790,10 @@ const builder = [
                       value: "1:2",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Hierarchy levels of the cache.",
                         },
@@ -8759,7 +7807,7 @@ const builder = [
                       label: "Reverse proxy cache zone size",
                       regex: "^\\d+[kKmMgG]?$",
                       type: "text",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern: "^\\d+[kKmMgG]?$",
                       inpType: "input",
                       name: "Reverse proxy cache zone size",
@@ -8772,14 +7820,10 @@ const builder = [
                       value: "10m",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum size of cached metadata when caching proxied resources.",
                         },
@@ -8793,7 +7837,7 @@ const builder = [
                       label: "Reverse proxy cache params",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Reverse proxy cache params",
@@ -8806,14 +7850,10 @@ const builder = [
                       value: "max_size=100m",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Additional parameters to add to the proxy_cache directive.",
                         },
@@ -8828,7 +7868,7 @@ const builder = [
                       regex:
                         "^(?! )( ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern:
                         "^(?! )( ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
                       inpType: "input",
@@ -8842,14 +7882,10 @@ const builder = [
                       value: "GET HEAD",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "HTTP methods that should trigger a cache operation.",
                         },
@@ -8863,7 +7899,7 @@ const builder = [
                       label: "Reverse proxy cache minimum uses",
                       regex: "^[1-9]\\d*$",
                       type: "text",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^[1-9]\\d*$",
                       inpType: "input",
                       name: "Reverse proxy cache minimum uses",
@@ -8876,14 +7912,10 @@ const builder = [
                       value: "2",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The minimum number of requests before a response is cached.",
                         },
@@ -8897,7 +7929,7 @@ const builder = [
                       label: "Reverse proxy cache key",
                       regex: "^(?! )( ?(\\$[a-z_]+)(?!.*\\2))+$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^(?! )( ?(\\$[a-z_]+)(?!.*\\2))+$",
                       inpType: "input",
                       name: "Reverse proxy cache key",
@@ -8910,14 +7942,10 @@ const builder = [
                       value: "$scheme$host$request_uri",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "The key used to uniquely identify a cached response.",
                         },
@@ -8932,7 +7960,7 @@ const builder = [
                       regex:
                         "^(?! )( ?([1-5]\\d{2})(?!.*\\2=)=\\d+(ms?|[shdwMy]))*$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^(?! )( ?([1-5]\\d{2})(?!.*\\2=)=\\d+(ms?|[shdwMy]))*$",
                       inpType: "input",
@@ -8946,14 +7974,10 @@ const builder = [
                       value: "200=24h 301=1h 302=24h",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
                         },
@@ -8967,7 +7991,7 @@ const builder = [
                       label: "Reverse proxy no cache",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Reverse proxy no cache",
@@ -8980,14 +8004,10 @@ const builder = [
                       value: "$http_pragma $http_authorization",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Conditions to disable caching of responses.",
                         },
@@ -9001,7 +8021,7 @@ const builder = [
                       label: "Reverse proxy bypass",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Reverse proxy bypass",
@@ -9014,14 +8034,10 @@ const builder = [
                       value: "0",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Conditions to bypass caching of responses.",
                         },
@@ -9049,7 +8065,7 @@ const builder = [
                       label: "Reverse scan",
                       regex: "^(no|yes)$",
                       type: "check",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(no|yes)$",
                       inpType: "checkbox",
                       name: "Reverse scan",
@@ -9062,14 +8078,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Enable scanning of clients ports and deny access if one is opened.",
                         },
@@ -9083,7 +8095,7 @@ const builder = [
                       label: "Reverse scan ports",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Reverse scan ports",
@@ -9096,14 +8108,10 @@ const builder = [
                       value: "22 80 443 3128 8000 8080",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of port to scan when using reverse scan feature.",
                         },
@@ -9117,7 +8125,7 @@ const builder = [
                       label: "Reverse scan timeout",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Reverse scan timeout",
@@ -9130,14 +8138,10 @@ const builder = [
                       value: "500",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Specify the maximum timeout (in ms) when scanning a port.",
                         },
@@ -9164,7 +8168,7 @@ const builder = [
                       label: "Activate self-signed certificate",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate self-signed certificate",
@@ -9177,14 +8181,10 @@ const builder = [
                       value: "no",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Generate and use self-signed certificate.",
                         },
@@ -9198,7 +8198,7 @@ const builder = [
                       label: "Certificate expiry",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Certificate expiry",
@@ -9211,14 +8211,10 @@ const builder = [
                       value: "365",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Self-signed certificate expiry in days.",
                         },
@@ -9232,7 +8228,7 @@ const builder = [
                       label: "Certificate subject",
                       regex: "^/CN=[^,]+$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^/CN=[^,]+$",
                       inpType: "input",
                       name: "Certificate subject",
@@ -9245,14 +8241,10 @@ const builder = [
                       value: "/CN=www.example.com/",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Self-signed certificate subject.",
                         },
@@ -9279,7 +8271,7 @@ const builder = [
                       label: "Sessions secret",
                       regex: "^\\w+$",
                       type: "password",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^\\w+$",
                       inpType: "input",
                       name: "Sessions secret",
@@ -9292,14 +8284,10 @@ const builder = [
                       value: "random",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Secret used to encrypt sessions variables for storing data related to challenges.",
                         },
@@ -9313,7 +8301,7 @@ const builder = [
                       label: "Sessions name",
                       regex: "^\\w+$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^\\w+$",
                       inpType: "input",
                       name: "Sessions name",
@@ -9326,14 +8314,10 @@ const builder = [
                       value: "random",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Name of the cookie given to clients.",
                         },
@@ -9347,7 +8331,7 @@ const builder = [
                       label: "Sessions idling timeout",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Sessions idling timeout",
@@ -9360,14 +8344,10 @@ const builder = [
                       value: "1800",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum time (in seconds) of inactivity before the session is invalidated.",
                         },
@@ -9381,7 +8361,7 @@ const builder = [
                       label: "Sessions rolling timeout",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Sessions rolling timeout",
@@ -9394,14 +8374,10 @@ const builder = [
                       value: "3600",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum time (in seconds) before a session must be renewed.",
                         },
@@ -9415,7 +8391,7 @@ const builder = [
                       label: "Sessions absolute timeout",
                       regex: "^\\d+$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern: "^\\d+$",
                       inpType: "input",
                       name: "Sessions absolute timeout",
@@ -9428,14 +8404,10 @@ const builder = [
                       value: "86400",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Maximum time (in seconds) before a session is destroyed.",
                         },
@@ -9449,7 +8421,7 @@ const builder = [
                       label: "Sessions check IP",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Sessions check IP",
@@ -9462,14 +8434,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Destroy session if IP address is different than original one.",
                         },
@@ -9483,7 +8451,7 @@ const builder = [
                       label: "Sessions check User-Agent",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Sessions check User-Agent",
@@ -9496,14 +8464,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Destroy session if User-Agent is different than original one.",
                         },
@@ -9530,7 +8494,7 @@ const builder = [
                       label: "Use UI",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use UI",
@@ -9543,14 +8507,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use UI",
                         },
@@ -9564,7 +8524,7 @@ const builder = [
                       label: "UI host",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "UI host",
@@ -9577,14 +8537,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Address of the web UI used for initial setup",
                         },
@@ -9612,7 +8568,7 @@ const builder = [
                       label: "Activate whitelisting",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-11 setting",
+                      containerClass: "z-11",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Activate whitelisting",
@@ -9625,14 +8581,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Activate whitelist feature.",
                         },
@@ -9648,7 +8600,7 @@ const builder = [
                       regex:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       type: "text",
-                      containerClass: "z-10 setting",
+                      containerClass: "z-10",
                       pattern:
                         "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
                       inpType: "input",
@@ -9663,14 +8615,10 @@ const builder = [
                         "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of IP/network, separated with spaces, to put into the whitelist.",
                         },
@@ -9685,7 +8633,7 @@ const builder = [
                       label: "Whitelist reverse DNS",
                       regex: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
                       type: "text",
-                      containerClass: "z-9 setting",
+                      containerClass: "z-9",
                       pattern: "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
                       inpType: "input",
                       name: "Whitelist reverse DNS",
@@ -9699,14 +8647,10 @@ const builder = [
                         ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of reverse DNS suffixes, separated with spaces, to whitelist.",
                         },
@@ -9720,7 +8664,7 @@ const builder = [
                       label: "Whitelist reverse DNS global IPs",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-8 setting",
+                      containerClass: "z-8",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Whitelist reverse DNS global IPs",
@@ -9733,14 +8677,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Only perform RDNS whitelist checks on global IP addresses.",
                         },
@@ -9754,7 +8694,7 @@ const builder = [
                       label: "Whitelist ASN",
                       regex: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
                       type: "text",
-                      containerClass: "z-7 setting",
+                      containerClass: "z-7",
                       pattern: "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
                       inpType: "input",
                       name: "Whitelist ASN",
@@ -9767,14 +8707,10 @@ const builder = [
                       value: "32934",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of ASN numbers, separated with spaces, to whitelist.",
                         },
@@ -9788,7 +8724,7 @@ const builder = [
                       label: "Whitelist User-Agent",
                       regex: "^.*$",
                       type: "text",
-                      containerClass: "z-6 setting",
+                      containerClass: "z-6",
                       pattern: "^.*$",
                       inpType: "input",
                       name: "Whitelist User-Agent",
@@ -9801,14 +8737,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of User-Agent (PCRE regex), separated with spaces, to whitelist.",
                         },
@@ -9822,7 +8754,7 @@ const builder = [
                       label: "Whitelist URI",
                       regex: "^( *(.*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-5 setting",
+                      containerClass: "z-5",
                       pattern: "^( *(.*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
                       name: "Whitelist URI",
@@ -9835,14 +8767,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URI (PCRE regex), separated with spaces, to whitelist.",
                         },
@@ -9857,7 +8785,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-4 setting",
+                      containerClass: "z-4",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -9871,14 +8799,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing good IP/network to whitelist.",
                         },
@@ -9893,7 +8817,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-3 setting",
+                      containerClass: "z-3",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -9907,14 +8831,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.",
                         },
@@ -9929,7 +8849,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-2 setting",
+                      containerClass: "z-2",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -9943,14 +8863,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing ASN to whitelist.",
                         },
@@ -9965,7 +8881,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -9979,14 +8895,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing good User-Agent to whitelist.",
                         },
@@ -10001,7 +8913,7 @@ const builder = [
                       regex:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       type: "text",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern:
                         "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
                       inpType: "input",
@@ -10015,14 +8927,10 @@ const builder = [
                       value: "",
                       popovers: [
                         {
-                          iconColor: "blue",
-                          svgSize: "sm",
                           iconName: "globe",
                           text: "inp_popover_global",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "List of URLs, separated with spaces, containing bad URI to whitelist.",
                         },
@@ -10047,7 +8955,7 @@ const builder = [
                       label: "Use UI",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use UI",
@@ -10060,14 +8968,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use UI",
                         },
@@ -10081,7 +8985,7 @@ const builder = [
                       label: "Use CORS",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use CORS",
@@ -10094,20 +8998,14 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "red",
                           iconName: "trespass",
-                          svgSize: "sm",
                           text: "inp_popover_method_disabled",
                         },
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use CORS",
                         },
@@ -10127,7 +9025,7 @@ const builder = [
                       label: "Use UI",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-1 setting",
+                      containerClass: "z-1",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use UI",
@@ -10140,14 +9038,10 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use UI",
                         },
@@ -10161,7 +9055,7 @@ const builder = [
                       label: "Use CORS",
                       regex: "^(yes|no)$",
                       type: "check",
-                      containerClass: "z-0 setting",
+                      containerClass: "z-0",
                       pattern: "^(yes|no)$",
                       inpType: "checkbox",
                       name: "Use CORS",
@@ -10174,20 +9068,14 @@ const builder = [
                       value: "yes",
                       popovers: [
                         {
-                          iconColor: "red",
                           iconName: "trespass",
-                          svgSize: "sm",
                           text: "inp_popover_method_disabled",
                         },
                         {
-                          iconColor: "orange",
-                          svgSize: "sm",
                           iconName: "disk",
                           text: "inp_popover_multisite",
                         },
                         {
-                          iconColor: "info",
-                          svgSize: "sm",
                           iconName: "info",
                           text: "Use CORS",
                         },

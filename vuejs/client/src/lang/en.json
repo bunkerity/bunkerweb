@@ -98,6 +98,7 @@
   "dashboard_table": "Table element",
   "dashboard_no_match" : "No match found",
   "dashboard_no_match_filter" : "No match found with filter",
+  "dashboard_something_wrong": "Something is wrong",
   "inp_input_valid": "input valid",
   "inp_input_error_required": "input is required",
   "inp_input_error": "input is invalid",

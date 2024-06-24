@@ -1,7 +1,5 @@
 <script setup>
-import Flex from "@components/Widget/Flex.vue";
 import Popover from "@components/Widget/Popover.vue";
-import { v4 as uuidv4 } from "uuid";
 
 /** 
   @name Widget/PopoverGroup.vue
@@ -15,17 +13,15 @@ import { v4 as uuidv4 } from "uuid";
       {
         text: "This is a popover text",
         iconName: "info",
-        iconColor: "info",
       },
       {
         text: "This is a popover text",
         iconName: "info",
-        iconColor: "info",
       },
     ],
   }
-  @param {string} [flexClass="justify-center items-start"] - Additional class for the flex container
   @param {array} popovers - List of popovers to display. Popover component is used.
+  @param {string} [groupClasss=""] - Additional class for the flex container
 */
 
 const props = defineProps({
@@ -34,21 +30,23 @@ const props = defineProps({
     required: true,
     default: [],
   },
-  flexClass: {
+  groupClasss: {
     type: String,
     required: false,
-    default: "justify-center items-start",
+    default: "",
   },
 });
 </script>
 
 <template>
-  <Flex v-if="props.popovers.length > 0" :flexClass="props.flexClass">
+  <div
+    v-if="props.popovers.length > 0"
+    :class="['flex justify-center items-center', props.groupClasss]"
+  >
     <Popover
       v-for="(popover, id) in props.popovers"
       :key="popover"
       v-bind="popover"
-      :popoverClass="id === props.popovers.length - 1 ? '' : 'mr-2'"
     />
-  </Flex>
+  </div>
 </template>

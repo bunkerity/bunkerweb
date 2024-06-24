@@ -37,7 +37,6 @@ import { useFilter } from "@utils/form.js";
             {
               text: "inp_select_plugin_type_desc",
               iconName: "info",
-              iconColor: "info",
             },
           ],
           columns: { pc: 3, tablet: 4, mobile: 12 },

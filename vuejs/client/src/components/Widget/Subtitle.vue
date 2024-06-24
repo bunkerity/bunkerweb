@@ -72,7 +72,7 @@ onMounted(() => {
     data-subtitle
     :is="tag"
     v-if="props.subtitle"
-    :class="[subtitle.class, props.color]"
+    :class="[subtitle.class, props.color, 'text-el']"
   >
     {{ $t(props.subtitle, props.subtitle) }}
   </component>

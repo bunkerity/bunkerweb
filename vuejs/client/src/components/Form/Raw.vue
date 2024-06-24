@@ -152,10 +152,12 @@ const buttonSave = {
     </Container>
     <Button :disabled="data.isValid ? false : true" v-bind="buttonSave" />
 
-    <Text
-      v-if="!data.isValid"
-      :text="'dashboard_raw_invalid'"
-      :textClass="'form-setting-error'"
-    />
+    <div class="flex justify-center items-center" data-is="form-error">
+      <Text
+        v-if="!data.isValid"
+        :text="'dashboard_raw_invalid'"
+        :textClass="'form-setting-error'"
+      />
+    </div>
   </Container>
 </template>

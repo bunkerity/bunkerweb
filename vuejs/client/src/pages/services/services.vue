@@ -88,12 +88,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Tell client to store locally static files.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -121,7 +119,6 @@ const data = {
             value: "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of file extensions, separated with pipes that should be cached.",
               },
@@ -153,12 +150,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send the HTTP ETag header for static resources.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -187,12 +182,10 @@ const data = {
             value: "public, max-age=15552000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value of the Cache-Control HTTP header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -232,12 +225,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -264,12 +255,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -309,12 +298,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use custom HTTPS certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -341,12 +328,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full path of the certificate or bundle file (must be readable by the scheduler).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -373,12 +358,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full path of the key file (must be readable by the scheduler).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -405,12 +388,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Certificate data encoded in base64.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -437,12 +418,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Key data encoded in base64.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -482,7 +461,6 @@ const data = {
             value: "sqlite:////var/lib/bunkerweb/db.sqlite3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The database URI, following the sqlalchemy format.",
               },
@@ -514,7 +492,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.",
               },
@@ -547,7 +524,6 @@ const data = {
             value: "warning",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The level to use for database logs.",
               },
@@ -592,12 +568,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate DNSBL feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -626,7 +600,6 @@ const data = {
               "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of DNSBL servers.",
               },
@@ -673,12 +646,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -705,12 +676,10 @@ const data = {
             value: "400 401 403 404 405 413 429 500 501 502 503 504",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP error code intercepted by BunkerWeb",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -751,12 +720,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate greylist feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -785,12 +752,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of IP/network, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -817,12 +782,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -849,12 +812,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Only perform RDNS greylist checks on global IP addresses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -881,12 +842,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of ASN numbers, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -913,12 +872,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -945,12 +902,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -979,7 +934,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
               },
@@ -1013,7 +967,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
               },
@@ -1047,7 +1000,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing ASN to put into the greylist.",
               },
@@ -1081,7 +1033,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
               },
@@ -1115,7 +1066,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
               },
@@ -1160,12 +1110,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use gzip",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1194,12 +1142,10 @@ const data = {
               "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of MIME types that will be compressed with gzip.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1226,12 +1172,10 @@ const data = {
             value: "1000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Minimum length for gzip compression.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1259,12 +1203,10 @@ const data = {
             value: "5",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The compression level of the gzip algorithm.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1291,12 +1233,10 @@ const data = {
             value: "no-cache no-store private expired auth",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Which kind of proxied requests we should compress.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1336,12 +1276,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The HTML code to inject.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1382,12 +1320,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Custom header to add (HeaderName: HeaderValue).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1416,12 +1352,10 @@ const data = {
               "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Headers to remove (Header1 Header2 Header3 ...)",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1450,12 +1384,10 @@ const data = {
               "Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1482,12 +1414,10 @@ const data = {
             value: "max-age=31536000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Strict-Transport-Security header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1517,12 +1447,10 @@ const data = {
             value: "* HttpOnly SameSite=Lax",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1549,12 +1477,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Automatically add the Secure flag to all cookies.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1583,12 +1509,10 @@ const data = {
               "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Content-Security-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1615,12 +1539,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1649,12 +1571,10 @@ const data = {
             value: "strict-origin-when-cross-origin",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Referrer-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1685,12 +1605,10 @@ const data = {
               "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), 2024-06-06T13:46:22.766316807Z document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Permissions-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1721,12 +1639,10 @@ const data = {
               "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Feature-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1754,12 +1670,10 @@ const data = {
             value: "SAMEORIGIN",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-Frame-Options header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1787,12 +1701,10 @@ const data = {
             value: "nosniff",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-Content-Type-Options header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1821,12 +1733,10 @@ const data = {
             value: "1; mode=block",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-XSS-Protection header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1879,12 +1789,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate automatic Let's Encrypt mode.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1911,12 +1819,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Email used for Let's Encrypt notification and in certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1943,12 +1849,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use the staging environment for Let\u2019s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -1975,7 +1879,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Clear old certificates when renewing.",
               },
@@ -2020,12 +1923,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate limit requests feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2053,12 +1954,10 @@ const data = {
             value: "/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2086,12 +1985,10 @@ const data = {
             value: "2r/s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2118,12 +2015,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate limit connections feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2150,12 +2045,10 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of connections per IP when using HTTP/1.X protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2182,12 +2075,10 @@ const data = {
             value: "100",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of streams per IP when using HTTP/2 protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2214,12 +2105,10 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of connections per IP when using stream.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2259,12 +2148,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable collection and retrieval of internal metrics.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2291,7 +2178,6 @@ const data = {
             value: "16m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Size of the internal storage for metrics.",
               },
@@ -2323,7 +2209,6 @@ const data = {
             value: "100",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of blocked requests to store (per worker).",
               },
@@ -2368,7 +2253,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny HTTP request if the request vhost is unknown.",
               },
@@ -2400,7 +2284,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Close SSL/TLS connection if the SNI is unknown.",
               },
@@ -2432,12 +2315,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect all HTTP request to HTTPS.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2464,12 +2345,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2496,12 +2375,10 @@ const data = {
             value: "GET|POST|HEAD",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2528,12 +2405,10 @@ const data = {
             value: "10m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum body size (0 for infinite).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2560,12 +2435,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Serve files from the local folder.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2592,12 +2465,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2624,12 +2495,10 @@ const data = {
             value: "TLSv1.2 TLSv1.3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2656,12 +2525,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Support HTTP2 protocol when HTTPS is enabled.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2688,12 +2555,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Support HTTP3 protocol when HTTPS is enabled.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2720,12 +2585,10 @@ const data = {
             value: "443",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2752,12 +2615,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Respond to (insecure) HTTP requests.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2784,12 +2645,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache feature",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2816,12 +2675,10 @@ const data = {
             value: "max=1000 inactive=20s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Open file cache directive",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2848,12 +2705,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache for errors",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2880,12 +2735,10 @@ const data = {
             value: "2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache minimum uses",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2912,12 +2765,10 @@ const data = {
             value: "30s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Open file cache valid time",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -2946,7 +2797,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
               },
@@ -2979,7 +2829,6 @@ const data = {
             value: "403",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
               },
@@ -3011,7 +2860,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send anonymous report to BunkerWeb maintainers.",
               },
@@ -3056,12 +2904,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable ModSecurity WAF.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3088,12 +2934,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable OWASP Core Rule Set.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3121,12 +2965,10 @@ const data = {
             value: "3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3154,12 +2996,10 @@ const data = {
             value: "RelevantOnly",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecAuditEngine directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3187,12 +3027,10 @@ const data = {
             value: "On",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecRuleEngine directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3219,12 +3057,10 @@ const data = {
             value: "ABCFHZ",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecAuditLogParts directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3266,12 +3102,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Hostname of the remote PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3298,12 +3132,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files in the remote PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3330,12 +3162,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Path to the PHP-FPM socket file.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3362,12 +3192,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files in the local PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3407,7 +3235,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The License Key for the Pro version of BunkerWeb.",
               },
@@ -3453,12 +3280,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Retrieve the real IP of client.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3485,12 +3310,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable PROXY protocol communication.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3519,12 +3342,10 @@ const data = {
             value: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3551,12 +3372,10 @@ const data = {
             value: "X-Forwarded-For",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3583,12 +3402,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Perform a recursive search in the header container IP address.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3617,7 +3434,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
               },
@@ -3664,12 +3480,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect a whole site to another one.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3696,12 +3510,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Append the requested URI to the redirect address.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3729,12 +3541,10 @@ const data = {
             value: "301",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Status code to send to client when redirecting.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -3775,7 +3585,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate Redis.",
               },
@@ -3809,7 +3618,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server IP or hostname.",
               },
@@ -3841,7 +3649,6 @@ const data = {
             value: "6379",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server port.",
               },
@@ -3873,7 +3680,6 @@ const data = {
             value: "0",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis database number.",
               },
@@ -3905,7 +3711,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use SSL/TLS connection with Redis server.",
               },
@@ -3937,7 +3742,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Verify the certificate of Redis server.",
               },
@@ -3969,7 +3773,6 @@ const data = {
             value: "1000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server timeout (in ms) for connect, read and write.",
               },
@@ -4001,7 +3804,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis username used in AUTH command.",
               },
@@ -4033,7 +3835,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis password used in AUTH command.",
               },
@@ -4065,7 +3866,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel hosts with format host:[port] separated with spaces.",
               },
@@ -4097,7 +3897,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel username.",
               },
@@ -4129,7 +3928,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel password.",
               },
@@ -4161,7 +3959,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel master name.",
               },
@@ -4193,7 +3990,6 @@ const data = {
             value: "30000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Max idle time (in ms) before closing redis connection in the pool.",
               },
@@ -4225,7 +4021,6 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Max number of redis connection(s) kept in the pool.",
               },
@@ -4270,12 +4065,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate reverse proxy mode.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4302,12 +4095,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Intercept and rewrite errors.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4334,12 +4125,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Override Host header sent to upstream server.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4367,12 +4156,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full URL of the proxied resource (proxy_pass).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4400,12 +4187,10 @@ const data = {
             value: "/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Location URL that will be proxied.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4433,12 +4218,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable websocket on the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4466,12 +4249,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4499,12 +4280,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4532,12 +4311,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable buffering of responses from proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4565,12 +4342,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable keepalive connections with the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4598,12 +4373,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable authentication using an external provider (value of auth_request directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4633,12 +4406,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4666,12 +4437,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4699,12 +4468,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when connecting to the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4732,12 +4499,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when reading from the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4765,12 +4530,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when sending to the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4798,12 +4561,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Additional configuration to include in the location block, separated with spaces.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4830,12 +4591,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable caching of the proxied resources.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4862,7 +4621,6 @@ const data = {
             value: "1:2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Hierarchy levels of the cache.",
               },
@@ -4894,7 +4652,6 @@ const data = {
             value: "10m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum size of cached metadata when caching proxied resources.",
               },
@@ -4926,7 +4683,6 @@ const data = {
             value: "max_size=100m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Additional parameters to add to the proxy_cache directive.",
               },
@@ -4960,12 +4716,10 @@ const data = {
             value: "GET HEAD",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP methods that should trigger a cache operation.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -4992,12 +4746,10 @@ const data = {
             value: "2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The minimum number of requests before a response is cached.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5024,12 +4776,10 @@ const data = {
             value: "$scheme$host$request_uri",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The key used to uniquely identify a cached response.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5056,12 +4806,10 @@ const data = {
             value: "200=24h 301=1h 302=24h",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5088,12 +4836,10 @@ const data = {
             value: "$http_pragma $http_authorization",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Conditions to disable caching of responses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5120,12 +4866,10 @@ const data = {
             value: "0",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Conditions to bypass caching of responses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5165,12 +4909,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable scanning of clients ports and deny access if one is opened.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5197,12 +4939,10 @@ const data = {
             value: "22 80 443 3128 8000 8080",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of port to scan when using reverse scan feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5229,12 +4969,10 @@ const data = {
             value: "500",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Specify the maximum timeout (in ms) when scanning a port.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5274,12 +5012,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Generate and use self-signed certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5306,12 +5042,10 @@ const data = {
             value: "365",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Self-signed certificate expiry in days.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5338,12 +5072,10 @@ const data = {
             value: "/CN=www.example.com/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Self-signed certificate subject.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5383,7 +5115,6 @@ const data = {
             value: "random",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Secret used to encrypt sessions variables for storing data related to challenges.",
               },
@@ -5415,7 +5146,6 @@ const data = {
             value: "random",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Name of the cookie given to clients.",
               },
@@ -5447,7 +5177,6 @@ const data = {
             value: "1800",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) of inactivity before the session is invalidated.",
               },
@@ -5479,7 +5208,6 @@ const data = {
             value: "3600",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) before a session must be renewed.",
               },
@@ -5511,7 +5239,6 @@ const data = {
             value: "86400",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) before a session is destroyed.",
               },
@@ -5543,7 +5270,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Destroy session if IP address is different than original one.",
               },
@@ -5575,7 +5301,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Destroy session if User-Agent is different than original one.",
               },
@@ -5620,12 +5345,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use UI",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5652,7 +5375,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Address of the web UI used for initial setup",
               },
@@ -5698,12 +5420,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate whitelist feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5734,12 +5454,10 @@ const data = {
               "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of IP/network, separated with spaces, to put into the whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5768,12 +5486,10 @@ const data = {
               ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of reverse DNS suffixes, separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5800,12 +5516,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Only perform RDNS whitelist checks on global IP addresses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5832,12 +5546,10 @@ const data = {
             value: "32934",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of ASN numbers, separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5864,12 +5576,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of User-Agent (PCRE regex), separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5896,12 +5606,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URI (PCRE regex), separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -5930,7 +5638,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good IP/network to whitelist.",
               },
@@ -5964,7 +5671,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.",
               },
@@ -5998,7 +5704,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing ASN to whitelist.",
               },
@@ -6032,7 +5737,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good User-Agent to whitelist.",
               },
@@ -6066,7 +5770,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing bad URI to whitelist.",
               },
@@ -6113,12 +5816,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Tell client to store locally static files.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6146,7 +5847,6 @@ const data = {
             value: "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of file extensions, separated with pipes that should be cached.",
               },
@@ -6178,12 +5878,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send the HTTP ETag header for static resources.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6212,12 +5910,10 @@ const data = {
             value: "public, max-age=15552000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value of the Cache-Control HTTP header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6257,12 +5953,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6289,12 +5983,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6334,12 +6026,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use custom HTTPS certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6366,12 +6056,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full path of the certificate or bundle file (must be readable by the scheduler).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6398,12 +6086,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full path of the key file (must be readable by the scheduler).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6430,12 +6116,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Certificate data encoded in base64.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6462,12 +6146,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Key data encoded in base64.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6507,7 +6189,6 @@ const data = {
             value: "sqlite:////var/lib/bunkerweb/db.sqlite3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The database URI, following the sqlalchemy format.",
               },
@@ -6539,7 +6220,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.",
               },
@@ -6572,7 +6252,6 @@ const data = {
             value: "warning",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The level to use for database logs.",
               },
@@ -6617,12 +6296,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate DNSBL feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6651,7 +6328,6 @@ const data = {
               "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of DNSBL servers.",
               },
@@ -6698,12 +6374,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6730,12 +6404,10 @@ const data = {
             value: "400 401 403 404 405 413 429 500 501 502 503 504",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP error code intercepted by BunkerWeb",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6776,12 +6448,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate greylist feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6810,12 +6480,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of IP/network, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6842,12 +6510,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6874,12 +6540,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Only perform RDNS greylist checks on global IP addresses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6906,12 +6570,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of ASN numbers, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6938,12 +6600,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -6970,12 +6630,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7004,7 +6662,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
               },
@@ -7038,7 +6695,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
               },
@@ -7072,7 +6728,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing ASN to put into the greylist.",
               },
@@ -7106,7 +6761,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
               },
@@ -7140,7 +6794,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
               },
@@ -7185,12 +6838,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use gzip",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7219,12 +6870,10 @@ const data = {
               "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of MIME types that will be compressed with gzip.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7251,12 +6900,10 @@ const data = {
             value: "1000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Minimum length for gzip compression.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7284,12 +6931,10 @@ const data = {
             value: "5",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The compression level of the gzip algorithm.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7316,12 +6961,10 @@ const data = {
             value: "no-cache no-store private expired auth",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Which kind of proxied requests we should compress.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7361,12 +7004,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The HTML code to inject.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7407,12 +7048,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Custom header to add (HeaderName: HeaderValue).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7441,12 +7080,10 @@ const data = {
               "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Headers to remove (Header1 Header2 Header3 ...)",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7475,12 +7112,10 @@ const data = {
               "Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7507,12 +7142,10 @@ const data = {
             value: "max-age=31536000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Strict-Transport-Security header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7542,12 +7175,10 @@ const data = {
             value: "* HttpOnly SameSite=Lax",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7574,12 +7205,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Automatically add the Secure flag to all cookies.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7608,12 +7237,10 @@ const data = {
               "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Content-Security-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7640,12 +7267,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7674,12 +7299,10 @@ const data = {
             value: "strict-origin-when-cross-origin",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Referrer-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7710,12 +7333,10 @@ const data = {
               "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), 2024-06-06T13:46:22.766316807Z document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Permissions-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7746,12 +7367,10 @@ const data = {
               "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Feature-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7779,12 +7398,10 @@ const data = {
             value: "SAMEORIGIN",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-Frame-Options header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7812,12 +7429,10 @@ const data = {
             value: "nosniff",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-Content-Type-Options header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7846,12 +7461,10 @@ const data = {
             value: "1; mode=block",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-XSS-Protection header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7904,12 +7517,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate automatic Let's Encrypt mode.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7936,12 +7547,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Email used for Let's Encrypt notification and in certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -7968,12 +7577,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use the staging environment for Let\u2019s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8000,7 +7607,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Clear old certificates when renewing.",
               },
@@ -8045,12 +7651,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate limit requests feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8078,12 +7682,10 @@ const data = {
             value: "/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8111,12 +7713,10 @@ const data = {
             value: "2r/s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8143,12 +7743,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate limit connections feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8175,12 +7773,10 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of connections per IP when using HTTP/1.X protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8207,12 +7803,10 @@ const data = {
             value: "100",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of streams per IP when using HTTP/2 protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8239,12 +7833,10 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of connections per IP when using stream.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8284,12 +7876,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable collection and retrieval of internal metrics.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8316,7 +7906,6 @@ const data = {
             value: "16m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Size of the internal storage for metrics.",
               },
@@ -8348,7 +7937,6 @@ const data = {
             value: "100",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of blocked requests to store (per worker).",
               },
@@ -8393,7 +7981,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny HTTP request if the request vhost is unknown.",
               },
@@ -8425,7 +8012,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Close SSL/TLS connection if the SNI is unknown.",
               },
@@ -8457,12 +8043,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect all HTTP request to HTTPS.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8489,12 +8073,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8521,12 +8103,10 @@ const data = {
             value: "GET|POST|HEAD",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8553,12 +8133,10 @@ const data = {
             value: "10m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum body size (0 for infinite).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8585,12 +8163,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Serve files from the local folder.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8617,12 +8193,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8649,12 +8223,10 @@ const data = {
             value: "TLSv1.2 TLSv1.3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8681,12 +8253,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Support HTTP2 protocol when HTTPS is enabled.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8713,12 +8283,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Support HTTP3 protocol when HTTPS is enabled.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8745,12 +8313,10 @@ const data = {
             value: "443",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8777,12 +8343,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Respond to (insecure) HTTP requests.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8809,12 +8373,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache feature",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8841,12 +8403,10 @@ const data = {
             value: "max=1000 inactive=20s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Open file cache directive",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8873,12 +8433,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache for errors",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8905,12 +8463,10 @@ const data = {
             value: "2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache minimum uses",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8937,12 +8493,10 @@ const data = {
             value: "30s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Open file cache valid time",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -8971,7 +8525,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
               },
@@ -9004,7 +8557,6 @@ const data = {
             value: "403",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
               },
@@ -9036,7 +8588,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send anonymous report to BunkerWeb maintainers.",
               },
@@ -9081,12 +8632,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable ModSecurity WAF.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9113,12 +8662,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable OWASP Core Rule Set.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9146,12 +8693,10 @@ const data = {
             value: "3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9179,12 +8724,10 @@ const data = {
             value: "RelevantOnly",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecAuditEngine directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9212,12 +8755,10 @@ const data = {
             value: "On",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecRuleEngine directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9244,12 +8785,10 @@ const data = {
             value: "ABCFHZ",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecAuditLogParts directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9291,12 +8830,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Hostname of the remote PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9323,12 +8860,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files in the remote PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9355,12 +8890,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Path to the PHP-FPM socket file.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9387,12 +8920,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files in the local PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9432,7 +8963,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The License Key for the Pro version of BunkerWeb.",
               },
@@ -9478,12 +9008,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Retrieve the real IP of client.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9510,12 +9038,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable PROXY protocol communication.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9544,12 +9070,10 @@ const data = {
             value: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9576,12 +9100,10 @@ const data = {
             value: "X-Forwarded-For",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9608,12 +9130,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Perform a recursive search in the header container IP address.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9642,7 +9162,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
               },
@@ -9689,12 +9208,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect a whole site to another one.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9721,12 +9238,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Append the requested URI to the redirect address.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9754,12 +9269,10 @@ const data = {
             value: "301",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Status code to send to client when redirecting.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -9800,7 +9313,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate Redis.",
               },
@@ -9834,7 +9346,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server IP or hostname.",
               },
@@ -9866,7 +9377,6 @@ const data = {
             value: "6379",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server port.",
               },
@@ -9898,7 +9408,6 @@ const data = {
             value: "0",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis database number.",
               },
@@ -9930,7 +9439,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use SSL/TLS connection with Redis server.",
               },
@@ -9962,7 +9470,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Verify the certificate of Redis server.",
               },
@@ -9994,7 +9501,6 @@ const data = {
             value: "1000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server timeout (in ms) for connect, read and write.",
               },
@@ -10026,7 +9532,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis username used in AUTH command.",
               },
@@ -10058,7 +9563,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis password used in AUTH command.",
               },
@@ -10090,7 +9594,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel hosts with format host:[port] separated with spaces.",
               },
@@ -10122,7 +9625,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel username.",
               },
@@ -10154,7 +9656,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel password.",
               },
@@ -10186,7 +9687,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel master name.",
               },
@@ -10218,7 +9718,6 @@ const data = {
             value: "30000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Max idle time (in ms) before closing redis connection in the pool.",
               },
@@ -10250,7 +9749,6 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Max number of redis connection(s) kept in the pool.",
               },
@@ -10295,12 +9793,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate reverse proxy mode.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10327,12 +9823,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Intercept and rewrite errors.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10359,12 +9853,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Override Host header sent to upstream server.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10392,12 +9884,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full URL of the proxied resource (proxy_pass).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10425,12 +9915,10 @@ const data = {
             value: "/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Location URL that will be proxied.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10458,12 +9946,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable websocket on the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10491,12 +9977,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10524,12 +10008,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10557,12 +10039,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable buffering of responses from proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10590,12 +10070,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable keepalive connections with the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10623,12 +10101,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable authentication using an external provider (value of auth_request directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10658,12 +10134,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10691,12 +10165,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10724,12 +10196,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when connecting to the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10757,12 +10227,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when reading from the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10790,12 +10258,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when sending to the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10823,12 +10289,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Additional configuration to include in the location block, separated with spaces.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10855,12 +10319,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable caching of the proxied resources.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -10887,7 +10349,6 @@ const data = {
             value: "1:2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Hierarchy levels of the cache.",
               },
@@ -10919,7 +10380,6 @@ const data = {
             value: "10m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum size of cached metadata when caching proxied resources.",
               },
@@ -10951,7 +10411,6 @@ const data = {
             value: "max_size=100m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Additional parameters to add to the proxy_cache directive.",
               },
@@ -10985,12 +10444,10 @@ const data = {
             value: "GET HEAD",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP methods that should trigger a cache operation.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11017,12 +10474,10 @@ const data = {
             value: "2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The minimum number of requests before a response is cached.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11049,12 +10504,10 @@ const data = {
             value: "$scheme$host$request_uri",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The key used to uniquely identify a cached response.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11081,12 +10534,10 @@ const data = {
             value: "200=24h 301=1h 302=24h",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11113,12 +10564,10 @@ const data = {
             value: "$http_pragma $http_authorization",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Conditions to disable caching of responses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11145,12 +10594,10 @@ const data = {
             value: "0",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Conditions to bypass caching of responses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11190,12 +10637,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable scanning of clients ports and deny access if one is opened.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11222,12 +10667,10 @@ const data = {
             value: "22 80 443 3128 8000 8080",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of port to scan when using reverse scan feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11254,12 +10697,10 @@ const data = {
             value: "500",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Specify the maximum timeout (in ms) when scanning a port.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11299,12 +10740,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Generate and use self-signed certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11331,12 +10770,10 @@ const data = {
             value: "365",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Self-signed certificate expiry in days.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11363,12 +10800,10 @@ const data = {
             value: "/CN=www.example.com/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Self-signed certificate subject.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11408,7 +10843,6 @@ const data = {
             value: "random",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Secret used to encrypt sessions variables for storing data related to challenges.",
               },
@@ -11440,7 +10874,6 @@ const data = {
             value: "random",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Name of the cookie given to clients.",
               },
@@ -11472,7 +10905,6 @@ const data = {
             value: "1800",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) of inactivity before the session is invalidated.",
               },
@@ -11504,7 +10936,6 @@ const data = {
             value: "3600",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) before a session must be renewed.",
               },
@@ -11536,7 +10967,6 @@ const data = {
             value: "86400",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) before a session is destroyed.",
               },
@@ -11568,7 +10998,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Destroy session if IP address is different than original one.",
               },
@@ -11600,7 +11029,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Destroy session if User-Agent is different than original one.",
               },
@@ -11645,12 +11073,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use UI",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11677,7 +11103,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Address of the web UI used for initial setup",
               },
@@ -11723,12 +11148,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate whitelist feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11759,12 +11182,10 @@ const data = {
               "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of IP/network, separated with spaces, to put into the whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11793,12 +11214,10 @@ const data = {
               ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of reverse DNS suffixes, separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11825,12 +11244,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Only perform RDNS whitelist checks on global IP addresses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11857,12 +11274,10 @@ const data = {
             value: "32934",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of ASN numbers, separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11889,12 +11304,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of User-Agent (PCRE regex), separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11921,12 +11334,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URI (PCRE regex), separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -11955,7 +11366,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good IP/network to whitelist.",
               },
@@ -11989,7 +11399,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.",
               },
@@ -12023,7 +11432,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing ASN to whitelist.",
               },
@@ -12057,7 +11465,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good User-Agent to whitelist.",
               },
@@ -12091,7 +11498,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing bad URI to whitelist.",
               },
@@ -12140,12 +11546,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Tell client to store locally static files.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12173,7 +11577,6 @@ const data = {
             value: "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of file extensions, separated with pipes that should be cached.",
               },
@@ -12205,12 +11608,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send the HTTP ETag header for static resources.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12239,12 +11640,10 @@ const data = {
             value: "public, max-age=15552000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value of the Cache-Control HTTP header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12284,12 +11683,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12316,12 +11713,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12361,12 +11756,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use custom HTTPS certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12393,12 +11786,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full path of the certificate or bundle file (must be readable by the scheduler).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12425,12 +11816,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full path of the key file (must be readable by the scheduler).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12457,12 +11846,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Certificate data encoded in base64.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12489,12 +11876,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Key data encoded in base64.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12534,7 +11919,6 @@ const data = {
             value: "sqlite:////var/lib/bunkerweb/db.sqlite3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The database URI, following the sqlalchemy format.",
               },
@@ -12566,7 +11950,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.",
               },
@@ -12599,7 +11982,6 @@ const data = {
             value: "warning",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The level to use for database logs.",
               },
@@ -12644,12 +12026,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate DNSBL feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12678,7 +12058,6 @@ const data = {
               "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of DNSBL servers.",
               },
@@ -12725,12 +12104,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12757,12 +12134,10 @@ const data = {
             value: "400 401 403 404 405 413 429 500 501 502 503 504",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP error code intercepted by BunkerWeb",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12803,12 +12178,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate greylist feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12837,12 +12210,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of IP/network, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12869,12 +12240,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12901,12 +12270,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Only perform RDNS greylist checks on global IP addresses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12933,12 +12300,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of ASN numbers, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12965,12 +12330,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -12997,12 +12360,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13031,7 +12392,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
               },
@@ -13065,7 +12425,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
               },
@@ -13099,7 +12458,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing ASN to put into the greylist.",
               },
@@ -13133,7 +12491,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
               },
@@ -13167,7 +12524,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
               },
@@ -13212,12 +12568,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use gzip",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13246,12 +12600,10 @@ const data = {
               "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of MIME types that will be compressed with gzip.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13278,12 +12630,10 @@ const data = {
             value: "1000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Minimum length for gzip compression.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13311,12 +12661,10 @@ const data = {
             value: "5",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The compression level of the gzip algorithm.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13343,12 +12691,10 @@ const data = {
             value: "no-cache no-store private expired auth",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Which kind of proxied requests we should compress.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13388,12 +12734,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The HTML code to inject.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13434,12 +12778,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Custom header to add (HeaderName: HeaderValue).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13468,12 +12810,10 @@ const data = {
               "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Headers to remove (Header1 Header2 Header3 ...)",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13502,12 +12842,10 @@ const data = {
               "Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13534,12 +12872,10 @@ const data = {
             value: "max-age=31536000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Strict-Transport-Security header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13569,12 +12905,10 @@ const data = {
             value: "* HttpOnly SameSite=Lax",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13601,12 +12935,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Automatically add the Secure flag to all cookies.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13635,12 +12967,10 @@ const data = {
               "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Content-Security-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13667,12 +12997,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13701,12 +13029,10 @@ const data = {
             value: "strict-origin-when-cross-origin",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Referrer-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13737,12 +13063,10 @@ const data = {
               "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), 2024-06-06T13:46:22.766316807Z document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Permissions-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13773,12 +13097,10 @@ const data = {
               "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Feature-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13806,12 +13128,10 @@ const data = {
             value: "SAMEORIGIN",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-Frame-Options header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13839,12 +13159,10 @@ const data = {
             value: "nosniff",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-Content-Type-Options header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13873,12 +13191,10 @@ const data = {
             value: "1; mode=block",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-XSS-Protection header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13931,12 +13247,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate automatic Let's Encrypt mode.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13963,12 +13277,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Email used for Let's Encrypt notification and in certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -13995,12 +13307,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use the staging environment for Let\u2019s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14027,7 +13337,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Clear old certificates when renewing.",
               },
@@ -14072,12 +13381,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate limit requests feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14105,12 +13412,10 @@ const data = {
             value: "/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14138,12 +13443,10 @@ const data = {
             value: "2r/s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14170,12 +13473,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate limit connections feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14202,12 +13503,10 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of connections per IP when using HTTP/1.X protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14234,12 +13533,10 @@ const data = {
             value: "100",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of streams per IP when using HTTP/2 protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14266,12 +13563,10 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of connections per IP when using stream.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14311,12 +13606,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable collection and retrieval of internal metrics.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14343,7 +13636,6 @@ const data = {
             value: "16m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Size of the internal storage for metrics.",
               },
@@ -14375,7 +13667,6 @@ const data = {
             value: "100",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of blocked requests to store (per worker).",
               },
@@ -14420,7 +13711,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny HTTP request if the request vhost is unknown.",
               },
@@ -14452,7 +13742,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Close SSL/TLS connection if the SNI is unknown.",
               },
@@ -14484,12 +13773,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect all HTTP request to HTTPS.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14516,12 +13803,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14548,12 +13833,10 @@ const data = {
             value: "GET|POST|HEAD",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14580,12 +13863,10 @@ const data = {
             value: "10m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum body size (0 for infinite).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14612,12 +13893,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Serve files from the local folder.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14644,12 +13923,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14676,12 +13953,10 @@ const data = {
             value: "TLSv1.2 TLSv1.3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14708,12 +13983,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Support HTTP2 protocol when HTTPS is enabled.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14740,12 +14013,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Support HTTP3 protocol when HTTPS is enabled.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14772,12 +14043,10 @@ const data = {
             value: "443",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14804,12 +14073,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Respond to (insecure) HTTP requests.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14836,12 +14103,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache feature",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14868,12 +14133,10 @@ const data = {
             value: "max=1000 inactive=20s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Open file cache directive",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14900,12 +14163,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache for errors",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14932,12 +14193,10 @@ const data = {
             value: "2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache minimum uses",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14964,12 +14223,10 @@ const data = {
             value: "30s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Open file cache valid time",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -14998,7 +14255,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
               },
@@ -15031,7 +14287,6 @@ const data = {
             value: "403",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
               },
@@ -15063,7 +14318,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send anonymous report to BunkerWeb maintainers.",
               },
@@ -15108,12 +14362,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable ModSecurity WAF.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15140,12 +14392,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable OWASP Core Rule Set.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15173,12 +14423,10 @@ const data = {
             value: "3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15206,12 +14454,10 @@ const data = {
             value: "RelevantOnly",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecAuditEngine directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15239,12 +14485,10 @@ const data = {
             value: "On",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecRuleEngine directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15271,12 +14515,10 @@ const data = {
             value: "ABCFHZ",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecAuditLogParts directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15318,12 +14560,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Hostname of the remote PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15350,12 +14590,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files in the remote PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15382,12 +14620,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Path to the PHP-FPM socket file.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15414,12 +14650,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files in the local PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15459,7 +14693,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The License Key for the Pro version of BunkerWeb.",
               },
@@ -15505,12 +14738,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Retrieve the real IP of client.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15537,12 +14768,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable PROXY protocol communication.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15571,12 +14800,10 @@ const data = {
             value: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15603,12 +14830,10 @@ const data = {
             value: "X-Forwarded-For",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15635,12 +14860,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Perform a recursive search in the header container IP address.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15669,7 +14892,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
               },
@@ -15716,12 +14938,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect a whole site to another one.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15748,12 +14968,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Append the requested URI to the redirect address.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15781,12 +14999,10 @@ const data = {
             value: "301",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Status code to send to client when redirecting.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -15827,7 +15043,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate Redis.",
               },
@@ -15861,7 +15076,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server IP or hostname.",
               },
@@ -15893,7 +15107,6 @@ const data = {
             value: "6379",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server port.",
               },
@@ -15925,7 +15138,6 @@ const data = {
             value: "0",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis database number.",
               },
@@ -15957,7 +15169,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use SSL/TLS connection with Redis server.",
               },
@@ -15989,7 +15200,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Verify the certificate of Redis server.",
               },
@@ -16021,7 +15231,6 @@ const data = {
             value: "1000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server timeout (in ms) for connect, read and write.",
               },
@@ -16053,7 +15262,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis username used in AUTH command.",
               },
@@ -16085,7 +15293,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis password used in AUTH command.",
               },
@@ -16117,7 +15324,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel hosts with format host:[port] separated with spaces.",
               },
@@ -16149,7 +15355,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel username.",
               },
@@ -16181,7 +15386,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel password.",
               },
@@ -16213,7 +15417,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel master name.",
               },
@@ -16245,7 +15448,6 @@ const data = {
             value: "30000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Max idle time (in ms) before closing redis connection in the pool.",
               },
@@ -16277,7 +15479,6 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Max number of redis connection(s) kept in the pool.",
               },
@@ -16322,12 +15523,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate reverse proxy mode.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16354,12 +15553,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Intercept and rewrite errors.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16386,12 +15583,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Override Host header sent to upstream server.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16419,12 +15614,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full URL of the proxied resource (proxy_pass).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16452,12 +15645,10 @@ const data = {
             value: "/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Location URL that will be proxied.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16485,12 +15676,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable websocket on the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16518,12 +15707,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16551,12 +15738,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16584,12 +15769,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable buffering of responses from proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16617,12 +15800,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable keepalive connections with the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16650,12 +15831,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable authentication using an external provider (value of auth_request directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16685,12 +15864,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16718,12 +15895,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16751,12 +15926,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when connecting to the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16784,12 +15957,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when reading from the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16817,12 +15988,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when sending to the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16850,12 +16019,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Additional configuration to include in the location block, separated with spaces.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16882,12 +16049,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable caching of the proxied resources.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -16914,7 +16079,6 @@ const data = {
             value: "1:2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Hierarchy levels of the cache.",
               },
@@ -16946,7 +16110,6 @@ const data = {
             value: "10m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum size of cached metadata when caching proxied resources.",
               },
@@ -16978,7 +16141,6 @@ const data = {
             value: "max_size=100m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Additional parameters to add to the proxy_cache directive.",
               },
@@ -17012,12 +16174,10 @@ const data = {
             value: "GET HEAD",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP methods that should trigger a cache operation.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17044,12 +16204,10 @@ const data = {
             value: "2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The minimum number of requests before a response is cached.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17076,12 +16234,10 @@ const data = {
             value: "$scheme$host$request_uri",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The key used to uniquely identify a cached response.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17108,12 +16264,10 @@ const data = {
             value: "200=24h 301=1h 302=24h",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17140,12 +16294,10 @@ const data = {
             value: "$http_pragma $http_authorization",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Conditions to disable caching of responses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17172,12 +16324,10 @@ const data = {
             value: "0",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Conditions to bypass caching of responses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17217,12 +16367,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable scanning of clients ports and deny access if one is opened.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17249,12 +16397,10 @@ const data = {
             value: "22 80 443 3128 8000 8080",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of port to scan when using reverse scan feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17281,12 +16427,10 @@ const data = {
             value: "500",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Specify the maximum timeout (in ms) when scanning a port.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17326,12 +16470,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Generate and use self-signed certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17358,12 +16500,10 @@ const data = {
             value: "365",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Self-signed certificate expiry in days.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17390,12 +16530,10 @@ const data = {
             value: "/CN=www.example.com/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Self-signed certificate subject.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17435,7 +16573,6 @@ const data = {
             value: "random",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Secret used to encrypt sessions variables for storing data related to challenges.",
               },
@@ -17467,7 +16604,6 @@ const data = {
             value: "random",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Name of the cookie given to clients.",
               },
@@ -17499,7 +16635,6 @@ const data = {
             value: "1800",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) of inactivity before the session is invalidated.",
               },
@@ -17531,7 +16666,6 @@ const data = {
             value: "3600",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) before a session must be renewed.",
               },
@@ -17563,7 +16697,6 @@ const data = {
             value: "86400",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) before a session is destroyed.",
               },
@@ -17595,7 +16728,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Destroy session if IP address is different than original one.",
               },
@@ -17627,7 +16759,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Destroy session if User-Agent is different than original one.",
               },
@@ -17672,12 +16803,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use UI",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17704,7 +16833,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Address of the web UI used for initial setup",
               },
@@ -17750,12 +16878,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate whitelist feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17786,12 +16912,10 @@ const data = {
               "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of IP/network, separated with spaces, to put into the whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17820,12 +16944,10 @@ const data = {
               ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of reverse DNS suffixes, separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17852,12 +16974,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Only perform RDNS whitelist checks on global IP addresses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17884,12 +17004,10 @@ const data = {
             value: "32934",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of ASN numbers, separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17916,12 +17034,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of User-Agent (PCRE regex), separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17948,12 +17064,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URI (PCRE regex), separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -17982,7 +17096,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good IP/network to whitelist.",
               },
@@ -18016,7 +17129,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.",
               },
@@ -18050,7 +17162,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing ASN to whitelist.",
               },
@@ -18084,7 +17195,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good User-Agent to whitelist.",
               },
@@ -18118,7 +17228,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing bad URI to whitelist.",
               },
@@ -18165,12 +17274,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Tell client to store locally static files.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18198,7 +17305,6 @@ const data = {
             value: "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of file extensions, separated with pipes that should be cached.",
               },
@@ -18230,12 +17336,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send the HTTP ETag header for static resources.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18264,12 +17368,10 @@ const data = {
             value: "public, max-age=15552000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value of the Cache-Control HTTP header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18309,12 +17411,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18341,12 +17441,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18386,12 +17484,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use custom HTTPS certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18418,12 +17514,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full path of the certificate or bundle file (must be readable by the scheduler).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18450,12 +17544,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full path of the key file (must be readable by the scheduler).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18482,12 +17574,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Certificate data encoded in base64.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18514,12 +17604,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Key data encoded in base64.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18559,7 +17647,6 @@ const data = {
             value: "sqlite:////var/lib/bunkerweb/db.sqlite3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The database URI, following the sqlalchemy format.",
               },
@@ -18591,7 +17678,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The database URI for read-only operations, it can also serve as a fallback if the main database is down. Following the sqlalchemy format.",
               },
@@ -18624,7 +17710,6 @@ const data = {
             value: "warning",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The level to use for database logs.",
               },
@@ -18669,12 +17754,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate DNSBL feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18703,7 +17786,6 @@ const data = {
               "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of DNSBL servers.",
               },
@@ -18750,12 +17832,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18782,12 +17862,10 @@ const data = {
             value: "400 401 403 404 405 413 429 500 501 502 503 504",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP error code intercepted by BunkerWeb",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18828,12 +17906,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate greylist feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18862,12 +17938,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of IP/network, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18894,12 +17968,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18926,12 +17998,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Only perform RDNS greylist checks on global IP addresses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18958,12 +18028,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of ASN numbers, separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -18990,12 +18058,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19022,12 +18088,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19056,7 +18120,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
               },
@@ -19090,7 +18153,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
               },
@@ -19124,7 +18186,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing ASN to put into the greylist.",
               },
@@ -19158,7 +18219,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
               },
@@ -19192,7 +18252,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
               },
@@ -19237,12 +18296,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use gzip",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19271,12 +18328,10 @@ const data = {
               "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of MIME types that will be compressed with gzip.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19303,12 +18358,10 @@ const data = {
             value: "1000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Minimum length for gzip compression.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19336,12 +18389,10 @@ const data = {
             value: "5",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The compression level of the gzip algorithm.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19368,12 +18419,10 @@ const data = {
             value: "no-cache no-store private expired auth",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Which kind of proxied requests we should compress.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19413,12 +18462,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The HTML code to inject.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19459,12 +18506,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Custom header to add (HeaderName: HeaderValue).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19493,12 +18538,10 @@ const data = {
               "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Headers to remove (Header1 Header2 Header3 ...)",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19527,12 +18570,10 @@ const data = {
               "Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19559,12 +18600,10 @@ const data = {
             value: "max-age=31536000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Strict-Transport-Security header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19594,12 +18633,10 @@ const data = {
             value: "* HttpOnly SameSite=Lax",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19626,12 +18663,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Automatically add the Secure flag to all cookies.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19660,12 +18695,10 @@ const data = {
               "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Content-Security-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19692,12 +18725,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19726,12 +18757,10 @@ const data = {
             value: "strict-origin-when-cross-origin",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Referrer-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19762,12 +18791,10 @@ const data = {
               "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), 2024-06-06T13:46:22.766316807Z document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Permissions-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19798,12 +18825,10 @@ const data = {
               "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the Feature-Policy header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19831,12 +18856,10 @@ const data = {
             value: "SAMEORIGIN",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-Frame-Options header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19864,12 +18887,10 @@ const data = {
             value: "nosniff",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-Content-Type-Options header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19898,12 +18919,10 @@ const data = {
             value: "1; mode=block",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Value for the X-XSS-Protection header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19956,12 +18975,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate automatic Let's Encrypt mode.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -19988,12 +19005,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Email used for Let's Encrypt notification and in certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20020,12 +19035,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use the staging environment for Let\u2019s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20052,7 +19065,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Clear old certificates when renewing.",
               },
@@ -20097,12 +19109,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate limit requests feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20130,12 +19140,10 @@ const data = {
             value: "/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20163,12 +19171,10 @@ const data = {
             value: "2r/s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20195,12 +19201,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate limit connections feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20227,12 +19231,10 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of connections per IP when using HTTP/1.X protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20259,12 +19261,10 @@ const data = {
             value: "100",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of streams per IP when using HTTP/2 protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20291,12 +19291,10 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of connections per IP when using stream.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20336,12 +19334,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable collection and retrieval of internal metrics.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20368,7 +19364,6 @@ const data = {
             value: "16m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Size of the internal storage for metrics.",
               },
@@ -20400,7 +19395,6 @@ const data = {
             value: "100",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum number of blocked requests to store (per worker).",
               },
@@ -20445,7 +19439,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Deny HTTP request if the request vhost is unknown.",
               },
@@ -20477,7 +19470,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Close SSL/TLS connection if the SNI is unknown.",
               },
@@ -20509,12 +19501,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect all HTTP request to HTTPS.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20541,12 +19531,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20573,12 +19561,10 @@ const data = {
             value: "GET|POST|HEAD",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20605,12 +19591,10 @@ const data = {
             value: "10m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum body size (0 for infinite).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20637,12 +19621,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Serve files from the local folder.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20669,12 +19651,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20701,12 +19681,10 @@ const data = {
             value: "TLSv1.2 TLSv1.3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20733,12 +19711,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Support HTTP2 protocol when HTTPS is enabled.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20765,12 +19741,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Support HTTP3 protocol when HTTPS is enabled.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20797,12 +19771,10 @@ const data = {
             value: "443",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP3 alternate service port. This value will be used as part of the Alt-Svc header.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20829,12 +19801,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Respond to (insecure) HTTP requests.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20861,12 +19831,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache feature",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20893,12 +19861,10 @@ const data = {
             value: "max=1000 inactive=20s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Open file cache directive",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20925,12 +19891,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache for errors",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20957,12 +19921,10 @@ const data = {
             value: "2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable open file cache minimum uses",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -20989,12 +19951,10 @@ const data = {
             value: "30s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Open file cache valid time",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21023,7 +19983,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
               },
@@ -21056,7 +20015,6 @@ const data = {
             value: "403",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
               },
@@ -21088,7 +20046,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Send anonymous report to BunkerWeb maintainers.",
               },
@@ -21133,12 +20090,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable ModSecurity WAF.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21165,12 +20120,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable OWASP Core Rule Set.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21198,12 +20151,10 @@ const data = {
             value: "3",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21231,12 +20182,10 @@ const data = {
             value: "RelevantOnly",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecAuditEngine directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21264,12 +20213,10 @@ const data = {
             value: "On",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecRuleEngine directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21296,12 +20243,10 @@ const data = {
             value: "ABCFHZ",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "SecAuditLogParts directive of ModSecurity.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21343,12 +20288,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Hostname of the remote PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21375,12 +20318,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files in the remote PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21407,12 +20348,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Path to the PHP-FPM socket file.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21439,12 +20378,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Root folder containing files in the local PHP-FPM instance.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21484,7 +20421,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The License Key for the Pro version of BunkerWeb.",
               },
@@ -21530,12 +20466,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Retrieve the real IP of client.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21562,12 +20496,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable PROXY protocol communication.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21596,12 +20528,10 @@ const data = {
             value: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21628,12 +20558,10 @@ const data = {
             value: "X-Forwarded-For",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21660,12 +20588,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Perform a recursive search in the header container IP address.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21694,7 +20620,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
               },
@@ -21741,12 +20666,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect a whole site to another one.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21773,12 +20696,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Append the requested URI to the redirect address.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21806,12 +20727,10 @@ const data = {
             value: "301",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Status code to send to client when redirecting.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -21852,7 +20771,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate Redis.",
               },
@@ -21886,7 +20804,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server IP or hostname.",
               },
@@ -21918,7 +20835,6 @@ const data = {
             value: "6379",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server port.",
               },
@@ -21950,7 +20866,6 @@ const data = {
             value: "0",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis database number.",
               },
@@ -21982,7 +20897,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use SSL/TLS connection with Redis server.",
               },
@@ -22014,7 +20928,6 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Verify the certificate of Redis server.",
               },
@@ -22046,7 +20959,6 @@ const data = {
             value: "1000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis server timeout (in ms) for connect, read and write.",
               },
@@ -22078,7 +20990,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis username used in AUTH command.",
               },
@@ -22110,7 +21021,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis password used in AUTH command.",
               },
@@ -22142,7 +21052,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel hosts with format host:[port] separated with spaces.",
               },
@@ -22174,7 +21083,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel username.",
               },
@@ -22206,7 +21114,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel password.",
               },
@@ -22238,7 +21145,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redis sentinel master name.",
               },
@@ -22270,7 +21176,6 @@ const data = {
             value: "30000",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Max idle time (in ms) before closing redis connection in the pool.",
               },
@@ -22302,7 +21207,6 @@ const data = {
             value: "10",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Max number of redis connection(s) kept in the pool.",
               },
@@ -22347,12 +21251,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate reverse proxy mode.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22379,12 +21281,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Intercept and rewrite errors.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22411,12 +21311,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Override Host header sent to upstream server.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22444,12 +21342,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Full URL of the proxied resource (proxy_pass).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22477,12 +21373,10 @@ const data = {
             value: "/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Location URL that will be proxied.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22510,12 +21404,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable websocket on the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22543,12 +21435,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22576,12 +21466,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22609,12 +21497,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable buffering of responses from proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22642,12 +21528,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable keepalive connections with the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22675,12 +21559,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable authentication using an external provider (value of auth_request directive).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22710,12 +21592,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22743,12 +21623,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22776,12 +21654,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when connecting to the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22809,12 +21685,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when reading from the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22842,12 +21716,10 @@ const data = {
             value: "60s",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Timeout when sending to the proxied resource.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22875,12 +21747,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Additional configuration to include in the location block, separated with spaces.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22907,12 +21777,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable or disable caching of the proxied resources.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -22939,7 +21807,6 @@ const data = {
             value: "1:2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Hierarchy levels of the cache.",
               },
@@ -22971,7 +21838,6 @@ const data = {
             value: "10m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum size of cached metadata when caching proxied resources.",
               },
@@ -23003,7 +21869,6 @@ const data = {
             value: "max_size=100m",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Additional parameters to add to the proxy_cache directive.",
               },
@@ -23037,12 +21902,10 @@ const data = {
             value: "GET HEAD",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "HTTP methods that should trigger a cache operation.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23069,12 +21932,10 @@ const data = {
             value: "2",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The minimum number of requests before a response is cached.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23101,12 +21962,10 @@ const data = {
             value: "$scheme$host$request_uri",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "The key used to uniquely identify a cached response.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23133,12 +21992,10 @@ const data = {
             value: "200=24h 301=1h 302=24h",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23165,12 +22022,10 @@ const data = {
             value: "$http_pragma $http_authorization",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Conditions to disable caching of responses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23197,12 +22052,10 @@ const data = {
             value: "0",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Conditions to bypass caching of responses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23242,12 +22095,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Enable scanning of clients ports and deny access if one is opened.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23274,12 +22125,10 @@ const data = {
             value: "22 80 443 3128 8000 8080",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of port to scan when using reverse scan feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23306,12 +22155,10 @@ const data = {
             value: "500",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Specify the maximum timeout (in ms) when scanning a port.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23351,12 +22198,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Generate and use self-signed certificate.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23383,12 +22228,10 @@ const data = {
             value: "365",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Self-signed certificate expiry in days.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23415,12 +22258,10 @@ const data = {
             value: "/CN=www.example.com/",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Self-signed certificate subject.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23460,7 +22301,6 @@ const data = {
             value: "random",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Secret used to encrypt sessions variables for storing data related to challenges.",
               },
@@ -23492,7 +22332,6 @@ const data = {
             value: "random",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Name of the cookie given to clients.",
               },
@@ -23524,7 +22363,6 @@ const data = {
             value: "1800",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) of inactivity before the session is invalidated.",
               },
@@ -23556,7 +22394,6 @@ const data = {
             value: "3600",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) before a session must be renewed.",
               },
@@ -23588,7 +22425,6 @@ const data = {
             value: "86400",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Maximum time (in seconds) before a session is destroyed.",
               },
@@ -23620,7 +22456,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Destroy session if IP address is different than original one.",
               },
@@ -23652,7 +22487,6 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Destroy session if User-Agent is different than original one.",
               },
@@ -23697,12 +22531,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Use UI",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23729,7 +22561,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Address of the web UI used for initial setup",
               },
@@ -23775,12 +22606,10 @@ const data = {
             value: "no",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Activate whitelist feature.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23811,12 +22640,10 @@ const data = {
               "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of IP/network, separated with spaces, to put into the whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23845,12 +22672,10 @@ const data = {
               ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of reverse DNS suffixes, separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23877,12 +22702,10 @@ const data = {
             value: "yes",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "Only perform RDNS whitelist checks on global IP addresses.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23909,12 +22732,10 @@ const data = {
             value: "32934",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of ASN numbers, separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23941,12 +22762,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of User-Agent (PCRE regex), separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -23973,12 +22792,10 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URI (PCRE regex), separated with spaces, to whitelist.",
               },
               {
-                iconColor: "orange",
                 iconName: "disk",
                 text: "inp_popover_multisite",
               },
@@ -24007,7 +22824,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good IP/network to whitelist.",
               },
@@ -24041,7 +22857,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.",
               },
@@ -24075,7 +22890,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing ASN to whitelist.",
               },
@@ -24109,7 +22923,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing good User-Agent to whitelist.",
               },
@@ -24143,7 +22956,6 @@ const data = {
             value: "",
             popovers: [
               {
-                iconColor: "info",
                 iconName: "info",
                 text: "List of URLs, separated with spaces, containing bad URI to whitelist.",
               },

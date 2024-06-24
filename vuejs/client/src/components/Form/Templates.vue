@@ -46,8 +46,6 @@ const comboboxTemplate = {
     {
       text: "inp_templates_desc",
       iconName: "info",
-      iconColor: "info",
-      svgSize: "sm",
     },
   ],
 };

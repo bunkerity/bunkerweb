@@ -31,6 +31,7 @@ import External from "@components/Icons/External.vue";
 import Trash from "@components/Icons/Trash.vue";
 import Lock from "@components/Icons/Lock.vue";
 import Search from "@components/Icons/Search.vue";
+import Exclamation from "@components/Icons/Exclamation.vue";
 
 /**
   @name Widget/Icons.vue
@@ -47,6 +48,7 @@ import Search from "@components/Icons/Search.vue";
   @param {string} [iconClass="base"] - Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically.
   @param {string} [color=""] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
   @param {boolean} [isStick=false] - If true, the icon will be stick to the top right of the parent container.
+  @param {boolean} [disabled=false] - If true, the icon will be disabled.
   */
 
 const props = defineProps({
@@ -69,6 +71,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
 const icon = reactive({
@@ -87,160 +94,197 @@ onMounted(() => {
 </script>
 <template>
   <div ref="iconEl" :class="[props.isStick ? 'stick' : '', 'icon-container']">
+    <Exclamation
+      v-if="props.iconName === 'exclamation'"
+      :iconClass="icon.class"
+      :color="props.color"
+      :disabled="props.disabled"
+    />
     <Box
       v-if="props.iconName === 'box'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Carton
       v-if="props.iconName === 'carton'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Core
       v-if="props.iconName === 'core'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <External
       v-if="props.iconName === 'external'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Search
       v-if="props.iconName === 'search'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Trash
       v-if="props.iconName === 'trash'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Lock
       v-if="props.iconName === 'lock'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Crown
       v-if="props.iconName === 'crown'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Discord
       v-if="props.iconName === 'discord'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Disk
       v-if="props.iconName === 'disk'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Disks
       v-if="props.iconName === 'disks'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Globe
       v-if="props.iconName === 'globe'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Info
       v-if="props.iconName === 'info'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Flag
       v-if="props.iconName === 'flag'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Gear
       v-if="props.iconName === 'gear'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Github
       v-if="props.iconName === 'github'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <House
       v-if="props.iconName === 'house'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <List
       v-if="props.iconName === 'list'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Key
       v-if="props.iconName === 'key'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Linkedin
       v-if="props.iconName === 'linkedin'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Plus
       v-if="props.iconName === 'plus'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Puzzle
       v-if="props.iconName === 'puzzle'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Settings
       v-if="props.iconName === 'settings'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Task
       v-if="props.iconName === 'task'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Trespass
       v-if="props.iconName === 'trespass'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Check
       v-if="props.iconName === 'check'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Cross
       v-if="props.iconName === 'cross'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Twitter
       v-if="props.iconName === 'twitter'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Wire
       v-if="props.iconName === 'wire'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Funnel
       v-if="props.iconName === 'funnel'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
     <Redirect
       v-if="props.iconName === 'redirect'"
       :iconClass="icon.class"
       :color="props.color"
+      :disabled="props.disabled"
     />
   </div>
 </template>

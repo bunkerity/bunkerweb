@@ -31,12 +31,10 @@ import ButtonGroup from "@components/Widget/ButtonGroup.vue";
               {
                 text: "This is a popover text",
                 iconName: "info",
-                iconColor: "info",
               },
               {
                 text: "This is a popover text",
                 iconName: "info",
-                iconColor: "info",
               },
             ],
           },

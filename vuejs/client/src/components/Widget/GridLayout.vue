@@ -114,9 +114,7 @@ onMounted(() => {
               :attrs="{ 'data-hide-el': container.id }"
               :text="'action_close_modal'"
               :hideText="true"
-              :iconName="'cross'"
-              :iconColor="'dark'"
-              :iconClass="'lg'"
+              :iconName="'close'"
               :color="'transparent'"
             />
           </div>

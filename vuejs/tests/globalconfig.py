@@ -3232,9 +3232,7 @@ def format_setting(
     ) not in ("ui", "default"):
         popovers.append(
             {
-                "iconColor": "red",
                 "iconName": "trespass",
-                "svgSize": "sm",
                 "text": "inp_popover_method_disabled",
             }
         )
@@ -3242,10 +3240,6 @@ def format_setting(
     if setting_value.get("context"):
         popovers.append(
             {
-                "iconColor": (
-                    "orange" if setting_value.get("context") == "multisite" else "blue"
-                ),
-                "svgSize": "sm",
                 "iconName": (
                     "disk" if setting_value.get("context") == "multisite" else "globe"
                 ),
@@ -3260,8 +3254,6 @@ def format_setting(
     if setting_value.get("help"):
         popovers.append(
             {
-                "iconColor": "info",
-                "svgSize": "sm",
                 "iconName": "info",
                 "text": setting_value.get("help"),
             }

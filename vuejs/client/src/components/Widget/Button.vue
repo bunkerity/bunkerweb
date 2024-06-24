@@ -17,7 +17,6 @@ import { useUUID } from "@utils/global.js";
     color: "green",
     size: "normal",
     iconName: "modal",
-    iconColor: "white",
     attrs: { data-toggle: "modal", "data-target": "#modal"},
     
   }
@@ -27,9 +26,9 @@ import { useUUID } from "@utils/global.js";
   @param {boolean} [disabled=false]
   @param {boolean} [hideText=false] - Hide text to only display icon
   @param {string} [color="primary"] 
+  @param {string} [iconColor=""] - Color we want to apply to the icon. If falsy value, default icon color is applied.
   @param {string} [size="normal"] - Can be of size sm || normal || lg || xl
   @param {string} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
-  @param {string} [iconColor=""]
   @param {Object} [attrs={}] - List of attributs to add to the button. Some attributs will conduct to additionnal script
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
@@ -86,11 +85,6 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  iconClass: {
-    type: String,
-    required: false,
-    default: "sm",
-  },
   attrs: {
     type: Object,
     required: false,
@@ -127,6 +121,7 @@ onMounted(() => {
 
 <template>
   <Container
+    data-is="button"
     :containerClass="`${props.containerClass}`"
     :columns="props.columns"
   >
@@ -158,8 +153,8 @@ onMounted(() => {
       <Icons
         v-if="props.iconName"
         :iconName="props.iconName"
-        :iconClass="`${props.iconClass} pointer-events-none`"
-        :iconColor="props.iconColor"
+        :color="props.iconColor"
+        :disabled="props.disabled || false"
       />
     </button>
   </Container>

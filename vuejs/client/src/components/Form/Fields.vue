@@ -24,7 +24,6 @@ import { contentIndex } from "@utils/tabindex.js";
     {
       text: "This is a popover text",
       iconName: "info",
-      iconColor: "info",
     },
   ]
   }

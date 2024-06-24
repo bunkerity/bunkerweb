@@ -17,7 +17,6 @@ import PopoverGroup from "@components/Widget/PopoverGroup.vue";
       {
         text: "This is a popover text",
         iconName: "info",
-        iconColor: "info",
       },
     ],
   }

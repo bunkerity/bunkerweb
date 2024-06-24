@@ -1,14 +1,14 @@
 <script setup>
 import { defineProps, reactive } from "vue";
 /** 
-  @name Icons/Box.vue
-  @description This component is a svg icon representing box.
+  @name Icons/Exclamation.vue
+  @description This component is a svg icon representing exclamation.
   @example
   {
     color: 'info',
   }
   @param {string} [iconClass="icon-default"] - The class of the icon.
-  @param {string} [color="dark"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
+  @param {string} [color="red"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
   @param {boolean} [disabled=false] - If true, the icon will be disabled.
   */
 
@@ -21,13 +21,13 @@ const props = defineProps({
   color: {
     type: String,
     required: false,
-    default: "dark",
+    default: "red",
   },
   disabled: { type: Boolean, required: false, default: false },
 });
 
 const icon = reactive({
-  color: props.color || "dark",
+  color: props.color || "red",
 });
 </script>
 <template>
@@ -37,7 +37,7 @@ const icon = reactive({
     data-svg="box"
     role="img"
     aria-hidden="true"
-    :class="[props.iconClass, icon.color, 'fill dark:brightness-[125%]']"
+    :class="[props.iconClass, icon.color]"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"

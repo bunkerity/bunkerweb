@@ -220,7 +220,6 @@ def get_jobs_list(jobs):
                         k: "success" if v else "failed",
                         "type": "Icons",
                         "data": {
-                            "iconColor": "success" if v else "error",
                             "iconName": "check" if v else "cross",
                         },
                     }
@@ -269,7 +268,6 @@ def get_jobs_list(jobs):
                                 "maxBtnChars": 12,
                                 "popovers": [
                                     {
-                                        "iconColor": "info",
                                         "iconName": "info",
                                         "text": "jobs_download_cache_file",
                                     },
@@ -344,7 +342,6 @@ def job_builder(jobs):
                                         {
                                             "text": "jobs_search_desc",
                                             "iconName": "info",
-                                            "iconColor": "info",
                                         },
                                     ],
                                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
@@ -368,7 +365,6 @@ def job_builder(jobs):
                                         {
                                             "text": "jobs_interval_desc",
                                             "iconName": "info",
-                                            "iconColor": "info",
                                         },
                                     ],
                                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
@@ -392,7 +388,6 @@ def job_builder(jobs):
                                         {
                                             "text": "jobs_reload_desc",
                                             "iconName": "info",
-                                            "iconColor": "info",
                                         },
                                     ],
                                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},
@@ -416,7 +411,6 @@ def job_builder(jobs):
                                         {
                                             "text": "jobs_success_desc",
                                             "iconName": "info",
-                                            "iconColor": "info",
                                         },
                                     ],
                                     "columns": {"pc": 3, "tablet": 4, "mobile": 12},

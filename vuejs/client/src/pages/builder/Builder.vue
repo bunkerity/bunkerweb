@@ -77,8 +77,6 @@ const builder = [
         type: "IconStat",
         data: {
           iconName: "crown",
-          iconColor: "yellow",
-          iconClass: "col-span-12",
         },
       },
       {

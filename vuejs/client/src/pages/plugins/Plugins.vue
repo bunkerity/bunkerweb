@@ -27,7 +27,7 @@ function redirectPlugin() {
           .closest("[data-plugin-redirect]")
           .getAttribute("data-plugin-redirect") !== "true" ||
         !e.target.querySelector(
-          '[:data-color="icon.color" data-svg="redirect"]'
+          '[:data-color="icon.color" :disabled="props.disabled" data-svg="redirect"]'
         )
       )
         return;

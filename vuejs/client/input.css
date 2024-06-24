@@ -513,11 +513,28 @@ body {
   @apply py-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
 }
 
-.layout-unmatch {
-  @apply col-span-12 flex mx-2 my-4;
+/* MESSAGE */
+.msg-container {
+  @apply col-span-12 w-full;
 }
 
-.layout-unmatch-table {
+.msg-unmatch-card {
+  @apply col-span-12 w-full mx-2 my-4;
+}
+
+.msg-unmatch-form {
+  @apply col-span-12 w-full mx-2 my-4;
+}
+
+.msg-unmatch-base {
+  @apply col-span-12 w-full mx-2 my-4;
+}
+
+.msg-unmatch-list-details {
+  @apply col-span-12 w-full mx-2 my-4;
+}
+
+.msg-unmatch-table {
   @apply fixed col-span-12 flex mx-2 my-8 w-full;
 
 }
@@ -545,7 +562,7 @@ body {
 }
 
 .icon-container {
-  @apply block w-full h-full;
+  @apply block w-fit;
 }
 
 .stick.icon-container {
@@ -568,16 +585,32 @@ body {
   @apply block w-8 h-8
 }
 
+.icon-card {
+  @apply block w-8 h-8
+}
+
+.icon-unmatch {
+  @apply block w-8 h-8;
+}
+
 .icon-menu {
   @apply h-6 w-6 relative;
 }
 
-.icon-table {
+.icon-form {
+  @apply h-6 w-6 relative;
+}
+
+.icon-button {
+  @apply h-6 w-6 relative;
+}
+
+.icon-table:not([disabled]) {
   @apply h-6 w-6 relative;
 }
 
 .icon-list-details {
-  @apply mx-1 h-7 w-7 relative;
+  @apply ml-2 h-6.5 w-6.5 relative;
 }
 
 /* TABS */
@@ -1040,14 +1073,22 @@ body {
   @apply col-span-12 mb-2 text-center break-word;
 }
 
-.text-unmatch {
+.text-card {
   @apply col-span-12 text-lg mb-0 break-word;
-
 }
+
+.text-unmatch {
+  @apply col-span-12 text-lg mb-0 font-bold break-word;
+}
+
 
 .text-table {
   @apply col-span-12 mb-0 break-word;
 
+}
+
+.text-form-error {
+  @apply mt-2 font-bold error text-center text-red-500;
 }
 
 .text-stat {
@@ -1057,6 +1098,21 @@ body {
 .text-list-details {
   @apply w-full col-span-12 mb-0 break-word;
 }
+
+/* BTN GROUP */
+
+.button-group-default {
+  @apply flex justify-center items-center;
+}
+
+.button-group-instance {
+  @apply flex justify-end items-center;
+}
+
+.button-group-modal {
+  @apply flex justify-center items-center mt-4;
+}
+
 /* LIST COMPONENT */
 
 .list-pairs-container {
@@ -1095,8 +1151,8 @@ body {
   @apply col-span-12 grid grid-cols-12 gap-3 py-2;
 }
 
-.list-details-flex {
-  @apply justify-end items-center;
+.list-details-item-wrap {
+  @apply flex justify-between items-center w-full;
 }
 
 /* TITLE */
@@ -1214,9 +1270,7 @@ body {
   @apply col-span-12 w-full;
 }
 
-.form-setting-error {
-  @apply mt-2 font-bold error text-center text-red-500;
-}
+
 
 /* CARD */
 
@@ -1256,7 +1310,7 @@ body {
 /* BTN */
 
 .btn {
-  @apply tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply flex justify-center items-center tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 
@@ -1492,6 +1546,10 @@ body {
   @apply w-full appearance-none block col-span-12 overflow-x-auto grid grid-cols-12;
 }
 
+.table-unmatch {
+  @apply col-span-12 mx-2 my-4 w-full;
+}
+
 .table {
   @apply appearance-none w-full grid grid-cols-12 col-span-12 block;
 }
@@ -1646,327 +1704,151 @@ body {
 
 /* TEXT COLOR MODIFIER */
 
-.success.subtitle-stat,
-.success.subtitle-card,
-.success.title-card,
-.success.title-container,
-.success.title-stat,
-.success.text-content {
+.text-el {
+  @apply text-current;
+}
+
+.success.text-el{
   @apply text-green-500;
 }
 
-.error.subtitle-stat,
-.error.subtitle-card,
-.error.title-card,
-.error.title-container,
-.error.title-stat,
-.error.text-content {
+.error.text-el {
   @apply text-red-500;
 }
 
-.warning.subtitle-stat,
-.warning.subtitle-card,
-.warning.title-card,
-.warning.title-container,
-.warning.title-stat,
-.warning.text-content {
+.warning.text-el {
   @apply text-yellow-500;
 }
 
-.info.subtitle-stat,
-.info.subtitle-card,
-.info.title-card,
-.info.title-container,
-.info.title-stat,
-.info.text-content {
+.info.text-el {
   @apply text-sky-500;
 }
 
-.purple.subtitle-stat,
-.purple.subtitle-card,
-.purple.title-card,
-.purple.title-container,
-.purple.title-stat,
-.purple.text-content {
+.purple.text-el {
   @apply text-purple-500;
 }
 
-.green.subtitle-stat,
-.green.subtitle-card,
-.green.title-card,
-.green.title-container,
-.green.title-stat,
-.green.text-content {
+.green.text-el {
   @apply text-green-500;
 }
 
-.red.subtitle-stat,
-.red.subtitle-card,
-.red.title-card,
-.red.title-container,
-.red.title-stat,
-.red.text-content {
+.red.text-el {
   @apply text-red-500;
 }
 
-.orange.subtitle-stat,
-.orange.subtitle-card,
-.orange.title-card,
-.orange.title-container,
-.orange.title-stat,
-.orange.text-content {
+.orange.text-el {
   @apply text-orange-500;
 }
 
-.blue.subtitle-stat,
-.blue.subtitle-card,
-.blue.title-card,
-.blue.title-container,
-.blue.title-stat,
-.blue.text-content {
+.blue.text-el {
   @apply text-blue-500;
 }
 
-.yellow.subtitle-stat,
-.yellow.subtitle-card,
-.yellow.title-card,
-.yellow.title-container,
-.yellow.title-stat,
-.yellow.text-content {
+.yellow.text-el {
   @apply text-yellow-500;
 }
 
-.gray.subtitle-stat,
-.gray.subtitle-card,
-.gray.title-card,
-.gray.title-container,
-.gray.title-stat,
-.gray.text-content {
+.gray.text-el{
   @apply text-gray-500;
 }
 
-.dark.subtitle-stat,
-.dark.subtitle-card,
-.dark.title-card,
-.dark.title-container,
-.dark.title-stat,
-.dark.text-content {
+.dark.text-el {
   @apply text-slate-500;
 }
 
-.amber.subtitle-stat,
-.amber.subtitle-card,
-.amber.title-card,
-.amber.title-container,
-.amber.title-stat,
-.amber.text-content {
+.amber.text-el {
   @apply text-amber-500;
 }
 
-.emerald.subtitle-stat,
-.emerald.subtitle-card,
-.emerald.title-card,
-.emerald.title-container,
-.emerald.title-stat,
-.emerald.text-content {
+.emerald.text-el {
   @apply text-emerald-500;
 }
 
-.teal.subtitle-stat,
-.teal.subtitle-card,
-.teal.title-card,
-.teal.title-container,
-.teal.title-stat,
-.teal.text-content {
+.teal.text-el {
   @apply text-teal-500;
 }
 
-.indigo.subtitle-stat,
-.indigo.subtitle-card,
-.indigo.title-card,
-.indigo.title-container,
-.indigo.title-stat,
-.indigo.text-content {
+.indigo.text-el {
   @apply text-indigo-500;
 }
 
-.cyan.subtitle-stat,
-.cyan.subtitle-card,
-.cyan.title-card,
-.cyan.title-container,
-.cyan.title-stat,
-.cyan.text-content {
+.cyan.text-el{
   @apply text-cyan-500;
 }
 
-.sky.subtitle-stat,
-.sky.subtitle-card,
-.sky.title-card,
-.sky.title-container,
-.sky.title-stat,
-.sky.text-content {
+.sky.text-el{
   @apply text-sky-500;
 }
 
-.pink.subtitle-stat,
-.pink.subtitle-card,
-.pink.title-card,
-.pink.title-container,
-.pink.title-stat,
-.pink.text-content {
+.pink.text-el {
   @apply text-pink-500;
 }
 
-.lime.subtitle-stat,
-.lime.subtitle-card,
-.lime.title-card,
-.lime.title-container,
-.lime.title-stat,
-.lime.text-content {
+.lime.text-el {
   @apply text-lime-500;
 }
 
-.purple-darker.subtitle-stat,
-.purple.subtitle-card,
-.purple.title-card,
-.purple.title-container,
-.purple.title-stat,
-.purple.text-content {
+.purple-darker.text-el {
   @apply text-purple-600;
 }
 
-.green-darker.subtitle-stat,
-.green-dark.subtitle-card,
-.green-dark.title-card,
-.green-dark.title-container,
-.green-dark.title-stat,
-.green-darker.text-content {
+.green-darker.text-el {
   @apply text-green-700;
 }
 
-.red-darker.subtitle-stat,
-.red-darker.subtitle-card,
-.red-darker.title-card,
-.red-darker.title-container,
-.red-darker.title-stat,
-.red-darker.text-content {
+.red-darker.text-el {
   @apply text-red-700;
 }
 
-.orange-darker.subtitle-stat,
-.orange-darker.subtitle-card,
-.orange-darker.title-card,
-.orange-darker.title-container,
-.orange-darker.title-stat,
-.orange-darker.text-content {
+.orange-darker.text-el {
   @apply text-orange-600;
 }
 
-.blue-darker.subtitle-stat,
-.blue-darker.subtitle-card,
-.blue-darker.title-card,
-.blue-darker.title-container,
-.blue-darker.title-stat,
-.blue-darker.text-content {
+.blue-darker.text-el {
   @apply text-blue-600;
 }
 
-.yellow-darker.subtitle-stat,
-.yellow-darker.subtitle-card,
-.yellow-darker.title-card,
-.yellow-darker.title-container,
-.yellow-darker.title-stat,
-.yellow-darker.text-content {
+.yellow-darker.text-el {
   @apply text-yellow-600;
 }
 
-.gray-darker.subtitle-stat,
-.gray-darker.subtitle-card,
-.gray-darker.title-card,
-.gray-darker.title-container,
-.gray-darker.title-stat,
-.gray-darker.text-content {
+.gray-darker.text-el {
   @apply text-gray-600;
 }
 
-.dark-darker.subtitle-stat,
-.dark-darker.subtitle-card,
-.dark-darker.title-card,
-.dark-darker.title-container,
-.dark-darker.title-stat,
-.dark-darker.text-content {
+.dark-darker.text-el {
   @apply text-slate-600;
 }
 
-.amber-darker.subtitle-stat,
-.amber-darker.subtitle-card,
-.amber-darker.title-card,
-.amber-darker.title-container,
-.amber-darker.title-stat,
-.amber-darker.text-content {
+.amber-darker.text-el {
   @apply text-amber-600;
 }
 
-.emerald-darker.subtitle-stat,
-.emerald-darker.subtitle-card,
-.emerald-darker.title-card,
-.emerald-darker.title-container,
-.emerald-darker.title-stat,
-.emerald-darker.text-content {
+.emerald-darker.text-el {
   @apply text-emerald-600;
 }
 
-.teal-darker.subtitle-stat,
-.teal-darker.subtitle-card,
-.teal-darker.title-card,
-.teal-darker.title-container,
-.teal-darker.title-stat,
-.teal-darker.text-content {
+.teal-darker.text-el {
   @apply text-teal-600;
 }
 
-.indigo-darker.subtitle-stat,
-.indigo-darker.subtitle-card,
-.indigo-darker.title-card,
-.indigo-darker.title-container,
-.indigo-darker.title-stat,
-.indigo-darker.text-content {
+.indigo-darker.text-el {
   @apply text-indigo-600;
 }
 
-.cyan-darker.subtitle-stat,
-.cyan-darker.subtitle-card,
-.cyan-darker.title-card,
-.cyan-darker.title-container,
-.cyan-darker.title-stat,
-.cyan-darker.text-content {
+.cyan-darker.text-el {
   @apply text-cyan-600;
 }
 
-.sky-darker.subtitle-stat,
-.sky-darker.subtitle-card,
-.sky-darker.title-card,
-.sky-darker.title-container,
-.sky-darker.title-stat,
-.sky-darker.text-content {
+.sky-darker.text-el {
   @apply text-sky-700;
 }
 
-.pink-darker.subtitle-stat,
-.pink-darker.subtitle-card,
-.pink-darker.title-card,
-.pink-darker.title-container,
-.pink-darker.title-stat,
-.pink-darker.text-content {
+.pink-darker.text-el {
   @apply text-pink-600;
 }
 
-.lime-darker.subtitle-stat,
-.lime-darker.subtitle-card,
-.lime-darker.title-card,
-.lime-darker.title-container,
-.lime-darker.title-stat,
-.lime-darker.text-content {
+.lime-darker.text-el {
   @apply text-lime-600;
 }
 

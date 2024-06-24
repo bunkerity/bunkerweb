@@ -28,7 +28,6 @@ import ButtonGroup from "@components/Widget/ButtonGroup.vue";
         color: "green",
         size: "normal",
         iconName: "modal",
-        iconColor: "white",
       },
     ]
   }
@@ -62,13 +61,10 @@ const props = defineProps({
 </script>
 
 <template>
-  <Container :columns="{ pc: 12, tablet: 12, mobile: 12 }">
+  <Container data-is="instance" :columns="{ pc: 12, tablet: 12, mobile: 12 }">
     <Status :id="props.title" :status="props.status" />
     <Title type="card" :title="props.title" />
     <ListPairs :pairs="props.pairs" />
-    <ButtonGroup
-      :buttons="props.buttons"
-      :groupClass="'justify-end item-center'"
-    />
+    <ButtonGroup :buttons="props.buttons" />
   </Container>
 </template>

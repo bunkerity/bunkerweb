@@ -4,7 +4,6 @@ import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
-import Flex from "@components/Widget/Flex.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
@@ -174,7 +173,7 @@ onUnmounted(() => {
         </Container>
       </Container>
     </template>
-    <Flex :flexClass="'justify-center'">
+    <div class="flex justify-center items-center">
       <Button
         @click="data.currStep = Math.max(data.currStep - 1, 0)"
         :disabled="data.isFirstStep"
@@ -191,21 +190,22 @@ onUnmounted(() => {
         :disabled="!data.isFinalStep || data.isRegErr || data.isReqErr"
         v-bind="buttonSave"
       />
-    </Flex>
-    <Text
-      v-if="data.isRegErr || data.isReqErr"
-      :textClass="'form-setting-error'"
-      :text="
-        data.isReqErr
-          ? $t('dashboard_easy_required', {
-              step: data.stepErr,
-              setting: data.settingErr,
-            })
-          : $t('dashboard_easy_invalid', {
-              step: data.stepErr,
-              setting: data.settingErr,
-            })
-      "
-    />
+    </div>
+    <div class="flex justify-center items-center" data-is="form-error">
+      <Text
+        v-if="data.isRegErr || data.isReqErr"
+        :text="
+          data.isReqErr
+            ? $t('dashboard_easy_required', {
+                step: data.stepErr,
+                setting: data.settingErr,
+              })
+            : $t('dashboard_easy_invalid', {
+                step: data.stepErr,
+                setting: data.settingErr,
+              })
+        "
+      />
+    </div>
   </Container>
 </template>
