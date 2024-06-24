@@ -38,12 +38,12 @@ else
 
     echo "CUSTOM_HEADER=" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REMOVE_HEADERS=Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "STRICT_TRANSPORT_SECURITY=max-age=31536000" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "STRICT_TRANSPORT_SECURITY=max-age=31536000; includeSubDomains; preload" | sudo tee -a /etc/bunkerweb/variables.env
     echo "COOKIE_FLAGS=* HttpOnly SameSite=Lax" | sudo tee -a /etc/bunkerweb/variables.env
     echo "COOKIE_AUTO_SECURE_FLAG=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CONTENT_SECURITY_POLICY=object-src 'none'; form-action 'self'; frame-ancestors 'self';" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REFERRER_POLICY=strict-origin-when-cross-origin" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_FRAME_OPTIONS=SAMEORIGIN" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_CONTENT_TYPE_OPTIONS=nosniff" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_XSS_PROTECTION=1; mode=block" | sudo tee -a /etc/bunkerweb/variables.env
@@ -58,13 +58,13 @@ cleanup_stack () {
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CUSTOM_HEADER: "X-Test: test"@CUSTOM_HEADER: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REMOVE_HEADERS: ".*"$@REMOVE_HEADERS: "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@STRICT_TRANSPORT_SECURITY: "max-age=86400"@STRICT_TRANSPORT_SECURITY: "max-age=31536000"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@STRICT_TRANSPORT_SECURITY: "max-age=86400"@STRICT_TRANSPORT_SECURITY: "max-age=31536000; includeSubDomains; preload"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_FLAGS: ".*"$@COOKIE_FLAGS: "* HttpOnly SameSite=Lax"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@GENERATE_SELF_SIGNED_SSL: "yes"@GENERATE_SELF_SIGNED_SSL: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_AUTO_SECURE_FLAG: "no"@COOKIE_AUTO_SECURE_FLAG: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY: ".*"$@CONTENT_SECURITY_POLICY: "object-src '"'"'none'"'"'; form-action '"'"'self'"'"'; frame-ancestors '"'"'self'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "no-referrer"@REFERRER_POLICY: "strict-origin-when-cross-origin"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
@@ -80,12 +80,12 @@ cleanup_stack () {
             sudo sed -i 's@GENERATE_SELF_SIGNED_SSL=.*$@GENERATE_SELF_SIGNED_SSL=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@CUSTOM_HEADER=.*$@CUSTOM_HEADER=@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REMOVE_HEADERS=.*$@REMOVE_HEADERS=Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@STRICT_TRANSPORT_SECURITY=.*$@STRICT_TRANSPORT_SECURITY=max-age=31536000@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@STRICT_TRANSPORT_SECURITY=.*$@STRICT_TRANSPORT_SECURITY=max-age=31536000; includeSubDomains; preload@' /etc/bunkerweb/variables.env
             sudo sed -i 's@COOKIE_FLAGS=.*$@COOKIE_FLAGS=* HttpOnly SameSite=Lax@' /etc/bunkerweb/variables.env
             sudo sed -i 's@COOKIE_AUTO_SECURE_FLAG=.*$@COOKIE_AUTO_SECURE_FLAG=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@CONTENT_SECURITY_POLICY=.*$@CONTENT_SECURITY_POLICY=object-src '"'"'none'"'"'; form-action '"'"'self'"'"'; frame-ancestors '"'"'self'"'"';@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REFERRER_POLICY=.*$@REFERRER_POLICY=strict-origin-when-cross-origin@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env
@@ -140,7 +140,7 @@ do
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CUSTOM_HEADER: ""@CUSTOM_HEADER: "X-Test: test"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REMOVE_HEADERS: ".*"$@REMOVE_HEADERS: "X-Powered-By X-AspNet-Version X-AspNetMvc-Version"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@STRICT_TRANSPORT_SECURITY: "max-age=31536000"@STRICT_TRANSPORT_SECURITY: "max-age=86400"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@STRICT_TRANSPORT_SECURITY: "max-age=31536000; includeSubDomains; preload"@STRICT_TRANSPORT_SECURITY: "max-age=86400"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY: ".*"$@CONTENT_SECURITY_POLICY: "object-src '"'"'none'"'"'; frame-ancestors '"'"'self'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "strict-origin-when-cross-origin"@REFERRER_POLICY: "no-referrer"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "geolocation=(self), microphone=()"@' {} \;
@@ -173,11 +173,11 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_FLAGS: ".*"$@COOKIE_FLAGS: "* SameSite=Lax"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CUSTOM_HEADER: "X-Test: test"@CUSTOM_HEADER: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REMOVE_HEADERS: ".*"$@REMOVE_HEADERS: "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@STRICT_TRANSPORT_SECURITY: "max-age=86400"@STRICT_TRANSPORT_SECURITY: "max-age=31536000"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@STRICT_TRANSPORT_SECURITY: "max-age=86400"@STRICT_TRANSPORT_SECURITY: "max-age=31536000; includeSubDomains; preload"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@GENERATE_SELF_SIGNED_SSL: "yes"@GENERATE_SELF_SIGNED_SSL: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY: ".*"$@CONTENT_SECURITY_POLICY: "object-src '"'"'none'"'"'; form-action '"'"'self'"'"'; frame-ancestors '"'"'self'"'"';"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "no-referrer"@REFERRER_POLICY: "strict-origin-when-cross-origin"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
@@ -185,11 +185,11 @@ do
             sudo sed -i 's@COOKIE_FLAGS=.*$@COOKIE_FLAGS=* SameSite=Lax@' /etc/bunkerweb/variables.env
             sudo sed -i 's@CUSTOM_HEADER=.*$@CUSTOM_HEADER=@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REMOVE_HEADERS=.*$@REMOVE_HEADERS=Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@STRICT_TRANSPORT_SECURITY=.*$@STRICT_TRANSPORT_SECURITY=max-age=31536000@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@STRICT_TRANSPORT_SECURITY=.*$@STRICT_TRANSPORT_SECURITY=max-age=31536000; includeSubDomains; preload@' /etc/bunkerweb/variables.env
             sudo sed -i 's@GENERATE_SELF_SIGNED_SSL=.*$@GENERATE_SELF_SIGNED_SSL=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@CONTENT_SECURITY_POLICY=.*$@CONTENT_SECURITY_POLICY=object-src '"'"'none'"'"'; form-action '"'"'self'"'"'; frame-ancestors '"'"'self'"'"';@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REFERRER_POLICY=.*$@REFERRER_POLICY=strict-origin-when-cross-origin@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env

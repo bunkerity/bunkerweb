@@ -47,7 +47,7 @@ services:
   bunkernet-api:
     build: api
     networks:
-      bw-docker:
+      bw-universe:
       bw-services:
         ipv4_address: 1.0.0.4
 

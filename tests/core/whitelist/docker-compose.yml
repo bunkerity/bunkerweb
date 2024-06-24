@@ -64,7 +64,7 @@ services:
   whitelist-api:
     build: api
     networks:
-      bw-docker:
+      bw-universe:
       bw-services:
         ipv4_address: 192.168.0.4
 
