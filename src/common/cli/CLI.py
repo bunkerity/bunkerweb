@@ -180,17 +180,9 @@ class CLI(ApiCaller):
                 self.__logger.error("USE_REDIS is set to yes but REDIS_HOST or REDIS_SENTINEL_HOSTS is not set, disabling redis")
                 self.__use_redis = False
 
-        if Path(sep, "usr", "sbin", "nginx").exists() or self.__integration == "Linux":
-            return super().__init__(
-                [
-                    API(
-                        f"http://127.0.0.1:{self.__get_variable('API_HTTP_PORT', '5000')}",
-                        host=self.__get_variable("API_SERVER_NAME", "bwapi"),
-                    )
-                ]
-            )
         super().__init__()
-        self.auto_setup(self.__integration)
+        for db_instance in self.__db.get_instances():
+            self.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
