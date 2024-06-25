@@ -1,7 +1,6 @@
 x-env: &env
   DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
-  DOCKER_HOST: "tcp://bw-docker:2375"
-  LOG_LEVEL: "debug"
+  CUSTOM_LOG_LEVEL: "debug"
 
 services:
   bw:
@@ -11,6 +10,24 @@ services:
       - 80:80
       - 443:443
     environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    pull_policy: never
+    depends_on:
+      - bw
+    volumes:
+      - bw-data:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bw"
       SERVER_NAME: ""
       MULTISITE: "yes"
       HTTP_PORT: "80"
@@ -35,60 +52,32 @@ services:
             ngx.exit(ngx.HTTP_OK)
           }
         }
-    labels:
-      - "bunkerweb.INSTANCE=yes"
     networks:
-      bw-universe:
-      bw-services:
-        ipv4_address: 192.168.0.2
-
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
-    pull_policy: never
-    depends_on:
-      - bw
-      - bw-docker
-    volumes:
-      - bw-data:/data
-    environment:
-      <<: *env
-    networks:
-      - bw-docker
       - bw-universe
+      - bw-db
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.6.0-beta
     pull_policy: never
     depends_on:
       - bw
-      - bw-docker
     environment:
       <<: *env
     networks:
-      - bw-docker
       - bw-universe
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
+      - bw-db
 
   bw-db:
     image: mariadb:11
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=secret
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
     volumes:
       - bw-db:/var/lib/mysql
     networks:
-      - bw-docker
+      - bw-db
 
   app1:
     image: nginxdemos/nginx-hello
@@ -113,5 +102,5 @@ networks:
       driver: default
       config:
         - subnet: 192.168.0.0/24
-  bw-docker:
-    name: bw-docker
+  bw-db:
+    name: bw-db
