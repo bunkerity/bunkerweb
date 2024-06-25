@@ -36,7 +36,8 @@ try:
 
     custom_headers = getenv("CUSTOM_HEADER", "")
     remove_headers = getenv("REMOVE_HEADERS", "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version")
-    strict_transport_security = getenv("STRICT_TRANSPORT_SECURITY", "max-age=31536000")
+    keep_upstream_headers = getenv("KEEP_UPSTREAM_HEADERS", "Content-Security-Policy X-Frame-Options")
+    strict_transport_security = getenv("STRICT_TRANSPORT_SECURITY", "max-age=31536000; includeSubDomains; preload")
     cookie_flags = getenv("COOKIE_FLAGS", "* HttpOnly SameSite=Lax")
     cookie_flags_1 = getenv("COOKIE_FLAGS_1")
     cookie_auto_secure_flag = getenv("COOKIE_AUTO_SECURE_FLAG", "yes") == "yes"
@@ -44,16 +45,18 @@ try:
         "CONTENT_SECURITY_POLICY",
         "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
     )
+    content_security_policy_report_only = getenv("CONTENT_SECURITY_POLICY_REPORT_ONLY", "no") == "yes"
     referrer_policy = getenv("REFERRER_POLICY", "strict-origin-when-cross-origin")
     permissions_policy = getenv(
         "PERMISSIONS_POLICY",
         "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(),"
         + " execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(),"
         + " navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
-    )
+    ) + (", interest-cohort=()" if getenv("DISABLE_FLOC", "yes") == "yes" else "")
     x_frame_options = getenv("X_FRAME_OPTIONS", "SAMEORIGIN")
     x_content_type_options = getenv("X_CONTENT_TYPE_OPTIONS", "nosniff")
     x_xss_protection = getenv("X_XSS_PROTECTION", "1; mode=block")
+    x_dns_prefetch_control = getenv("X_DNS_PREFETCH_CONTROL", "off")
 
     print(
         f"ℹ️ Sending a HEAD request to http{'s' if ssl else ''}://www.example.com ...",
@@ -94,9 +97,12 @@ try:
             flush=True,
         )
         exit(1)
-    elif response.headers.get("Content-Security-Policy") != content_security_policy:
+    elif (
+        response.headers.get("Content-Security-Policy-Report-Only" if content_security_policy_report_only else "Content-Security-Policy")
+        != content_security_policy
+    ):
         print(
-            f'❌ Header "Content-Security-Policy" doesn\'t have the right value. {response.headers.get("Content-Security-Policy", "missing header")} (header) != {content_security_policy} (env), exiting ...\nheaders: {response.headers}',
+            f'❌ Header "{"Content-Security-Policy-Report-Only" if content_security_policy_report_only else "Content-Security-Policy"}" doesn\'t have the right value. {response.headers.get("Content-Security-Policy-Report-Only" if content_security_policy_report_only else "Content-Security-Policy", "missing header")} (header) != {content_security_policy} (env), exiting ...\nheaders: {response.headers}',
             flush=True,
         )
         exit(1)
@@ -106,9 +112,17 @@ try:
             flush=True,
         )
         exit(1)
-    elif response.headers.get("Permissions-Policy") != permissions_policy:
+    elif ("Permissions-Policy" not in keep_upstream_headers and keep_upstream_headers != "*") and response.headers.get(
+        "Permissions-Policy"
+    ) != permissions_policy:
         print(
             f'❌ Header "Permissions-Policy" doesn\'t have the right value. {response.headers.get("Permissions-Policy", "missing header")} (header) != {permissions_policy} (env), exiting ...\nheaders: {response.headers}',
+            flush=True,
+        )
+        exit(1)
+    elif ("Permissions-Policy" in keep_upstream_headers or keep_upstream_headers == "*") and response.headers.get("Permissions-Policy") == permissions_policy:
+        print(
+            f'❌ Header "Permissions-Policy" was not kept even though it was supposed to be. {response.headers.get("Permissions-Policy", "missing header")} (header) != {permissions_policy} (env), exiting ...\nheaders: {response.headers}',
             flush=True,
         )
         exit(1)
@@ -127,6 +141,12 @@ try:
     elif response.headers.get("X-XSS-Protection") != x_xss_protection:
         print(
             f'❌ Header "X-XSS-Protection" doesn\'t have the right value. {response.headers.get("X-XSS-Protection", "missing header")} (header) != {x_xss_protection} (env), exiting ...\nheaders: {response.headers}',
+            flush=True,
+        )
+        exit(1)
+    elif response.headers.get("X-DNS-Prefetch-Control") != x_dns_prefetch_control:
+        print(
+            f'❌ Header "X-DNS-Prefetch-Control" doesn\'t have the right value. {response.headers.get("X-DNS-Prefetch-Control", "missing header")} (header) != {x_dns_prefetch_control} (env), exiting ...\nheaders: {response.headers}',
             flush=True,
         )
         exit(1)

@@ -37,15 +37,19 @@ services:
       # ? HEADERS settings
       CUSTOM_HEADER: ""
       REMOVE_HEADERS: "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version"
+      KEEP_UPSTREAM_HEADERS: "Content-Security-Policy X-Frame-Options"
       STRICT_TRANSPORT_SECURITY: "max-age=31536000; includeSubDomains; preload"
       COOKIE_FLAGS: "* HttpOnly SameSite=Lax"
       COOKIE_AUTO_SECURE_FLAG: "yes"
       CONTENT_SECURITY_POLICY: "object-src 'none'; form-action 'self'; frame-ancestors 'self';"
+      CONTENT_SECURITY_POLICY_REPORT_ONLY: "no"
       REFERRER_POLICY: "strict-origin-when-cross-origin"
       PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"
+      DISABLE_FLOC: "yes"
       X_FRAME_OPTIONS: "SAMEORIGIN"
       X_CONTENT_TYPE_OPTIONS: "nosniff"
       X_XSS_PROTECTION: "1; mode=block"
+      X_DNS_PREFETCH_CONTROL: "off"
       CUSTOM_CONF_SERVER_HTTP_ready: |
         location /ready {
           default_type 'text/plain';
