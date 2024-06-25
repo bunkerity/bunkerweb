@@ -57,7 +57,6 @@ else
     sudo touch /var/www/html/index.html
 
     export TEST_TYPE="linux"
-    export GLOBAL_BUNKERWEB_INSTANCES="127.0.0.1"
     export GLOBAL_SERVER_NAME="bwadm.example.com"
     export GLOBAL_HTTP_PORT="80"
     export GLOBAL_HTTPS_PORT="443"
