@@ -4,7 +4,7 @@ import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 import Text from "@components/Widget/Text.vue";
 import Filter from "@components/Widget/Filter.vue";
 import Grid from "@components/Widget/Grid.vue";
-
+import MessageUnmatch from "@components/Message/Unmatch.vue";
 /** 
   @name List/Details.vue
   @description This component is a list of items separate on two columns : one for the title, and other for a list of popovers related to the plugin (type, link...)
@@ -58,14 +58,6 @@ const data = reactive({
 const gridClass = computed(() => {
   return `col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
 });
-
-const unmatch = {
-  text: "dashboard_no_match",
-  textClass: "text-unmatch",
-  icon: {
-    iconName: "search",
-  },
-};
 </script>
 
 <template>
@@ -76,9 +68,7 @@ const unmatch = {
       :data="data.base"
       :filters="props.filters"
     />
-    <div data-is="unmatch" v-if="!data.format.length" class="layout-unmatch">
-      <Text v-bind="unmatch" />
-    </div>
+    <MessageUnmatch v-if="!data.format.length" />
     <ul
       data-is="list-details"
       v-if="data.format.length"

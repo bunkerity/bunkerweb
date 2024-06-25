@@ -40,7 +40,7 @@ onMounted(() => {
   <span :id="icon.id" class="sr-only">{{ $t("icons_linkedin_desc") }}</span>
   <svg
     :data-color="icon.color"
-    :disabled="props.disabled"
+    :aria-disabled="props.disabled ? 'true' : 'false'"
     data-svg="key"
     role="img"
     :class="[props.iconClass, icon.color, 'fill']"

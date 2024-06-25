@@ -33,7 +33,7 @@ const icon = reactive({
 <template>
   <svg
     :data-color="icon.color"
-    :disabled="props.disabled"
+    :aria-disabled="props.disabled ? 'true' : 'false'"
     data-svg="info"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"

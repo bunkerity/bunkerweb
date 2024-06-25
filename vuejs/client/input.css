@@ -505,6 +505,7 @@ body {
   @apply relative min-w-[300px] sm:min-w-[450px] max-w-screen-xl max-h-[80vh] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out  px-6 py-4 overflow-hidden break-words grid grid-cols-12; 
 }
 
+
 .layout-modal-button-container {
   @apply absolute right-4 top-4 z-[30];
 }
@@ -1066,25 +1067,24 @@ body {
 /* CONTENT COMPONENT */
 
 .text-content {
-  @apply col-span-12 mb-0 break-word;
+  @apply col-span-12 mb-0 dark:text-gray-300 break-word;
 }
 
 .text-modal {
-  @apply col-span-12 mb-2 text-center break-word;
+  @apply col-span-12 mb-2 text-center dark:text-gray-300 break-word;
 }
 
 .text-card {
-  @apply col-span-12 text-lg mb-0 break-word;
+  @apply col-span-12 text-lg mb-0 dark:text-gray-300 break-word;
 }
 
 .text-unmatch {
-  @apply col-span-12 text-lg mb-0 font-bold break-word;
+  @apply col-span-12 text-lg mb-0 font-bold dark:text-gray-300 break-word;
 }
 
 
 .text-table {
-  @apply col-span-12 mb-0 break-word;
-
+  @apply col-span-12 mb-0 dark:text-gray-300 break-word;
 }
 
 .text-form-error {
@@ -1092,11 +1092,11 @@ body {
 }
 
 .text-stat {
-  @apply col-span-12 my-1 font-bold dark:text-white/90 text-black uppercase break-word;
+  @apply col-span-12 my-1 font-bold dark:text-gray-300 text-black uppercase break-word;
 }
 
 .text-list-details {
-  @apply w-full col-span-12 mb-0 break-word;
+  @apply w-full col-span-12 mb-0 dark:text-gray-300 break-word;
 }
 
 /* BTN GROUP */
@@ -1253,7 +1253,6 @@ body {
   @apply col-span-12 w-full;
 }
 
-
 .form-easy-container {
   @apply col-span-12 w-full;
 }
@@ -1310,7 +1309,7 @@ body {
 /* BTN */
 
 .btn {
-  @apply flex justify-center items-center tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply flex justify-center items-end leading-none tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 
@@ -1705,7 +1704,6 @@ body {
 /* TEXT COLOR MODIFIER */
 
 .text-el {
-  @apply text-current;
 }
 
 .success.text-el{
@@ -1855,8 +1853,6 @@ body {
 /* BACKGROUND COLOR MODIFIER */
 
 .bg-el {
-  @apply bg-current;
-
 }
 
 .success.bg-el {
@@ -2006,7 +2002,10 @@ body {
 /* SVG COLOR MODIFIER */
 
 .fill {
-  @apply fill-current;
+}
+
+.fill[aria-disabled="true"] {
+  @apply !fill-gray-700 dark:!fill-gray-300;
 }
 
 .success.fill {
@@ -2046,7 +2045,7 @@ body {
 }
 
 .blue.fill {
-  @apply fill-blue-500;
+  @apply fill-blue-500 dark:fill-blue-400;
 }
 
 .yellow.fill {
@@ -2129,7 +2128,7 @@ body {
   @apply fill-blue-600;
 }
 
-.yellow-darker.fill-default {
+.yellow-darker.fill {
   @apply fill-yellow-600;
 }
 

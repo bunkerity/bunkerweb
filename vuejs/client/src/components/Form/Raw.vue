@@ -147,7 +147,7 @@ const buttonSave = {
     <Title type="card" :title="'dashboard_raw_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_raw_mode_subtitle'" />
 
-    <Container class="form-raw-editor-container">
+    <Container class="form-raw-editor-container layout-settings">
       <Editor @inp="(v) => (data.inp = v)" v-bind="editorData" />
     </Container>
     <Button :disabled="data.isValid ? false : true" v-bind="buttonSave" />

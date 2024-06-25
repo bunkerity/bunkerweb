@@ -33,7 +33,7 @@ const icon = reactive({
 <template>
   <svg
     :data-color="icon.color"
-    :disabled="props.disabled"
+    :aria-disabled="props.disabled ? 'true' : 'false'"
     data-svg="puzzle"
     :class="[props.iconClass, icon.color, 'fill']"
     role="img"

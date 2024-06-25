@@ -41,7 +41,7 @@ onMounted(() => {
   <span :id="icon.id" class="sr-only">{{ $t("icons_plus_desc") }}</span>
   <svg
     :data-color="icon.color"
-    :disabled="props.disabled"
+    :aria-disabled="props.disabled ? 'true' : 'false'"
     data-svg="plus"
     role="img"
     :aria-labelledby="icon.id"

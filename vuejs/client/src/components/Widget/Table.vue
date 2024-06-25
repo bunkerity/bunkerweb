@@ -141,14 +141,6 @@ const table = reactive({
   itemsFormat: JSON.parse(JSON.stringify(props.items)),
 });
 
-const unmatch = {
-  text: "dashboard_no_match",
-  icons: {
-    iconName: "search",
-    color: "info",
-  },
-};
-
 function setUnmatchWidth() {
   try {
     const value = tableBody.value.closest("[data-is='card']").clientWidth - 60;
