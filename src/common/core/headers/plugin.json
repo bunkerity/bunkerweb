@@ -100,7 +100,7 @@
     "DISABLE_FLOC": {
       "context": "multisite",
       "default": "yes",
-      "help": "Disable FLoC (Federated Learning of Cohorts) by adding the interest-cohort=() directive to the Permissions-Policy header.",
+      "help": "Disable FLoC (Federated Learning of Cohorts) by adding the interest-cohort=() directive to the Permissions-Policy header if it is not already present.",
       "id": "disable-floc",
       "label": "Disable FLoC (Federated Learning of Cohorts)",
       "regex": "^(yes|no)$",
