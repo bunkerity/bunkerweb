@@ -63,25 +63,9 @@ spec:
             - containerPort: 8443
               hostPort: 443
           env:
-            - name: KUBERNETES_MODE
-              value: "yes"
-            # replace with your DNS resolvers
-            # e.g. : kube-dns.kube-system.svc.cluster.local
-            - name: DNS_RESOLVERS
-              value: "coredns.kube-system.svc.cluster.local"
-            - name: USE_API
-              value: "yes"
             # 10.0.0.0/8 is the cluster internal subnet
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8"
-            - name: SERVER_NAME
-              value: ""
-            - name: MULTISITE
-              value: "yes"
-            - name: USE_REDIS
-              value: "yes"
-            - name: REDIS_HOST
-              value: "svc-bunkerweb-redis.default.svc.cluster.local"
           livenessProbe:
             exec:
               command:
@@ -150,8 +134,25 @@ spec:
           env:
             - name: KUBERNETES_MODE
               value: "yes"
-            - name: "DATABASE_URI"
+            - name: DATABASE_URI
               value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+            # replace with your DNS resolvers
+            # e.g. : kube-dns.kube-system.svc.cluster.local
+            - name: DNS_RESOLVERS
+              value: "coredns.kube-system.svc.cluster.local"
+            # 10.0.0.0/8 is the cluster internal subnet
+            - name: API_WHITELIST_IP
+              value: "127.0.0.0/8 10.0.0.0/8"
+            - name: BUNKERWEB_INSTANCES
+              value: ""
+            - name: SERVER_NAME
+              value: ""
+            - name: MULTISITE
+              value: "yes"
+            - name: USE_REDIS
+              value: "yes"
+            - name: REDIS_HOST
+              value: "svc-bunkerweb-redis.default.svc.cluster.local"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -192,7 +193,7 @@ spec:
     spec:
       containers:
         - name: bunkerweb-db
-          image: mariadb:10.10
+          image: mariadb:11
           imagePullPolicy: Always
           env:
             - name: MYSQL_RANDOM_ROOT_PASSWORD
@@ -233,14 +234,14 @@ spec:
           image: bunkerity/bunkerweb-ui:1.6.0-beta
           imagePullPolicy: Always
           env:
-            - name: ADMIN_USERNAME
-              value: "changeme"
-            - name: "ADMIN_PASSWORD"
-              value: "changeme"
             - name: KUBERNETES_MODE
               value: "YES"
-            - name: "DATABASE_URI"
+            - name: DATABASE_URI
               value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+            - name: ADMIN_USERNAME
+              value: "changeme"
+            - name: ADMIN_PASSWORD
+              value: "changeme"
 ---
 apiVersion: v1
 kind: Service

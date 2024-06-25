@@ -1,4 +1,6 @@
-version: "3.5"
+x-env: &env
+  DATABASE_URI: "postgresql://bunkerweb:changeme@bw-db:5432/db" # Remember to set a stronger password for the database
+  AUTOCONF_MODE: "yes"
 
 services:
   bunkerweb:
@@ -9,11 +11,8 @@ services:
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
-      - SERVER_NAME=
-      - DATABASE_URI=postgresql://bunkerweb:changeme@bw-db:5432/db
-      - AUTOCONF_MODE=yes
-      - MULTISITE=yes
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      <<: *env
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     networks:
       - bw-universe
       - bw-services
@@ -24,49 +23,53 @@ services:
       - bunkerweb
       - bw-docker
     environment:
-      - DATABASE_URI=postgresql://bunkerweb:changeme@bw-db:5432/db
-      - AUTOCONF_MODE=yes
-      - DOCKER_HOST=tcp://bw-docker:2375
+      <<: *env
+      DOCKER_HOST: "tcp://bw-docker:2375"
     networks:
       - bw-universe
       - bw-docker
+      - bw-db
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
     depends_on:
       - bunkerweb
-      - bw-docker
+    volumes:
+      - bw-data:/data
     environment:
-      - DATABASE_URI=postgresql://bunkerweb:changeme@bw-db:5432/db
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - AUTOCONF_MODE=yes
+      <<: *env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     networks:
       - bw-universe
-      - bw-docker
+      - bw-db
+
+  bw-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: "bunkerweb"
+      POSTGRES_PASSWORD: "changeme" # Remember to set a stronger password for the database
+      POSTGRES_DB: "db"
+    volumes:
+      - bw-db:/var/lib/postgresql/data
+    networks:
+      - bw-db
 
   bw-docker:
     image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
-
-  bw-db:
-    image: postgres:15.1
-    environment:
-      - POSTGRES_USER=bunkerweb
-      - POSTGRES_PASSWORD=changeme
-      - POSTGRES_DB=db
-    volumes:
-      - bw-data:/var/lib/postgresql/data
+      CONTAINERS: "1"
+      LOG_LEVEL: "warning"
     networks:
       - bw-docker
 
 volumes:
   bw-data:
+  bw-db:
 
 networks:
   bw-universe:
@@ -79,3 +82,5 @@ networks:
     name: bw-services
   bw-docker:
     name: bw-docker
+  bw-db:
+    name: bw-db

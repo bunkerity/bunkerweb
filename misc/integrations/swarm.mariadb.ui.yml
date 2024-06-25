@@ -1,4 +1,6 @@
-version: "3.5"
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+  SWARM_MODE: "yes"
 
 services:
   bunkerweb:
@@ -13,13 +15,8 @@ services:
         mode: host
         protocol: tcp
     environment:
-      - SERVER_NAME=
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
-      - SWARM_MODE=yes
-      - MULTISITE=yes
-      - USE_REDIS=yes
-      - REDIS_HOST=bw-redis
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      <<: *env
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     networks:
       - bw-universe
       - bw-services
@@ -34,68 +31,44 @@ services:
   bw-autoconf:
     image: bunkerity/bunkerweb-autoconf:1.6.0-beta
     environment:
-      - SWARM_MODE=yes
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+      <<: *env
+      DOCKER_HOST: "tcp://bw-docker:2375"
     networks:
       - bw-universe
       - bw-docker
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONFIGS=1
-      - CONTAINERS=1
-      - SERVICES=1
-      - SWARM=1
-      - TASKS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
+      - bw-db
     deploy:
       placement:
         constraints:
-          - "node.role == manager"
+          - "node.role == worker"
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
     environment:
-      - SWARM_MODE=yes
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+      <<: *env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      USE_REDIS: "yes"
+      REDIS_HOST: "bw-redis"
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-db:
-    image: mariadb:10.10
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=changeme
-    volumes:
-      - bw-data:/var/lib/mysql
-    networks:
-      - bw-docker
-
-  bw-redis:
-    image: redis:7-alpine
-    networks:
-      - bw-universe
+      - bw-db
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.6.0-beta
     environment:
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-      - DOCKER_HOST=tcp://bw-docker:2375
-      - ADMIN_USERNAME=changeme
-      - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
+      <<: *env
+      ADMIN_USERNAME: "changeme"
+      ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
     networks:
       - bw-universe
-      - bw-docker
+      - bw-db
     deploy:
       labels:
         - "bunkerweb.SERVER_NAME=www.example.com"
@@ -106,8 +79,52 @@ services:
         - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
         - "bunkerweb.MAX_CLIENT_SIZE=50m"
 
+  bw-db:
+    image: mariadb:11
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
+    volumes:
+      - bw-db:/var/lib/mysql
+    networks:
+      - bw-db
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
+
+  bw-redis:
+    image: redis:7-alpine
+    networks:
+      - bw-universe
+    deploy:
+      placement:
+        constraints:
+          - "node.role == worker"
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONFIGS: "1"
+      CONTAINERS: "1"
+      SERVICES: "1"
+      SWARM: "1"
+      TASKS: "1"
+      LOG_LEVEL: "warning"
+    networks:
+      - bw-docker
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+
 volumes:
   bw-data:
+  bw-db:
 
 networks:
   bw-universe:
@@ -123,5 +140,9 @@ networks:
     attachable: true
   bw-docker:
     name: bw-docker
+    driver: overlay
+    attachable: true
+  bw-db:
+    name: bw-db
     driver: overlay
     attachable: true

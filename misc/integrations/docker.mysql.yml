@@ -1,4 +1,6 @@
-version: "3.5"
+x-env: &env
+  DATABASE_URI: "mysql+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
 
 services:
   bunkerweb:
@@ -9,9 +11,7 @@ services:
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
-      - SERVER_NAME=www.example.com
-      - DATABASE_URI=mysql+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      <<: *env
     networks:
       - bw-universe
       - bw-services
@@ -20,38 +20,31 @@ services:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
     depends_on:
       - bunkerweb
-      - bw-docker
+    volumes:
+      - bw-data:/data
     environment:
-      - DATABASE_URI=mysql+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-      - DOCKER_HOST=tcp://bw-docker:2375
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com"
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
+      - bw-db
 
   bw-db:
-    image: mysql:8.0
+    image: mysql:8
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
-      - bw-data:/var/lib/mysql
+      - bw-db:/var/lib/mysql
     networks:
-      - bw-docker
+      - bw-db
 
 volumes:
   bw-data:
+  bw-db:
 
 networks:
   bw-universe:
@@ -62,5 +55,5 @@ networks:
         - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
-  bw-docker:
-    name: bw-docker
+  bw-db:
+    name: bw-db
