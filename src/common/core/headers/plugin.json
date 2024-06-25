@@ -26,7 +26,7 @@
     },
     "KEEP_UPSTREAM_HEADERS": {
       "context": "multisite",
-      "default": "Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options",
+      "default": "Content-Security-Policy Permissions-Policy X-Frame-Options",
       "help": "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
       "id": "keep-upstream-headers",
       "label": "Keep upstream headers",
