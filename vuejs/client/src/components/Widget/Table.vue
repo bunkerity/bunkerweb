@@ -203,7 +203,7 @@ onMounted(() => {
               v-for="(head, id) in props.header"
               :class="['table-header-item', `col-span-${props.positions[id]}`]"
             >
-              {{ $t(head, head) }}
+              {{ $t(head, $t("dashboard_placeholder", head)) }}
             </th>
           </tr>
         </thead>

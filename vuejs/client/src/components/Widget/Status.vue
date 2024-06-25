@@ -39,14 +39,10 @@ const status = reactive({
 });
 
 const statusDesc = computed(() => {
-  if (props.status === "success")
-    return ["dashboard_status_success", "status active or success."];
-  if (props.status === "error")
-    return ["dashboard_status_error", "status inactive or error."];
-  if (props.status === "warning")
-    return ["dashboard_status_warning", "status warning or alert."];
-  if (props.status === "info")
-    return ["dashboard_status_info", "status loading or waiting or unknown."];
+  if (props.status === "success") return "dashboard_status_success";
+  if (props.status === "error") return "dashboard_status_error";
+  if (props.status === "warning") return "dashboard_status_warning";
+  if (props.status === "info") return "dashboard_status_info";
 });
 
 onMounted(() => {
@@ -61,7 +57,7 @@ onMounted(() => {
       :class="[props.status, 'status-icon']"
     ></div>
     <p :id="`status-${status.id}`" class="sr-only">
-      {{ $t(statusDesc[0], statusDesc[1]) }}
+      {{ $t(statusDesc) }}
     </p>
   </div>
 </template>

@@ -47,14 +47,30 @@ onMounted(() => {
         <nav>
           <!-- breadcrumb -->
           <h2 class="header-title">
-            {{ $t(`dashboard_${header.currPath}`, header.currPath) }}
+            {{
+              $t(
+                `dashboard_${header.currPath}`,
+                $t(
+                  "dashboard_placeholder",
+                  $t("dashboard_placeholder", header.currPath)
+                )
+              )
+            }}
           </h2>
           <ul class="header-breadcrumb-container">
             <li class="header-breadcrumb-item first">
               {{ $t("dashboard_bw") }}
             </li>
             <li class="header-breadcrumb-item slash mobile active">
-              {{ $t(`dashboard_${header.lastPath}`, header.lastPath) }}
+              {{
+                $t(
+                  `dashboard_${header.lastPath}`,
+                  $t(
+                    "dashboard_placeholder",
+                    $t("dashboard_placeholder", header.lastPath)
+                  )
+                )
+              }}
             </li>
           </ul>
         </nav>

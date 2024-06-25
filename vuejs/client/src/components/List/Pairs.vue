@@ -32,10 +32,10 @@ const gridClass = computed(() => {
   <ul data-is="list-pairs" v-if="props.pairs" :class="['list-pairs-container']">
     <li v-for="item in props.pairs" :class="['list-pairs-item', gridClass]">
       <span class="list-pairs-title">
-        {{ $t(item["key"], item["key"]) }}
+        {{ $t(item["key"], $t("dashboard_placeholder", item["key"])) }}
       </span>
       <span class="list-pairs-subtitle">
-        {{ $t(item["value"], item["value"]) }}
+        {{ $t(item["value"], $t("dashboard_placeholder", item["value"])) }}
       </span>
     </li>
   </ul>

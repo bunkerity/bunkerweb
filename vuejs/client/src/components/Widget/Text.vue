@@ -78,7 +78,7 @@ onMounted(() => {
     ref="textEl"
     :class="[text.class, props.color, 'text-el']"
   >
-    {{ $t(props.text, props.text) }}
+    {{ $t(props.text, $t("dashboard_placeholder", props.text)) }}
   </component>
 
   <div :class="['flex justify-center items-center']" v-if="props.icon">
@@ -89,7 +89,7 @@ onMounted(() => {
       v-bind="props.attrs"
       :class="[text.class, props.color, 'text-el', 'ml-2']"
     >
-      {{ $t(props.text, props.text) }}
+      {{ $t(props.text, $t("dashboard_placeholder", props.text)) }}
     </component>
   </div>
 </template>

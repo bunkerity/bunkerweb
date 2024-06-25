@@ -148,7 +148,7 @@ onMounted(() => {
           'pointer-events-none',
         ]"
         :id="`text-${btn.id}`"
-        >{{ $t(props.text, props.text) }}
+        >{{ $t(props.text, $t("dashboard_placeholder", props.text)) }}
       </span>
       <Icons
         v-if="props.iconName"

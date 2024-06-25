@@ -8,7 +8,7 @@ import Text from "@components/Widget/Text.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 
 /**
-  @name Builder/pLugin.vue
+  @name Builder/PLugin.vue
   @description This component is lightweight builder containing only the necessary components to create the plugins page.
   @example
   [

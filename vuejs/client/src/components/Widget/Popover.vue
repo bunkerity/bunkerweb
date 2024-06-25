@@ -191,7 +191,7 @@ onMounted(() => {
     :aria-description="$t('dashboard_popover_detail_desc')"
   >
     <p :id="`${popover.id}-popover-text`" class="popover-text">
-      {{ $t(props.text, props.text) }}
+      {{ $t(props.text, $t("dashboard_placeholder", props.text)) }}
     </p>
   </div>
 </template>

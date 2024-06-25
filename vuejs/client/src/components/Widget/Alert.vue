@@ -87,7 +87,7 @@ onMounted(() => {
     <div :class="[props.type, 'feedback-alert-wrap bg-el']">
       <div class="feedback-alert-header">
         <h5 class="feedback-alert-title">
-          {{ $t(props.title, props.title) }}
+          {{ $t(props.title, $t("dashboard_placeholder", props.title)) }}
         </h5>
         <button
           :tabindex="props.tabId"
@@ -113,7 +113,9 @@ onMounted(() => {
           </svg>
         </button>
       </div>
-      <p class="feedback-alert-text">{{ $t(props.message, props.message) }}</p>
+      <p class="feedback-alert-text">
+        {{ $t(props.message, $t("dashboard_placeholder", props.message)) }}
+      </p>
     </div>
   </div>
 </template>

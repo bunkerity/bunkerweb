@@ -334,7 +334,6 @@ def job_builder(jobs):
                                     "value": "",
                                     "type": "text",
                                     "name": "jobs-keyword",
-                                    "containerClass": "setting",
                                     "label": "jobs_search",
                                     "placeholder": "inp_keyword",
                                     "isClipboard": False,
@@ -360,7 +359,6 @@ def job_builder(jobs):
                                     "name": "jobs-every",
                                     "onlyDown": True,
                                     "label": "jobs_interval",
-                                    "containerClass": "setting",
                                     "popovers": [
                                         {
                                             "text": "jobs_interval_desc",
@@ -382,7 +380,6 @@ def job_builder(jobs):
                                     "values": ["all", "success", "failed"],
                                     "name": "jobs-last-run",
                                     "onlyDown": True,
-                                    "containerClass": "setting",
                                     "label": "jobs_reload",
                                     "popovers": [
                                         {
@@ -405,7 +402,6 @@ def job_builder(jobs):
                                     "values": ["all", "success", "failed"],
                                     "name": "jobs-success",
                                     "onlyDown": True,
-                                    "containerClass": "setting",
                                     "label": "jobs_success",
                                     "popovers": [
                                         {

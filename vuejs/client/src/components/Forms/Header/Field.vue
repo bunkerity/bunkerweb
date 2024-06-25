@@ -90,8 +90,8 @@ onMounted(() => {
       >
         {{
           props.label
-            ? $t(props.label, props.label)
-            : $t(props.name, props.name)
+            ? $t(props.label, $t("dashboard_placeholder", props.label))
+            : $t(props.name, $t("dashboard_placeholder", props.name))
         }}
       </label>
       <span v-if="props.required" class="input-header-required-sign">*</span>

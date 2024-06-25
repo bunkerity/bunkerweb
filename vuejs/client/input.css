@@ -1594,7 +1594,7 @@ body {
 }
 
 .table-content-item-wrap {
-  @apply appearance-none pl-1;
+  @apply appearance-none pl-1 pr-2;
 }
 
 /** MISC **/

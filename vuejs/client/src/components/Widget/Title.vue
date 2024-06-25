@@ -85,6 +85,6 @@ onMounted(() => {
     v-if="props.title"
     :class="[props.color, isSubtitleClass, title.class, 'text-el']"
   >
-    {{ $t(props.title, props.title) }}
+    {{ $t(props.title, $t("dashboard_placeholder", props.title)) }}
   </component>
 </template>

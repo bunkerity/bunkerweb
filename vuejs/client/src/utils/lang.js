@@ -1,4 +1,5 @@
 import { createI18n } from "vue-i18n";
+
 import en from "@lang/en.json" assert { type: "json" };
 import fr from "@lang/fr.json" assert { type: "json" };
 
@@ -59,8 +60,12 @@ function getI18n(pagesArr = []) {
     availableLocales: availablesLangs,
     fallbackWarn: false,
     missingWarn: false,
-    warnHtmlMessage: false
-    });
+    warnHtmlMessage: false,
+    silentTranslationWarn: false,
+    missingWarn: false,
+    WarnHtmlInMessageLevel: "off",
+    messageCompiler: false,
+  });
 
   return i18n;
 }

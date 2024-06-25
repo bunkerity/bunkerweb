@@ -204,7 +204,12 @@ onMounted(() => {
         :readonly="props.readonly || false"
         :disabled="props.disabled || false"
         :placeholder="
-          props.placeholder ? $t(props.placeholder, props.placeholder) : ''
+          props.placeholder
+            ? $t(
+                props.placeholder,
+                $t('dashboard_placeholder', props.placeholder)
+              )
+            : ''
         "
         :pattern="props.pattern || '(?s).*'"
         :name="props.name"
