@@ -172,6 +172,16 @@
       "type": "text",
       "multiple": "reverse-proxy"
     },
+    "REVERSE_PROXY_PASS_REQUEST_BODY": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable or disable passing the request body to the proxied resource.",
+      "id": "reverse-proxy-pass-request-body",
+      "label": "Reverse proxy pass request body",
+      "regex": "^(yes|no)$",
+      "type": "check",
+      "multiple": "reverse-proxy"
+    },
     "USE_PROXY_CACHE": {
       "context": "multisite",
       "default": "no",
