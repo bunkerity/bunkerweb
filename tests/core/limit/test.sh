@@ -43,12 +43,12 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@LIMIT_REQ_RATE: ".*"$@LIMIT_REQ_RATE: "2r/s"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_LIMIT_CONN: "no"@USE_LIMIT_CONN: "yes"@' {} \;
 
-            if [[ $(sed '22!d' docker-compose.yml) = '      LIMIT_REQ_URL_1: "/custom"' ]] ; then
-                sed -i '22d' docker-compose.yml
+            if [[ $(sed '33!d' docker-compose.yml) = '      LIMIT_REQ_URL_1: "/custom"' ]] ; then
+                sed -i '33d' docker-compose.yml
             fi
 
-            if [[ $(sed '22!d' docker-compose.yml) = '      LIMIT_REQ_RATE_1: "4r/s"' ]] ; then
-                sed -i '22d' docker-compose.yml
+            if [[ $(sed '33!d' docker-compose.yml) = '      LIMIT_REQ_RATE_1: "4r/s"' ]] ; then
+                sed -i '33d' docker-compose.yml
             fi
 
             if [[ $(sed '11!d' docker-compose.test.yml) = '      LIMIT_REQ_URL_1: "/custom"' ]] ; then
@@ -132,8 +132,8 @@ do
     elif [ "$test" = "custom_endpoint_rate" ] ; then
         echo "🎚️ Running tests with a custom endpoint rate ..."
         if [ "$integration" == "docker" ] ; then
-            sed -i '22i \      LIMIT_REQ_URL_1: "/custom"' docker-compose.yml
-            sed -i '23i \      LIMIT_REQ_RATE_1: "4r/s"' docker-compose.yml
+            sed -i '33i \      LIMIT_REQ_URL_1: "/custom"' docker-compose.yml
+            sed -i '34i \      LIMIT_REQ_RATE_1: "4r/s"' docker-compose.yml
             sed -i '11i \      LIMIT_REQ_URL_1: "/custom"' docker-compose.test.yml
             sed -i '12i \      LIMIT_REQ_RATE_1: "4r/s"' docker-compose.test.yml
         else
