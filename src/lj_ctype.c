@@ -643,6 +643,18 @@ CTState *lj_ctype_init(lua_State *L)
   return cts;
 }
 
+/* Create special weak-keyed finalizer table. */
+void lj_ctype_initfin(lua_State *L)
+{
+  /* NOBARRIER: The table is new (marked white). */
+  GCtab *t = lj_tab_new(L, 0, 1);
+  setgcref(t->metatable, obj2gco(t));
+  setstrV(L, lj_tab_setstr(L, t, lj_str_newlit(L, "__mode")),
+	  lj_str_newlit(L, "k"));
+  t->nomm = (uint8_t)(~(1u<<MM_mode));
+  setgcref(G(L)->gcroot[GCROOT_FFI_FIN], obj2gco(t));
+}
+
 /* Free C type table and state. */
 void lj_ctype_freestate(global_State *g)
 {
