@@ -53,11 +53,28 @@ const props = defineProps({
 const data = reactive({
   base: JSON.parse(JSON.stringify(props.details)),
   format: JSON.parse(JSON.stringify(props.details)),
+  upIndex: "",
+  pendingIndex: [],
 });
 
 const gridClass = computed(() => {
   return `col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
 });
+
+// When we focus or pointerover an item, we will add a higher z-index than others items in order to avoid to crop popovers
+// In case we leave the item, for few moments the item will get an higher z-index than this in order to get a smooth transition
+function indexUp(id) {
+  data.upIndex = id;
+}
+
+// This will add a higher z-index for 100ms when cursor is out of the item in order to avoid to crop popovers
+function indexPending(id) {
+  data.pendingIndex.push(id);
+  // Remove id from pendingIndex after a moment
+  setTimeout(() => {
+    data.pendingIndex = data.pendingIndex.filter((index) => index !== id);
+  }, 100);
+}
 </script>
 
 <template>
@@ -80,8 +97,17 @@ const gridClass = computed(() => {
           'list-details-item',
           gridClass,
           item.disabled ? 'disabled' : 'enabled',
+          data.upIndex === id
+            ? 'up'
+            : data.pendingIndex.includes(id)
+            ? 'pending'
+            : '',
         ]"
         v-bind="item.attrs || {}"
+        @focusin="indexUp(id)"
+        @pointerover="indexUp(id)"
+        @focusout="indexPending(id)"
+        @pointerleave="indexPending(id)"
       >
         <div class="list-details-item-wrap">
           <Text :tag="'p'" :text="item.text" />
