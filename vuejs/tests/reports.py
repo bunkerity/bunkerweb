@@ -1,5 +1,6 @@
 import json
 
+no_reports = []
 
 reports = [
     {
@@ -314,7 +315,8 @@ def reports_builder(reports, data=None):
     return builder
 
 
-output = reports_builder(reports)
+#output = reports_builder(reports)
+output = reports_builder(no_reports)
 
 # store on a file
 with open("reports.json", "w") as f:

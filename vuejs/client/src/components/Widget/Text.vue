@@ -68,10 +68,12 @@ const textIconEl = ref(null);
 onMounted(() => {
   // Check if next sibling is a
   const renderEl = textEl.value || textIconEl.value || null;
-
+  const isVoid = renderEl.closest('[data-is="void"]') ? "void" : "";
   text.class =
     props.textClass || renderEl.closest("[data-is]")
-      ? `text-${renderEl.closest("[data-is]").getAttribute("data-is")}`
+      ? `text-${
+          isVoid || renderEl.closest("[data-is]").getAttribute("data-is")
+        }`
       : "text-card";
 });
 </script>

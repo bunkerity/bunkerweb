@@ -1082,6 +1082,9 @@ body {
   @apply col-span-12 text-lg mb-0 font-bold dark:text-gray-300 break-word;
 }
 
+.text-void {
+  @apply col-span-12 text-lg mb-0 font-bold text-gray-300 break-word;
+}
 
 .text-table {
   @apply col-span-12 mb-0 dark:text-gray-300 break-word;
@@ -1162,6 +1165,10 @@ body {
   @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
 }
 
+.title-void {
+  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold  dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-white tracking-normal;
+}
+
 .title-form {
   @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
 }
@@ -1191,6 +1198,7 @@ body {
 }
 
 .no-subtitle.title-card,
+.no-subtitle.title-void,
 .no-subtitle.title-content,
 .no-subtitle.title-min,
 .no-subtitle.title-form { 
@@ -1204,6 +1212,7 @@ body {
 
 .is-subtitle.title-form,
 .is-subtitle.title-card,
+.is-subtitle.title-void,
 .is-subtitle.title-modal,
 .is-subtitle.title-stat,
 .is-subtitle.title-content,
@@ -1215,6 +1224,10 @@ body {
 
 .subtitle-card {
   @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0 lowercase;
+}
+
+.subtitle-void {
+  @apply capitalize-first break-word text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0 lowercase;
 }
 
 .subtitle-form {
