@@ -240,12 +240,15 @@ function isItemSelect(filters, item) {
       // Avoid non-primitive value
       if (typeof value !== "string" && typeof value !== "number") continue;
       // Value need to match exactly filter value
-      if (value.toString().toLowerCase() === filterValue.toLowerCase()) {
-        return true;
+      if (
+        value.toString().toLowerCase().trim() !==
+        filterValue.toString().toLowerCase().trim()
+      ) {
+        return false;
       }
     }
   }
-  return false;
+  return true;
 }
 
 /**

@@ -87,11 +87,10 @@ function filterData(filter, value) {
 
   // Base keys filtering (like plugin)
   const defaultFilters = getFilters.filter((f) => f.filter === "default");
-  template = useFilter(template, defaultFilters);
+  if (defaultFilters.length) template = useFilter(template, defaultFilters);
 
   // Specific settings filtering from advanced template
   const filterSettings = getFilters.filter((f) => f.filter === "settings");
-
   if (filterSettings.length) {
     template.forEach((plugin, id) => {
       // loop on plugin settings dict

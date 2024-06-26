@@ -57,6 +57,17 @@ reports = [
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
         "data": {},
     },
+    {
+        "url": "/admin/login?id=e",
+        "ip": "111111",
+        "reason": " antibot",
+        "country": "fr",
+        "status": 403,
+        "method": "POST",
+        "date": "25/06/2024 07:40:23",
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "data": {},
+    },
 ]
 
 # Reoder reports to get in order "date", "ip", "country", "method", "url", "code", "user_agent", "reason", "data"
@@ -69,7 +80,7 @@ for report in reports:
     report["code"] = report.pop("status")
     report["user_agent"] = report.pop("user_agent")
     report["reason"] = report.pop("reason")
-    report["data"] = report.pop("data")
+    report["raw_data"] = report.pop("data")
 
 
 def get_reports_filter(reports):
@@ -103,7 +114,7 @@ def get_reports_filter(reports):
             "filterName": "keyword",
             "type": "keyword",
             "value": "",
-            "keys": ["url", "ip", "date", "user_agent"],
+            "keys": ["url", "ip", "date", "user_agent", "raw_data"],
             "field": {
                 "id": "reports-keyword",
                 "value": "",
