@@ -461,8 +461,8 @@ typedef struct jit_State {
 #endif
 
   IRIns *irbuf;		/* Temp. IR instruction buffer. Biased with REF_BIAS. */
-  IRRef irtoplim;	/* Upper limit of instuction buffer (biased). */
-  IRRef irbotlim;	/* Lower limit of instuction buffer (biased). */
+  IRRef irtoplim;	/* Upper limit of instruction buffer (biased). */
+  IRRef irbotlim;	/* Lower limit of instruction buffer (biased). */
   IRRef loopref;	/* Last loop reference or ref of final LOOP (or 0). */
 
   MSize sizesnap;	/* Size of temp. snapshot buffer. */

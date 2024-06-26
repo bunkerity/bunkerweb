@@ -816,7 +816,7 @@ static void asm_href(ASMState *as, IRIns *ir, IROp merge)
   int destused = ra_used(ir);
   Reg dest = ra_dest(as, ir, allow);
   Reg tab = ra_alloc1(as, ir->op1, rset_clear(allow, dest));
-  Reg tmp = RID_TMP, type = RID_NONE, key, tkey;
+  Reg tmp = RID_TMP, type = RID_NONE, key = RID_NONE, tkey;
   IRRef refkey = ir->op2;
   IRIns *irkey = IR(refkey);
   int isk = irref_isk(refkey);

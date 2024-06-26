@@ -300,10 +300,12 @@ static StrHash hash_dense_sse42(uint64_t seed, uint32_t h, const char* str,
 
 void str_hash_init_sse42(void)
 {
-  hash_sparse = hash_sparse_sse42;
+  if (0) {
+      hash_sparse = hash_sparse_sse42;
 #if LUAJIT_SECURITY_STRHASH
-  hash_dense = hash_dense_sse42;
+      hash_dense = hash_dense_sse42;
 #endif
-  str_hash_init_random();
+      str_hash_init_random();
+  }
 }
 #endif
