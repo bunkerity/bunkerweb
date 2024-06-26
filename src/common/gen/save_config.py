@@ -211,6 +211,12 @@ if __name__ == "__main__":
             changes.append("custom_configs")
             LOGGER.info("Custom configs successfully saved to database")
 
+        err = db.update_instances([], method="manual", changed=False)
+        if err:
+            LOGGER.warning(f"Couldn't clear manual instances from database : {err}, instances may be incorrect")
+
+        changes.append("instances")
+
         for api in apis:
             endpoint_data = api.endpoint.replace("http://", "").split(":")
             err = db.add_instance(endpoint_data[0], endpoint_data[1].replace("/", ""), api.host, method="manual", changed=False)
@@ -218,8 +224,6 @@ if __name__ == "__main__":
             if err:
                 LOGGER.warning(err)
             else:
-                if "instances" not in changes:
-                    changes.append("instances")
                 LOGGER.info(f"Instance {endpoint_data[0]} successfully saved to database")
 
         if not args.no_check_changes:
