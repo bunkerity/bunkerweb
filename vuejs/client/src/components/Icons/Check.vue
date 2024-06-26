@@ -1,6 +1,6 @@
 <script setup>
 import { useUUID } from "@utils/global.js";
-import { defineProps, reactive, onMounted } from "vue";
+import { defineProps, reactive, onBeforeMount } from "vue";
 /** 
   @name Icons/Check.vue
   @description This component is a svg icon representing a check mark.
@@ -32,7 +32,7 @@ const icon = reactive({
   color: props.color || "success",
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   icon.id = useUUID();
 });
 </script>

@@ -141,7 +141,7 @@ def get_reports_filter(reports):
         },
     )
 
-    if len(total_countries) > 1:
+    if len(total_countries) > 2:
         filters.append(
             {
                 "filter": "table",
@@ -167,7 +167,7 @@ def get_reports_filter(reports):
             },
         )
 
-    if len(total_methods) > 1:
+    if len(total_methods) > 2:
         filters.append(
             {
                 "filter": "table",
@@ -193,7 +193,7 @@ def get_reports_filter(reports):
             },
         )
 
-    if len(total_status) > 1:
+    if len(total_status) > 2:
         filters.append(
             {
                 "filter": "table",
@@ -219,7 +219,7 @@ def get_reports_filter(reports):
             },
         )
 
-    if len(total_reasons) > 1:
+    if len(total_reasons) > 2:
         filters.append(
             {
                 "filter": "table",
@@ -323,7 +323,7 @@ def reports_builder(reports, details=None):
                 "type": "Table",
                 "data": {
                     "title": "reports_table_title",
-                    "minWidth": "xl",
+                    "minWidth": "xxl",
                     "header": [
                         "reports_table_date",
                         "reports_table_ip",

@@ -10,8 +10,26 @@ bans = [
         "ip": "127.0.0.1",
         "remain": "23 hours and 49 minutes",
         "term": "hour(s)",
-        "ban_start": "26/06/2024 09:25:20",
-        "ban_end": "27/06/2024 09:15:15",
+        "ban_start": 1719393920,
+        "ban_end": 1719393920,
+    },
+    {
+        "reason": "ui",
+        "date": 1719393920,
+        "ip": "127.0.0.1",
+        "remain": "23 hours and 49 minutes",
+        "term": "day(s)",
+        "ban_start": 1719393920,
+        "ban_end": 1719393920,
+    },
+    {
+        "reason": "core",
+        "date": 1719393920,
+        "ip": "127.0.0.1",
+        "remain": "23 hours and 49 minutes",
+        "term": "hour(s)",
+        "ban_start": 1719393920,
+        "ban_end": 1719393920,
     },
     {
         "reason": "ui",
@@ -19,12 +37,31 @@ bans = [
         "ip": "127.0.0.1",
         "remain": "23 hours and 49 minutes",
         "term": "hour(s)",
-        "ban_start": "26/06/2024 09:25:20",
-        "ban_end": "27/06/2024 09:15:15",
+        "ban_start": 1719393920,
+        "ban_end": 1719393920,
+    },
+    {
+        "reason": "ui",
+        "date": 1719393920,
+        "ip": "127.0.0.1",
+        "remain": "23 hours and 49 minutes",
+        "term": "hour(s)",
+        "ban_start": 1719393920,
+        "ban_end": 1719393920,
+    },
+    {
+        "reason": "ui",
+        "date": 1719393920,
+        "ip": "127.0.0.1",
+        "remain": "23 hours and 49 minutes",
+        "term": "hour(s)",
+        "ban_start": 1719393920,
+        "ban_end": 1719393920,
     },
 ]
 # Reoder bans dict
 for ban in bans:
+    ban.pop("date")
     ban["ip"] = ban.pop("ip")
     ban["reason"] = ban.pop("reason")
     ban["ban_start"] = ban.pop("ban_start")
@@ -76,7 +113,7 @@ def get_bans_filter(bans):
         },
     )
 
-    if len(total_reasons) > 1:
+    if len(total_reasons) > 2:
         filters.append(
             {
                 "filter": "table",
@@ -102,40 +139,82 @@ def get_bans_filter(bans):
             },
         )
 
-        if len(total_terms) > 1:
-            filters.append(
-                {
-                    "filter": "table",
-                    "filterName": "term",
-                    "type": "select",
+    if len(total_terms) > 2:
+        filters.append(
+            {
+                "filter": "table",
+                "filterName": "term",
+                "type": "select",
+                "value": "all",
+                "keys": ["term"],
+                "field": {
+                    "id": "bans-terms",
                     "value": "all",
-                    "keys": ["term"],
-                    "field": {
-                        "id": "bans-terms",
-                        "value": "all",
-                        "values": total_terms,
-                        "name": "bans-terms",
-                        "onlyDown": True,
-                        "label": "bans_terms",
-                        "popovers": [
-                            {
-                                "text": "bans_terms_desc",
-                                "iconName": "info",
-                            },
-                        ],
-                        "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                    },
+                    "values": total_terms,
+                    "name": "bans-terms",
+                    "onlyDown": True,
+                    "label": "bans_terms",
+                    "popovers": [
+                        {
+                            "text": "bans_terms_desc",
+                            "iconName": "info",
+                        },
+                    ],
+                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                 },
-            )
+            },
+        )
     return filters
 
 
-def get_reports_list(reports):
+def get_bans_list(bans):
     data = []
     # loop on each dict
-    for report in reports:
+    id = 0
+    for ban in bans:
+        id += 1
         item = []
-        for k, v in report.items():
+        item.append(
+            {
+                "select": False,
+                "type": "Fields",
+                "data": {
+                    "setting": {
+                        "columns": {"pc": 12, "tablet": 12, "mobile": 12},
+                        "disabled": False,
+                        "value": "no",
+                        "inpType": "checkbox",
+                        "id": f"select-ban-{id}",
+                        "name": f"select-ban-{id}",
+                        "label": f"select-ban-{id}",
+                        "hideLabel": True,
+                    },
+                },
+            }
+        )
+        for k, v in ban.items():
+
+            if k in ("date", "ban_start", "ban_end"):
+                item.append(
+                    {
+                        k: json.dumps(v) if isinstance(v, dict) else str(v),
+                        "type": "Fields",
+                        "data": {
+                            "setting": {
+                                "columns": {"pc": 12, "tablet": 12, "mobile": 12},
+                                "disabled": True,
+                                "value": v,
+                                "inpType": "datepicker",
+                                "id": f"datepicker-ban-{k}-{id}".replace("_", "-"),
+                                "name": f"datepicker-ban-{k}-{id}".replace("_", "-"),
+                                "label": f"datepicker-ban-{k}-{id}".replace("_", "-"),
+                                "hideLabel": True,
+                            },
+                        },
+                    }
+                )
+                continue
+
             item.append(
                 {
                     k: json.dumps(v) if isinstance(v, dict) else str(v),
@@ -151,89 +230,67 @@ def get_reports_list(reports):
     return data
 
 
-def get_reports_details(details):
-    return {
-        "type": "card",
-        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
-        "widgets": [
-            {
-                "type": "Title",
-                "data": {"title": "dashboard_details"},
-            },
-            {
-                "type": "ListPairs",
-                "data": {
-                    "pairs": [
-                        {"key": "reports_total", "value": details.get("total_reports")},
-                        {"key": "reports_top_status", "value": details.get("top_code")},
-                        {
-                            "key": "reports_top_reason",
-                            "value": details.get("top_reason"),
-                        },
-                    ],
-                },
-            },
-        ],
-    }
+def bans_builder(bans):
 
+    builder = [
+        {
+            "type": "void",
+            "widgets": [{"type": "Button", "data": {"text": "bans_not_found"}}],
+        },
+    ]
 
-def reports_builder(reports, details=None):
-
-    if not reports:
-        return [
+    if not bans:
+        builder.append(
             {
                 "type": "void",
                 "widgets": [
-                    {"type": "MessageUnmatch", "data": {"text": "reports_not_found"}}
+                    {"type": "MessageUnmatch", "data": {"text": "bans_not_found"}}
                 ],
-            },
-        ]
+            }
+        )
+        return builder
 
-    details = get_reports_details(details)
+    filters = get_bans_filter(bans)
+    bans_list = get_bans_list(bans)
 
-    filters = get_bans_filter(reports)
-    reports_list = get_reports_list(reports)
-
-    reports_table = {
+    bans_table = {
         "type": "card",
         "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
         "widgets": [
             {
                 "type": "Title",
-                "data": {"title": "reports_title"},
+                "data": {"title": "bans_title"},
             },
             {
                 "type": "Table",
                 "data": {
-                    "title": "reports_table_title",
+                    "title": "bans_table_title",
                     "minWidth": "xl",
                     "header": [
-                        "reports_table_date",
-                        "reports_table_ip",
-                        "reports_table_country",
-                        "reports_table_method",
-                        "reports_table_url",
-                        "reports_table_status_code",
-                        "reports_table_cache_user_agent",
-                        "reports_table_reason",
-                        "reports_table_data",
+                        "bans_table_select",
+                        "bans_table_ip",
+                        "bans_table_reason",
+                        "bans_table_ban_start",
+                        "bans_table_ban_end",
+                        "bans_table_remain",
+                        "bans_table_term",
                     ],
-                    "positions": [1, 1, 1, 1, 2, 1, 2, 1, 2],
-                    "items": reports_list,
+                    "positions": [1, 1, 1, 3, 3, 2, 1],
+                    "items": bans_list,
                     "filters": filters,
                 },
             },
         ],
     }
 
-    builder = [details, reports_table]
+    builder.append(bans_table)
 
     return builder
 
 
-# output = reports_builder(reports)
-output = reports_builder(no_bans)
+output = bans_builder(bans)
+# output = bans_builder(no_bans)
 
 # store on a file
-with open("reports.json", "w") as f:
+with open("bans.json", "w") as f:
     json.dump(output, f, indent=4)

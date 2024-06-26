@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, defineProps, ref, onMounted } from "vue";
+import { reactive, defineProps, ref, onMounted, onBeforeMount } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
@@ -132,9 +132,12 @@ function updateValue() {
   return checkbox.value;
 }
 
+onBeforeMount(() => {
+  checkbox.id = useUUID(props.id);
+});
+
 onMounted(() => {
   checkbox.isValid = checkboxEl.value.checkValidity();
-  checkbox.id = useUUID(props.id);
 });
 </script>
 

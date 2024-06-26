@@ -1,5 +1,12 @@
 <script setup>
-import { reactive, ref, defineEmits, onMounted, defineProps } from "vue";
+import {
+  reactive,
+  ref,
+  defineEmits,
+  onMounted,
+  onBeforeMount,
+  defineProps,
+} from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
@@ -159,8 +166,11 @@ const inp = reactive({
 
 const emits = defineEmits(["inp"]);
 
-onMounted(() => {
+onBeforeMount(() => {
   inp.id = useUUID(props.id);
+});
+
+onMounted(() => {
   inp.isValid = inputEl.value.checkValidity();
 
   // Clipboard not allowed on http

@@ -6,6 +6,7 @@ import {
   onMounted,
   defineProps,
   onUnmounted,
+  onBeforeMount,
 } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
@@ -59,7 +60,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: uuidv4(),
+    default: "",
   },
   columns: {
     type: [Object, Boolean],
@@ -315,9 +316,12 @@ function setEditorAttrs() {
   }
 }
 
+onBeforeMount(() => {
+  editor.id = useUUID(props.id);
+});
+
 // Use ace editor
 onMounted(() => {
-  editor.id = useUUID(props.id);
   setTimeout(() => {
     // Default value
     editorEl = new Editor();

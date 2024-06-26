@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, computed, onMounted, reactive } from "vue";
+import { defineProps, computed, onBeforeMount, reactive } from "vue";
 import { useUUID } from "@utils/global.js";
 
 /**
@@ -45,7 +45,7 @@ const statusDesc = computed(() => {
   if (props.status === "info") return "dashboard_status_info";
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   status.id = useUUID(props.id);
 });
 </script>

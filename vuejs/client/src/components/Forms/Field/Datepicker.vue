@@ -1,5 +1,11 @@
 <script setup>
-import { reactive, defineProps, onMounted, onUnmounted } from "vue";
+import {
+  reactive,
+  defineProps,
+  onMounted,
+  onUnmounted,
+  onBeforeMount,
+} from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
@@ -573,18 +579,25 @@ function setIndex(calendarEl, tabindex) {
   } catch (e) {}
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   date.id = useUUID(props.id);
+});
+
+onMounted(() => {
   datepicker = flatpickr(`#${date.id}`, {
     locale: "en",
     dateFormat: date.format,
-    defaultDate: +props.value,
+    defaultDate: isNaN(props.value) ? props.value : +props.value,
     maxDate: +props.maxDate ? +props.maxDate : "",
     minDate: +props.minDate ? +props.minDate : "",
     enableTime: true,
     enableSeconds: true,
     time_24hr: true,
     minuteIncrement: 1,
+    onReady(selectedDates, dateStr, instance) {
+      const currStamp = Date.parse(dateStr);
+      date.currStamp = currStamp;
+    },
     onChange(selectedDates, dateStr, instance) {
       if (!dateStr && props.required) return (date.isValid = false);
       //Check if date is in interval
@@ -637,7 +650,9 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  datepicker.destroy();
+  try {
+    datepicker.destroy();
+  } catch (e) {}
 });
 </script>
 

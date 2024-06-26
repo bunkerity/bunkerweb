@@ -247,6 +247,15 @@
   "bans_search_desc" : "Search within ban ip, ban start / end date",
   "bans_reason": "Reason",
   "bans_reason_desc": "Reason is the method that triggered the ban.",
-  "bans_terms": "Interval",
-  "bans_terms_desc": "Order of magnitude before unban."
+  "bans_terms": "Term",
+  "bans_terms_desc": "Order of magnitude before unban.",
+  "bans_title" :"Bans",
+  "bans_table_title" :"Bans list with ip, start date, end date, reason and terms.",
+  "bans_table_ip" : "IP",
+  "bans_table_ban_start" : "Ban start",
+  "bans_table_ban_end" : "Ban end",
+  "bans_table_reason" : "Reason",
+  "bans_table_remain" : "Remain",
+  "bans_table_term" : "Term",
+  "bans_table_select" : "Select"
 }

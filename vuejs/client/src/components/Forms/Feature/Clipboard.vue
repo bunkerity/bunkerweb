@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, onMounted, reactive } from "vue";
+import { defineProps, onBeforeMount, reactive } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useClipboard } from "@vueuse/core";
 import { useUUID } from "@utils/global.js";
@@ -57,7 +57,7 @@ const clip = reactive({
   id: "",
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   clip.id = useUUID(props.id);
 });
 </script>

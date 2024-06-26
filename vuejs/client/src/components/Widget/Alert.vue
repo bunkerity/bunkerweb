@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted } from "vue";
-import { defineProps, defineEmits, reactive } from "vue";
+import { defineProps, reactive, onMounted, onBeforeMount } from "vue";
+
 import { useUUID } from "@utils/global.js";
 /** 
   @name Forms/Error/Field.vue
@@ -65,14 +65,16 @@ const alert = reactive({
   id: "",
 });
 
+onBeforeMount(() => {
+  alert.id = useUUID();
+});
+
 onMounted(() => {
   if (props.delayToClose > 0) {
     setTimeout(() => {
       alert.visible = false;
     }, props.delayToClose);
   }
-
-  alert.id = useUUID();
 });
 </script>
 

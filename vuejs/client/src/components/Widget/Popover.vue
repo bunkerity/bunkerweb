@@ -1,5 +1,12 @@
 <script setup>
-import { reactive, ref, watch, defineProps, onMounted } from "vue";
+import {
+  reactive,
+  ref,
+  watch,
+  defineProps,
+  onMounted,
+  onBeforeMount,
+} from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useUUID } from "@utils/global.js";
 import Icons from "@components/Widget/Icons.vue";
@@ -75,14 +82,17 @@ function showPopover() {
 
   // Position popover relative to btn
   const popoverBtnRect = popoverBtn.value.getBoundingClientRect();
-
   popoverContainer.value.style.right = `${
     window.innerWidth - popoverBtnRect.left - popoverBtnRect.width / 1.5
   }px`;
 
   // We need to take care of parent padding and margin that will affect dropdown position but aren't calculate in rect
-  const parents = [popoverBtn.value.parentElement];
+  const parents = [];
+  const firstParent = popoverBtn.value.parentElement;
+  const firstParentY = firstParent.getBoundingClientRect().y || 0;
   let isParent = popoverBtn.value.parentElement ? true : false;
+  if (isParent) parents.push(firstParent);
+
   while (isParent) {
     parents.push(parents[parents.length - 1].parentElement);
     isParent = parents[parents.length - 1].parentElement ? true : false;
@@ -104,12 +114,11 @@ function showPopover() {
         .replace("px", "");
     } catch (e) {}
   }
-
   popoverContainer.value.style.top = `${
-    window.scrollY +
-    popoverBtnRect.top -
+    firstParentY +
+    window.scrollY -
     noRectParentHeight -
-    popoverBtnRect.height * 1.5 -
+    popoverBtnRect.height -
     80
   }px`;
 
@@ -133,8 +142,11 @@ watch(popover, () => {
   }
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   popover.id = useUUID();
+});
+
+onMounted(() => {
   // Set props color or the default icon color
   popover.color =
     props.color || popoverBtn.value.querySelector("[data-svg]")

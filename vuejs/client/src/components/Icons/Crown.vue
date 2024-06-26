@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted } from "vue";
+import { defineProps, reactive, onBeforeMount } from "vue";
 import { useUUID } from "@utils/global.js";
 
 /** 
@@ -33,7 +33,7 @@ const icon = reactive({
   color: props.color || "amber",
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   icon.id = useUUID();
 });
 </script>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted, reactive } from "vue";
+import { computed, ref, onMounted, reactive, onBeforeMount } from "vue";
 import Button from "@components/Widget/Button.vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useUUID } from "@utils/global.js";
@@ -84,8 +84,11 @@ const gridClass = computed(() => {
 
 const flowEl = ref();
 
-onMounted(() => {
+onBeforeMount(() => {
   container.id = useUUID(props.id);
+});
+
+onMounted(() => {
   if (!props.link) return;
   flowEl.value.setAttribute("href", props.link);
   flowEl.value.setAttribute("rel", "noopener");

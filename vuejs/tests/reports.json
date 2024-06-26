@@ -16,7 +16,7 @@
             {
                 "type": "ListPairs",
                 "data": {
-                    "details": [
+                    "pairs": [
                         {
                             "key": "reports_total",
                             "value": "200"

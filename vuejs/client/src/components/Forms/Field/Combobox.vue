@@ -7,6 +7,7 @@ import {
   defineEmits,
   defineProps,
   computed,
+  onBeforeMount,
 } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
@@ -299,8 +300,11 @@ watch(select, () => {
   }
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   inp.id = useUUID(props.id);
+});
+
+onMounted(() => {
   inp.isValid = inputEl.value.checkValidity();
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
   window.addEventListener("resize", () => {

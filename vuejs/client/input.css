@@ -1583,6 +1583,10 @@ body {
 }
 
 .xl.table {
+  @apply min-w-[1300px];
+}
+
+.xxl.table {
   @apply min-w-[1400px];
 }
 
@@ -1607,7 +1611,7 @@ body {
 }
 
 .table-content-item-wrap {
-  @apply appearance-none pl-1 pr-2;
+  @apply appearance-none pl-0.5 pr-4.5;
 }
 
 /** MISC **/

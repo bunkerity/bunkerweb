@@ -1,5 +1,13 @@
 <script setup>
-import { ref, reactive, watch, onMounted, defineEmits, defineProps } from "vue";
+import {
+  ref,
+  reactive,
+  watch,
+  onMounted,
+  defineEmits,
+  defineProps,
+  onBeforeMount,
+} from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
@@ -273,8 +281,11 @@ watch(select, () => {
   }
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   select.id = useUUID(props.id);
+});
+
+onMounted(() => {
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
   window.addEventListener("resize", () => {
     try {

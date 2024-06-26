@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, reactive, onMounted } from "vue";
+import { computed, ref, reactive, onBeforeMount } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Icons from "@components/Widget/Icons.vue";
@@ -114,7 +114,7 @@ const buttonClass = computed(() => {
   return `btn ${props.color} ${props.size}`;
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   btn.id = useUUID(props.id);
 });
 </script>
