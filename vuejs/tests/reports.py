@@ -290,7 +290,7 @@ def reports_builder(reports, data=None):
                     "type": "Table",
                     "data": {
                         "title": "reports_table_title",
-                        "minWidth": "lg",
+                        "minWidth": "xl",
                         "header": [
                             "reports_table_date",
                             "reports_table_ip",
