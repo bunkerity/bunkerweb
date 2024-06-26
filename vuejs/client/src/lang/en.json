@@ -242,5 +242,11 @@
   "reports_table_data": "Data",
   "reports_total": "Total reports",
   "reports_top_status": "Top status code",
-  "reports_top_reason": "Top reason"
+  "reports_top_reason": "Top reason",
+  "bans_search" : "Search bans",
+  "bans_search_desc" : "Search within ban ip, ban start / end date",
+  "bans_reason": "Reason",
+  "bans_reason_desc": "Reason is the method that triggered the ban.",
+  "bans_terms": "Interval",
+  "bans_terms_desc": "Order of magnitude before unban."
 }

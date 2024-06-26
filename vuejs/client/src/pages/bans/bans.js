@@ -1,11 +1,11 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { getI18n } from "@utils/lang.js";
-import Reports from "./Reports.vue";
+import Bans from "./Bans.vue";
 
 const pinia = createPinia();
 
-createApp(Reports)
+createApp(Bans)
   .use(pinia)
-  .use(getI18n(["dashboard", "action", "inp", "icons", "reports"]))
+  .use(getI18n(["dashboard", "action", "inp", "icons", "bans"]))
   .mount("#app");
