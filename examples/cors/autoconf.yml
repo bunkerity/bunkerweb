@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   myapp1:
-    image: php:fpm
+    image: php:fpm-alpine3.19
     networks:
       bw-services:
         aliases:
@@ -21,7 +19,7 @@ services:
       - bunkerweb.REMOTE_PHP_PATH=/app
 
   myapp2:
-    image: php:fpm
+    image: php:fpm-alpine3.19
     networks:
       bw-services:
         aliases:
@@ -38,7 +36,7 @@ services:
       - bunkerweb.REMOTE_PHP_PATH=/app
 
   myapp3:
-    image: php:fpm
+    image: php:fpm-alpine3.19
     networks:
       bw-services:
         aliases:

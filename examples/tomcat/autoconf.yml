@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   mytomcat:
-    image: tomcat
+    image: tomcat:11.0
     volumes:
       - ./app:/usr/local/tomcat/webapps/ # folder containing war files
     networks:
@@ -13,7 +11,7 @@ services:
       - bunkerweb.SERVER_NAME=www.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes
       - bunkerweb.REVERSE_PROXY_URL=/
-      - bunkerweb.REVERSE_PROXY_HOST=http://mytomcat:8080/sample/
+      - bunkerweb.REVERSE_PROXY_HOST=http://mytomcat:8080
 
 networks:
   bw-services:

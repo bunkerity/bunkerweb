@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   myapp1:
     image: nginxdemos/nginx-hello

@@ -1,69 +1,59 @@
-version: "3.4"
-
 services:
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
     ports:
-      - 80:8080
-      - 443:8443
-    labels:
-      - "bunkerweb.INSTANCE=yes"
+      - "80:8080"
+      - "443:8443"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
-    environment:
-      - MULTISITE=yes
-      - SERVER_NAME=auth.example.com app1.example.com app2.example.com # replace with your domains
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-      - SERVE_FILES=no
-      - DISABLE_DEFAULT_SERVER=yes
-      - AUTO_LETS_ENCRYPT=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      # Proxy to auth_request URI
-      - REVERSE_PROXY_URL_999=/authelia
-      - REVERSE_PROXY_HOST_999=http://authelia:9091/api/verify
-      - REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""
-      # Authelia
-      - auth.example.com_REVERSE_PROXY_URL=/
-      - auth.example.com_REVERSE_PROXY_HOST=http://authelia:9091
-      - auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
-      # Applications
-      - app1.example.com_REVERSE_PROXY_URL=/
-      - app1.example.com_REVERSE_PROXY_HOST=http://app1:8080
-      - app1.example.com_REVERSE_PROXY_AUTH_REQUEST=/authelia
-      - app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri
-      - app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email
-      - app1.example.com_REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email
-      - app2.example.com_REVERSE_PROXY_URL=/
-      - app2.example.com_REVERSE_PROXY_HOST=http://app2:8080
-      - app2.example.com_REVERSE_PROXY_AUTH_REQUEST=/authelia
-      - app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri
-      - app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SET=$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email
-      - app2.example.com_REVERSE_PROXY_HEADERS=Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
     depends_on:
-      - mybunker
-    environment:
-      - DOCKER_HOST=tcp://bw-docker-proxy:2375
-    networks:
-      - bw-universe
-      - bw-docker
+      - bunkerweb
     volumes:
       - bw-data:/data
-
-  bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "auth.example.com app1.example.com app2.example.com" # replace with your domains
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      # Proxy to auth_request URI
+      REVERSE_PROXY_URL_999: "/authelia"
+      REVERSE_PROXY_HOST_999: "http://authelia:9091/api/verify"
+      REVERSE_PROXY_HEADERS_999: "X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\""
+      # Authelia
+      auth.example.com_REVERSE_PROXY_URL: "/"
+      auth.example.com_REVERSE_PROXY_HOST: "http://authelia:9091"
+      auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+      # Applications
+      app1.example.com_REVERSE_PROXY_URL: "/"
+      app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
+      app1.example.com_REVERSE_PROXY_AUTH_REQUEST: "/authelia"
+      app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SET: "$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email"
+      app1.example.com_REVERSE_PROXY_HEADERS: "Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
+      app2.example.com_REVERSE_PROXY_URL: "/"
+      app2.example.com_REVERSE_PROXY_HOST: "http://app2:8080"
+      app2.example.com_REVERSE_PROXY_AUTH_REQUEST: "/authelia"
+      app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://auth.example.com/?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SET: "$$user $$upstream_http_remote_user;$$groups $$upstream_http_remote_groups;$$name $$upstream_http_remote_name;$$email $$upstream_http_remote_email"
+      app2.example.com_REVERSE_PROXY_HEADERS: "Remote-User $$user;Remote-Groups $$groups;Remote-Name $$name;Remote-Email $$email"
+    restart: "unless-stopped"
     networks:
-      - bw-docker
+      - bw-universe
 
   # APPLICATIONS
   app1:
@@ -79,31 +69,34 @@ services:
   authelia:
     image: authelia/authelia:4
     container_name: authelia
-    networks:
-      - bw-services
     volumes:
       - ./authelia:/config
-    restart: unless-stopped
+    environment:
+      TZ: "Europe/Paris"
+    restart: "unless-stopped"
     healthcheck:
       disable: true
-    environment:
-      - TZ=Europe/Paris
+    networks:
+      - authelia-redis
+      - bw-services
 
   redis:
     image: redis:7-alpine
     container_name: redis
-    networks:
-      - bw-services
-    volumes:
-      - ./redis:/data
     expose:
-      - 6379
-    restart: unless-stopped
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
     environment:
-      - TZ=Europe/Paris
+      TZ: "Europe/Paris"
+    restart: "unless-stopped"
+    networks:
+      - authelia-redis
 
 volumes:
   bw-data:
+  redis-data:
+
 
 networks:
   bw-universe:
@@ -113,4 +106,6 @@ networks:
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  bw-docker:
+    name: bw-services
+  authelia-redis:
+    name: authelia-redis

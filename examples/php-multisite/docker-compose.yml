@@ -1,11 +1,10 @@
-version: "3"
-
 services:
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
     ports:
-      - 80:8080
-      - 443:8443
+      - "80:8080"
+      - "443:8443"
     # ⚠️ read this if you use local folders for volumes ⚠️
     # bunkerweb runs as an unprivileged user with UID/GID 101
     # don't forget to edit the permissions of the files and folders accordingly
@@ -15,19 +14,8 @@ services:
     volumes:
       - ./www:/var/www/html # contains web files (PHP, assets, ...), don't forget to rename the subfolders
     environment:
-      - SERVER_NAME=app1.example.com app2.example.com # replace with your domains
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-      - MULTISITE=yes
-      - AUTO_LETS_ENCRYPT=yes
-      - DISABLE_DEFAULT_SERVER=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - app1.example.com_REMOTE_PHP=myapp1
-      - app1.example.com_REMOTE_PHP_PATH=/app
-      - app2.example.com_REMOTE_PHP=myapp2
-      - app2.example.com_REMOTE_PHP_PATH=/app
-    labels:
-      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - net-app1
@@ -35,28 +23,30 @@ services:
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
     depends_on:
-      - mybunker
-    environment:
-      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+      - bunkerweb
     volumes:
       - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "app1.example.com app2.example.com" # replace with your domains
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      MULTISITE: "yes"
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      app1.example.com_REMOTE_PHP: "myapp1"
+      app1.example.com_REMOTE_PHP_PATH: "/app"
+      app2.example.com_REMOTE_PHP: "myapp2"
+      app2.example.com_REMOTE_PHP_PATH: "/app"
+    restart: "unless-stopped"
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
 
   myapp1:
-    image: php:fpm
+    image: php:fpm-alpine3.19
     # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
     # but both needs access to the files and folders of web-files
     # don't forget to edit the permissions of the files and folders accordingly
@@ -67,7 +57,7 @@ services:
       - net-app1
 
   myapp2:
-    image: php:fpm
+    image: php:fpm-alpine3.19
     # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
     # but both needs access to the files and folders of web-files
     # don't forget to edit the permissions of the files and folders accordingly
@@ -77,15 +67,16 @@ services:
     networks:
       - net-app2
 
+volumes:
+  bw-data:
+
+
 networks:
   bw-universe:
+    name: bw-universe
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
-  bw-docker:
   net-app1:
   net-app2:
-
-volumes:
-  bw-data:

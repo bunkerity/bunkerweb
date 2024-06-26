@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   mync:
     image: nextcloud:stable-apache
@@ -57,7 +55,7 @@ services:
         SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:2000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
 
   mydb:
-    image: mariadb
+    image: mariadb:11
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
       - db-data:/var/lib/mysql

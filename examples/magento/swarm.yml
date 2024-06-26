@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   mymagento:
     image: bitnami/magento:2
@@ -41,7 +39,7 @@ services:
           - "node.role==worker"
 
   mydb:
-    image: mariadb:10.2
+    image: mariadb:11
     networks:
       - bw-services
     volumes:

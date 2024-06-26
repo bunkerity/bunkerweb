@@ -1,83 +1,75 @@
-version: "3"
-
 services:
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
     ports:
-      - 80:8080
-      - 443:8443
+      - "80:8080"
+      - "443:8443"
     environment:
-      - SERVER_NAME=www.example.com # replace with your domain
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-      - AUTO_LETS_ENCRYPT=yes
-      - DISABLE_DEFAULT_SERVER=yes
-      - MAX_CLIENT_SIZE=50m
-      - SERVE_FILES=no
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=https://mymoodle:8443
-    labels:
-      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
     depends_on:
-      - mybunker
-    environment:
-      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+      - bunkerweb
     volumes:
       - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      MAX_CLIENT_SIZE: "50m"
+      SERVE_FILES: "no"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "https://mymoodle:8443"
+    restart: "unless-stopped"
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
 
   mymoodle:
-    image: bitnami/moodle:4.1.0
+    image: bitnami/moodle:4
     depends_on:
       - mydb
     volumes:
       - moodle-files:/bitnami/moodle
       - moodle-data:/bitnami/moodledata
     environment:
-      - MOODLE_USERNAME=admin # replace with your moodle admin username
-      - MOODLE_PASSWORD=password # replace with your moodle admin password
-      - MOODLE_EMAIL=moodle@example.com # replace with your moodle admin email
-      - MOODLE_SITE_NAME=My Moodle # replace with your moodle site name
-      - MOODLE_DATABASE_HOST=mydb
-      - MOODLE_DATABASE_NAME=moodle
-      - MOODLE_DATABASE_USER=user
-      - MOODLE_DATABASE_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+      MOODLE_USERNAME: "admin" # replace with your moodle admin username
+      MOODLE_PASSWORD: "password" # replace with your moodle admin password
+      MOODLE_EMAIL: "moodle@example.com" # replace with your moodle admin email
+      MOODLE_SITE_NAME: "My Moodle" # replace with your moodle site name
+      MOODLE_DATABASE_HOST: "mydb"
+      MOODLE_DATABASE_NAME: "moodle"
+      MOODLE_DATABASE_USER: "user"
+      MOODLE_DATABASE_PASSWORD: "db-user-pwd" # replace with a stronger password (must match MARIADB_PASSWORD)
+    restart: "unless-stopped"
     networks:
+      - moodle-net
       - bw-services
 
   mydb:
-    image: mariadb:10.5
+    image: bitnami/mariadb:11.2
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/bitnami/mariadb
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
-      - MYSQL_DATABASE=moodle
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
-      - MARIADB_CHARACTER_SET=utf8mb4
-      - MARIADB_COLLATE=utf8mb4_unicode_ci
+      MARIADB_ROOT_PASSWORD: "db-root-pwd" # replace with a stronger password
+      MARIADB_DATABASE: "moodle"
+      MARIADB_USER: "user"
+      MARIADB_PASSWORD: "db-user-pwd" # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
+      MARIADB_CHARACTER_SET: "utf8mb4"
+      MARIADB_COLLATE: "utf8mb4_unicode_ci"
     networks:
-      - bw-services
+      - moodle-net
 
 volumes:
   bw-data:
@@ -85,11 +77,15 @@ volumes:
   moodle-files:
   moodle-data:
 
+
 networks:
   bw-universe:
+    name: bw-universe
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  bw-docker:
+    name: bw-services
+  moodle-net:
+    name: moodle-net

@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   mync:
-    image: nextcloud:24-apache
+    image: nextcloud:stable-apache
     volumes:
       - nc-files:/var/www/html
     networks:
@@ -38,7 +36,7 @@ services:
         - bunkerweb.LIMIT_REQ_RATE_3=5r/s
 
   mydb:
-    image: mariadb:10.9
+    image: mariadb:11
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
       - db-data:/var/lib/mysql

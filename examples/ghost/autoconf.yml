@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   myghost:
-    image: ghost:5.25-alpine
+    image: ghost:5-alpine
     volumes:
       - ghost-data:/var/lib/ghost/content
     networks:
@@ -10,8 +8,8 @@ services:
         aliases:
           - myghost
     environment:
-      - url=https://www.example.com # replace with your domain
-      - NODE_ENV=development
+      url: "https://www.example.com" # replace with your domain
+      NODE_ENV: "development"
     labels:
       - bunkerweb.SERVER_NAME=www.example.com # replace with your domain
       - bunkerweb.USE_REVERSE_PROXY=yes

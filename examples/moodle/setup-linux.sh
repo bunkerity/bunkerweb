@@ -13,7 +13,7 @@ else
 	echo "❌ No PHP user found"
 	exit 1
 fi
-curl https://download.moodle.org/download.php/direct/stable401/moodle-4.1.tgz -Lo /tmp/moodle.tgz
+curl https://download.moodle.org/download.php/stable404/moodle-latest-404.tgz -Lo /tmp/moodle.tgz
 tar -xzf /tmp/moodle.tgz -C /tmp
 cp -r /tmp/moodle/* /var/www/html
 chown -R $user:nginx /var/www/html

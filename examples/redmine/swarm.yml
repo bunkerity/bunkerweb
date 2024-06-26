@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   myredmine:
-    image: redmine
+    image: redmine:5-alpine
     restart: always
     volumes:
       - redmine-data:/usr/src/redmine/files
@@ -24,7 +22,7 @@ services:
         - bunkerweb.REVERSE_PROXY_HOST=http://myredmine:3000
 
   mydb:
-    image: mysql
+    image: mysql:8
     volumes:
       - db-data:/var/lib/mysql
     networks:

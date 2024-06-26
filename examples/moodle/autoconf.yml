@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   mymoodle:
-    image: bitnami/moodle:4.1.0
+    image: bitnami/moodle:4
     networks:
       bw-services:
         aliases:
@@ -28,9 +26,9 @@ services:
       - bunkerweb.REVERSE_PROXY_HOST=https://mymoodle:8443
 
   mydb:
-    image: mariadb:10.5
+    image: bitnami/mariadb:11.2
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/bitnami/mariadb
     networks:
       bw-services:
         aliases:

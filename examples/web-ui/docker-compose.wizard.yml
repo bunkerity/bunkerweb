@@ -1,74 +1,70 @@
-version: "3.5"
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
 
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
     ports:
-      - 80:8080
-      - 443:8443
-    labels:
-      - "bunkerweb.INSTANCE=yes"
+      - "80:8080"
+      - "443:8443"
     environment:
-      - SERVER_NAME=
-      - MULTISITE=yes
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-      - AUTO_LETS_ENCRYPT=yes
-      - DISABLE_DEFAULT_SERVER=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - UI_HOST=http://bw-ui:7000
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
     depends_on:
       - bunkerweb
-      - bw-docker
+    volumes:
+      - bw-data:/data
     environment:
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-      - DOCKER_HOST=tcp://bw-docker:2375
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      SERVE_FILES: "no"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      UI_HOST: "http://bw-ui:7000"
+    restart: "unless-stopped"
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
+      - bw-db
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.6.0-beta
-    depends_on:
-      - bw-docker
+    container_name: bw-ui
     environment:
-      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
-      - DOCKER_HOST=tcp://bw-docker:2375
+      <<: *env
+    restart: "unless-stopped"
     networks:
       - bw-universe
-      - bw-docker
+      - bw-db
 
   bw-db:
-    image: mariadb:10.10
+    image: mariadb:11
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # replace with a stronger password
     volumes:
-      - bw-data:/var/lib/mysql
+      - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
     networks:
-      - bw-docker
+      - bw-db
 
 volumes:
   bw-data:
+  bw-db:
+
 
 networks:
   bw-universe:
@@ -79,5 +75,5 @@ networks:
         - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
-  bw-docker:
-    name: bw-docker
+  bw-db:
+    name: bw-db

@@ -1,26 +1,18 @@
-version: "3"
+x-env: &env
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  # proxy protocol settings
+  USE_PROXY_PROTOCOL: "yes"
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "10.10.10.0/24"
+  REAL_IP_HEADER: "proxy_protocol"
 
 services:
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
     environment:
-      - SERVER_NAME=www.example.com # replace with your domains
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-      - SERVE_FILES=no
-      - DISABLE_DEFAULT_SERVER=yes
-      - AUTO_LETS_ENCRYPT=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://myapp:8080
-      # proxy protocol settings
-      - USE_PROXY_PROTOCOL=yes
-      - USE_REAL_IP=yes
-      - REAL_IP_FROM=10.10.10.0/24
-      - REAL_IP_HEADER=proxy_protocol
-    labels:
-      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
+      <<: *env
+    restart: "unless-stopped"
     networks:
       - net-proxy
       - bw-universe
@@ -28,31 +20,32 @@ services:
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
     depends_on:
-      - mybunker
-    environment:
-      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+      - bunkerweb
     volumes:
       - bw-data:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domains
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://myapp:8080"
+    restart: "unless-stopped"
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
 
   myproxy:
-    image: haproxy:2.9-alpine
+    image: haproxy:3.0-alpine
     ports:
-      - 80:8080
-      - 443:8443
+      - "80:8080"
+      - "443:8443"
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     networks:
@@ -66,14 +59,16 @@ services:
 volumes:
   bw-data:
 
+
 networks:
   bw-universe:
+    name: bw-universe
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  bw-docker:
+    name: bw-services
   net-proxy:
     ipam:
       driver: default

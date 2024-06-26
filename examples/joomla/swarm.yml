@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   myjoomla:
-    image: joomla:4-apache
+    image: joomla:5-apache
     networks:
       - bw-services
     volumes:
@@ -27,7 +25,7 @@ services:
         - bunkerweb.LIMIT_REQ_RATE_2=8r/s
 
   mydb:
-    image: mariadb
+    image: mariadb:11
     networks:
       - bw-services
     volumes:

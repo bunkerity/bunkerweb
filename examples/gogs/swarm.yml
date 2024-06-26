@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   mygogs:
-    image: gogs/gogs:0.12
+    image: gogs/gogs:0.13
     volumes:
       - gogs_data:/data/gogs/data
     networks:

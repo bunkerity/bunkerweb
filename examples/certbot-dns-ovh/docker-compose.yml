@@ -1,65 +1,53 @@
-version: "3"
-
 services:
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
     ports:
-      - 80:8080
-      - 443:8443
-    volumes:
-      - certs:/certs
+      - "80:8080"
+      - "443:8443"
     environment:
-      - MULTISITE=yes
-      - SERVER_NAME=app1.example.com app2.example.com app3.example.com # replace with your domains
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-      - SERVE_FILES=no
-      - DISABLE_DEFAULT_SERVER=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      - USE_CUSTOM_SSL=yes
-      - CUSTOM_SSL_CERT=/certs/live/example.com/fullchain.pem
-      - CUSTOM_SSL_KEY=/certs/live/example.com/privkey.pem
-      - app1.example.com_REVERSE_PROXY_URL=/
-      - app1.example.com_REVERSE_PROXY_HOST=http://app1:8080
-      - app2.example.com_REVERSE_PROXY_URL=/
-      - app2.example.com_REVERSE_PROXY_HOST=http://app2:8080
-      - app3.example.com_REVERSE_PROXY_URL=/
-      - app3.example.com_REVERSE_PROXY_HOST=http://app3:8080
-    labels:
-      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
     depends_on:
-      - mybunker
-    environment:
-      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+      - bunkerweb
     volumes:
       - bw-data:/data
       - certs:/certs
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "app1.example.com app2.example.com app3.example.com" # replace with your domains
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      USE_CUSTOM_SSL: "yes"
+      CUSTOM_SSL_CERT: "/certs/live/example.com/fullchain.pem"
+      CUSTOM_SSL_KEY: "/certs/live/example.com/privkey.pem"
+      app1.example.com_REVERSE_PROXY_URL: "/"
+      app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
+      app2.example.com_REVERSE_PROXY_URL: "/"
+      app2.example.com_REVERSE_PROXY_HOST: "http://app2:8080"
+      app3.example.com_REVERSE_PROXY_URL: "/"
+      app3.example.com_REVERSE_PROXY_HOST: "http://app3:8080"
+    restart: "unless-stopped"
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
 
   mycertbot:
-    image: certbot/dns-ovh:v2.0.0
+    image: certbot/dns-ovh:v2.11.0
     environment:
-      - DOMAINS=*.example.com,example.com
-      - EMAIL=contact@example.com
+      DOMAINS: "*.example.com,example.com"
+      EMAIL: "contact@example.com"
     volumes:
       - certs:/etc/letsencrypt
       - ./ovh.ini:/opt/ovh.ini
@@ -85,11 +73,13 @@ volumes:
   bw-data:
   certs:
 
+
 networks:
   bw-universe:
+    name: bw-universe
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
-  bw-docker:
   bw-services:
+    name: bw-services

@@ -1,5 +1,3 @@
-version: '3.6'
-
 # clone the repository https://github.com/bigbluebutton/docker into the root directory and run the following command: ./scripts/setup
 # when executing the file ./scripts/setup do this:
 
@@ -26,24 +24,15 @@ services:
 
   ...
 
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
     ports:
-      - 80:8080
-      - 443:8443
+      - "80:8080"
+      - "443:8443"
     environment:
-      - SERVER_NAME=${DOMAIN}
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-      - AUTO_LETS_ENCRYPT=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_WS=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://10.7.7.253:8080
-    labels:
-      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
-    # You have to put this IP address in your docker-compose.yml file
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
     networks:
       bbb-net:
         ipv4_address: 10.7.7.254
@@ -51,25 +40,25 @@ services:
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
     depends_on:
-      - mybunker
-    environment:
-      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+      - bunkerweb
     volumes:
       - bw-data:/data
-    networks:
-      bw-universe:
-      bw-docker:
-
-  bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "${DOMAIN}"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_WS: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://10.7.7.253:8080"
+    restart: "unless-stopped"
     networks:
-      - bw-docker
+      - bw-universe
 
   ...
 
@@ -84,4 +73,3 @@ networks:
       driver: default
       config:
         - subnet: 10.20.30.0/24
-  bw-docker:

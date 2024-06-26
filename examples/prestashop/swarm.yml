@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   myps:
-    image: prestashop/prestashop:1.7
+    image: prestashop/prestashop:8
     volumes:
       - ps-data:/var/www/html
     networks:
@@ -31,7 +29,7 @@ services:
         - bunkerweb.LIMIT_REQ_RATE_1=8r/s
 
   mydb:
-    image: mariadb
+    image: mariadb:11
     volumes:
       - db-data:/var/lib/mysql
     networks:

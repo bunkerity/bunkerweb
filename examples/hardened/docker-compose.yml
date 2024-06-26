@@ -1,8 +1,7 @@
-version: "3"
-
 services:
-  mybunker:
+  bunkerweb:
     image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
     # dropping all capabilities
     cap_drop:
       - ALL
@@ -19,46 +18,37 @@ services:
       - /var/cache/bunkerweb:mode=0770,uid=0,gid=101
       - /etc/nginx:mode=0770,uid=0,gid=101
     ports:
-      - 80:8080
-      - 443:8443
+      - "80:8080"
+      - "443:8443"
     environment:
-      - SERVER_NAME=www.example.com # replace with your domain
-      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
-      - AUTO_LETS_ENCRYPT=yes
-      - DISABLE_DEFAULT_SERVER=yes
-      - USE_CLIENT_CACHE=yes
-      - USE_GZIP=yes
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://myapp:8080
-      - REMOTE_PHP_PATH=/app
-    labels:
-      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
     depends_on:
-      - mybunker
-    environment:
-      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+      - bunkerweb
     volumes:
       - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://myapp:8080"
+      REMOTE_PHP_PATH: "/app"
+    restart: "unless-stopped"
     networks:
       - bw-universe
-      - bw-docker
-
-  bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:nightly
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - LOG_LEVEL=warning
-    networks:
-      - bw-docker
 
   myapp:
     image: nginxdemos/nginx-hello
@@ -68,11 +58,13 @@ services:
 volumes:
   bw-data:
 
+
 networks:
   bw-universe:
+    name: bw-universe
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-  bw-docker:
+    name: bw-services

@@ -1,8 +1,6 @@
-version: "3"
-
 services:
   mydrupal:
-    image: drupal:9.4-apache
+    image: drupal:10-apache
     networks:
       bw-services:
         aliases:
@@ -24,7 +22,7 @@ services:
         CUSTOM_CONF_MODSEC_CRS_drupal=SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_drupal=1"
 
   mydb:
-    image: mariadb:10.10
+    image: mariadb:11
     networks:
       bw-services:
         aliases:

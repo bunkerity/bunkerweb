@@ -13,7 +13,7 @@ else
 	echo "❌ No PHP user found"
 	exit 1
 fi
-curl https://downloads.joomla.org/fr/cms/joomla4/4-1-5/Joomla_4-1-5-Stable-Full_Package.zip?format=zip -Lo /tmp/joomla.zip
+curl https://downloads.joomla.org/fr/cms/joomla5/5-1-1/Joomla_5-1-1-Stable-Full_Package.zip?format=zip -Lo /tmp/joomla.zip
 unzip -qq /tmp/joomla.zip -d /var/www/html
 chown -R $user:nginx /var/www/html
 find /var/www/html -type f -exec chmod 0640 {} \;

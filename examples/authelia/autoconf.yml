@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   # APPLICATIONS
   app1:
@@ -43,17 +41,17 @@ services:
   # AUTHELIA
   authelia:
     image: authelia/authelia:4
-    networks:
-      bw-services:
-        aliases:
-          - authelia
+    container_name: authelia
     volumes:
       - ./authelia:/config
-    restart: unless-stopped
+    environment:
+      TZ: "Europe/Paris"
+    restart: "unless-stopped"
     healthcheck:
       disable: true
-    environment:
-      - TZ=Europe/Paris
+    networks:
+      - authelia-redis
+      - bw-services
     labels:
       - bunkerweb.SERVER_NAME=auth.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes
@@ -63,19 +61,20 @@ services:
 
   redis:
     image: redis:7-alpine
-    networks:
-      bw-services:
-        aliases:
-          - redis
-    volumes:
-      - ./redis:/data
+    container_name: redis
     expose:
-      - 6379
-    restart: unless-stopped
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
     environment:
-      - TZ=Europe/Paris
+      TZ: "Europe/Paris"
+    restart: "unless-stopped"
+    networks:
+      - authelia-redis
 
 networks:
   bw-services:
     external: true
     name: bw-services
+  authelia-redis:
+    name: authelia-redis
