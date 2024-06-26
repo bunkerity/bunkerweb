@@ -7,8 +7,6 @@ services:
       - 80:8080/tcp
       - 443:8443/tcp
       - 443:8443/udp
-    labels:
-      - "bunkerweb.INSTANCE=yes"
     environment:
       - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
     restart: "unless-stopped"
