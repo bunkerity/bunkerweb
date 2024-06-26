@@ -21,21 +21,20 @@ function redirectPlugin() {
     "click",
     (e) => {
       // Case avoid redirect
+      if (e.target.tagName !== "A") return;
       if (!e.target.closest("[data-plugin-redirect]")) return;
       if (
         e.target
           .closest("[data-plugin-redirect]")
-          .getAttribute("data-plugin-redirect") !== "true" ||
-        !e.target.querySelector(
-          '[:data-color="icon.color" :disabled="props.disabled" data-svg="redirect"]'
-        )
+          ?.getAttribute("data-plugin-redirect") !== "true" ||
+        !e.target.querySelector('[data-svg="redirect"]')
       )
         return;
       // Prepare redirect
       const pluginId = e.target
         .closest("[data-plugin-id]")
         .getAttribute("data-plugin-id");
-      // Redirect
+
       window.location.href = `./${pluginId}`;
     },
     true
@@ -54,11 +53,13 @@ function deletePlugin() {
     "click",
     (e) => {
       // Case avoid redirect
+      if (e.target.tagName !== "A") return;
       if (!e.target.closest("[data-plugin-delete]")) return;
       if (
         e.target
           .closest("[data-plugin-delete]")
-          .getAttribute("data-plugin-delete") !== "true"
+          .getAttribute("data-plugin-delete") !== "true" ||
+        !e.target.querySelector('[data-svg="trash"]')
       )
         return;
       // Update data
@@ -119,14 +120,13 @@ const builder = [
         type: "Text",
         data: {
           text: "plugins_modal_delete_confirm",
-          textClass: "text-modal",
         },
       },
       {
         type: "Text",
         data: {
           text: "",
-          textClass: "text-modal bold",
+          bold: true,
           attrs: {
             "data-modal-plugin-name": "true",
           },

@@ -3125,14 +3125,13 @@ def plugins_builder(plugins, data={}):
                 "type": "Text",
                 "data": {
                     "text": "plugins_modal_delete_confirm",
-                    "textClass": "text-modal",
                 },
             },
             {
                 "type": "Text",
                 "data": {
                     "text": "",
-                    "textClass": "text-modal bold",
+                    "bold": True,
                     "attrs": {
                         "data-modal-plugin-name": "true",
                     },

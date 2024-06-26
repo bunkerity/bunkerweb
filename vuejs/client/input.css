@@ -563,7 +563,7 @@ body {
 }
 
 .icon-container {
-  @apply block w-fit;
+  @apply block w-fit  pointer-events-none;
 }
 
 .stick.icon-container {
@@ -571,7 +571,7 @@ body {
 }
 
 .icon-social {
-  @apply hover:opacity-80;
+  @apply hover:opacity-80 pointer-events-none;
 }
 
 .icon-header-field {
@@ -579,39 +579,39 @@ body {
 }
 
 .icon-stat {
-  @apply block w-10 h-10;
+  @apply block w-10 h-10  pointer-events-none;
 }
 
 .icon-base {
-  @apply block w-8 h-8
+  @apply block w-8 h-8 pointer-events-none;
 }
 
 .icon-card {
-  @apply block w-8 h-8
+  @apply block w-8 h-8 pointer-events-none;
 }
 
 .icon-unmatch {
-  @apply block w-8 h-8;
+  @apply block w-8 h-8 pointer-events-none;
 }
 
 .icon-menu {
-  @apply h-6 w-6 relative;
+  @apply h-6 w-6 relative pointer-events-none;
 }
 
 .icon-form {
-  @apply h-6 w-6 relative;
+  @apply h-6 w-6 relative pointer-events-none;
 }
 
 .icon-button {
-  @apply h-6 w-6 relative;
+  @apply h-6 w-6 relative pointer-events-none;
 }
 
 .icon-table:not([disabled]) {
-  @apply h-6 w-6 relative;
+  @apply h-6 w-6 relative pointer-events-none;
 }
 
 .icon-list-details {
-  @apply ml-2 h-6.5 w-6.5 relative;
+  @apply ml-2 h-6.5 w-6.5 relative pointer-events-none;
 }
 
 /* TABS */
@@ -1096,7 +1096,7 @@ body {
 }
 
 .text-list-details {
-  @apply w-full col-span-12 mb-0 dark:text-gray-300 break-word;
+  @apply w-full col-span-12 mb-0 text-gray-700 dark:text-gray-300 break-word;
 }
 
 /* BTN GROUP */
@@ -1590,7 +1590,7 @@ body {
 }
 
 .table-content-item {
-  @apply appearance-none text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 min-h-[65px];
+  @apply py-2 appearance-none text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 min-h-[65px];
 }
 
 .table-content-item-wrap {
@@ -1803,7 +1803,7 @@ body {
 }
 
 .blue-darker.text-el {
-  @apply text-blue-600;
+  @apply text-blue-600 dark:text-blue-500;
 }
 
 .yellow-darker.text-el {
@@ -1815,7 +1815,7 @@ body {
 }
 
 .dark-darker.text-el {
-  @apply text-slate-600;
+  @apply text-slate-600  dark:text-slate-500;
 }
 
 .amber-darker.text-el {
@@ -1952,7 +1952,7 @@ body {
 }
 
 .blue-darker.bg-el {
-  @apply bg-blue-600;
+  @apply bg-blue-600 dark:bg-blue-500;
 }
 
 .yellow-darker.bg-el {
@@ -1964,7 +1964,7 @@ body {
 }
 
 .dark-darker.bg-el {
-  @apply bg-slate-600;
+  @apply bg-slate-600  dark:bg-slate-500;
 }
 
 .amber-darker.bg-el {
@@ -2057,7 +2057,7 @@ body {
 }
 
 .dark.fill {
-  @apply fill-slate-500;
+  @apply fill-slate-500 ;
 }
 
 .amber.fill {
@@ -2125,7 +2125,7 @@ body {
 }
 
 .blue-darker.fill{
-  @apply fill-blue-600;
+  @apply fill-blue-600 dark:fill-blue-500;
 }
 
 .yellow-darker.fill {
@@ -2138,7 +2138,7 @@ body {
 
 .dark-darker.fill
  {
-  @apply fill-slate-600;
+  @apply fill-slate-600  dark:fill-slate-500;
 }
 
 .amber-darker.fill {

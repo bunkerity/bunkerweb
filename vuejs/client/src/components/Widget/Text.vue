@@ -14,6 +14,7 @@ import { onMounted, reactive, ref } from "vue";
   @param {string} text - The text value. Can be a translation key or by default raw text.
   @param {string} [textClass=""] - Style of text. Can be replace by any class starting by 'text-' like 'text-stat'.
   @param {string} [color=""] - The color of the text between error, success, warning, info or tailwind color
+  @param {boolean} [bold=false] - If the text should be bold or not.
   @param {string} [tag="p"] - The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6
   @param {boolean|object} [icon=false] - The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color.
   @param {object} [attrs={}] - List of attributs to add to the text.
@@ -33,6 +34,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  bold: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   tag: {
     type: String,
@@ -76,7 +82,7 @@ onMounted(() => {
     :is="props.tag"
     v-bind="props.attrs"
     ref="textEl"
-    :class="[text.class, props.color, 'text-el']"
+    :class="[text.class, props.color, 'text-el', props.bold ? 'bold' : '']"
   >
     {{ $t(props.text, $t("dashboard_placeholder", props.text)) }}
   </component>

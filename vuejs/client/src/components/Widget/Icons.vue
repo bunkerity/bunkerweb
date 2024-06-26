@@ -32,6 +32,7 @@ import Trash from "@components/Icons/Trash.vue";
 import Lock from "@components/Icons/Lock.vue";
 import Search from "@components/Icons/Search.vue";
 import Exclamation from "@components/Icons/Exclamation.vue";
+import Close from "@components/Icons/Close.vue";
 
 /**
   @name Widget/Icons.vue
@@ -286,5 +287,6 @@ onMounted(() => {
       :color="props.color"
       :disabled="props.disabled"
     />
+    <Close v-if="props.iconName === 'close'" :iconClass="icon.class" />
   </div>
 </template>
