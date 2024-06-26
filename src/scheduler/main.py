@@ -515,31 +515,24 @@ if __name__ == "__main__":
 
         APPLYING_CHANGES.set()
 
-        if (
-            isinstance(db_metadata, str)
-            or (db_metadata["is_initialized"] and SCHEDULER.db.get_config() != dotenv_env)
-            or not tmp_variables_path.exists()
-            or not nginx_variables_path.exists()
-            or (tmp_variables_path.read_text(encoding="utf-8") != nginx_variables_path.read_text(encoding="utf-8"))
-        ):
-            if SCHEDULER.db.readonly:
-                LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
-            else:
-                # run the config saver
-                proc = subprocess_run(
-                    [
-                        "python3",
-                        join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                        "--settings",
-                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                    ]
-                    + (["--variables", str(tmp_variables_path)] if args.variables else []),
-                    stdin=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
-                )
-                if proc.returncode != 0:
-                    LOGGER.error("Config saver failed, configuration will not work as expected...")
+        if SCHEDULER.db.readonly:
+            LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
+        else:
+            # run the config saver
+            proc = subprocess_run(
+                [
+                    "python3",
+                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                    "--settings",
+                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                ]
+                + (["--variables", str(tmp_variables_path)] if args.variables else []),
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                LOGGER.error("Config saver failed, configuration will not work as expected...")
 
         ready = False
         while not ready:
