@@ -1119,7 +1119,7 @@ body {
 /* LIST COMPONENT */
 
 .list-pairs-container {
-  @apply grid grid-cols-12 gap-2 my-4;
+  @apply col-span-12 grid grid-cols-12 gap-2 my-4;
 }
 
 .list-pairs-item {

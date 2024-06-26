@@ -15,6 +15,7 @@ import { computed, onMounted, reactive, ref } from "vue";
   @param {string} [type="card"] - The type of title between "container", "card", "content", "min" or "stat"
   @param {string} [tag=""] - The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title.
   @param {string} [color=""] - The color of the title between error, success, warning, info or tailwind color
+  @param {boolean} [uppercase=false] - If the title should be uppercase or not.
   @param {string} [titleClass=""] - Additional class, useful when component is used directly on a grid system
 */
 
@@ -37,6 +38,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  uppercase: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   titleClass: {
     type: String,
@@ -83,7 +89,13 @@ onMounted(() => {
     data-title
     :is="tag"
     v-if="props.title"
-    :class="[props.color, isSubtitleClass, title.class, 'text-el']"
+    :class="[
+      props.color,
+      isSubtitleClass,
+      title.class,
+      'text-el',
+      props.uppercase ? 'uppercase' : '',
+    ]"
   >
     {{ $t(props.title, $t("dashboard_placeholder", props.title)) }}
   </component>

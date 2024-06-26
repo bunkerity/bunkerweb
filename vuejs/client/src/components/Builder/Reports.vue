@@ -5,6 +5,7 @@ import GridLayout from "@components/Widget/GridLayout.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Table from "@components/Widget/Table.vue";
+import ListPairs from "@components/List/Pairs.vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
 
 /**
@@ -52,6 +53,7 @@ const props = defineProps({
         <Title v-if="widget.type === 'Title'" v-bind="widget.data" />
         <Subtitle v-if="widget.type === 'Subtitle'" v-bind="widget.data" />
         <Table v-if="widget.type === 'Table'" v-bind="widget.data" />
+        <ListPairs v-if="widget.type === 'ListPairs'" v-bind="widget.data" />
       </template>
     </Grid>
   </GridLayout>

@@ -2,6 +2,12 @@ import json
 
 no_reports = []
 
+details = {
+    "top_reason": "antibot",
+    "top_code": "400",
+    "total_reports": "200",
+}
+
 reports = [
     {
         "url": "/admin/login?id=etc/passwd",
@@ -262,7 +268,33 @@ def get_reports_list(reports):
     return data
 
 
-def reports_builder(reports, data=None):
+def get_reports_details(details):
+    return {
+        "type": "card",
+        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "widgets": [
+            {
+                "type": "Title",
+                "data": {"title": "dashboard_details"},
+            },
+            {
+                "type": "ListPairs",
+                "data": {
+                    "pairs": [
+                        {"key": "reports_total", "value": details.get("total_reports")},
+                        {"key": "reports_top_status", "value": details.get("top_code")},
+                        {
+                            "key": "reports_top_reason",
+                            "value": details.get("top_reason"),
+                        },
+                    ],
+                },
+            },
+        ],
+    }
+
+
+def reports_builder(reports, details=None):
 
     if not reports:
         return [
@@ -274,49 +306,50 @@ def reports_builder(reports, data=None):
             },
         ]
 
-    filters = get_reports_filter(reports)
+    details = get_reports_details(details)
 
+    filters = get_reports_filter(reports)
     reports_list = get_reports_list(reports)
 
-    builder = [
-        {
-            "type": "card",
-            "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
-            "widgets": [
-                {
-                    "type": "Title",
-                    "data": {"title": "reports_title"},
+    reports_table = {
+        "type": "card",
+        "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
+        "widgets": [
+            {
+                "type": "Title",
+                "data": {"title": "reports_title"},
+            },
+            {
+                "type": "Table",
+                "data": {
+                    "title": "reports_table_title",
+                    "minWidth": "xl",
+                    "header": [
+                        "reports_table_date",
+                        "reports_table_ip",
+                        "reports_table_country",
+                        "reports_table_method",
+                        "reports_table_url",
+                        "reports_table_status_code",
+                        "reports_table_cache_user_agent",
+                        "reports_table_reason",
+                        "reports_table_data",
+                    ],
+                    "positions": [1, 1, 1, 1, 2, 1, 2, 1, 2],
+                    "items": reports_list,
+                    "filters": filters,
                 },
-                {
-                    "type": "Table",
-                    "data": {
-                        "title": "reports_table_title",
-                        "minWidth": "xl",
-                        "header": [
-                            "reports_table_date",
-                            "reports_table_ip",
-                            "reports_table_country",
-                            "reports_table_method",
-                            "reports_table_url",
-                            "reports_table_status_code",
-                            "reports_table_cache_user_agent",
-                            "reports_table_reason",
-                            "reports_table_data",
-                        ],
-                        "positions": [1, 1, 1, 1, 2, 1, 2, 1, 2],
-                        "items": reports_list,
-                        "filters": filters,
-                    },
-                },
-            ],
-        }
-    ]
+            },
+        ],
+    }
+
+    builder = [details, reports_table]
 
     return builder
 
 
-#output = reports_builder(reports)
-output = reports_builder(no_reports)
+# output = reports_builder(reports)
+output = reports_builder(reports, details)
 
 # store on a file
 with open("reports.json", "w") as f:

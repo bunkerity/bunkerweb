@@ -16,6 +16,7 @@ import { computed, onMounted, reactive, ref } from "vue";
   @param {string} [tag=""] - The tag of the subtitle. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of subtitle.
   @param {string} [color=""] - The color of the subtitle between error, success, warning, info or tailwind color
   @param {boolean} [bold=false] - If the subtitle should be bold or not.
+  @param {boolean} [uppercase=false] - If the subtitle should be uppercase or not.
   @param {string} [subtitleClass=""] - Additional class, useful when component is used directly on a grid system
 */
 
@@ -40,6 +41,11 @@ const props = defineProps({
     default: "",
   },
   bold: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  uppercase: {
     type: Boolean,
     required: false,
     default: false,
@@ -78,7 +84,13 @@ onMounted(() => {
     data-subtitle
     :is="tag"
     v-if="props.subtitle"
-    :class="[subtitle.class, props.color, 'text-el', props.bold ? 'bold' : '']"
+    :class="[
+      subtitle.class,
+      props.color,
+      'text-el',
+      props.bold ? 'bold' : '',
+      props.uppercase ? 'uppercase' : '',
+    ]"
   >
     {{ $t(props.subtitle, $t("dashboard_placeholder", props.subtitle)) }}
   </component>
