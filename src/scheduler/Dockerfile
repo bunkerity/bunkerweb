@@ -46,7 +46,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-client postgresql-client sqlite && \
+RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
   cp helpers/bwcli /usr/bin/ && \
