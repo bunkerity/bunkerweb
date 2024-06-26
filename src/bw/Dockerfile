@@ -70,11 +70,11 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42366
 
-LABEL maintainer "Bunkerity <contact@bunkerity.com>"
-LABEL version "1.5.8"
-LABEL url "https://www.bunkerweb.io"
-LABEL bunkerweb.type "bunkerweb"
-LABEL bunkerweb.INSTANCE "bunkerweb"
+LABEL maintainer="Bunkerity <contact@bunkerity.com>"
+LABEL version="1.5.8"
+LABEL url="https://www.bunkerweb.io"
+LABEL bunkerweb.type="bunkerweb"
+LABEL bunkerweb.INSTANCE="bunkerweb"
 
 EXPOSE 8080/tcp 8443/tcp 8443/udp
 
