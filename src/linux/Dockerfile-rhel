@@ -1,7 +1,7 @@
-FROM redhat/ubi8:8.10@sha256:143123d85045df426c5bbafc6863659880ebe276eb02c77ee868b88d08dbd05d as builder
+FROM redhat/ubi8:8.10@sha256:143123d85045df426c5bbafc6863659880ebe276eb02c77ee868b88d08dbd05d AS builder
 
 ENV OS=rhel
-ENV NGINX_VERSION 1.26.1
+ENV NGINX_VERSION=1.26.1
 
 # Copy rocky repo
 COPY src/linux/rocky-8.repo /etc/yum.repos.d/rocky.repo

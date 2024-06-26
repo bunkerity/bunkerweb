@@ -1,4 +1,4 @@
-FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c as builder
+FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -80,6 +80,6 @@ USER ui:ui
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-ui.sh
 
-ENV PYTHONPATH /usr/share/bunkerweb/deps/python
+ENV PYTHONPATH="/usr/share/bunkerweb/deps/python"
 
 CMD [ "python3", "-m", "gunicorn", "--config", "gunicorn.conf.py", "--user", "ui", "--group", "ui", "--bind", "0.0.0.0:7000" ]
