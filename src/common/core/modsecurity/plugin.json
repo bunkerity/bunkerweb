@@ -23,6 +23,15 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "USE_MODSECURITY_CRS_PLUGINS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable OWASP Core Rule Set plugins.",
+      "id": "use-modsecurity-crs-plugins",
+      "label": "Use Core Rule Set Plugins",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "MODSECURITY_CRS_VERSION": {
       "context": "multisite",
       "default": "4",
@@ -32,6 +41,15 @@
       "regex": "^(3|4|nightly)$",
       "type": "select",
       "select": ["3", "4", "nightly"]
+    },
+    "MODSECURITY_CRS_PLUGIN_URLS": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of OWASP CRS plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space). (Not compatible with CRS version 3)",
+      "id": "modsecurity-crs-plugin-urls",
+      "label": "Core Rule Set Plugin URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
     },
     "MODSECURITY_SEC_AUDIT_ENGINE": {
       "context": "multisite",
@@ -67,6 +85,12 @@
     {
       "name": "coreruleset-nightly",
       "file": "coreruleset-nightly.py",
+      "every": "day",
+      "reload": true
+    },
+    {
+      "name": "download-crs-plugins",
+      "file": "download-crs-plugins.py",
       "every": "day",
       "reload": true
     }

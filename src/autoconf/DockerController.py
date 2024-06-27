@@ -14,7 +14,7 @@ class DockerController(Controller):
     def __init__(self, docker_host):
         super().__init__("docker")
         self.__client = DockerClient(base_url=docker_host)
-        self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$")
+        self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_STREAM|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(.+)$")
 
     def _get_controller_instances(self) -> List[Container]:
         return self.__client.containers.list(filters={"label": "bunkerweb.INSTANCE"})

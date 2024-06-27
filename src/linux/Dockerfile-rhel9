@@ -92,7 +92,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod 755 /usr/bin/bwcli && \
   mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
   echo "Linux" > INTEGRATION && \
-  for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+  for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
   find . -path deps -prune -o -type f -exec chmod 0740 {} \; && \
   find . -path deps -prune -o -type d -exec chmod 0750 {} \; && \
   chmod 755 /var/log/bunkerweb && \

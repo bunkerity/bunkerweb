@@ -1181,7 +1181,18 @@ def services():
         operation = request.form["operation"]
         # Get all variables starting with custom_config and delete them from variables
         custom_configs = []
-        config_types = ("http", "stream", "server-http", "server-stream", "default-server-http", "modsec", "modsec-crs")
+        config_types = (
+            "http",
+            "stream",
+            "server-http",
+            "server-stream",
+            "default-server-http",
+            "default-server-stream",
+            "modsec",
+            "modsec-crs",
+            "crs-plugins-before",
+            "crs-plugins-after",
+        )
 
         for variable in variables:
             if variable.startswith("custom_config_"):

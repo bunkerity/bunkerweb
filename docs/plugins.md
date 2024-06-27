@@ -356,7 +356,7 @@ Each job has the following fields :
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec` and `modsec-crs`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](quickstart-guide.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 

@@ -65,7 +65,7 @@ class Templator:
             self.__render_template(template)
 
     def __render_server(self, server: str):
-        templates = self.__find_templates(["modsec", "modsec-crs", "server-http", "server-stream"])
+        templates = self.__find_templates(["modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after", "server-http", "server-stream"])
         if self.__config.get("MULTISITE", "no") == "yes":
             config = self.__config.copy()
             for variable, value in self.__config.items():

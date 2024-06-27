@@ -53,6 +53,8 @@ CUSTOM_CONFIGS_DIRS = (
     "default-server-stream",
     "modsec",
     "modsec-crs",
+    "crs-plugins-before",
+    "crs-plugins-after",
 )
 
 for custom_config_dir in CUSTOM_CONFIGS_DIRS:

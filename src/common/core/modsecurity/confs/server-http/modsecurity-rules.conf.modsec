@@ -1,4 +1,6 @@
-{% set os_path = import("os.path") %}
+{% set pathlib = import("pathlib") %}
+{% set json = import("json") %}
+{% set service_id = SERVER_NAME.split(" ")[0] %}
 # process rules with disruptive actions
 SecRuleEngine {{ MODSECURITY_SEC_RULE_ENGINE }}
 
@@ -65,32 +67,66 @@ SecAuditLogParts {{ MODSECURITY_SEC_AUDIT_LOG_PARTS }}
 SecAuditLogType Serial
 SecAuditLog /var/log/bunkerweb/modsec_audit.log
 
+{% if USE_MODSECURITY_CRS == "yes" +%}
 # include OWASP CRS configurations
-{% if USE_MODSECURITY_CRS == "yes" %}
-{% if MODSECURITY_CRS_VERSION == "nightly" %}
-{% if os_path.isfile("/var/cache/bunkerweb/modsecurity/crs/crs-setup-nightly.conf") %}
-include /var/cache/bunkerweb/modsecurity/crs/crs-setup-nightly.conf
-{% else %}
+     {% if MODSECURITY_CRS_VERSION == "nightly" %}
+          {% if pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/nightly/crs-setup-nightly.conf").is_file() %}
+include /var/cache/bunkerweb/modsecurity/crs/nightly/crs-setup-nightly.conf
+          {% else %}
 # fallback to the default CRS setup as the nightly one is not available
-include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v3.conf
-{% endif %}
-{% else %}
+include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v4.conf
+          {% endif %}
+     {% else %}
 include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v{{ MODSECURITY_CRS_VERSION }}.conf
-{% endif %}
+     {% endif %}
+
+     {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and MODSECURITY_CRS_VERSION != "3" %}
+# custom CRS plugins configurations before loading plugins
+          {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-before") %}
+include /etc/bunkerweb/configs/crs-plugins-before/*.conf
+          {% endif %}
+          {% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/crs-plugins-before/" + service_id) %}
+include /etc/bunkerweb/configs/crs-plugins-before/{{ service_id }}/*.conf
+          {% endif %}
+          {% if is_custom_conf("/etc/nginx/crs-plugins-before") %}
+include /etc/nginx/crs-plugins-before/*.conf
+          {% endif %}
+          {% if MULTISITE == "yes" and is_custom_conf("/etc/nginx/" + service_id + "/crs-plugins-before/") %}
+include /etc/nginx/{{ service_id }}/crs-plugins-before/*.conf
+          {% endif %}
+
+          {% with plugins_path = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/plugins") %}
+          {% with plugins_file = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs-plugins.json") %}
+          {% if plugins_path.is_dir() and plugins_file.is_file() %}
+               {% with service_plugins = json.loads(plugins_file.read_text()) %}
+# include downloaded CRS plugins configurations and before rules
+                    {% for plugin_id in service_plugins.get(service_id, []) %}
+                         {% if plugins_path.joinpath(plugin_id).is_dir() %}
+include /var/cache/bunkerweb/modsecurity/crs/plugins/{{ plugin_id }}/*-config.conf
+                              {% if plugins_path.joinpath(plugin_id).glob("*-before.conf") | list %}
+include /var/cache/bunkerweb/modsecurity/crs/plugins/{{ plugin_id }}/*-before.conf
+                              {% endif %}
+                         {% endif %}
+                    {% endfor %}
+               {% endwith %}
+          {% endif %}
+          {% endwith %}
+          {% endwith %}
+     {% endif %}
 
 # custom CRS configurations before loading rules (e.g. exclusions)
-{% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs") %}
+     {% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs") %}
 include /etc/bunkerweb/configs/modsec-crs/*.conf
-{% endif %}
-{% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/modsec-crs/" + SERVER_NAME.split(" ")[0]) %}
-include /etc/bunkerweb/configs/modsec-crs/{{ SERVER_NAME.split(" ")[0] }}/*.conf
-{% endif %}
-{% if is_custom_conf("/etc/nginx/modsec-crs") %}
+     {% endif %}
+     {% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/modsec-crs/" + service_id) %}
+include /etc/bunkerweb/configs/modsec-crs/{{ service_id }}/*.conf
+     {% endif %}
+     {% if is_custom_conf("/etc/nginx/modsec-crs") %}
 include /etc/nginx/modsec-crs/*.conf
-{% endif %}
-{% if MULTISITE == "yes" and is_custom_conf("/etc/nginx/" + SERVER_NAME.split(" ")[0] + "/modsec-crs/") %}
-include /etc/nginx/{{ SERVER_NAME.split(" ")[0] }}/modsec-crs/*.conf
-{% endif %}
+     {% endif %}
+     {% if MULTISITE == "yes" and is_custom_conf("/etc/nginx/" + service_id + "/modsec-crs/") %}
+include /etc/nginx/{{ service_id }}/modsec-crs/*.conf
+     {% endif %}
 
 # unset REASON env var
 SecAction "nolog,phase:1,setenv:REASON=none"
@@ -105,35 +141,66 @@ SecAction \
   setvar:'tx.allowed_methods={{ ALLOWED_METHODS.replace("|", " ") }}'"
 
 # Check if client is whitelisted
-{% if USE_WHITELIST == "yes" +%}
+     {% if USE_WHITELIST == "yes" +%}
 SecRule ENV:is_whitelisted "yes" "id:1000,phase:1,allow,nolog,ctl:ruleEngine=Off"
-{% endif +%}
+     {% endif +%}
 
 # include OWASP CRS rules
-{% if MODSECURITY_CRS_VERSION == "nightly" %}
-{% if os_path.exists("/var/cache/bunkerweb/modsecurity/crs/crs-nightly/rules") %}
-include /var/cache/bunkerweb/modsecurity/crs/crs-nightly/rules/*.conf
-{% else %}
+     {% if MODSECURITY_CRS_VERSION == "nightly" %}
+     {% if pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/nightly/crs-nightly/rules").is_dir() %}
+include /var/cache/bunkerweb/modsecurity/crs/nightly/crs-nightly/rules/*.conf
+     {% else %}
 # fallback to the default CRS setup as the nightly one is not available
-include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v3/rules/*.conf
-{% endif %}
-{% else %}
+include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v4/rules/*.conf
+     {% endif %}
+     {% else %}
 include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v{{ MODSECURITY_CRS_VERSION }}/rules/*.conf
-{% endif %}
+     {% endif %}
+
+     {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and MODSECURITY_CRS_VERSION != "3" %}
+# custom CRS plugins configurations after loading plugins
+          {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
+include /etc/bunkerweb/configs/crs-plugins-after/*.conf
+          {% endif %}
+          {% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after/" + service_id) %}
+include /etc/bunkerweb/configs/crs-plugins-after/{{ service_id }}/*.conf
+          {% endif %}
+          {% if is_custom_conf("/etc/nginx/crs-plugins-after") %}
+include /etc/nginx/crs-plugins-after/*.conf
+          {% endif %}
+          {% if MULTISITE == "yes" and is_custom_conf("/etc/nginx/" + service_id + "/crs-plugins-after/") %}
+include /etc/nginx/{{ service_id }}/crs-plugins-after/*.conf
+          {% endif %}
+
+          {% with plugins_path = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/plugins") %}
+          {% with plugins_file = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs-plugins.json") %}
+          {% if plugins_path.is_dir() and plugins_file.is_file() %}
+               {% with service_plugins = json.loads(plugins_file.read_text()) %}
+# include downloaded CRS plugins after rules
+                    {% for plugin_id in service_plugins.get(service_id, []) %}
+                         {% if plugins_path.joinpath(plugin_id).is_dir() and plugins_path.joinpath(plugin_id).glob("*-after.conf") | list %}
+include /var/cache/bunkerweb/modsecurity/crs/plugins/{{ plugin_id }}/*-after.conf
+                         {% endif %}
+                    {% endfor %}
+               {% endwith %}
+          {% endif %}
+          {% endwith %}
+          {% endwith %}
+     {% endif %}
 {% endif +%}
 
 # custom rules after loading the CRS
 {% if is_custom_conf("/etc/bunkerweb/configs/modsec") %}
 include /etc/bunkerweb/configs/modsec/*.conf
 {% endif %}
-{% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/modsec/" + SERVER_NAME.split(" ")[0]) %}
-include /etc/bunkerweb/configs/modsec/{{ SERVER_NAME.split(" ")[0] }}/*.conf
+{% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/modsec/" + service_id) %}
+include /etc/bunkerweb/configs/modsec/{{ service_id }}/*.conf
 {% endif %}
 {% if is_custom_conf("/etc/nginx/modsec") %}
 include /etc/nginx/modsec/*.conf
 {% endif %}
-{% if MULTISITE == "yes" and is_custom_conf("/etc/nginx/" + SERVER_NAME.split(" ")[0] + "/modsec") %}
-include /etc/nginx/{{ SERVER_NAME.split(" ")[0] }}/modsec/*.conf
+{% if MULTISITE == "yes" and is_custom_conf("/etc/nginx/" + service_id + "/modsec") %}
+include /etc/nginx/{{ service_id }}/modsec/*.conf
 {% endif %}
 
 

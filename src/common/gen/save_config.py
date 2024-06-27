@@ -19,7 +19,7 @@ from Configurator import Configurator
 from API import API  # type: ignore
 
 CUSTOM_CONF_RX = re_compile(
-    r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(?P<name>.+)$"
+    r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
 BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(http://)?(?P<hostname>(?<![:@])\b[^:@\s]+\b)(:(?P<port>\d+))?")
 

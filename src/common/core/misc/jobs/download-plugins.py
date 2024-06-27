@@ -215,7 +215,6 @@ except:
     status = 2
     LOGGER.error(f"Exception while running download-plugins.py :\n{format_exc()}")
 
-for plugin_tmp in TMP_DIR.glob("*"):
-    rmtree(plugin_tmp, ignore_errors=True)
+rmtree(TMP_DIR, ignore_errors=True)
 
 sys_exit(status)

@@ -54,7 +54,7 @@ function log() {
 # get only interesting env (var=value)
 function get_env() {
 for var_name in $(python3 -c 'import os ; [print(k) for k in os.environ]') ; do
-	filter=$(echo -n "$var_name" | sed -r 's/^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME|([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC|MODSEC_CRS)_(.*))$//g')
+	filter=$(echo -n "$var_name" | sed -r 's/^(HOSTNAME|PWD|PKG_RELEASE|NJS_VERSION|SHLVL|PATH|_|NGINX_VERSION|HOME|([0-9a-z\.\-]*)_?CUSTOM_CONF_(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(.*))$//g')
 	if [ "$filter" != "" ] ; then
         var_value=$(python3 -c "import os ; print(os.environ['${var_name}'])")
 		echo "${var_name}=${var_value}"

@@ -16,15 +16,7 @@ class Config:
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
         self.__instances = []
         self.__services = []
-        self._supported_config_types = [
-            "http",
-            "stream",
-            "server-http",
-            "server-stream",
-            "default-server-http",
-            "modsec",
-            "modsec-crs",
-        ]
+        self._supported_config_types = ("server-http", "server-stream", "modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after")
         self.__configs = {config_type: {} for config_type in self._supported_config_types}
         self.__config = {}
 
@@ -131,6 +123,10 @@ class Config:
         custom_configs = []
         if "custom_configs" in changes:
             for config_type in self.__configs:
+                if config_type not in self._supported_config_types:
+                    self.__logger.warning(f"Unsupported custom config type: {config_type}")
+                    continue
+
                 for file, data in self.__configs[config_type].items():
                     site = None
                     name = file

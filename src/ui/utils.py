@@ -58,15 +58,18 @@ def path_to_dict(
     services = services or []
 
     if not is_cache:
-        config_types = [
+        config_types = (
             "http",
             "stream",
             "server-http",
             "server-stream",
             "default-server-http",
+            "default-server-stream",
             "modsec",
             "modsec-crs",
-        ]
+            "crs-plugins-before",
+            "crs-plugins-after",
+        )
 
         d = {
             "name": "configs",

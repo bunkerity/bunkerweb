@@ -8,7 +8,7 @@ log "$service" "ℹ️" "Setup and check /data folder ..."
 
 # Create folders if missing and check permissions
 rwx_folders=("cache" "cache/letsencrypt" "lib")
-rx_folders=("pro" "pro/plugins" "configs" "configs/http" "configs/stream" "configs/server-http" "configs/server-stream" "configs/default-server-http" "configs/default-server-stream" "configs/modsec" "configs/modsec-crs" "plugins" "www")
+rx_folders=("pro" "pro/plugins" "configs" "configs/http" "configs/stream" "configs/server-http" "configs/server-stream" "configs/default-server-http" "configs/default-server-stream" "configs/modsec" "configs/modsec-crs" "configs/crs-plugins-before" "configs/crs-plugins-after" "plugins" "www")
 for folder in "${rwx_folders[@]}" ; do
 	if [ ! -d "/data/${folder}" ] ; then
 		mkdir -p "/data/${folder}"

@@ -22,12 +22,15 @@ METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual", name="methods_enum"
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "http",
-    "default_server_http",
+    "stream",
     "server_http",
+    "server_stream",
+    "default_server_http",
+    "default_server_stream",
     "modsec",
     "modsec_crs",
-    "stream",
-    "server_stream",
+    "crs_plugins_before",
+    "crs_plugins_after",
     name="custom_configs_types_enum",
 )
 INTEGRATIONS_ENUM = Enum(
