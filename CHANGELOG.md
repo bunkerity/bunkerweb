@@ -1,6 +1,12 @@
 # Changelog
 
-## v1.5.8 - ????/??/??
+## v1.5.9 - ????/??/??
+
+- [BUGFIX] Fix compatibility issues with mysql 8.4+ version and the `backup` plugin by adding the `mariadb-connector-c` dependency to the scheduler Dockerfile (on alpine)
+- [DEPS] Updated LuaJIT version to v2.1-20240626
+- [DEPS] Updated coreruleset-v4 version to v4.4.0
+
+## v1.5.8 - 2024/06/19
 
 - [LINUX] Support Fedora 40 and drop support of Fedora 39
 - [BUGFIX] Fix potential errors when upgrading from a previous version
