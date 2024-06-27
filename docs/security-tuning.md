@@ -310,6 +310,228 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
     8. Downloaded plugins rules **after CRS rules**
     9. Custom rules (`modsec`)
 
+## CrowdSec
+
+STREAM support :x:
+
+<figure markdown>
+  ![Overview](assets/img/crowdsec.svg){ align=center, width="600" }
+</figure>
+
+This BunkerWeb plugin acts as a [CrowdSec](https://crowdsec.net/) bouncer. It will deny requests based on the decision of your CrowdSec API. Not only you will benefinit from the crowdsourced blacklist, you can also configure [scenarios](https://docs.crowdsec.net/docs/concepts#scenarios) to automatically ban IPs based on suspicious behaviors.
+
+### Setup
+
+=== "Docker"
+    **Acquisition file**
+
+    You will need to run CrowdSec instance and configure it to parse BunkerWeb logs. Because BunkerWeb is based on NGINX, you can use the `nginx` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored "as is" without additional data) :
+
+    ```yaml
+    filenames:
+       - /var/log/bunkerweb.log
+    labels:
+        type: nginx
+    ```
+
+    **Syslog**
+
+    For container-based integrations, we recommend you to redirect the logs of the BunkerWeb container to a syslog service that will store the logs so CrowdSec can access it easily. Here is an example configuration for syslog-ng that will store raw logs coming from BunkerWeb to a local `/var/log/bunkerweb.log` file :
+
+    ```syslog
+    @version: 4.7
+
+    source s_net {
+        udp(
+            ip("0.0.0.0")
+        );
+    };
+
+    template t_imp {
+        template("$MSG\n");
+        template_escape(no);
+    };
+
+    destination d_file {
+        file("/var/log/bunkerweb.log" template(t_imp));
+    };
+
+    log {
+        source(s_net);
+        destination(d_file);
+    };
+    ```
+
+    **Optional : Application Security Component**
+
+    CrowdSec also provides an [Application Security Component](https://docs.crowdsec.net/docs/appsec/intro) that can be used to protect your application from attacks. You can configure the plugin to send requests to the AppSec Component for further analysis. If you want to use it, you will need to create another acquisition file for the AppSec Component :
+
+    ```yaml
+    appsec_config: crowdsecurity/appsec-default
+    labels:
+        type: appsec
+    listen_addr: 0.0.0.0:7422
+    source: appsec
+    ```
+
+    **Docker Compose**
+
+    Here is the docker-compose boilerplate that you can use (**don't forget to edit the bouncer key**) :
+
+    ```yaml
+    services:
+        bunkerweb:
+            image: bunkerity/bunkerweb:1.6.0-beta
+            ports:
+              - "80:8080"
+              - "443:8443"
+            environment:
+                API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+            restart: "unless-stopped"
+            networks:
+              - bw-universe
+              - bw-services
+              - bw-plugins
+            logging:
+                driver: syslog
+                options:
+                    syslog-address: "udp://10.10.10.254:514"
+
+        bw-scheduler:
+            image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+            depends_on:
+              - bunkerweb
+            environment:
+                BUNKERWEB_INSTANCES: "bunkerweb"
+                SERVER_NAME: "www.example.com"
+                API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+                USE_CROWDSEC: "yes"
+                CROWDSEC_API: "http://crowdsec:8080" # This is the API URL of the CrowdSec instance
+                CROWDSEC_APPSEC_URL: "http://crowdsec:7422" # This is the AppSec Component URL of the CrowdSec instance, comment if you don't want to use it
+                CROWDSEC_API_KEY: "s3cr3tb0unc3rk3y" # This is the API key of the Bouncer, we recommend have a more complex key
+            restart: "unless-stopped"
+            networks:
+              - bw-universe
+
+        crowdsec:
+            image: crowdsecurity/crowdsec:v1.6.2
+            volumes:
+              - cs-data:/var/lib/crowdsec/data
+              - ./acquis.yaml:/etc/crowdsec/acquis.yaml # This is the acquisition file for CrowdSec created above
+              - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # Comment if you don't want to use the AppSec Component
+              - bw-logs:/var/log:ro
+            environment:
+                BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # This is the API key of the Bouncer, we recommend have a more complex key (it must match the one configured)
+                COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+                #   COLLECTIONS: "crowdsecurity/nginx" # If you don't want to use the AppSec Component use this line instead
+            networks:
+              - bw-plugins
+
+        syslog:
+            image: balabit/syslog-ng:4.7.1 # For x86_64 architecture
+            # image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture
+            volumes:
+              - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file created above
+              - bw-logs:/var/log
+            networks:
+                bw-plugins:
+                    ipv4_address: 10.10.10.254
+
+    networks:
+        bw-services:
+            name: bw-services
+        bw-universe:
+            name: bw-universe
+            ipam:
+            driver: default
+            config:
+                - subnet: 10.20.30.0/24
+        bw-plugins:
+            ipam:
+            driver: default
+            config:
+                - subnet: 10.10.10.0/24
+
+    volumes:
+        bw-data:
+        bw-logs:
+        cs-data:
+    ```
+
+=== "Linux"
+
+    You'll need to install CrowdSec and configure it to parse BunkerWeb logs. To do so, you can follow the [official documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec).
+
+    For CrowdSec to parse BunkerWeb logs, you have to add the following lines to your acquisition file located in `/etc/crowdsec/acquis.yaml` :
+
+    ```yaml
+    filenames:
+      - /var/log/bunkerweb/access.log
+      - /var/log/bunkerweb/error.log
+      - /var/log/bunkerweb/modsec_audit.log
+    labels:
+        type: nginx
+    ```
+
+    Now we have to add our custom bouncer to the CrowdSec API. To do so, you can use the `cscli` tool :
+
+    ```shell
+    sudo cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6
+    ```
+
+    !!! warning "API key"
+        Keep the key generated by the `cscli` command, you will need it later.
+
+    Now restart the CrowdSec service :
+
+    ```shell
+    sudo systemctl restart crowdsec
+    ```
+
+    **Optional : Application Security Component with Linux**
+
+    If you want to use the AppSec Component, you will need to create another acquisition file for it located in `/etc/crowdsec/acquis.d/appsec.yaml` :
+
+    ```yaml
+    appsec_config: crowdsecurity/appsec-default
+    labels:
+        type: appsec
+    listen_addr: 127.0.0.1:7422
+    source: appsec
+    ```
+
+    And you will need to install the AppSec Component's collections :
+
+    ```shell
+    sudo cscli collections install crowdsecurity/appsec-virtual-patching
+    sudo cscli collections install crowdsecurity/appsec-generic-rules
+    ```
+
+    Now you just have to restart the CrowdSec service :
+
+    ```shell
+    sudo systemctl restart crowdsec
+    ```
+
+    If you need more information about the AppSec Component, you can refer to the [official documentation](https://docs.crowdsec.net/docs/appsec/intro).
+
+    **Settings**
+
+    Now you can configure the plugin by adding the following settings to your BunkerWeb configuration file :
+
+    ```env
+    USE_CROWDSEC=yes
+    CROWDSEC_API=http://127.0.0.1:8080
+    CROWDSEC_API_KEY=<The key provided by cscli>
+    CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 # Comment if you don't want to use the AppSec Component
+    ```
+
+    And finally reload the BunkerWeb service :
+
+    ```shell
+    sudo systemctl reload bunkerweb
+    ```
+
 ## Bad behavior
 
 STREAM support :white_check_mark:
