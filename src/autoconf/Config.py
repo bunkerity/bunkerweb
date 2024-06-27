@@ -16,7 +16,17 @@ class Config:
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
         self.__instances = []
         self.__services = []
-        self._supported_config_types = ("server-http", "server-stream", "modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after")
+        self._supported_config_types = (
+            "http",
+            "stream",
+            "server-http",
+            "server-stream",
+            "default-server-http",
+            "modsec",
+            "modsec-crs",
+            "crs-plugins-before",
+            "crs-plugins-after",
+        )
         self.__configs = {config_type: {} for config_type in self._supported_config_types}
         self.__config = {}
 
