@@ -34,13 +34,13 @@ LETS_ENCRYPT_LOGS_DIR = join(sep, "var", "log", "bunkerweb")
 try:
     # Check if we're using let's encrypt
     use_letsencrypt = False
-    if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
-        use_letsencrypt = True
-    elif getenv("MULTISITE", "no") == "yes":
+    if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
             if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
                 break
+    elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
+        use_letsencrypt = True
 
     if not use_letsencrypt:
         LOGGER.info("Let's Encrypt is not activated, skipping renew...")
