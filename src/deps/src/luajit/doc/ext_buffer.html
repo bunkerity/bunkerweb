@@ -85,7 +85,7 @@ operations.
 </p>
 <p>
 The string buffer library also includes a high-performance
-<a href="serialize">serializer</a> for Lua objects.
+<a href="#serialize">serializer</a> for Lua objects.
 </p>
 
 <h2 id="use">Using the String Buffer Library</h2>
@@ -588,9 +588,9 @@ num       → 0x07 double.L
 tab       → 0x08                                   // Empty table
           | 0x09 h.U h*{object object}          // Key/value hash
           | 0x0a a.U a*object                    // 0-based array
-          | 0x0b a.U a*object h.U h*{object object}      // Mixed
+          | 0x0b a.U h.U a*object h*{object object}      // Mixed
           | 0x0c a.U (a-1)*object                // 1-based array
-          | 0x0d a.U (a-1)*object h.U h*{object object}  // Mixed
+          | 0x0d a.U h.U (a-1)*object h*{object object}  // Mixed
 tab_mt    → 0x0e (index-1).U tab          // Metatable dict entry
 
 int64     → 0x10 int.L                             // FFI int64_t

@@ -13,7 +13,7 @@ TREDEF(STACKOV,	"trace too deep")
 TREDEF(SNAPOV,	"too many snapshots")
 TREDEF(BLACKL,	"blacklisted")
 TREDEF(RETRY,	"retry recording")
-TREDEF(NYIBC,	"NYI: bytecode %d")
+TREDEF(NYIBC,	"NYI: bytecode %s")
 
 /* Recording loop ops. */
 TREDEF(LLEAVE,	"leaving loop in root trace")

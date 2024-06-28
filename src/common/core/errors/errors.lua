@@ -89,16 +89,30 @@ function errors:render_template(code)
 	local nonce_script = rand(16)
 	local nonce_style = rand(16)
 
-	-- Override headers
-	local header = "Content-Security-Policy"
-	if self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes" then
-		header = header .. "-Report-Only"
-	end
-	ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
+	-- Override CSP header
+	--luacheck: ignore 631
+	ngx.header["Content-Security-Policy"] = "default-src 'none'; script-src http: https: 'unsafe-inline' 'strict-dynamic' 'nonce-"
 		.. nonce_script
-		.. "' 'unsafe-inline' http: https:; img-src 'self' data:; style-src 'self' 'nonce-"
+		.. "'; style-src 'nonce-"
 		.. nonce_style
-		.. "'; font-src 'self' data:; base-uri 'self'; require-trusted-types-for 'script';"
+		--luacheck: ignore 631
+		.. "'; frame-ancestors 'none'; base-uri 'none'; img-src 'self' data:; font-src 'self' data:; require-trusted-types-for 'script';"
+
+	-- Remove server header
+	ngx.header["Server"] = nil
+
+	-- Override HSTS header
+	local ssl
+
+	if self.ctx.bw and self.ctx.bw.scheme == "https" then
+		ssl = true
+	else
+		ssl = ngx.var.scheme == "https"
+	end
+
+	if ssl then
+		ngx.header["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+	end
 
 	-- Render template
 	render("error.html", {

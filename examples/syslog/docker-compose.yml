@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.8
+    image: bunkerity/bunkerweb:1.5.9
     logging:
       driver: syslog
       options:
@@ -28,7 +28,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.8
+    image: bunkerity/bunkerweb-scheduler:1.5.9
     logging:
       driver: syslog
       options:

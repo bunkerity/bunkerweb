@@ -1,4 +1,4 @@
-FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c as builder
+FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -64,10 +64,10 @@ RUN apk add --no-cache bash && \
 RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
 RUN apk add --no-cache "libcrypto3>=3.1.5-r0" "libssl3>=3.1.5-r0" # CVE-2024-4603
 
-LABEL maintainer "Bunkerity <contact@bunkerity.com>"
-LABEL version "1.5.8"
-LABEL url "https://www.bunkerweb.io"
-LABEL bunkerweb.type "autoconf"
+LABEL maintainer="Bunkerity <contact@bunkerity.com>"
+LABEL version="1.5.9"
+LABEL url="https://www.bunkerweb.io"
+LABEL bunkerweb.type="autoconf"
 
 VOLUME /data
 

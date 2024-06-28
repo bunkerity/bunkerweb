@@ -1,4 +1,4 @@
-FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c as builder
+FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -46,7 +46,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-client postgresql-client sqlite && \
+RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
   cp helpers/bwcli /usr/bin/ && \
@@ -71,10 +71,10 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunker
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
 
-LABEL maintainer "Bunkerity <contact@bunkerity.com>"
-LABEL version "1.5.8"
-LABEL url "https://www.bunkerweb.io"
-LABEL bunkerweb.type "scheduler"
+LABEL maintainer="Bunkerity <contact@bunkerity.com>"
+LABEL version="1.5.9"
+LABEL url="https://www.bunkerweb.io"
+LABEL bunkerweb.type="scheduler"
 
 VOLUME /data
 
