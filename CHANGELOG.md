@@ -3,6 +3,7 @@
 ## v1.5.9 - ????/??/??
 
 - [BUGFIX] Fix compatibility issues with mysql 8.4+ version and the `backup` plugin by adding the `mariadb-connector-c` dependency to the scheduler Dockerfile (on alpine)
+- [SECURITY] Update security headers in default pages and error pages for improved security
 - [DEPS] Updated LuaJIT version to v2.1-20240626
 - [DEPS] Updated coreruleset-v4 version to v4.4.0
 
