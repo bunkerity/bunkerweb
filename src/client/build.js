@@ -2,12 +2,62 @@ const { execSync } = require("child_process");
 const { resolve } = require("path");
 const fs = require("fs");
 
+const frontDir = "/vite";
 const clientBuildDir = "static";
 const setupBuildDir = "setup/output";
+const appStaticDir = "../ui/static";
+const appTempDir = "../ui/templates";
+
+async function moveFile(src, dest) {
+  fs.renameSync(src, dest, (err) => {
+    if (err) {
+      return console.error(err);
+    }
+  });
+}
+
+async function createDir(dir) {
+  fs.promises
+    .access(dir, fs.constants.F_OK)
+    .then(() => true)
+    .catch(() =>
+      fs.mkdir(dir, (err) => {
+        if (err) {
+          return console.error(err);
+        }
+      })
+    );
+}
+
+async function deleteDir(dir) {
+  fs.rm(
+    dir,
+    {
+      recursive: true,
+    },
+    (error) => {
+      if (error) {
+        console.log(error);
+      } else {
+      }
+    }
+  );
+}
+
+async function copyDir(src, dest) {
+  fs.cpSync(src, dest, { recursive: true }, (err) => {
+    /* callback */
+  });
+}
+
+async function copyFile(src, dest) {
+  fs.copyFileSync(src, dest, { recursive: true }, (err) => {
+    /* callback */
+  });
+}
 
 // Run subprocess command on specific dir
-function runCommand(dir, command) {
-  let isErr = false;
+async function runCommand(dir, command) {
   try {
     execSync(
       command,
@@ -16,118 +66,94 @@ function runCommand(dir, command) {
         console.log(stdout);
         console.log(stderr);
         if (err !== null) {
-          isErr = true;
           console.log(`exec error: ${err}`);
         }
       }
     );
   } catch (err) {
-    isErr = true;
+    console.log(err);
   }
-
-  return isErr;
 }
 
 // Install deps and build vite (work for client and setup)
-function buildVite(dir) {
-  let isErr = false;
+async function buildVite(dir) {
   // Install packages
-  isErr = runCommand(dir, "npm install");
-  if (isErr) return isErr;
-  // Build vite
-  isErr = runCommand(dir, "npm run build");
-  return isErr;
+  await runCommand(dir, "npm install");
+  await runCommand(dir, "npm run build");
 }
 
 // Change dir structure for flask app
-function updateClientDir() {
-  let isErr = false;
+async function updateClientDir() {
   const srcDir = resolve(`./${clientBuildDir}/src/pages`);
-  const destDir = resolve(`./${clientBuildDir}/templates`);
   const dirToRem = resolve(`./${clientBuildDir}/src`);
+  const staticTemp = resolve(`./${clientBuildDir}/templates`);
 
   try {
-    // Change dir position for html
-    fs.cpSync(srcDir, destDir, {
-      force: true,
-      recursive: true,
-    });
+    const changeDirHtml = await copyDir(srcDir, staticTemp);
     // Remove prev dir
-    fs.rmSync(dirToRem, { recursive: true, force: true });
-    // Change templates/page/index.html by templates/{page_name}.html
-    // And move from static to templates
-    const templateDir = resolve(`./${clientBuildDir}/templates`);
-
+    const removePrevDir = await deleteDir(dirToRem);
     // Create template dir if not exist
-    if (!fs.existsSync(resolve("./templates"))) {
-      fs.mkdirSync(resolve("./templates"));
-    }
-
-    fs.readdir(templateDir, (err, subdirs) => {
-      subdirs.forEach((subdir) => {
-        // Get absolute path of current subdir
-        const currPath = resolve(`./${clientBuildDir}/templates/${subdir}`);
-        // Rename index.html by subdir name
-        fs.renameSync(`${currPath}/index.html`, `${currPath}/${subdir}.html`);
-        // Copy file to move it from /template/page to /template
-        fs.copyFileSync(
-          `${currPath}/${subdir}.html`,
-          resolve(`./templates/${subdir}.html`)
-        );
-      });
-    });
-    // Delete useless dir
-    fs.rmSync(currPath, { recursive: true, force: true });
-    fs.rmSync(`./${clientBuildDir}/templates/`, {
-      recursive: true,
-      force: true,
-    });
+    const createTemp = await createDir("./templates");
+    // Change output templates
+    const changeOutputTemp = await changeOutputTemplates();
+    const removeTemp = await deleteDir(staticTemp);
   } catch (err) {
-    isErr = true;
+    console.log(err);
   }
-  return isErr;
 }
 
-function setFlaskData() {
+async function changeOutputTemplates() {
+  const templateDir = resolve(`./${clientBuildDir}/templates`);
+  console.log(templateDir);
+  fs.readdir(templateDir, async (err, subdirs) => {
+    subdirs.forEach(async (subdir) => {
+      // Get absolute path of current subdir
+      const currPath = resolve(`./${clientBuildDir}/templates/${subdir}`);
+      // Rename index.html by subdir name
+      await moveFile(
+        `${currPath}/index.html`,
+        resolve(`./templates/${subdir}.html`)
+      );
+    });
+  });
+}
+
+async function setFlaskData() {
   // Run all files in /templates and get data
   fs.readdir(resolve("./templates"), (err, files) => {
     // Read content
     files.forEach((file) => {
-      let updateData = "";
-      const data = fs.readFileSync(resolve(`./templates/${file}`), {
-        encoding: "utf8",
-        flag: "r",
-      });
-      try {
-        // match every attribute starting with data- and ending with a ' or a "
-        const matches = data.match(/data-[^"']+["']/g);
-        // remove content between <body> and </body>
-        updateData = data.replace(/<body>[\s\S]*<\/body>/g, "");
-        // get the <body> index to insert the new content
-        const bodyIndex = data.indexOf("<body>");
+      const data = fs.readFile(
+        resolve(`./templates/${file}`),
+        {
+          encoding: "utf8",
+          flag: "r",
+        },
+        (err, data) => {
+          if (err) {
+            console.log(err);
+          }
+          let updateData = "";
+          // remove everything after <body> tag
+          const bodyIndex = data.indexOf("<body>");
+          // Add attributs
 
-        let attributs = "";
-        matches.forEach((match) => {
-          const matchFormat = match.replace('="', "").replace("='", "");
-          attributs += `<div class="hidden" ${matchFormat}={{${matchFormat.replaceAll(
-            "-",
-            "_"
-          )}}}></div>\n`;
-        });
-        // insert the new content
-        updateData =
-          data.slice(0, bodyIndex) +
-          `\n<body>\n` +
-          `<div class="hidden" data-csrf-token={{ csrf_token() }}></div>\n` +
-          attributs +
-          `<div id="app"></div>\n</body>\n</html>`;
-      } catch (e) {
-        console.log(e);
-        updateData = "";
-      }
-      // Write the new content to the file
-      if (updateData)
-        fs.writeFileSync(resolve(`./templates/${file}`), updateData, "utf8");
+          const attributs = `<body>
+                        <div class="hidden" data-csrf-token={{ csrf_token() }}></div>\n
+                        <div class="hidden" data-server-global={{data_server_global}}></div>\n
+                        <div class="hidden" data-server-flash={{data_server_flash}}></div>\n
+                        <div class="hidden" data-server-builder={{data_server_builder}}></div>\n
+                        <div id="app"></div>\n</body>\n</html>`;
+          // insert the new content
+          updateData = updateData = data.substring(0, bodyIndex) + attributs;
+          fs.writeFile(
+            `${appTempDir}/${file}`,
+            updateData,
+            "utf8",
+            (err) => {}
+          );
+        }
+      );
     });
   });
 }
@@ -147,14 +173,39 @@ function setSetup() {
   return isErr;
 }
 
-// Build client and setup
-const buildClientErr = buildVite("/client");
-if (buildClientErr)
-  console.log("Error while building client. Impossible to continue.");
-// Change client dir structure
-const isUpdateDirErr = updateClientDir();
-if (isUpdateDirErr)
-  console.log(
-    "Error while changing client dir structure. Impossible to continue."
-  );
-const setFlskData = setFlaskData();
+async function moveDir() {
+  // move build static subdir to app ui static dir
+  const srcDir = resolve(`./static`);
+  const destDir = resolve(appStaticDir);
+  fs.readdir(srcDir, (err, dirs) => {
+    dirs.forEach((dir) => {
+      fs.rmSync(`${destDir}/${dir}`, { recursive: true }, (err) => {
+        if (err) {
+          console.log(err);
+        }
+      });
+      fs.renameSync(
+        `${srcDir}/${dir}`,
+        `${destDir}/${dir}`,
+        { recursive: true },
+        (err) => {
+          if (err) {
+            console.log(err);
+          }
+        }
+      );
+    });
+  });
+}
+
+async function build() {
+  // Build client and setup
+  const build = await buildVite(frontDir);
+  // Change client dir structure
+  const update = await updateClientDir();
+
+  const setFlskData = await setFlaskData();
+  const moveDirs = await moveDir();
+}
+
+build();

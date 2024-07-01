@@ -228,13 +228,12 @@ function formatMd() {
 // And delete output folder
 function moveMd() {
 
-fs.rename(`./output/${finalFile}`, `./${finalFile}`, function (err) {
-  if (err) throw err
-  console.log('Successfully renamed - AKA moved!')
-})
+  fs.rename(`./output/${finalFile}`, `./${finalFile}`, function (err) {
+    if (err) throw err
+  })
 
-// Delete output folder
-fs.rmdirSync(ouputFolder, { recursive: true });
+  // Delete output folder
+  fs.rmdirSync(ouputFolder, { recursive: true });
 
 }
 

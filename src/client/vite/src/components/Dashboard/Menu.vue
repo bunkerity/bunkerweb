@@ -3,8 +3,8 @@ import Icons from "@components/Widget/Icons.vue";
 import { reactive, onMounted, onBeforeMount } from "vue";
 import { menuIndex, menuFloatIndex } from "@/utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
-import logoMenu2 from "@public/images/logo-menu-2.png";
-import logoMenu from "@public/images/logo-menu.png";
+import logoMenu2 from "@public/img/logo-menu-2.png";
+import logoMenu from "@public/img/logo-menu.png";
 
 /** 
   @name Dashboard/Menu.vue

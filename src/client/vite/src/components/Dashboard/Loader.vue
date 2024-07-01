@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
-import logoMenu2 from "@public/images/logo-menu-2.png";
+import logoMenu2 from "@public/img/logo-menu-2.png";
 
 /**
   @name Dashboard/Loader.vue
