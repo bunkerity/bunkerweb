@@ -16,43 +16,25 @@ async function moveFile(src, dest) {
   });
 }
 
-async function createDir(dir) {
-  fs.promises
-    .access(dir, fs.constants.F_OK)
-    .then(() => true)
-    .catch(() =>
-      fs.mkdir(dir, (err) => {
-        if (err) {
-          return console.error(err);
-        }
-      })
-    );
+async function createDirIfNotExists(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
 }
 
-async function deleteDir(dir) {
-  fs.rm(
-    dir,
-    {
-      recursive: true,
-    },
-    (error) => {
-      if (error) {
-        console.log(error);
-      } else {
-      }
+async function delElRecursive(path) {
+  fs.rmSync(path, { recursive: true }, (err) => {
+    if (err) {
+      console.log(err);
     }
-  );
+  });
 }
 
 async function copyDir(src, dest) {
   fs.cpSync(src, dest, { recursive: true }, (err) => {
-    /* callback */
-  });
-}
-
-async function copyFile(src, dest) {
-  fs.copyFileSync(src, dest, { recursive: true }, (err) => {
-    /* callback */
+    if (err) {
+      console.log(err);
+    }
   });
 }
 
@@ -76,10 +58,10 @@ async function runCommand(dir, command) {
 }
 
 // Install deps and build vite (work for client and setup)
-async function buildVite(dir) {
+async function buildVite() {
   // Install packages
-  await runCommand(dir, "npm install");
-  await runCommand(dir, "npm run build");
+  await runCommand(frontDir, "npm install");
+  await runCommand(frontDir, "npm run build");
 }
 
 // Change dir structure for flask app
@@ -89,14 +71,10 @@ async function updateClientDir() {
   const staticTemp = resolve(`./${clientBuildDir}/templates`);
 
   try {
-    const changeDirHtml = await copyDir(srcDir, staticTemp);
-    // Remove prev dir
-    const removePrevDir = await deleteDir(dirToRem);
-    // Create template dir if not exist
-    const createTemp = await createDir("./templates");
-    // Change output templates
-    const changeOutputTemp = await changeOutputTemplates();
-    const removeTemp = await deleteDir(staticTemp);
+    await copyDir(srcDir, staticTemp);
+    await delElRecursive(dirToRem);
+    await createDirIfNotExists("./templates");
+    await changeOutputTemplates();
   } catch (err) {
     console.log(err);
   }
@@ -104,21 +82,17 @@ async function updateClientDir() {
 
 async function changeOutputTemplates() {
   const templateDir = resolve(`./${clientBuildDir}/templates`);
-  console.log(templateDir);
-  fs.readdir(templateDir, async (err, subdirs) => {
-    subdirs.forEach(async (subdir) => {
+  fs.readdir(templateDir, (err, subdirs) => {
+    subdirs.forEach((subdir) => {
       // Get absolute path of current subdir
       const currPath = resolve(`./${clientBuildDir}/templates/${subdir}`);
       // Rename index.html by subdir name
-      await moveFile(
-        `${currPath}/index.html`,
-        resolve(`./templates/${subdir}.html`)
-      );
+      moveFile(`${currPath}/index.html`, `./templates/${subdir}.html`);
     });
   });
 }
 
-async function setFlaskData() {
+async function setBuildTempToUI() {
   // Run all files in /templates and get data
   fs.readdir(resolve("./templates"), (err, files) => {
     // Read content
@@ -146,7 +120,7 @@ async function setFlaskData() {
                         <div id="app"></div>\n</body>\n</html>`;
           // insert the new content
           updateData = updateData = data.substring(0, bodyIndex) + attributs;
-          fs.writeFile(
+          fs.writeFileSync(
             `${appTempDir}/${file}`,
             updateData,
             "utf8",
@@ -158,54 +132,24 @@ async function setFlaskData() {
   });
 }
 
-// SETUP : rename and move to /static as html file
-function setSetup() {
-  let isErr = false;
-  const srcDir = resolve(`./${setupBuildDir}`);
-  const destDir = resolve(`./${clientBuildDir}`);
-
-  try {
-    // Copy file from src to dest
-    fs.copyFileSync(`${srcDir}/index.html`, `${destDir}/setup.html`);
-  } catch (err) {
-    isErr = true;
-  }
-  return isErr;
-}
-
-async function moveDir() {
+async function moveBuildStaticToUI() {
   // move build static subdir to app ui static dir
   const srcDir = resolve(`./static`);
   const destDir = resolve(appStaticDir);
   fs.readdir(srcDir, (err, dirs) => {
-    dirs.forEach((dir) => {
-      fs.rmSync(`${destDir}/${dir}`, { recursive: true }, (err) => {
-        if (err) {
-          console.log(err);
-        }
-      });
-      fs.renameSync(
-        `${srcDir}/${dir}`,
-        `${destDir}/${dir}`,
-        { recursive: true },
-        (err) => {
-          if (err) {
-            console.log(err);
-          }
-        }
-      );
+    dirs.forEach(async (dir) => {
+      // Delete prev existing dir
+      await copyDir(`${srcDir}/${dir}`, `${destDir}/${dir}`);
     });
   });
 }
 
 async function build() {
   // Build client and setup
-  const build = await buildVite(frontDir);
-  // Change client dir structure
-  const update = await updateClientDir();
-
-  const setFlskData = await setFlaskData();
-  const moveDirs = await moveDir();
+  await buildVite();
+  await updateClientDir();
+  await setBuildTempToUI();
+  await moveBuildStaticToUI();
 }
 
 build();
