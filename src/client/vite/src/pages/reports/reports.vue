@@ -1,0 +1,618 @@
+<script setup>
+import { reactive, onBeforeMount, onMounted } from "vue";
+import DashboardLayout from "@components/Dashboard/Layout.vue";
+import BuilderReports from "@components/Builder/Reports.vue";
+import { useGlobal } from "@utils/global.js";
+import { useForm } from "@utils/form.js";
+
+/**
+  @name Page/Reports.vue
+  @description This component is the report page.
+  This page displays global information about reports, and allow to delete or upload some reports.
+*/
+
+const reports = reactive({
+  builder: "",
+});
+
+onBeforeMount(() => {
+  // Get builder data
+  const dataAtt = "data-server-builder";
+  const dataEl = document.querySelector(`[${dataAtt}]`);
+  const data =
+    dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
+      ? JSON.parse(dataEl.getAttribute(dataAtt))
+      : {};
+  reports.builder = data;
+});
+
+onMounted(() => {
+  useGlobal();
+  useForm();
+});
+
+const builder = [
+  {
+    type: "card",
+    containerColumns: {
+      pc: 4,
+      tablet: 6,
+      mobile: 12,
+    },
+    widgets: [
+      {
+        type: "Title",
+        data: {
+          title: "dashboard_details",
+        },
+      },
+      {
+        type: "ListPairs",
+        data: {
+          pairs: [
+            {
+              key: "reports_total",
+              value: "200",
+            },
+            {
+              key: "reports_top_status",
+              value: "400",
+            },
+            {
+              key: "reports_top_reason",
+              value: "antibot",
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    type: "card",
+    containerColumns: {
+      pc: 12,
+      tablet: 12,
+      mobile: 12,
+    },
+    widgets: [
+      {
+        type: "Title",
+        data: {
+          title: "reports_title",
+        },
+      },
+      {
+        type: "Table",
+        data: {
+          title: "reports_table_title",
+          minWidth: "xl",
+          header: [
+            "reports_table_date",
+            "reports_table_ip",
+            "reports_table_country",
+            "reports_table_method",
+            "reports_table_url",
+            "reports_table_status_code",
+            "reports_table_cache_user_agent",
+            "reports_table_reason",
+            "reports_table_data",
+          ],
+          positions: [1, 1, 1, 1, 2, 1, 2, 1, 2],
+          items: [
+            [
+              {
+                date: "25/06/2024 07:40:23",
+                type: "Text",
+                data: {
+                  text: "25/06/2024 07:40:23",
+                },
+              },
+              {
+                ip: "172.21.0.1",
+                type: "Text",
+                data: {
+                  text: "172.21.0.1",
+                },
+              },
+              {
+                country: "local",
+                type: "Text",
+                data: {
+                  text: "local",
+                },
+              },
+              {
+                method: "GET",
+                type: "Text",
+                data: {
+                  text: "GET",
+                },
+              },
+              {
+                url: "/admin/login?id=etc/passwd",
+                type: "Text",
+                data: {
+                  text: "/admin/login?id=etc/passwd",
+                },
+              },
+              {
+                code: "403",
+                type: "Text",
+                data: {
+                  text: "403",
+                },
+              },
+              {
+                user_agent:
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                type: "Text",
+                data: {
+                  text: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                },
+              },
+              {
+                reason: "modsecurity",
+                type: "Text",
+                data: {
+                  text: "modsecurity",
+                },
+              },
+              {
+                raw_data:
+                  '{"fesfesfsefesfesfesfesfesfesfesfesfesfsefes": "fesfs"}',
+                type: "Text",
+                data: {
+                  text: '{"fesfesfsefesfesfesfesfesfesfesfesfesfsefes": "fesfs"}',
+                },
+              },
+            ],
+            [
+              {
+                date: "25/06/2024 07:40:23",
+                type: "Text",
+                data: {
+                  text: "25/06/2024 07:40:23",
+                },
+              },
+              {
+                ip: "111111",
+                type: "Text",
+                data: {
+                  text: "111111",
+                },
+              },
+              {
+                country: "fr",
+                type: "Text",
+                data: {
+                  text: "fr",
+                },
+              },
+              {
+                method: "POST",
+                type: "Text",
+                data: {
+                  text: "POST",
+                },
+              },
+              {
+                url: "/admin/login?id=e",
+                type: "Text",
+                data: {
+                  text: "/admin/login?id=e",
+                },
+              },
+              {
+                code: "403",
+                type: "Text",
+                data: {
+                  text: "403",
+                },
+              },
+              {
+                user_agent:
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                type: "Text",
+                data: {
+                  text: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                },
+              },
+              {
+                reason: " antibot",
+                type: "Text",
+                data: {
+                  text: " antibot",
+                },
+              },
+              {
+                raw_data: "{}",
+                type: "Text",
+                data: {
+                  text: "{}",
+                },
+              },
+            ],
+            [
+              {
+                date: "25/06/2024 07:40:23",
+                type: "Text",
+                data: {
+                  text: "25/06/2024 07:40:23",
+                },
+              },
+              {
+                ip: "111111",
+                type: "Text",
+                data: {
+                  text: "111111",
+                },
+              },
+              {
+                country: "fr",
+                type: "Text",
+                data: {
+                  text: "fr",
+                },
+              },
+              {
+                method: "POST",
+                type: "Text",
+                data: {
+                  text: "POST",
+                },
+              },
+              {
+                url: "/admin/login?id=e",
+                type: "Text",
+                data: {
+                  text: "/admin/login?id=e",
+                },
+              },
+              {
+                code: "403",
+                type: "Text",
+                data: {
+                  text: "403",
+                },
+              },
+              {
+                user_agent:
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                type: "Text",
+                data: {
+                  text: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                },
+              },
+              {
+                reason: " antibot",
+                type: "Text",
+                data: {
+                  text: " antibot",
+                },
+              },
+              {
+                raw_data: "{}",
+                type: "Text",
+                data: {
+                  text: "{}",
+                },
+              },
+            ],
+            [
+              {
+                date: "25/06/2024 07:40:23",
+                type: "Text",
+                data: {
+                  text: "25/06/2024 07:40:23",
+                },
+              },
+              {
+                ip: "111111",
+                type: "Text",
+                data: {
+                  text: "111111",
+                },
+              },
+              {
+                country: "fr",
+                type: "Text",
+                data: {
+                  text: "fr",
+                },
+              },
+              {
+                method: "POST",
+                type: "Text",
+                data: {
+                  text: "POST",
+                },
+              },
+              {
+                url: "/admin/login?id=e",
+                type: "Text",
+                data: {
+                  text: "/admin/login?id=e",
+                },
+              },
+              {
+                code: "403",
+                type: "Text",
+                data: {
+                  text: "403",
+                },
+              },
+              {
+                user_agent:
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                type: "Text",
+                data: {
+                  text: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                },
+              },
+              {
+                reason: " antibot",
+                type: "Text",
+                data: {
+                  text: " antibot",
+                },
+              },
+              {
+                raw_data: "{}",
+                type: "Text",
+                data: {
+                  text: "{}",
+                },
+              },
+            ],
+            [
+              {
+                date: "25/06/2024 07:40:23",
+                type: "Text",
+                data: {
+                  text: "25/06/2024 07:40:23",
+                },
+              },
+              {
+                ip: "111111",
+                type: "Text",
+                data: {
+                  text: "111111",
+                },
+              },
+              {
+                country: "fr",
+                type: "Text",
+                data: {
+                  text: "fr",
+                },
+              },
+              {
+                method: "POST",
+                type: "Text",
+                data: {
+                  text: "POST",
+                },
+              },
+              {
+                url: "/admin/login?id=e",
+                type: "Text",
+                data: {
+                  text: "/admin/login?id=e",
+                },
+              },
+              {
+                code: "403",
+                type: "Text",
+                data: {
+                  text: "403",
+                },
+              },
+              {
+                user_agent:
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                type: "Text",
+                data: {
+                  text: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                },
+              },
+              {
+                reason: " antibot",
+                type: "Text",
+                data: {
+                  text: " antibot",
+                },
+              },
+              {
+                raw_data: "{}",
+                type: "Text",
+                data: {
+                  text: "{}",
+                },
+              },
+            ],
+            [
+              {
+                date: "25/06/2024 07:40:23",
+                type: "Text",
+                data: {
+                  text: "25/06/2024 07:40:23",
+                },
+              },
+              {
+                ip: "111111",
+                type: "Text",
+                data: {
+                  text: "111111",
+                },
+              },
+              {
+                country: "fr",
+                type: "Text",
+                data: {
+                  text: "fr",
+                },
+              },
+              {
+                method: "POST",
+                type: "Text",
+                data: {
+                  text: "POST",
+                },
+              },
+              {
+                url: "/admin/login?id=e",
+                type: "Text",
+                data: {
+                  text: "/admin/login?id=e",
+                },
+              },
+              {
+                code: "403",
+                type: "Text",
+                data: {
+                  text: "403",
+                },
+              },
+              {
+                user_agent:
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                type: "Text",
+                data: {
+                  text: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                },
+              },
+              {
+                reason: " antibot",
+                type: "Text",
+                data: {
+                  text: " antibot",
+                },
+              },
+              {
+                raw_data: "{}",
+                type: "Text",
+                data: {
+                  text: "{}",
+                },
+              },
+            ],
+          ],
+          filters: [
+            {
+              filter: "table",
+              filterName: "keyword",
+              type: "keyword",
+              value: "",
+              keys: ["url", "ip", "date", "user_agent", "raw_data"],
+              field: {
+                id: "reports-keyword",
+                value: "",
+                type: "text",
+                name: "reports-keyword",
+                label: "reports_search",
+                placeholder: "inp_keyword",
+                isClipboard: false,
+                popovers: [
+                  {
+                    text: "reports_search_desc",
+                    iconName: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+            {
+              filter: "table",
+              filterName: "country",
+              type: "select",
+              value: "all",
+              keys: ["country"],
+              field: {
+                id: "reports-country",
+                value: "all",
+                values: ["all", "local", "fr"],
+                name: "reports-country",
+                onlyDown: true,
+                label: "reports_country",
+                popovers: [
+                  {
+                    text: "reports_country_desc",
+                    iconName: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+            {
+              filter: "table",
+              filterName: "method",
+              type: "select",
+              value: "all",
+              keys: ["method"],
+              field: {
+                id: "reports-method",
+                value: "all",
+                values: ["all", "GET", "POST"],
+                name: "reports-method",
+                onlyDown: true,
+                label: "reports_method",
+                popovers: [
+                  {
+                    text: "reports_method_desc",
+                    iconName: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+            {
+              filter: "table",
+              filterName: "reason",
+              type: "select",
+              value: "all",
+              keys: ["reason"],
+              field: {
+                id: "reports-reason",
+                value: "all",
+                values: ["all", "modsecurity", " antibot"],
+                name: "reports-reason",
+                onlyDown: true,
+                label: "reports_reason",
+                popovers: [
+                  {
+                    text: "reports_reason_desc",
+                    iconName: "info",
+                  },
+                ],
+                columns: {
+                  pc: 3,
+                  tablet: 4,
+                  mobile: 12,
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+];
+</script>
+
+<template>
+  <DashboardLayout>
+    <BuilderReports v-if="builder" :builder="builder" />
+  </DashboardLayout>
+</template>

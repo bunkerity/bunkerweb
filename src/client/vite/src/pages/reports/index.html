@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/flag-icons.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BunkerWeb | Reports</title>
+  </head>
+  <body>
+    <div class="hidden" data-server-global='{"username" : "admin"}'></div>
+    <div class="hidden"
+         data-server-flash='[{"type" : "success", "title" : "title", "message" : "Success feedback"}, {"type" : "error", "title" : "title", "message" : "Error feedback"}, {"type" : "warning", "title" : "title", "message" : "Warning feedback"}, {"type" : "info", "title" : "title", "message" : "Info feedback"}]'>
+    </div>
+    <div class="hidden"
+         data-server-builder='[{"type":"card","containerColumns":{"pc":6,"tablet":6,"mobile":12},"widgets":[{"type":"Instance","data":{"details":[{"key":"instances_hostname","value":"bunkerweb"},{"key":"instances_type","value":"manual"},{"key":"instances_status","value":"instances_active"}],"status":"success","title":"bunkerweb","buttons":[{"attrs":{"data-form-INSTANCE_ID":"bunkerweb","data-form-operation":"reload","data-submit-form":"true"},"text":"action_reload","color":"warning","size":"normal"},{"attrs":{"data-form-INSTANCE_ID":"bunkerweb","data-form-operation":"stop","data-submit-form":"true"},"text":"action_stop","color":"error","size":"normal"}]}}]}]'>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="reports.js"></script>
+  </body>
+</html>
