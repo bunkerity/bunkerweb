@@ -16,8 +16,6 @@
   @apply focus:outline-4 focus:outline-secondary focus:outline-offset-4;
 }
 
-
-
 .ace_editor,
 .ace_editor * {
   font-family: "Monaco", "Menlo", "Ubuntu Mono", "Droid Sans Mono", "Consolas",
@@ -303,7 +301,6 @@ body {
   disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
-
 .input-regular {
   @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-200 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full  appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500     disabled:cursor-not-allowed
   disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
@@ -362,7 +359,7 @@ body {
 }
 
 .copied.input-clipboard-button {
-  @apply focus:ring-0 opacity-100;    
+  @apply focus:ring-0 opacity-100;
 }
 
 .not-copied.input-clipboard-button {
@@ -502,9 +499,8 @@ body {
 }
 
 .layout-modal {
-  @apply relative min-w-[300px] sm:min-w-[450px] max-w-screen-xl max-h-[80vh] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out  px-6 py-4 overflow-hidden break-words grid grid-cols-12; 
+  @apply relative min-w-[300px] sm:min-w-[450px] max-w-screen-xl max-h-[80vh] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out  px-6 py-4 overflow-hidden break-words grid grid-cols-12;
 }
-
 
 .layout-modal-button-container {
   @apply absolute right-4 top-4 z-[30];
@@ -537,7 +533,6 @@ body {
 
 .msg-unmatch-table {
   @apply fixed col-span-12 flex mx-2 my-8 w-full;
-
 }
 
 /* POPOVER */
@@ -690,8 +685,6 @@ body {
   @apply !transition-none !fixed !opacity-100  z-10;
 }
 /* MENU */
-
-
 
 .menu-account-title-container {
   @apply mt-2 w-full px-1;
@@ -856,7 +849,6 @@ body {
 .menu-mode-label {
   @apply dark:text-gray-200 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700;
 }
-
 
 .menu-social-list {
   @apply mb-3 flex justify-center align-middle w-full;
@@ -1140,7 +1132,7 @@ body {
 
 .list-details-item {
   @apply z-0 px-3 py-2 min-h-12 h-fit relative flex justify-between items-center transition rounded;
- }
+}
 
 .pending.list-details-item {
   @apply z-20;
@@ -1149,12 +1141,12 @@ body {
 .up.list-details-item {
   @apply z-10;
 }
- 
-.enabled.list-details-item  {
+
+.enabled.list-details-item {
   @apply bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-800;
 }
 
-.disabled.list-details-item  {
+.disabled.list-details-item {
   @apply cursor-not-allowed bg-gray-300 dark:bg-gray-800;
 }
 
@@ -1168,8 +1160,11 @@ body {
 
 /* TITLE */
 
-
 .title-card {
+  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
+}
+
+.title-instance {
   @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
 }
 
@@ -1197,11 +1192,11 @@ body {
   @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
 }
 
-.no-subtitle.title-modal { 
+.no-subtitle.title-modal {
   @apply mb-6;
 }
 
-.no-subtitle.title-container { 
+.no-subtitle.title-container {
   @apply mb-2.5;
 }
 
@@ -1209,12 +1204,11 @@ body {
 .no-subtitle.title-void,
 .no-subtitle.title-content,
 .no-subtitle.title-min,
-.no-subtitle.title-form { 
+.no-subtitle.title-form {
   @apply mb-2;
 }
 
-
-.no-subtitle.title-stat { 
+.no-subtitle.title-stat {
   @apply mb-0;
 }
 
@@ -1290,10 +1284,7 @@ body {
   @apply col-span-12 w-full;
 }
 
-
-
 /* CARD */
-
 
 .card-info-text {
   @apply col-span-12 mb-0 leading-normal text-sm text-gray-700 dark:text-gray-500 ml-2 mr-1.5;
@@ -1332,7 +1323,6 @@ body {
 .btn {
   @apply flex justify-center items-end leading-none tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
-
 
 .btn.close:not([disabled]) {
   @apply bg-white text-red-500 border border-red-500 hover:border-red-500/80 focus:border-red-500/80 hover:text-red-500/80 focus:text-red-500/80;
@@ -1731,7 +1721,7 @@ body {
 .text-el {
 }
 
-.success.text-el{
+.success.text-el {
   @apply text-green-500;
 }
 
@@ -1771,7 +1761,7 @@ body {
   @apply text-yellow-500;
 }
 
-.gray.text-el{
+.gray.text-el {
   @apply text-gray-500;
 }
 
@@ -1795,11 +1785,11 @@ body {
   @apply text-indigo-500;
 }
 
-.cyan.text-el{
+.cyan.text-el {
   @apply text-cyan-500;
 }
 
-.sky.text-el{
+.sky.text-el {
   @apply text-sky-500;
 }
 
@@ -1884,7 +1874,7 @@ body {
   @apply bg-green-500;
 }
 
-.error.bg-el{
+.error.bg-el {
   @apply bg-red-500;
 }
 
@@ -1892,7 +1882,7 @@ body {
   @apply bg-yellow-500;
 }
 
-.info.bg-el{
+.info.bg-el {
   @apply bg-sky-500;
 }
 
@@ -1956,7 +1946,7 @@ body {
   @apply bg-pink-500;
 }
 
-.lime.bg-el{
+.lime.bg-el {
   @apply bg-lime-500;
 }
 
@@ -1984,7 +1974,7 @@ body {
   @apply bg-yellow-600;
 }
 
-.gray-darker.bg-el{
+.gray-darker.bg-el {
   @apply bg-gray-600;
 }
 
@@ -2037,7 +2027,7 @@ body {
   @apply fill-green-500;
 }
 
-.error.fill{
+.error.fill {
   @apply fill-red-500;
 }
 
@@ -2061,7 +2051,7 @@ body {
   @apply fill-green-500;
 }
 
-.red.fill{
+.red.fill {
   @apply fill-red-500;
 }
 
@@ -2082,7 +2072,7 @@ body {
 }
 
 .dark.fill {
-  @apply fill-slate-500 ;
+  @apply fill-slate-500;
 }
 
 .amber.fill {
@@ -2149,7 +2139,7 @@ body {
   @apply fill-orange-600;
 }
 
-.blue-darker.fill{
+.blue-darker.fill {
   @apply fill-blue-600 dark:fill-blue-500;
 }
 
@@ -2161,8 +2151,7 @@ body {
   @apply fill-gray-600;
 }
 
-.dark-darker.fill
- {
+.dark-darker.fill {
   @apply fill-slate-600  dark:fill-slate-500;
 }
 
@@ -2170,8 +2159,7 @@ body {
   @apply fill-amber-600;
 }
 
-.emerald-darker.fill
- {
+.emerald-darker.fill {
   @apply fill-emerald-600;
 }
 
@@ -2601,8 +2589,6 @@ body {
 .z-80 {
   @apply z-[80];
 }
-
-
 
 @keyframes dropOpen {
   from {
