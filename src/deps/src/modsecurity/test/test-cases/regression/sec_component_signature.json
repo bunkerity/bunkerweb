@@ -1,0 +1,53 @@
+[  
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"SecComponentSignature",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "www.modsecurity.org",
+        "User-Agent": "Mozilla\/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko\/20091102 Firefox\/3.5.5 (.NET CLR 3.5.30729)",
+        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept-Language": "en-us,en;q=0.5",
+        "Accept-Encoding": "gzip,deflate",
+        "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+        "Keep-Alive": "300",
+        "Connection": "keep-alive",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache"
+      },
+      "uri": "\/test.pl?param1=   test   &param2=test2",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "plain\/text\n\r"
+      },
+      "body": [
+        "test"
+      ]
+    },
+    "expected":{  
+      "audit_log":"",
+      "debug_log":".*",
+      "error_log":"",
+      "http_code": 403
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecComponentSignature \"OWASP_CRS/2.2.9\"",
+      "SecRule ARGS \"@contains test\" \"id:1,t:trim,deny,status:403,auditlog\""
+    ]
+  }
+]

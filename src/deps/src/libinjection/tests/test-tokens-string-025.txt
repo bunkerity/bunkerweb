@@ -1,0 +1,7 @@
+--TEST--
+pgsql $-quoted strings, open with $$, close with $EOF
+--INPUT--
+$$FOO$
+--EXPECTED--
+s $FOO$
+

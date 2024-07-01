@@ -1,0 +1,32 @@
+name: Create ARM node (REUSABLE)
+
+on:
+  workflow_call:
+    secrets:
+      SCW_ACCESS_KEY:
+        required: true
+      SCW_SECRET_KEY:
+        required: true
+      SCW_DEFAULT_PROJECT_ID:
+        required: true
+      SCW_DEFAULT_ORGANIZATION_ID:
+        required: true
+      ARM_ID:
+        required: true
+
+jobs:
+  rm:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Delete ARM VM
+        uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
+        with:
+          args: instance server delete ${{ secrets.ARM_ID }} zone=fr-par-2 with-ip=true with-volumes=all force-shutdown=true
+          access-key: ${{ secrets.SCW_ACCESS_KEY }}
+          secret-key: ${{ secrets.SCW_SECRET_KEY }}
+          default-project-id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+          default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}

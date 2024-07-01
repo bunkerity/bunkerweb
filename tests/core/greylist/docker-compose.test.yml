@@ -1,0 +1,54 @@
+version: "3.5"
+
+services:
+  local-tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      GLOBAL: "0"
+      USE_GREYLIST: "no"
+      GREYLIST_IP: ""
+      GREYLIST_IP_URLS: ""
+      GREYLIST_RDNS_GLOBAL: "yes"
+      GREYLIST_RDNS: ""
+      GREYLIST_RDNS_URLS: ""
+      GREYLIST_ASN: ""
+      GREYLIST_ASN_URLS: ""
+      GREYLIST_USER_AGENT: ""
+      GREYLIST_USER_AGENT_URLS: ""
+      GREYLIST_URI: ""
+      GREYLIST_URI_URLS: ""
+    extra_hosts:
+      - "www.example.com:192.168.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.3
+
+  global-tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      GLOBAL: "1"
+      USE_GREYLIST: "no"
+      GREYLIST_IP: ""
+      GREYLIST_IP_URLS: ""
+      GREYLIST_RDNS_GLOBAL: "yes"
+      GREYLIST_RDNS: ""
+      GREYLIST_RDNS_URLS: ""
+      GREYLIST_ASN: ""
+      GREYLIST_ASN_URLS: ""
+      GREYLIST_USER_AGENT: ""
+      GREYLIST_USER_AGENT_URLS: ""
+      GREYLIST_URI: ""
+      GREYLIST_URI_URLS: ""
+    extra_hosts:
+      - "www.example.com:1.0.0.2"
+    networks:
+      bw-global-network:
+        ipv4_address: 1.0.0.3
+
+networks:
+  bw-services:
+    external: true
+  bw-global-network:
+    external: true

@@ -1,0 +1,16 @@
+version: "3.5"
+
+services:
+  bw-db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=secret
+    networks:
+      - bw-docker
+
+networks:
+  bw-docker:
+    external: true

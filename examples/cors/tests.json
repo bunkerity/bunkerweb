@@ -1,0 +1,26 @@
+{
+  "name": "cors",
+  "kinds": ["docker", "autoconf", "linux"],
+  "timeout": 120,
+  "delay": 120,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://app1.example.com",
+      "string": "app1",
+      "tls": "app1.example.com"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com",
+      "string": "app2",
+      "tls": "app2.example.com"
+    },
+    {
+      "type": "string",
+      "url": "https://app3.example.com",
+      "string": "app3",
+      "tls": "app3.example.com"
+    }
+  ]
+}

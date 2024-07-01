@@ -1,0 +1,2 @@
+Include test-cases/data/config_example2.txt
+SecRule ARGS "@contains config_example" ops "id:1000,pass,t:trim"

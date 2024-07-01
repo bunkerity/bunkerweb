@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+    {% set attribute_name = "instances" %}
+    {% if instances|length == 0 %}
+        <div class="col-span-12 sm:col-span-4 sm:col-start-5">
+            <div class="text-center relative w-full p-4 text-white bg-blue-500 rounded-lg">No instance to show</div>
+        </div>
+    {% else %}
+        {% for instances_batched in instances|batch(2) %}
+            {% for instance in
+                instances_batched %}
+                <!-- instance card -->
+                <div class="overflow-hidden max-h-none sm:max-h- hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:brightness-110 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+                    <form class="w-full" id="form-instance-{{ instance._id }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" name="INSTANCE_ID" value="{{ instance._id }}" />
+                        <!-- state and title-->
+                        <div class="flex justify-start items-start overflow-hidden">
+                            {% if instance.health %}<div class="min-w-4 mr-2 mt-2 h-4 w-4 rounded-full bg-green-500"></div>{% endif %}
+                            {% if not instance.health %}<div class="min-w-4 mr-2 mt-2 h-4 w-4 rounded-full bg-red-500"></div>{% endif %}
+                            <h5 class="break-words font-bold dark:text-white/90 transition duration-300 ease-in-out">{{ instance.name }}</h5>
+                        </div>
+                        <!-- end state and title-->
+                        <!-- detail list -->
+                        <div role="grid" class="card-detail-container">
+                            {% set instance_details = [{"name" : "TYPE", "value" : instance['_type']},{"name" : "HOSTNAME", "value" : instance['hostname']}] %}
+                            <!-- detail -->
+                            {% for detail in instance_details %}
+                                <div role="row" class="card-detail-item">
+                                    <p role="gridcell" class="card-detail-item-title">{{ detail['name'] }}</p>
+                                    <p role="gridcell" class="card-detail-item-subtitle">{{ detail['value'] }}</p>
+                                </div>
+                            {% endfor %}
+                            <!-- end detail -->
+                        </div>
+                        <!-- end detail list-->
+                        <!-- button list-->
+                        <div class="relative w-full flex justify-center sm:justify-end">
+                            {% if instance._type == "local" and instance.health %}
+                                <button type="submit"
+                                        name="operation"
+                                        value="restart"
+                                        class="edit-btn mx-1 text-xs">Restart</button>
+                                <button type="submit"
+                                        name="operation"
+                                        value="stop"
+                                        class="delete-btn mx-1 text-xs">Stop</button>
+                            {% endif %}
+                            {% if not instance._type == "local" and instance.health %}
+                                <button type="submit"
+                                        name="operation"
+                                        value="reload"
+                                        class="edit-btn mx-1 text-xs">Reload</button>
+                                <button type="submit"
+                                        name="operation"
+                                        value="stop"
+                                        class="delete-btn mx-1 text-xs">Stop</button>
+                            {% endif %}
+                            {% if instance._type == "local" and not instance.health or not
+                                instance._type == "local" and not instance.health %}
+                                <button type="submit"
+                                        name="operation"
+                                        value="start"
+                                        class="valid-btn mx-1 text-xs">Start</button>
+                            {% endif %}
+                        </div>
+                        <!-- end button list-->
+                    </form>
+                </div>
+                <!-- end instance card -->
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+{% endblock content %}

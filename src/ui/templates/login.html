@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+{% block content %}
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+            <title>BunkerWeb UI | Log in</title>
+            <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
+            <link rel="stylesheet" href="css/dashboard.css" />
+            <script src="js/lottie-web.min.js" defer></script>
+        </head>
+        <body>
+            <div data-loader
+                 class="fixed z-[10000] transition duration-300 h-screen w-screen bg-primary flex justify-center align-middle items-center">
+                <img data-loader-img
+                     src="images/logo-menu-2.png"
+                     class="duration-300 w-40 h-12 sm:w-50 sm:h-14 md:w-60 md:h-16 lg:w-80 lg:h-24 inline transition-all"
+                     alt="main logo" />
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if
+                    messages %}
+                    <!-- flash message-->
+                    {% for category, message in messages %}
+                        <div role="alert"
+                             aria-description="login message alert"
+                             data-flash-message
+                             class="p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border">
+                            <button data-close-flash-message
+                                    role="close alert message"
+                                    class="absolute right-7 top-1.5">
+                                <svg class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-5 w-5"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 320 512">
+                                    <path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z">
+                                    </path>
+                                </svg>
+                            </button>
+                            {% if category == 'error' or (message|safe).startswith("Please log in") %}
+                                <h5 class="text-lg mb-0 text-red-500">Error</h5>
+                                <p class="text-gray-700 dark:text-gray-300 mb-0 text-sm">{{ message|safe }}</p>
+                            {% else %}
+                                <h5 class="text-lg mb-0 text-green-500">Success</h5>
+                                <p class="text-gray-700 dark:text-gray-300 mb-0 text-sm">{{ message|safe }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <!-- end flash message-->
+                {% endif %}
+            {% endwith %}
+            <!-- end flash message-->
+            <!--content -->
+            <main class="grid grid-cols-2 align-middle items-center min-h-screen">
+                <!--form -->
+                <div class="mx-4 lg:mx-0 col-span-2 lg:col-span-1 bg-none lg:bg-gray-50 h-full flex flex-col items-center justify-center">
+                    <div class="bg-gray-50 rounded px-8 sm:px-12 py-16 w-full max-w-[400px]">
+                        <div class="flex justify-center">
+                            <img class="lg:hidden w-full max-w-60 max-h-30 mb-6"
+                                 src="images/BUNKERWEB-print-hd.png"
+                                 alt="logo" />
+                        </div>
+                        <h1 class="hidden lg:block text-center font-bold dark:text-white mb-8">Log in</h1>
+                        <form action="login" method="POST" autocomplete="off">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden"
+                                   name="next"
+                                   value="{{ request.values.get('next', '') }}" />
+                            <!-- username inpt-->
+                            <div class="flex flex-col relative col-span-12 my-3">
+                                <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300">
+                                    Username
+                                </h5>
+                                <label class="sr-only" for="username">username</label>
+                                <input type="text"
+                                       id="username"
+                                       name="username"
+                                       class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                       placeholder="enter username"
+                                       pattern="(.*?)"
+                                       required />
+                            </div>
+                            <!-- end username inpt-->
+                            <!-- password inpt-->
+                            <div class="flex flex-col relative col-span-12 my-3">
+                                <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300">
+                                    Password
+                                </h5>
+                                <label class="sr-only" for="password">password</label>
+                                <input type="password"
+                                       id="password"
+                                       name="password"
+                                       class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                       placeholder="enter password"
+                                       pattern="(.*?)"
+                                       required />
+                            </div>
+                            <!-- end password inpt-->
+                            <!-- totp -->
+                            <div class="flex justify-center">
+                                <button type="submit"
+                                        id="login"
+                                        name="login"
+                                        value="login"
+                                        class="my-4 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                                    Log in
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- end form -->
+                <!-- particles -->
+                <div class="-z-10 fixed lg:relative lg:col-span-1 bg-primary w-full h-full">
+                    <div id="lottie-particles"
+                         data-lottie="/lotties/PARTICLES.json"
+                         class="absolute top-0 left-0 w-full h-full login-img [&>*]:bg-primary"></div>
+                    <div class="h-full w-full hidden relative lg:flex items-center justify-center">
+                        <img class="max-w-60 max-h-30"
+                             src="images/BUNKERWEB-print-hd-blanc.png"
+                             alt="logo" />
+                    </div>
+                </div>
+            </main>
+            <!-- end particles -->
+            <!-- end content -->
+            <script nonce="{{ script_nonce }}">
+      class Loader {
+        constructor() {
+          this.menuContainer = document.querySelector("[data-menu-container]");
+          this.logoContainer = document.querySelector("[data-loader]");
+          this.logoEl = document.querySelector("[data-loader-img]");
+          this.isLoading = true;
+          this.init();
+        }
+
+        init() {
+          this.loading();
+          window.addEventListener("load", (e) => {
+            setTimeout(() => {
+              this.logoContainer.classList.add("opacity-0");
+            }, 350);
+
+            setTimeout(() => {
+              this.isLoading = false;
+              this.logoContainer.classList.add("hidden");
+            }, 650);
+
+            setTimeout(() => {
+              this.logoContainer.remove();
+            }, 800);
+          });
+        }
+
+        loading() {
+          if ((this.isLoading = true)) {
+            setTimeout(() => {
+              this.logoEl.classList.toggle("scale-105");
+              this.loading();
+            }, 300);
+          }
+        }
+      }
+
+      class FlashMsg {
+        constructor() {
+          this.delayBeforeRemove = 8000;
+          this.init();
+        }
+
+        //remove flash message after this.delay if exist
+        init() {
+          window.addEventListener("DOMContentLoaded", () => {
+            try {
+              const flashEl = document.querySelector("[data-flash-message]");
+              setTimeout(() => {
+                try {
+                  flashEl.remove();
+                } catch (err) {}
+              }, this.delayBeforeRemove);
+            } catch (err) {}
+          });
+
+          window.addEventListener("click", (e) => {
+            try {
+              if (
+                e.target
+                  .closest("button")
+                  .hasAttribute("data-close-flash-message")
+              ) {
+                const closeBtn = e.target.closest("button");
+                const flashEl = closeBtn.closest("[data-flash-message]");
+                flashEl.remove();
+              }
+            } catch (err) {}
+          });
+        }
+      }
+
+      const setLoader = new Loader();
+      const setFlash = new FlashMsg();
+
+      window.addEventListener("load", () => {
+        lottie.loadAnimation({
+          container: document.querySelector("#lottie-particles"), // the dom element that will contain the animation
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: "json/particles.json" // the path to the animation json
+          });
+      });
+            </script>
+        </body>
+    </html>
+{% endblock content %}

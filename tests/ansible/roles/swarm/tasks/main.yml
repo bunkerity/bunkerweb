@@ -1,0 +1,89 @@
+---
+- name: Install pip
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+
+- name: Upgrade pip3
+  pip:
+    name: pip
+    state: latest
+    executable: pip3
+
+- name: Install dockerpy for py3
+  pip:
+    name: docker
+    state: forcereinstall
+    executable: pip3
+    version: "7.1.0"
+
+- name: Install requests for py3
+  pip:
+    name: requests
+    state: forcereinstall
+    executable: pip3
+    version: "2.31.0"
+
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: ".*{{ item }}$"
+    line: "{{ hostvars[item].local_ip }} {{item}}"
+    state: present
+  when: hostvars[item].local_ip is defined
+  with_items: "{{ groups.all }}"
+
+- name: Init Docker Swarm
+  community.docker.docker_swarm:
+    advertise_addr: "{{ local_ip }}"
+    listen_addr: "{{ local_ip }}"
+    state: present
+  register: result
+  when: inventory_hostname == groups['managers'][0]
+
+- name: Get join-token for manager nodes
+  set_fact:
+    join_token_manager: "{{ hostvars[groups['managers'][0]].result.swarm_facts.JoinTokens.Manager }}"
+
+- name: Get join-token for worker nodes
+  set_fact:
+    join_token_worker: "{{ hostvars[groups['managers'][0]].result.swarm_facts.JoinTokens.Worker }}"
+
+- name: Join Swarm as managers
+  community.docker.docker_swarm:
+    advertise_addr: "{{ local_ip }}"
+    listen_addr: "{{ local_ip }}"
+    ssl_version: "1.3"
+    validate_certs: yes
+    state: join
+    join_token: "{{ join_token_manager }}"
+    remote_addrs: ["{{ hostvars[groups['managers'][0]].local_ip }}:2377"]
+  when:
+    - inventory_hostname in groups['managers']
+    - inventory_hostname != groups['managers'][0]
+
+- name: Join Swarm as workers
+  community.docker.docker_swarm:
+    advertise_addr: "{{ local_ip }}"
+    listen_addr: "{{ local_ip }}"
+    state: join
+    join_token: "{{ join_token_worker }}"
+    remote_addrs: ["{{ hostvars[groups['managers'][0]].local_ip }}:2377"]
+  when: inventory_hostname in groups['workers']
+
+- name: Update daemon.json
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Reload docker
+  service:
+    name: docker
+    enabled: true
+    state: restarted

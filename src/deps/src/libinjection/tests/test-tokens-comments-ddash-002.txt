@@ -1,0 +1,8 @@
+--TEST--
+Variables
+--INPUT--
+SELECT 1 --sp_password
+--EXPECTED--
+E SELECT
+1 1
+c --sp_password

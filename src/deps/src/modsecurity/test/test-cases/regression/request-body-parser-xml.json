@@ -1,0 +1,252 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser (validate ok)",
+    "expected":{
+      "debug_log": "XML: Successfully validated payload against Schema:"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "    <soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"",
+        "       xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\"",
+        "       xmlns:tns=\"http://www.bluebank.example.com/axis/getBalance.jws\"",
+        "       xmlns:types=\"http://www.bluebank.example.com/axis/getBalance.jws/encodedTypes\"",
+        "       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"",
+        "       xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">",
+        "    <soap:Body soap:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">",
+        "       <q1:getInput xmlns:q1=\"http://DefaultNamespace\">",
+        "           <id xsi:type=\"xsd:string\">12123</id>",
+        "       </q1:getInput>",
+        "    </soap:Body>",
+        "</soap:Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500005,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateSchema test-cases/data/SoapEnvelope.xsd\" \"id:500007,phase:3,deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser (validate attribute value failed)",
+    "expected":{
+      "debug_log": "'badval' is not a valid value of the local atomic type",
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "    <soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"",
+        "        xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\"",
+        "        xmlns:tns=\"http://www.bluebank.example.com/axis/getBalance.jws\"",
+        "        xmlns:types=\"http://www.bluebank.example.com/axis/getBalance.jws/encodedTypes\"",
+        "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"",
+        "        xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">",
+        "        <soap:Body soap:mustUnderstand=\"badval\" soap:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">",
+        "            <q1:getInput xmlns:q1=\"http://DefaultNamespace\">",
+        "                <id xsi:type=\"xsd:string\">12123</id>",
+        "            </q1:getInput>",
+        "        </soap:Body>",
+        "    </soap:Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500008,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateSchema test-cases/data/SoapEnvelope.xsd\" \"id:500007,phase:3,deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser (validate failed)",
+    "expected":{
+      "debug_log": "This element is not expected. Expected is one of",
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "    <soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"",
+        "        xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\"",
+        "        xmlns:tns=\"http://www.bluebank.example.com/axis/getBalance.jws\"",
+        "        xmlns:types=\"http://www.bluebank.example.com/axis/getBalance.jws/encodedTypes\"",
+        "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"",
+        "        xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">",
+        "        <soap:xBody soap:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">",
+        "            <q1:getInput xmlns:q1=\"http://DefaultNamespace\">",
+        "                <id xsi:type=\"xsd:string\">12123</id>",
+        "            </q1:getInput>",
+        "        </soap:xBody>",
+        "    </soap:Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500008,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateSchema test-cases/data/SoapEnvelope.xsd\" \"id:500007,phase:3,deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser (bad XML)",
+    "expected":{
+      "debug_log": "XML Error: Element '{http://schemas.xmlsoap.org/soap/envelope/}xBody'",
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+            "    <soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"",
+            "        xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\"",
+            "        xmlns:tns=\"http://www.bluebank.example.com/axis/getBalance.jws\"",
+            "        xmlns:types=\"http://www.bluebank.example.com/axis/getBalance.jws/encodedTypes\"",
+            "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"",
+            "        xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">",
+            "        <soap:xBody soap:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">",
+            "            <q1:getInput xmlns:q1=\"http://DefaultNamespace\">",
+            "                <id xsi:type=\"xsd:string\">12123</id>",
+            "            </q1:getInput>",
+            "        </soap:xBody>",
+            "    </soap:Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500008,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateSchema test-cases/data/SoapEnvelope.xsd\" \"id:500007,phase:3,deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser (bad schema)",
+    "expected":{
+      "debug_log": "XML: Failed to load Schema: test-cases/data/SoapEnvelope-bad.xsd. XML Error: Failed to parse the XML resource 'test-cases/data/SoapEnvelope-bad.xsd",
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "    <soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"",
+        "        xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\"",
+        "        xmlns:tns=\"http://www.bluebank.example.com/axis/getBalance.jws\"",
+        "        xmlns:types=\"http://www.bluebank.example.com/axis/getBalance.jws/encodedTypes\"",
+        "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"",
+        "        xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">",
+        "    <soap:Body soap:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">",
+        "        <q1:getInput xmlns:q1=\"http://DefaultNamespace\">",
+        "            <id xsi:type=\"xsd:string\">12123</id>",
+        "        </q1:getInput>",
+        "    </soap:Body>",
+        "</soap:Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500008,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateSchema test-cases/data/SoapEnvelope-bad.xsd\" \"id:500007,phase:3,deny\""
+    ]
+  }
+]
+

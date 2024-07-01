@@ -1,0 +1,86 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing SecArgumentLimit not over limit (1/1)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Content-Type":"application/json"
+      },
+      "uri":"/?foo=bar",
+      "method":"POST",
+      "body": [
+        "{",
+        "       \"k1\":\"v1\",",
+        "       \"k2\":\"v2\",",
+        "       \"k3\":\"v3\",",
+        "       \"k4\":\"v4\",",
+        "       \"k5\":\"v5\"",
+        "}"
+      ]
+    },
+    "expected":{
+      "debug_log": " Running action deny",
+      "http_code":403
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecArgumentsLimit 6",
+      "SecRule REQUEST_HEADERS:Content-Type \"^application/json\" \"id:'200001',phase:1,t:none,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:'200002', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}'\"",
+      "SecRule ARGS:/k5/ \"@rx v5\" \"id:'1234',phase:2,deny,status:403,t:none,log,auditlog\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing SecArgumentLimit over limit (2/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Content-Type":"application/json"
+      },
+      "uri":"/?foo=bar",
+      "method":"POST",
+      "body": [
+        "{",
+        "       \"k1\":\"v1\",",
+        "       \"k2\":\"v2\",",
+        "       \"k3\":\"v3\",",
+        "       \"k4\":\"v4\",",
+        "       \"k5\":\"v5\"",
+        "}"
+      ]
+    },
+    "expected":{
+      "debug_log": "Skipping request argument, over limit",
+      "http_code":400
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecArgumentsLimit 5",
+      "SecRule REQUEST_HEADERS:Content-Type \"^application/json\" \"id:'200001',phase:1,t:none,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:'200002', phase:2,t:none,log,deny,status:400,msg:'Failed to parse request body.',logdata:'%{reqbody_error_msg}'\"",
+      "SecRule ARGS:/k5/ \"@rx v5\" \"id:'1234',phase:2,deny,status:403,t:none,log,auditlog\""
+    ]
+  }
+]

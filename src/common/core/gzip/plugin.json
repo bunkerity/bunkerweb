@@ -1,0 +1,55 @@
+{
+  "id": "gzip",
+  "name": "Gzip",
+  "description": "Compress HTTP requests with the gzip algorithm.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_GZIP": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Use gzip",
+      "id": "use-gzip",
+      "label": "Use gzip",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "GZIP_TYPES": {
+      "context": "multisite",
+      "default": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
+      "help": "List of MIME types that will be compressed with gzip.",
+      "id": "gzip-types",
+      "label": "MIME types",
+      "regex": "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
+      "type": "text"
+    },
+    "GZIP_MIN_LENGTH": {
+      "context": "multisite",
+      "default": "1000",
+      "help": "Minimum length for gzip compression.",
+      "id": "gzip-min-length",
+      "label": "Minimum length",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
+    "GZIP_COMP_LEVEL": {
+      "context": "multisite",
+      "default": "5",
+      "help": "The compression level of the gzip algorithm.",
+      "id": "gzip-comp-level",
+      "label": "Compression level",
+      "regex": "^[1-9]$",
+      "type": "select",
+      "select": ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    },
+    "GZIP_PROXIED": {
+      "context": "multisite",
+      "default": "no-cache no-store private expired auth",
+      "help": "Which kind of proxied requests we should compress.",
+      "id": "gzip-proxied",
+      "label": "Proxied requests",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  }
+}

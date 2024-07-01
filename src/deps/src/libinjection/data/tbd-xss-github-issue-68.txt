@@ -1,0 +1,3 @@
+# https://github.com/client9/libinjection/issues/68
+
+%3Cobject%00IRSDL+allowScriptAccess%3Dalways+data%3D%2F%2F0me.me%2Fdemo%2Fxss%2Fflash%2FnormalEmbededXSS.swf%3F

@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    name: Test build on ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        luaVersion: [ "5.4", "5.3", "5.2", "5.1", "luajit", "luajit-openresty" ]
+        platform: [ "ubuntu-20.04", "macos-11" ] # "windows-2022" not supported by gh-actions-lua
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup ‘lua’
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: ${{ matrix.luaVersion }}
+      - name: Setup ‘luarocks’
+        uses: leafo/gh-actions-luarocks@v4
+      - name: Make and install
+        run: |
+          export DEBUG=DEBUG
+          luarocks make -- luasocket-scm-3.rockspec
+      - name: Run regression tests
+        run: |
+          cd test
+          lua hello.lua
+          lua testsrvr.lua > /dev/null &
+          lua testclnt.lua
+          lua stufftest.lua
+          lua excepttest.lua
+          lua test_bind.lua
+          lua test_getaddrinfo.lua
+          lua ltn12test.lua
+          lua mimetest.lua
+          lua urltest.lua
+          lua test_socket_error.lua
+          kill %1

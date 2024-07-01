@@ -1,0 +1,29 @@
+name: 🚀 Feature Request
+description: Suggest an idea that will improve BunkerWeb
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        #### Before submitting a feature request, please make sure the feature hasn't been already addressed by searching through [the existing and past feature requests](https://github.com/bunkerity/bunkerweb/issues?q=is%3Aissue+sort%3Acreated-desc+%5BFEATURE%5D+in%3Atitle).
+  - type: textarea
+    id: whats-needed-and-why
+    attributes:
+      label: What's needed and why?
+      description: Describe the feature you would like to see in the project and why it should be implemented.
+    validations:
+      required: true
+  - type: textarea
+    id: implementations-ideas
+    attributes:
+      label: Implementations ideas (optional)
+      description: How it should be used and integrated into the project ? List some posts, research papers or codes that we can use as implementation.
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this feature request, you agree to follow our [Code of Conduct](https://github.com/bunkerity/bunkerweb/blob/master/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

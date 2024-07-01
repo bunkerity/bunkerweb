@@ -1,0 +1,61 @@
+name: Update cached mmdb files
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: "0 12 5 * *"
+
+jobs:
+  mmdb-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BUNKERBOT_TOKEN }}
+          ref: dev
+      - name: Download mmdb files
+        run: |
+          mkdir -p src/bw/misc/
+          cd src/bw/misc/
+          CURL_RETURN_CODE=0
+          CURL_OUTPUT=`curl -w httpcode=%{http_code} -s -o asn.mmdb.gz https://download.db-ip.com/free/dbip-asn-lite-$(date +%Y-%m).mmdb.gz 2> /dev/null` || CURL_RETURN_CODE=$?
+          if [ ${CURL_RETURN_CODE} -ne 0 ]; then
+            echo "Curl connection failed when downloading asn-lite mmdb file with return code - ${CURL_RETURN_CODE}"
+            exit 1
+          else
+              echo "Curl connection success"
+              # Check http code for curl operation/response in  CURL_OUTPUT
+              httpCode=$(echo "${CURL_OUTPUT}" | sed -e 's/.*\httpcode=//')
+              if [ ${httpCode} -ne 200 ]; then
+                  echo "Curl operation/command failed due to server return code - ${httpCode}"
+                  exit 1
+              fi
+          fi
+          CURL_RETURN_CODE=0
+          CURL_OUTPUT=`curl -w httpcode=%{http_code} -s -o country.mmdb.gz https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz 2> /dev/null` || CURL_RETURN_CODE=$?
+          if [ ${CURL_RETURN_CODE} -ne 0 ]; then
+            echo "Curl connection failed when downloading country-lite mmdb file with return code - ${CURL_RETURN_CODE}"
+            exit 1
+          else
+              echo "Curl connection success"
+              # Check http code for curl operation/response in  CURL_OUTPUT
+              httpCode=$(echo "${CURL_OUTPUT}" | sed -e 's/.*\httpcode=//')
+              if [ ${httpCode} -ne 200 ]; then
+                  echo "Curl operation/command failed due to server return code - ${httpCode}"
+                  exit 1
+              fi
+          fi
+          rm -f asn.mmdb country.mmdb
+          gunzip asn.mmdb.gz country.mmdb.gz
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
+        with:
+          branch: dev
+          commit_message: "Monthly mmdb update"
+          commit_options: "--no-verify"
+          commit_user_name: "BunkerBot"
+          commit_user_email: "bunkerbot@bunkerity.com"

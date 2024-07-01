@@ -1,0 +1,91 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
+    ports:
+      - "80:8080"
+      - "443:8443"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      MAX_CLIENT_SIZE: "50m"
+      SERVE_FILES: "no"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "https://mymoodle:8443"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  mymoodle:
+    image: bitnami/moodle:4
+    depends_on:
+      - mydb
+    volumes:
+      - moodle-files:/bitnami/moodle
+      - moodle-data:/bitnami/moodledata
+    environment:
+      MOODLE_USERNAME: "admin" # replace with your moodle admin username
+      MOODLE_PASSWORD: "password" # replace with your moodle admin password
+      MOODLE_EMAIL: "moodle@example.com" # replace with your moodle admin email
+      MOODLE_SITE_NAME: "My Moodle" # replace with your moodle site name
+      MOODLE_DATABASE_HOST: "mydb"
+      MOODLE_DATABASE_NAME: "moodle"
+      MOODLE_DATABASE_USER: "user"
+      MOODLE_DATABASE_PASSWORD: "db-user-pwd" # replace with a stronger password (must match MARIADB_PASSWORD)
+    restart: "unless-stopped"
+    networks:
+      - moodle-net
+      - bw-services
+
+  mydb:
+    image: bitnami/mariadb:11.2
+    volumes:
+      - db-data:/bitnami/mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: "db-root-pwd" # replace with a stronger password
+      MARIADB_DATABASE: "moodle"
+      MARIADB_USER: "user"
+      MARIADB_PASSWORD: "db-user-pwd" # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
+      MARIADB_CHARACTER_SET: "utf8mb4"
+      MARIADB_COLLATE: "utf8mb4_unicode_ci"
+    networks:
+      - moodle-net
+
+volumes:
+  bw-data:
+  db-data:
+  moodle-files:
+  moodle-data:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  moodle-net:
+    name: moodle-net

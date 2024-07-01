@@ -1,0 +1,15 @@
+{
+  "name": "gogs",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "no_copy_container": true,
+  "timeout": 90,
+  "delay": 150,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "gogs",
+      "tls": "www.example.com"
+    }
+  ]
+}

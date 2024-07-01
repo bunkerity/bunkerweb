@@ -1,0 +1,8 @@
+--TEST--
+pgsql X-string for bit-litterals
+--INPUT--
+SELECT x'';
+--EXPECTED--
+E SELECT
+1 x''
+; ;

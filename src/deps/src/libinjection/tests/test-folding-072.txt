@@ -1,0 +1,11 @@
+--TEST--
+if can function as keyword or expression/function depending on database
+--INPUT--
+1;if 1=1
+--EXPECTED--
+1 1
+; ;
+T if
+1 1
+
+

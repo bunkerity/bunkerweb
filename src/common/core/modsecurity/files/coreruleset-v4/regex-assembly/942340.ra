@@ -1,0 +1,28 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+in\s*?\(+\s*?select
+(?i:(?:n?and|x?x?or|div|like|between|not)\s+|(?:\|\||\&\&)\s*)[\s\w+]+regexp\s*?\(
+(?i:(?:n?and|x?x?or|div|like|between|not)\s+|(?:\|\||\&\&)\s*)[\s\w+]+sounds\s+like\s*?[\"'`]
+(?i:(?:n?and|x?x?or|div|like|between|not)\s+|(?:\|\||\&\&)\s*)[\s\w+]+[=\d]+x
+[\"'`]\s*?\d\s*?--
+[\"'`]\s*?\d\s*?#
+[\"'`][\%&<>^=]+\d\s*?=
+[\"'`][\%&<>^=]+\d\s*?or
+[\"'`][\%&<>^=]+\d\s*?xor
+[\"'`][\%&<>^=]+\d\s*?div
+[\"'`][\%&<>^=]+\d\s*?like
+[\"'`][\%&<>^=]+\d\s*?between
+[\"'`][\%&<>^=]+\d\s*?and
+[\"'`]\W+[\w+-]+\s*?=\s*?\d\W+[\"'`]
+[\"'`]\s*?is\s*?\d.+[\"'`]?\w
+[\"'`]\|?[\w-]{3,}[^\w\s.,]+[\"'`]
+[\"'`]\s*?is\s*?[\d.]+\s*?\W.*?[\"'`]
+\bexcept\s+select\b
+\bexcept\s+values\s*?\(
+[\"'`]\s*(?i:(?:n?and|x?x?or|div|like|between|not)\s+|(?:\|\||\&\&)\s*)array\s*\[
+[\"'`]\s*(?i:(?:n?and|x?x?or|div|like|between|not)\s+|(?:\|\||\&\&)\s*)[\w]+\s*!?~
+[\"'`]\s*(?i:(?:n?and|x?x?or|div|like|between|not)\s+|(?:\|\||\&\&)\s*)[\w]+\s+(?:not\s+)?similar\s+to\s+
+[\"'`]\s*(?i:(?:n?and|x?x?or|div|like|between|not)\s+|(?:\|\||\&\&)\s*)(?:true|false)\b

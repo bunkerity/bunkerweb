@@ -1,0 +1,9 @@
+--TEST--
+Not actually a number but a database.table
+--INPUT--
+SELECT 10.10e;
+--EXPECTED--
+E SELECT
+n 10.10e
+; ;
+

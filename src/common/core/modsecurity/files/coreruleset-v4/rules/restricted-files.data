@@ -1,0 +1,279 @@
+# Apache
+# (no slash; also guards against old.htaccess, old.htpasswd, etc.)
+.htaccess
+.htdigest
+.htpasswd
+# home level dotfiles (keep in sync with lfi-os-files.data)
+# grep -E '^\.' lfi-os-files.data
+.addressbook
+.aptitude/config
+.aws/
+.azure/
+.bash_
+.bashrc
+.cache/notify-osd.log
+.config/
+.cshrc
+.docker
+.drush/
+.env
+.eslintignore
+.fbcindex
+.forward
+.gitattributes
+.gitconfig
+.gnupg/
+.google_authenticator
+.hplip/hplip.conf
+.htaccess
+.htdigest
+.htpasswd
+.ksh_history
+.lesshst
+.lftp/
+.lhistory
+.lighttpdpassword
+.lldb-history
+.local/share/mc/
+.lynx_cookies
+.my.cnf
+.mysql_history
+.nano_history
+.node_repl_history
+.npmrc
+.nsconfig
+.nsr
+.oh-my-
+.password-store
+.pearrc
+.pgpass
+.php_history
+.pinerc
+.pki/
+.proclog
+.procmailrc
+.profile
+.psql_history
+.python_history
+.rediscli_history
+.rhistory
+.rhosts
+.selected_editor
+.sh_history
+.sqlite_history
+.snap/
+.ssh/
+.subversion/
+.tconn/
+.tcshrc
+.tmux.conf
+.tor/
+.vagrant.d/
+.vidalia/
+.vim/
+.viminfo
+.vimrc
+.vscode
+.www_acl
+.wwwacl
+.Xauthority
+.yarnrc
+.zhistory
+.zsh_history
+.zshenv
+.zshrc
+# Version control
+/.git/
+/.gitignore
+/.hg/
+/.hgignore
+/.svn/
+# October CMS credentials file
+/auth.json
+# Wordpress
+wp-config.php
+wp-config.bak
+wp-config.old
+wp-config.temp
+wp-config.tmp
+wp-config.txt
+# Symfony
+/config/config.yml
+/config/config_dev.yml
+/config/config_prod.yml
+/config/config_test.yml
+/config/parameters.yml
+/config/routing.yml
+/config/security.yml
+/config/services.yml
+# Drupal
+/sites/default/default.settings.php
+/sites/default/settings.php
+/sites/default/settings.local.php
+# NextCloud
+/config/config.php
+# PrestaShop configuration files
+/config/settings.inc.php
+/app/config/parameters.php
+# Magento
+/app/etc/local.xml
+# Sublime Text
+/sftp-config.json
+# ASP.NET
+/Web.config
+# Node
+/package.json
+/package-lock.json
+/npm-shrinkwrap.json
+/gruntfile.js
+/npm-debug.log
+/ormconfig.json
+/tsconfig.json
+/webpack.config.js
+/yarn.lock
+# Composer
+/composer.json
+/composer.lock
+/packages.json
+# OSX
+/.DS_Store
+# WS FTP
+/.ws_ftp.ini
+# New Per-Project Files
+.idea
+nbproject/
+bower.json
+.bowerrc
+.eslintrc
+.jshintrc
+.gitlab-ci.yml
+.travis.yml
+database.yml
+Dockerfile
+# PHP_CodeSniffer configuration files
+.php_cs.dist
+.phpcs.xml
+phpcs.xml
+.phpcs.xml.dist
+phpcs.xml.dist
+# Windows desktop configuration file
+Desktop.ini
+# Windows Explorer cache of thumbnail images
+Thumbs.db
+# PHP configuration files
+.user.ini
+php.ini
+# Oracle WebLogic Server configuration file
+weblogic.xml
+# Oracle SOAP Request Handler configuration file
+soapConfig.xml
+# Common names for local PHP error logs
+php_error.log
+php_errors.log
+# Java directory for non-public application data
+WEB-INF/
+# Fortinet SSL VPN session file
+sslvpn_websession
+# BlockCypher log file used in code examples
+BlockCypher.log
+# Roundcube Webmail
+config.inc.php
+config.sample.php
+defaults.inc.php
+
+# /proc entries (keep in sync with lfi-os-files.data)
+# grep -E "^proc/" lfi-os-files.data
+proc/0
+proc/1
+proc/2
+proc/3
+proc/4
+proc/5
+proc/6
+proc/7
+proc/8
+proc/9
+proc/acpi
+proc/asound
+proc/bootconfig
+proc/buddyinfo
+proc/bus
+proc/cgroups
+proc/cmdline
+proc/config.gz
+proc/consoles
+proc/cpuinfo
+proc/crypto
+proc/devices
+proc/diskstats
+proc/dma
+proc/docker
+proc/driver
+proc/dynamic_debug
+proc/execdomains
+proc/fb
+proc/filesystems
+proc/fs
+proc/interrupts
+proc/iomem
+proc/ioports
+proc/ipmi
+proc/irq
+proc/kallsyms
+proc/kcore
+proc/key-users
+proc/keys
+proc/kmsg
+proc/kpagecgroup
+proc/kpagecount
+proc/kpageflags
+proc/latency_stats
+proc/loadavg
+proc/locks
+proc/mdstat
+proc/meminfo
+proc/misc
+proc/modules
+proc/mounts
+proc/mpt
+proc/mtd
+proc/mtrr
+proc/net
+proc/pagetypeinfo
+proc/partitions
+proc/pressure
+proc/sched_debug
+proc/schedstat
+proc/scsi
+proc/self
+proc/slabinfo
+proc/softirqs
+proc/stat
+proc/swaps
+proc/sys
+proc/sysrq-trigger
+proc/sysvipc
+proc/thread-self
+proc/timer_list
+proc/timer_stats
+proc/tty
+proc/uptime
+proc/version
+proc/version_signature
+proc/vmallocinfo
+proc/vmstat
+proc/zoneinfo
+
+# /sys entries (keep in sync with lfi-os-files.data)
+# grep -E "^sys/" lfi-os-files.data
+sys/block
+sys/bus
+sys/class
+sys/dev
+sys/devices
+sys/firmware
+sys/fs
+sys/hypervisor
+sys/kernel
+sys/module
+sys/power

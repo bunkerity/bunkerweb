@@ -1,0 +1,84 @@
+version: "3.5"
+
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    pull_policy: never
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    volumes:
+      - ./index.html:/var/www/html/index.html
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    pull_policy: never
+    depends_on:
+      - bw
+    environment:
+      BUNKERWEB_INSTANCES: "bw"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
+      HTTP_PORT: "80"
+      HTTPS_PORT: "443"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      LIMIT_REQ_RATE: "20r/s"
+      CUSTOM_LOG_LEVEL: "debug"
+
+      # ? REVERSE_PROXY settings
+      USE_REVERSE_PROXY: "no"
+      REVERSE_PROXY_INTERCEPT_ERRORS: "yes"
+      REVERSE_PROXY_HOST: "http://reverseproxy-api:8080"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_WS: "no"
+      REVERSE_PROXY_HEADERS: ""
+      REVERSE_PROXY_HEADERS_CLIENT: ""
+      REVERSE_PROXY_KEEPALIVE: "no"
+      REVERSE_PROXY_AUTH_REQUEST: ""
+      REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: ""
+      REVERSE_PROXY_AUTH_REQUEST_SET: ""
+      REVERSE_PROXY_CUSTOM_HOST: ""
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
+    networks:
+      - bw-universe
+
+  reverseproxy-api:
+    build: api
+    environment:
+      REVERSE_PROXY_HEADERS: ""
+      REVERSE_PROXY_WS: "no"
+      REVERSE_PROXY_KEEPALIVE: "no"
+      REVERSE_PROXY_AUTH_REQUEST: ""
+      REVERSE_PROXY_CUSTOM_HOST: ""
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.4
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24

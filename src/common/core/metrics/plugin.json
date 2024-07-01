@@ -1,0 +1,36 @@
+{
+  "id": "metrics",
+  "name": "Metrics",
+  "description": "Metrics collection and retrieve.",
+  "version": "1.0",
+  "stream": "partial",
+  "settings": {
+    "USE_METRICS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable collection and retrieval of internal metrics.",
+      "id": "use-metrics",
+      "label": "Use metrics",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "METRICS_MEMORY_SIZE": {
+      "context": "global",
+      "default": "16m",
+      "help": "Size of the internal storage for metrics.",
+      "id": "metrics-memory-size",
+      "label": "Metrics memory size",
+      "regex": "^\\d+[kKmMgG]?$",
+      "type": "text"
+    },
+    "METRICS_MAX_BLOCKED_REQUESTS": {
+      "context": "global",
+      "default": "100",
+      "help": "Maximum number of blocked requests to store (per worker).",
+      "id": "metrics-max-blocked-requests",
+      "label": "Metrics max blocked requests",
+      "regex": "^\\d+$",
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+
+NDK_UPSTREAM_LIST
+-----------------
+
+This submodule provides a directive that creates a list of upstreams, with
+optional weighting. This list can then be used by other modules to hash over
+the upstreams however they choose.
+
+
+USAGE IN CONF FILE
+------------------
+
+e.g. upstream_list   name    backend1  4:backend2    3:backend3;
+
+
+
+USAGE WITH OTHER MODULES
+------------------------
+
+Add a line like
+
+CFLAGS="$CFLAGS -DNDK_UPSTREAM_LIST"
+
+to the config file of your module.
+
+
+
+INTEGRATING WITH YOUR MODULE
+----------------------------
+
+The upstream lists are stored in the array given in the lists.h file, which is
+an array of ndk_upstream_list_t elts.  The elts are currently all pointers to 
+strings which have been distributed according to the weight - so if there are
+two backends, with weight 3 and 4 respectively, there will be 7 pointers in
+total with the first 3 pointing to the first backend and the last 4 to the 
+second.
+
+
+
+TODO
+----
+-   replace strings with pointers to upstreams if they are available (and if 
+    this is possible)
+-   add additional 'http://' to strings if necessary
+-   improve this documentation

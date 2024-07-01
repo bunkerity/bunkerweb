@@ -1,0 +1,125 @@
+{
+  "id": "whitelist",
+  "name": "Whitelist",
+  "description": "Allow access based on internal and external IP/network/rDNS/ASN whitelists.",
+  "version": "1.0",
+  "stream": "partial",
+  "settings": {
+    "USE_WHITELIST": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Activate whitelist feature.",
+      "id": "use-whitelist",
+      "label": "Activate whitelisting",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "WHITELIST_IP": {
+      "context": "multisite",
+      "default": "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
+      "help": "List of IP/network, separated with spaces, to put into the whitelist.",
+      "id": "whitelist-ip",
+      "label": "Whitelist IP/network",
+      "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
+      "type": "text"
+    },
+    "WHITELIST_RDNS": {
+      "context": "multisite",
+      "default": ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
+      "help": "List of reverse DNS suffixes, separated with spaces, to whitelist.",
+      "id": "whitelist-rdns",
+      "label": "Whitelist reverse DNS",
+      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
+      "type": "text"
+    },
+    "WHITELIST_RDNS_GLOBAL": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Only perform RDNS whitelist checks on global IP addresses.",
+      "id": "whitelist-rdns-global",
+      "label": "Whitelist reverse DNS global IPs",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "WHITELIST_ASN": {
+      "context": "multisite",
+      "default": "32934",
+      "help": "List of ASN numbers, separated with spaces, to whitelist.",
+      "id": "whitelist-asn",
+      "label": "Whitelist ASN",
+      "regex": "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
+      "type": "text"
+    },
+    "WHITELIST_USER_AGENT": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of User-Agent (PCRE regex), separated with spaces, to whitelist.",
+      "id": "whitelist-user-agent",
+      "label": "Whitelist User-Agent",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "WHITELIST_URI": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of URI (PCRE regex), separated with spaces, to whitelist.",
+      "id": "whitelist-uri",
+      "label": "Whitelist URI",
+      "regex": "^( *(.*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "WHITELIST_IP_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing good IP/network to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "id": "whitelist-ip-urls",
+      "label": "Whitelist IP/network URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "WHITELIST_RDNS_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "id": "whitelist-rdns-urls",
+      "label": "Whitelist reverse DNS URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "WHITELIST_ASN_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing ASN to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "id": "whitelist-asn-urls",
+      "label": "Whitelist ASN URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "WHITELIST_USER_AGENT_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing good User-Agent to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "id": "whitelist-user-agent-urls",
+      "label": "Whitelist User-Agent URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "WHITELIST_URI_URLS": {
+      "context": "global",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing bad URI to whitelist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "id": "whitelist-uri-urls",
+      "label": "Whitelist URI URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "whitelist-download",
+      "file": "whitelist-download.py",
+      "every": "hour",
+      "reload": true
+    }
+  ]
+}

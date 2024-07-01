@@ -1,0 +1,7 @@
+--TEST--
+two tokens with embedded comment
+--INPUT--
+123 /* junk */;
+--EXPECTED--
+1 123
+; ;

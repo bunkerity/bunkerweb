@@ -1,0 +1,29 @@
+{
+  "name": "kubernetes-tls",
+  "kinds": ["kubernetes"],
+  "timeout": 60,
+  "delay": 300,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://app1.example.com",
+      "string": "hello",
+      "tls": "app1.example.com,app2.example.com",
+      "tls_edit": false
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com",
+      "string": "hello",
+      "tls": "app1.example.com,app2.example.com",
+      "tls_edit": false
+    },
+    {
+      "type": "string",
+      "url": "https://app3.example.com",
+      "string": "hello",
+      "tls": "app3.example.com",
+      "tls_edit": false
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+*.so
+*.lo
+*.tar.gz
+
+demos/out.png
+demos/out.gif
+demos/counter.txt
+

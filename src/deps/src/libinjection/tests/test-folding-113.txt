@@ -1,0 +1,12 @@
+--TEST--
+LIKE can function as operator or function
+--INPUT--
+SELECT LIKE("foo","bar")
+--EXPECTED--
+E SELECT
+f LIKE
+( (
+s "foo"
+) )
+
+

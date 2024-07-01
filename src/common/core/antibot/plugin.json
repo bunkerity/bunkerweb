@@ -1,0 +1,117 @@
+{
+  "id": "antibot",
+  "name": "Antibot",
+  "description": "Bot detection by using a challenge.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_ANTIBOT": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Activate antibot feature.",
+      "id": "use-antibot",
+      "label": "Antibot challenge",
+      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile)$",
+      "type": "select",
+      "select": [
+        "no",
+        "cookie",
+        "javascript",
+        "captcha",
+        "recaptcha",
+        "hcaptcha",
+        "turnstile"
+      ]
+    },
+    "ANTIBOT_URI": {
+      "context": "multisite",
+      "default": "/challenge",
+      "help": "Unused URI that clients will be redirected to to solve the challenge.",
+      "id": "antibot-uri",
+      "label": "Antibot URL",
+      "regex": "^\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*$",
+      "type": "text"
+    },
+    "ANTIBOT_TIME_RESOLVE": {
+      "context": "multisite",
+      "default": "60",
+      "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
+      "id": "antibot-time-resolve",
+      "label": "Time to resolve",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "ANTIBOT_TIME_VALID": {
+      "context": "multisite",
+      "default": "86400",
+      "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
+      "id": "antibot-time-valid",
+      "label": "Time valid",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "ANTIBOT_RECAPTCHA_SCORE": {
+      "context": "multisite",
+      "default": "0.7",
+      "help": "Minimum score required for reCAPTCHA challenge (Only compatible with reCAPTCHA v3).",
+      "id": "antibot-recaptcha-score",
+      "label": "reCAPTCHA v3 score",
+      "regex": "^(0\\.[1-9]|1\\.0)$",
+      "type": "text"
+    },
+    "ANTIBOT_RECAPTCHA_SITEKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitekey for reCAPTCHA challenge.",
+      "id": "antibot-recaptcha-sitekey",
+      "label": "reCAPTCHA sitekey",
+      "regex": "^[\\w\\-]*$",
+      "type": "text"
+    },
+    "ANTIBOT_RECAPTCHA_SECRET": {
+      "context": "multisite",
+      "default": "",
+      "help": "Secret for reCAPTCHA challenge.",
+      "id": "antibot-recaptcha-secret",
+      "label": "reCAPTCHA secret",
+      "regex": "^[\\w\\-]*$",
+      "type": "password"
+    },
+    "ANTIBOT_HCAPTCHA_SITEKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitekey for hCaptcha challenge.",
+      "id": "antibot-hcaptcha-sitekey",
+      "label": "hCaptcha sitekey",
+      "regex": "^[a-zA-Z0-9\\-]*$",
+      "type": "text"
+    },
+    "ANTIBOT_HCAPTCHA_SECRET": {
+      "context": "multisite",
+      "default": "",
+      "help": "Secret for hCaptcha challenge.",
+      "id": "antibot-hcaptcha-secret",
+      "label": "hCaptcha secret",
+      "regex": "^\\w*$",
+      "type": "password"
+    },
+    "ANTIBOT_TURNSTILE_SITEKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitekey for Turnstile challenge.",
+      "id": "antibot-turnstile-sitekey",
+      "label": "Turnstile sitekey",
+      "regex": "^(0x[\\w\\-]+)?$",
+      "type": "text"
+    },
+    "ANTIBOT_TURNSTILE_SECRET": {
+      "context": "multisite",
+      "default": "",
+      "help": "Secret for Turnstile challenge.",
+      "id": "antibot-turnstile-secret",
+      "label": "Turnstile secret",
+      "regex": "^(0x[\\w\\-]+)?$",
+      "type": "password"
+    }
+  }
+}

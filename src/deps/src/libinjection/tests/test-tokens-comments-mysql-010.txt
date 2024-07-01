@@ -1,0 +1,8 @@
+--TEST--
+Comments, C-style. MySQL dangling but processed as ASNI comments
+--INPUT--
+SELECT 1 /*!12XXXXXXXXXXXX
+--EXPECTED--
+E SELECT
+1 1
+X /*!12XXXXXXXXXXXX

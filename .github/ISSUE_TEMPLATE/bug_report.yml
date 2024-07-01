@@ -1,0 +1,91 @@
+name: 🐛 Bug Report
+description: Create a report to help us reproduce and fix the bug
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        #### Before submitting a bug, please make sure the issue hasn't been already addressed by searching through [the existing and past issues](https://github.com/bunkerity/bunkerweb/issues?q=is%3Aissue+sort%3Acreated-desc+).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Concise description of what you're trying to do, the expected behavior and the current bug.
+      placeholder: Describe the bug, the expected behavior and the current behavior
+    validations:
+      required: true
+  - type: textarea
+    id: how-to-reproduce
+    attributes:
+      label: How to reproduce?
+      description: Concise description of how to reproduce the issue.
+      placeholder: Describe how to reproduce the issue
+    validations:
+      required: true
+  - type: textarea
+    id: configuration-file
+    attributes:
+      label: Configuration file(s) (yaml or .env)
+      description: |
+        Please copy and paste your configuration file or the relevant part of it.
+        ⚠️ DON'T FORGET TO REMOVE PRIVATE DATA LIKE IP ADDRESSES ! ⚠️
+      placeholder: Configuration file
+      render: YAML
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+        ⚠️ DON'T FORGET TO REMOVE PRIVATE DATA LIKE IP ADDRESSES ! ⚠️
+      placeholder: Log output
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: BunkerWeb version
+      description: What version of BunkerWeb are you running?
+      placeholder: Version
+      value: 1.6.0-beta
+    validations:
+      required: true
+  - type: dropdown
+    id: integration
+    attributes:
+      label: What integration are you using?
+      options:
+        - Docker
+        - Autoconf
+        - Swarm
+        - Kubernetes
+        - Linux
+        - Ansible
+        - Vagrant
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: linux-distribution
+    attributes:
+      label: Linux distribution (if applicable)
+      description: What Linux distribution are you using? (e.g. Ubuntu Server 18.04)
+      placeholder: Linux distribution
+  - type: checkboxes
+    id: removed-private-data
+    attributes:
+      label: Removed private data
+      description: |
+        We would like to emphasize that we are not responsible for any private data that may be inadvertently included in the logs or configuration files.
+        ⚠️ I have removed all private data from the configuration file and the logs ⚠️
+      options:
+        - label: I have removed all private data from the configuration file and the logs
+          required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/bunkerity/bunkerweb/blob/master/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

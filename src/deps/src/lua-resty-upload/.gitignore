@@ -1,0 +1,7 @@
+*.swp
+*.swo
+*~
+go
+t/servroot/
+reindex
+test.html

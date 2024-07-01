@@ -1,0 +1,9 @@
+@@ -95,7 +95,7 @@
+ 
+ ]])
+ 
+-local zlib = ffi.load(ffi.os == "Windows" and "zlib1" or "z")
++local zlib = ffi.load("/usr/share/bunkerweb/deps/lib/lua/libz.so")
+ _M.zlib = zlib
+ 
+ -- Default to 16k output buffer

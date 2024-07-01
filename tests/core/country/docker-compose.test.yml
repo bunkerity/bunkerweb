@@ -1,0 +1,34 @@
+version: "3.5"
+
+services:
+  tests-gb:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      COUNTRY: "GB"
+      BLACKLIST_COUNTRY: ""
+      WHITELIST_COUNTRY: ""
+    extra_hosts:
+      - "www.example.com:2.0.0.2"
+    networks:
+      bw-gb-network:
+        ipv4_address: 2.0.0.3
+
+  tests-us:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      COUNTRY: "US"
+      BLACKLIST_COUNTRY: ""
+      WHITELIST_COUNTRY: ""
+    extra_hosts:
+      - "www.example.com:8.0.0.2"
+    networks:
+      bw-us-network:
+        ipv4_address: 8.0.0.3
+
+networks:
+  bw-gb-network:
+    external: true
+  bw-us-network:
+    external: true

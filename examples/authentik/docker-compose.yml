@@ -1,0 +1,209 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
+    ports:
+      - "80:8080"
+      - "443:8443"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "auth.example.com app1.example.com app2.example.com" # replace with your domains
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_KEEPALIVE: "yes"
+      # Proxy to outpost
+      REVERSE_PROXY_URL_999: "/outpost.goauthentik.io"
+      REVERSE_PROXY_HOST_999: "http://server:9000"
+      REVERSE_PROXY_HEADERS_999: "X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length \"\";Connection $$connection_upgrade_keepalive"
+      REVERSE_PROXY_HEADERS_CLIENT_999: "Set-Cookie $$auth_cookie"
+      REVERSE_PROXY_AUTH_REQUEST_SET_999: "$$auth_cookie $$upstream_http_set_cookie"
+      REVERSE_PROXY_PASS_REQUEST_BODY_999: "no"
+      # Authentik
+      auth.example.com_REVERSE_PROXY_URL: "/"
+      auth.example.com_REVERSE_PROXY_HOST: "http://server:9000"
+      auth.example.com_REVERSE_PROXY_WS: "yes"
+      auth.example.com_LIMIT_REQ_URL_1: "^/api/"
+      auth.example.com_LIMIT_REQ_RATE_1: "5r/s"
+      auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+      auth.example.com_ALLOWED_METHODS: "GET|POST|HEAD|PUT|DELETE|PATCH"
+      auth.example.com_COOKIE_FLAGS: "* SameSite=Lax"
+      # Applications
+      app1.example.com_REVERSE_PROXY_URL: "/"
+      app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
+      app1.example.com_REVERSE_PROXY_AUTH_REQUEST: "/outpost.goauthentik.io/auth/nginx"
+      app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://auth.example.com/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SET: "$$auth_cookie $$upstream_http_set_cookie;$$authentik_username $$upstream_http_x_authentik_username;$$authentik_groups $$upstream_http_x_authentik_groups;$$authentik_email $$upstream_http_x_authentik_email;$$authentik_name $$upstream_http_x_authentik_name;$$authentik_uid $$upstream_http_x_authentik_uid"
+      app1.example.com_REVERSE_PROXY_HEADERS_CLIENT: "Set-Cookie $$auth_cookie"
+      app1.example.com_REVERSE_PROXY_HEADERS: "Connection $$connection_upgrade_keepalive;X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid"
+      app1.example.com_ERRORS: "401=@goauthentik_proxy_signin"
+      app2.example.com_REVERSE_PROXY_URL: "/"
+      app2.example.com_REVERSE_PROXY_HOST: "http://app2:8080"
+      app2.example.com_REVERSE_PROXY_AUTH_REQUEST: "/outpost.goauthentik.io/auth/nginx"
+      app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: "https://auth.example.com/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri"
+      app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SET: "$$auth_cookie $$upstream_http_set_cookie;$$authentik_username $$upstream_http_x_authentik_username;$$authentik_groups $$upstream_http_x_authentik_groups;$$authentik_email $$upstream_http_x_authentik_email;$$authentik_name $$upstream_http_x_authentik_name;$$authentik_uid $$upstream_http_x_authentik_uid"
+      app2.example.com_REVERSE_PROXY_HEADERS_CLIENT: "Set-Cookie $$auth_cookie"
+      app2.example.com_REVERSE_PROXY_HEADERS: "Connection $$connection_upgrade_keepalive;X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid"
+      app2.example.com_ERRORS: "401=@goauthentik_proxy_signin"
+      # Custom configuration
+      CUSTOM_CONF_HTTP_connection_upgrade_keepalive: |
+        map $$http_upgrade $$connection_upgrade_keepalive {
+            default upgrade;
+            ''      '';
+        }
+      CUSTOM_CONF_SERVER_HTTP_goauthentik_proxy_signin: |
+        proxy_buffers 8 16k;
+        proxy_buffer_size 32k;
+
+        location @goauthentik_proxy_signin {
+            internal;
+            add_header Set-Cookie $$auth_cookie;
+            return 302 /outpost.goauthentik.io/start?rd=$$request_uri;
+            # For domain level, use the below error_page to redirect to your authentik server with the full redirect path
+            # return 302 https://authentik.company/outpost.goauthentik.io/start?rd=$$scheme://$$http_host$$request_uri;
+        }
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  # APPLICATIONS
+  app1:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+  app2:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+
+  # AUTHENTIK SERVICES
+  postgresql:
+    image: docker.io/library/postgres:16-alpine
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
+        ]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASS:?database password required}
+      POSTGRES_USER: ${PG_USER:-authentik}
+      POSTGRES_DB: ${PG_DB:-authentik}
+    env_file:
+      - .env
+    networks:
+      - authentik-net
+  redis:
+    image: docker.io/library/redis:alpine
+    command: --save 60 1 --loglevel warning
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - redis:/data
+    networks:
+      - authentik-net
+  server:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2024.4.2}
+    restart: unless-stopped
+    command: server
+    environment:
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+    volumes:
+      - media:/media
+      - custom-templates:/templates
+    env_file:
+      - .env
+    # ports:
+    #   - "${COMPOSE_PORT_HTTP:-9000}:9000"
+    #   - "${COMPOSE_PORT_HTTPS:-9443}:9443"
+    depends_on:
+      - postgresql
+      - redis
+    networks:
+      - authentik-net
+      - bw-services
+  worker:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2024.4.2}
+    restart: unless-stopped
+    command: worker
+    environment:
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+    # `user: root` and the docker socket volume are optional.
+    # See more for the docker socket integration here:
+    # https://goauthentik.io/docs/outposts/integrations/docker
+    # Removing `user: root` also prevents the worker from fixing the permissions
+    # on the mounted folders, so when removing this make sure the folders have the correct UID/GID
+    # (1000:1000 by default)
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - media:/media
+      - certs:/certs
+      - custom-templates:/templates
+    env_file:
+      - .env
+    depends_on:
+      - postgresql
+      - redis
+    networks:
+      - authentik-net
+
+volumes:
+  bw-data:
+  database:
+  redis:
+  media:
+  certs:
+  custom-templates:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  authentik-net:
+    name: authentik-net

@@ -1,0 +1,8 @@
+--TEST--
+tag with name attribute, quoted value, unclosed
+--INPUT--
+</foo  >
+--EXPECTED--
+TAG_NAME_OPEN,3,foo
+TAG_NAME_CLOSE,1,>
+

@@ -1,0 +1,59 @@
+name: Create staging infra (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      TYPE:
+        required: true
+        type: string
+    secrets:
+      CICD_SECRETS:
+        required: true
+      SECRET_KEY:
+        required: true
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Generate SSH keypair
+        run: ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" && ssh-keygen -f ~/.ssh/id_rsa -y > ~/.ssh/id_rsa.pub && echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/ssh_config
+        if: inputs.TYPE != 'k8s'
+      - name: Checkout source code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Install terraform
+        uses: hashicorp/setup-terraform@651471c36a6092792c552e8b1bef71e592b462d8 # v3.1.1
+      - name: Install kubectl
+        uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4.0.0
+        if: inputs.TYPE == 'k8s'
+        with:
+          version: "v1.29.1"
+      - name: Set up Python 3.12
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        if: inputs.TYPE != 'k8s'
+        with:
+          python-version: "3.12"
+      - name: Install ansible
+        run: pip install --no-cache-dir --require-hashes -r misc/requirements-ansible.txt
+        if: inputs.TYPE != 'k8s'
+      - name: Install ansible libs
+        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner,1.18.7 && ansible-galaxy collection install --timeout 120 community.general && ansible-galaxy collection install --timeout 120 community.docker
+        if: inputs.TYPE != 'k8s'
+      # Create infra
+      - run: ./tests/create.sh ${{ inputs.TYPE }}
+        env:
+          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+      - run: |
+          tar -cf terraform.tar /tmp/${{ inputs.TYPE }}
+          echo "$SECRET_KEY" > /tmp/.secret_key
+          openssl enc -in terraform.tar -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out terraform.tar.enc
+          rm -f /tmp/.secret_key
+        if: always()
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        if: always()
+        with:
+          name: tf-${{ inputs.TYPE }}
+          path: terraform.tar.enc

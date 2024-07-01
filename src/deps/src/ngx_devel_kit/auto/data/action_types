@@ -1,0 +1,12 @@
+r0          return 0
+r1          return 1
+r_1         return -1
+rok         return %OK%
+rce         return %CE%
+rcok        return %COK%
+re          return %E%
+rn          return NULL
+rse         {ngx_script_error (e); return;}
+sce         {ngx_script_configure_error (c); return;}
+g(_lb)      goto _lb
+ge          goto error

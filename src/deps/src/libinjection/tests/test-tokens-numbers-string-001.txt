@@ -1,0 +1,8 @@
+--TEST--
+pgsql/mysql X-string for bit-litterals
+--INPUT--
+SELECT x'1234';
+--EXPECTED--
+E SELECT
+1 x'1234'
+; ;

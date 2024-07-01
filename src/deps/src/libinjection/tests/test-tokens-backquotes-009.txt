@@ -1,0 +1,8 @@
+--TEST--
+variable using backquotes, last backtick is end of string.  Needed for memory testing off-by-1
+problems.
+--INPUT--
+SELECT @`foobar`
+--EXPECTED--
+E SELECT
+v @`foobar`

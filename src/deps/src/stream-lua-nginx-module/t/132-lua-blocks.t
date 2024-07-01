@@ -1,0 +1,399 @@
+# vim:set ft= ts=4 sw=4 et fdm=marker:
+
+use Test::Nginx::Socket::Lua::Stream;
+#worker_connections(1014);
+#master_on();
+#workers(2);
+#log_level('warn');
+
+repeat_each(2);
+#repeat_each(1);
+
+plan tests => repeat_each() * ((blocks() * 3) + 1);
+
+#no_diff();
+no_long_string();
+run_tests();
+
+__DATA__
+
+=== TEST 1: content_by_lua_block (nested curly braces)
+--- stream_server_config
+    content_by_lua_block {
+        local a = {
+            dogs = {32, 78, 96},
+            cat = "kitty",
+        }
+        ngx.say("a.dogs[1] = ", a.dogs[1])
+        ngx.say("a.dogs[2] = ", a.dogs[2])
+        ngx.say("a.dogs[3] = ", a.dogs[3])
+        ngx.say("a.cat = ", a.cat)
+    }
+
+--- config
+--- stream_response
+a.dogs[1] = 32
+a.dogs[2] = 78
+a.dogs[3] = 96
+a.cat = kitty
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 2: content_by_lua_block (curly braces in strings)
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say("}1, 2)")
+        ngx.say('{1, 2)')
+    }
+
+--- config
+--- stream_response
+}1, 2)
+{1, 2)
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 3: content_by_lua_block (curly braces in strings, with escaped terminators)
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say("\"}1, 2)")
+        ngx.say('\'{1, 2)')
+    }
+
+--- config
+--- stream_response
+"}1, 2)
+'{1, 2)
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 4: content_by_lua_block (curly braces in long brackets)
+--- stream_server_config
+    content_by_lua_block {
+        --[[
+            {{{
+
+                    }
+        ]]
+        --[==[
+            }}}
+
+                    {
+        ]==]
+        ngx.say("ok")
+    }
+
+--- config
+--- stream_response
+ok
+--- no_error_log
+[error]
+
+
+
+=== TEST 5: content_by_lua_block ("nested" long brackets)
+--- stream_server_config
+    content_by_lua_block {
+        --[[
+            ]=]
+        '  "
+                    }
+        ]]
+        ngx.say("ok")
+    }
+
+--- config
+--- stream_response
+ok
+--- no_error_log
+[error]
+
+
+
+=== TEST 6: content_by_lua_block (curly braces in line comments)
+--- stream_server_config
+    content_by_lua_block {
+        --}} {}
+        ngx.say("ok")
+    }
+
+--- config
+--- stream_response
+ok
+--- no_error_log
+[error]
+
+
+
+=== TEST 7: content_by_lua_block (cosockets)
+--- stream_server_config
+    content_by_lua_block {
+        local sock = ngx.socket.tcp()
+        local port = $TEST_NGINX_SERVER_PORT
+        local ok, err = sock:connect('127.0.0.1', port)
+        if not ok then
+            ngx.say("failed to connect: ", err)
+            return
+        end
+
+        ngx.say('connected: ', ok)
+
+        local req = "GET /foo HTTP/1.0\r\nHost: localhost\r\nConnection: close\r\n\r\n"
+        -- req = "OK"
+
+        local bytes, err = sock:send(req)
+        if not bytes then
+            ngx.say("failed to send request: ", err)
+            return
+        end
+
+        ngx.say("request sent: ", bytes)
+
+        while true do
+            local line, err, part = sock:receive()
+            if line then
+                ngx.say("received: ", line)
+
+            else
+                ngx.say("failed to receive a line: ", err, " [", part, "]")
+                break
+            end
+        end
+
+        ok, err = sock:close()
+        ngx.say("close: ", ok, " ", err)
+    }
+
+--- config
+    server_tokens off;
+    location = /foo {
+        content_by_lua_block { ngx.say("foo") }
+        more_clear_headers Date;
+    }
+
+--- stream_response
+connected: 1
+request sent: 57
+received: HTTP/1.1 200 OK
+received: Server: nginx
+received: Content-Type: text/plain
+received: Content-Length: 4
+received: Connection: close
+received: 
+received: foo
+failed to receive a line: closed []
+close: 1 nil
+--- no_error_log
+[error]
+
+
+
+=== TEST 8: all in one
+--- stream_config
+    init_by_lua_block {
+        glob = "init by lua }here{"
+    }
+
+    init_worker_by_lua_block {
+        glob = glob .. ", init worker }here{"
+    }
+--- stream_server_config
+#access_by_lua_block {
+    #local s = ngx.var.a
+    #s = s .. '}access{\n'
+    #ngx.var.a = s
+    #}
+    content_by_lua_block {
+        s = [[}content{]]
+        ngx.ctx.a = s
+        ngx.say(s)
+        ngx.say("glob: ", glob)
+    }
+    log_by_lua_block {
+        print("log by lua running \"}{!\"")
+    }
+
+--- config
+--- stream_response
+}content{
+glob: init by lua }here{, init worker }here{
+
+--- error_log
+log by lua running "}{!"
+--- no_error_log
+[error]
+
+
+
+=== TEST 9: missing ]] (string)
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say([[hello, world")
+    }
+
+--- config
+--- stream_response
+hello, world
+--- no_error_log
+[error]
+--- must_die
+--- error_log eval
+qr/\[emerg\] .*? Lua code block missing the closing long bracket "]]" in .*?\bnginx\.conf:22/
+
+
+
+=== TEST 10: missing ]==] (string)
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say([==[hello, world")
+    }
+
+--- config
+--- stream_response
+hello, world
+--- no_error_log
+[error]
+--- must_die
+--- error_log eval
+qr/\[emerg\] .*? Lua code block missing the closing long bracket "]==]" in .*?\bnginx\.conf:22/
+
+
+
+=== TEST 11: missing ]] (comment)
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say(--[[hello, world")
+    }
+
+--- config
+--- stream_response
+hello, world
+--- no_error_log
+[error]
+--- must_die
+--- error_log eval
+qr/\[emerg\] .*? Lua code block missing the closing long bracket "]]" in .*?\bnginx\.conf:22/
+
+
+
+=== TEST 12: missing ]=] (comment)
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say(--[=[hello, world")
+    }
+
+--- config
+--- stream_response
+hello, world
+--- no_error_log
+[error]
+--- must_die
+--- error_log eval
+qr/\[emerg\] .*? Lua code block missing the closing long bracket "]=]" in .*?\bnginx\.conf:22/
+
+
+
+=== TEST 13: missing }
+FIXME: we need better diagnostics by actually loading the inlined Lua code while parsing
+the *_by_lua_block directive.
+
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say("hello")
+--- stream_response
+hello, world
+--- no_error_log
+[error]
+--- error_log eval
+qr/\[emerg\] .*? "http" directive is not allowed here/
+--- must_die
+
+
+
+=== TEST 14: content_by_lua_block (compact)
+--- stream_server_config
+    content_by_lua_block {ngx.say("hello, world", {"!"})}
+
+--- config
+--- stream_response
+hello, world!
+--- no_error_log
+[error]
+
+
+
+=== TEST 15: content_by_lua_block unexpected closing long brackets ignored (GitHub #748)
+--- config
+    location = /t {
+        content_by_lua_block {
+            local t1, t2 = {"hello world"}, {1}
+            ngx.say(t1[t2[1]])
+        }
+    }
+--- request
+GET /t
+--- response_body
+hello world
+--- no_error_log
+[error]
+
+
+
+=== TEST 16: ambiguous line comments inside a long bracket string (GitHub #596)
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say([[ok--]])
+        ngx.say([==[ok--]==])
+        ngx.say([==[ok-- ]==])
+        --[[ --]] ngx.say("done")
+    }
+
+--- config
+--- stream_response
+ok--
+ok--
+ok-- 
+done
+--- no_error_log
+[error]
+
+
+
+=== TEST 17: double quotes in long brackets
+TODO
+--- SKIP
+--- stream_server_config
+    access_by_lua_block { print([[Hey, it is "!]]) } content_by_lua_block { ngx.say([["]]) }
+
+--- config
+--- stream_response
+"
+--- error_log
+Hey, it is "!
+--- no_error_log
+[error]
+
+
+
+=== TEST 18: single quotes in long brackets
+TODO
+--- SKIP
+--- stream_server_config
+    access_by_lua_block { print([[Hey, it is '!]]) } content_by_lua_block { ngx.say([[']]) }
+
+--- config
+--- stream_response
+'
+--- error_log
+Hey, it is '!
+--- no_error_log
+[error]

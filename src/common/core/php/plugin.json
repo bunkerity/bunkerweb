@@ -1,0 +1,45 @@
+{
+  "id": "php",
+  "name": "PHP",
+  "description": "Manage local or remote PHP-FPM.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "REMOTE_PHP": {
+      "context": "multisite",
+      "default": "",
+      "help": "Hostname of the remote PHP-FPM instance.",
+      "id": "remote-php",
+      "label": "Remote PHP",
+      "regex": "^((?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?)?$",
+      "type": "text"
+    },
+    "REMOTE_PHP_PATH": {
+      "context": "multisite",
+      "default": "",
+      "help": "Root folder containing files in the remote PHP-FPM instance.",
+      "id": "remote-php-path",
+      "label": "Remote PHP path",
+      "regex": "^(/[\\w. \\-]+)*/?$",
+      "type": "text"
+    },
+    "LOCAL_PHP": {
+      "context": "multisite",
+      "default": "",
+      "help": "Path to the PHP-FPM socket file.",
+      "id": "local",
+      "label": "Local PHP",
+      "regex": "^(/[\\w. \\-]+)*/?$",
+      "type": "text"
+    },
+    "LOCAL_PHP_PATH": {
+      "context": "multisite",
+      "default": "",
+      "help": "Root folder containing files in the local PHP-FPM instance.",
+      "id": "local-php-path",
+      "label": "Local PHP path",
+      "regex": "^(/[\\w. \\-]+)*/?$",
+      "type": "text"
+    }
+  }
+}

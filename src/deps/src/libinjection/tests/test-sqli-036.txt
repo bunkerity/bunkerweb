@@ -1,0 +1,9 @@
+--TEST--
+Empty Input
+--INPUT--
+foo" and 1=1 `
+--EXPECTED--
+s&1c
+
+
+

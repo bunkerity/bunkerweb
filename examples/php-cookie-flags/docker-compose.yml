@@ -1,0 +1,68 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
+    ports:
+      - "80:8080"
+      - "443:8443"
+    # ⚠️ read this if you use local folders for volumes ⚠️
+    # bunkerweb runs as an unprivileged user with UID/GID 101
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example if you need to create a directory : mkdir folder && chown root:101 folder && chmod 770 folder
+    # another example for existing folder : chown -R root:101 folder && chmod -R 770 folder
+    # more info at https://docs.bunkerweb.io
+    volumes:
+      - ./www:/var/www/html # contains web files (PHP, assets, ...)
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      COOKIE_FLAGS_1: "my_cookie HttpOnly"
+      REMOTE_PHP: "myphp"
+      REMOTE_PHP_PATH: "/app"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  myphp:
+    image: php:fpm-alpine3.19
+    # ⚠️ UID and GID of BunkerWeb (101:101) and php:fpm (33:33) are not the same ⚠️
+    # but both needs access to the files and folders of web-files
+    # don't forget to edit the permissions of the files and folders accordingly
+    # example : chown -R 33:101 ./www && find ./www -type f -exec chmod 0640 {} \; && find ./www -type d -exec chmod 0750 {} \;
+    volumes:
+      - ./www:/app # folder containing PHP app
+    networks:
+      - bw-services
+
+volumes:
+  bw-data:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services

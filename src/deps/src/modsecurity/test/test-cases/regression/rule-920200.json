@@ -1,0 +1,47 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Byte ranges :: OWASP CRS id:920200",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept-Language":"en-us,en;q=0.5",
+        "Accept":"*/*",
+        "Keep-Alive":"300",
+	"Range": "bytes=1-10,11-20,21-30,31-40,41-50,51-60"
+      },
+      "uri":"/",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":400
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecDefaultAction \"phase:2,deny,block,status:400,log\"",
+      "SecRule REQUEST_HEADERS:Range|REQUEST_HEADERS:Request-Range \"@rx ^bytes=(?:(?:\\d+)?\\-(?:\\d+)?\\s*,?\\s*){6}\" \"id:920200,phase:2,block,t:none,msg:'Range: Too many fields (6 or more)',logdata:'%{MATCHED_VAR}',tag:'application-multi',tag:'language-multi',tag:'platform-multi',tag:'attack-protocol',tag:'OWASP_CRS/PROTOCOL_VIOLATION/INVALID_HREQ',tag:'paranoia-level/2',ver:'OWASP_CRS/3.1.0',severity:'WARNING',chain",
+      "SecRule REQUEST_BASENAME \"!@endsWith .pdf\" \"setvar:'tx.msg=%{rule.msg}',setvar:'tx.anomaly_score_pl2=+%{tx.warning_anomaly_score}',setvar:'tx.%{rule.id}-OWASP_CRS/PROTOCOL_VIOLATION/INVALID_HREQ-%{MATCHED_VAR_NAME}=%{MATCHED_VAR}'\""
+    ]
+  }
+]
+

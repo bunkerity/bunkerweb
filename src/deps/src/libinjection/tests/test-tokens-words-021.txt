@@ -1,0 +1,10 @@
+--TEST--
+` breaks a word
+--INPUT--
+1 AND`BAR`
+--EXPECTED--
+1 1
+& AND
+n BAR
+
+

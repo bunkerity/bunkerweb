@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Help and support
+    url:  https://security.stackexchange.com/questions/tagged/owasp-crs
+    about: For help and support please go here.
+  - name: OWASP Core Rule Set mailing list
+    url:  https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
+    about: Ask general usage questions and participate in discussions on the CRS.

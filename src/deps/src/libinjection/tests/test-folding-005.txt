@@ -1,0 +1,9 @@
+--TEST--
+initial comments removed
+--INPUT--
+/* foo */ SELECT 1 );
+--EXPECTED--
+E SELECT
+1 1
+) )
+; ;

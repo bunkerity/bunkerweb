@@ -1,0 +1,11 @@
+--TEST--
+TSQL if, if not after semi-colon
+--INPUT--
+; if not((select serverproperty('isintegratedsecurityonly'))
+--EXPECTED--
+; ;
+T if not
+( (
+E select
+f serverproperty
+

@@ -1,0 +1,55 @@
+{
+  "init": [
+    "sessions",
+    "whitelist",
+    "blacklist",
+    "greylist",
+    "bunkernet",
+    "limit"
+  ],
+  "init_worker": [
+    "redis",
+    "bunkernet",
+    "dnsbl",
+    "customcert",
+    "letsencrypt",
+    "selfsigned"
+  ],
+  "set": ["sessions", "whitelist", "letsencrypt", "customcert", "selfsigned", "ui"],
+  "ssl_certificate": ["customcert", "letsencrypt", "selfsigned"],
+  "access": [
+    "whitelist",
+    "letsencrypt",
+    "blacklist",
+    "greylist",
+    "country",
+    "dnsbl",
+    "bunkernet",
+    "reversescan",
+    "limit",
+    "misc",
+    "cors",
+    "antibot"
+  ],
+  "headers": [
+    "headers",
+    "cors",
+    "reverseproxy",
+    "clientcache",
+    "antibot",
+    "misc"
+  ],
+  "log": ["badbehavior", "bunkernet", "errors", "metrics"],
+  "preread": [
+    "whitelist",
+    "blacklist",
+    "greylist",
+    "country",
+    "dnsbl",
+    "reversescan"
+  ],
+  "log_stream": ["badbehavior", "bunkernet"],
+  "log_default": ["badbehavior", "bunkernet", "errors", "misc", "metrics"],
+  "timer": ["metrics"],
+  "init_workers": []
+}

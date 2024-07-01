@@ -1,0 +1,7 @@
+--TEST--
+sqli test for code coverage, plain, mysql-style non-comment
+--INPUT--
+1' == --1 OR 1
+--EXPECTED--
+so1&1
+

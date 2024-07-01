@@ -1,0 +1,47 @@
+services:
+  myredmine:
+    image: redmine:5-alpine
+    restart: always
+    volumes:
+      - redmine-data:/usr/src/redmine/files
+    networks:
+      - bw-services
+    environment:
+      - REDMINE_DB_MYSQL=mydb
+      - REDMINE_DB_DATABASE=redminedb
+      - REDMINE_DB_USERNAME=user
+      - REDMINE_DB_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=www.example.com
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=http://myredmine:3000
+
+  mydb:
+    image: mysql:8
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - bw-services
+    environment:
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
+      - MYSQL_DATABASE=redminedb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match REDMINE_DB_PASSWORD)
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+
+volumes:
+  redmine-data:
+  db-data:

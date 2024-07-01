@@ -1,0 +1,37 @@
+name: Perform tests for UI (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      TEST:
+        required: true
+        type: string
+      RELEASE:
+        required: true
+        type: string
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Login to ghcr
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull BW image
+        run: docker pull ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} bunkerweb-tests
+      - name: Pull Scheduler image
+        run: docker pull ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} scheduler-tests
+      - name: Pull UI image
+        run: docker pull ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} ui-tests
+      # Do tests
+      - name: Run tests
+        run: |
+          cd ./tests/ui
+          ./tests.sh "docker" ${{ inputs.TEST }}
+        env:
+          MODE: ${{ inputs.RELEASE }}

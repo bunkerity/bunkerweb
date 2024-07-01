@@ -1,0 +1,80 @@
+version: "3.5"
+
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    pull_policy: never
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    pull_policy: never
+    depends_on:
+      - bw
+    volumes:
+      - bw-data:/data/lib
+      - bw-volume:/usr/share/bunkerweb
+      - ./init/plugins:/data/plugins
+    environment:
+      BUNKERWEB_INSTANCES: "bw"
+      SERVER_NAME: "bwadm.example.com"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      MULTISITE: "no"
+      HTTP_PORT: "80"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1:8080"
+      LOG_LEVEL: "info"
+      CUSTOM_LOG_LEVEL: "debug"
+      CUSTOM_CONF_MODSEC_test_custom_conf: 'SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
+      # ? DATABASE settings
+      DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
+    networks:
+      - bw-universe
+      - bw-docker
+
+  app1:
+    image: nginxdemos/nginx-hello
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.4
+
+volumes:
+  bw-data:
+    name: bw-data
+  bw-volume:
+    name: bw-volume
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+  bw-docker:
+    external: true

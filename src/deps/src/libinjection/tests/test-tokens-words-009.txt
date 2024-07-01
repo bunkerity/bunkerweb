@@ -1,0 +1,8 @@
+--TEST--
+MS Brackets
+--INPUT--
+[]
+--EXPECTED--
+n []
+
+

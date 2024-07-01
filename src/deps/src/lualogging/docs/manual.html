@@ -1,0 +1,472 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>LuaLogging: A simple API to use logging features in Lua</title>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+  <div id="product_logo">
+    <img alt="LuaLogging logo" src="images/lualogging-128.png"/>
+  </div>
+  <div id="product_name"><big><strong>LuaLogging</strong></big></div>
+  <div id="product_description">A simple API to use logging features in Lua.</div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+<h1>LuaLogging</h1>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><strong>Manual</strong>
+      <ul>
+        <li><a href="manual.html#installation">Installation</a></li>
+        <li><a href="manual.html#logger">Logger objects</a></li>
+        <li><a href="manual.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="manual.html#appenders">Appenders</a>
+      <ul>
+        <li><a href="console.html">Console</a></li>
+        <li><a href="file.html">File</a></li>
+        <li><a href="rolling_file.html">Rolling File</a></li>
+        <li><a href="sql.html">SQL</a></li>
+        <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
+        <li><a href="email.html">Email</a></li>
+        <li><a href="nginx.html">Nginx</a></li>
+      </ul>
+    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
+    <li><a href="license.html">License</a></li>
+  </ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+
+<h2><a name="introduction"></a>Introduction</h2>
+
+<p>LuaLogging provides a simple API to use logging features in Lua.
+Its design was based on
+<a href="https://logging.apache.org/log4j/docs/index.html">log4j</a>.
+LuaLogging currently supports console, file, email, socket and sql
+outputs through the use of <em><a href="#appenders">appenders</a></em>.</p>
+
+<p>The <code>logging</code> module holds a <code>new</code> function to create
+new <a href="#logger"><code>logger</code></a> objects.</p>
+
+<p>This logger constructor receives a function
+(known as the <em>appender</em> function)
+that will be called on each call to log a message.</p>
+
+<p>An <em>appender</em> function receives three arguments:</p>
+
+<ul>
+    <li><strong>self</strong>: the logger object</li>
+    <li><strong>level</strong>: the logging level</li>
+    <li><strong>message</strong>: the message to be logged</li>
+</ul>
+<p>The logger constructor also receives a optional second argument which should
+be a table with parameters</p>
+
+<h2><a name="installation"></a>Installation</h2>
+
+<p>LuaLogging is installed as a regular Lua module called <code>logging</code>.</p>
+<p>installation is easiest using LuaRocks; "<code>luarocks install lualogging</code>",
+or alternatively using the <code>Makefile</code>.</p>
+
+<h2><a name="logging"></a>Logging module</h2>
+
+<p>The logging module has a number of global functions:</p>
+<dl class="reference">
+  <dt><strong>logging.new( function[, logLevel] )</strong></dt>
+  <dd>Creates a new logger object from a custom 'appender' function. See examples below.
+    The appender function signature is <code>function(self, level, message)</code>. The
+    optional logLevel argument specifies the initial log-level to set (the value must be
+    a valid log-level constant). If omitted defaults to <code>logging.defaultLevel</code>.
+  </dd>
+
+  <dt><strong>patts = logging.buildLogPatterns([table], [string])</strong></dt>
+  <dd>Creates a log-patterns table. The returned table will for each level have
+    the logPattern set to 1. the value in the table, or alternatively 2. the
+    string value, or 3. the pattern from the global defaults.<br/>
+  <br/>
+    Returns a logPatterns table.<br/>
+  <br/>
+    Example logging source info only on debug-level, and coloring error and fatal
+    messages:
+    <pre class="example">
+local patterns = logging.buildLogPatterns(
+  {
+    [logging.DEBUG] = "%date %level %message (%source)\n"
+    [logging.ERROR] = "%date "..ansi_red.."%level %message"..ansi_reset.."\n"
+    [logging.FATAL] = "%date "..ansi_red.."%level %message"..ansi_reset.."\n"
+  }, "%date %level %message\n"
+)
+      </pre>
+  </dd>
+
+  <dt><strong>date_val = logging.date([format,[time]])</strong></dt>
+  <dd>Compatible with standard Lua <code>os.date()</code> function, but supports second fractions.
+    The placeholder in the format string is <code>"%q"</code>, or <code>"%1q"</code> to <code>"%6q"</code>,
+    where the number 1-6 specifies the number of decimals. The default is 3, so <code>"%q"</code> is the same
+    as <code>"%3q"</code>. The format will always have the specified length, padded with leading and trailing 0's
+    where necessary.<br/>
+    If the pattern is <code>"*t"</code>, then the returned table will have an extra field <code>"secf"</code> that holds
+    the fractional part.<br/>
+    <br/>
+    Example: <code>"%y-%m-%d %H:%M:%S.%6q"</code><br/>
+    <br/>
+    Note: if the "time" parameter is not provided, it will try and use the LuaSocket function <code>gettime()</code>
+    to get the time. If unavailable, the fractional part will be set to 0.
+  </dd>
+
+  <dt><strong>patts = logging.defaultLogPatterns([string | table])</strong></dt>
+  <dd>Sets the default logPatterns (global!) if a parameter is given.
+    If the parameter is a string then that string will be used as the pattern for
+    all log-levels. If a table is given, then it must have all log-levels defined
+    with a pattern string. See also <code>logging.buildLogPatterns</code>.<br/>
+  <br/>
+    The default is <code>"%date %level %message\n"</code> for all log-levels.<br/>
+  <br/>
+    Available placeholders in the pattern string are; <code>"%date"</code>, <code>"%level"</code>, <code>"%message"</code>,
+    <code>"%file"</code>, <code>"%line"</code>, <code>"%function"</code> and <code>"%source"</code>. The <code>"%source"</code> placeholder evaluates
+    to <code>"%file:%line in function'%function'"</code>.<br/>
+  <br/>
+    Returns the current defaultLogPatterns value.<br/>
+  <br/>
+    <em>NOTE:</em> since this is a global setting, libraries should never set it,
+    only applications should.
+  </dd>
+
+  <dt><strong>patt = logging.defaultTimestampPattern([string])</strong></dt>
+  <dd>Sets the default timestampPattern (global!) if given.
+    The default is <code>nil</code>, which results in a system specific date/time format.
+    The pattern should be accepted by the function <code>logging.date</code> for formatting.<br/>
+  <br/>
+    Returns the current defaultTimestampPattern value.<br/>
+  <br/>
+    <em>NOTE:</em> since this is a global setting, libraries should never set it,
+    only applications should.
+  </dd>
+
+  <dt><strong>level = logging.defaultLevel([level constant])</strong></dt>
+  <dd>Sets the default log-level (global!) if given. Each new logger object created
+    will start with the log-level as specified by this value.
+    The level parameter must be one of the log-level constants. The default is <code>logging.DEBUG</code>.<br/>
+  <br/>
+    Returns the current defaultLevel value.<br/>
+  <br/>
+    <em>NOTE:</em> since this is a global setting, libraries should never set it,
+    only applications should.
+  </dd>
+
+  <dt><strong>logger = logging.defaultLogger([logger object])</strong></dt>
+  <dd>Sets the default logger object (global!) if given.
+    The logger parameter must be a LuaLogging logger object. The default is to
+    generate a new <code>console</code> logger (with "destination" set to "stderr")
+    on the first call to get the default logger.<br/>
+  <br/>
+    Returns the current defaultLogger value.<br/>
+  <br/>
+    <em>NOTE:</em> since this is a global setting, libraries should never set it,
+    only applications should. Libraries should get this logger and use it, assuming
+    the application has set it.
+    <pre class="example">
+-- Example: application setting the default logger
+local color = require("ansicolors") -- https://github.com/kikito/ansicolors.lua
+local ll = require("logging")
+require "logging.console"
+ll.defaultLogger(ll.console {
+  destination = "stderr",
+  timestampPattern = "!%y-%m-%dT%H:%M:%S.%qZ", -- ISO 8601 in UTC
+  logPatterns = {
+    [ll.DEBUG] = color("%{white}%date%{cyan} %level %message (%source)\n"),
+    [ll.INFO] = color("%{white}%date%{white} %level %message\n"),
+    [ll.WARN] = color("%{white}%date%{yellow} %level %message\n"),
+    [ll.ERROR] = color("%{white}%date%{red bright} %level %message %{cyan}(%source)\n"),
+    [ll.FATAL] = color("%{white}%date%{magenta bright} %level %message %{cyan}(%source)\n"),
+  }
+})
+
+
+-- Example: library using default if available (fallback to nop)
+local log do
+  local ll = package.loaded.logging
+  if ll and type(ll) == "table" and ll.defaultLogger and
+    tostring(ll._VERSION):find("LuaLogging") then
+    -- default LuaLogging logger is available
+    log = ll.defaultLogger()
+  else
+    -- just use a stub logger with only no-op functions
+    local nop = function() end
+    log = setmetatable({}, {
+      __index = function(self, key) self[key] = nop return nop end
+    })
+  end
+end
+
+log:debug("starting my library")
+  </pre>
+  </dd>
+  </dl>
+
+
+<h2><a name="environment"></a>Environment variables</h2>
+
+<p>The submodule <code>logging.envconfig</code> allows to configure the default
+logger via environment variables. This is done based on a "prefix" for the environment
+variables (with default value "LL").
+The variables are the logger options names with the prefix in all-caps separated by "_".
+So if a logger takes an option "<code>opts.logLevel</code>", then it can be configured
+using environment variable <code>LL_LOGLEVEL=warn</code>.</p>
+
+<p>The type of logger can be set using environment variable <code>LL_LOGGER=console</code>
+(assuming the default prefix "LL").</p>
+
+<p>The defaults are "LL" for the prefix, and a console logger to "stderr".</p>
+
+<p>The exposed functions:</p>
+<dl class="reference">
+  <dt><strong>envconfig.set_default_settings(prefix)</strong></dt>
+  <dd>Sets the default prefix and loads the configuration. Returns <code>true</code> on
+    success, <code>nil, "already set a default"</code> if it was called before. Will
+    throw an error if something during the configuration fails (bad user input in environment
+    variables for example).<br/>
+    This method should be called by applications at startup, to set the default prefix.
+  </dd>
+
+  <dt><strong>name, opts = envconfig.get_default_settings()</strong></dt>
+  <dd>returns the appender name (eg. "file", "console", etc), and the options table for
+    configuring the appender. The table has a metatable that will dynamically lookup
+    fields in environment variables, this ensures that any option an appender checks
+    will be read and returned.
+    Boolean and number values will be converted to their respective types (case insensitive).<br/>
+  <br/>
+    The common <code>logPatterns</code> field is a special case where each level can be
+    configured by appending the level with an "_". See example below:
+    <pre class="example">
+# set these environment variables
+export MYAPP_LOGGER="console"
+export MYAPP_LOGLEVEL="info"
+export MYAPP_LOGPATTERN = "%message"
+export MYAPP_LOGPATTERNS_DEBUG = "%message %source"
+export MYAPP_LOGPATTERNS_FATAL = "Oh my!! %message"
+
+-- Lua code (see set_default_logger for a shorter version)
+local logging = require "logging"
+local logenv = require "logging.envconfig"
+assert(logenv.set_default_settings("MYAPP"))
+local logger_name, logger_opts = logenv.get_default_settings()
+local logger = assert(require("logging."..logger_name)(logger_opts))
+logging.setdefaultLogger(logger)
+
+logger:info("configured via environment!")
+    </pre>
+  </dd>
+
+  <dt><strong>logger = envconfig.set_default_logger(prefix)</strong></dt>
+  <dd>Sets (and returns) the default logger from the environment.
+    <pre class="example">
+# set these environment variables
+export MYAPP_LOGGER="console"
+export MYAPP_LOGLEVEL="info"
+export MYAPP_LOGPATTERN = "%message"
+export MYAPP_LOGPATTERNS_DEBUG = "%message %source"
+export MYAPP_LOGPATTERNS_FATAL = "Oh my!! %message"
+
+-- Lua code
+local logenv = require "logging.envconfig"
+local logger = assert(logenv.set_default_logger("MYAPP"))
+
+logger:info("configured via environment!")
+    </pre>
+  </dd>
+
+
+</dl>
+
+
+<h2><a name="logger"></a>Logger objects</h2>
+
+<p>Logger objects are created by loading the 'appender' module, and calling on it. For example:</p>
+<pre class="example">
+  local logger = require("logging.console") {
+    -- options go here (see appenders for options)
+  }
+</pre>
+
+<p>A logger object offers the following methods that write log messages.</p>
+
+<p>For each of the methods below, the parameter <code>message</code> may be any lua value,
+not only strings. When necessary <code>message</code> is converted to a string.</p>
+
+<p>The parameter <code>level</code> can be one of the variables enumerated below.
+The values are presented in descending criticality, so if the minimum level is
+defined as <code>logger.WARN</code> then <code>logger.INFO</code> and
+<code>logger.DEBUG</code> level messages are not logged.
+The default set level at startup is <code>logger.DEBUG</code>.</p>
+
+<h3>Constants</h3>
+
+<dl class="reference">
+    <dt><strong>logger.DEBUG</strong></dt>
+    <dd>The <em>DEBUG</em> level designates fine-grained informational events that
+    are most useful to debug an application.</dd>
+
+    <dt><strong>logger.INFO</strong></dt>
+    <dd>The <em>INFO</em> level designates informational messages that highlight the
+    progress of the application at coarse-grained level.</dd>
+
+    <dt><strong>logger.WARN</strong></dt>
+    <dd>The <em>WARN</em> level designates potentially harmful situations.</dd>
+
+    <dt><strong>logger.ERROR</strong></dt>
+    <dd>The <em>ERROR</em> level designates error events that might still allow the
+    application to continue running.</dd>
+
+    <dt><strong>logger.FATAL</strong></dt>
+    <dd>The <em>FATAL</em> level designates very severe error events that would
+    presumably lead the application to abort.</dd>
+
+    <dt><strong>logger.OFF</strong></dt>
+    <dd>The <em>OFF</em> level will stop all log messages.</dd>
+</dl>
+
+<h3>Methods</h3>
+
+<dl class="reference">
+    <dt><strong>logger:log (level, [message]|[table]|[format, ...]|[function, ...])</strong></dt>
+    <dd>Logs a message with the specified level.</dd>
+
+    <dt><strong>logger:setLevel (level)</strong></dt>
+    <dd>This method sets a minimum level for messages to be logged.</dd>
+
+    <dt><strong>logger:getPrint (level)</strong></dt>
+    <dd>This method returns a print-like function that redirects all output to
+    the logger instead of the console. The <code>level</code> parameter specifies
+    the log-level of the output.</dd>
+</dl>
+
+<p>The following set of methods is dynamically generated from the log-levels.</p>
+
+<dl class="reference">
+
+    <dt><strong>logger:debug ([message]|[table]|[format, ...]|[function, ...])</strong></dt>
+    <dd>Logs a message with DEBUG level.</dd>
+
+    <dt><strong>logger:info ([message]|[table]|[format, ...]|[function, ...])</strong></dt>
+    <dd>Logs a message with INFO level.</dd>
+
+    <dt><strong>logger:warn ([message]|[table]|[format, ...]|[function, ...])</strong></dt>
+    <dd>Logs a message with WARN level.</dd>
+
+    <dt><strong>logger:error ([message]|[table]|[format, ...]|[function, ...])</strong></dt>
+    <dd>Logs a message with ERROR level.</dd>
+
+    <dt><strong>logger:fatal ([message]|[table]|[format, ...]|[function, ...])</strong></dt>
+    <dd>Logs a message with FATAL level.</dd>
+</dl>
+
+<h2><a name="examples"></a>Examples</h2>
+
+<p>The example below creates a logger that prints the level and message
+to the standard output (or whatever the print function does).</p>
+
+<pre class="example">
+local Logging = require "logging"
+
+local appender = function(self, level, message)
+  print(level, message)
+  return true
+end
+
+local logger = Logging.new(appender)
+
+logger:setLevel(logger.WARN)
+logger:log(logger.INFO, "sending email")
+
+logger:info("trying to contact server")
+logger:warn("server did not respond yet")
+logger:error("server unreachable")
+
+-- dump a table in a log message
+local tab = { a = 1, b = 2 }
+logger:debug(tab)
+
+-- use string.format() style formatting
+logger:info("val1='%s', val2=%d", "string value", 1234)
+
+-- complex log formatting.
+local function log_callback(val1, val2)
+  -- Do some complex pre-processing of parameters, maybe dump a table to a string.
+  return string.format("val1='%s', val2=%d", val1, val2)
+end
+
+-- function 'log_callback' will only be called if the current log level is "DEBUG"
+logger:debug(log_callback, "string value", 1234)
+
+-- create a print that redirects to the logger at level "INFO"
+logger:setLevel (logger.INFO)
+local print = logger:getPrint(logger.INFO)
+print "hello\nthere!"
+</pre>
+
+<p>Upon execution of the above example the following lines will
+show in the standard output. Notice that some of the <em>INFO</em> log requests
+are not handled because the minimum level is set to <em>WARN</em>.</p>
+
+<pre class="example">
+WARN server did not responded yet
+ERROR server unreachable
+INFO hello
+INFO there!
+</pre>
+
+<a name="appenders"></a>
+
+<h2>Appenders</h2>
+
+The following appenders are included in the standard distribution.
+
+<ul>
+<li><a href="console.html">Console</a></li>
+<li><a href="file.html">File</a></li>
+<li><a href="rolling_file.html">Rolling File</a></li>
+<li><a href="sql.html">SQL</a></li>
+<li><a href="socket.html">Socket</a></li>
+<li><a href="rsyslog.html">Rsyslog</a></li>
+<li><a href="email.html">Email</a></li>
+<li><a href="nginx.html">Nginx/OpenResty</a></li>
+</ul>
+
+<h2>Upgrading from 1.0.0</h2>
+
+<p>Upgrading from LuaLogging 1.0.0 is very easy. The
+<code>logger</code> object is fully compatible. You just need to
+change the code that creates the object.</p>
+
+<p>The <code>logger</code> constructor from 1.0.0 received a single
+argument which was a filename. To upgrade to 1.1.0 you should
+create a <code>logging.file</code> object instead, passing the
+filename as argument. As simple as this.</p>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+  <p><a href="https://validator.w3.org/check?uri=referer">
+    <img src="https://www.w3.org/Icons/valid-xhtml10" alt="XHTML 1.0 v&aacute;lido!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html>

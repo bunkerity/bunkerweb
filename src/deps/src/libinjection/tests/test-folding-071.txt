@@ -1,0 +1,10 @@
+--TEST--
+select 1,-1;
+--INPUT--
+select 1,-1;
+--EXPECTED--
+E select
+1 1
+; ;
+
+

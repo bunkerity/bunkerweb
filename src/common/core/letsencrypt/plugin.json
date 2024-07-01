@@ -1,0 +1,59 @@
+{
+  "id": "letsencrypt",
+  "name": "Let's Encrypt",
+  "description": "Automatic creation, renewal and configuration of Let's Encrypt certificates.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "AUTO_LETS_ENCRYPT": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Activate automatic Let's Encrypt mode.",
+      "id": "auto-lets-encrypt",
+      "label": "Automatic Let's Encrypt",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "EMAIL_LETS_ENCRYPT": {
+      "context": "multisite",
+      "default": "",
+      "help": "Email used for Let's Encrypt notification and in certificate.",
+      "id": "email-lets-encrypt",
+      "label": "Email Let's Encrypt",
+      "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
+      "type": "text"
+    },
+    "USE_LETS_ENCRYPT_STAGING": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
+      "id": "use-lets-encrypt-staging",
+      "label": "Use Let's Encrypt Staging",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+      "context": "global",
+      "default": "no",
+      "help": "Clear old certificates when renewing.",
+      "id": "lets-encrypt-clear-old-certs",
+      "label": "Clear old certificates when they are no longer needed",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    }
+  },
+  "jobs": [
+    {
+      "name": "certbot-new",
+      "file": "certbot-new.py",
+      "every": "once",
+      "reload": false
+    },
+    {
+      "name": "certbot-renew",
+      "file": "certbot-renew.py",
+      "every": "day",
+      "reload": true
+    }
+  ]
+}

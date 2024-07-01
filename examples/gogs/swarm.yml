@@ -1,0 +1,36 @@
+services:
+  mygogs:
+    image: gogs/gogs:0.13
+    volumes:
+      - gogs_data:/data/gogs/data
+    networks:
+      - bw-services
+    configs:
+      - source: config_gogs_app
+        target: /data/gogs/conf/app.ini
+        uid: "0"
+        gid: "0"
+        mode: 0444
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+      labels:
+        - bunkerweb.SERVER_NAME=www.example.com
+        - bunkerweb.USE_REVERSE_PROXY=yes
+        - bunkerweb.REVERSE_PROXY_URL=/
+        - bunkerweb.REVERSE_PROXY_HOST=http://mygogs:3000
+        - bunkerweb.REVERSE_PROXY_HEADERS_1=Authorization $http_authorization
+        - bunkerweb.MAX_CLIENT_SIZE=1G
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services
+
+volumes:
+  gogs_data:
+
+configs:
+  config_gogs_app:
+    file: ./gogs-data/gogs/conf/app.ini

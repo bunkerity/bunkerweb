@@ -1,0 +1,14 @@
+{
+  "name": "ghost",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "timeout": 60,
+  "delay": 300,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "ghost",
+      "tls": "www.example.com"
+    }
+  ]
+}

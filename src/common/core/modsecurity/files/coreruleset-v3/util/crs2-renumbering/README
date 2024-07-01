@@ -1,0 +1,30 @@
+CRS 2.x to 3.x migration utility
+================================
+
+In CRS 3.0, we have renumbered the rules to be more logical and helpful.
+The new rule file names now correspond with the rule IDs in the file.
+First rule of a given file is usually 9XX100, then the rules continue
+in steps of ten. Related rules/siblings follow with a single digit
+change (9XX101, etc.).
+
+This utility replaces CRS 2 ruleIds with their CRS 3 counterparts.
+You can use it when migrating your CRS 2 exclusion/.conf files to CRS 3.0
+or higher.
+
+Example usage:
+
+	./update.py -f your_old_modsec_conf.conf
+
+Rules which have been removed in CRS 3 are listed with the new ID 000000 in the
+CSV file. This means that the former rule is no longer part of CRS 3. If after
+replacement you find a string 000000 in your config files, you can likely
+remove that exclusion or special case.
+
+If you want to create your own tooling for this migration, you can use
+the file idNumbering.csv in this directory. It lists the old rule IDs of
+CRS 2.2, together with the corresponding rule IDs in CRS 3.0.
+
+A rule renumbering is painful for all existing installations. But we really
+think that the rule IDs lacked sense and reason, and we are confident future
+maintenance will be much easier once this is done. We do not plan to change
+rule IDs after this. We appreciate your understanding in this matter.

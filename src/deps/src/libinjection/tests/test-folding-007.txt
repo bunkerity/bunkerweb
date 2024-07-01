@@ -1,0 +1,5 @@
+--TEST--
+nothing but unary, left-parens, comments
+--INPUT--
+- /* foo */ ( /* bar */ -
+--EXPECTED--

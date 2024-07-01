@@ -1,0 +1,85 @@
+version: "3.5"
+
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    pull_policy: never
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    volumes:
+      - ./www:/var/www/html
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    pull_policy: never
+    depends_on:
+      - bw
+    environment:
+      BUNKERWEB_INSTANCES: "bw"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
+      HTTP_PORT: "80"
+      HTTPS_PORT: "443"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      GENERATE_SELF_SIGNED_SSL: "no"
+      REMOTE_PHP: "bw-php"
+      REMOTE_PHP_PATH: "/app"
+      CUSTOM_LOG_LEVEL: "debug"
+
+      # ? HEADERS settings
+      CUSTOM_HEADER: ""
+      REMOVE_HEADERS: "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version"
+      KEEP_UPSTREAM_HEADERS: "Content-Security-Policy X-Frame-Options"
+      STRICT_TRANSPORT_SECURITY: "max-age=31536000; includeSubDomains; preload"
+      COOKIE_FLAGS: "* HttpOnly SameSite=Lax"
+      COOKIE_AUTO_SECURE_FLAG: "yes"
+      CONTENT_SECURITY_POLICY: "object-src 'none'; form-action 'self'; frame-ancestors 'self';"
+      CONTENT_SECURITY_POLICY_REPORT_ONLY: "no"
+      REFERRER_POLICY: "strict-origin-when-cross-origin"
+      PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"
+      DISABLE_FLOC: "yes"
+      X_FRAME_OPTIONS: "SAMEORIGIN"
+      X_CONTENT_TYPE_OPTIONS: "nosniff"
+      X_XSS_PROTECTION: "1; mode=block"
+      X_DNS_PREFETCH_CONTROL: "off"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
+    networks:
+      - bw-universe
+
+  bw-php:
+    image: php:fpm-alpine3.17
+    volumes:
+      - ./www:/app
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.4
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24

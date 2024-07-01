@@ -1,0 +1,97 @@
+name: Push on GitHub (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        required: true
+        type: string
+      PRERELEASE:
+        required: true
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      # Get PDF doc
+      - name: Get documentation
+        if: inputs.VERSION != 'testing'
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+      # Create tag
+      - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
+        name: Create tag
+        if: inputs.VERSION != 'testing'
+        with:
+          tag: "v${{ inputs.VERSION }}"
+          message: "v${{ inputs.VERSION }}"
+          force_push_tag: true
+      # Create tag
+      - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
+        name: Create tag
+        if: inputs.VERSION == 'testing'
+        with:
+          tag: "${{ inputs.VERSION }}"
+          message: "${{ inputs.VERSION }}"
+          force_push_tag: true
+      # Extract changelog
+      - name: Extract changelog
+        if: inputs.VERSION != 'testing'
+        id: getchangelog
+        run: |
+          content=$(awk -v n=2 '/##/{n--}; n > 0' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "content=$content" >> $GITHUB_OUTPUT
+      # Create release
+      - name: Create release
+        if: inputs.VERSION != 'testing'
+        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
+        with:
+          body: |
+            Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
+
+            Docker tags :
+            - BunkerWeb : `bunkerity/bunkerweb:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb:${{ inputs.VERSION }}`
+            - Scheduler : `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
+            - Autoconf : `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
+            - UI : `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
+
+            Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
+
+            Changelog :
+            ${{ steps.getchangelog.outputs.content }}
+          draft: true
+          prerelease: ${{ inputs.PRERELEASE }}
+          name: v${{ inputs.VERSION }}
+          tag_name: v${{ inputs.VERSION }}
+          discussion_category_name: Announcements
+          files: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+      # Create release
+      - name: Create release
+        if: inputs.VERSION == 'testing'
+        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
+        with:
+          body: |
+            **The testing version of BunkerWeb should not be used in production, please use the latest stable version instead.**
+
+            Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
+
+            Docker tags :
+            - BunkerWeb : `bunkerity/bunkerweb:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb:${{ inputs.VERSION }}`
+            - Scheduler : `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
+            - Autoconf : `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
+            - UI : `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
+
+            Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
+
+            Please note that when using Linux Debian or Ubuntu integration, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing the testing version of BunkerWeb.
+          draft: false
+          prerelease: ${{ inputs.PRERELEASE }}
+          name: Testing
+          tag_name: ${{ inputs.VERSION }}

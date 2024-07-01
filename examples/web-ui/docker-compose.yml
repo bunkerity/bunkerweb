@@ -1,0 +1,86 @@
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
+    ports:
+      - "80:8080"
+      - "443:8443"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com"
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      SERVE_FILES: "no"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      www.example.com_USE_UI: "yes"
+      www.example.com_USE_REVERSE_PROXY: "yes"
+      www.example.com_REVERSE_PROXY_URL: "/changeme"
+      www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
+      www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
+      www.example.com_MAX_CLIENT_SIZE: "50m"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:1.6.0-beta
+    container_name: bw-ui
+    environment:
+      <<: *env
+      ADMIN_USERNAME: "changeme"
+      ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-db:
+    image: mariadb:11
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # replace with a stronger password
+    volumes:
+      - bw-db:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
+
+volumes:
+  bw-data:
+  bw-db:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db

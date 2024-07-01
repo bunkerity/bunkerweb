@@ -1,0 +1,113 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
+    ports:
+      - "80:8080"
+      - "443:8443"
+    environment:
+      API_WHITELIST_IP: "127.0.0.1 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domain
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      API_WHITELIST_IP: "127.0.0.1 10.20.30.0/24"
+      MAX_CLIENT_SIZE: "10G"
+      USE_CLIENT_CACHE: "yes"
+      SERVE_FILES: "no"
+      ALLOWED_METHODS: "GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS"
+      X_FRAME_OPTIONS: "SAMEORIGIN"
+      USE_GZIP: "yes"
+      BAD_BEHAVIOR_STATUS_CODES: "400 401 403 405 444"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://mync"
+      LIMIT_REQ_URL_1: "/apps"
+      LIMIT_REQ_RATE_1: "5r/s"
+      LIMIT_REQ_URL_2: "/apps/text/session/sync"
+      LIMIT_REQ_RATE_2: "8r/s"
+      LIMIT_REQ_URL_3: "/core/preview"
+      LIMIT_REQ_RATE_3: "5r/s"
+      CUSTOM_CONF_MODSEC_CRS_nextcloud: |
+        SecAction \
+         "id:900130,\
+          phase:1,\
+          nolog,\
+          pass,\
+          t:none,\
+          setvar:tx.crs_exclusions_nextcloud=1"
+        # WebDAV
+        SecAction \
+         "id:900200,\
+          phase:1,\
+          nolog,\
+          pass,\
+          t:none,\
+          setvar:'tx.allowed_methods=GET POST HEAD COPY DELETE LOCK MKCOL MOVE PROPFIND PROPPATCH PUT UNLOCK OPTIONS'"
+      CUSTOM_CONF_MODSEC_nextcloud: |
+        SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:2000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  mync:
+    image: nextcloud:stable-apache
+    volumes:
+      - nc-files:/var/www/html
+    environment:
+      NEXTCLOUD_ADMIN_USER: "admin" # replace with the admin username
+      NEXTCLOUD_ADMIN_PASSWORD: "changeme" # replace with a stronger password
+      NEXTCLOUD_TRUSTED_DOMAINS: "www.example.com" # replace with your domain(s)
+      TRUSTED_PROXIES: "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+      APACHE_DISABLE_REWRITE_IP: "1"
+      MYSQL_HOST: "mydb"
+      MYSQL_DATABASE: "nc"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "db-user-pwd" # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+    networks:
+      - nextcloud-net
+      - bw-services
+
+  mydb:
+    image: mariadb:11
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "db-root-pwd" # replace with a stronger password
+      MYSQL_DATABASE: "nc"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "db-user-pwd" # replace with a stronger password (must match MYSQL_PASSWORD)
+    networks:
+      - nextcloud-net
+
+volumes:
+  bw-data:
+  db-data:
+  nc-files:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  nextcloud-net:
+    name: nextcloud-net

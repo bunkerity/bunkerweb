@@ -1,0 +1,17 @@
+{
+  "name": "reverse-proxy-websocket",
+  "kinds": ["docker"],
+  "timeout": 60,
+  "tests": [
+    {
+      "type": "string-ws",
+      "url": "https://www.example.com/app1",
+      "string": "hello"
+    },
+    {
+      "type": "string",
+      "url": "https://www.example.com/app2",
+      "string": "hello"
+    }
+  ]
+}

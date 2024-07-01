@@ -1,0 +1,10 @@
+--TEST--
+identifiers in backquotes evaluated as functions
+--INPUT--
+SELECT `version`();
+--EXPECTED--
+E SELECT
+f version
+( (
+) )
+; ;

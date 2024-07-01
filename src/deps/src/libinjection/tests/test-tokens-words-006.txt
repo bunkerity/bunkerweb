@@ -1,0 +1,11 @@
+--TEST--
+keyword parsing, bogus SQL, but testing keyword merging
+--INPUT--
+SELECT 1 CROSS FIT 2;
+--EXPECTED--
+E SELECT
+1 1
+n CROSS
+n FIT
+1 2
+; ;

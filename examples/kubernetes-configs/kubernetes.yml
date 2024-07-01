@@ -1,0 +1,207 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+spec:
+  rules:
+    - host: app1.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app1
+                port:
+                  number: 80
+    - host: app2.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app2
+                port:
+                  number: 80
+    - host: app3.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-app3
+                port:
+                  number: 80
+---
+# you don't even need to mount the config as volumes : a declaration is enough, the controller will take care of the rest
+# bunkerweb.io/CONFIG_TYPE accepted values are http, stream, server-http, server-stream, default-server-http, modsec and modsec-crs
+# bunkerweb.io/CONFIG_SITE lets you choose on which web service the config should be applied (MULTISITE mode) and if it's not set, the config will be applied for all services
+# more info at https://docs.bunkerweb.io
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cfg-bunkerweb-all-server-http
+  annotations:
+    bunkerweb.io/CONFIG_TYPE: "server-http"
+data:
+  myconf: |
+    location /hello {
+        default_type "text/plain";
+        content_by_lua_block {
+            ngx.say("hello")
+        }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cfg-bunkerweb-app1-server-http
+  annotations:
+    bunkerweb.io/CONFIG_TYPE: "server-http"
+    bunkerweb.io/CONFIG_SITE: "app1.example.com"
+data:
+  myconf: |
+    location /app1 {
+        default_type "text/plain";
+        content_by_lua_block {
+            ngx.say("app1")
+        }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cfg-bunkerweb-app2-server-http
+  annotations:
+    bunkerweb.io/CONFIG_TYPE: "server-http"
+    bunkerweb.io/CONFIG_SITE: "app2.example.com"
+data:
+  myconf: |
+    location /app2 {
+        default_type "text/plain";
+        content_by_lua_block {
+            ngx.say("app2")
+        }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cfg-bunkerweb-app3-server-http
+  annotations:
+    bunkerweb.io/CONFIG_TYPE: "server-http"
+    bunkerweb.io/CONFIG_SITE: "app3.example.com"
+data:
+  myconf: |
+    location /app3 {
+        default_type "text/plain";
+        content_by_lua_block {
+            ngx.say("app3")
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+        - name: app1
+          image: nginxdemos/nginx-hello
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+  labels:
+    app: app2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+        - name: app2
+          image: nginxdemos/nginx-hello
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app3
+  labels:
+    app: app3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app3
+  template:
+    metadata:
+      labels:
+        app: app3
+    spec:
+      containers:
+        - name: app3
+          image: nginxdemos/nginx-hello
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app1
+spec:
+  selector:
+    app: app1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app2
+spec:
+  selector:
+    app: app2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-app3
+spec:
+  selector:
+    app: app3
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

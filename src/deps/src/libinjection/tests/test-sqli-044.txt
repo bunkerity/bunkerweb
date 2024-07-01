@@ -1,0 +1,10 @@
+--TEST--
+Short SQL, 1 INTO OUTFILE 'foo' is sqli, but this is not
+--INPUT--
+1 ANALYZE 'foo'
+--EXPECTED--
+
+
+
+
+

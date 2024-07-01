@@ -1,0 +1,83 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.0-beta
+    container_name: bunkerweb
+    depends_on:
+      - mysyslog
+    ports:
+      - "80:8080"
+      - "443:8443"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - syslog-net
+      - bw-universe
+      - bw-services
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://10.10.10.254:514"
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.0-beta
+    depends_on:
+      - bunkerweb
+      - mysyslog
+    volumes:
+      - bw-data:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.10.10.0/24"
+      AUTO_LETS_ENCRYPT: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://myapp:8080"
+    restart: "unless-stopped"
+    networks:
+      - syslog-net
+      - bw-universe
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://10.10.10.254:514"
+
+  mysyslog:
+    image: balabit/syslog-ng:4.7.1 # For x86_64 architecture
+    # image: lscr.io/linuxserver/syslog-ng:4.7.1-r1-ls116 # For aarch64 architecture
+    command: --no-caps
+    volumes:
+      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+      - ./log:/var/log
+    networks:
+      syslog-net:
+        ipv4_address: 10.10.10.254
+
+  myapp:
+    image: nginxdemos/nginx-hello
+    networks:
+      - bw-services
+
+volumes:
+  bw-data:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  syslog-net:
+    name: syslog-net
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.10.0/24
+  bw-services:
+    name: bw-services

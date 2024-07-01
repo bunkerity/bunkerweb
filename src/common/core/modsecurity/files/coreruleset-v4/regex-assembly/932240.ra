@@ -1,0 +1,44 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 932240 (Generic RCE Unix command evasion detection)
+##!
+##! Conceptually, we want to match:
+##! - at least one character
+##! - at least one character from an evasion technique
+
+##!+ i
+
+##! The previous cmdline evasion detection was based on the one from modsecurity: `[\x5c'\"]*`
+##! We extended the evasion detection from the cmdline processor with `(?:\$[a-z0-9_@?!#{*-]*)?(?:\x5c)?` to match:
+##! - non-existing vars: cu$@rl, una$$me -a, uname$$u -a
+##! - vars + spacing: v='u';cu$v\r\l google.com
+##! - globbing pattern expansion: {n$u\c$u,-nlvp,777}
+##! - globbing: garb=cur[l];$garb+google.com
+
+##! kill '-'9
+##!> assemble
+  [a-z0-9_-]+
+  ##!=>
+  \s*['\"][^'\"\s]+['\"]
+  ##!=>
+  [a-z0-9_-]+
+##!<
+
+##!> assemble
+  [a-z0-9_-]+
+  ##!=>
+  ##! py""thon
+  ['\"]['\"]+
+  [\x5c\[\]]+
+  \$+[\x5ca-z0-9_@?!#{*-]+
+  ##! process substitution
+  ``
+  \$\(\)
+  <\(\)
+  >\(\)
+  ##!=>
+
+  \s*[a-z0-9_-]+
+  ##!=>
+##!<

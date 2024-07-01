@@ -1,0 +1,98 @@
+{
+  "id": "modsecurity",
+  "name": "ModSecurity",
+  "description": "Management of the ModSecurity WAF.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_MODSECURITY": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable ModSecurity WAF.",
+      "id": "use-modsecurity",
+      "label": "Use ModSecurity",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "USE_MODSECURITY_CRS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable OWASP Core Rule Set.",
+      "id": "use-modsecurity-crs",
+      "label": "Use Core Rule Set",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "USE_MODSECURITY_CRS_PLUGINS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Enable OWASP Core Rule Set plugins.",
+      "id": "use-modsecurity-crs-plugins",
+      "label": "Use Core Rule Set Plugins",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "MODSECURITY_CRS_VERSION": {
+      "context": "multisite",
+      "default": "4",
+      "help": "Version of the OWASP Core Rule Set to use with ModSecurity (3, 4 or nightly).",
+      "id": "modsecurity-crs-version",
+      "label": "Core Rule Set Version",
+      "regex": "^(3|4|nightly)$",
+      "type": "select",
+      "select": ["3", "4", "nightly"]
+    },
+    "MODSECURITY_CRS_PLUGIN_URLS": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of OWASP CRS plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space). (Not compatible with CRS version 3)",
+      "id": "modsecurity-crs-plugin-urls",
+      "label": "Core Rule Set Plugin URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "type": "text"
+    },
+    "MODSECURITY_SEC_AUDIT_ENGINE": {
+      "context": "multisite",
+      "default": "RelevantOnly",
+      "help": "SecAuditEngine directive of ModSecurity.",
+      "id": "modsecurity-sec-audit-engine",
+      "label": "SecAuditEngine",
+      "regex": "^(On|RelevantOnly|Off)$",
+      "type": "select",
+      "select": ["On", "RelevantOnly", "Off"]
+    },
+    "MODSECURITY_SEC_RULE_ENGINE": {
+      "context": "multisite",
+      "default": "On",
+      "help": "SecRuleEngine directive of ModSecurity.",
+      "id": "modsecurity-sec-rule-engine",
+      "label": "SecRuleEngine",
+      "regex": "^(On|DetectionOnly|Off)$",
+      "type": "select",
+      "select": ["On", "DetectionOnly", "Off"]
+    },
+    "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+      "context": "multisite",
+      "default": "ABCFHZ",
+      "help": "SecAuditLogParts directive of ModSecurity.",
+      "id": "modsecurity-sec-audit-log-parts",
+      "label": "SecAuditLogParts",
+      "regex": "^A(([B-K])(?!.*\\2))+Z$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "coreruleset-nightly",
+      "file": "coreruleset-nightly.py",
+      "every": "day",
+      "reload": true
+    },
+    {
+      "name": "download-crs-plugins",
+      "file": "download-crs-plugins.py",
+      "every": "day",
+      "reload": true
+    }
+  ]
+}

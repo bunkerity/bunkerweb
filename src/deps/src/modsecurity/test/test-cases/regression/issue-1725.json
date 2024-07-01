@@ -1,0 +1,42 @@
+[
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Macro expansion on msg and logdata does not work for DURATION",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1725",
+  "gihub_issue": 1725,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "headers":{
+      "Host":"localhost",
+      "User-Agent":"curl/7.38.0",
+      "Accept":"*/*",
+      "Content-Length": "1539",
+      "Cookie": "__utma=1.32168570.12572608.1259628772.2&__utmb=1.4.10.1259628772&"
+    },
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1,
+    "uri": "/test"
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "\/test; 0.[0-9]+; 0.[0-9]+;"
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRule DURATION \"@unconditionalMatch\" \"phase:2,id:10001,log,auditlog,pass,msg:'%{REQUEST_URI}; %{MATCHED_VAR}; %{DURATION};',logdata:'%{REQUEST_URI}; %{MATCHED_VAR}; %{DURATION};'\""
+  ]
+}
+]

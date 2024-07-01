@@ -1,0 +1,66 @@
+{% set template_data = {"javascript": ""} %}
+<!DOCTYPE html>
+<html lang="en">
+    {% include "head.html" %}
+    <body class="overflow-x-hidden h-full font-sans z-100 m-0 text-base antialiased font-normal dark:bg-slate-900 leading-default bg-primary text-slate-500">
+        <noscript class="relative w-full p-4 text-white bg-yellow-500 rounded-lg">Your browser does not support JavaScript!</noscript>
+        <div data-loader
+             class="fixed z-[10000] transition duration-300 h-screen w-screen bg-primary flex justify-center align-middle items-center">
+            <img data-loader-img
+                 src="images/logo-menu-2.png"
+                 class="-translate-x-1.5 duration-300 w-50 h-14 md:w-60 md:h-16 lg:w-80 lg:h-24 inline transition-all"
+                 alt="main logo" />
+        </div>
+        {% include "menu.html" %}
+        {% include "news.html" %}
+        {% include "flashs.html"
+        %}
+        {% include "banner.html" %}
+        <div class="w-full relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl">
+            {% include "header.html" %}
+        </div>
+        <!-- info -->
+        <main class="xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-3 min-h-[85vh] flex flex-col justify-between">
+            <div class="max-w-[1920px] grid gap-y-4 gap-3 sm:gap-4 lg:gap-6 grid-cols-12 w-full">
+                <div class="hidden"
+                     data-global-is-readonly="{% if is_readonly %}true{% else %}false{% endif %}"></div>
+                {% block content %}{% endblock %}
+            </div>
+            {% include "footer.html" %}
+        </main>
+        <!-- end info -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if
+                messages %}
+                <!-- flash message-->
+                {% for category, message in messages %}
+                    <div role="alert"
+                         aria-description="login message alert"
+                         data-flash-message
+                         data-flash-message-fixed
+                         class="{% if category == 'error' %} bg-red-500 {% else %} bg-green-500 {% endif %} p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 my-2 border rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90">
+                        <div class="flex justify-between align-top items-start">
+                            {% if category == 'error' %}
+                                <h5 class="text-lg mb-0 text-white">Error</h5>
+                            {% else %}
+                                <h5 class="text-lg mb-0 text-white">Success</h5>
+                            {% endif %}
+                            <button aria-label="close flash message"
+                                    data-close-flash-message
+                                    class="absolute right-8 top-2">
+                                <svg class="cursor-pointer fill-white dark:opacity-80 absolute h-5 w-5"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 320 512">
+                                    <path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="text-white mt-2 mb-0 text-sm">{{ message|safe }}</p>
+                    </div>
+                {% endfor %}
+                <!-- end flash message-->
+            {% endif %}
+        {% endwith %}
+    </body>
+</html>

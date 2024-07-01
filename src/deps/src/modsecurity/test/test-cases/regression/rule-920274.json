@@ -1,0 +1,43 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Byte ranges :: OWASP CRS id:920274",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "Test": "ThisIsATest%60"
+      },
+      "uri":"/",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":400,
+      "debug_log":"Invalid character in request headers"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecDefaultAction \"phase:2,deny,block,status:400,log\"",
+      "SecRule REQUEST_HEADERS|!REQUEST_HEADERS:User-Agent|!REQUEST_HEADERS:Referer|!REQUEST_HEADERS:Cookie \"@validateByteRange 32,34,38,42-59,61,65-90,95,97-122\" \"id:920274,phase:2,block,t:none,t:urlDecodeUni,msg:'Invalid character in request headers (outside of very strict set)',logdata:'%{MATCHED_VAR_NAME}=%{MATCHED_VAR}',tag:'application-multi',tag:'language-multi',tag:'platform-multi',tag:'attack-protocol',tag:'OWASP_CRS/PROTOCOL_VIOLATION/EVASION',tag:'paranoia-level/4',ver:'OWASP_CRS/3.1.0',severity:'CRITICAL',setvar:'tx.msg=%{rule.msg}',setvar:'tx.anomaly_score_pl4=+%{tx.critical_anomaly_score}',setvar:'tx.%{rule.id}-OWASP_CRS/PROTOCOL_VIOLATION/EVASION-%{MATCHED_VAR_NAME}=%{MATCHED_VAR}'\""
+    ]
+  }
+]
+

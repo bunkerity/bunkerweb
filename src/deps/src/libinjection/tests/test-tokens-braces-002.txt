@@ -1,0 +1,12 @@
+--TEST--
+ODBC / MYSQL braces
+--INPUT--
+SELECT{ foo 1 };
+--EXPECTED--
+E SELECT
+{ {
+n foo
+1 1
+} }
+; ;
+

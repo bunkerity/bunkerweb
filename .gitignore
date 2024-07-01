@@ -1,0 +1,11 @@
+site/
+.idea/
+.vscode/
+__pycache__
+env/
+tmp_venv/
+node_modules
+/src/ui/*.txt
+.mypy_cache
+.cache/
+/package*.json

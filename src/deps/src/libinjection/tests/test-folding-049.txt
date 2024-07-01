@@ -1,0 +1,9 @@
+--TEST--
+pgsql type intents
+--INPUT--
+SELECT double precision '1';
+--EXPECTED--
+E SELECT
+s '1'
+; ;
+

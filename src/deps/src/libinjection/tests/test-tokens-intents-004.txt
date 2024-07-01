@@ -1,0 +1,10 @@
+--TEST--
+mysql character encoding intents
+--INPUT--
+SELECT _bogon 'foo';
+--EXPECTED--
+E SELECT
+n _bogon
+s 'foo'
+; ;
+

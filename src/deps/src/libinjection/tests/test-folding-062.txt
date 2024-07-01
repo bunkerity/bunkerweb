@@ -1,0 +1,10 @@
+--TEST--
+IN list handling + folds
+--INPUT--
+select 1 IN (2,3,4);
+--EXPECTED--
+E select
+1 1
+o IN
+( (
+1 2

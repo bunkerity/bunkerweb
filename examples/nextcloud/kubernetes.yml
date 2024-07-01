@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+    bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "10G"
+    bunkerweb.io/www.example.com_ALLOWED_METHODS: "GET|POST|HEAD|COPY|DELETE|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|PUT|UNLOCK|OPTIONS"
+    bunkerweb.io/www.example.com_X_FRAME_OPTIONS: "SAMEORIGIN"
+    bunkerweb.io/www.example.com_BAD_BEHAVIOR_STATUS_CODES: "400 401 405 444"
+    bunkerweb.io/www.example.com_LIMIT_REQ_URL_1: "/apps"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE_1: "5r/s"
+    bunkerweb.io/www.example.com_LIMIT_REQ_URL_2: "/apps/text/session/sync"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE_2: "8r/s"
+    bunkerweb.io/www.example.com_LIMIT_REQ_URL_3: "/core/preview"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE_3: "5r/s"
+spec:
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nextcloud
+                port:
+                  number: 8080

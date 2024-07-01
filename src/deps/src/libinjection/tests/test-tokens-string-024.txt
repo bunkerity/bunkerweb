@@ -1,0 +1,8 @@
+--TEST--
+pgsql $ quoted strings
+--INPUT--
+$foo$ 1 $bar$ 2 $foo$ other
+--EXPECTED--
+s $ 1 $bar$ 2 $
+n other
+

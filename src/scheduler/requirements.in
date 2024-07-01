@@ -1,0 +1,6 @@
+certbot==2.11.0
+cryptography==42.0.8
+maxminddb==2.6.2
+python-magic==0.4.27
+requests==2.32.3
+schedule==1.2.2

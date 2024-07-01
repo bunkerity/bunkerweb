@@ -1,0 +1,25 @@
+services:
+  myghost:
+    image: ghost:5-alpine
+    volumes:
+      - ghost-data:/var/lib/ghost/content
+    networks:
+      bw-services:
+        aliases:
+          - myghost
+    environment:
+      url: "https://www.example.com" # replace with your domain
+      NODE_ENV: "development"
+    labels:
+      - bunkerweb.SERVER_NAME=www.example.com # replace with your domain
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://myghost:2368
+
+volumes:
+  ghost-data:
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services

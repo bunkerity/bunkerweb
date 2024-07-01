@@ -1,0 +1,14 @@
+--TEST--
+Test folding of SQL type between operator and parenthesis
+--INPUT--
+1 - binary binary (2)
+--EXPECTED--
+1 1
+
+
+
+
+
+
+
+

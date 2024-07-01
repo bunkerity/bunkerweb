@@ -1,0 +1,71 @@
+services:
+  bunkerweb:
+    build:
+      context: ../..
+      dockerfile: ./src/bw/Dockerfile
+    ports:
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
+    environment:
+      - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bunkerweb
+      bw-services:
+        aliases:
+          - bunkerweb
+
+  bw-scheduler:
+    build:
+      context: ../..
+      dockerfile: ./src/scheduler/Dockerfile
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-data:/data
+    environment:
+      - BUNKERWEB_INSTANCES=bunkerweb
+      - SERVER_NAME=app1.example.com
+      - API_WHITELIST_IP=127.0.0.0/24 10.20.30.0/24
+      - USE_BUNKERNET=no
+      - USE_BLACKLIST=no
+      - USE_WHITELIST=no
+      - SEND_ANONYMOUS_REPORT=no
+      - CUSTOM_LOG_LEVEL=debug
+      - LOG_LEVEL=info
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://app1:8080
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-scheduler
+
+  app1:
+    image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
+    networks:
+      bw-services:
+        aliases:
+          - app1
+
+volumes:
+  bw-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services

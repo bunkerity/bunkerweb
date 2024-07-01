@@ -1,0 +1,14 @@
+--TEST--
+test of special function 'IF EXISTS'
+--INPUT--
+IF EXISTS(1)
+--EXPECTED--
+f IF EXISTS
+( (
+1 1
+) )
+
+
+
+
+

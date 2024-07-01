@@ -1,0 +1,84 @@
+name: Push image (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      IMAGE:
+        required: true
+        type: string
+      TAGS:
+        required: true
+        type: string
+      CACHE_FROM:
+        required: true
+        type: string
+      DOCKERFILE:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
+      ARM_SSH_KEY:
+        required: true
+      ARM_SSH_CONFIG:
+        required: true
+      ARM_SSH_IP:
+        required: true
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Check out repository code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Login to Docker Hub
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to ghcr
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup SSH for ARM node
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
+          chmod 600 ~/.ssh/id_rsa_arm
+          echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
+          echo "ServerAliveInterval 60" >> ~/.ssh/config
+          echo "ServerAliveCountMax 10" >> ~/.ssh/config
+        env:
+          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
+          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Setup Buildx (ARM)
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        with:
+          endpoint: ssh://root@arm
+          platforms: linux/arm64,linux/arm/v7,linux/arm/v6
+      # Compute metadata
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
+        with:
+          images: bunkerity/${{ inputs.IMAGE }}
+      # Build and push
+      - name: Build and push
+        uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6.2.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ inputs.TAGS }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=gha,scope=${{ inputs.CACHE_FROM }}-amd64
+            type=gha,scope=${{ inputs.CACHE_FROM }}-386
+            type=gha,scope=${{ inputs.CACHE_FROM }}-arm

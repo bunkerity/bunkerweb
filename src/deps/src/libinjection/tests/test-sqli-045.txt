@@ -1,0 +1,10 @@
+--TEST--
+SQLi, probably part of parameter splitting attack
+--INPUT--
+1 /* junk */ UNION
+--EXPECTED--
+1U
+
+
+
+

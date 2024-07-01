@@ -1,0 +1,89 @@
+This directory contains code that is more useful than the
+samples. This code *is* supported.
+
+    tftp.lua                -- Trivial FTP client
+
+This module implements file retrieval by the TFTP protocol.
+Its main use was to test the UDP code, but since someone
+found it usefull, I turned it into a module that is almost
+official (no uploads, yet).
+
+    dict.lua                -- Dict client
+
+The dict.lua  module started with  a cool  simple client
+for the  DICT protocol, written by Luiz Henrique Figueiredo.
+This new version has been converted into a library, similar
+to the HTTP  and FTP libraries, that can be used from within
+any luasocket application. Take  a look on the  source code
+and you will be able to figure out how to use it.
+
+    lp.lua                  -- LPD client library
+
+The lp.lua module implements the client part of the Line
+Printer Daemon protocol, used to print files on Unix
+machines. It is courtesy of David Burgess!  See the source
+code and the lpr.lua in the examples directory.
+
+    b64.lua
+    qp.lua
+    eol.lua
+
+These are tiny programs that perform Base64,
+Quoted-Printable and end-of-line marker conversions.
+
+    get.lua                 -- file retriever
+
+This little  program is  a client  that uses  the FTP  and
+HTTP  code to implement a  command line  file graber. Just
+run 
+
+	lua get.lua <remote-file> [<local-file>]
+
+to download  a remote file (either  ftp:// or http://) to
+the specified local file.  The program  also prints  the
+download  throughput, elapsed time, bytes already downloaded
+etc during download.
+
+    check-memory.lua        -- checks memory consumption
+
+This is just to see how much memory each module uses.
+
+    dispatch.lua            -- coroutine based dispatcher
+
+This is a first try at a coroutine based non-blocking
+dispatcher for LuaSocket. Take a look at 'check-links.lua'
+and at 'forward.lua' to see how to use it.
+
+	check-links.lua			-- HTML link checker program
+
+This little program scans a HTML file and checks for broken
+links. It is similar to check-links.pl by Jamie Zawinski,
+but uses all facilities of the LuaSocket library and the Lua
+language. It has not been thoroughly tested, but it should
+work. Just run
+
+	lua check-links.lua [-n] {<url>} > output
+
+and open the result to see a list of broken links. Make sure
+you check the '-n' switch. It runs in non-blocking mode,
+using coroutines, and is MUCH faster!
+
+    forward.lua             -- coroutine based forward server
+
+This is a forward server that can accept several connections
+and transfers simultaneously using non-blocking I/O and the
+coroutine-based dispatcher. You can run, for example
+
+    lua forward.lua 8080:proxy.com:3128 
+
+to redirect all local conections to port 8080 to the host 
+'proxy.com' at port 3128.
+
+    unix.c and unix.h
+
+This is an implementation of Unix local domain sockets and
+demonstrates how to extend LuaSocket with a new type of
+transport. It has been tested on Linux and on Mac OS X.
+
+Good luck,
+Diego.

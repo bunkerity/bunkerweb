@@ -1,0 +1,27 @@
+{
+  "id": "ui",
+  "name": "UI",
+  "description": "Integrate easily the BunkerWeb UI.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_UI": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Use UI",
+      "id": "use-ui",
+      "label": "Use UI",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "UI_HOST": {
+      "context": "global",
+      "default": "",
+      "help": "Address of the web UI used for initial setup",
+      "id": "ui-host",
+      "label": "UI host",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  }
+}

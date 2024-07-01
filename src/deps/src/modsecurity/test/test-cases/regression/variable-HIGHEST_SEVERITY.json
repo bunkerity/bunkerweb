@@ -1,0 +1,83 @@
+[  
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: HIGHEST_SEVERITY (1/2)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"0\" \\(Variable: HIGHEST_SEVERITY\\)"
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REMOTE_ADDR \"@contains 200.249\" \"id:1,pass,t:trim,severity:0\"",
+      "SecRule HIGHEST_SEVERITY \"@lt 10\" \"id:2,pass,t:trim\""
+    ]
+  },
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: HIGHEST_SEVERITY (2/2)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"0\" \\(Variable: HIGHEST_SEVERITY\\)"
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REMOTE_ADDR \"@contains 200.249\" \"id:1,pass,t:trim,severity:EMERGENCY\"",
+      "SecRule HIGHEST_SEVERITY \"@lt 10\" \"id:2,pass,t:trim\""
+    ]
+  }
+]
+

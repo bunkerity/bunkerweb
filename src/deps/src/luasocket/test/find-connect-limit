@@ -1,0 +1,32 @@
+#!/usr/bin/env lua
+--[[
+Find out how many TCP connections we can make.
+
+Use ulimit to increase the max number of descriptors:
+
+ulimit -n 10000
+ulimit -n
+
+You'll probably need to be root to do this.
+]]
+
+socket = require "socket"
+
+host = arg[1] or "google.com"
+port = arg[2] or 80
+
+connections = {}
+
+repeat
+	c = assert(socket.connect(hostip or host, 80))
+	table.insert(connections, c)
+
+        if not hostip then
+            hostip = c:getpeername()
+            print("resolved", host, "to", hostip)
+        end
+
+	print("connection #", #connections, c, "fd", c:getfd())
+
+until false
+

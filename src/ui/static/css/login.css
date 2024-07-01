@@ -1,0 +1,10 @@
+@font-face {
+  font-family: "Open Sans";
+  src: url("../webfonts/OpenSans.ttf");
+  font-display: swap;
+}
+
+* {
+  font-family: "Open Sans", sans-serif !important;
+  font-display: swap;
+}

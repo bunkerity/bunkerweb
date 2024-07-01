@@ -1,0 +1,41 @@
+name: Push documentation (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        required: true
+        type: string
+      ALIAS:
+        required: true
+        type: string
+    secrets:
+      BUNKERBOT_TOKEN:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BUNKERBOT_TOKEN }}
+      - name: Replace VERSION
+        if: inputs.VERSION == 'testing'
+        run: ./misc/update-version.sh testing
+      - name: Setup git user
+        run: |
+          git config --global user.name "BunkerBot"
+          git config --global user.email "bunkerbot@bunkerity.com"
+      - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: "3.10"
+      - name: Install doc dependencies
+        run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt && sudo apt install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
+      - name: Push doc
+        run: mike deploy --update-aliases --push --alias-type=copy ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
+      - name: Set default doc
+        if: inputs.ALIAS == 'latest'
+        run: mike set-default --push latest

@@ -1,0 +1,139 @@
+name: Build container (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      RELEASE:
+        required: true
+        type: string
+      ARCH:
+        required: true
+        type: string
+      IMAGE:
+        required: true
+        type: string
+      DOCKERFILE:
+        required: true
+        type: string
+      CACHE:
+        required: false
+        type: boolean
+        default: true
+      PUSH:
+        required: false
+        type: boolean
+        default: true
+      CACHE_SUFFIX:
+        required: false
+        type: string
+        default: ""
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
+      ARM_SSH_KEY:
+        required: false
+      ARM_SSH_IP:
+        required: false
+      ARM_SSH_CONFIG:
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Replace VERSION
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
+        run: ./misc/update-version.sh ${{ inputs.RELEASE }}
+      - name: Replace VERSION 1.6
+        if: inputs.RELEASE == '1.6'
+        run: ./misc/update-version.sh dev
+      - name: Setup SSH for ARM node
+        if: inputs.CACHE_SUFFIX == 'arm'
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
+          chmod 600 ~/.ssh/id_rsa_arm
+          echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
+          echo "ServerAliveInterval 60" >> ~/.ssh/config
+          echo "ServerAliveCountMax 10" >> ~/.ssh/config
+        env:
+          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
+          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        if: inputs.CACHE_SUFFIX != 'arm'
+      - name: Setup Buildx (ARM)
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        if: inputs.CACHE_SUFFIX == 'arm'
+        with:
+          endpoint: ssh://root@arm
+          platforms: linux/arm64,linux/arm/v7,linux/arm/v6
+      - name: Login to Docker Hub
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to ghcr
+        if: inputs.PUSH == true
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Compute metadata
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
+        with:
+          images: bunkerity/${{ inputs.IMAGE }}
+      # Build cached image
+      - name: Build image
+        if: inputs.CACHE == true
+        uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6.2.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: ${{ inputs.ARCH }}
+          load: true
+          tags: local/${{ inputs.IMAGE }}
+          cache-from: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
+          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=min
+          labels: ${{ steps.meta.outputs.labels }}
+      # Build non-cached image
+      - name: Build image
+        if: inputs.CACHE != true
+        uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6.2.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: ${{ inputs.ARCH }}
+          load: ${{ inputs.CACHE_SUFFIX != 'arm' }}
+          tags: local/${{ inputs.IMAGE }}
+          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=min
+          labels: ${{ steps.meta.outputs.labels }}
+      # Check OS vulnerabilities
+      - name: Check OS vulnerabilities
+        if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
+        uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
+        with:
+          vuln-type: os
+          skip-dirs: /root/.cargo
+          image-ref: local/${{ inputs.IMAGE }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
+      # Push image
+      - name: Push image
+        if: inputs.PUSH == true
+        run: docker tag local/$IMAGE ghcr.io/bunkerity/$IMAGE-tests:$TAG && docker push ghcr.io/bunkerity/$IMAGE-tests:$TAG
+        env:
+          IMAGE: "${{ inputs.IMAGE }}"
+          TAG: "${{ inputs.RELEASE }}"

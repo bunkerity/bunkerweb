@@ -1,0 +1,4 @@
+#!/bin/sh
+echo Content-type: text/plain
+echo
+echo $REQUEST_URI

@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+    bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "50m"
+    # Methods used to query the api
+    # more info at https://api.mattermost.com/
+    bunkerweb.io/www.example.com_ALLOWED_METHODS: "GET|POST|HEAD|DELETE|PUT"
+    # Reverse proxy to Mattermost
+    # second endpoint needs websocket enabled
+    # more info at https://docs.mattermost.com/install/config-proxy-nginx.html
+    bunkerweb.io/www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_WS_1: "yes"
+    # Default limit rate for URLs
+    bunkerweb.io/www.example.com_LIMIT_REQ_URL_1: "/"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE_1: "3r/s"
+    # Limit rate for api endpoints
+    bunkerweb.io/www.example.com_LIMIT_REQ_URL_2: "^/api/"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE_2: "10r/s"
+    # Limit rate for static resources
+    bunkerweb.io/www.example.com_LIMIT_REQ_URL_3: "^/static/"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE_3: "10r/s"
+spec:
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mattermost-team-edition
+                port:
+                  number: 8065

@@ -1,0 +1,8 @@
+--TEST--
+MS Brackets
+--INPUT--
+SELECT [1];
+--EXPECTED--
+E SELECT
+n [1]
+; ;

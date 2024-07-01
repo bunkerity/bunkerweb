@@ -1,0 +1,49 @@
+name: Delete staging infra (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      TYPE:
+        required: true
+        type: string
+    secrets:
+      CICD_SECRETS:
+        required: true
+      SECRET_KEY:
+        required: true
+
+jobs:
+  delete:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Install terraform
+        uses: hashicorp/setup-terraform@651471c36a6092792c552e8b1bef71e592b462d8 # v3.1.1
+      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: tf-${{ inputs.TYPE }}
+          path: /tmp
+      - run: |
+          echo "$SECRET_KEY" > /tmp/.secret_key
+          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
+          rm -f /tmp/.secret_key
+          tar xf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4.0.0
+        if: inputs.TYPE == 'k8s'
+        with:
+          version: "v1.29.1"
+      # Remove infra
+      - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60s ; kubectl delete pvc --all --timeout=60s ; kubectl delete pv --all --timeout=60s
+        if: inputs.TYPE == 'k8s'
+        continue-on-error: true
+        env:
+          KUBECONFIG: /tmp/k8s/kubeconfig
+      - run: ./tests/rm.sh ${{ inputs.TYPE }}
+        env:
+          CICD_SECRETS: ${{ secrets.CICD_SECRETS }}

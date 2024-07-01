@@ -1,0 +1,150 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "pm operator test 1/4",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com"
+      },
+      "uri": "\/test.pl?param1=something`somenthing",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "Rule returned 1",
+      "http_code": 500
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@pm a ` b\" \"phase:1,id:999,deny,status:500\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "pm operater test 2/4",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com"
+      },
+      "uri": "\/test.pl?param1=`somenthing",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "",
+      "http_code": 500
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@pm a ` b\" \"phase:1,id:999,deny,status:500\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "pm operater test 3/4",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com"
+      },
+      "uri": "\/test.pl?param1=a",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "Rule returned 1",
+      "http_code": 500
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@pm a ` b\" \"phase:1,id:999,deny,status:500\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "version_max": 0,
+    "title": "pm operater test 4/4",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "net.tutsplus.com"
+      },
+      "uri": "\/test.pl?param1=a`b",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": ""
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text\/xml; charset=utf-8\n\r",
+        "Content-Length": "length\n\r"
+      }
+    },
+    "expected": {
+      "debug_log": "Rule returned 1",
+      "http_code": 500
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule ARGS \"@pm a ` b\" \"phase:1,id:999,deny,status:500\""
+    ]
+  }
+]

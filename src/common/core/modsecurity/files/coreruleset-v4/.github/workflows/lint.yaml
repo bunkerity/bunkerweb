@@ -1,0 +1,68 @@
+name: Lint
+
+on: [push, pull_request, merge_group]
+
+# Pin versions to not disrupt test pipelines
+env:
+  CRS_TOOLCHAIN_VERSION: '2.1.0'
+  SECRULES_PARSING_VERSION: '0.2.9'
+
+jobs:
+  check-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Lint Yaml
+        uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c # v3.1.1
+        with:
+          format: github
+          file_or_dir: tests/regression/tests
+          config_file: .yamllint.yml
+
+      - name: Linelint
+        uses: fernandrone/linelint@7907a5dca0c28ea7dd05c6d8d8cacded713aca11 # v0.0.6
+        id: linelint
+
+      - name: Set up Python 3
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: 3.7
+
+      - name: "Check CRS syntax"
+        run: |
+          pip install --upgrade setuptools
+          pip install secrules-parsing==${{ env.SECRULES_PARSING_VERSION }}
+          secrules-parser -c --output-type github -f rules/*.conf
+
+      - name: "Check CRS formatting"
+        run: |
+          pip install --upgrade setuptools
+          pip install -r ./util/crs-rules-check/requirements.txt
+          ./util/crs-rules-check/rules-check.py --output=github -r crs-setup.conf.example -r rules/*.conf -t util/APPROVED_TAGS
+
+      - name: "Find rules without test"
+        run: |
+          pip install --upgrade setuptools
+          pip install -r ./util/find-rules-without-test/requirements.txt
+          ./util/find-rules-without-test/find-rules-without-test.py --output=github .
+
+      - name: "Install crs-toolchain ${{ env.CRS_TOOLCHAIN_VERSION }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download -R coreruleset/crs-toolchain "v${{ env.CRS_TOOLCHAIN_VERSION }}" \
+            -p "crs-toolchain_${{ env.CRS_TOOLCHAIN_VERSION }}_linux_amd64.tar.gz" -O - | tar -xzvf - crs-toolchain
+
+      - name: "Check that all assembly files are properly formatted"
+        run: |
+          ./crs-toolchain regex format -aco github
+
+      - name: "Check that all rules are up to date"
+        run: |
+          ./crs-toolchain regex compare -ao github
+
+      - name: "Check that all tests are properly numbered"
+        run: |
+          ./crs-toolchain util renumber-tests -cao github

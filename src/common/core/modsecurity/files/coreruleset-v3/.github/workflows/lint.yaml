@@ -1,0 +1,37 @@
+---
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  check-syntax:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    # check why is failing and change afterwards
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Lint Yaml
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          format: github
+          file_or_dir: tests/regression/tests
+          config_file: .yamllint.yml
+
+      - name: Linelint
+        uses: fernandrone/linelint@master
+        id: linelint
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: "Check CRS syntax"
+        run: |
+          pip install --upgrade setuptools
+          pip install secrules-parsing
+          secrules-parser -c --output-type github -f rules/*.conf
+

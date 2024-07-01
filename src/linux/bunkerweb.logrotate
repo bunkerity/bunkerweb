@@ -1,0 +1,13 @@
+/var/log/bunkerweb/*.log
+{
+    su nginx nginx
+    daily
+    rotate 7
+    copytruncate
+    compress
+    missingok
+    notifempty
+    dateext
+    dateformat -%Y-%m-%d
+    create 0640 root nginx
+}

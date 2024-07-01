@@ -1,0 +1,10 @@
+--TEST--
+test of unary operator 'NOT'
+--INPUT--
+1 + NOT 1
+--EXPECTED--
+1 1
+
+
+
+

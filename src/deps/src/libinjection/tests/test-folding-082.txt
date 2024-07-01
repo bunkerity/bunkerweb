@@ -1,0 +1,12 @@
+--TEST--
+folding with operator
+--INPUT--
+@version mod (2)
+--EXPECTED--
+v @version
+o mod
+( (
+1 2
+) )
+
+

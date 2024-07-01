@@ -1,0 +1,8 @@
+--TEST--
+pgsql, U&' strings
+--INPUT--
+U&'foo'bar
+--EXPECTED--
+s ufoou
+n bar
+

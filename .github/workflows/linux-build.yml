@@ -1,0 +1,157 @@
+name: Build Linux package (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      RELEASE:
+        required: true
+        type: string
+      LINUX:
+        required: true
+        type: string
+      PACKAGE:
+        required: true
+        type: string
+      PLATFORMS:
+        required: true
+        type: string
+      TEST:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
+      ARM_SSH_KEY:
+        required: false
+      ARM_SSH_IP:
+        required: false
+      ARM_SSH_CONFIG:
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Replace VERSION
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
+        run: ./misc/update-version.sh ${{ inputs.RELEASE }}
+      - name: Replace VERSION 1.6
+        if: inputs.RELEASE == '1.6'
+        run: ./misc/update-version.sh dev
+      - name: Extract arch
+        run: |
+          echo "ARCH=${{ env.PLATFORMS }}" | sed 's/linux//g' | sed 's@/@@g' >> "$GITHUB_ENV"
+        env:
+          PLATFORMS: ${{ inputs.PLATFORMS }}
+      - name: Extract linux arch
+        if: inputs.PACKAGE == 'rpm'
+        run: |
+          echo "LARCH=${{ env.ARCH }}" | sed 's/amd64/x86_64/g' | sed 's/arm64/aarch64/g' >> "$GITHUB_ENV"
+        env:
+          ARCH: ${{ env.ARCH }}
+      - name: Extract linux arch
+        if: inputs.PACKAGE == 'deb'
+        run: |
+          echo "LARCH=${{ env.ARCH }}" >> "$GITHUB_ENV"
+        env:
+          ARCH: ${{ env.ARCH }}
+      - name: Setup SSH for ARM node
+        if: startsWith(env.ARCH, 'arm') == true
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
+          chmod 600 ~/.ssh/id_rsa_arm
+          echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
+          echo "ServerAliveInterval 60" >> ~/.ssh/config
+          echo "ServerAliveCountMax 10" >> ~/.ssh/config
+        env:
+          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
+          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        if: startsWith(env.ARCH, 'arm') == false
+      - name: Setup Buildx (ARM)
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        if: startsWith(env.ARCH, 'arm') == true
+        with:
+          endpoint: ssh://root@arm
+          platforms: linux/arm64,linux/arm/v7,linux/arm/v6
+      - name: Login to Docker Hub
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to ghcr
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Build testing package image
+      - name: Build package image
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.6'
+        uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6.2.0
+        with:
+          context: .
+          load: true
+          file: src/linux/Dockerfile-${{ inputs.LINUX }}
+          platforms: ${{ inputs.PLATFORMS }}
+          tags: local/bunkerweb-${{ inputs.LINUX }}:latest
+          cache-from: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }}
+          cache-to: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }},mode=min
+      # Build non-testing package image
+      - name: Build package image
+        if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev' && inputs.RELEASE != 'ui' && inputs.RELEASE != '1.6'
+        uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6.2.0
+        with:
+          context: .
+          load: true
+          file: src/linux/Dockerfile-${{ inputs.LINUX }}
+          platforms: ${{ inputs.PLATFORMS }}
+          tags: local/bunkerweb-${{ inputs.LINUX }}:latest
+      # Generate package
+      - name: Generate package
+        if: startsWith(env.ARCH, 'arm') == false
+        run: ./src/linux/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
+        env:
+          LARCH: ${{ env.LARCH }}
+      - name: Generate package (ARM)
+        if: startsWith(env.ARCH, 'arm') == true
+        run: |
+          docker save local/bunkerweb-${{ inputs.LINUX }}:latest | ssh -C root@arm docker load
+          scp ./src/linux/package.sh root@arm:/opt
+          ssh root@arm chmod +x /opt/package.sh
+          ssh root@arm /opt/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }} "$(cat src/VERSION | tr -d '\n')"
+          scp -r root@arm:/root/package-${{ inputs.LINUX }} ./package-${{ inputs.LINUX }}
+        env:
+          LARCH: ${{ env.LARCH }}
+      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: package-${{ inputs.LINUX }}-${{ env.LARCH }}
+          path: package-${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+      # Build test image
+      - name: Extract metadata
+        if: inputs.TEST == true
+        id: meta
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
+        with:
+          images: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
+      - name: Build test image
+        if: inputs.TEST == true
+        uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6.2.0
+        with:
+          context: .
+          file: tests/linux/Dockerfile-${{ inputs.LINUX }}
+          platforms: ${{ inputs.PLATFORMS }}
+          push: true
+          tags: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }}-tests
+          cache-to: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }}-tests,mode=min

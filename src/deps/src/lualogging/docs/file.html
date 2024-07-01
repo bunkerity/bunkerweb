@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>LuaLogging: A simple API to use logging features in Lua</title>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+  <div id="product_logo">
+    <img alt="LuaLogging logo" src="images/lualogging-128.png"/>
+  </div>
+  <div id="product_name"><big><strong>LuaLogging</strong></big></div>
+  <div id="product_description">A simple API to use logging features in Lua.</div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+<h1>LuaLogging</h1>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="manual.html">Manual</a>
+      <ul>
+        <li><a href="manual.html#installation">Installation</a></li>
+        <li><a href="manual.html#logger">Logger objects</a></li>
+        <li><a href="manual.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="manual.html#appenders">Appenders</a>
+      <ul>
+        <li><a href="console.html">Console</a></li>
+        <li><strong>File</strong></li>
+        <li><a href="rolling_file.html">Rolling File</a></li>
+        <li><a href="sql.html">SQL</a></li>
+        <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
+        <li><a href="email.html">Email</a></li>
+        <li><a href="nginx.html">Nginx</a></li>
+      </ul>
+    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
+    <li><a href="license.html">License</a></li>
+  </ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+
+<h2>File appender</h2>
+
+<p>The file appender can be used to write log messages to a file. It
+uses Lua I/O routines to do its job.</p>
+
+<pre class="example">
+function logging.file {
+    [filename = <i>string</i>,]
+    [datePattern = <i>string</i>,]
+
+    [logPattern = <i>string</i>,]
+    [logPatterns = {
+      [logging.DEBUG = <i>string</i>,]
+      [logging.INFO  = <i>string</i>,]
+      [logging.WARN  = <i>string</i>,]
+      [logging.ERROR = <i>string</i>,]
+      [logging.FATAL = <i>string</i>,]
+    },]
+    [timestampPattern = <i>string</i>,]
+    [logLevel = <i>log-level-constant</i>,]
+}
+</pre>
+
+<ul>
+    <li><code>filename</code>:<br />
+    The name of the file to be written to. On each call to log a
+    message the file is opened for appending and closed immediately.<br />
+    If the file cannot be opened for appending the logging request
+    returns nil and an error message.<br />
+    The default value is <code>"lualogging.log"</code>.</li>
+
+    <li><code>datePattern</code>:<br />
+    This is an optional parameter that can be used to specify a date
+    pattern that will be passed to the
+    <a href="https://www.lua.org/manual/5.1/manual.html#pdf-os.date"><code>os.date</code></a>
+    function to compose the filename.<br />
+    This is useful to create daily or monthly log files. If the user
+    wants to create one log file per day he specifies a
+    <code>"%Y-%m-%d"</code> pattern and a filename like
+    <code>"temp%s.log"</code>.</li>
+
+    <li><code>logPatterns</code>:<br />
+      A table with logPattern strings indexed by the log-levels.
+      A logPattern specifies how the message is written.<br />
+      If this parameter is omitted, a patterns table will be created with the
+      parameter <code>logPattern</code> as the default value for each log-level.
+      If <code>logPattern</code> also is omitted then each level will fall back to
+      the current default setting, see <code>logging.defaultLogPatterns</code>.
+    </li>
+
+    <li><code>logPattern</code>:<br />
+      This value will be used as the default value for each log-level that was
+      omitted in <code>logPatterns</code>.
+    </li>
+
+    <li><code>timestampPattern</code>:<br />
+      This is an optional parameter that can be used to specify a date/time formatting
+      in the log message.
+      See <code>logging.date</code> for the format.
+      The default is taken from <code>logging.defaultTimestampPattern()</code>.</li>
+
+    <li><code>logLevel</code>:<br />
+      The initial log-level to set for the created logger.</li>
+    </ul>
+
+<h2>Example</h2>
+
+<pre class="example">
+require"logging.file"
+
+local logger = logging.file {
+    filename = "test%s.log",
+    datePattern = "%Y-%m-%d",
+}
+
+logger:info("logging.file test")
+logger:debug("debugging...")
+logger:error("error!")
+</pre>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+  <p><a href="https://validator.w3.org/check?uri=referer">
+    <img src="https://www.w3.org/Icons/valid-xhtml10" alt="XHTML 1.0 v&aacute;lido!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html>

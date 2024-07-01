@@ -1,0 +1,30 @@
+FROM fedora:40@sha256:5ce8497aeea599bf6b54ab3979133923d82aaa4f6ca5ced1812611b197c79eb0
+
+ENV container docker
+ENV NGINX_VERSION 1.26.1
+
+RUN dnf -y update \
+    && dnf -y install systemd \
+    && dnf clean all
+
+RUN cd /lib/systemd/system/sysinit.target.wants/; \
+    for i in *; do [ $i = systemd-tmpfiles-setup.service ] || rm -f $i; done
+
+RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/basic.target.wants/* \
+    /lib/systemd/system/anaconda.target.wants/*
+
+# Nginx
+RUN dnf update -y && \
+    dnf install -y php-fpm curl gnupg2 ca-certificates redhat-lsb-core python3-pip which && \
+    dnf install --enablerepo=updates-testing nginx-${NGINX_VERSION} -y
+
+COPY ./package-fedora/*.rpm /opt
+
+VOLUME ["/sys/fs/cgroup"]
+
+CMD ["/usr/sbin/init"]

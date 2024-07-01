@@ -1,0 +1,10 @@
+--TEST--
+unary between expression and left-parens is folded away
+--INPUT--
+select +++ (1);
+--EXPECTED--
+E select
+( (
+1 1
+) )
+; ;

@@ -1,0 +1,11 @@
+--TEST--
+pgsql type intents, not folded, postfix
+--INPUT--
+SELECT '1'::money;
+--EXPECTED--
+E SELECT
+s '1'
+o ::
+t money
+; ;
+
