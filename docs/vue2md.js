@@ -2,11 +2,11 @@ const fs = require("fs");
 const path = require("path");
 
 // Merge all components md on this file name
-const finalFile = "COMPONENTS.md";
+const finalFile = "ui-components.md";
 // Where we have all SFC components
-const inputFolder = path.join(__dirname, "components");
+const inputFolder = path.join(__dirname, "../src/client/vite/src/components");
 // Where we want to output md components file
-const ouputFolder = path.join(__dirname, "output");
+const ouputFolder = path.join(__dirname, "components");
 
 // Check that input folder exists
 if (!fs.existsSync(inputFolder)) {
@@ -224,7 +224,23 @@ function formatMd() {
   fs.writeFileSync(merge, data, "utf8");
 }
 
+// Move final file to root with others pages
+// And delete output folder
+function moveMd() {
+
+fs.rename(`./output/${finalFile}`, `./${finalFile}`, function (err) {
+  if (err) throw err
+  console.log('Successfully renamed - AKA moved!')
+})
+
+// Delete output folder
+fs.rmdirSync(ouputFolder, { recursive: true });
+
+}
+
+
 vue2js();
 js2md();
 mergeMd();
 formatMd();
+moveMd();
