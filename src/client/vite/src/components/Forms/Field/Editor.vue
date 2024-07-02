@@ -13,7 +13,6 @@ import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 import Clipboard from "@components/Forms/Feature/Clipboard.vue";
-import { v4 as uuidv4 } from "uuid";
 import { useUUID } from "@utils/global.js";
 
 import "@assets/script/editor/ace.js";
