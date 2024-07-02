@@ -1,4 +1,4 @@
-FROM redhat/ubi9:9.4@sha256:d98fdae16212df566150ac975cab860cd8d2cb1b322ed9966d09a13e219112e9 AS builder
+FROM redhat/ubi9:9.4@sha256:081c96d1b1c7cd1855722d01f1ca53360510443737b1eb33284c6c4c330e537c AS builder
 
 ENV OS=rhel
 ENV NGINX_VERSION=1.26.1
@@ -68,7 +68,7 @@ COPY src/scheduler scheduler
 COPY src/ui ui
 COPY src/VERSION VERSION
 
-FROM redhat/ubi9:9.4@sha256:d98fdae16212df566150ac975cab860cd8d2cb1b322ed9966d09a13e219112e9
+FROM redhat/ubi9:9.4@sha256:081c96d1b1c7cd1855722d01f1ca53360510443737b1eb33284c6c4c330e537c
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
