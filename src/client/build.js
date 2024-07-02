@@ -4,7 +4,6 @@ const fs = require("fs");
 
 const frontDir = "/vite";
 const clientBuildDir = "static";
-const setupBuildDir = "setup/output";
 const appStaticDir = "../ui/static";
 const appTempDir = "../ui/templates";
 
@@ -23,6 +22,7 @@ async function createDirIfNotExists(dir) {
 }
 
 async function delElRecursive(path) {
+  if (!fs.existsSync(path)) return;
   fs.rmSync(path, { recursive: true }, (err) => {
     if (err) {
       console.log(err);
@@ -129,6 +129,8 @@ async function setBuildTempToUI() {
         }
       );
     });
+    // Delete templates to avoid to add it to static
+    delElRecursive("./static/templates");
   });
 }
 
@@ -137,9 +139,11 @@ async function moveBuildStaticToUI() {
   const srcDir = resolve(`./static`);
   const destDir = resolve(appStaticDir);
   fs.readdir(srcDir, (err, dirs) => {
-    dirs.forEach(async (dir) => {
+    dirs.forEach((dir) => {
+      // Avoid try something on dir templates because it's already moved/removed
+      if (dir === "templates") return;
       // Delete prev existing dir
-      await copyDir(`${srcDir}/${dir}`, `${destDir}/${dir}`);
+      copyDir(`${srcDir}/${dir}`, `${destDir}/${dir}`);
     });
   });
 }
