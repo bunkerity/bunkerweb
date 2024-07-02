@@ -738,7 +738,7 @@ def home_builder(data):
 
     instances_card = {
         "type": "card",
-        "link": "/instances",
+        "link": "instances",
         "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
         "widgets": [
             {
@@ -756,7 +756,7 @@ def home_builder(data):
 
     services_card = {
         "type": "card",
-        "link": "/services",
+        "link": "services",
         "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
         "widgets": [
             {
@@ -774,7 +774,7 @@ def home_builder(data):
 
     plugins_card = {
         "type": "card",
-        "link": "/plugins",
+        "link": "plugins",
         "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
         "widgets": [
             {
