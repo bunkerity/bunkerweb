@@ -1,7 +1,7 @@
 <script setup>
 /** 
-  @name Forms/Error/Field.vue
-  @description This component is used to display a feedback message to user when a field is invalid.
+  @name Forms/Error/Dropdown.vue
+  @description This component is used to display a feedback message on a dropdown field.
   It is used with /Forms/Field components.
   @example
   {
@@ -37,21 +37,27 @@ const props = defineProps({
 </script>
 
 <template>
-  <p
+  <div
     :aria-hidden="props.isValid ? 'true' : 'false'"
+    :class="[
+      props.isValid ? 'hidden' : '',
+      'select-dropdown-btn last first',
+      props.errorClass,
+    ]"
     role="alert"
-    :class="[props.isValid ? 'valid' : '', 'input-error-msg', props.errorClass]"
   >
-    {{
-      props.isValid
-        ? $t("inp_input_valid")
-        : props.isNoMatch
-        ? $t("inp_input_no_match")
-        : props.isValueTaken
-        ? $t("inp_input_error_taken")
-        : !props.isValue
-        ? $t("inp_input_error_required")
-        : $t("inp_input_error")
-    }}
-  </p>
+    <p class="input-error-dropdown-msg">
+      {{
+        props.isValid
+          ? $t("inp_input_valid")
+          : props.isNoMatch
+          ? $t("inp_input_no_match")
+          : props.isValueTaken
+          ? $t("inp_input_error_taken")
+          : !props.isValue
+          ? $t("inp_input_error_required")
+          : $t("inp_input_error")
+      }}
+    </p>
+  </div>
 </template>

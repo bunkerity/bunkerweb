@@ -179,6 +179,11 @@ body {
   @apply font-bold text-red-500 absolute;
 }
 
+
+.input-error-dropdown-msg {
+  @apply text-red-500 text-sm mb-0 font-semibold leading-normal tracking-normal;
+}
+
 .input-error-msg {
   @apply absolute text-red-500 text-[0.75rem] font-semibold mb-0 mt-0.5;
 }
@@ -209,6 +214,14 @@ body {
 
 .valid.input-error-msg {
   @apply pointer-events-none text-green-500 -z-10 opacity-0;
+}
+
+.input-list-add {
+  @apply transition absolute top-1 right-9 cursor-pointer transition-transform h-6 w-6 disabled:cursor-not-allowed disabled:opacity-50 disabled:dark:opacity-75;
+}
+
+.input-list-svg {
+  @apply absolute top-1.5 right-2 pointer-events-none transition-transform h-6 w-6 fill-gray-600 dark:fill-gray-500;
 }
 
 .checkbox-container {
@@ -256,10 +269,6 @@ body {
   @apply flex flex-col max-h-[200px] overflow-x-hidden overflow-y-auto;
 }
 
-.combobox-no-match {
-  @apply text-[0.75rem] font-semibold mb-0 mt-0.5;
-}
-
 .select-dropdown-container {
   @apply flex max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-fit mt-2;
 }
@@ -277,7 +286,7 @@ body {
 }
 
 .select-dropdown-btn {
-  @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
+  @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-2 py-2  text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
 }
 
 .active.select-dropdown-btn {
@@ -558,11 +567,15 @@ body {
 }
 
 .icon-container {
-  @apply block w-fit  pointer-events-none;
+  @apply block w-fit pointer-events-none;
 }
 
 .stick.icon-container {
   @apply absolute top-0 right-0 min-w-12 dark:brightness-90 flex justify-center items-center w-12 h-12 text-center rounded-circle;
+}
+
+.icon-input {
+  @apply h-6 w-6 relative pointer-events-none;
 }
 
 .icon-social {

@@ -13,6 +13,7 @@ import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
+import ErrorDropdown from "@components/Forms/Error/Dropdown.vue";
 import { useUUID } from "@utils/global.js";
 
 /**
@@ -431,18 +432,14 @@ const emits = defineEmits(["inp"]);
             :value="inp.value"
             :type="'text'"
           />
-          <div
-            class="select-dropdown-btn"
+          <ErrorDropdown
             v-if="!inp.isMatching"
-            :aria-hidden="!inp.isMatching ? 'true' : 'false'"
-            role="alert"
-          >
-            <p class="combobox-no-match">
-              {{ $t("inp_combobox_no_match") }}
-            </p>
-          </div>
+            :isNoMatch="true"
+            :isValid="false"
+          />
         </div>
         <div
+          v-if="inp.isMatching"
           data-select-dropdown-items
           :id="`${inp.id}-list`"
           :aria-hidden="select.isOpen ? 'false' : 'true'"
