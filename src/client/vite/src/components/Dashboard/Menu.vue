@@ -23,53 +23,53 @@ const bannerStore = useBannerStore();
 // Navigation with components
 // resolveComponent allow to replace a tag by a real Vue component
 const navList = [
-  { tag: "home", svg: "house", svgColor: "cyan", path: "/home" },
+  { tag: "home", svg: "house", svgColor: "cyan", path: "home" },
   {
     tag: "instances",
     svg: "box",
     svgColor: "dark",
-    path: "/instances",
+    path: "instances",
   },
 
   {
     tag: "global_config",
     svg: "settings",
     svgColor: "blue",
-    path: "/global-config",
+    path: "global-config",
   },
   {
     tag: "services",
     svg: "disk",
     svgColor: "orange",
-    path: "/services",
+    path: "services",
   },
   {
     tag: "configs",
     svg: "gear",
     svgColor: "purple",
-    path: "/configs",
+    path: "configs",
   },
   {
     tag: "plugins",
     svg: "puzzle",
     svgColor: "yellow",
-    path: "/plugins",
+    path: "plugins",
   },
   {
     tag: "cache",
     svg: "carton",
     svgColor: "purple",
-    path: "/cache",
+    path: "cache",
   },
   {
     tag: "reports",
     svg: "flag",
     svgColor: "amber",
-    path: "/reports",
+    path: "reports",
   },
-  { tag: "bans", svg: "funnel", svgColor: "red", path: "/bans" },
-  { tag: "jobs", svg: "task", svgColor: "emerald", path: "/jobs" },
-  { tag: "logs", svg: "list", svgColor: "dark", path: "/logs" },
+  { tag: "bans", svg: "funnel", svgColor: "red", path: "bans" },
+  { tag: "jobs", svg: "task", svgColor: "emerald", path: "jobs" },
+  { tag: "logs", svg: "list", svgColor: "dark", path: "logs" },
 ];
 
 // Social links
