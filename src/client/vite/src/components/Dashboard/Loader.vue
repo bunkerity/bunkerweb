@@ -1,7 +1,9 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
-import logoMenu2 from "@public/img/logo-menu-2.png";
-
+// Get assets path
+import logo2 from "@assets/img/logo-menu-2.png";
+// Change path on PROD removing '/' in order to get the right path
+const logoMenu2 = logo2.substring(import.meta.env.DEV ? 0 : 1);
 /**
   @name Dashboard/Loader.vue
   @description This component is a loader used to transition between pages.

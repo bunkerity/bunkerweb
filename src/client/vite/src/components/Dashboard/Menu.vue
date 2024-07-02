@@ -1,10 +1,15 @@
 <script setup>
 import Icons from "@components/Widget/Icons.vue";
-import { reactive, onMounted, onBeforeMount } from "vue";
+import { reactive, onBeforeMount } from "vue";
 import { menuIndex, menuFloatIndex } from "@/utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
-import logoMenu2 from "@public/img/logo-menu-2.png";
-import logoMenu from "@public/img/logo-menu.png";
+
+// Get assets path
+import logo from "@assets/img/logo-menu.png";
+import logo2 from "@assets/img/logo-menu-2.png";
+// Change path on PROD removing '/' in order to get the right path
+const logoMenu = logo.substring(import.meta.env.DEV ? 0 : 1);
+const logoMenu2 = logo2.substring(import.meta.env.DEV ? 0 : 1);
 
 /** 
   @name Dashboard/Menu.vue
