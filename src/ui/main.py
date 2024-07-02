@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import json
 from contextlib import suppress
 from math import floor
 from os import _exit, getenv, listdir, sep, urandom
@@ -387,7 +387,7 @@ def inject_variables():
 
     # check that is value is in tuple
     return dict(
-        data_server_global={"username": current_user.get_id() if current_user.is_authenticated else ""},
+        data_server_global=json.dumps({"username": current_user.get_id() if current_user.is_authenticated else ""}),
         script_nonce=app.config["SCRIPT_NONCE"],
         is_pro_version=metadata["is_pro"],
         pro_status=metadata["pro_status"],
@@ -707,7 +707,6 @@ def home_builder(data):
                         )
                     ),
                     "iconName": "crown" if data.get("is_pro_version") else "key",
-                    "iconColor": "amber" if data.get("is_pro_version") else "green",
                 },
             }
         ],
@@ -732,7 +731,6 @@ def home_builder(data):
                     ),
                     "stat": data.get("version"),
                     "iconName": "wire",
-                    "iconColor": "teal",
                 },
             }
         ],
@@ -751,7 +749,6 @@ def home_builder(data):
                     "subtitleColor": "info",
                     "stat": data.get("instances_number"),
                     "iconName": "box",
-                    "iconColor": "dark",
                 },
             }
         ],
@@ -770,7 +767,6 @@ def home_builder(data):
                     "subtitleColor": "info",
                     "stat": data.get("services_number"),
                     "iconName": "disk",
-                    "iconColor": "orange",
                 },
             }
         ],
@@ -789,7 +785,6 @@ def home_builder(data):
                     "subtitleColor": "error" if data.get("plugins_errors") > 0 else "success",
                     "stat": "42",
                     "iconName": "puzzle",
-                    "iconColor": "yellow",
                 },
             }
         ],
@@ -848,45 +843,27 @@ def home():
 
     metadata = app.config["DB"].get_metadata()
 
-    # is_pro_version = metadata["is_pro"] # TODO: either remove or use this
-    # pro_status = metadata["pro_status"]
-    # pro_services = metadata["pro_services"]
-    # pro_overlapped = metadata["pro_overlapped"]
-    bw_version = metadata["version"]
+    data = {
+        "check_version": not remote_version or bw_version == remote_version,
+        "remote_version": remote_version,
+        "version": metadata["version"],
+        "instances_number": len(instances),
+        "services_number": services,
+        "instance_health_count": instance_health_count,
+        "services_scheduler_count": services_scheduler_count,
+        "services_ui_count": services_ui_count,
+        "services_autoconf_count": services_autoconf_count,
+        "is_pro_version": metadata["is_pro"],
+        "pro_status": metadata["pro_status"],
+        "pro_services": metadata["pro_services"],
+        "pro_overlapped": metadata["pro_overlapped"],
+        "plugins_number": len(app.config["CONFIG"].get_plugins()),
+        "plugins_errors": app.config["DB"].get_plugins_errors(),
+    }
 
-    # data = { # TODO: either remove or use this
-    #     "check_version": not remote_version or bw_version == remote_version,
-    #     "remote_version": remote_version,
-    #     "version": bw_version,
-    #     "instances_number": len(instances),
-    #     "services_number": services,
-    #     "instance_health_count": instance_health_count,
-    #     "services_scheduler_count": services_scheduler_count,
-    #     "services_ui_count": services_ui_count,
-    #     "services_autoconf_count": services_autoconf_count,
-    #     "is_pro_version": is_pro_version,
-    #     "pro_status": pro_status,
-    #     "pro_services": pro_services,
-    #     "pro_overlapped": pro_overlapped,
-    #     "plugins_number": len(app.config["CONFIG"].get_plugins()),
-    #     "plugins_errors": app.config["DB"].get_plugins_errors(),
-    # }
+    data_server_builder = home_builder(data)
 
-    # data_server_builder = home_builder(data) # TODO: either remove or use this
-
-    return render_template(
-        "home.html",
-        check_version=not remote_version or bw_version == remote_version,
-        remote_version=remote_version,
-        version=bw_version,
-        instances_number=len(instances),
-        services_number=services,
-        plugins_errors=app.config["DB"].get_plugins_errors(),
-        instance_health_count=instance_health_count,
-        services_scheduler_count=services_scheduler_count,
-        services_ui_count=services_ui_count,
-        services_autoconf_count=services_autoconf_count,
-    )
+    return render_template("home.html", data_server_builder=json.dumps(data_server_builder))
 
 
 @app.route("/account", methods=["GET", "POST"])

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@intlify/unplugin-vue-i18n": "^4.0.0",
     "@vueuse/core": "^10.11.0",
     "ace-builds": "^1.24.2",
     "flag-icons": "^6.15.0",

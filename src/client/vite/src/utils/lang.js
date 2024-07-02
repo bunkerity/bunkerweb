@@ -64,7 +64,7 @@ function getI18n(pagesArr = []) {
     silentTranslationWarn: false,
     missingWarn: false,
     WarnHtmlInMessageLevel: "off",
-    messageCompiler: false,
+    messageCompiler: true,
   });
 
   return i18n;

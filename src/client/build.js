@@ -107,19 +107,34 @@ async function setBuildTempToUI() {
           if (err) {
             console.log(err);
           }
-          let updateData = "";
+          let updateData = data;
+          // I want to remove the first "/" for href="/css", href="/js", href="/img", href="/favicon", src="/assets" or src="/js"
+          const regexPaths = /href="\/(css|js|img|favicon)|src="\/(assets|js)/g;
+          updateData = data.replace(regexPaths, (match) => {
+            return match.replace("/", "");
+          });
+
+          // For each <script> tag, I want to add nonce="{{ script_nonce }}" inside it
+          const regexScript = /<script/g;
+          updateData = updateData.replace(regexScript, (match) => {
+            return match.replace(
+              "<script",
+              '<script nonce="{{ script_nonce }}" '
+            );
+          });
+
           // remove everything after <body> tag
-          const bodyIndex = data.indexOf("<body>");
+          const bodyIndex = updateData.indexOf("<body>");
           // Add attributs
 
           const attributs = `<body>
-                        <div class="hidden" data-csrf-token={{ csrf_token() }}></div>\n
-                        <div class="hidden" data-server-global={{data_server_global}}></div>\n
-                        <div class="hidden" data-server-flash={{data_server_flash}}></div>\n
-                        <div class="hidden" data-server-builder={{data_server_builder}}></div>\n
-                        <div id="app"></div>\n</body>\n</html>`;
+<div class="hidden" data-csrf-token="{{ csrf_token() }}"></div>\n
+<div class="hidden" data-server-global="{{data_server_global if data_server_global else {}}}"></div>\n
+<div class="hidden" data-server-flash="{{data_server_flash if data_server_flash else []}}"></div>\n
+<div class="hidden" data-server-builder="{{data_server_builder}}"></div>\n
+<div id="app"></div>\n</body>\n</html>`;
           // insert the new content
-          updateData = updateData = data.substring(0, bodyIndex) + attributs;
+          updateData = updateData.substring(0, bodyIndex) + attributs;
           fs.writeFileSync(
             `${appTempDir}/${file}`,
             updateData,
