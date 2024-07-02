@@ -1,3 +1,7 @@
+# UI Components
+
+This page contains all the UI components used in the application.
+
 ##  Builder
 
 ### Bans.vue

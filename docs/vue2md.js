@@ -132,7 +132,7 @@ function mergeMd() {
   });
 
   // Create the md file to merge
-  const merge = path.join(ouputFolder, finalFile);
+  const merge = path.join(finalFile);
   fs.writeFileSync(merge, "", "utf8");
   // Append each file in order
   order.forEach((item) => {
@@ -144,7 +144,7 @@ function mergeMd() {
 // Format merge file
 function formatMd() {
   // Create a md file to merge
-  const merge = path.join(ouputFolder, finalFile);
+  const merge = path.join(finalFile);
 
   // Get data from merge
   let data = fs.readFileSync(merge, "utf8");
@@ -221,25 +221,19 @@ function formatMd() {
   // Update the data with split
   data = dataSplit.join("\n");
 
+  // Add title and description
+  const title = "# UI Components";
+  const description =
+    "This page contains all the UI components used in the application.";
+  data = `${title}\n\n${description}\n\n${data}`;
+
   fs.writeFileSync(merge, data, "utf8");
+  fs.rmSync(ouputFolder, { recursive: true });
 }
 
-// Move final file to root with others pages
-// And delete output folder
-function moveMd() {
-
-  fs.rename(`./output/${finalFile}`, `./${finalFile}`, function (err) {
-    if (err) throw err
-  })
-
-  // Delete output folder
-  fs.rmdirSync(ouputFolder, { recursive: true });
-
-}
 
 
 vue2js();
 js2md();
 mergeMd();
 formatMd();
-moveMd();
