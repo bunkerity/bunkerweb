@@ -145,7 +145,7 @@ const props = defineProps({
 const inp = reactive({
   isOpen: false,
   id: "",
-  value: props.value,
+  value: props.value.trim(),
   values: computed(() => {
     return inp.value.split(props.separator);
   }),
@@ -162,8 +162,8 @@ const inp = reactive({
   // Check if enter value is already a value
   isEnterMatching: computed(() => {
     if (!inp.enterValue) return false;
-    if (!props.value.split(props.separator)) return false;
-    return props.value
+    if (!inp.value.split(props.separator)) return false;
+    return inp.value
       .split(props.separator)
       .some((str) => str.toLowerCase() === inp.enterValue.toLowerCase());
   }),
@@ -353,7 +353,6 @@ const emits = defineEmits(["inp"]);
       :hideLabel="props.hideLabel"
       :headerClass="props.headerClass"
     />
-
     <!--custom-->
     <div class="relative">
       <div data-input-container class="input-regular-container">
