@@ -7,7 +7,7 @@ import DashboardLayout from "@components/Dashboard/Layout.vue";
 
 const list = {
   id: "test-input",
-  value: "yes no maybe",
+  value: "yes no maybe I don't know can you repeat the question",
   name: "test-list",
   label: "Test list",
   inpType: "list",

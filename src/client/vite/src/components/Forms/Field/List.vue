@@ -226,12 +226,13 @@ function openSelect() {
   }, 10);
 }
 
-function closeSelect() {
-  inp.isOpen = false;
-}
-
 // Close select when clicked outside logic
 function closeOutside(e) {
+  if (
+    e.target.hasAttribute("data-select-item") ||
+    e.target.hasAttribute("data-delete-entry")
+  )
+    return;
   try {
     if (e.target !== inputEl.value && e.target !== inputEl.value) {
       inp.isOpen = false;
@@ -254,13 +255,23 @@ function closeScroll(e) {
   inp.isOpen = false;
 }
 
+function closeEscape(e) {
+  if (e.key !== "Escape") return;
+  inp.isOpen = false;
+}
+
 // Check after a key is pressed if the current active element is the select button
 // If not close the select
 function closeTab(e) {
   if (e.key !== "Tab" && e.key !== "Shift-Tab") return;
   setTimeout(() => {
     const activeEl = document.activeElement;
-    if (activeEl.closest("[data-select-dropdown]") !== selectDropdown.value)
+    if (
+      activeEl.closest("[data-select-dropdown]") !== selectDropdown.value &&
+      activeEl
+        ?.closest("[data-input-container]")
+        ?.querySelector("[data-toggle-dropdown]") !== inputEl.value
+    )
       return (inp.isOpen = false);
   }, 10);
 }
@@ -276,9 +287,9 @@ function addEntry(e) {
   )
     return;
 
-  inp.value = `${inp.enterValue}${props.separator}${inp.value}`;
-  console.log(inp.value);
+  inp.value = `${inp.enterValue}${props.separator}${inp.value}`.trim();
   inp.enterValue = "";
+  inputEl.value.focus();
 }
 
 // Case the entry is focus and value is valid, add it to the list
@@ -286,19 +297,25 @@ function deleteValue(value) {
   inp.value = inp.value
     .split(props.separator)
     .filter((val) => val !== value)
-    .join(props.separator);
+    .join(props.separator)
+    .trim();
+
+  // Case no item anymore, focus on main input
+  if (!inp.value) inputEl.value.focus();
 }
 
 // Close select dropdown when clicked outside element
 watch(inp, () => {
   if (inp.isOpen) {
-    window.addEventListener("click", closeOutside);
     window.addEventListener("scroll", closeScroll, true);
+    window.addEventListener("click", closeOutside);
+    window.addEventListener("keydown", closeEscape);
     window.addEventListener("keydown", closeTab);
     window.addEventListener("keydown", addEntry);
   } else {
-    window.removeEventListener("click", closeOutside);
     window.removeEventListener("scroll", closeScroll, true);
+    window.removeEventListener("click", closeOutside);
+    window.removeEventListener("keydown", closeEscape);
     window.removeEventListener("keydown", closeTab);
     window.removeEventListener("keydown", addEntry);
   }
@@ -339,7 +356,7 @@ const emits = defineEmits(["inp"]);
 
     <!--custom-->
     <div class="relative">
-      <div class="input-regular-container">
+      <div data-input-container class="input-regular-container">
         <input
           data-toggle-dropdown
           :aria-controls="`${inp.id}-custom`"
@@ -349,6 +366,7 @@ const emits = defineEmits(["inp"]);
           ref="inputEl"
           @input="
             (e) => {
+              openSelect();
               inp.enterValue = e.target.value;
               $emit('inp', inp.value);
             }
@@ -378,6 +396,7 @@ const emits = defineEmits(["inp"]);
           type="text"
         />
         <button
+          :tabindex="props.tabId"
           data-add-entry
           @click.prevent="(e) => addEntry(e)"
           :disabled="
@@ -412,16 +431,15 @@ const emits = defineEmits(["inp"]);
         </svg>
       </div>
       <!-- dropdown-->
-      <div
+      <ul
         data-select-dropdown
         :aria-hidden="inp.isOpen ? 'false' : 'true'"
         :aria-expanded="inp.isOpen ? 'true' : 'false'"
         ref="selectDropdown"
-        role="listbox"
         :style="{ width: selectWidth }"
         :id="`${inp.id}-custom`"
         :class="[inp.isOpen ? 'open' : 'close']"
-        class="select-dropdown-container"
+        class="list-dropdown-container"
         :aria-description="$t('inp_select_dropdown_desc')"
       >
         <ErrorDropdown
@@ -430,25 +448,42 @@ const emits = defineEmits(["inp"]);
           :isValue="!!inp.value"
           :isValueTaken="inp.isEnterMatching"
         />
-        <button
-          @click="deleteValue(value)"
-          v-if="inp.isValid && !inp.isEnterMatching && inp.isEnterValid"
-          role="option"
-          :tabindex="inp.isOpen ? props.tabId : '-1'"
-          v-for="(value, id) in inp.values"
-          :class="[
-            id === 0 ? 'first' : '',
-            id === inp.values.length - 1 ? 'last' : '',
-            'select-dropdown-btn',
-          ]"
-          data-select-item
-          :data-setting-id="inp.id"
-          :data-setting-value="value"
-          :aria-controls="`${inp.id}-text`"
+        <template
+          v-if="
+            inp.isValid &&
+            !inp.isEnterMatching &&
+            inp.isEnterValid &&
+            inp.values.length >= 0 &&
+            inp.values[0]
+          "
         >
-          {{ value }}
-        </button>
-      </div>
+          <li
+            :tabindex="inp.isOpen ? props.tabId : '-1'"
+            v-for="(value, id) in inp.values"
+            :class="[
+              id === 0 ? 'first' : '',
+              id === inp.values.length - 1 ? 'last' : '',
+              'list-dropdown-btn',
+            ]"
+            data-select-item
+            :data-setting-id="inp.id"
+            :data-setting-value="value"
+            :aria-controls="`${inp.id}-text`"
+          >
+            <span>
+              {{ value }}
+            </span>
+            <button
+              data-delete-entry
+              :tabindex="inp.isOpen ? props.tabId : '-1'"
+              data-is="input"
+              @click="deleteValue(value)"
+            >
+              <Icons :iconName="'trash'" />
+            </button>
+          </li>
+        </template>
+      </ul>
       <ErrorField
         v-if="!inp.isOpen"
         :errorClass="'input'"

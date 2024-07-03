@@ -276,6 +276,11 @@ function closeScroll(e) {
   select.isOpen = false;
 }
 
+function closeEscape(e) {
+  if (e.key !== "Escape") return;
+  select.isOpen = false;
+}
+
 // Check after a key is pressed if the current active element is the select button
 // If not close the select
 function closeTab(e) {
@@ -291,13 +296,15 @@ function closeTab(e) {
 watch(select, () => {
   if (select.isOpen) {
     inputEl.value.focus();
-    window.addEventListener("click", closeOutside);
     window.addEventListener("scroll", closeScroll, true);
+    window.addEventListener("click", closeOutside);
     window.addEventListener("keydown", closeTab);
+    window.addEventListener("keydown", closeEscape);
   } else {
-    window.removeEventListener("click", closeOutside);
     window.removeEventListener("scroll", closeScroll, true);
+    window.removeEventListener("click", closeOutside);
     window.removeEventListener("keydown", closeTab);
+    window.removeEventListener("keydown", closeEscape);
   }
 });
 

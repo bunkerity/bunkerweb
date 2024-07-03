@@ -217,11 +217,11 @@ body {
 }
 
 .input-list-add {
-  @apply transition absolute top-1 right-9 cursor-pointer transition-transform h-6 w-6 disabled:cursor-not-allowed disabled:opacity-50 disabled:dark:opacity-75;
+  @apply transition absolute top-1 right-9 cursor-pointer transition-transform h-6 w-6 disabled:cursor-not-allowed disabled:opacity-50 disabled:dark:opacity-50;
 }
 
 .input-list-svg {
-  @apply absolute top-1.5 right-2 pointer-events-none transition-transform h-6 w-6 fill-gray-600 dark:fill-gray-500;
+  @apply absolute top-1.5 right-2 pointer-events-none transition-transform h-6 w-6 stroke-gray-600 dark:stroke-gray-500;
 }
 
 .checkbox-container {
@@ -273,32 +273,45 @@ body {
   @apply flex max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-fit mt-2;
 }
 
-.open.select-dropdown-container {
-  @apply absolute z-[2000];
-}
-
-.open.select-dropdown-container {
-  animation: dropOpen 0.1s linear;
-}
-
-.close.select-dropdown-container {
-  @apply hidden;
+.list-dropdown-container {
+  @apply flex max-h-[200px] overflow-x-hidden overflow-y-auto flex-col w-fit mt-2;
 }
 
 .select-dropdown-btn {
   @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-2 py-2  text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
 }
 
+.list-dropdown-btn {
+  @apply outline-offset-[-4px] border-b border-l border-r border-gray-300 hover:brightness-90 bg-white text-gray-700 my-0 relative px-2 py-2 flex justify-between align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-normal dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
+}
+
 .active.select-dropdown-btn {
   @apply dark:border-slate-600 dark:bg-slate-600 bg-gray-200 font-semibold dark:text-gray-100;
 }
 
-.first.select-dropdown-btn {
+.first.select-dropdown-btn,
+.first.list-dropdown-btn {
   @apply border-t rounded-t;
 }
 
-.last.select-dropdown-btn {
+.last.select-dropdown-btn,
+.last.list-dropdown-btn {
   @apply rounded-b;
+}
+
+.open.select-dropdown-container,
+.open.list-dropdown-container {
+  @apply absolute z-[2000];
+}
+
+.open.select-dropdown-container,
+.open.list-dropdown-container{
+  animation: dropOpen 0.1s linear;
+}
+
+.close.select-dropdown-container,
+.close.list-dropdown-container {
+  @apply hidden;
 }
 
 .input-title {
