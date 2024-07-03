@@ -445,7 +445,7 @@ const emits = defineEmits(["inp"]);
         <ErrorDropdown
           v-if="!inp.isMatching || !inp.isEnterValid || !inp.isValid"
           :isValid="inp.isValid && !inp.isEnterMatching && inp.isEnterValid"
-          :isValue="!!inp.value"
+          :isValue="props.required ? !!inp.value : true"
           :isValueTaken="inp.isEnterMatching"
         />
         <template
@@ -485,10 +485,14 @@ const emits = defineEmits(["inp"]);
         </template>
       </ul>
       <ErrorField
-        v-if="!inp.isOpen"
         :errorClass="'input'"
+        v-if="
+          (!inp.isOpen && !inp.isMatching) ||
+          (!inp.isOpen && !inp.isEnterValid) ||
+          (!inp.isOpen && !inp.isValid)
+        "
         :isValid="inp.isValid && !inp.isEnterMatching && inp.isEnterValid"
-        :isValue="!!inp.value"
+        :isValue="props.required ? !!inp.value : true"
         :isValueTaken="inp.isEnterMatching"
       />
       <!-- end dropdown-->
