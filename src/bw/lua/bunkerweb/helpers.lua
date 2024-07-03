@@ -268,12 +268,16 @@ function helpers.load_variables(all_variables, plugins)
 		end
 		if data.multiple then
 			for variable, value in pairs(all_variables) do
-				local _, server_name, multiple_setting = variable:match("((%S*_?)(" .. setting .. "_%d+))")
+				local multiple_setting = variable:match("^(" .. setting .. "_%d+)$")
 				if multiple_setting then
-					if multisite and server_name and server_name:match("%S+_$") then
-						variables[server_name:sub(1, -2)][multiple_setting] = value
-					else
-						variables["global"][multiple_setting] = value
+					variables["global"][multiple_setting] = value
+				end
+				if multisite then
+					for _, server_name in ipairs(server_names) do
+						multiple_setting = variable:match("^" .. server_name .. "_(" .. setting .. "_%d+)$")
+						if multiple_setting then
+							variables[server_name][multiple_setting] = value
+						end
 					end
 				end
 			end

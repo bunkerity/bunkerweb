@@ -80,7 +80,7 @@ end
 function headers:header()
 	-- Override upstream headers if needed
 	local ngx_header = ngx.header
-	local ssl = self.ctx.bw.https_configured == "yes"
+	local ssl = self.ctx.bw.scheme == "https"
 	for variable, header in pairs(self.all_headers) do
 		if
 			ngx_header[header] == nil

@@ -104,7 +104,7 @@ function errors:render_template(code)
 	-- Override HSTS header
 	local ssl
 
-	if self.ctx.bw and self.ctx.bw.https_configured == "yes" then
+	if self.ctx.bw and self.ctx.bw.scheme == "https" then
 		ssl = true
 	else
 		ssl = ngx.var.scheme == "https"
