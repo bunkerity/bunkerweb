@@ -128,12 +128,21 @@ async function setBuildTempToUI() {
           const bodyIndex = updateData.indexOf("<body>");
           // Add attributs
 
-          const attributs = `<body>
-<div class="hidden" data-csrf-token="{{ csrf_token() }}"></div>\n
-<div class="hidden" data-server-global="{{data_server_global if data_server_global else {}}}"></div>\n
-<div class="hidden" data-server-flash="{{data_server_flash if data_server_flash else []}}"></div>\n
-<div class="hidden" data-server-builder="{{data_server_builder}}"></div>\n
-<div id="app"></div>\n</body>\n</html>`;
+          const attributs = `
+<body>
+  {% set data_server_flash = [] %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      {% if data_server_flash.append({"type": "error" if category == "error" else "success", "title": "dashboard_error" if category == "error" else "dashboard_success", "message": message}) %}{% endif %}
+    {% endfor %}
+  {% endwith %}
+  <div class='hidden' data-csrf-token='{{ csrf_token() }}'></div>
+  <div class='hidden' data-server-global='{{data_server_global if data_server_global else {}}}''></div>
+  <div class='hidden' data-server-flash='{{data_server_flash|tojson}}'></div>
+  <div class='hidden' data-server-builder='{{data_server_builder}}'></div>
+  <div id='app'></div>
+  </body>
+</html>`;
           // insert the new content
           updateData = updateData.substring(0, bodyIndex) + attributs;
           fs.writeFileSync(
