@@ -1043,10 +1043,11 @@ def instances_builder(instances: list):
         )
         buttons = [
             {
-                "attrs": {"data-form-INSTANCE_ID": instance._id, "data-form-operation": action, "data-submit-form": "true"},
+                "attrs": {
+                    "data-submit-form": f"""{{"INSTANCE_ID" : "{instance._id}", "operation" : "{action}" }}""",
+                },
                 "text": f"action_{action}",
                 "color": "success" if action == "start" else "error" if action == "stop" else "warning",
-                "size": "normal",
             }
             for action in actions
         ]
@@ -1058,7 +1059,7 @@ def instances_builder(instances: list):
                 {
                     "type": "Instance",
                     "data": {
-                        "details": [
+                        "pairs": [
                             {"key": "instances_hostname", "value": instance.hostname},
                             {"key": "instances_type", "value": instance._type},
                             {"key": "instances_status", "value": "instances_active" if instance.health else "instances_inactive"},
@@ -1116,8 +1117,9 @@ def instances():
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
+
     data_server_builder = instances_builder(instances)
-    return render_template("instances.html", title="Instances", data_server_builder=data_server_builder, instances=instances, username=current_user.get_id())
+    return render_template("instances.html", title="Instances", data_server_builder=json.dumps(data_server_builder))
 
 
 @app.route("/services", methods=["GET", "POST"])

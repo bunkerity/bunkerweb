@@ -36,6 +36,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         home: resolve(__dirname, "./src/pages/home/index.html"),
+        instances: resolve(__dirname, "./src/pages/instances/index.html"),
       },
     },
   },

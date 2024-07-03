@@ -1,4 +1,6 @@
-stats = [
+import json
+
+home = [
     {
         "type": "card",
         "link": "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro",
@@ -85,3 +87,7 @@ stats = [
         ],
     },
 ]
+
+# store on a file
+with open("home.json", "w") as f:
+    json.dump(home, f, indent=4)

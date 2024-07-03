@@ -52,7 +52,7 @@ function useSubmitForm(data) {
     input.value = data[key];
     form.appendChild(input);
   }
-  // Append the form to the body and submit it
+  // Append to be able to submit
   document.querySelector("body").appendChild(form);
   form.submit();
 }

@@ -97,7 +97,7 @@ async function setBuildTempToUI() {
   fs.readdir(resolve("./templates"), (err, files) => {
     // Read content
     files.forEach((file) => {
-      const data = fs.readFile(
+      fs.readFile(
         resolve(`./templates/${file}`),
         {
           encoding: "utf8",
@@ -109,7 +109,8 @@ async function setBuildTempToUI() {
           }
           let updateData = data;
           // I want to remove the first "/" for href="/css", href="/js", href="/img", href="/favicon", src="/assets" or src="/js"
-          const regexPaths = /href="\/(css|js|img|favicon)|src="\/(assets|js)/g;
+          const regexPaths =
+            /href="\/(css|js|img|favicon|assets|js)|src="\/(assets|js)/g;
           updateData = data.replace(regexPaths, (match) => {
             return match.replace("/", "");
           });
@@ -163,8 +164,17 @@ async function moveBuildStaticToUI() {
   });
 }
 
+async function delPrevDirs() {
+  // Delete prev existing dir
+  delElRecursive(`${appStaticDir}/css`);
+  delElRecursive(`${appStaticDir}/assets`);
+  delElRecursive(`${appStaticDir}/flags`);
+  delElRecursive(`${appStaticDir}/img`);
+}
+
 async function build() {
   // Build client and setup
+  await delPrevDirs();
   await buildVite();
   await updateClientDir();
   await setBuildTempToUI();
