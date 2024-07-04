@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+from itertools import chain
 from os import getenv
 from time import sleep
 from copy import deepcopy
@@ -40,16 +41,22 @@ class Config:
             self._settings.update(plugin["settings"])
 
     def __get_full_env(self) -> dict:
+        env_instances = {"SERVER_NAME": ""}
+        for instance in self.__instances:
+            for variable, value in instance["env"].items():
+                env_instances[variable] = value
+
         config = {"SERVER_NAME": "", "MULTISITE": "yes"}
         for service in self.__services:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
                 continue
-            for variable, value in service.items():
+            for variable, value in chain(env_instances.items(), service.items()):
                 if variable.startswith("CUSTOM_CONF") or not variable.isupper():
                     continue
                 if not self._db.is_setting(variable, multisite=True):
-                    self.__logger.warning(f"Variable {variable}: {value} is not a valid multisite setting, ignoring it")
+                    if variable in service:
+                        self.__logger.warning(f"Variable {variable}: {value} is not a valid multisite setting, ignoring it")
                     continue
                 config[f"{server_name}_{variable}"] = value
             config["SERVER_NAME"] += f" {server_name}"
