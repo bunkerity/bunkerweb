@@ -603,28 +603,27 @@ def setup():
         ui_data = get_ui_data()
         ui_data["RELOADING"] = True
         ui_data["LAST_RELOAD"] = time()
+
+        config = {
+            "SERVER_NAME": request.form["server_name"],
+            "USE_UI": "yes",
+            "USE_REVERSE_PROXY": "yes",
+            "REVERSE_PROXY_HOST": request.form["ui_host"],
+            "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
+            "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
+            "MAX_CLIENT_SIZE": "50m",
+        }
+
+        if request.form.get("auto_lets_encrypt", "no") == "yes":
+            config["AUTO_LETS_ENCRYPT"] = "yes"
+        else:
+            config["GENERATE_SELF_SIGNED_SSL"] = "yes"
+
         # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
-            args=(
-                "services",
-                {
-                    "SERVER_NAME": request.form["server_name"],
-                    "USE_UI": "yes",
-                    "USE_REVERSE_PROXY": "yes",
-                    "REVERSE_PROXY_HOST": request.form["ui_host"],
-                    "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
-                    "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
-                    "USE_CUSTOM_SSL": "yes" if request.form.get("auto_lets_encrypt", "no") == "no" else "no",
-                    "CUSTOM_SSL_CERT": "/var/cache/bunkerweb/misc/default-server-cert.pem" if request.form.get("auto_lets_encrypt", "no") == "no" else "",
-                    "CUSTOM_SSL_KEY": "/var/cache/bunkerweb/misc/default-server-cert.key" if request.form.get("auto_lets_encrypt", "no") == "no" else "",
-                    "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
-                    "MAX_CLIENT_SIZE": "50m",
-                },
-                request.form["server_name"],
-                request.form["server_name"],
-            ),
+            args=("services", config, request.form["server_name"], request.form["server_name"]),
             kwargs={"operation": "new", "threaded": True},
         ).start()
 
@@ -2369,6 +2368,7 @@ def login():
 
         if admin_user.get_id() == request.form["username"] and admin_user.check_password(request.form["password"]):
             # log the user in
+            session.permanent = True
             session["ip"] = request.remote_addr
             session["user_agent"] = request.headers.get("User-Agent")
             session["totp_validated"] = False
