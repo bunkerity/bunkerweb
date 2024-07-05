@@ -226,7 +226,7 @@ class Config:
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
-    def edit_global_conf(self, variables: dict) -> Tuple[str, int]:
+    def edit_global_conf(self, variables: dict, *, check_changes: bool = True) -> Tuple[str, int]:
         """Edits the global conf
 
         Parameters
@@ -239,7 +239,7 @@ class Config:
         str
             the confirmation message
         """
-        ret = self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
+        ret = self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False), check_changes=check_changes)
         if isinstance(ret, str):
             return ret, 1
         return "The global configuration has been edited.", 0
