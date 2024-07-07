@@ -4,13 +4,13 @@
     {% for plugin in plugins %}
         {% if plugin.get('name')|lower == 'pro' %}
         {% if pro_setting.update({'method' : plugin.get('method', 'ui')}) %}{% endif %}
-        
+
         {% for setting, value in plugin.get('settings').items() %}
             {% if setting == "PRO_LICENSE_KEY" %}
                 {% if pro_setting.update({'value' : value.get('value', '')}) %}{% endif %}
             {% endif %}
         {% endfor %}
-        
+
         {% endif %}
     {% endfor %}
     {% set attribute_name = "account" %}
