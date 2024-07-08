@@ -22,9 +22,9 @@ packaging==24.1 \
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==24.1.1 \
-    --hash=sha256:5aa64f65e1952733ee0a9a9b1f52496ebdb3f3077cc46f80a16d983b58d1180a \
-    --hash=sha256:efca15145a95e95c00608afeab66311d40bfb73bb2266a855befd705e6bb15a0
+pip==24.1.2 \
+    --hash=sha256:7cd207eed4c60b0f411b444cd1464198fe186671c323b6cd6d433ed80fc9d247 \
+    --hash=sha256:e5458a0b89f2755e0ee8c0c77613fe5273e05f337907874d64f13171a898a7ff
     # via build
 pip-tools==7.4.1 \
     --hash=sha256:4c690e5fbae2f21e87843e89c26191f0d9454f362d8acdbd695716493ec8b3a9 \

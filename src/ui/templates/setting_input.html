@@ -15,6 +15,7 @@
         <input {% if is_readonly %}disabled{% endif %}
                {% if inp_name == "SERVER_NAME" %}required{% endif %}
                data-default-value="{{ global_config_value }}"
+               data-default="{{ inp_default }}"
                data-default-method="{{ global_config_method }}"
                data-setting-input
                {% if global_config_method != 'ui' and global_config_method != 'default' or is_read_only %}disabled{% endif %}

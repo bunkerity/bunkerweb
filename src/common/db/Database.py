@@ -1599,11 +1599,11 @@ class Database:
             if not global_only and is_multisite:
                 servers = ""
                 for service in services:
+                    for key in multisite:
+                        config[f"{service.id}_{key}"] = config[key]
                     config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
                     if methods:
                         config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
-                    for key in multisite:
-                        config[f"{service.id}_{key}"] = config[key]
                     servers += f"{service.id} "
                 servers = servers.strip()
 

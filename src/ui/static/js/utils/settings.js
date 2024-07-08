@@ -13,7 +13,7 @@ class Popover {
           this.hidePopover(this.relateBtn);
         } catch (e) {}
       },
-      true,
+      true
     );
 
     window.addEventListener("pointerover", (e) => {
@@ -48,7 +48,7 @@ class Popover {
     const popoverName = btn.getAttribute("data-popover-btn");
     //toggle curr popover
     const popover = btn.parentElement.querySelector(
-      `[data-popover-content=${popoverName}]`,
+      `[data-popover-content=${popoverName}]`
     );
 
     popover.classList.add("transition-all", "delay-200", "opacity-0");
@@ -70,7 +70,7 @@ class Popover {
     const popoverName = btn.getAttribute("data-popover-btn");
     //toggle curr popover
     const popover = btn.parentElement.querySelector(
-      `[data-popover-content=${popoverName}]`,
+      `[data-popover-content=${popoverName}]`
     );
     popover.classList.add("hidden");
     popover.classList.remove("transition-all", "delay-200");
@@ -127,7 +127,7 @@ class TabsSelect {
             window.history.replaceState(
               null,
               "",
-              `${window.location.pathname}#${tabAtt}`,
+              `${window.location.pathname}#${tabAtt}`
             );
           }
         }
@@ -153,7 +153,7 @@ class TabsSelect {
         const fragment = window.location.hash.substring(1);
         if (fragment) {
           const tab = this.tabContainer.querySelector(
-            `button[data-tab-select-handler='${fragment}']`,
+            `button[data-tab-select-handler='${fragment}']`
           );
           tab.click();
           // Scroll to the top of the page (with a delay to ensure the tab is clicked first)
@@ -167,7 +167,7 @@ class TabsSelect {
 
   resetTabsStyle() {
     const tabsEl = this.tabContainer.querySelectorAll(
-      "button[data-tab-select-handler]",
+      "button[data-tab-select-handler]"
     );
     tabsEl.forEach((tab) => {
       tab.classList.remove("active");
@@ -176,7 +176,7 @@ class TabsSelect {
 
   highlightClicked(tabAtt) {
     const tabMobile = this.tabContainer.querySelector(
-      `button[data-tab-select-handler='${tabAtt}']`,
+      `button[data-tab-select-handler='${tabAtt}']`
     );
     tabMobile.classList.add("active");
   }
@@ -191,14 +191,14 @@ class TabsSelect {
 
   showSettingClicked(tabAtt) {
     const plugin = this.contentContainer.querySelector(
-      `[data-plugin-item='${tabAtt}']`,
+      `[data-plugin-item='${tabAtt}']`
     );
     plugin.classList.remove("hidden");
   }
 
   setDropBtnText(tabAtt, text) {
     const dropBtn = this.tabContainer.querySelector(
-      "[data-tab-select-dropdown-btn]",
+      "[data-tab-select-dropdown-btn]"
     );
     dropBtn.setAttribute("data-tab-id", tabAtt);
     dropBtn.querySelector("span").textContent = text;
@@ -206,7 +206,7 @@ class TabsSelect {
 
   closeDropdown() {
     const dropdown = this.tabContainer.querySelector(
-      "[data-tab-select-dropdown]",
+      "[data-tab-select-dropdown]"
     );
     dropdown.classList.add("hidden");
     dropdown.classList.remove("flex");
@@ -216,7 +216,7 @@ class TabsSelect {
 
   toggleDropdown() {
     const dropdown = this.tabContainer.querySelector(
-      "[data-tab-select-dropdown]",
+      "[data-tab-select-dropdown]"
     );
     const combobox = dropdown.querySelector("[data-combobox]");
     if (combobox) {
@@ -241,7 +241,7 @@ class TabsSelect {
 
   updateTabArrow() {
     const dropdown = this.tabContainer.querySelector(
-      "[data-tab-select-dropdown]",
+      "[data-tab-select-dropdown]"
     );
 
     if (dropdown.classList.contains("hidden")) {
@@ -275,24 +275,24 @@ class FilterSettings {
     inputID,
     tabContainer,
     contentContainer,
-    prefix = "global-config",
+    prefix = "global-config"
   ) {
     this.input = document.querySelector(`input#${inputID}`);
     this.prefix = prefix;
     this.contextTxtEl = document.querySelector(
-      `span[data-${this.prefix}-setting-select-text="context"]`,
+      `span[data-${this.prefix}-setting-select-text="context"]`
     );
     this.typeTxtEl = document.querySelector(
-      `span[data-${this.prefix}-setting-select-text="type"]`,
+      `span[data-${this.prefix}-setting-select-text="type"]`
     );
     this.comboboxEl = document.querySelector(
-      `[data-${this.prefix}-tabs-select] [data-combobox]`,
+      `[data-${this.prefix}-tabs-select] [data-combobox]`
     );
     this.isComboCheck = false;
     this.tabContainer = tabContainer;
     this.contentContainer = contentContainer;
     this.tabsEls = this.tabContainer.querySelectorAll(
-      `[data-tab-select-handler]`,
+      `[data-tab-select-handler]`
     );
     this.comboboxEl = this.tabContainer
       .querySelector("[data-tab-select-dropdown]")
@@ -325,16 +325,16 @@ class FilterSettings {
         try {
           if (
             (e.target.hasAttribute(
-              `data-${this.prefix}-setting-select-dropdown-btn`,
+              `data-${this.prefix}-setting-select-dropdown-btn`
             ) &&
               e.target.getAttribute(
-                `data-${this.prefix}-setting-select-dropdown-btn`,
+                `data-${this.prefix}-setting-select-dropdown-btn`
               ) === `context`) ||
             (e.target.hasAttribute(
-              `data-${this.prefix}-setting-select-dropdown-btn`,
+              `data-${this.prefix}-setting-select-dropdown-btn`
             ) &&
               e.target.getAttribute(
-                `data-${this.prefix}-setting-select-dropdown-btn`,
+                `data-${this.prefix}-setting-select-dropdown-btn`
               ) === `type`)
           ) {
             return this.runFilter();
@@ -531,7 +531,7 @@ class FilterSettings {
         const multGroups = this.contentContainer
           .querySelector(`[data-plugin-item=${tabName}]`)
           .querySelectorAll(
-            `[data-${this.prefix}-settings-multiple^="${multHandlerName}"]`,
+            `[data-${this.prefix}-settings-multiple^="${multHandlerName}"]`
           );
         // check for each if all settings are hidden
 
@@ -539,7 +539,7 @@ class FilterSettings {
           const multGroup = multGroups[j];
           let isAllMultSettingHidden = true;
           const settings = multGroup.querySelectorAll(
-            `[data-setting-container]`,
+            `[data-setting-container]`
           );
           for (let k = 0; k < settings.length; k++) {
             if (!settings[k].classList.contains("hidden")) {
@@ -632,7 +632,7 @@ class FilterSettings {
         .querySelector("[data-tab-select-dropdown-btn]")
         .setAttribute("data-tab-id", "no-match");
       this.tabContainer.querySelector(
-        "[data-tab-select-dropdown-btn] span",
+        "[data-tab-select-dropdown-btn] span"
       ).textContent = "No match";
       // we want to close dropdown in case open previously
       this.toggleDropdown(true, true, false);
@@ -641,7 +641,7 @@ class FilterSettings {
 
     // case at least one match
     const currTabBtn = this.tabContainer.querySelector(
-      `[data-tab-select-handler='${tabNameBeforeFilter}']`,
+      `[data-tab-select-handler='${tabNameBeforeFilter}']`
     );
 
     // case the previous plugin is still visible, set is as active by clicking it again
@@ -661,7 +661,7 @@ class FilterSettings {
       return;
 
     const hiddenTabsEl = this.tabContainer.querySelectorAll(
-      `[data-tab-select-handler][class*="!hidden"]`,
+      `[data-tab-select-handler][class*="!hidden"]`
     );
 
     if (hiddenTabsEl.length < this.tabsEls.length - 1)
@@ -672,15 +672,15 @@ class FilterSettings {
   toggleDropdown(
     avoidComboFocus = false,
     disableOpen = false,
-    disableClose = false,
+    disableClose = false
   ) {
     // avoid this on mobile
     if (window.innerWidth < 768) return;
     const dropdownEl = this.tabContainer.querySelector(
-      "[data-tab-select-dropdown]",
+      "[data-tab-select-dropdown]"
     );
     const dropdownBtn = this.tabContainer.querySelector(
-      "[data-tab-select-dropdown-btn]",
+      "[data-tab-select-dropdown-btn]"
     );
     if (this.comboboxEl && avoidComboFocus)
       this.comboboxEl.setAttribute("data-focus", "false");
@@ -736,7 +736,7 @@ class FilterSettings {
         const multGroups = this.contentContainer
           .querySelector(`[data-plugin-item=${tabName}]`)
           .querySelectorAll(
-            `[data-${this.prefix}-settings-multiple^="${multHandlerName}"]`,
+            `[data-${this.prefix}-settings-multiple^="${multHandlerName}"]`
           );
         // check for each if all settings are hidden
         for (let j = 0; j < multGroups.length; j++) {
@@ -751,7 +751,7 @@ class FilterSettings {
           multGroup.classList.remove("hidden");
 
           const settings = multGroup.querySelectorAll(
-            `[data-setting-container]`,
+            `[data-setting-container]`
           );
           for (let k = 0; k < settings.length; k++) {
             settings[k].classList.remove("hidden");
@@ -768,7 +768,7 @@ class FilterSettings {
       .querySelector(`[data-plugin-item="${tabName}"]`)
       .querySelector(`[data-plugin-settings]`);
     const settings = settingContainer.querySelectorAll(
-      "[data-setting-container]",
+      "[data-setting-container]"
     );
     return settings;
   }
@@ -790,7 +790,7 @@ class FilterSettings {
       )
         continue;
       const settingsContainer = settingMultipleGroup.querySelectorAll(
-        `[data-setting-container]`,
+        `[data-setting-container]`
       );
 
       settingsContainer.forEach((setting) => {
@@ -859,7 +859,7 @@ class CheckNoMatchFilter {
     elsToCheck,
     elContainer,
     noMatchEl,
-    classToCheck = "hidden",
+    classToCheck = "hidden"
   ) {
     this.input = input;
     this.type = type;
@@ -989,11 +989,11 @@ class Settings {
     this.mode = mode;
 
     this.serverNameInps = this.container.querySelectorAll(
-      'input[name="SERVER_NAME"][data-setting-input]',
+      'input[name="SERVER_NAME"][data-setting-input]'
     );
 
     this.submitBtn = this.container.querySelector(
-      `button[data-${this.prefix}-modal-submit]`,
+      `button[data-${this.prefix}-modal-submit]`
     );
     this.currAction = "";
     this.currMethod = "";
@@ -1092,7 +1092,7 @@ class Settings {
     parentEl = this.container,
     attMethodName = "data-default-method",
     attValueName = "data-default-value",
-    avoidMultiple = true,
+    avoidMultiple = true
   ) {
     // Start with input-like (input, checkbox)
     const inps = avoidMultiple
@@ -1123,7 +1123,7 @@ class Settings {
           "select",
           select,
           select.getAttribute("name"),
-          parentEl,
+          parentEl
         )
       )
         return;
@@ -1133,15 +1133,15 @@ class Settings {
       //click the custom select dropdown to update select value
       select.parentElement
         .querySelector(
-          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`,
+          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`
         )
         .click();
 
       //set state to custom visible el
       const btnCustom = document.querySelector(
         `[data-setting-select=${select.getAttribute(
-          "data-setting-select-default",
-        )}]`,
+          "data-setting-select-default"
+        )}]`
       );
 
       this.setDisabledByMethod(btnCustom, defaultMethod);
@@ -1171,7 +1171,7 @@ class Settings {
     setMethodUI,
     forceEnabled,
     emptyServerName,
-    forceDisabled,
+    forceDisabled
   ) {
     // Get global needed data
     this.currAction = action;
@@ -1189,7 +1189,7 @@ class Settings {
 
   updateOldNameValue() {
     const oldNameInps = this.container.querySelectorAll(
-      'input[name="OLD_SERVER_NAME"]',
+      'input[name="OLD_SERVER_NAME"]'
     );
 
     oldNameInps.forEach((inp) => {
@@ -1201,7 +1201,7 @@ class Settings {
   updateOperation() {
     // update operation and other hidden inputs for all mode in modal
     const operationInps = this.container.querySelectorAll(
-      'input[name="operation"]',
+      'input[name="operation"]'
     );
     operationInps.forEach((inp) => {
       inp.setAttribute("value", this.operation);
@@ -1273,7 +1273,7 @@ class Settings {
             if (inp.tagName === "SELECT") {
               inp.parentElement
                 .querySelector(
-                  `button[data-setting-select-dropdown-btn][value='${value}']`,
+                  `button[data-setting-select-dropdown-btn][value='${value}']`
                 )
                 .click();
               inp.setAttribute("data-method", method);
@@ -1350,7 +1350,7 @@ class SettingsMultiple extends Settings {
           const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
           //get all multiple groups
           const multipleEls = this.container.querySelectorAll(
-            `[data-${this.prefix}-settings-multiple*="${attName}"]`,
+            `[data-${this.prefix}-settings-multiple*="${attName}"]`
           );
           //case no schema
           if (multipleEls.length <= 0) return;
@@ -1362,7 +1362,7 @@ class SettingsMultiple extends Settings {
           //and keep the highest num
           multipleEls.forEach((container) => {
             const ctnrName = container.getAttribute(
-              `data-${this.prefix}-settings-multiple`,
+              `data-${this.prefix}-settings-multiple`
             );
             const [containerSuffix, containerIsNum, containerName] =
               this.getSuffixData(ctnrName);
@@ -1375,7 +1375,7 @@ class SettingsMultiple extends Settings {
           const setNum = +currNum === 0 ? `` : `_${currNum}`;
           //the default (schema) group is the last group
           const schema = this.container.querySelector(
-            `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
+            `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`
           );
           //clone schema to create a group with new num
           const schemaClone = schema.cloneNode(true);
@@ -1416,12 +1416,12 @@ class SettingsMultiple extends Settings {
           // We are not removing it really, just hiding it and update values to default
           // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
           const multContainer = e.target.closest(
-            `[data-${this.prefix}-settings-multiple]`,
+            `[data-${this.prefix}-settings-multiple]`
           );
           multContainer.classList.add("hidden-multiple");
           // get setting container
           const settings = multContainer.querySelectorAll(
-            `[data-setting-container]`,
+            `[data-setting-container]`
           );
           settings.forEach((setting) => {
             // for regular input
@@ -1450,7 +1450,7 @@ class SettingsMultiple extends Settings {
             // for select
             try {
               const selects = setting.querySelectorAll(
-                "button[data-setting-select]",
+                "button[data-setting-select]"
               );
               selects.forEach((select) => {
                 const defaultVal =
@@ -1462,8 +1462,8 @@ class SettingsMultiple extends Settings {
                   defaultVal;
                 const dropdown = this.container.querySelector(
                   `[data-setting-select-dropdown="${select.getAttribute(
-                    "data-setting-select",
-                  )}"]`,
+                    "data-setting-select"
+                  )}"]`
                 );
                 dropdown.querySelector(`button[value=${defaultVal}]`).click();
               });
@@ -1491,7 +1491,7 @@ class SettingsMultiple extends Settings {
 
   removePrevMultiples() {
     const multiPlugins = this.container.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple]`,
+      `[data-${this.prefix}-settings-multiple]`
     );
     multiPlugins.forEach((multiGrp) => {
       if (
@@ -1516,17 +1516,45 @@ class SettingsMultiple extends Settings {
     this.setSettingsByData(multipleSettings);
     // Show at least one mult group
     this.addOneMultGroup();
+    // Check each multiple, if one setting is one data-method isn't ui, default or manual, disabled remove
+    this.setMultStateActions();
+  }
+
+  setMultStateActions() {
+    const multiplesGroup = this.container.querySelectorAll(
+      `[data-${this.prefix}-settings-multiple]`
+    );
+    multiplesGroup.forEach((group) => {
+      // Check if at least one data-method isn't ui, default or manual
+      let isDisabled = false;
+      const settings = group.querySelectorAll("[data-method]");
+      for (let i = 0; i < settings.length; i++) {
+        const setting = settings[i];
+        const method = setting.getAttribute("data-method");
+        if (method !== "ui" && method !== "default" && method !== "manual") {
+          isDisabled = true;
+          break;
+        }
+      }
+      // Case no need to disabled, stop
+      if (!isDisabled) return;
+      // Case need to disabled
+      const removeBtn = group.querySelector(
+        `[data-${this.prefix}-multiple-delete]`
+      );
+      removeBtn.setAttribute("disabled", "");
+    });
   }
 
   //put multiple on the right plugin, on schema container
   setMultipleToDOM(sortMultObj) {
     // We want to loop on each schema container
     for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
-      sortMultObj,
+      sortMultObj
     )) {
       //we need to access the DOM schema container
       const schemaCtnr = this.container.querySelector(
-        `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`,
+        `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`
       );
       //now we have to loop on each multiple settings group
       for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
@@ -1542,7 +1570,7 @@ class SettingsMultiple extends Settings {
         for (const [name, data] of Object.entries(settings)) {
           //get setting container of clone container
           const settingContainer = schemaCtnrClone.querySelector(
-            `[data-setting-container="${name}"]`,
+            `[data-setting-container="${name}"]`
           );
         }
         //send schema clone to DOM and show it
@@ -1565,7 +1593,7 @@ class SettingsMultiple extends Settings {
     const multiples = {};
 
     const schemaSettings = this.container.querySelectorAll(
-      `[data-setting-container$="SCHEMA"]`,
+      `[data-setting-container$="SCHEMA"]`
     );
 
     // loop on every schema settings
@@ -1592,13 +1620,13 @@ class SettingsMultiple extends Settings {
 
   addOneMultGroup() {
     const multAddBtns = this.container.querySelectorAll(
-      `[data-${this.prefix}-multiple-add]`,
+      `[data-${this.prefix}-multiple-add]`
     );
     multAddBtns.forEach((btn) => {
       const att = btn.getAttribute(`data-${this.prefix}-multiple-add`);
       //check if already one (SCHEMA exclude so length >= 2)
       const multGroups = this.container.querySelectorAll(
-        `[data-${this.prefix}-settings-multiple^="${att}"]`,
+        `[data-${this.prefix}-settings-multiple^="${att}"]`
       );
       if (multGroups.length >= 2) return;
 
@@ -1615,7 +1643,7 @@ class SettingsMultiple extends Settings {
   hiddenIfNoMultiples() {
     //hide multiple btn if no multiple exist on a plugin
     const multiples = this.container.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple]`,
+      `[data-${this.prefix}-settings-multiple]`
     );
     multiples.forEach((container) => {
       if (container.querySelectorAll(`[data-setting-container]`).length <= 0)
@@ -1627,7 +1655,7 @@ class SettingsMultiple extends Settings {
 
   showMultByAtt(att) {
     const multContainers = this.container.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple^=${att}]`,
+      `[data-${this.prefix}-settings-multiple^=${att}]`
     );
     multContainers.forEach((container) => {
       if (
@@ -1641,7 +1669,7 @@ class SettingsMultiple extends Settings {
 
   toggleMultByAtt(att) {
     const multContainers = this.container.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple^=${att}]`,
+      `[data-${this.prefix}-settings-multiple^=${att}]`
     );
     multContainers.forEach((container) => {
       if (
@@ -1676,10 +1704,10 @@ class SettingsMultiple extends Settings {
         selects.forEach((select) => {
           const method = select.getAttribute("data-default-method");
           const name = select.getAttribute(
-            `data-${this.prefix}-setting-select-default`,
+            `data-${this.prefix}-setting-select-default`
           );
           const selDOM = this.container.querySelector(
-            `button[data-${this.prefix}-setting-select='${name}']`,
+            `button[data-${this.prefix}-setting-select='${name}']`
           );
           if (method === "ui" || method === "default") {
             selDOM.removeAttribute("disabled", "");
@@ -1704,14 +1732,14 @@ class SettingsMultiple extends Settings {
         ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
         : name.trim();
       const relateSetting = this.container.querySelector(
-        `[data-setting-container=${nameSuffixLess}_SCHEMA]`,
+        `[data-setting-container=${nameSuffixLess}_SCHEMA]`
       );
       if (!relateSetting) continue;
       const relateCtnr = relateSetting.closest(
-        `[data-${this.prefix}-settings-multiple]`,
+        `[data-${this.prefix}-settings-multiple]`
       );
       const relateCtnrName = relateCtnr.getAttribute(
-        `data-${this.prefix}-settings-multiple`,
+        `data-${this.prefix}-settings-multiple`
       );
       //then we sort the setting on the right container name by suffixe number
       if (!(relateCtnrName in sortMultiples)) {
@@ -1732,7 +1760,7 @@ class SettingsMultiple extends Settings {
       `data-${this.prefix}-settings-multiple`,
       schemaCtnrClone
         .getAttribute(`data-${this.prefix}-settings-multiple`)
-        .replace("_SCHEMA", suffix),
+        .replace("_SCHEMA", suffix)
     );
 
     // Get all elemennts by attribute to update _SCHEMA by suffix
@@ -1751,7 +1779,7 @@ class SettingsMultiple extends Settings {
       attEls.forEach((attEl) => {
         attEl.setAttribute(
           att,
-          attEl.getAttribute(att).replace("_SCHEMA", suffix),
+          attEl.getAttribute(att).replace("_SCHEMA", suffix)
         );
       });
     });
@@ -1838,7 +1866,7 @@ class SettingsEditor extends SettingsMultiple {
   addDefaultEditorIfNone() {
     // get containers with _SCHEMA
     const editorContainers = this.container.querySelectorAll(
-      "[data-editor-container$='_SCHEMA']",
+      "[data-editor-container$='_SCHEMA']"
     );
     editorContainers.forEach((editorContainer) => {
       // Check if others editor exists with same base name
@@ -1846,7 +1874,7 @@ class SettingsEditor extends SettingsMultiple {
         .getAttribute("data-editor-container")
         .replace("_SCHEMA", "");
       const otherEditors = this.container.querySelectorAll(
-        `[data-editor-container*='${editorName}']`,
+        `[data-editor-container*='${editorName}']`
       );
       if (otherEditors.length > 1) return;
       // Add default editor
@@ -1864,7 +1892,7 @@ class SettingsEditor extends SettingsMultiple {
     // reset previous editors
     this.editorEls.forEach((editor) => {
       const editorContainer = editor.container.closest(
-        "[data-editor-container]",
+        "[data-editor-container]"
       );
       editorContainer.remove();
       editor.destroy();
@@ -1873,7 +1901,7 @@ class SettingsEditor extends SettingsMultiple {
     this.editorEls = [];
     // get only container ending with _SCHEMA
     const editorContainers = this.container.querySelectorAll(
-      "[data-editor-container$='_SCHEMA']",
+      "[data-editor-container$='_SCHEMA']"
     );
     const configsSettings = this.getEditorSettings();
     // Create instances on the right containers
@@ -1894,7 +1922,7 @@ class SettingsEditor extends SettingsMultiple {
           editorType,
           editorName,
           num,
-          editorValue,
+          editorValue
         );
       }
     });
@@ -1913,11 +1941,11 @@ class SettingsEditor extends SettingsMultiple {
       editor.setAttribute("name", `${contName}_${num}`);
     }
     const filenameInp = containerClone.querySelector(
-      `input[data-editor-filename]`,
+      `input[data-editor-filename]`
     );
     if (filenameInp) filenameInp.value = name;
     const hiddenInp = containerClone.querySelector(
-      `textarea[data-editor-input]`,
+      `textarea[data-editor-input]`
     );
     if (hiddenInp) {
       hiddenInp.setAttribute("data-config-type", type);
@@ -1977,7 +2005,7 @@ class SettingsAdvanced extends SettingsEditor {
     setMethodUI = false,
     forceEnabled = false,
     emptyServerName = false,
-    forceDisabled = false,
+    forceDisabled = false
   ) {
     this.updateData(
       action,
@@ -1987,7 +2015,7 @@ class SettingsAdvanced extends SettingsEditor {
       setMethodUI,
       forceEnabled,
       emptyServerName,
-      forceDisabled,
+      forceDisabled
     );
     this.setSettingsAdvanced();
     this.resetServerName();
@@ -2003,7 +2031,7 @@ class SettingsAdvanced extends SettingsEditor {
   checkVisibleInpsValidity() {
     try {
       const inps = this.container.querySelectorAll(
-        "[data-plugin-item]:not(.hidden) input[data-setting-input], [data-plugin-item][class*='hidden'] input[data-setting-input]",
+        "[data-plugin-item]:not(.hidden) input[data-setting-input], [data-plugin-item][class*='hidden'] input[data-setting-input]"
       );
 
       // merge input with visible and not visible
@@ -2029,7 +2057,7 @@ class SettingsAdvanced extends SettingsEditor {
         ) {
           // Case conflict with another server name
           const serverNames = document.querySelectorAll(
-            "[data-services-service]",
+            "[data-services-service]"
           );
           const serverNameValue = inps[i].getAttribute("value");
           serverNames.forEach((serverName) => {
@@ -2044,7 +2072,7 @@ class SettingsAdvanced extends SettingsEditor {
       }
 
       const errMsg = this.container.querySelector(
-        "[data-services-modal-error-msg]",
+        "[data-services-modal-error-msg]"
       );
       if (!isAllValid) {
         invalidInp.classList.add("invalid");
