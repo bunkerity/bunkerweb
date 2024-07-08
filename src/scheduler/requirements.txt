@@ -12,7 +12,7 @@ certbot==2.11.0 \
     --hash=sha256:257ae1cb0a534373ca50dd807c9ae96f27660e41379c45afb9b50cab0e6a7a97 \
     --hash=sha256:dc4e0a48bcb09448d60362170ca1047cc9a81966da0dd35135f2561f0ea7d5b1
     # via -r requirements.in
-certifi==2024.6.2 \
+certifi==2024.7.4 \
     --hash=sha256:3cd43f1c6fa7dedc5899d69d3ad0398fd018ad1a17fba83ddaf78aa46c747516 \
     --hash=sha256:ddc6c8ce995e6987e7faf5e3f1b02b302836a0e5d98ece18392cb1a36c72ad56
     # via requests
