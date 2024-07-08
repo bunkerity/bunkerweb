@@ -1,11 +1,12 @@
-import json
-import base64
-
-home = [
+[
     {
         "type": "card",
         "link": "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui#pro",
-        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "containerColumns": {
+            "pc": 4,
+            "tablet": 6,
+            "mobile": 12
+        },
         "widgets": [
             {
                 "type": "Stat",
@@ -14,15 +15,19 @@ home = [
                     "subtitle": "home_upgrade_to_pro",
                     "subtitleColor": "warning",
                     "stat": "home_free",
-                    "iconName": "key",
-                },
+                    "iconName": "key"
+                }
             }
-        ],
+        ]
     },
     {
         "type": "card",
         "link": "https://github.com/bunkerity/bunkerweb",
-        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "containerColumns": {
+            "pc": 4,
+            "tablet": 6,
+            "mobile": 12
+        },
         "widgets": [
             {
                 "type": "Stat",
@@ -31,15 +36,19 @@ home = [
                     "subtitle": "home_update_available",
                     "subtitleColor": "warning",
                     "stat": "1.5.8",
-                    "iconName": "wire",
-                },
+                    "iconName": "wire"
+                }
             }
-        ],
+        ]
     },
     {
         "type": "card",
         "link": "/instances",
-        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "containerColumns": {
+            "pc": 4,
+            "tablet": 6,
+            "mobile": 12
+        },
         "widgets": [
             {
                 "type": "Stat",
@@ -48,15 +57,19 @@ home = [
                     "subtitle": "home_total_number",
                     "subtitleColor": "info",
                     "stat": 1,
-                    "iconName": "box",
-                },
+                    "iconName": "box"
+                }
             }
-        ],
+        ]
     },
     {
         "type": "card",
         "link": "/services",
-        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "containerColumns": {
+            "pc": 4,
+            "tablet": 6,
+            "mobile": 12
+        },
         "widgets": [
             {
                 "type": "Stat",
@@ -65,15 +78,19 @@ home = [
                     "subtitle": "home_all_methods_included",
                     "subtitleColor": "info",
                     "stat": 2,
-                    "iconName": "disk",
-                },
+                    "iconName": "disk"
+                }
             }
-        ],
+        ]
     },
     {
         "type": "card",
         "link": "/plugins",
-        "containerColumns": {"pc": 4, "tablet": 6, "mobile": 12},
+        "containerColumns": {
+            "pc": 4,
+            "tablet": 6,
+            "mobile": 12
+        },
         "widgets": [
             {
                 "type": "Stat",
@@ -82,18 +99,9 @@ home = [
                     "subtitle": "home_no_error",
                     "subtitleColor": "success",
                     "stat": "42",
-                    "iconName": "puzzle",
-                },
+                    "iconName": "puzzle"
+                }
             }
-        ],
-    },
+        ]
+    }
 ]
-
-# store on a file
-with open("home.json", "w") as f:
-    json.dump(home, f, indent=4)
-output_base64_bytes = base64.b64encode(bytes(json.dumps(home), "utf-8"))
-output_base64_string = output_base64_bytes.decode("ascii")
-
-with open("home.txt", "w") as f:
-    f.write(output_base64_string)

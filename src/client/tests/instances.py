@@ -1,4 +1,5 @@
 import json
+import base64
 
 
 # Create instance class using keys from the instances list
@@ -75,3 +76,9 @@ builder = instances_builder(instances)
 # store on a file
 with open("instances.json", "w") as f:
     json.dump(builder, f)
+
+output_base64_bytes = base64.b64encode(bytes(json.dumps(builder), "utf-8"))
+output_base64_string = output_base64_bytes.decode("ascii")
+
+with open("instances.txt", "w") as f:
+    f.write(output_base64_string)

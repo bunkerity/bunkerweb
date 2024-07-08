@@ -20,7 +20,7 @@ onBeforeMount(() => {
   const dataEl = document.querySelector(`[${dataAtt}]`);
   const data =
     dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
-      ? JSON.parse(dataEl.getAttribute(dataAtt))
+      ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
       : {};
   home.builder = data;
 });

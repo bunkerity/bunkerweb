@@ -1,5 +1,6 @@
 import json
 import copy
+import base64
 
 
 plugins = [
@@ -3036,15 +3037,9 @@ def get_service_forms(templates=[], plugins=[], service_settings={}):
     forms = {"advanced": {}, "easy": {}, "raw": {}}
 
     for template in templates:
-        forms["advanced"][template.get("name")] = set_advanced(
-            template, plugins, service_settings
-        )
-        forms["raw"][template.get("name")] = set_raw(
-            template, plugins, service_settings
-        )
-        forms["easy"][template.get("name")] = set_easy(
-            template, plugins, service_settings
-        )
+        forms["advanced"][template.get("name")] = set_advanced(template, plugins, service_settings)
+        forms["raw"][template.get("name")] = set_raw(template, plugins, service_settings)
+        forms["easy"][template.get("name")] = set_easy(template, plugins, service_settings)
 
     return forms
 
@@ -3111,9 +3106,7 @@ def set_raw(template, plugins_base, service_settings):
     for plugin in plugins:
         for setting, value in plugin.get("settings").items():
             # avoid some methods from services_settings
-            if setting in service_settings and service_settings[setting].get(
-                "method", "ui"
-            ) not in ("ui", "default"):
+            if setting in service_settings and service_settings[setting].get("method", "ui") not in ("ui", "default"):
                 continue
 
             raw_value = False
@@ -3125,9 +3118,7 @@ def set_raw(template, plugins_base, service_settings):
 
             # Then override by service settings
             if setting in service_settings:
-                raw_value = service_settings[setting].get(
-                    "value", value.get("value", value.get("default"))
-                )
+                raw_value = service_settings[setting].get("value", value.get("value", value.get("default")))
 
             # Add value only if exists
             if raw_value:
@@ -3158,7 +3149,43 @@ def set_advanced(template, plugins_base, service_settings):
                 template_settings,
                 service_settings,
             )
+
+    set_multiples(plugins)
+
     return plugins
+
+
+def set_multiples(format_plugins):
+    """
+    Set the multiples settings for each plugin.
+    """
+    # copy of format plugins
+    for plugin in format_plugins:
+        # Prepare multiples key
+        plugin["multiples"] = {}
+        # Get multiples
+        multiples = {}
+        settings_to_delete = []
+        for setting, value in plugin.get("settings").items():
+            if not value.get("multiple"):
+                continue
+
+            mult_name = value.get("multiple")
+            # Get the multiple value and set it as key if not in multiples dict
+            if mult_name not in multiples:
+                multiples[mult_name] = {}
+
+            multiples[mult_name][setting] = value
+            settings_to_delete.append(setting)
+
+        # Delete multiple settings from regular settings
+        for setting in settings_to_delete:
+            del plugin["settings"][setting]
+
+        if len(multiples):
+            plugin["multiples"].update(multiples)
+
+    return format_plugins
 
 
 def format_setting(
@@ -3182,11 +3209,7 @@ def format_setting(
     inpType = (
         "checkbox"
         if setting_value.get("type") == "check"
-        else (
-            "select"
-            if setting_value.get("type") == "select"
-            else "datepicker" if setting_value.get("type") == "date" else "input"
-        )
+        else ("select" if setting_value.get("type") == "select" else "datepicker" if setting_value.get("type") == "date" else "input")
     )
     setting_value["inpType"] = inpType
 
@@ -3209,27 +3232,17 @@ def format_setting(
     # Start by setting template value if exists
     if setting_name in template_settings:
         # Update value or set default as value
-        setting_value["value"] = template_settings.get(
-            setting_name, setting_value.get("default")
-        )
+        setting_value["value"] = template_settings.get(setting_name, setting_value.get("default"))
 
     # Then override by service settings
     if setting_name in service_settings:
-        setting_value["value"] = service_settings[setting_name].get(
-            "value", setting_value.get("value", setting_value.get("default"))
-        )
-        setting_value["disabled"] = (
-            False
-            if service_settings[setting_name].get("method", "ui") in ("ui", "default")
-            else True
-        )
+        setting_value["value"] = service_settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
+        setting_value["disabled"] = False if service_settings[setting_name].get("method", "ui") in ("ui", "default") else True
 
     # Prepare popover checking "help", "context"
     popovers = []
 
-    if (setting_value.get("disabled", False)) and service_settings[setting_name].get(
-        "method", "ui"
-    ) not in ("ui", "default"):
+    if (setting_value.get("disabled", False)) and service_settings[setting_name].get("method", "ui") not in ("ui", "default"):
         popovers.append(
             {
                 "iconName": "trespass",
@@ -3240,14 +3253,8 @@ def format_setting(
     if setting_value.get("context"):
         popovers.append(
             {
-                "iconName": (
-                    "disk" if setting_value.get("context") == "multisite" else "globe"
-                ),
-                "text": (
-                    "inp_popover_multisite"
-                    if setting_value.get("context") == "multisite"
-                    else "inp_popover_global"
-                ),
+                "iconName": ("disk" if setting_value.get("context") == "multisite" else "globe"),
+                "text": ("inp_popover_multisite" if setting_value.get("context") == "multisite" else "inp_popover_global"),
             }
         )
 
@@ -3283,9 +3290,7 @@ def global_config_builder():
                 {
                     "type": "Templates",
                     "data": {
-                        "templates": get_service_forms(
-                            templates, plugins, service_settings
-                        ),
+                        "templates": get_service_forms(templates, plugins, service_settings),
                     },
                 },
             ],
@@ -3296,6 +3301,10 @@ def global_config_builder():
 
 
 output = global_config_builder()
-
-with open("globalconfig.json", "w") as f:
+with open("globalconfig64.txt", "w") as f:
     json.dump(output, f, indent=4)
+
+output_base64_bytes = base64.b64encode(bytes(json.dumps(output), "utf-8"))
+output_base64_string = output_base64_bytes.decode("ascii")
+with open("globalconfig64.txt", "w") as f:
+    f.write(output_base64_string)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import base64
 from contextlib import suppress
 from math import floor
 from os import _exit, getenv, listdir, sep, urandom
@@ -790,7 +791,8 @@ def home_builder(data):
         ],
     }
     builder = [version_card, version_num_card, instances_card, services_card, plugins_card]
-    return builder
+
+    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
 
 
 @app.route("/home")
@@ -1074,7 +1076,7 @@ def instances_builder(instances: list):
 
         builder.append(component)
 
-    return builder
+    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
 
 
 @app.route("/instances", methods=["GET", "POST"])

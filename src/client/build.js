@@ -137,9 +137,9 @@ async function setBuildTempToUI() {
     {% endfor %}
   {% endwith %}
   <div class='hidden' data-csrf-token='{{ csrf_token() }}'></div>
-  <div class='hidden' data-server-global='{{data_server_global if data_server_global else {}}}''></div>
+  <div class='hidden' data-server-global='{{data_server_global if data_server_global else {}}}'></div>
   <div class='hidden' data-server-flash='{{data_server_flash|tojson}}'></div>
-  <div class='hidden' data-server-builder='{{data_server_builder}}'></div>
+  <div class='hidden' data-server-builder='{{data_server_builder[1:-1]}}'></div>
   <div id='app'></div>
   </body>
 </html>`;

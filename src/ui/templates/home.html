@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/flag-icons.min.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BunkerWeb | DASHBOARD</title>
-    <script nonce="{{ script_nonce }}"  type="module" crossorigin src="assets/home-ef55bffd.js"></script>
+    <script nonce="{{ script_nonce }}"  type="module" crossorigin src="assets/home-098d38b3.js"></script>
     <link rel="modulepreload" crossorigin href="assets/Title-9ae7a316.js">
   </head>
   
@@ -19,9 +19,9 @@
     {% endfor %}
   {% endwith %}
   <div class='hidden' data-csrf-token='{{ csrf_token() }}'></div>
-  <div class='hidden' data-server-global='{{data_server_global if data_server_global else {}}}''></div>
+  <div class='hidden' data-server-global='{{data_server_global if data_server_global else {}}}'></div>
   <div class='hidden' data-server-flash='{{data_server_flash|tojson}}'></div>
-  <div class='hidden' data-server-builder='{{data_server_builder}}'></div>
+  <div class='hidden' data-server-builder='{{data_server_builder[1:-1]}}'></div>
   <div id='app'></div>
   </body>
 </html>
