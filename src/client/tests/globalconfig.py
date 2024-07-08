@@ -3002,13 +3002,21 @@ plugins = [
     },
 ]
 
-template_settings = {"ERRORS": "", "USE_UI": "no", "USE_CORS": "no"}
+template_settings = {
+    "ERRORS": "",
+    "USE_UI": "no",
+    "USE_CORS": "no",
+    "REVERSE_PROXY_HOST_1": "template1",
+    "REVERSE_PROXY_HOST_2": "template2",
+}
 
 # Service settings
 service_settings = {
     "ERRORS": {"value": "", "global": True, "method": "scheduler"},
     "USE_UI": {"value": "yes", "global": True, "method": "ui"},
     "USE_CORS": {"value": "yes", "global": True, "method": "scheduler"},
+    "REVERSE_PROXY_HOST_1": {"value": "service1", "global": True, "method": "ui"},
+    "REVERSE_PROXY_HOST": {"value": "service", "global": True, "method": "ui"},
 }
 
 
@@ -3106,7 +3114,7 @@ def set_raw(template, plugins_base, service_settings):
     for plugin in plugins:
         for setting, value in plugin.get("settings").items():
             # avoid some methods from services_settings
-            if setting in service_settings and service_settings[setting].get("method", "ui") not in ("ui", "default"):
+            if setting in service_settings and service_settings[setting].get("method", "ui") not in ("ui", "default", "manual"):
                 continue
 
             raw_value = False
@@ -3150,12 +3158,20 @@ def set_advanced(template, plugins_base, service_settings):
                 service_settings,
             )
 
-    set_multiples(plugins)
+    set_multiples(template, plugins, service_settings)
 
     return plugins
 
 
-def set_multiples(format_plugins):
+def get_multiple_from_template(template, plugins):
+    pass
+
+
+def get_multiple_from_settings(template, settings):
+    pass
+
+
+def set_multiples(template, format_plugins, service_settings):
     """
     Set the multiples settings for each plugin.
     """
@@ -3166,9 +3182,16 @@ def set_multiples(format_plugins):
         # Get multiples
         multiples = {}
         settings_to_delete = []
+        total_settings = len(plugin.get("settings"))
+        zindex = 0
         for setting, value in plugin.get("settings").items():
+
             if not value.get("multiple"):
                 continue
+
+            zindex += 1
+
+            value["containerClass"] = f"z-{total_settings - zindex}"
 
             mult_name = value.get("multiple")
             # Get the multiple value and set it as key if not in multiples dict
@@ -3182,8 +3205,19 @@ def set_multiples(format_plugins):
         for setting in settings_to_delete:
             del plugin["settings"][setting]
 
+        # Case all settings are disabled or at least one setting has a method different than "ui" or "default" or "manual"
+        # we need to add key "removeDisabled" to True
+        for setting, value in multiples.items():
+            if all([v.get("disabled") for v in value.values()]) or any([v.get("method") not in ("ui", "default", "manual") for v in value.values()]):
+                plugin["removeDisabled"] = True
+
         if len(multiples):
             plugin["multiples"].update(multiples)
+
+    # Now that we have for each plugin the multiples settings, we need to do the following
+    # get all settings from template that are multiples
+    # get all settings from service settings / global config that are multiples
+    # separate them per multiple group (no prefix, _1, _2, etc.)
 
     return format_plugins
 
@@ -3197,10 +3231,14 @@ def format_setting(
     service_settings,
 ):
     """
-    Format a setting in ordert to be used with form builder.
+    Format a setting in order to be used with form builder.
+    This will only set value for none multiple settings.
+    Additionnel set_multiples function will handle multiple settings.
     """
-    # add zindex for container
-    setting_value["containerClass"] = f"z-{total_settings - loop_id}"
+    # add zindex for field in case not a multiple
+    # Case multiple, this will be set on the group level
+    if not "multiple" in setting_value:
+        setting_value["containerClass"] = f"z-{total_settings - loop_id}"
 
     # regex by pattern
     setting_value["pattern"] = setting_value.get("regex", "")
@@ -3230,19 +3268,24 @@ def format_setting(
     setting_value["value"] = setting_value.get("default")
 
     # Start by setting template value if exists
-    if setting_name in template_settings:
+    if setting_name in template_settings and not "multiple" in setting_value:
         # Update value or set default as value
         setting_value["value"] = template_settings.get(setting_name, setting_value.get("default"))
 
+    # Then override by service settings if not a multiple
+    # Case multiple, we need to keep the default value and override only each multiple group
+    if setting_name in service_settings and not "multiple" in setting_value:
+        setting_value["value"] = service_settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
+        setting_value["method"] = service_settings[setting_name].get("method", "ui")
+
     # Then override by service settings
     if setting_name in service_settings:
-        setting_value["value"] = service_settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
-        setting_value["disabled"] = False if service_settings[setting_name].get("method", "ui") in ("ui", "default") else True
+        setting_value["disabled"] = False if service_settings[setting_name].get("method", "ui") in ("ui", "default", "manual") else True
 
     # Prepare popover checking "help", "context"
     popovers = []
 
-    if (setting_value.get("disabled", False)) and service_settings[setting_name].get("method", "ui") not in ("ui", "default"):
+    if (setting_value.get("disabled", False)) and service_settings[setting_name].get("method", "ui") not in ("ui", "default", "manual"):
         popovers.append(
             {
                 "iconName": "trespass",
@@ -3301,7 +3344,7 @@ def global_config_builder():
 
 
 output = global_config_builder()
-with open("globalconfig64.txt", "w") as f:
+with open("globalconfig.json", "w") as f:
     json.dump(output, f, indent=4)
 
 output_base64_bytes = base64.b64encode(bytes(json.dumps(output), "utf-8"))

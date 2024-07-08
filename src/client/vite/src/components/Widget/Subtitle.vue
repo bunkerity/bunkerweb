@@ -90,6 +90,7 @@ onMounted(() => {
       'text-el',
       props.bold ? 'bold' : '',
       props.uppercase ? 'uppercase' : '',
+      props.subtitleClass,
     ]"
   >
     {{ $t(props.subtitle, $t("dashboard_placeholder", props.subtitle)) }}

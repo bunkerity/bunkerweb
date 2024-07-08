@@ -532,6 +532,15 @@ body {
   @apply py-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
 }
 
+.layout-settings-multiple {
+  @apply py-5 col-span-12 grid grid-cols-12 w-full relative;
+}
+
+.layout-settings-multiple-group {
+  @apply mt-4 rounded border border-gray-500/50 dark:border-gray-500 p-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative bg-gray-200/50 dark:bg-gray-800/80;
+}
+
+
 /* MESSAGE */
 .msg-container {
   @apply col-span-12 w-full;
@@ -1122,16 +1131,21 @@ body {
 
 /* BTN GROUP */
 
-.button-group-default {
-  @apply flex justify-center items-center;
+
+.button-group-content {
+  @apply flex justify-center items-center mx-4;
+}
+
+.button-group-multiple {
+  @apply flex justify-center items-center mx-4;
 }
 
 .button-group-instance {
-  @apply flex justify-end items-center;
+  @apply flex justify-end items-center mx-4;
 }
 
 .button-group-modal {
-  @apply flex justify-center items-center mt-4;
+  @apply flex justify-center items-center mt-4 mx-4;
 }
 
 /* LIST COMPONENT */
@@ -1272,6 +1286,10 @@ body {
 
 .subtitle-stat {
   @apply capitalize-first break-word dark:text-gray-300  col-span-12 break-words w-full max-w-[80%] sm:max-w-[600px] font-bold leading-normal text-sm mb-0 lowercase;
+}
+
+.subtitle-multiple {
+  @apply capitalize-first break-word dark:text-gray-300  col-span-12 break-words max-w-[80%] sm:max-w-[600px] font-bold leading-normal text-sm mb-0 lowercase;
 }
 
 /* STAT COMPONENT */

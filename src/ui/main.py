@@ -1406,6 +1406,7 @@ def global_config():
 
     # Display global config
     global_config = app.config["DB"].get_config(global_only=True, methods=True)
+    print(global_config, flush=True)
     return render_template("global_config.html", global_config=global_config, dumped_global_config=dumps(global_config))
 
 

@@ -238,6 +238,7 @@ export default {
     "lg:p-2",
     "scale-90",
     "scale-95",
+    "w-fit",
   ],
   important: true,
   darkMode: "class",

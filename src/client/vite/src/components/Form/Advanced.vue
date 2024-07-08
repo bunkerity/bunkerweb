@@ -9,7 +9,9 @@ import Combobox from "@components/Forms/Field/Combobox.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import Filter from "@components/Widget/Filter.vue";
+import GroupMultiple from "@components/Forms/Group/Multiple.vue";
 import { plugin_types } from "@utils/variables";
+
 import {
   useCheckPluginsValidity,
   useUpdateTempSettings,
@@ -197,13 +199,6 @@ const filters = [
   },
 ];
 
-const unmatch = {
-  text: "dashboard_no_match",
-  icon: {
-    iconName: "search",
-  },
-};
-
 function filter(filterData) {
   setValidity();
   data.format = filterData;
@@ -306,6 +301,7 @@ onUnmounted(() => {
             <Fields :setting="setting" />
           </template>
         </Container>
+        <GroupMultiple v-if="plugin.multiples" :multiples="plugin.multiples" />
       </Container>
     </template>
     <Button
