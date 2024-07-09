@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw-db:
-    image: postgres:15.1
+    image: postgres
     environment:
       - POSTGRES_USER=bunkerweb
       - POSTGRES_PASSWORD=secret
