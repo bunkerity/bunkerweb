@@ -1,0 +1,15 @@
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: bunkerweb-redis
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.redis.service.type }}
+  selector:
+    app: bunkerweb-redis
+  {{- include "bunkerweb.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.redis.service.ports | toYaml | nindent 2 }}
+{{- end }}

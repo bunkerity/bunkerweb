@@ -1,0 +1,19 @@
+{{- if .Values.ui.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: bunkerweb-ui
+  {{- with .Values.ui.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ui.service.type }}
+  selector:
+    app: bunkerweb-ui
+  {{- include "bunkerweb.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.ui.service.ports | toYaml | nindent 2 }}
+{{- end }}

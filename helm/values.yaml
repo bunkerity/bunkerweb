@@ -1,0 +1,300 @@
+# Docker Registry
+registry:
+  # -- Image pull secret name
+  # -- Docker and helm Registry
+  imagePullSecretName: regcred
+  # -- auto creation with helpers.tpl of a dockerconfig secret named regcred
+  imageCredentials:
+    # enabled auto creation of secret
+    enabled: false
+    # -- registry url
+    registry: ""
+    # -- registry username
+    username: ""
+    # -- registry password
+    password: ""
+
+# -- bunkerweb daemonset pod
+bunkerweb:
+  # -- podSecurityContext
+  podSecurityContext: {}
+  # -- containerSecurityContext
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    runAsGroup: 101
+    runAsUser: 101
+  # -- environnement variable
+  env:
+    API_WHITELIST_IP: 127.0.0.0/8 10.0.0.0/8
+    DNS_RESOLVERS: coredns.kube-system.svc.cluster.local
+    KUBERNETES_MODE: "yes"
+    MULTISITE: "yes"
+    REDIS_HOST: bunkerweb-redis.default.svc.cluster.local
+    SERVER_NAME: ""
+    USE_API: "yes"
+    USE_REDIS: "yes"
+  # -- envFrom for mount secret or configmap
+  envFrom: {}
+  # -- image configuration
+  image:
+    repository: bunkerity/bunkerweb
+    tag: 1.5.7
+    imagePullPolicy: Always
+  # -- cpu and memory resources
+  resources: {}
+  # -- nodeSelector for choose node on deploy this pod
+  nodeSelector: {}
+  # -- service configuration
+  service:
+    annotations: {}
+    # bunkerweb kubernetes service type
+    type: "LoadBalancer"
+    clusterIP: None
+    # -- List of IP CIDRs allowed access to load balancer (if supported)
+    # -- https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    loadBalancerSourceRanges: []
+    # -- LoadBalancerIP to request (cloud specific)
+    # -- ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    loadBalancerIP: []
+    # -- Set external traffic policy to: "Local" to preserve source IP on providers supporting it
+    # -- Enable client source IP preservation
+    # -- Ref: https://kubernetes.io/docs/tutorials/services/source-ip/#source-ip-for-services-with-typeloadbalancer
+    externalTrafficPolicy: "Local"
+    # -- Set loadBalancerClass for use a dedicated loadBalancer (ex metallb)
+    loadBalancerClass: ""
+    ports:
+      - name: http
+        port: 80
+        protocol: TCP
+        targetPort: http
+      - name: https
+        port: 443
+        protocol: TCP
+        targetPort: https
+
+# -- bunkerweb controller
+controller:
+  # -- podSecurityContext
+  podSecurityContext: {}
+  # -- containerSecurityContext
+  containerSecurityContext: {}
+  # -- nodeSelector for choose node on deploy this pod
+  nodeSelector: {}
+  # -- environnement variable
+  env:
+    DATABASE_URI: mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db
+    KUBERNETES_MODE: "yes"
+  # -- envFrom
+  envFrom: {}
+  # -- image settings
+  image:
+    repository: bunkerity/bunkerweb-autoconf
+    tag: 1.5.7
+    imagePullPolicy: Always
+  # -- replica
+  replicas: 1
+  # -- resources cpu/memory
+  resources: {}
+  # -- initContainers configuration
+  initContainers: {}
+  # -- add extra container volumesMounts
+  volumeMounts: {}
+  # -- add extra volumes
+  volumes: {}
+
+# -- bunkerweb clamav plugin
+clamav:
+  # enabled plugin
+  enabled: false
+  # -- podSecurityContext
+  podSecurityContext: {}
+  # -- containerSecurityContext
+  containerSecurityContext: {}
+  # -- nodeSelector for choose node on deploy this pod
+  nodeSelector: {}
+  # -- environnement variable
+  env: {}
+  # -- envFrom
+  envFrom: {}
+  # -- image settings
+  image:
+    repository: clamav/clamav
+    tag: 1.2
+    imagePullPolicy: Always
+  # -- replica
+  replicas: 1
+  # -- resources cpu/memory
+  resources: {}
+  # -- initContainers configuration
+  initContainers: {}
+  # -- add extra container volumesMounts
+  volumeMounts: {}
+  # -- add extra volumes
+  volumes: {}
+  # -- service configuration
+  service:
+    annotations: {}
+    ports:
+    - name: tcp
+      protocol: TCP
+      port: 3310
+      targetPort: 3310
+# -- bunkerweb ui
+ui:
+  # -- enabled deployement of ui
+  enabled: true
+  # -- podSecurityContext
+  podSecurityContext: {}
+  # -- containerSecurityContext
+  containerSecurityContext: {}
+  # -- nodeSelector for choose node on deploy this pod
+  nodeSelector: {}
+  # -- environnement variable
+  env:
+    DATABASE_URI: mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db
+    KUBERNETES_MODE: "yes"
+    ADMIN_USERNAME: "bunkerAdmin"
+    ADMIN_PASSWORD: "ChangeIT"
+    ABSOLUTE_URI: "https://bunkerweb-build.service.ovh/"
+  # -- envFrom
+  envFrom: {}
+  # -- image settings
+  image:
+    repository: bunkerity/bunkerweb-ui
+    tag: 1.5.7
+    imagePullPolicy: Always
+  # -- replica
+  replicas: 1
+  # -- resources cpu/memory
+  resources: {}
+  # -- service configuration
+  service:
+    annotations: {}
+    ports:
+    - name: http
+      protocol: TCP
+      port: 7000
+      targetPort: 7000
+    type: ClusterIP
+  # -- ingress configuration
+  ingress:
+    # -- enable ingress for ui
+    enabled: true
+    annotations: {}
+    path: /
+    host: "bunkerweb.tld.local"
+    ingressClassName: ""
+    secretName: "mysecret"
+    enabledTls: true
+
+# -- mysql database configuration
+db:
+  # -- deploy database
+  enabled: true
+  # -- podSecurityContext
+  podSecurityContext: {}
+  # -- containerSecurityContext
+  containerSecurityContext: {}
+  # -- nodeSelector for choose node on deploy this pod
+  nodeSelector: {}
+  # -- environnement variable
+  env:
+    MYSQL_DATABASE: db
+    MYSQL_PASSWORD: changeme
+    MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    MYSQL_USER: bunkerweb
+  # -- envFrom
+  envFrom: {}
+  # -- image settings
+  image:
+    repository: mariadb
+    tag: "10.10"
+    imagePullPolicy: Always
+  # -- number of replicas
+  replicas: 1
+  # -- resources
+  resources: {}
+  # -- services configuration
+  service:
+    ports:
+    - name: sql
+      port: 3306
+      protocol: TCP
+      targetPort: 3306
+    type: ClusterIP
+  # -- enable storage
+  persistence:
+    enabled: true
+    storageRequest: 5Gi
+    storageClassName: ""
+
+# -- redis configuration
+redis:
+  # -- enabled redis deployment
+  enabled: true
+  # -- podSecurityContext
+  podSecurityContext: {}
+  # -- containerSecurityContext
+  containerSecurityContext: {}
+  # -- nodeSelector for choose node on deploy this pod
+  nodeSelector: {}
+  # -- enFrom
+  envFrom: {}
+  # -- image settings
+  image:
+    repository: redis
+    tag: 7-alpine
+    imagePullPolicy: Always
+  # -- number of replicas
+  replicas: 1
+  # -- resources cpu/mem
+  resources: {}
+  # -- service configuration
+  service:
+    ports:
+    - name: redis
+      port: 6379
+      protocol: TCP
+      targetPort: 6379
+    type: ClusterIP
+
+# -- bunkerweb scheduler 
+scheduler:
+  # -- podSecurityContext
+  podSecurityContext: {}
+  # -- containerSecurityContext
+  containerSecurityContext: {}
+  # -- nodeSelector for choose node on deploy this pod
+  nodeSelector: {}
+  # -- environnement variable
+  env:
+    DATABASE_URI: mariadb+pymysql://bunkerweb:changeme@bunkerweb-db:3306/db
+    KUBERNETES_MODE: "yes"
+  # -- envFrom
+  envFrom: {}
+  # -- image settings
+  image:
+    repository: bunkerity/bunkerweb-scheduler
+    tag: 1.5.7
+    imagePullPolicy: Always
+  # -- replicas
+  replicas: 1
+  # -- resources
+  resources: {}
+  # -- add extra container volumesMounts
+  volumeMounts: {}
+  # -- add extra volumes
+  volumes: {}
+# -- kubernetes cluster domain
+kubernetesClusterDomain: cluster.local
+
+# -- service Account for scheduler and controller
+saBunkerweb:
+  serviceAccount:
+    annotations: {}
+
+
+

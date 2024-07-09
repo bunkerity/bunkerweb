@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bunkerweb
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: bunkerweb
+    {{- include "bunkerweb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: bunkerweb
+      {{- include "bunkerweb.selectorLabels" . | nindent 8 }}
+      annotations:
+        bunkerweb.io/INSTANCE: "yes"
+    spec:
+    {{- if .Values.registry.imageCredentials }}
+      imagePullSecrets:
+        - name: regcred
+    {{- else }}
+      imagePullSecrets:
+        - name: {{ .Values.registry.imagePullSecretName }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.bunkerweb.podSecurityContext | nindent 8 }}
+      containers:
+      - name: bunkerweb
+        env:
+        {{- if .Values.bunkerweb.env }}
+        {{- range $key, $val := .Values.bunkerweb.env }}
+          - name: {{ $key }}
+            value: {{ $val | quote }}
+        {{- end }}
+        {{- end }}
+          - name: KUBERNETES_CLUSTER_DOMAIN
+            value: {{ quote .Values.kubernetesClusterDomain }}
+        {{- with .Values.bunkerweb.envFrom }}
+        envFrom:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        image: {{ .Values.bunkerweb.image.repository }}:{{ .Values.bunkerweb.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.bunkerweb.image.imagePullPolicy }}
+        livenessProbe:
+          exec:
+            command:
+            - /usr/share/bunkerweb/helpers/healthcheck.sh
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 1
+        ports:
+        - containerPort: 8080
+          hostPort: 80
+          name: http
+        - containerPort: 8443
+          hostPort: 443
+          name: https
+        readinessProbe:
+          exec:
+            command:
+            - /usr/share/bunkerweb/helpers/healthcheck.sh
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 1
+          timeoutSeconds: 1
+        resources:
+          {{- toYaml .Values.bunkerweb.resources | nindent 12 }}
+        securityContext: {{- toYaml .Values.bunkerweb.containerSecurityContext | nindent 10 }}
+      {{- with .Values.bunkerweb.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

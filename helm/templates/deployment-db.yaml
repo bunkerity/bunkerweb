@@ -1,0 +1,61 @@
+{{- if .Values.db.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-db
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.db.replicas }}
+  selector:
+    matchLabels:
+      app: bunkerweb-db
+    {{- include "bunkerweb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-db
+      {{- include "bunkerweb.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- if .Values.registry.imageCredentials }}
+      imagePullSecrets:
+        - name: regcred
+    {{- else }}
+      imagePullSecrets:
+        - name: {{ .Values.registry.imagePullSecretName }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.db.podSecurityContext | nindent 8 }}
+      containers:
+      - name: bunkerweb-db
+        env:
+        {{- if .Values.db.env }}
+        {{- range $key, $val := .Values.db.env }}
+          - name: {{ $key }}
+            value: {{ $val | quote }}
+        {{- end }}
+        {{- end }}
+          - name: KUBERNETES_CLUSTER_DOMAIN
+            value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.db.image.repository }}:{{ .Values.db.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.db.image.imagePullPolicy }}
+        resources:
+          {{- toYaml .Values.db.resources | nindent 12 }}
+        securityContext: 
+          {{- toYaml .Values.db.containerSecurityContext | nindent 12 }}
+        {{- if .Values.db.persistence.enabled }}
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: vol-db
+        {{- end }}
+      {{- with .Values.db.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.db.persistence.enabled }}
+      volumes:
+      - name: vol-db
+        persistentVolumeClaim:
+          claimName: bunkerweb-db
+      {{- end }}
+{{- end }}

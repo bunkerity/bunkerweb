@@ -1,0 +1,55 @@
+{{- if .Values.ui.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-ui
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.ui.replicas }}
+  selector:
+    matchLabels:
+      app: bunkerweb-ui
+    {{- include "bunkerweb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-ui
+      {{- include "bunkerweb.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- if .Values.registry.imageCredentials }}
+      imagePullSecrets:
+        - name: regcred
+    {{- else }}
+      imagePullSecrets:
+        - name: {{ .Values.registry.imagePullSecretName }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.ui.podSecurityContext | nindent 8 }}
+      containers:
+      - name: bunkerweb-ui
+        env:
+        {{- if .Values.ui.env }}
+        {{- range $key, $val := .Values.ui.env }}
+          - name: {{ $key }}
+            value: {{ $val | quote }}
+        {{- end }}
+        {{- end }}
+          - name: KUBERNETES_CLUSTER_DOMAIN
+            value: {{ quote .Values.kubernetesClusterDomain }}
+        {{- with .Values.ui.envFrom }}
+        envFrom:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        image: {{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.ui.image.imagePullPolicy  }}
+        resources:
+          {{- toYaml .Values.ui.resources | nindent 12 }}
+        securityContext: 
+          {{- toYaml .Values.ui.containerSecurityContext | nindent 12 }}
+      serviceAccountName: bunkerweb
+      {{- with .Values.ui.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

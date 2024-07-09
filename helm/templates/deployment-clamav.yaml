@@ -1,0 +1,64 @@
+{{- if .Values.clamav.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-clamav
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.clamav.replicas }}
+  selector:
+    matchLabels:
+      app: bunkerweb-clamav
+    {{- include "bunkerweb.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-clamav
+      {{- include "bunkerweb.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- if .Values.registry.imageCredentials }}
+      imagePullSecrets:
+        - name: regcred
+    {{- else }}
+      imagePullSecrets:
+        - name: {{ .Values.registry.imagePullSecretName }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.clamav.podSecurityContext | nindent 8 }}
+      {{- with .Values.clamav.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}        
+      {{- end }}
+      containers:
+      - name: bunkerweb-clamav
+        env:
+        {{- if .Values.clamav.env }}
+        {{- range $key, $val := .Values.clamav.env }}
+          - name: {{ $key }}
+            value: {{ $val | quote }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.clamav.envFrom }}
+        envFrom:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        image: {{ .Values.clamav.image.repository }}:{{ .Values.clamav.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.clamav.image.imagePullPolicy  }}
+        resources:
+          {{- toYaml .Values.clamav.resources | nindent 12 }}
+        {{- with .Values.clamav.volumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        securityContext: 
+          {{- toYaml .Values.clamav.containerSecurityContext | nindent 12 }}
+      {{- with .Values.clamav.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clamav.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
