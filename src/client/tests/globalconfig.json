@@ -4850,8 +4850,7 @@
                                                 "containerClass": "z-12"
                                             }
                                         }
-                                    },
-                                    "removeDisabled": true
+                                    }
                                 },
                                 {
                                     "id": "jobs",
@@ -5227,8 +5226,7 @@
                                                 "containerClass": "z-5"
                                             }
                                         }
-                                    },
-                                    "removeDisabled": true
+                                    }
                                 },
                                 {
                                     "id": "metrics",
@@ -7557,8 +7555,7 @@
                                                     "mobile": 12
                                                 },
                                                 "disabled": false,
-                                                "value": "",
-                                                "method": "ui",
+                                                "value": "service",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -7569,7 +7566,8 @@
                                                         "text": "Full URL of the proxied resource (proxy_pass)."
                                                     }
                                                 ],
-                                                "containerClass": "z-26"
+                                                "containerClass": "z-26",
+                                                "method": "ui"
                                             },
                                             "REVERSE_PROXY_URL": {
                                                 "context": "multisite",
@@ -7975,8 +7973,7 @@
                                                 "containerClass": "z-13"
                                             }
                                         }
-                                    },
-                                    "removeDisabled": true
+                                    }
                                 },
                                 {
                                     "id": "reversescan",
@@ -9012,7 +9009,7 @@
                         "raw": {
                             "default": {
                                 "USE_GZIP": "dsfrgrdgrdgrdhgd",
-                                "REVERSE_PROXY_HOST": "test",
+                                "REVERSE_PROXY_HOST": "service",
                                 "USE_UI": "yes"
                             }
                         }
