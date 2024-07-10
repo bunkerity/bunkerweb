@@ -291,3 +291,4 @@ typing-extensions==4.12.2 \
     #   psycopg
     #   psycopg-pool
     #   sqlalchemy
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
