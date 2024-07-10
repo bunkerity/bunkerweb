@@ -3015,8 +3015,7 @@ service_settings = {
     "ERRORS": {"value": "", "global": True, "method": "scheduler"},
     "USE_UI": {"value": "yes", "global": True, "method": "ui"},
     "USE_CORS": {"value": "yes", "global": True, "method": "scheduler"},
-    "REVERSE_PROXY_HOST_1": {"value": "service1", "global": True, "method": "ui"},
-    "REVERSE_PROXY_HOST": {"value": "service", "global": True, "method": "ui"},
+    "REVERSE_PROXY_HOST_1": {"value": "yes", "global": True, "method": "scheduler"},
 }
 
 
@@ -3170,7 +3169,7 @@ def set_advanced(template, plugins_base, service_settings):
     return plugins
 
 
-def get_multiple_from_template(template, plugins):
+def get_multiple_from_template(template, multiples):
     """
     We are gonna loop on each plugins multiples group, in case a setting is matching a template setting,
     we will create a group using the prefix as key (or "0" if no prefix) with default settings at first.
@@ -3180,10 +3179,7 @@ def get_multiple_from_template(template, plugins):
     """
     # Loop on each plugin and loop on multiples key
     # Check if the name us matching a template key
-    multiple_plugins = {}
-    for plugin in plugins:
-        for setting, value in plugin.get("multiples").items():
-            multiple_plugins.update(plugin["multiples"])
+    multiple_plugin = copy.deepcopy(multiples)
 
     multiple_template = {}
     for setting, value in template.get("settings").items():
@@ -3196,13 +3192,14 @@ def get_multiple_from_template(template, plugins):
             prefix = setting_split[-1]
             format_setting = "_".join(setting_split[:-1])
         # loop on settings of a multiple group
-        for mult_name, mult_settings in multiple_plugins.items():
+        for mult_name, mult_settings in multiple_plugin.items():
             # Check if at least one multiple plugin setting is matching the template setting
             if format_setting in mult_settings:
-                multiple_template[mult_name] = {}
+                if not mult_name in multiple_template:
+                    multiple_template[mult_name] = {}
                 # Case it is, we will check if already a group with the right prefix exists
                 # If not, we will create it
-                if not prefix in multiple_template:
+                if not prefix in multiple_template[mult_name]:
                     # We want each settings to have the prefix if exists
                     # We will get the value of the setting without the prefix and create a prefix key with the same value
                     # And after that we can delete the original setting
@@ -3210,18 +3207,18 @@ def get_multiple_from_template(template, plugins):
                     for multSett, multValue in mult_settings.items():
                         new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    multiple_template[mult_name][prefix] = new_multiple_group
+                    multiple_template[mult_name][prefix] = copy.deepcopy(new_multiple_group)
+
                 # We can now add the template value to setting using the same setting name with prefix
                 multiple_template[mult_name][prefix][setting]["value"] = value
 
-        # Sort key incrementally
-        for mult_name, mult_settings in multiple_template.items():
-            multiple_template[mult_name] = dict(sorted(mult_settings.items(), key=lambda item: int(item[0])))
-
+                # Sort key incrementally
+                for mult_name, mult_settings in multiple_template.items():
+                    multiple_template[mult_name] = dict(sorted(mult_settings.items(), key=lambda item: int(item[0])))
     return multiple_template
 
 
-def get_multiple_from_settings(settings, plugins):
+def get_multiple_from_settings(settings, multiples):
     """
     We are gonna loop on each plugins multiples group, in case a setting is matching a service / global config setting,
     we will create a group using the prefix as key (or "0" if no prefix) with default settings at first.
@@ -3232,10 +3229,7 @@ def get_multiple_from_settings(settings, plugins):
 
     # Loop on each plugin and loop on multiples key
     # Check if the name us matching a template key
-    multiple_plugins = {}
-    for plugin in plugins:
-        for setting, value in plugin.get("multiples").items():
-            multiple_plugins.update(plugin["multiples"])
+    multiple_plugins = copy.deepcopy(multiples)
 
     multiple_settings = {}
     for setting, value in settings.items():
@@ -3251,7 +3245,9 @@ def get_multiple_from_settings(settings, plugins):
         for mult_name, mult_settings in multiple_plugins.items():
             # Check if at least one multiple plugin setting is matching the template setting
             if format_setting in mult_settings:
-                multiple_settings[mult_name] = {}
+
+                if not mult_name in multiple_settings:
+                    multiple_settings[mult_name] = {}
                 # Case it is, we will check if already a group with the right prefix exists
                 # If not, we will create it
                 if not prefix in multiple_settings:
@@ -3262,10 +3258,18 @@ def get_multiple_from_settings(settings, plugins):
                     for multSett, multValue in mult_settings.items():
                         new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    multiple_settings[mult_name][prefix] = new_multiple_group
+                    multiple_settings[mult_name][prefix] = copy.deepcopy(new_multiple_group)
                 # We can now add the template value to setting using the same setting name with prefix
                 multiple_settings[mult_name][prefix][setting]["value"] = value.get("value", multiple_settings[mult_name][prefix][setting]["value"])
                 multiple_settings[mult_name][prefix][setting]["method"] = value.get("method", "ui")
+                multiple_settings[mult_name][prefix][setting]["disabled"] = False if value.get("method", "ui") in ("ui", "default", "manual") else True
+                if multiple_settings[mult_name][prefix][setting].get("disabled", False):
+                    multiple_settings[mult_name][prefix][setting]["popovers"] = [
+                        {
+                            "iconName": "trespass",
+                            "text": "inp_popover_method_disabled",
+                        }
+                    ] + multiple_settings[mult_name][prefix][setting].get("popovers", [])
     return multiple_settings
 
 
@@ -3275,8 +3279,6 @@ def set_multiples(template, format_plugins, service_settings):
     """
     # copy of format plugins
     for plugin in format_plugins:
-        # Prepare multiples key
-        plugin["multiples"] = {}
         # Get multiples
         multiples = {}
         settings_to_delete = []
@@ -3304,14 +3306,13 @@ def set_multiples(template, format_plugins, service_settings):
             del plugin["settings"][setting]
 
         if len(multiples):
-            plugin["multiples"].update(multiples)
-
-    # Now that we have for each plugin the multiples settings, we need to do the following
-    # Get all settings from template that are multiples
-    template_multiples = get_multiple_from_template(template, format_plugins)
-    # Get all settings from service settings / global config that are multiples
-    service_multiples = get_multiple_from_settings(service_settings, format_plugins)
-    # We need
+            # Now that we have for each plugin the multiples settings, we need to do the following
+            # Get all settings from template that are multiples
+            template_multiples = get_multiple_from_template(template, multiples)
+            # Get all settings from service settings / global config that are multiples
+            service_multiples = get_multiple_from_settings(service_settings, multiples)
+            # Get service multiples if at least one, else use template multiples
+            plugin["multiples"] = service_multiples if len(service_multiples) else template_multiples
 
     return format_plugins
 

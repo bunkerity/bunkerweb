@@ -14,39 +14,137 @@ import Container from "@components/Widget/Container.vue";
   {
    "columns": {"pc": 6, "tablet": 12, "mobile": 12},
     "multiples": {
-        "custom-headers": {
-            "CUSTOM_HEADER": {
-                "context": "multisite",
-                "default": "",
-                "help": "Custom header to add (HeaderName: HeaderValue).",
-                "id": "custom-header",
-                "label": "Custom header (HeaderName: HeaderValue)",
-                "regex": "^([\\w\\-]+: .+)?$",
-                "type": "text",
-                "multiple": "custom-headers",
-                "containerClass": "z-13",
-                "pattern": "^([\\w\\-]+: .+)?$",
-                "inpType": "input",
-                "name": "Custom header (HeaderName: HeaderValue)",
-                "columns": {
-                    "pc": 4,
-                    "tablet": 6,
-                    "mobile": 12
-                },
-                "disabled": false,
-                "value": "",
-                "popovers": [
-                    {
-                        "iconName": "disk",
-                        "text": "inp_popover_multisite"
+        "reverse-proxy": {
+            "0": {
+                "REVERSE_PROXY_HOST": {
+                    "context": "multisite",
+                    "default": "",
+                    "help": "Full URL of the proxied resource (proxy_pass).",
+                    "id": "reverse-proxy-host",
+                    "label": "Reverse proxy host",
+                    "regex": "^.*$",
+                    "type": "text",
+                    "multiple": "reverse-proxy",
+                    "pattern": "^.*$",
+                    "inpType": "input",
+                    "name": "Reverse proxy host",
+                    "columns": {
+                        "pc": 4,
+                        "tablet": 6,
+                        "mobile": 12
                     },
-                    {
-                        "iconName": "info",
-                        "text": "Custom header to add (HeaderName: HeaderValue)."
-                    }
-                ]
+                    "disabled": false,
+                    "value": "service",
+                    "popovers": [
+                        {
+                            "iconName": "disk",
+                            "text": "inp_popover_multisite"
+                        },
+                        {
+                            "iconName": "info",
+                            "text": "Full URL of the proxied resource (proxy_pass)."
+                        }
+                    ],
+                    "containerClass": "z-26",
+                    "method": "ui"
+                },
+                "REVERSE_PROXY_KEEPALIVE": {
+                    "context": "multisite",
+                    "default": "no",
+                    "help": "Enable or disable keepalive connections with the proxied resource.",
+                    "id": "reverse-proxy-keepalive",
+                    "label": "Reverse proxy keepalive",
+                    "regex": "^(yes|no)$",
+                    "type": "check",
+                    "multiple": "reverse-proxy",
+                    "pattern": "^(yes|no)$",
+                    "inpType": "checkbox",
+                    "name": "Reverse proxy keepalive",
+                    "columns": {
+                        "pc": 4,
+                        "tablet": 6,
+                        "mobile": 12
+                    },
+                    "disabled": false,
+                    "value": "no",
+                    "popovers": [
+                        {
+                            "iconName": "disk",
+                            "text": "inp_popover_multisite"
+                        },
+                        {
+                            "iconName": "info",
+                            "text": "Enable or disable keepalive connections with the proxied resource."
+                        }
+                    ],
+                    "containerClass": "z-20"
+                },
+                "REVERSE_PROXY_AUTH_REQUEST": {
+                    "context": "multisite",
+                    "default": "",
+                    "help": "Enable authentication using an external provider (value of auth_request directive).",
+                    "id": "reverse-proxy-auth-request",
+                    "label": "Reverse proxy auth request",
+                    "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+                    "type": "text",
+                    "multiple": "reverse-proxy",
+                    "pattern": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+                    "inpType": "input",
+                    "name": "Reverse proxy auth request",
+                    "columns": {
+                        "pc": 4,
+                        "tablet": 6,
+                        "mobile": 12
+                    },
+                    "disabled": false,
+                    "value": "",
+                    "popovers": [
+                        {
+                            "iconName": "disk",
+                            "text": "inp_popover_multisite"
+                        },
+                        {
+                            "iconName": "info",
+                            "text": "Enable authentication using an external provider (value of auth_request directive)."
+                        }
+                    ],
+                    "containerClass": "z-19"
+                },
+                "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+                    "context": "multisite",
+                    "default": "",
+                    "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+                    "id": "reverse-proxy-auth-request-signin-url",
+                    "label": "Auth request signin URL",
+                    "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+                    "type": "text",
+                    "multiple": "reverse-proxy",
+                    "pattern": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+                    "inpType": "input",
+                    "name": "Auth request signin URL",
+                    "columns": {
+                        "pc": 4,
+                        "tablet": 6,
+                        "mobile": 12
+                    },
+                    "disabled": false,
+                    "value": "",
+                    "popovers": [
+                        {
+                            "iconName": "disk",
+                            "text": "inp_popover_multisite"
+                        },
+                        {
+                            "iconName": "info",
+                            "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
+                        }
+                    ],
+                    "containerClass": "z-18"
+                  },
+                },
             }
-        },
+        }
+    }
     },
     @param {object<object>} multiples - The multiples settings to display. This needs to be a dict of settings using default field format.
     @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
@@ -106,7 +204,6 @@ function addGroup() {}
 
 <template>
   <template v-for="(multObj, multName, id) in props.multiples">
-    {{ id }}
     <Container
       data-is="multiple"
       class="layout-settings-multiple"
@@ -118,11 +215,16 @@ function addGroup() {}
         <ButtonGroup :buttons="[buttonAdd, buttonToggle]" />
       </Container>
 
-      <Container class="layout-settings-multiple-group">
-        <template v-for="(setting, value) in props.multiples[multName]">
-          <Fields :setting="setting" :tabId="props.tabId" />
-        </template>
-      </Container>
+      <template v-for="(group, groupName, id) in props.multiples[multName]">
+        <Container class="layout-settings-multiple-group">
+          <Subtitle
+            :subtitle="`${multName.replaceAll('-', ' ')} #${+groupName + 1}`"
+          />
+          <template v-for="(setting, settingName, id) in group">
+            <Fields :setting="setting" :tabId="props.tabId" />
+          </template>
+        </Container>
+      </template>
     </Container>
   </template>
 </template>

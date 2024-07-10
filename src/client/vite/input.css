@@ -262,7 +262,7 @@ body {
 }
 
 .select-combobox-dropdown-container {
-  @apply flex  w-fit mt-2;
+  @apply flex w-fit mt-2;
 }
 
 .select-combobox-list {
