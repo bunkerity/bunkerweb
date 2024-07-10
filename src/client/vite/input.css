@@ -537,7 +537,7 @@ body {
 }
 
 .layout-settings-multiple-group {
-  @apply mt-4 rounded border border-gray-500/50 dark:border-gray-500 p-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative bg-gray-200/50 dark:bg-gray-800/80;
+  @apply mt-4 rounded border border-gray-500/50 dark:border-gray-500 p-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative bg-gray-200/50 dark:bg-gray-900/10;
 }
 
 
@@ -1137,7 +1137,7 @@ body {
 }
 
 .button-group-multiple {
-  @apply flex justify-center items-center mx-4;
+  @apply col-span-12 flex justify-center items-center mx-4;
 }
 
 .button-group-instance {

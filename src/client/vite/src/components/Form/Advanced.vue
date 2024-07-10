@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, onUnmounted } from "vue";
+import { defineProps, reactive, onMounted, onUnmounted, KeepAlive } from "vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
@@ -284,25 +284,30 @@ onUnmounted(() => {
     </Filter>
     <MessageUnmatch v-if="!data.format.length" />
     <template v-for="plugin in data.format">
-      <Container
-        data-is="content"
-        data-advanced-form-plugin
-        v-if="plugin.name === data.currPlugin"
-        class="form-advanced-plugin-container"
-      >
-        <Title type="content" :title="plugin.name" />
-        <Subtitle type="content" :subtitle="plugin.description" />
+      <KeepAlive>
+        <Container
+          data-is="content"
+          data-advanced-form-plugin
+          v-if="plugin.name === data.currPlugin"
+          class="form-advanced-plugin-container"
+        >
+          <Title type="content" :title="plugin.name" />
+          <Subtitle type="content" :subtitle="plugin.description" />
 
-        <Container class="layout-settings">
-          <template
-            v-for="(setting, name, index) in plugin.settings"
-            :key="index"
-          >
-            <Fields :setting="setting" />
-          </template>
+          <Container class="layout-settings">
+            <template
+              v-for="(setting, name, index) in plugin.settings"
+              :key="index"
+            >
+              <Fields :setting="setting" />
+            </template>
+          </Container>
+          <GroupMultiple
+            v-if="plugin.multiples"
+            :multiples="plugin.multiples"
+          />
         </Container>
-        <GroupMultiple v-if="plugin.multiples" :multiples="plugin.multiples" />
-      </Container>
+      </KeepAlive>
     </template>
     <Button
       v-if="data.format.length"

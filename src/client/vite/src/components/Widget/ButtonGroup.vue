@@ -10,7 +10,7 @@ import { onMounted, reactive, ref } from "vue";
   @example
   {
     id: "group-btn",
-    groupClass : "justify-center",
+    boutonGroupClass : "justify-center",
     buttons: [
       {
         id: "open-modal-btn",
@@ -35,7 +35,7 @@ import { onMounted, reactive, ref } from "vue";
     ],
   }
   @param {array} buttons - List of buttons to display. Button component is used.
-  @param {string} [groupClass=""] - Additional class for the flex container
+  @param {string} [boutonGroupClass=""] - Additional class for the flex container
 */
 
 const props = defineProps({
@@ -44,7 +44,7 @@ const props = defineProps({
     required: true,
     default: [],
   },
-  groupClass: {
+  boutonGroupClass: {
     type: String,
     required: false,
     default: "",
@@ -59,7 +59,7 @@ const groupEl = ref(null);
 
 onMounted(() => {
   group.class =
-    props.groupClass || groupEl.value.closest("[data-is]")
+    props.boutonGroupClass || groupEl.value.closest("[data-is]")
       ? `button-group-${groupEl.value
           .closest("[data-is]")
           .getAttribute("data-is")}`
@@ -70,7 +70,7 @@ onMounted(() => {
 <template>
   <div
     ref="groupEl"
-    :class="[group.class, props.groupClass]"
+    :class="[group.class, props.boutonGroupClass]"
     v-if="props.buttons.length > 0"
   >
     <Button

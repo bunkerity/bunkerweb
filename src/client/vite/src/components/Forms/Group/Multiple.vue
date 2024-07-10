@@ -6,7 +6,7 @@ import Fields from "@components/Form/Fields.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Container from "@components/Widget/Container.vue";
 
-/** 
+/**
   @name Forms/Group/Multiple.vue
   @description This Will regroup all multiples settings with add and remove logic.
   This component under the hood is rendering default fields but by group with possibility to add or remove a multiple group.
@@ -178,9 +178,9 @@ const props = defineProps({
 
 const multiples = reactive({
   // Store value of multiple group
-  // By default, all multiples are visible
-  // But when clicking toggle, we can hide them by removing the key from the array
-  visible: [],
+  // By default, all multiples are invisible
+  invisible: [],
+  toDelete: [],
 });
 
 const buttonAdd = {
@@ -199,7 +199,33 @@ const buttonToggle = {
   containerClass: "flex justify-center",
 };
 
-function addGroup() {}
+const buttonDelete = {
+  text: "action_remove",
+  color: "error",
+  size: "normal",
+  type: "button",
+  containerClass: "flex justify-center",
+};
+
+function setInvisible(id) {
+  multiples.invisible.push(id);
+}
+
+function delInvisible(id) {
+  multiples.invisible = multiples.invisible.filter((v) => v !== id);
+}
+
+function toggleVisible(id) {
+  if (multiples.invisible.includes(id)) {
+    delInvisible(id);
+  } else {
+    setInvisible(id);
+  }
+}
+
+function delGroup(multName, groupName) {
+  multiples.toDelete.push({ multName: multName, groupName: groupName });
+}
 </script>
 
 <template>
@@ -212,17 +238,32 @@ function addGroup() {}
     >
       <Container class="col-span-12 flex items-center">
         <Subtitle :subtitle="multName.replaceAll('-', ' ')" />
-        <ButtonGroup :buttons="[buttonAdd, buttonToggle]" />
+        <ButtonGroup
+          @click="toggleVisible(`${multName}${id}`)"
+          :buttons="[buttonAdd, buttonToggle]"
+        />
       </Container>
 
-      <template v-for="(group, groupName, id) in props.multiples[multName]">
-        <Container class="layout-settings-multiple-group">
+      <template
+        v-for="(group, groupName, groupId) in props.multiples[multName]"
+      >
+        <Container
+          class="layout-settings-multiple-group"
+          :aria-hidden="multiples.invisible.includes(`${multName}${id}`)"
+          v-show="
+            multiples.invisible.includes(`${multName}${id}`) ? false : true
+          "
+        >
           <Subtitle
             :subtitle="`${multName.replaceAll('-', ' ')} #${+groupName + 1}`"
           />
-          <template v-for="(setting, settingName, id) in group">
+          <template v-for="(setting, settingName, settingId) in group">
             <Fields :setting="setting" :tabId="props.tabId" />
           </template>
+          <ButtonGroup
+            @click="delGroup(multName, groupName)"
+            :buttons="[buttonDelete]"
+          />
         </Container>
       </template>
     </Container>
