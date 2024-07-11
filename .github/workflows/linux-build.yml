@@ -123,9 +123,9 @@ jobs:
         if: startsWith(env.ARCH, 'arm') == true
         run: |
           docker save local/bunkerweb-${{ inputs.LINUX }}:latest | ssh -C root@arm docker load
-          scp ./src/linux/package.sh root@arm:/opt
-          ssh root@arm chmod +x /opt/package.sh
-          ssh root@arm /opt/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }} "$(cat src/VERSION | tr -d '\n')"
+          scp ./src/linux/package.sh root@arm:/opt/package_${{ inputs.LINUX }}.sh
+          ssh root@arm chmod +x /opt/package_${{ inputs.LINUX }}.sh
+          ssh root@arm /opt/package_${{ inputs.LINUX }}.sh ${{ inputs.LINUX }} ${{ env.LARCH }} "$(cat src/VERSION | tr -d '\n')"
           scp -r root@arm:/root/package-${{ inputs.LINUX }} ./package-${{ inputs.LINUX }}
         env:
           LARCH: ${{ env.LARCH }}
