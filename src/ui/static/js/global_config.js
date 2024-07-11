@@ -59,11 +59,11 @@ class Multiple {
             //get plugin from btn
             const btn = e.target.closest("button");
             const attName = btn.getAttribute(
-              `data-${this.prefix}-multiple-add`
+              `data-${this.prefix}-multiple-add`,
             );
             //get all multiple groups
             const multipleEls = document.querySelectorAll(
-              `[data-${this.prefix}-settings-multiple*="${attName}"]`
+              `[data-${this.prefix}-settings-multiple*="${attName}"]`,
             );
             //case no schema
             if (multipleEls.length <= 0) return;
@@ -75,7 +75,7 @@ class Multiple {
             //and keep the highest num
             multipleEls.forEach((container) => {
               const ctnrName = container.getAttribute(
-                `data-${this.prefix}-settings-multiple`
+                `data-${this.prefix}-settings-multiple`,
               );
               const num = this.getSuffixNumOrFalse(ctnrName);
               if (!isNaN(num) && num > topNum) topNum = num;
@@ -86,7 +86,7 @@ class Multiple {
             const setNum = +currNum === 0 ? `` : `_${currNum}`;
             //the default (schema) group is the last group
             const schema = document.querySelector(
-              `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`
+              `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
             );
             //clone schema to create a group with new num
             const schemaClone = schema.cloneNode(true);
@@ -129,12 +129,12 @@ class Multiple {
             // We are not removing it really, just hiding it and update values to default
             // By setting default value, group will be send to server and delete (because a setting with default value is useless to keep)
             const multContainer = e.target.closest(
-              `[data-${this.prefix}-settings-multiple]`
+              `[data-${this.prefix}-settings-multiple]`,
             );
             multContainer.classList.add("hidden-multiple");
             // get setting container
             const settings = multContainer.querySelectorAll(
-              `[data-setting-container]`
+              `[data-setting-container]`,
             );
             settings.forEach((setting) => {
               // for regular input
@@ -161,7 +161,7 @@ class Multiple {
               // for select
               try {
                 const selects = setting.querySelectorAll(
-                  "button[data-setting-select]"
+                  "button[data-setting-select]",
                 );
                 selects.forEach((select) => {
                   const defaultVal = select.getAttribute("data-default") || "";
@@ -172,8 +172,8 @@ class Multiple {
                     defaultVal;
                   const dropdown = document.querySelector(
                     `[data-setting-select-dropdown="${select.getAttribute(
-                      "data-setting-select"
-                    )}"]`
+                      "data-setting-select",
+                    )}"]`,
                   );
                   dropdown.querySelector(`button[value=${defaultVal}]`).click();
                 });
@@ -187,7 +187,7 @@ class Multiple {
 
   setMultStateActions() {
     const multiplesGroup = this.container.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple]`
+      `[data-${this.prefix}-settings-multiple]`,
     );
     multiplesGroup.forEach((group) => {
       // Check if at least one data-method isn't ui, default or manual
@@ -205,7 +205,7 @@ class Multiple {
       if (!isDisabled) return;
       // Case need to disabled
       const removeBtn = group.querySelector(
-        `[data-${this.prefix}-multiple-delete]`
+        `[data-${this.prefix}-multiple-delete]`,
       );
       removeBtn.setAttribute("disabled", "");
     });
@@ -237,13 +237,13 @@ class Multiple {
         ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
         : name.trim();
       const relateSetting = document.querySelector(
-        `[data-setting-container=${nameSuffixLess}_SCHEMA]`
+        `[data-setting-container=${nameSuffixLess}_SCHEMA]`,
       );
       const relateCtnr = relateSetting.closest(
-        `[data-${this.prefix}-settings-multiple]`
+        `[data-${this.prefix}-settings-multiple]`,
       );
       const relateCtnrName = relateCtnr.getAttribute(
-        `data-${this.prefix}-settings-multiple`
+        `data-${this.prefix}-settings-multiple`,
       );
       //then we sort the setting on the right container name by suffixe number
       if (!(relateCtnrName in sortMultiples)) {
@@ -261,7 +261,7 @@ class Multiple {
   addOneMultGroup() {
     const settings = document.querySelector(`[data-${this.prefix}-modal-form]`);
     const multAddBtns = settings.querySelectorAll(
-      `[data-${this.prefix}-multiple-add]`
+      `[data-${this.prefix}-multiple-add]`,
     );
     multAddBtns.forEach((btn) => {
       //check if already one (SCHEMA exclude so length >= 2)
@@ -277,7 +277,7 @@ class Multiple {
 
   showMultByAtt(att) {
     const multContainers = document.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple^=${att}]`
+      `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
       if (
@@ -291,7 +291,7 @@ class Multiple {
 
   toggleMultByAtt(att) {
     const multContainers = document.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple^=${att}]`
+      `[data-${this.prefix}-settings-multiple^=${att}]`,
     );
     multContainers.forEach((container) => {
       if (
@@ -307,7 +307,7 @@ class Multiple {
     //get schema settings
     const multiples = {};
     const schemaSettings = document.querySelectorAll(
-      `[data-setting-container$="SCHEMA"]`
+      `[data-setting-container$="SCHEMA"]`,
     );
     // loop on every schema settings
     schemaSettings.forEach((schema) => {
@@ -333,11 +333,11 @@ class Multiple {
   setMultipleToDOM(sortMultObj) {
     //we loop on each multiple that contains values to render to DOM
     for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
-      sortMultObj
+      sortMultObj,
     )) {
       //we need to access the DOM schema container
       const schemaCtnr = document.querySelector(
-        `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`
+        `[data-${this.prefix}-settings-multiple="${schemaCtnrName}"]`,
       );
       //now we have to loop on each multiple settings group
       for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
@@ -353,14 +353,14 @@ class Multiple {
         for (const [name, data] of Object.entries(settings)) {
           //get setting container of clone container
           const settingContainer = schemaCtnrClone.querySelector(
-            `[data-setting-container="${name}"]`
+            `[data-setting-container="${name}"]`,
           );
           //replace input info and disabled state
           this.setSetting(
             data["value"],
             data["method"],
             data["global"],
-            settingContainer
+            settingContainer,
           );
         }
         //send schema clone to DOM and show it
@@ -375,7 +375,7 @@ class Multiple {
       `data-${this.prefix}-settings-multiple`,
       schemaCtnrClone
         .getAttribute(`data-${this.prefix}-settings-multiple`)
-        .replace("_SCHEMA", suffix)
+        .replace("_SCHEMA", suffix),
     );
 
     //rename title
@@ -389,18 +389,18 @@ class Multiple {
 
     //rename setting container
     const settingCtnrs = schemaCtnrClone.querySelectorAll(
-      "[data-setting-container]"
+      "[data-setting-container]",
     );
     settingCtnrs.forEach((settingCtnr) => {
       settingCtnr.setAttribute(
         "data-setting-container",
         settingCtnr
           .getAttribute("data-setting-container")
-          .replace("_SCHEMA", suffix)
+          .replace("_SCHEMA", suffix),
       );
       settingCtnr.setAttribute(
         "id",
-        settingCtnr.getAttribute("id").replace("_SCHEMA", suffix)
+        settingCtnr.getAttribute("id").replace("_SCHEMA", suffix),
       );
     });
 
@@ -409,7 +409,7 @@ class Multiple {
     labelEls.forEach((label) => {
       label.setAttribute(
         "for",
-        label.getAttribute("for").replace("_SCHEMA", suffix)
+        label.getAttribute("for").replace("_SCHEMA", suffix),
       );
     });
 
@@ -418,19 +418,19 @@ class Multiple {
     popoverBtns.forEach((popoverBtn) => {
       popoverBtn.setAttribute(
         "data-popover-btn",
-        popoverBtn.getAttribute("data-popover-btn").replace("_SCHEMA", suffix)
+        popoverBtn.getAttribute("data-popover-btn").replace("_SCHEMA", suffix),
       );
     });
 
     const popoverContents = schemaCtnrClone.querySelectorAll(
-      "[data-popover-content]"
+      "[data-popover-content]",
     );
     popoverContents.forEach((popoverContent) => {
       popoverContent.setAttribute(
         "data-popover-content",
         popoverContent
           .getAttribute("data-popover-content")
-          .replace("_SCHEMA", suffix)
+          .replace("_SCHEMA", suffix),
       );
     });
 
@@ -439,7 +439,7 @@ class Multiple {
     invalidEls.forEach((invalidEl) => {
       invalidEl.setAttribute(
         "data-invalid",
-        invalidEl.getAttribute("data-invalid").replace("_SCHEMA", suffix)
+        invalidEl.getAttribute("data-invalid").replace("_SCHEMA", suffix),
       );
     });
 
@@ -517,15 +517,15 @@ class Multiple {
       //click the custom select dropdown btn value to update select value
       select.parentElement
         .querySelector(
-          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`
+          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`,
         )
         .click();
 
       //set state to custom visible el
       const btnCustom = document.querySelector(
         `[data-setting-select=${select.getAttribute(
-          "data-setting-select-default"
-        )}]`
+          "data-setting-select-default",
+        )}]`,
       );
 
       this.setDisabledMultServ(btnCustom, method, global);
@@ -561,10 +561,10 @@ class Multiple {
         selects.forEach((select) => {
           const method = select.getAttribute("data-default-method");
           const name = select.getAttribute(
-            `data-${this.prefix}-setting-select-default`
+            `data-${this.prefix}-setting-select-default`,
           );
           const selDOM = document.querySelector(
-            `button[data-${this.prefix}-setting-select='${name}']`
+            `button[data-${this.prefix}-setting-select='${name}']`,
           );
           if (method === "ui" || method === "default") {
             selDOM.removeAttribute("disabled", "");
@@ -607,7 +607,7 @@ class Multiple {
   hiddenIfNoMultiples() {
     //hide multiple btn if no multiple exist on a plugin
     const multiples = document.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple]`
+      `[data-${this.prefix}-settings-multiple]`,
     );
     multiples.forEach((container) => {
       if (container.querySelectorAll(`[data-setting-container]`).length <= 0)
@@ -619,7 +619,7 @@ class Multiple {
 
   removePrevMultiples() {
     const multiPlugins = document.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple]`
+      `[data-${this.prefix}-settings-multiple]`,
     );
     multiPlugins.forEach((multiGrp) => {
       if (
@@ -655,7 +655,7 @@ const setPopover = new Popover("main", "global-config");
 const setDrop = new Dropdown("global-config");
 const setTabsSelect = new TabsSelect(
   document.querySelector("[data-global-config-tabs-select-container]"),
-  document.querySelector("[data-global-config-plugins-container]")
+  document.querySelector("[data-global-config-plugins-container]"),
 );
 const setInvalid = new showInvalid();
 const format = new FormatValue();
@@ -663,7 +663,7 @@ const format = new FormatValue();
 const setFilterGlobal = new FilterSettings(
   "keyword",
   document.querySelector("[data-global-config-tabs-select-container]"),
-  document.querySelector("[data-global-config-plugins-container]")
+  document.querySelector("[data-global-config-plugins-container]"),
 );
 
 const setMultiple = new Multiple("global-config");
@@ -675,19 +675,19 @@ const checkServiceModalKeyword = new CheckNoMatchFilter(
     .querySelector("[data-global-config-plugins-container]")
     .querySelectorAll("[data-plugin-item]"),
   document.querySelector("[data-global-config-form]"),
-  document.querySelector("[data-global-config-nomatch]")
+  document.querySelector("[data-global-config-nomatch]"),
 );
 
 try {
   const checkServiceCardSelect = new CheckNoMatchFilter(
     document.querySelectorAll(
-      "button[data-global-config-setting-select-dropdown-btn]"
+      "button[data-global-config-setting-select-dropdown-btn]",
     ),
     "select",
     document
       .querySelector("[data-global-config-plugins-container]")
       .querySelectorAll("[data-plugin-item]"),
     document.querySelector("[data-global-config-form]"),
-    document.querySelector("[data-global-config-nomatch]")
+    document.querySelector("[data-global-config-nomatch]"),
   );
 } catch (e) {}

@@ -80,9 +80,15 @@ class Config:
         i = 0
         while i < 60:
             curr_changes = self._db.check_changes()
+            first_config_saved = self._db.is_first_config_saved()
             if isinstance(curr_changes, str):
                 if not startup:
                     self.__logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
+            elif isinstance(first_config_saved, str):
+                if not startup:
+                    self.__logger.error(f"An error occurred when checking if the first config is saved in the database : {first_config_saved}")
+            elif not first_config_saved:
+                self.__logger.warning("First configuration is not saved yet, retrying in 5 seconds ...")
             elif not any(curr_changes.values()):
                 break
             else:
