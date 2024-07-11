@@ -19,7 +19,7 @@ jobs:
       # Get PDF doc
       - name: Get documentation
         if: inputs.VERSION != 'testing'
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
       # Create tag
@@ -51,7 +51,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION != 'testing'
-        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
+        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
         with:
           body: |
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
@@ -75,7 +75,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION == 'testing'
-        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
+        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v2.0.6
         with:
           body: |
             **The testing version of BunkerWeb should not be used in production, please use the latest stable version instead.**

@@ -70,6 +70,7 @@ function antibot:header()
 			.. self.ctx.bw.antibot_nonce_script
 			.. "'",
 		["style-src"] = "'self' 'nonce-" .. self.ctx.bw.antibot_nonce_style .. "'",
+		["frame-ancestors"] = "'none'",
 		["require-trusted-types-for"] = "'script'",
 	}
 	if self.session_data.type == "recaptcha" then

@@ -18,6 +18,7 @@
                name="{{ inp_name_mult }}"
                data-default-method="{% if inp_name in ['AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE'] %}mode{% else %}{{ global_config_method }}{% endif %}"
                data-default-value="{{ global_config_value }}"
+               data-default="{{ inp_default }}"
                {% if inp_name in ['AUTOCONF_MODE', 'SWARM_MODE', 'KUBERNETES_MODE'] or global_config_method != 'ui' and global_config_method != 'default' or is_read_only %} disabled {% endif %}
                data-checked="{% if global_config_value == "yes" %}true{% else %}false{% endif %}"
                {% if global_config_value == "yes" %}checked{% endif %}

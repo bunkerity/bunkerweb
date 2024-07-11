@@ -461,7 +461,7 @@ class Database:
     def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
         data = {
-            "version": "1.5.8",
+            "version": "1.5.9",
             "integration": "unknown",
             "database_version": "Unknown",
             "is_pro": "no",
@@ -1250,6 +1250,10 @@ class Database:
                     changed_plugins.add(session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first().plugin_id)
 
             if config:
+                db_global_config = {}
+                if method == "autoconf":
+                    db_global_config = self.get_non_default_settings(global_only=True)
+
                 config.pop("DATABASE_URI", None)
                 db_services = session.query(Services).with_entities(Services.id, Services.method, Services.is_draft).all()
                 db_ids: Dict[str, dict] = {service.id: {"method": service.method, "is_draft": service.is_draft} for service in db_services}
@@ -1338,7 +1342,9 @@ class Database:
 
                             if not service_setting:
                                 if key != "SERVER_NAME" and (
-                                    (original_key not in config and value == setting.default) or (original_key in config and value == config[original_key])
+                                    (original_key not in config and original_key not in db_global_config and value == setting.default)
+                                    or (original_key in config and value == config[original_key])
+                                    or (original_key in db_global_config and value == db_global_config[original_key])
                                 ):
                                     continue
 
@@ -1355,7 +1361,9 @@ class Database:
                                 )
 
                                 if key != "SERVER_NAME" and (
-                                    (original_key not in config and value == setting.default) or (original_key in config and value == config[original_key])
+                                    (original_key not in config and original_key not in db_global_config and value == setting.default)
+                                    or (original_key in config and value == config[original_key])
+                                    or (original_key in db_global_config and value == db_global_config[original_key])
                                 ):
                                     query.delete()
                                     continue
@@ -1386,7 +1394,7 @@ class Database:
                                     query.delete()
                                     continue
                                 query.update({Global_values.value: value, Global_values.method: method})
-                else:
+                elif method != "autoconf":
                     if (
                         config.get("SERVER_NAME", "www.example.com")
                         and not session.query(Services)
@@ -1599,11 +1607,11 @@ class Database:
             if not global_only and is_multisite:
                 servers = ""
                 for service in services:
+                    for key in multisite:
+                        config[f"{service.id}_{key}"] = config[key]
                     config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
                     if methods:
                         config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
-                    for key in multisite:
-                        config[f"{service.id}_{key}"] = config[key]
                     servers += f"{service.id} "
                 servers = servers.strip()
 

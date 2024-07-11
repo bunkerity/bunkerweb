@@ -440,6 +440,19 @@ If you don't do this, the default Lua number &rarr; <tt>double</tt>
 conversion rule applies. A vararg C&nbsp;function expecting an integer
 will see a garbled or uninitialized value.
 </p>
+<p>
+Note: this is the only place where creating a boxed scalar number type is
+actually useful. <b>Never use <tt>ffi.new("int")</tt>, <tt>ffi.new("float")</tt>
+etc. anywhere else!</b>
+</p>
+<p style="font-size: 8pt;">
+Ditto for <tt>ffi.cast()</tt>. Explicitly boxing scalars <b>does not</b>
+improve performance or force <tt>int</tt> or <tt>float</tt> arithmetic! It
+just adds costly boxing, unboxing and conversions steps. And it may lead
+to surprise results, because
+<a href="#cdata_arith">cdata arithmetic on scalar numbers</a>
+is always performed on 64 bit integers.
+</p>
 
 <h2 id="init">Initializers</h2>
 <p>

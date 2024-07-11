@@ -1,4 +1,4 @@
-FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c as builder
+FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -45,7 +45,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add ui user, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash unzip libmagic mariadb-client postgresql-client sqlite && \
+RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
   addgroup -g 101 ui && \
   adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
   echo "Docker" > INTEGRATION && \
@@ -63,12 +63,12 @@ RUN apk add --no-cache bash unzip libmagic mariadb-client postgresql-client sqli
 
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
-RUN apk add --no-cache "libcrypto3>=3.1.5-r0" "libssl3>=3.1.5-r0" # CVE-2024-4603
+RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
 
-LABEL maintainer "Bunkerity <contact@bunkerity.com>"
-LABEL version "1.5.8"
-LABEL url "https://www.bunkerweb.io"
-LABEL bunkerweb.type "ui"
+LABEL maintainer="Bunkerity <contact@bunkerity.com>"
+LABEL version="1.5.9"
+LABEL url="https://www.bunkerweb.io"
+LABEL bunkerweb.type="ui"
 
 VOLUME /data
 
@@ -80,6 +80,6 @@ USER ui:ui
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-ui.sh
 
-ENV PYTHONPATH /usr/share/bunkerweb/deps/python
+ENV PYTHONPATH="/usr/share/bunkerweb/deps/python"
 
 CMD [ "python3", "-m", "gunicorn", "--config", "gunicorn.conf.py", "--user", "ui", "--group", "ui", "--bind", "0.0.0.0:7000" ]

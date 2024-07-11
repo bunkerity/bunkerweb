@@ -12,9 +12,9 @@ click==8.1.7 \
     --hash=sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28 \
     --hash=sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de
     # via pip-tools
-importlib-metadata==7.1.0 \
-    --hash=sha256:30962b96c0c223483ed6cc7280e7f0199feb01a0e40cfae4d4450fc6fab1f570 \
-    --hash=sha256:b78938b926ee8d5f020fc4772d487045805a55ddbad2ecf21c6d60938dc7fcd2
+importlib-metadata==8.0.0 \
+    --hash=sha256:15584cf2b1bf449d98ff8a6ff1abef57bf20f3ac6454f431736cd3e660921b2f \
+    --hash=sha256:188bd24e4c346d3f0a933f275c2fec67050326a856b9a359881d7c2a697e8812
     # via build
 packaging==24.1 \
     --hash=sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002 \
@@ -22,9 +22,9 @@ packaging==24.1 \
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==24.0 \
-    --hash=sha256:ba0d021a166865d2265246961bec0152ff124de910c5cc39f1156ce3fa7c69dc \
-    --hash=sha256:ea9bd1a847e8c5774a5777bb398c19e80bcd4e2aa16a4b301b718fe6f593aba2
+pip==24.1.2 \
+    --hash=sha256:7cd207eed4c60b0f411b444cd1464198fe186671c323b6cd6d433ed80fc9d247 \
+    --hash=sha256:e5458a0b89f2755e0ee8c0c77613fe5273e05f337907874d64f13171a898a7ff
     # via build
 pip-tools==7.4.1 \
     --hash=sha256:4c690e5fbae2f21e87843e89c26191f0d9454f362d8acdbd695716493ec8b3a9 \
@@ -36,9 +36,9 @@ pyproject-hooks==1.1.0 \
     # via
     #   -r requirements.in
     #   pip-tools
-setuptools==70.0.0 \
-    --hash=sha256:54faa7f2e8d2d11bcd2c07bed282eef1046b5c080d1c32add737d7b5817b1ad4 \
-    --hash=sha256:f211a66637b8fa059bb28183da127d4e86396c991a942b028c6650d4319c3fd0
+setuptools==70.3.0 \
+    --hash=sha256:f171bab1dfbc86b132997f26a119f6056a57950d058587841a0082e8830f9dc5 \
+    --hash=sha256:fe384da74336c398e0d956d1cae0669bc02eed936cdb1d49b57de1990dc11ffc
     # via
     #   build
     #   pip-tools

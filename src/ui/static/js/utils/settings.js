@@ -1516,6 +1516,34 @@ class SettingsMultiple extends Settings {
     this.setSettingsByData(multipleSettings);
     // Show at least one mult group
     this.addOneMultGroup();
+    // Check each multiple, if one setting is one data-method isn't ui, default or manual, disabled remove
+    this.setMultStateActions();
+  }
+
+  setMultStateActions() {
+    const multiplesGroup = this.container.querySelectorAll(
+      `[data-${this.prefix}-settings-multiple]`,
+    );
+    multiplesGroup.forEach((group) => {
+      // Check if at least one data-method isn't ui, default or manual
+      let isDisabled = false;
+      const settings = group.querySelectorAll("[data-method]");
+      for (let i = 0; i < settings.length; i++) {
+        const setting = settings[i];
+        const method = setting.getAttribute("data-method");
+        if (method !== "ui" && method !== "default" && method !== "manual") {
+          isDisabled = true;
+          break;
+        }
+      }
+      // Case no need to disabled, stop
+      if (!isDisabled) return;
+      // Case need to disabled
+      const removeBtn = group.querySelector(
+        `[data-${this.prefix}-multiple-delete]`,
+      );
+      removeBtn.setAttribute("disabled", "");
+    });
   }
 
   //put multiple on the right plugin, on schema container

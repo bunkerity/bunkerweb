@@ -99,20 +99,21 @@ buildvm -m folddef -o lj_folddef.h lj_opt_fold.c
 @if errorlevel 1 goto :BAD
 
 @rem ---- Cross compiler ----
+@set NXCOMPILER_ROOT="%NINTENDO_SDK_ROOT%\Compilers\NintendoClang"
 @if "%platform%" neq "x64" goto :NX32_CROSSBUILD
-@set LJCOMPILE="%NINTENDO_SDK_ROOT%\Compilers\NX\nx\aarch64\bin\clang" -Wall -I%NINTENDO_SDK_ROOT%\Include %DASMTARGET% -DLUAJIT_OS=LUAJIT_OS_OTHER -DLUAJIT_DISABLE_JIT -DLUAJIT_DISABLE_FFI -DLUAJIT_USE_SYSMALLOC -c
-@set LJLIB="%NINTENDO_SDK_ROOT%\Compilers\NX\nx\aarch64\bin\aarch64-nintendo-nx-elf-ar" rc
+@set LJCOMPILE="%NXCOMPILER_ROOT%\bin\clang" --target=aarch64-nintendo-nx-elf -Wall -I%NINTENDO_SDK_ROOT%\Include %DASMTARGET% -DLUAJIT_OS=LUAJIT_OS_OTHER -DLUAJIT_DISABLE_JIT -DLUAJIT_DISABLE_FFI -DLUAJIT_USE_SYSMALLOC -c
+@set LJLIB="%NXCOMPILER_ROOT%\bin\llvm-ar" rc
 @set TARGETLIB_SUFFIX=nx64
 
-%NINTENDO_SDK_ROOT%\Compilers\NX\nx\aarch64\bin\aarch64-nintendo-nx-elf-as -o lj_vm.o lj_vm.s
+%NXCOMPILER_ROOT%\bin\clang --target=aarch64-nintendo-nx-elf -o lj_vm.o -c lj_vm.s
 goto :DEBUGCHECK
 
 :NX32_CROSSBUILD
-@set LJCOMPILE="%NINTENDO_SDK_ROOT%\Compilers\NX\nx\armv7l\bin\clang" -Wall -I%NINTENDO_SDK_ROOT%\Include %DASMTARGET% -DLUAJIT_OS=LUAJIT_OS_OTHER -DLUAJIT_DISABLE_JIT -DLUAJIT_DISABLE_FFI -DLUAJIT_USE_SYSMALLOC -c
-@set LJLIB="%NINTENDO_SDK_ROOT%\Compilers\NX\nx\armv7l\bin\armv7l-nintendo-nx-eabihf-ar" rc
+@set LJCOMPILE="%NXCOMPILER_ROOT%\bin\clang" --target=armv7l-nintendo-nx-eabihf -Wall -I%NINTENDO_SDK_ROOT%\Include %DASMTARGET% -DLUAJIT_OS=LUAJIT_OS_OTHER -DLUAJIT_DISABLE_JIT -DLUAJIT_DISABLE_FFI -DLUAJIT_USE_SYSMALLOC -c
+@set LJLIB="%NXCOMPILER_ROOT%\bin\llvm-ar" rc
 @set TARGETLIB_SUFFIX=nx32
 
-%NINTENDO_SDK_ROOT%\Compilers\NX\nx\armv7l\bin\armv7l-nintendo-nx-eabihf-as -o lj_vm.o lj_vm.s
+%NXCOMPILER_ROOT%\bin\clang --target=armv7l-nintendo-nx-eabihf -o lj_vm.o -c lj_vm.s
 :DEBUGCHECK
 
 @if "%1" neq "debug" goto :NODEBUG

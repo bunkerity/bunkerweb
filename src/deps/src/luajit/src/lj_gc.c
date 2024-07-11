@@ -108,9 +108,6 @@ static void gc_mark_start(global_State *g)
   gc_markobj(g, tabref(mainthread(g)->env));
   gc_marktv(g, &g->registrytv);
   gc_mark_gcroot(g);
-#if LJ_HASFFI
-  if (ctype_ctsG(g)) gc_markobj(g, ctype_ctsG(g)->finalizer);
-#endif
   g->gc.state = GCSpropagate;
 }
 
@@ -190,8 +187,7 @@ static int gc_traverse_tab(global_State *g, GCtab *t)
     }
     if (weak) {  /* Weak tables are cleared in the atomic phase. */
 #if LJ_HASFFI
-      CTState *cts = ctype_ctsG(g);
-      if (cts && cts->finalizer == t) {
+      if (gcref(g->gcroot[GCROOT_FFI_FIN]) == obj2gco(t)) {
 	weak = (int)(~0u & ~LJ_GC_WEAKVAL);
       } else
 #endif
@@ -556,7 +552,7 @@ static void gc_finalize(lua_State *L)
     o->gch.marked &= (uint8_t)~LJ_GC_CDATA_FIN;
     /* Resolve finalizer. */
     setcdataV(L, &tmp, gco2cd(o));
-    tv = lj_tab_set(L, ctype_ctsG(g)->finalizer, &tmp);
+    tv = lj_tab_set(L, tabref(g->gcroot[GCROOT_FFI_FIN]), &tmp);
     if (!tvisnil(tv)) {
       g->gc.nocdatafin = 0;
       copyTV(L, &tmp, tv);
@@ -588,23 +584,20 @@ void lj_gc_finalize_udata(lua_State *L)
 void lj_gc_finalize_cdata(lua_State *L)
 {
   global_State *g = G(L);
-  CTState *cts = ctype_ctsG(g);
-  if (cts) {
-    GCtab *t = cts->finalizer;
-    Node *node = noderef(t->node);
-    ptrdiff_t i;
-    setgcrefnull(t->metatable);  /* Mark finalizer table as disabled. */
-    for (i = (ptrdiff_t)t->hmask; i >= 0; i--)
-      if (!tvisnil(&node[i].val) && tviscdata(&node[i].key)) {
-	GCobj *o = gcV(&node[i].key);
-	TValue tmp;
-	makewhite(g, o);
-	o->gch.marked &= (uint8_t)~LJ_GC_CDATA_FIN;
-	copyTV(L, &tmp, &node[i].val);
-	setnilV(&node[i].val);
-	gc_call_finalizer(g, L, &tmp, o);
-      }
-  }
+  GCtab *t = tabref(g->gcroot[GCROOT_FFI_FIN]);
+  Node *node = noderef(t->node);
+  ptrdiff_t i;
+  setgcrefnull(t->metatable);  /* Mark finalizer table as disabled. */
+  for (i = (ptrdiff_t)t->hmask; i >= 0; i--)
+    if (!tvisnil(&node[i].val) && tviscdata(&node[i].key)) {
+      GCobj *o = gcV(&node[i].key);
+      TValue tmp;
+      makewhite(g, o);
+      o->gch.marked &= (uint8_t)~LJ_GC_CDATA_FIN;
+      copyTV(L, &tmp, &node[i].val);
+      setnilV(&node[i].val);
+      gc_call_finalizer(g, L, &tmp, o);
+    }
 }
 #endif
 
@@ -720,7 +713,7 @@ static size_t gc_onestep(lua_State *L)
       return GCFINALIZECOST;
     }
 #if LJ_HASFFI
-    if (!g->gc.nocdatafin) lj_tab_rehash(L, ctype_ctsG(g)->finalizer);
+    if (!g->gc.nocdatafin) lj_tab_rehash(L, tabref(g->gcroot[GCROOT_FFI_FIN]));
 #endif
     g->gc.state = GCSpause;  /* End of GC cycle. */
     g->gc.debt = 0;
