@@ -302,8 +302,6 @@ List of supported Linux distros :
 - RHEL 8.9
 - RHEL 9.4
 
-Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
-
 You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.9/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 
 ## Microsoft Azure
