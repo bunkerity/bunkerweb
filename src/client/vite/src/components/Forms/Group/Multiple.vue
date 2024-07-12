@@ -177,8 +177,8 @@ const props = defineProps({
 });
 
 const multiples = reactive({
-  // Store value of multiple group
-  // By default, all multiples are invisible
+  // Store props.multiples on multiples.data and then use multiples.data to render increase performance
+  data: props.multiples,
   invisible: [],
   toDelete: [],
 });
@@ -245,7 +245,7 @@ function delGroup(group, multName, groupName) {
 </script>
 
 <template>
-  <template :key="multName" v-for="(multObj, multName, id) in props.multiples">
+  <template :key="multName" v-for="(multObj, multName, id) in multiples.data">
     <Container
       data-is="multiple"
       class="layout-settings-multiple"
@@ -262,12 +262,13 @@ function delGroup(group, multName, groupName) {
 
       <template
         :key="groupId"
-        v-for="(group, groupName, groupId) in props.multiples[multName]"
+        v-for="(group, groupName, groupId) in multiples.data[multName]"
       >
         <Container
           data-group="multiple"
           :data-group-name="groupName"
           :data-mult-name="multName"
+          :data-plugin-name="multName"
           class="layout-settings-multiple-group"
           :aria-hidden="multiples.invisible.includes(`${multName}${id}`)"
           v-show="
