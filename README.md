@@ -412,6 +412,12 @@ If you would like to contribute to the plugins you can read the [contributing gu
 
 We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](https://github.com/bunkerity/bunkerweb/raw/v1.5.9/SECURITY.md) for more information.
 
-# Stargazers over time
+# Star History
 
-[![Stargazers over time](https://starchart.cc/bunkerity/bunkerweb.svg)](https://starchart.cc/bunkerity/bunkerweb)
+<a href="https://star-history.com/#bunkerity/bunkerweb&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=bunkerity/bunkerweb&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=bunkerity/bunkerweb&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=bunkerity/bunkerweb&type=Date" />
+ </picture>
+</a>
