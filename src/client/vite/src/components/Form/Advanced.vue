@@ -203,7 +203,11 @@ function filter(filterData) {
   setValidity();
   data.format = filterData;
   data.plugins = getPluginNames(filterData);
-  data.currPlugin = getFirstPlugin(filterData);
+  // Check after a filter if previous plugin is still in the list and if at least one plugin is available
+  // Update if not the case
+  data.currPlugin = data.plugins.includes(data.currPlugin)
+    ? data.currPlugin
+    : getFirstPlugin(filterData);
 }
 
 function setValidity() {

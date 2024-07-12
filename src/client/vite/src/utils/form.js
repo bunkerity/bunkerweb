@@ -358,36 +358,39 @@ function useUnlistenTemp(handler) {
 */
 function useUpdateTemplate(e, template) {
   // Wait some ms that previous update logic is done like datepicker
-  let inpId, inpValue;
+  setTimeout(() => {
+    let inpId, inpValue;
 
-  // Case target is input (a little different for datepicker)
-  if (e.target.tagName === "INPUT") {
-    inpId = e.target.id;
-    inpValue = e.target.hasAttribute("data-timestamp")
-      ? e.target.getAttribute("data-timestamp")
-      : e.target.value;
-  }
+    // Case target is input (a little different for datepicker)
+    if (e.target.tagName === "INPUT") {
+      inpId = e.target.id;
+      inpValue = e.target.hasAttribute("data-timestamp")
+        ? e.target.getAttribute("data-timestamp")
+        : e.target.value;
+    }
 
-  // Case target is select
-  if (
-    e.target.closest("[data-field-container]") &&
-    e.target.hasAttribute("data-setting-id") &&
-    e.target.hasAttribute("data-setting-value")
-  ) {
-    inpId = e.target.getAttribute("data-setting-id");
-    inpValue = e.target.getAttribute("data-setting-value");
-  }
+    // Case target is select
+    if (
+      e.target.closest("[data-field-container]") &&
+      e.target.hasAttribute("data-setting-id") &&
+      e.target.hasAttribute("data-setting-value")
+    ) {
+      inpId = e.target.getAttribute("data-setting-id");
+      inpValue = e.target.getAttribute("data-setting-value");
+    }
 
-  // Case target is not an input-like
-  if (!inpId) return;
+    // Case target is not an input-like
+    if (!inpId) return;
 
-  // Check if setting is part multiple or regular settings
-  const isMultiple = e.target.closest('[data-group="multiple"]') ? true : false;
+    // Check if setting is part multiple or regular settings
+    const isMultiple = e.target.closest('[data-group="multiple"]')
+      ? true
+      : false;
 
-  if (!isMultiple) useUpdateTempSettings(template, inpId, inpValue);
-  if (isMultiple) useUpdateTempMultiples(template, inpId, inpValue);
-
-  return template;
+    if (!isMultiple) useUpdateTempSettings(template, inpId, inpValue);
+    if (isMultiple) useUpdateTempMultiples(template, inpId, inpValue);
+    return template;
+  }, 50);
 }
 
 /**
@@ -440,7 +443,7 @@ function useUpdateTempMultiples(template, inpId, inpValue) {
       for (const [groupId, groupSettings] of Object.entries(multGroups)) {
         // Check if inpid is mathing a groupSettings key
         for (const [settingName, settings] of Object.entries(groupSettings)) {
-          if (!settings?.inpId) continue;
+          if (settings?.id !== inpId) continue;
           settings.value = inpValue;
           isSettingUpdated = true;
           if (isSettingUpdated) break;

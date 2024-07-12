@@ -130,7 +130,6 @@ function filterData(filter, value) {
     // Remove empty row
     template = template.filter((row) => row.length > 0);
   }
-
   emits("filter", template);
 }
 
