@@ -155,9 +155,9 @@ import Container from "@components/Widget/Container.vue";
 const props = defineProps({
   // id && value && method
   multiples: {
-    type: String,
+    type: Object,
     required: false,
-    default: "",
+    default: {},
   },
   columns: {
     type: [Object, Boolean],
@@ -207,6 +207,22 @@ const buttonDelete = {
   containerClass: "flex justify-center",
 };
 
+// Check if at least one input is disabled (this means a method different than ui, default or manual is used)
+// If true, disable the delete button
+function setDeleteState(group) {
+  // Loop on group keys and check if at least one input is disabled
+  let isDisabled = false;
+  for (const [key, value] of Object.entries(group)) {
+    if (value.disabled) {
+      isDisabled = true;
+      break;
+    }
+  }
+  const delBtn = JSON.parse(JSON.stringify(buttonDelete));
+  delBtn.disabled = isDisabled;
+  return delBtn;
+}
+
 function setInvisible(id) {
   multiples.invisible.push(id);
 }
@@ -223,13 +239,13 @@ function toggleVisible(id) {
   }
 }
 
-function delGroup(multName, groupName) {
+function delGroup(group, multName, groupName) {
   multiples.toDelete.push({ multName: multName, groupName: groupName });
 }
 </script>
 
 <template>
-  <template v-for="(multObj, multName, id) in props.multiples">
+  <template :key="multName" v-for="(multObj, multName, id) in props.multiples">
     <Container
       data-is="multiple"
       class="layout-settings-multiple"
@@ -245,9 +261,11 @@ function delGroup(multName, groupName) {
       </Container>
 
       <template
+        :key="groupId"
         v-for="(group, groupName, groupId) in props.multiples[multName]"
       >
         <Container
+          data-group="multiple"
           class="layout-settings-multiple-group"
           :aria-hidden="multiples.invisible.includes(`${multName}${id}`)"
           v-show="
@@ -257,12 +275,15 @@ function delGroup(multName, groupName) {
           <Subtitle
             :subtitle="`${multName.replaceAll('-', ' ')} #${+groupName + 1}`"
           />
-          <template v-for="(setting, settingName, settingId) in group">
-            <Fields :setting="setting" :tabId="props.tabId" />
+          <template
+            :key="settingName"
+            v-for="(setting, settingName, settingId) in group"
+          >
+            <Fields :setting="setting" />
           </template>
           <ButtonGroup
-            @click="delGroup(multName, groupName)"
-            :buttons="[buttonDelete]"
+            @click="delGroup(group, multName, groupName)"
+            :buttons="[setDeleteState(group)]"
           />
         </Container>
       </template>

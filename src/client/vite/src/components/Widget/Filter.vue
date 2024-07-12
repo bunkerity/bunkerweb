@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive } from "vue";
+import { defineProps, reactive, watch } from "vue";
 import Container from "@components/Widget/Container.vue";
 
 import Input from "@components/Forms/Field/Input.vue";
@@ -73,6 +73,12 @@ const filters = reactive({
   base: JSON.parse(JSON.stringify(props.filters)),
 });
 
+watch(props.data, () => {
+  filters.base.forEach((filter) => {
+    filterData(filter, filter.value);
+  });
+});
+
 function filterData(filter, value) {
   // Loop on filter.base and update the "value" key when matching filterName
   filters.base.forEach((f) => {
@@ -92,25 +98,14 @@ function filterData(filter, value) {
   // Specific settings filtering from advanced template
   const filterSettings = getFilters.filter((f) => f.filter === "settings");
   if (filterSettings.length) {
-    template.forEach((plugin, id) => {
-      // loop on plugin settings dict
-      const settings = [];
-      for (const [key, value] of Object.entries(plugin.settings)) {
-        // add to value the key as setting_name
-        settings.push({ ...value, setting_name: key });
-      }
-      const filterSettingsData = useFilter(settings, filterSettings);
-      // Transform list of dict by a dict of dict with setting_name as key and add update plugin settings
-      const settingsData = {};
-      filterSettingsData.forEach((setting) => {
-        settingsData[setting.setting_name] = setting;
-      });
-      template[id].settings = settingsData;
-    });
-
-    // Case no settings found, remove plugin
+    filterRegularSettings(filterSettings, template);
+    filterMultiplesSettings(filterSettings, template);
+    // Case no settings or multiple found, remove plugin
     template = template.filter((plugin) => {
-      return Object.keys(plugin.settings).length > 0;
+      return (
+        Object.keys(plugin?.settings || {}).length > 0 ||
+        Object.keys(plugin?.multiples || {}).length > 0
+      );
     });
   }
 
@@ -137,6 +132,54 @@ function filterData(filter, value) {
   }
 
   emits("filter", template);
+}
+
+function filterRegularSettings(filterSettings, template) {
+  template.forEach((plugin, id) => {
+    // loop on plugin settings dict
+    const settings = [];
+    for (const [key, value] of Object.entries(plugin.settings)) {
+      // add to value the key as setting_name
+      settings.push({ ...value, setting_name: key });
+    }
+    const filterSettingsData = useFilter(settings, filterSettings);
+    // Transform list of dict by a dict of dict with setting_name as key and add update plugin settings
+    const settingsData = {};
+    filterSettingsData.forEach((setting) => {
+      settingsData[setting.setting_name] = setting;
+    });
+    template[id].settings = settingsData;
+  });
+}
+
+function filterMultiplesSettings(filterSettings, template) {
+  template.forEach((plugin, id) => {
+    // loop on plugin settings dict
+    const filterMultiple = {};
+    const multiples = plugin?.multiples;
+    if (!multiples || Object.keys(multiples).length <= 0) return;
+    for (const [multName, multGroups] of Object.entries(multiples)) {
+      for (const [groupId, groupSettings] of Object.entries(multGroups)) {
+        // Check if inpid is mathing a groupSettings key
+        const settings = [];
+        for (const [key, value] of Object.entries(groupSettings)) {
+          settings.push({ ...value, setting_name: key });
+        }
+        const filterSettingsData = useFilter(settings, filterSettings);
+        const settingsData = {};
+        filterSettingsData.forEach((setting) => {
+          settingsData[setting.setting_name] = setting;
+          delete settingsData[setting.setting_name]?.setting_name;
+        });
+        // Check if at least one setting is matching
+        if (Object.keys(settingsData).length > 0) {
+          if (!filterMultiple[multName]) filterMultiple[multName] = {};
+          filterMultiple[multName][groupId] = settingsData;
+        }
+      }
+    }
+    template[id].multiples = filterMultiple;
+  });
 }
 </script>
 

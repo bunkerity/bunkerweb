@@ -307,11 +307,11 @@ function useCheckPluginsValidity(template) {
   @description  This will add an handler to all needed event listeners to listen to input, select... fields in order to update the template settings.
   @example 
   function hander(e) {
-    // some code before calling useUpdateTempSettings
+    // some code before calling useUpdateTemplate
     if (!e.target.closest("[data-advanced-form-plugin]")) return;
-    useUpdateTempSettings(e, data.base);
+    useUpdateTemplate(e, data.base);
   }
-  @param handler - Callback function to call when event is triggered. This is usually an intermediate function that will call the useUpdateTempSettings function.
+  @param handler - Callback function to call when event is triggered. This is usually an intermediate function that will call the useUpdateTemplate function.
 */
 function useListenTemp(handler) {
   window.addEventListener("input", handler);
@@ -324,9 +324,9 @@ function useListenTemp(handler) {
   @description  This will stop listening to input, select... fields. Performance optimization and avoid duplicate calls conflicts.
   @example 
   function hander(e) {
-    // some code before calling useUpdateTempSettings
+    // some code before calling useUpdateTemplate
     if (!e.target.closest("[data-advanced-form-plugin]")) return;
-    useUpdateTempSettings(e, data.base);
+    useUpdateTemplate(e, data.base);
   }
   @param handler - Callback function to call when event is triggered. Need to be the same function as the one passed to useListenTemp.
 */
@@ -337,7 +337,7 @@ function useUnlistenTemp(handler) {
 }
 
 /**
-  @name useUpdateTempSettings
+  @name useUpdateTemplate
   @description This function will check if the target is a setting input-like field.
   In case it is, it will get the id and value for each field case, this will allow to update the template settings.
   @example 
@@ -356,42 +356,100 @@ function useUnlistenTemp(handler) {
   @param e - Event object, get it by default in the event listener.
   @param template - Template with plugins list and detail settings
 */
-function useUpdateTempSettings(e, template) {
+function useUpdateTemplate(e, template) {
   // Wait some ms that previous update logic is done like datepicker
-  setTimeout(() => {
-    let inpId, inpValue;
+  let inpId, inpValue;
 
-    // Case target is input (a little different for datepicker)
-    if (e.target.tagName === "INPUT") {
-      inpId = e.target.id;
-      inpValue = e.target.hasAttribute("data-timestamp")
-        ? e.target.getAttribute("data-timestamp")
-        : e.target.value;
-    }
+  // Case target is input (a little different for datepicker)
+  if (e.target.tagName === "INPUT") {
+    inpId = e.target.id;
+    inpValue = e.target.hasAttribute("data-timestamp")
+      ? e.target.getAttribute("data-timestamp")
+      : e.target.value;
+  }
 
-    // Case target is select
-    if (
-      e.target.closest("[data-field-container]") &&
-      e.target.hasAttribute("data-setting-id") &&
-      e.target.hasAttribute("data-setting-value")
-    ) {
-      inpId = e.target.getAttribute("data-setting-id");
-      inpValue = e.target.getAttribute("data-setting-value");
-    }
+  // Case target is select
+  if (
+    e.target.closest("[data-field-container]") &&
+    e.target.hasAttribute("data-setting-id") &&
+    e.target.hasAttribute("data-setting-value")
+  ) {
+    inpId = e.target.getAttribute("data-setting-id");
+    inpValue = e.target.getAttribute("data-setting-value");
+  }
 
-    // Case target is not an input-like
-    if (!inpId) return;
+  // Case target is not an input-like
+  if (!inpId) return;
 
-    template.find((plugin) => {
-      const settings = plugin["settings"];
-      // loop on each settings from plugin
-      for (const [key, value] of Object.entries(settings)) {
-        if (value.id === inpId) {
-          value.value = inpValue;
-        }
+  // Check if setting is part multiple or regular settings
+  const isMultiple = e.target.closest('[data-group="multiple"]') ? true : false;
+
+  if (!isMultiple) useUpdateTempSettings(template, inpId, inpValue);
+  if (isMultiple) useUpdateTempMultiples(template, inpId, inpValue);
+
+  return template;
+}
+
+/**
+  @name useUpdateTempSettings
+  @description This function will loop on template settings in order to update the setting value.
+  This will check each plugin.settings (what I call regular) instead of other type of settings like multiples (in plugin.multiples).
+  This function needs to be call in useUpdateTemplate.
+  @param template - Template with plugins list and detail settings
+  @param inpId - Input id to update
+  @param inpValue - Input value to update
+*/
+function useUpdateTempSettings(template, inpId, inpValue) {
+  // Try to update settings
+  let isSettingUpdated = false;
+  for (let i = 0; i < template.length; i++) {
+    const plugin = template[i];
+    const settings = plugin?.settings;
+    if (!settings) continue;
+    for (const [key, value] of Object.entries(settings)) {
+      if (value.id === inpId) {
+        value.value = inpValue;
+        isSettingUpdated = true;
+        break;
       }
-    });
-  }, 50);
+    }
+    if (isSettingUpdated) break;
+  }
+}
+
+/**
+  @name useUpdateTempMultiples
+  @description This function will loop on template multiples in order to update the setting value.
+  This will check each plugin.multiples that can be found in the template.
+  This function needs to be call in useUpdateTemplate.
+  @param template - Template with plugins list and detail settings
+  @param inpId - Input id to update
+  @param inpValue - Input value to update
+*/
+function useUpdateTempMultiples(template, inpId, inpValue) {
+  // Check at the same time the inpId without prefix group he is part of
+  // And try to update an existing inpId
+  // Case we found the inpId, we update the value
+  // Case we didn't find existing inpId, we create a new one
+  let isSettingUpdated = false;
+  for (let i = 0; i < template.length; i++) {
+    const plugin = template[i];
+    const multiples = plugin?.multiples;
+    if (!multiples || Object.keys(multiples).length <= 0) continue;
+    for (const [multName, multGroups] of Object.entries(multiples)) {
+      for (const [groupId, groupSettings] of Object.entries(multGroups)) {
+        // Check if inpid is mathing a groupSettings key
+        for (const [settingName, settings] of Object.entries(groupSettings)) {
+          if (!settings?.inpId) continue;
+          settings.value = inpValue;
+          isSettingUpdated = true;
+          if (isSettingUpdated) break;
+        }
+        if (isSettingUpdated) break;
+      }
+    }
+    if (isSettingUpdated) break;
+  }
 }
 
 export {
@@ -400,7 +458,7 @@ export {
   isItemKeyword,
   isItemSelect,
   useCheckPluginsValidity,
-  useUpdateTempSettings,
+  useUpdateTemplate,
   useListenTemp,
   useUnlistenTemp,
 };

@@ -9,7 +9,7 @@ import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
 import {
   useCheckPluginsValidity,
-  useUpdateTempSettings,
+  useUpdateTemplate,
   useListenTemp,
   useUnlistenTemp,
 } from "@utils/form.js";
@@ -94,7 +94,7 @@ function setValidity() {
 
 function updateTemplate(e) {
   if (!e.target.closest("[data-easy-form-step]")) return;
-  useUpdateTempSettings(e, data.base);
+  useUpdateTemplate(e, data.base);
 }
 
 const buttonSave = {
@@ -164,10 +164,7 @@ onUnmounted(() => {
         <Subtitle type="content" :subtitle="step.subtitle" />
 
         <Container class="layout-settings">
-          <template
-            v-for="(setting, name, index) in step.settings"
-            :key="index"
-          >
+          <template v-for="(setting, name, index) in step.settings" :key="name">
             <Fields :setting="setting" />
           </template>
         </Container>

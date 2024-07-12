@@ -7382,7 +7382,7 @@
                                                     "context": "multisite",
                                                     "default": "",
                                                     "help": "Full URL of the proxied resource (proxy_pass).",
-                                                    "id": "reverse-proxy-host",
+                                                    "id": "reverse-proxy-host_1",
                                                     "label": "Reverse proxy host",
                                                     "regex": "^.*$",
                                                     "type": "text",
@@ -7418,7 +7418,7 @@
                                                     "context": "multisite",
                                                     "default": "/",
                                                     "help": "Location URL that will be proxied.",
-                                                    "id": "reverse-proxy-url",
+                                                    "id": "reverse-proxy-url_1",
                                                     "label": "Reverse proxy url",
                                                     "regex": "^.*$",
                                                     "type": "text",
@@ -7449,7 +7449,7 @@
                                                     "context": "multisite",
                                                     "default": "no",
                                                     "help": "Enable websocket on the proxied resource.",
-                                                    "id": "reverse-proxy-ws",
+                                                    "id": "reverse-proxy-ws_1",
                                                     "label": "Reverse proxy WS",
                                                     "regex": "^(yes|no)$",
                                                     "type": "check",
@@ -7480,7 +7480,7 @@
                                                     "context": "multisite",
                                                     "default": "",
                                                     "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
-                                                    "id": "reverse-proxy-headers",
+                                                    "id": "reverse-proxy-headers_1",
                                                     "label": "Reverse proxy headers",
                                                     "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
                                                     "type": "text",
@@ -7511,7 +7511,7 @@
                                                     "context": "multisite",
                                                     "default": "",
                                                     "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
-                                                    "id": "reverse-proxy-headers-client",
+                                                    "id": "reverse-proxy-headers-client_1",
                                                     "label": "Reverse proxy headers-client",
                                                     "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
                                                     "type": "text",
@@ -7542,7 +7542,7 @@
                                                     "context": "multisite",
                                                     "default": "yes",
                                                     "help": "Enable or disable buffering of responses from proxied resource.",
-                                                    "id": "reverse-proxy-buffering",
+                                                    "id": "reverse-proxy-buffering_1",
                                                     "label": "Reverse proxy buffering",
                                                     "regex": "^(yes|no)$",
                                                     "type": "check",
@@ -7573,7 +7573,7 @@
                                                     "context": "multisite",
                                                     "default": "no",
                                                     "help": "Enable or disable keepalive connections with the proxied resource.",
-                                                    "id": "reverse-proxy-keepalive",
+                                                    "id": "reverse-proxy-keepalive_1",
                                                     "label": "Reverse proxy keepalive",
                                                     "regex": "^(yes|no)$",
                                                     "type": "check",
@@ -7604,7 +7604,7 @@
                                                     "context": "multisite",
                                                     "default": "",
                                                     "help": "Enable authentication using an external provider (value of auth_request directive).",
-                                                    "id": "reverse-proxy-auth-request",
+                                                    "id": "reverse-proxy-auth-request_1",
                                                     "label": "Reverse proxy auth request",
                                                     "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
                                                     "type": "text",
@@ -7635,7 +7635,7 @@
                                                     "context": "multisite",
                                                     "default": "",
                                                     "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
-                                                    "id": "reverse-proxy-auth-request-signin-url",
+                                                    "id": "reverse-proxy-auth-request-signin-url_1",
                                                     "label": "Auth request signin URL",
                                                     "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
                                                     "type": "text",
@@ -7666,7 +7666,7 @@
                                                     "context": "multisite",
                                                     "default": "",
                                                     "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
-                                                    "id": "reverse-proxy-auth-request-set",
+                                                    "id": "reverse-proxy-auth-request-set_1",
                                                     "label": "Reverse proxy auth request set",
                                                     "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
                                                     "type": "text",
@@ -7697,7 +7697,7 @@
                                                     "context": "multisite",
                                                     "default": "60s",
                                                     "help": "Timeout when connecting to the proxied resource.",
-                                                    "id": "reverse-proxy-connect-timeout",
+                                                    "id": "reverse-proxy-connect-timeout_1",
                                                     "label": "Reverse proxy connect timeout",
                                                     "regex": "^\\d+(ms?|[shdwMy])$",
                                                     "type": "text",
@@ -7728,7 +7728,7 @@
                                                     "context": "multisite",
                                                     "default": "60s",
                                                     "help": "Timeout when reading from the proxied resource.",
-                                                    "id": "reverse-proxy-read-timeout",
+                                                    "id": "reverse-proxy-read-timeout_1",
                                                     "label": "Reverse proxy read timeout",
                                                     "regex": "^\\d+(ms?|[shdwMy])$",
                                                     "type": "text",
@@ -7759,7 +7759,7 @@
                                                     "context": "multisite",
                                                     "default": "60s",
                                                     "help": "Timeout when sending to the proxied resource.",
-                                                    "id": "reverse-proxy-send-timeout",
+                                                    "id": "reverse-proxy-send-timeout_1",
                                                     "label": "Reverse proxy send timeout",
                                                     "regex": "^\\d+(ms?|[shdwMy])$",
                                                     "type": "text",
@@ -7787,6 +7787,443 @@
                                                     "containerClass": "z-14"
                                                 },
                                                 "REVERSE_PROXY_INCLUDES_1": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "Additional configuration to include in the location block, separated with spaces.",
+                                                    "id": "reverse-proxy-includes_1",
+                                                    "label": "Reverse proxy includes",
+                                                    "regex": "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(?! )( ?(\\w+)(?!.*\\b\\2\\b))*$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy includes",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Additional configuration to include in the location block, separated with spaces."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-13"
+                                                }
+                                            },
+                                            "0": {
+                                                "REVERSE_PROXY_HOST": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "Full URL of the proxied resource (proxy_pass).",
+                                                    "id": "reverse-proxy-host",
+                                                    "label": "Reverse proxy host",
+                                                    "regex": "^.*$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^.*$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy host",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "no",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Full URL of the proxied resource (proxy_pass)."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-26",
+                                                    "method": "ui"
+                                                },
+                                                "REVERSE_PROXY_URL": {
+                                                    "context": "multisite",
+                                                    "default": "/",
+                                                    "help": "Location URL that will be proxied.",
+                                                    "id": "reverse-proxy-url",
+                                                    "label": "Reverse proxy url",
+                                                    "regex": "^.*$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^.*$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy url",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "/",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Location URL that will be proxied."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-25"
+                                                },
+                                                "REVERSE_PROXY_WS": {
+                                                    "context": "multisite",
+                                                    "default": "no",
+                                                    "help": "Enable websocket on the proxied resource.",
+                                                    "id": "reverse-proxy-ws",
+                                                    "label": "Reverse proxy WS",
+                                                    "regex": "^(yes|no)$",
+                                                    "type": "check",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(yes|no)$",
+                                                    "inpType": "checkbox",
+                                                    "name": "Reverse proxy WS",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "no",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Enable websocket on the proxied resource."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-24"
+                                                },
+                                                "REVERSE_PROXY_HEADERS": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
+                                                    "id": "reverse-proxy-headers",
+                                                    "label": "Reverse proxy headers",
+                                                    "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy headers",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive)."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-23"
+                                                },
+                                                "REVERSE_PROXY_HEADERS_CLIENT": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
+                                                    "id": "reverse-proxy-headers-client",
+                                                    "label": "Reverse proxy headers-client",
+                                                    "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy headers-client",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "List of HTTP headers to send to client separated with semicolons (values for add_header directive)."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-22"
+                                                },
+                                                "REVERSE_PROXY_BUFFERING": {
+                                                    "context": "multisite",
+                                                    "default": "yes",
+                                                    "help": "Enable or disable buffering of responses from proxied resource.",
+                                                    "id": "reverse-proxy-buffering",
+                                                    "label": "Reverse proxy buffering",
+                                                    "regex": "^(yes|no)$",
+                                                    "type": "check",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(yes|no)$",
+                                                    "inpType": "checkbox",
+                                                    "name": "Reverse proxy buffering",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "yes",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Enable or disable buffering of responses from proxied resource."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-21"
+                                                },
+                                                "REVERSE_PROXY_KEEPALIVE": {
+                                                    "context": "multisite",
+                                                    "default": "no",
+                                                    "help": "Enable or disable keepalive connections with the proxied resource.",
+                                                    "id": "reverse-proxy-keepalive",
+                                                    "label": "Reverse proxy keepalive",
+                                                    "regex": "^(yes|no)$",
+                                                    "type": "check",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(yes|no)$",
+                                                    "inpType": "checkbox",
+                                                    "name": "Reverse proxy keepalive",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "no",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Enable or disable keepalive connections with the proxied resource."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-20"
+                                                },
+                                                "REVERSE_PROXY_AUTH_REQUEST": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "Enable authentication using an external provider (value of auth_request directive).",
+                                                    "id": "reverse-proxy-auth-request",
+                                                    "label": "Reverse proxy auth request",
+                                                    "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy auth request",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Enable authentication using an external provider (value of auth_request directive)."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-19"
+                                                },
+                                                "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+                                                    "id": "reverse-proxy-auth-request-signin-url",
+                                                    "label": "Auth request signin URL",
+                                                    "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+                                                    "inpType": "input",
+                                                    "name": "Auth request signin URL",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-18"
+                                                },
+                                                "REVERSE_PROXY_AUTH_REQUEST_SET": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
+                                                    "id": "reverse-proxy-auth-request-set",
+                                                    "label": "Reverse proxy auth request set",
+                                                    "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy auth request set",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives)."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-17"
+                                                },
+                                                "REVERSE_PROXY_CONNECT_TIMEOUT": {
+                                                    "context": "multisite",
+                                                    "default": "60s",
+                                                    "help": "Timeout when connecting to the proxied resource.",
+                                                    "id": "reverse-proxy-connect-timeout",
+                                                    "label": "Reverse proxy connect timeout",
+                                                    "regex": "^\\d+(ms?|[shdwMy])$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^\\d+(ms?|[shdwMy])$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy connect timeout",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "60s",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Timeout when connecting to the proxied resource."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-16"
+                                                },
+                                                "REVERSE_PROXY_READ_TIMEOUT": {
+                                                    "context": "multisite",
+                                                    "default": "60s",
+                                                    "help": "Timeout when reading from the proxied resource.",
+                                                    "id": "reverse-proxy-read-timeout",
+                                                    "label": "Reverse proxy read timeout",
+                                                    "regex": "^\\d+(ms?|[shdwMy])$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^\\d+(ms?|[shdwMy])$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy read timeout",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "60s",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Timeout when reading from the proxied resource."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-15"
+                                                },
+                                                "REVERSE_PROXY_SEND_TIMEOUT": {
+                                                    "context": "multisite",
+                                                    "default": "60s",
+                                                    "help": "Timeout when sending to the proxied resource.",
+                                                    "id": "reverse-proxy-send-timeout",
+                                                    "label": "Reverse proxy send timeout",
+                                                    "regex": "^\\d+(ms?|[shdwMy])$",
+                                                    "type": "text",
+                                                    "multiple": "reverse-proxy",
+                                                    "pattern": "^\\d+(ms?|[shdwMy])$",
+                                                    "inpType": "input",
+                                                    "name": "Reverse proxy send timeout",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "60s",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Timeout when sending to the proxied resource."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-14"
+                                                },
+                                                "REVERSE_PROXY_INCLUDES": {
                                                     "context": "multisite",
                                                     "default": "",
                                                     "help": "Additional configuration to include in the location block, separated with spaces.",
@@ -8850,7 +9287,7 @@
                         "raw": {
                             "default": {
                                 "USE_GZIP": "dsfrgrdgrdgrdhgd",
-                                "REVERSE_PROXY_HOST": "template",
+                                "REVERSE_PROXY_HOST": "no",
                                 "USE_UI": "yes"
                             }
                         }

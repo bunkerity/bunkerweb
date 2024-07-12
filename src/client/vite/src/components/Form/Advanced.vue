@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, onUnmounted, KeepAlive } from "vue";
+import { defineProps, reactive, onMounted, onUnmounted } from "vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
@@ -14,7 +14,7 @@ import { plugin_types } from "@utils/variables";
 
 import {
   useCheckPluginsValidity,
-  useUpdateTempSettings,
+  useUpdateTemplate,
   useListenTemp,
   useUnlistenTemp,
 } from "@utils/form.js";
@@ -239,7 +239,7 @@ function getPluginNames(template) {
 
 function updateTemplate(e) {
   if (!e.target.closest("[data-advanced-form-plugin]")) return;
-  useUpdateTempSettings(e, data.base);
+  useUpdateTemplate(e, data.base);
 }
 
 onMounted(() => {
@@ -284,30 +284,25 @@ onUnmounted(() => {
     </Filter>
     <MessageUnmatch v-if="!data.format.length" />
     <template v-for="plugin in data.format">
-      <KeepAlive>
-        <Container
-          data-is="content"
-          data-advanced-form-plugin
-          v-if="plugin.name === data.currPlugin"
-          class="form-advanced-plugin-container"
-        >
-          <Title type="content" :title="plugin.name" />
-          <Subtitle type="content" :subtitle="plugin.description" />
+      <Container
+        data-is="content"
+        data-advanced-form-plugin
+        v-if="plugin.name === data.currPlugin"
+        class="form-advanced-plugin-container"
+      >
+        <Title type="content" :title="plugin.name" />
+        <Subtitle type="content" :subtitle="plugin.description" />
 
-          <Container class="layout-settings">
-            <template
-              v-for="(setting, name, index) in plugin.settings"
-              :key="index"
-            >
-              <Fields :setting="setting" />
-            </template>
-          </Container>
-          <GroupMultiple
-            v-if="plugin.multiples"
-            :multiples="plugin.multiples"
-          />
+        <Container class="layout-settings">
+          <template
+            v-for="(setting, name, index) in plugin.settings"
+            :key="name"
+          >
+            <Fields :setting="setting" />
+          </template>
         </Container>
-      </KeepAlive>
+        <GroupMultiple v-if="plugin.multiples" :multiples="plugin.multiples" />
+      </Container>
     </template>
     <Button
       v-if="data.format.length"

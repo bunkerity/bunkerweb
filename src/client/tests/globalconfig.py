@@ -3016,6 +3016,7 @@ service_settings = {
     "USE_UI": {"value": "yes", "global": True, "method": "ui"},
     "USE_CORS": {"value": "yes", "global": True, "method": "scheduler"},
     "REVERSE_PROXY_HOST_1": {"value": "yes", "global": True, "method": "scheduler"},
+    "REVERSE_PROXY_HOST": {"value": "no", "global": True, "method": "ui"},
 }
 
 
@@ -3207,7 +3208,13 @@ def get_multiple_from_template(template, multiples):
                     for multSett, multValue in mult_settings.items():
                         new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    multiple_template[mult_name][prefix] = copy.deepcopy(new_multiple_group)
+                    new_multiple_group = copy.deepcopy(new_multiple_group)
+
+                    # Update id for each settings
+                    for multSett, multValue in new_multiple_group.items():
+                        multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
+
+                    multiple_template[mult_name][prefix] = new_multiple_group
 
                 # We can now add the template value to setting using the same setting name with prefix
                 multiple_template[mult_name][prefix][setting]["value"] = value
@@ -3258,7 +3265,14 @@ def get_multiple_from_settings(settings, multiples):
                     for multSett, multValue in mult_settings.items():
                         new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    multiple_settings[mult_name][prefix] = copy.deepcopy(new_multiple_group)
+                    new_multiple_group = copy.deepcopy(new_multiple_group)
+
+                    # Update id for each settings
+                    for multSett, multValue in new_multiple_group.items():
+                        multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
+
+                    multiple_settings[mult_name][prefix] = new_multiple_group
+
                 # We can now add the template value to setting using the same setting name with prefix
                 multiple_settings[mult_name][prefix][setting]["value"] = value.get("value", multiple_settings[mult_name][prefix][setting]["value"])
                 multiple_settings[mult_name][prefix][setting]["method"] = value.get("method", "ui")
