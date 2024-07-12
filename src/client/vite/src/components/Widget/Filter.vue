@@ -80,7 +80,6 @@ watch(props.data, () => {
 });
 
 function startFilter(filter = {}, value) {
-  filters.isFiltering = true;
   // Case we have new filter value, update it
   // Loop on filter.base and update the "value" key when matching filterName
   if (filter?.filterName && value !== null) {
@@ -136,10 +135,6 @@ function startFilter(filter = {}, value) {
   }
 
   emits("filter", template);
-  // Allow filtering again after 100ms
-  setTimeout(() => {
-    filters.isFiltering = false;
-  }, 100);
 }
 
 // Case we are changing a filter value
@@ -179,7 +174,7 @@ function filterMultiplesSettings(filterSettings, template) {
   // Format to filter
   for (let i = 0; i < template.length; i++) {
     const plugin = template[i];
-    if (!plugin?.multiples || Object.keys(plugin.multiples).length <= 0)
+    if (!plugin?.multiples || Object.keys(plugin?.multiples || {}).length <= 0)
       continue;
     for (const [multName, multGroups] of Object.entries(plugin.multiples)) {
       for (const [groupName, groupSettings] of Object.entries(multGroups)) {
@@ -196,6 +191,7 @@ function filterMultiplesSettings(filterSettings, template) {
       }
     }
   }
+
   // Remove multiples from template
   template.forEach((plugin) => {
     delete plugin.multiples;
@@ -236,13 +232,11 @@ function filterMultiplesSettings(filterSettings, template) {
       <Input
         v-if="filter.type === 'keyword'"
         @inp="(v) => filterData(filter, v)"
-        @change="(v) => filterData(filter, v)"
         v-bind="filter.field"
       />
       <Select
         v-if="filter.type === 'select'"
         @inp="(v) => filterData(filter, v)"
-        @change="(v) => filterData(filter, v)"
         v-bind="filter.field"
       />
     </template>

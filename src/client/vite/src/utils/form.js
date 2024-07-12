@@ -303,41 +303,41 @@ function useCheckPluginsValidity(template) {
 }
 
 /**
-  @name useListenTemp
+  @name useListenTempFields
   @description  This will add an handler to all needed event listeners to listen to input, select... fields in order to update the template settings.
   @example 
   function hander(e) {
-    // some code before calling useUpdateTemplate
+    // some code before calling useUpdateTemp
     if (!e.target.closest("[data-advanced-form-plugin]")) return;
-    useUpdateTemplate(e, data.base);
+    useUpdateTemp(e, data.base);
   }
-  @param handler - Callback function to call when event is triggered. This is usually an intermediate function that will call the useUpdateTemplate function.
+  @param handler - Callback function to call when event is triggered. This is usually an intermediate function that will call the useUpdateTemp function.
 */
-function useListenTemp(handler) {
+function useListenTempFields(handler) {
   window.addEventListener("input", handler);
   window.addEventListener("change", handler);
   window.addEventListener("click", handler);
 }
 
 /**
-  @name useUnlistenTemp
+  @name useUnlistenTempFields
   @description  This will stop listening to input, select... fields. Performance optimization and avoid duplicate calls conflicts.
   @example 
   function hander(e) {
-    // some code before calling useUpdateTemplate
+    // some code before calling useUpdateTemp
     if (!e.target.closest("[data-advanced-form-plugin]")) return;
-    useUpdateTemplate(e, data.base);
+    useUpdateTemp(e, data.base);
   }
-  @param handler - Callback function to call when event is triggered. Need to be the same function as the one passed to useListenTemp.
+  @param handler - Callback function to call when event is triggered. Need to be the same function as the one passed to useListenTempFields.
 */
-function useUnlistenTemp(handler) {
+function useUnlistenTempFields(handler) {
   window.removeEventListener("input", handler);
   window.removeEventListener("change", handler);
   window.removeEventListener("click", handler);
 }
 
 /**
-  @name useUpdateTemplate
+  @name useUpdateTemp
   @description This function will check if the target is a setting input-like field.
   In case it is, it will get the id and value for each field case, this will allow to update the template settings.
   @example 
@@ -356,7 +356,7 @@ function useUnlistenTemp(handler) {
   @param e - Event object, get it by default in the event listener.
   @param template - Template with plugins list and detail settings
 */
-function useUpdateTemplate(e, template) {
+function useUpdateTemp(e, template) {
   // Wait some ms that previous update logic is done like datepicker
   setTimeout(() => {
     let inpId, inpValue;
@@ -393,7 +393,7 @@ function useUpdateTemplate(e, template) {
   @name useUpdateTempSettings
   @description This function will loop on template settings in order to update the setting value.
   This will check each plugin.settings (what I call regular) instead of other type of settings like multiples (in plugin.multiples).
-  This function needs to be call in useUpdateTemplate.
+  This function needs to be call in useUpdateTemp.
   @param template - Template with plugins list and detail settings
   @param inpId - Input id to update
   @param inpValue - Input value to update
@@ -423,7 +423,7 @@ function useUpdateTempSettings(template, inpId, inpValue, target) {
   @name useUpdateTempMultiples
   @description This function will loop on template multiples in order to update the setting value.
   This will check each plugin.multiples that can be found in the template.
-  This function needs to be call in useUpdateTemplate.
+  This function needs to be call in useUpdateTemp.
   @param template - Template with plugins list and detail settings
   @param inpId - Input id to update
   @param inpValue - Input value to update
@@ -463,13 +463,39 @@ function useUpdateTempMultiples(template, inpId, inpValue, target) {
   }
 }
 
+/**
+  @name useDeleteMultGroup
+  @description This function will delete a group of multiples in the template.
+  The way the backend is working is that to delete a group, we need to send the group name with all default values.
+  This function needs to be call from the multiples component parent with the template and the group name to delete.
+  We will update the values of the group to default values.
+  @param template - Template with plugins list and detail settings
+  @param multName - Input id to update
+  @param groupName - Input value to update
+*/
+function useDeleteMultGroup(template, multName, groupName) {}
+
+/**
+  @name useAddMultGroup
+  @description This function will add a group of multiple in the template with default values.
+  Each plugin has a key "multiples_schema" with each multiples group and their default values.
+  We will retrieve the wanted multiple group and add it on the "multiples" key that contains the multiples that apply to the plugin.
+  @param template - Template with plugins list and detail settings
+  @param multName - Input id to update
+*/
+function useAddMultGroup(template, multName) {
+  // TODO : add to format multiples_schema
+}
+
 export {
   useForm,
   useFilter,
   isItemKeyword,
   isItemSelect,
   useCheckPluginsValidity,
-  useUpdateTemplate,
-  useListenTemp,
-  useUnlistenTemp,
+  useUpdateTemp,
+  useListenTempFields,
+  useUnlistenTempFields,
+  useDeleteMultGroup,
+  useAddMultGroup,
 };

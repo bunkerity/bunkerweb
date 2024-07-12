@@ -14,9 +14,9 @@ import { plugin_types } from "@utils/variables";
 
 import {
   useCheckPluginsValidity,
-  useUpdateTemplate,
-  useListenTemp,
-  useUnlistenTemp,
+  useUpdateTemp,
+  useListenTempFields,
+  useUnlistenTempFields,
 } from "@utils/form.js";
 import { v4 as uuidv4 } from "uuid";
 /**
@@ -243,7 +243,7 @@ function getPluginNames(template) {
 
 function updateTemplate(e) {
   if (!e.target.closest("[data-advanced-form-plugin]")) return;
-  useUpdateTemplate(e, data.base);
+  useUpdateTemp(e, data.base);
 }
 
 onMounted(() => {
@@ -254,11 +254,11 @@ onMounted(() => {
   // Store update data on
 
   // I want updatInp to access event, data.base and the container attribut
-  useListenTemp(updateTemplate);
+  useListenTempFields(updateTemplate);
 });
 
 onUnmounted(() => {
-  useUnlistenTemp(updateTemplate);
+  useUnlistenTempFields(updateTemplate);
 });
 </script>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, defineProps } from "vue";
+import { reactive, defineProps, defineEmits } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Fields from "@components/Form/Fields.vue";
@@ -177,8 +177,8 @@ const props = defineProps({
 });
 
 const multiples = reactive({
+  data: props.multiples,
   invisible: [],
-  toDelete: [],
 });
 
 const buttonAdd = {
@@ -237,13 +237,12 @@ function toggleVisible(id) {
   }
 }
 
-function delGroup(group, multName, groupName) {
-  multiples.toDelete.push({ multName: multName, groupName: groupName });
-}
+// emits
+const emits = defineEmits(["delete", "add"]);
 </script>
 
 <template>
-  <template :key="multObj" v-for="(multObj, multName, id) in props.multiples">
+  <template :key="multObj" v-for="(multObj, multName, id) in multiples.data">
     <Container
       data-is="multiple"
       class="layout-settings-multiple"
@@ -260,7 +259,7 @@ function delGroup(group, multName, groupName) {
 
       <template
         :key="groupId"
-        v-for="(group, groupName, groupId) in props.multiples[multName]"
+        v-for="(group, groupName, groupId) in multiples.data[multName]"
       >
         <Container
           data-group="multiple"
@@ -283,7 +282,7 @@ function delGroup(group, multName, groupName) {
             <Fields :setting="setting" />
           </template>
           <ButtonGroup
-            @click="delGroup(group, multName, groupName)"
+            @click="$emit('delete', multName, groupName)"
             :buttons="[setDeleteState(group)]"
           />
         </Container>

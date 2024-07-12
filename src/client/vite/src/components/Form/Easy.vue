@@ -9,9 +9,9 @@ import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
 import {
   useCheckPluginsValidity,
-  useUpdateTemplate,
-  useListenTemp,
-  useUnlistenTemp,
+  useUpdateTemp,
+  useListenTempFields,
+  useUnlistenTempFields,
 } from "@utils/form.js";
 
 /**
@@ -94,7 +94,7 @@ function setValidity() {
 
 function updateTemplate(e) {
   if (!e.target.closest("[data-easy-form-step]")) return;
-  useUpdateTemplate(e, data.base);
+  useUpdateTemp(e, data.base);
 }
 
 const buttonSave = {
@@ -124,11 +124,11 @@ onMounted(() => {
   // Restart step one every time the component is mounted
   data.currStep = 0;
   setValidity();
-  useListenTemp(updateTemplate);
+  useListenTempFields(updateTemplate);
 });
 
 onUnmounted(() => {
-  useUnlistenTemp(updateTemplate);
+  useUnlistenTempFields(updateTemplate);
 });
 </script>
 
