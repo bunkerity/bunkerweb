@@ -74,18 +74,21 @@ const filters = reactive({
 });
 
 watch(props.data, () => {
-  filters.base.forEach((filter) => {
-    filterData(filter, filter.value);
-  });
+  filterData();
 });
 
-function filterData(filter, value) {
+// Case we are changing a filter value
+// We only have to check data for this filter
+function filterData(filter = {}, value = "") {
+  // Case we have new filter value, update it
   // Loop on filter.base and update the "value" key when matching filterName
-  filters.base.forEach((f) => {
-    if (f.filterName === filter.filterName) {
-      f.value = value;
-    }
-  });
+  if (filter?.filterName && value) {
+    filters.base.forEach((f) => {
+      if (f.filterName === filter.filterName) {
+        f.value = value;
+      }
+    });
+  }
 
   // Start filtering
   let template = JSON.parse(JSON.stringify(props.data));
@@ -130,6 +133,7 @@ function filterData(filter, value) {
     // Remove empty row
     template = template.filter((row) => row.length > 0);
   }
+  console.log("filter");
   emits("filter", template);
 }
 
@@ -152,6 +156,7 @@ function filterRegularSettings(filterSettings, template) {
 }
 
 function filterMultiplesSettings(filterSettings, template) {
+  // Loop on plugins and get multiples settings like this
   template.forEach((plugin, id) => {
     // loop on plugin settings dict
     const filterMultiple = {};
