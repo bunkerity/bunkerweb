@@ -266,6 +266,8 @@ function delGroup(group, multName, groupName) {
       >
         <Container
           data-group="multiple"
+          :data-group-name="groupName"
+          :data-mult-name="multName"
           class="layout-settings-multiple-group"
           :aria-hidden="multiples.invisible.includes(`${multName}${id}`)"
           v-show="

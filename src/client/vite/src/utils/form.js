@@ -382,13 +382,9 @@ function useUpdateTemplate(e, template) {
     // Case target is not an input-like
     if (!inpId) return;
 
-    // Check if setting is part multiple or regular settings
-    const isMultiple = e.target.closest('[data-group="multiple"]')
-      ? true
-      : false;
-
-    if (!isMultiple) useUpdateTempSettings(template, inpId, inpValue);
-    if (isMultiple) useUpdateTempMultiples(template, inpId, inpValue);
+    // update settings
+    useUpdateTempSettings(template, inpId, inpValue, e.target);
+    useUpdateTempMultiples(template, inpId, inpValue, e.target);
     return template;
   }, 50);
 }
@@ -402,7 +398,10 @@ function useUpdateTemplate(e, template) {
   @param inpId - Input id to update
   @param inpValue - Input value to update
 */
-function useUpdateTempSettings(template, inpId, inpValue) {
+function useUpdateTempSettings(template, inpId, inpValue, target) {
+  // Case get data-group attribut, this is not a regular setting
+  if (target.closest("[data-group]")) return;
+
   // Try to update settings
   let isSettingUpdated = false;
   for (let i = 0; i < template.length; i++) {
@@ -429,7 +428,16 @@ function useUpdateTempSettings(template, inpId, inpValue) {
   @param inpId - Input id to update
   @param inpValue - Input value to update
 */
-function useUpdateTempMultiples(template, inpId, inpValue) {
+function useUpdateTempMultiples(template, inpId, inpValue, target) {
+  // Case get data-group attribut, this is not a regular setting
+  if (!target.closest("[data-group='multiple']")) return;
+  const multName =
+    target.closest("[data-group='multiple']").getAttribute("data-mult-name") ||
+    "";
+  const groupName =
+    target.closest("[data-group='multiple']").getAttribute("data-group-name") ||
+    "";
+
   // Check at the same time the inpId without prefix group he is part of
   // And try to update an existing inpId
   // Case we found the inpId, we update the value
@@ -438,18 +446,18 @@ function useUpdateTempMultiples(template, inpId, inpValue) {
   for (let i = 0; i < template.length; i++) {
     const plugin = template[i];
     const multiples = plugin?.multiples;
+    // Case no multiples, continue
     if (!multiples || Object.keys(multiples).length <= 0) continue;
-    for (const [multName, multGroups] of Object.entries(multiples)) {
-      for (const [groupId, groupSettings] of Object.entries(multGroups)) {
-        // Check if inpid is mathing a groupSettings key
-        for (const [settingName, settings] of Object.entries(groupSettings)) {
-          if (settings?.id !== inpId) continue;
-          settings.value = inpValue;
-          isSettingUpdated = true;
-          if (isSettingUpdated) break;
-        }
-        if (isSettingUpdated) break;
-      }
+    // Check if can find mult name in multiples
+    if (!(multName in multiples)) continue;
+    // Check if can find group name in multiples
+    if (!(groupName in multiples[multName])) continue;
+    const settings = multiples[multName][groupName];
+    for (const [key, value] of Object.entries(settings)) {
+      if (value.id !== inpId) continue;
+      value.value = inpValue;
+      isSettingUpdated = true;
+      break;
     }
     if (isSettingUpdated) break;
   }
