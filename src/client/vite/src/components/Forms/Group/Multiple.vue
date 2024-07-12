@@ -177,8 +177,6 @@ const props = defineProps({
 });
 
 const multiples = reactive({
-  // Store props.multiples on multiples.data and then use multiples.data to render increase performance
-  data: props.multiples,
   invisible: [],
   toDelete: [],
 });
@@ -245,7 +243,7 @@ function delGroup(group, multName, groupName) {
 </script>
 
 <template>
-  <template :key="multName" v-for="(multObj, multName, id) in multiples.data">
+  <template :key="multObj" v-for="(multObj, multName, id) in props.multiples">
     <Container
       data-is="multiple"
       class="layout-settings-multiple"
@@ -262,7 +260,7 @@ function delGroup(group, multName, groupName) {
 
       <template
         :key="groupId"
-        v-for="(group, groupName, groupId) in multiples.data[multName]"
+        v-for="(group, groupName, groupId) in props.multiples[multName]"
       >
         <Container
           data-group="multiple"
@@ -279,7 +277,7 @@ function delGroup(group, multName, groupName) {
             :subtitle="`${multName.replaceAll('-', ' ')} #${+groupName + 1}`"
           />
           <template
-            :key="settingName"
+            :key="setting"
             v-for="(setting, settingName, settingId) in group"
           >
             <Fields :setting="setting" />

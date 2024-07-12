@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, watch } from "vue";
+import { defineProps, onUpdated, reactive, watch } from "vue";
 import Container from "@components/Widget/Container.vue";
 
 import Input from "@components/Forms/Field/Input.vue";
@@ -71,18 +71,19 @@ const emits = defineEmits(["filter"]);
 
 const filters = reactive({
   base: JSON.parse(JSON.stringify(props.filters)),
+  bufferCount: 0,
+  isFiltering: false,
 });
 
 watch(props.data, () => {
   filterData();
 });
 
-// Case we are changing a filter value
-// We only have to check data for this filter
-function filterData(filter = {}, value = "") {
+function startFilter(filter = {}, value) {
+  filters.isFiltering = true;
   // Case we have new filter value, update it
   // Loop on filter.base and update the "value" key when matching filterName
-  if (filter?.filterName && value) {
+  if (filter?.filterName && value !== null) {
     filters.base.forEach((f) => {
       if (f.filterName === filter.filterName) {
         f.value = value;
@@ -133,8 +134,26 @@ function filterData(filter = {}, value = "") {
     // Remove empty row
     template = template.filter((row) => row.length > 0);
   }
-  console.log("filter");
+
   emits("filter", template);
+  // Allow filtering again after 100ms
+  setTimeout(() => {
+    filters.isFiltering = false;
+  }, 100);
+}
+
+// Case we are changing a filter value
+// We only have to check data for this filter
+function filterData(filter = {}, value = null) {
+  // Wait for buffer input
+  filters.bufferCount++;
+  const currBufferCount = filters.bufferCount;
+  // Wait time to check if not another input (count) to filter
+  setTimeout(() => {
+    // Case another input, don't filter and wait again
+    if (currBufferCount < filters.bufferCount) return;
+    startFilter(filter, value);
+  }, 50);
 }
 
 function filterRegularSettings(filterSettings, template) {
@@ -156,34 +175,57 @@ function filterRegularSettings(filterSettings, template) {
 }
 
 function filterMultiplesSettings(filterSettings, template) {
-  // Loop on plugins and get multiples settings like this
-  template.forEach((plugin, id) => {
-    // loop on plugin settings dict
-    const filterMultiple = {};
-    const multiples = plugin?.multiples;
-    if (!multiples || Object.keys(multiples).length <= 0) return;
-    for (const [multName, multGroups] of Object.entries(multiples)) {
-      for (const [groupId, groupSettings] of Object.entries(multGroups)) {
+  const multiples = [];
+  // Format to filter
+  for (let i = 0; i < template.length; i++) {
+    const plugin = template[i];
+    if (!plugin?.multiples || Object.keys(plugin.multiples).length <= 0)
+      continue;
+    for (const [multName, multGroups] of Object.entries(plugin.multiples)) {
+      for (const [groupName, groupSettings] of Object.entries(multGroups)) {
         // Check if inpid is mathing a groupSettings key
-        const settings = [];
         for (const [key, value] of Object.entries(groupSettings)) {
-          settings.push({ ...value, setting_name: key });
-        }
-        const filterSettingsData = useFilter(settings, filterSettings);
-        const settingsData = {};
-        filterSettingsData.forEach((setting) => {
-          settingsData[setting.setting_name] = setting;
-          delete settingsData[setting.setting_name]?.setting_name;
-        });
-        // Check if at least one setting is matching
-        if (Object.keys(settingsData).length > 0) {
-          if (!filterMultiple[multName]) filterMultiple[multName] = {};
-          filterMultiple[multName][groupId] = settingsData;
+          multiples.push({
+            ...value,
+            setting_name: key,
+            plugin_id: plugin.id,
+            group_name: groupName,
+            mult_name: multName,
+          });
         }
       }
     }
-    template[id].multiples = filterMultiple;
+  }
+  // Remove multiples from template
+  template.forEach((plugin) => {
+    delete plugin.multiples;
   });
+  // Add filtered multiples
+  const filterSettingsData = useFilter(multiples, filterSettings);
+
+  for (let i = 0; i < filterSettingsData.length; i++) {
+    const setting = filterSettingsData[i];
+    const pluginId = setting?.plugin_id;
+    const groupName = setting?.group_name;
+    const multName = setting?.mult_name;
+    const settingName = setting?.setting_name;
+    delete setting.plugin_id;
+    delete setting.group_name;
+    delete setting.setting_name;
+    // Find the plugin in template
+    const pluginIndex = template.findIndex((plugin) => plugin.id === pluginId);
+    if (pluginIndex < 0) continue;
+    if (!("multiples" in template[pluginIndex]))
+      template[pluginIndex]["multiples"] = {};
+
+    if (!(multName in template[pluginIndex]["multiples"]))
+      template[pluginIndex]["multiples"][multName] = {};
+    if (!(groupName in template[pluginIndex]["multiples"][multName]))
+      template[pluginIndex]["multiples"][multName][groupName] = {};
+
+    template[pluginIndex]["multiples"][multName][groupName][settingName] =
+      setting;
+  }
 }
 </script>
 
@@ -194,11 +236,13 @@ function filterMultiplesSettings(filterSettings, template) {
       <Input
         v-if="filter.type === 'keyword'"
         @inp="(v) => filterData(filter, v)"
+        @change="(v) => filterData(filter, v)"
         v-bind="filter.field"
       />
       <Select
         v-if="filter.type === 'select'"
         @inp="(v) => filterData(filter, v)"
+        @change="(v) => filterData(filter, v)"
         v-bind="filter.field"
       />
     </template>
