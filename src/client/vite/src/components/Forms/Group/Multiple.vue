@@ -1,5 +1,12 @@
 <script setup>
-import { reactive, defineProps, defineEmits } from "vue";
+import {
+  reactive,
+  defineProps,
+  defineEmits,
+  watch,
+  computed,
+  onMounted,
+} from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Button from "@components/Widget/Button.vue";
@@ -205,6 +212,9 @@ const buttonDelete = {
   containerClass: "flex justify-center",
 };
 
+// emits
+const emits = defineEmits(["delete", "add"]);
+
 // Check if at least one input is disabled (this means a method different than ui, default or manual is used)
 // If true, disable the delete button
 function setDeleteState(group) {
@@ -230,19 +240,16 @@ function delInvisible(id) {
 }
 
 function toggleVisible(id) {
-  if (multiples.invisible.includes(id)) {
-    delInvisible(id);
-  } else {
-    setInvisible(id);
-  }
+  multiples.invisible.includes(id) ? delInvisible(id) : setInvisible(id);
 }
 
-// emits
-const emits = defineEmits(["delete", "add"]);
+function delGroup(multName, groupName) {
+  emits("delete", multName, groupName);
+}
 </script>
 
 <template>
-  <template :key="multName" v-for="(multObj, multName, id) in props.multiples">
+  <template v-for="(multObj, multName, id) in props.multiples">
     <Container
       data-is="multiple"
       class="layout-settings-multiple"
@@ -264,36 +271,43 @@ const emits = defineEmits(["delete", "add"]);
         </div>
       </Container>
 
-      <template
-        :key="groupId"
-        v-for="(group, groupName, groupId) in props.multiples[multName]"
+      <div
+        :aria-hidden="
+          multiples.invisible.includes(`${multName}${id}`) ? 'false' : 'true'
+        "
+        :class="[
+          'flex-col-reverse col-span-12',
+          multiples.invisible.includes(`${multName}${id}`) ? 'hidden' : 'flex',
+        ]"
       >
-        <Container
-          data-group="multiple"
-          :data-group-name="groupName"
-          :data-mult-name="multName"
-          :data-plugin-name="multName"
-          class="layout-settings-multiple-group"
-          :aria-hidden="multiples.invisible.includes(`${multName}${id}`)"
-          v-show="
-            multiples.invisible.includes(`${multName}${id}`) ? false : true
-          "
+        <template
+          :key="groupName"
+          v-for="(group, groupName, groupId) in props.multiples[multName]"
         >
-          <Subtitle
-            :subtitle="`${multName.replaceAll('-', ' ')} #${+groupName + 1}`"
-          />
-          <template
-            :key="setting"
-            v-for="(setting, settingName, settingId) in group"
+          <Container
+            data-group="multiple"
+            :data-group-name="groupName"
+            :data-mult-name="multName"
+            class="layout-settings-multiple-group"
           >
-            <Fields :setting="setting" />
-          </template>
-          <ButtonGroup
-            @click="$emit('delete', multName, groupName)"
-            :buttons="[setDeleteState(group)]"
-          />
-        </Container>
-      </template>
+            <Subtitle
+              :subtitle="`${multName.replaceAll('-', ' ')} #${+groupName + 1}`"
+            />
+            <template
+              :key="settingName"
+              v-for="(setting, settingName, settingId) in group"
+            >
+              <Fields :setting="setting" />
+            </template>
+            <div class="col-span-12 flex justify-center">
+              <Button
+                @click="delGroup(multName, groupName)"
+                v-bind="setDeleteState(group)"
+              />
+            </div>
+          </Container>
+        </template>
+      </div>
     </Container>
   </template>
 </template>

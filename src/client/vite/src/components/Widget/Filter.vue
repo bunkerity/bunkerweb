@@ -75,9 +75,13 @@ const filters = reactive({
   isFiltering: false,
 });
 
-watch(props.data, () => {
-  filterData();
-});
+watch(
+  () => props.data,
+  () => {
+    filterData();
+  },
+  { deep: true }
+);
 
 function startFilter(filter = {}, value) {
   // Case we have new filter value, update it
@@ -133,7 +137,6 @@ function startFilter(filter = {}, value) {
     // Remove empty row
     template = template.filter((row) => row.length > 0);
   }
-
   emits("filter", template);
 }
 

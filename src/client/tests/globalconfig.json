@@ -4796,7 +4796,8 @@
                                                         "text": "Custom header to add (HeaderName: HeaderValue)."
                                                     }
                                                 ],
-                                                "containerClass": "z-13"
+                                                "containerClass": "z-13",
+                                                "plugin_id": "headers"
                                             }
                                         },
                                         "cookie-flags": {
@@ -4829,7 +4830,8 @@
                                                         "text": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module)."
                                                     }
                                                 ],
-                                                "containerClass": "z-12"
+                                                "containerClass": "z-12",
+                                                "plugin_id": "headers"
                                             }
                                         }
                                     },
@@ -5173,7 +5175,8 @@
                                                         "text": "URL (PCRE regex) where the limit request will be applied or special value / for all requests."
                                                     }
                                                 ],
-                                                "containerClass": "z-6"
+                                                "containerClass": "z-6",
+                                                "plugin_id": "limit"
                                             },
                                             "LIMIT_REQ_RATE": {
                                                 "context": "multisite",
@@ -5204,7 +5207,8 @@
                                                         "text": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day)."
                                                     }
                                                 ],
-                                                "containerClass": "z-5"
+                                                "containerClass": "z-5",
+                                                "plugin_id": "limit"
                                             }
                                         }
                                     },
@@ -7540,7 +7544,8 @@
                                                         "text": "Full URL of the proxied resource (proxy_pass)."
                                                     }
                                                 ],
-                                                "containerClass": "z-26"
+                                                "containerClass": "z-26",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_URL": {
                                                 "context": "multisite",
@@ -7571,7 +7576,8 @@
                                                         "text": "Location URL that will be proxied."
                                                     }
                                                 ],
-                                                "containerClass": "z-25"
+                                                "containerClass": "z-25",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_WS": {
                                                 "context": "multisite",
@@ -7602,7 +7608,8 @@
                                                         "text": "Enable websocket on the proxied resource."
                                                     }
                                                 ],
-                                                "containerClass": "z-24"
+                                                "containerClass": "z-24",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_HEADERS": {
                                                 "context": "multisite",
@@ -7633,7 +7640,8 @@
                                                         "text": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive)."
                                                     }
                                                 ],
-                                                "containerClass": "z-23"
+                                                "containerClass": "z-23",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_HEADERS_CLIENT": {
                                                 "context": "multisite",
@@ -7664,7 +7672,8 @@
                                                         "text": "List of HTTP headers to send to client separated with semicolons (values for add_header directive)."
                                                     }
                                                 ],
-                                                "containerClass": "z-22"
+                                                "containerClass": "z-22",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_BUFFERING": {
                                                 "context": "multisite",
@@ -7695,7 +7704,8 @@
                                                         "text": "Enable or disable buffering of responses from proxied resource."
                                                     }
                                                 ],
-                                                "containerClass": "z-21"
+                                                "containerClass": "z-21",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_KEEPALIVE": {
                                                 "context": "multisite",
@@ -7726,7 +7736,8 @@
                                                         "text": "Enable or disable keepalive connections with the proxied resource."
                                                     }
                                                 ],
-                                                "containerClass": "z-20"
+                                                "containerClass": "z-20",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_AUTH_REQUEST": {
                                                 "context": "multisite",
@@ -7757,7 +7768,8 @@
                                                         "text": "Enable authentication using an external provider (value of auth_request directive)."
                                                     }
                                                 ],
-                                                "containerClass": "z-19"
+                                                "containerClass": "z-19",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
                                                 "context": "multisite",
@@ -7788,7 +7800,8 @@
                                                         "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
                                                     }
                                                 ],
-                                                "containerClass": "z-18"
+                                                "containerClass": "z-18",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_AUTH_REQUEST_SET": {
                                                 "context": "multisite",
@@ -7819,7 +7832,8 @@
                                                         "text": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives)."
                                                     }
                                                 ],
-                                                "containerClass": "z-17"
+                                                "containerClass": "z-17",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_CONNECT_TIMEOUT": {
                                                 "context": "multisite",
@@ -7850,7 +7864,8 @@
                                                         "text": "Timeout when connecting to the proxied resource."
                                                     }
                                                 ],
-                                                "containerClass": "z-16"
+                                                "containerClass": "z-16",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_READ_TIMEOUT": {
                                                 "context": "multisite",
@@ -7881,7 +7896,8 @@
                                                         "text": "Timeout when reading from the proxied resource."
                                                     }
                                                 ],
-                                                "containerClass": "z-15"
+                                                "containerClass": "z-15",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_SEND_TIMEOUT": {
                                                 "context": "multisite",
@@ -7912,7 +7928,8 @@
                                                         "text": "Timeout when sending to the proxied resource."
                                                     }
                                                 ],
-                                                "containerClass": "z-14"
+                                                "containerClass": "z-14",
+                                                "plugin_id": "reverseproxy"
                                             },
                                             "REVERSE_PROXY_INCLUDES": {
                                                 "context": "multisite",
@@ -7943,7 +7960,8 @@
                                                         "text": "Additional configuration to include in the location block, separated with spaces."
                                                     }
                                                 ],
-                                                "containerClass": "z-13"
+                                                "containerClass": "z-13",
+                                                "plugin_id": "reverseproxy"
                                             }
                                         }
                                     },
@@ -7984,6 +8002,7 @@
                                                         }
                                                     ],
                                                     "containerClass": "z-26",
+                                                    "plugin_id": "reverseproxy",
                                                     "method": "scheduler"
                                                 },
                                                 "REVERSE_PROXY_URL_1": {
@@ -8015,7 +8034,8 @@
                                                             "text": "Location URL that will be proxied."
                                                         }
                                                     ],
-                                                    "containerClass": "z-25"
+                                                    "containerClass": "z-25",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_WS_1": {
                                                     "context": "multisite",
@@ -8046,7 +8066,8 @@
                                                             "text": "Enable websocket on the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-24"
+                                                    "containerClass": "z-24",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_HEADERS_1": {
                                                     "context": "multisite",
@@ -8077,7 +8098,8 @@
                                                             "text": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-23"
+                                                    "containerClass": "z-23",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_HEADERS_CLIENT_1": {
                                                     "context": "multisite",
@@ -8108,7 +8130,8 @@
                                                             "text": "List of HTTP headers to send to client separated with semicolons (values for add_header directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-22"
+                                                    "containerClass": "z-22",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_BUFFERING_1": {
                                                     "context": "multisite",
@@ -8139,7 +8162,8 @@
                                                             "text": "Enable or disable buffering of responses from proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-21"
+                                                    "containerClass": "z-21",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_KEEPALIVE_1": {
                                                     "context": "multisite",
@@ -8170,7 +8194,8 @@
                                                             "text": "Enable or disable keepalive connections with the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-20"
+                                                    "containerClass": "z-20",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST_1": {
                                                     "context": "multisite",
@@ -8201,7 +8226,8 @@
                                                             "text": "Enable authentication using an external provider (value of auth_request directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-19"
+                                                    "containerClass": "z-19",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL_1": {
                                                     "context": "multisite",
@@ -8232,7 +8258,8 @@
                                                             "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-18"
+                                                    "containerClass": "z-18",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST_SET_1": {
                                                     "context": "multisite",
@@ -8263,7 +8290,8 @@
                                                             "text": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-17"
+                                                    "containerClass": "z-17",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_CONNECT_TIMEOUT_1": {
                                                     "context": "multisite",
@@ -8294,7 +8322,8 @@
                                                             "text": "Timeout when connecting to the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-16"
+                                                    "containerClass": "z-16",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_READ_TIMEOUT_1": {
                                                     "context": "multisite",
@@ -8325,7 +8354,8 @@
                                                             "text": "Timeout when reading from the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-15"
+                                                    "containerClass": "z-15",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_SEND_TIMEOUT_1": {
                                                     "context": "multisite",
@@ -8356,7 +8386,8 @@
                                                             "text": "Timeout when sending to the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-14"
+                                                    "containerClass": "z-14",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_INCLUDES_1": {
                                                     "context": "multisite",
@@ -8387,7 +8418,8 @@
                                                             "text": "Additional configuration to include in the location block, separated with spaces."
                                                         }
                                                     ],
-                                                    "containerClass": "z-13"
+                                                    "containerClass": "z-13",
+                                                    "plugin_id": "reverseproxy"
                                                 }
                                             },
                                             "0": {
@@ -8421,6 +8453,7 @@
                                                         }
                                                     ],
                                                     "containerClass": "z-26",
+                                                    "plugin_id": "reverseproxy",
                                                     "method": "ui"
                                                 },
                                                 "REVERSE_PROXY_URL": {
@@ -8452,7 +8485,8 @@
                                                             "text": "Location URL that will be proxied."
                                                         }
                                                     ],
-                                                    "containerClass": "z-25"
+                                                    "containerClass": "z-25",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_WS": {
                                                     "context": "multisite",
@@ -8483,7 +8517,8 @@
                                                             "text": "Enable websocket on the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-24"
+                                                    "containerClass": "z-24",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_HEADERS": {
                                                     "context": "multisite",
@@ -8514,7 +8549,8 @@
                                                             "text": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-23"
+                                                    "containerClass": "z-23",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_HEADERS_CLIENT": {
                                                     "context": "multisite",
@@ -8545,7 +8581,8 @@
                                                             "text": "List of HTTP headers to send to client separated with semicolons (values for add_header directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-22"
+                                                    "containerClass": "z-22",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_BUFFERING": {
                                                     "context": "multisite",
@@ -8576,7 +8613,8 @@
                                                             "text": "Enable or disable buffering of responses from proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-21"
+                                                    "containerClass": "z-21",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_KEEPALIVE": {
                                                     "context": "multisite",
@@ -8607,7 +8645,8 @@
                                                             "text": "Enable or disable keepalive connections with the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-20"
+                                                    "containerClass": "z-20",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST": {
                                                     "context": "multisite",
@@ -8638,7 +8677,8 @@
                                                             "text": "Enable authentication using an external provider (value of auth_request directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-19"
+                                                    "containerClass": "z-19",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
                                                     "context": "multisite",
@@ -8669,7 +8709,8 @@
                                                             "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-18"
+                                                    "containerClass": "z-18",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST_SET": {
                                                     "context": "multisite",
@@ -8700,7 +8741,8 @@
                                                             "text": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-17"
+                                                    "containerClass": "z-17",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_CONNECT_TIMEOUT": {
                                                     "context": "multisite",
@@ -8731,7 +8773,8 @@
                                                             "text": "Timeout when connecting to the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-16"
+                                                    "containerClass": "z-16",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_READ_TIMEOUT": {
                                                     "context": "multisite",
@@ -8762,7 +8805,8 @@
                                                             "text": "Timeout when reading from the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-15"
+                                                    "containerClass": "z-15",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_SEND_TIMEOUT": {
                                                     "context": "multisite",
@@ -8793,7 +8837,8 @@
                                                             "text": "Timeout when sending to the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-14"
+                                                    "containerClass": "z-14",
+                                                    "plugin_id": "reverseproxy"
                                                 },
                                                 "REVERSE_PROXY_INCLUDES": {
                                                     "context": "multisite",
@@ -8824,7 +8869,8 @@
                                                             "text": "Additional configuration to include in the location block, separated with spaces."
                                                         }
                                                     ],
-                                                    "containerClass": "z-13"
+                                                    "containerClass": "z-13",
+                                                    "plugin_id": "reverseproxy"
                                                 }
                                             }
                                         }

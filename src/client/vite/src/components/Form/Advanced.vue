@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, onUnmounted } from "vue";
+import { defineProps, reactive, onMounted, onUnmounted, computed } from "vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
@@ -11,14 +11,8 @@ import Text from "@components/Widget/Text.vue";
 import Filter from "@components/Widget/Filter.vue";
 import GroupMultiple from "@components/Forms/Group/Multiple.vue";
 import { plugin_types } from "@utils/variables";
-import {
-  useCheckPluginsValidity,
-  useUpdateTemp,
-  useListenTempFields,
-  useUnlistenTempFields,
-  useDelAdvancedMult,
-  useAddAdvancedMult,
-} from "@utils/form.js";
+import { useAdvancedForm } from "@store/advanced.js";
+import { useCheckPluginsValidity } from "@utils/form.js";
 import { v4 as uuidv4 } from "uuid";
 /**
   @name Form/Advanced.vue
@@ -53,6 +47,8 @@ import { v4 as uuidv4 } from "uuid";
   @param {object} columns - Columns object.
 */
 
+const advancedForm = useAdvancedForm();
+
 const props = defineProps({
   // id && value && method
   template: {
@@ -75,13 +71,11 @@ const props = defineProps({
 const data = reactive({
   currPlugin: "",
   plugins: [],
-  base: JSON.parse(JSON.stringify(props.template)),
+  base: props.template,
   isRegErr: false,
   isReqErr: false,
   settingErr: "",
   pluginErr: "",
-  // Add filtering and check validity with regex and required
-  format: JSON.parse(JSON.stringify(props.template)),
 });
 
 const comboboxPlugin = {
@@ -109,7 +103,7 @@ const buttonSave = {
   size: "normal",
   type: "button",
   attrs: {
-    "data-submit-form": JSON.stringify(data.base),
+    "data-submit-form": JSON.stringify(advancedForm.templateBase),
   },
   containerClass: "flex justify-center",
   iconName: "plus",
@@ -201,19 +195,19 @@ const filters = [
 ];
 
 function filter(filterData) {
+  advancedForm.templateUIFormat = filterData;
   setValidity();
-  data.format = filterData;
-  data.plugins = getPluginNames(filterData);
+  data.plugins = getPluginNames(advancedForm.templateUIFormat);
   // Check after a filter if previous plugin is still in the list and if at least one plugin is available
   // Update if not the case
   data.currPlugin = data.plugins.includes(data.currPlugin)
     ? data.currPlugin
-    : getFirstPlugin(filterData);
+    : getFirstPlugin(advancedForm.templateUIFormat);
 }
 
 function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
-    useCheckPluginsValidity(data.base);
+    useCheckPluginsValidity(advancedForm.templateUI);
   data.isRegErr = isRegErr;
   data.isReqErr = isReqErr;
   data.settingErr = settingErr;
@@ -242,24 +236,20 @@ function getPluginNames(template) {
   }
 }
 
-function updateTemplate(e) {
-  if (!e.target.closest("[data-advanced-form-plugin]")) return;
-  useUpdateTemp(e, data.base);
-}
-
 onMounted(() => {
+  advancedForm.setTemplate(props.template);
   // Get first props.forms template name
-  data.currPlugin = getFirstPlugin(props.template);
-  data.plugins = getPluginNames(props.template);
+  data.currPlugin = getFirstPlugin(advancedForm.templateUIFormat);
+  data.plugins = getPluginNames(advancedForm.templateUIFormat);
   setValidity();
   // Store update data on
 
   // I want updatInp to access event, data.base and the container attribut
-  useListenTempFields(updateTemplate);
+  advancedForm.useListenTempFields();
 });
 
 onUnmounted(() => {
-  useUnlistenTempFields(updateTemplate);
+  advancedForm.useUnlistenTempFields();
 });
 </script>
 
@@ -277,7 +267,7 @@ onUnmounted(() => {
     <Filter
       v-if="filters.length"
       @filter="(v) => filter(v)"
-      :data="data.base"
+      :data="advancedForm.templateUI"
       :filters="filters"
     >
       <Combobox
@@ -287,8 +277,8 @@ onUnmounted(() => {
         @inp="data.currPlugin = $event"
       />
     </Filter>
-    <MessageUnmatch v-if="!data.format.length" />
-    <template v-for="plugin in data.format">
+    <MessageUnmatch v-if="!advancedForm.templateUIFormat.length" />
+    <template v-for="(plugin, pluginId) in advancedForm.templateUIFormat">
       <Container
         data-is="content"
         data-advanced-form-plugin
@@ -309,24 +299,23 @@ onUnmounted(() => {
         <GroupMultiple
           @delete="
             (multName, groupName) =>
-              useDelAdvancedMult(data.base, multName, groupName)
+              advancedForm.delMultiple(plugin.id, multName, groupName)
           "
-          @add="(multName) => useAddAdvancedMult(data.base, multName)"
-          v-if="plugin.multiples"
+          @add="(multName) => advancedForm.addMultiple(plugin.id, multName)"
           :multiples="plugin.multiples"
         />
       </Container>
     </template>
     <Button
-      v-if="data.format.length"
+      v-if="advancedForm.templateUIFormat.length"
       v-bind="buttonSave"
       :disabled="data.isReqErr || data.isRegErr ? true : false"
     />
     <div class="flex justify-center items-center" data-is="form-error">
       <Text
         v-if="
-          (data.format.length && data.isRegErr) ||
-          (data.format.length && data.isReqErr)
+          (advancedForm.templateUIFormat.length && data.isRegErr) ||
+          (advancedForm.templateUIFormat.length && data.isReqErr)
         "
         :text="
           data.isReqErr
