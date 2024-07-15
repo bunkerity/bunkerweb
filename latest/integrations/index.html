@@ -1290,7 +1290,6 @@ chmod -R 770 bw-data</code></p>
 <li>Red Hat Enterprise Linux (RHEL) 9.4</li>
 </ul>
 <p>Please ensure that you have <strong>NGINX 1.26.1 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
-<p>To simplify the installation process, Linux package repositories for BunkerWeb are available on <a href="https://packagecloud.io/bunkerity/bunkerweb">PackageCloud</a>. They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for <a href="https://packagecloud.io/bunkerity/bunkerweb/install">manual installation</a> instructions if you prefer.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1316,7 +1315,7 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 <p>And finally install BunkerWeb 1.5.8 :</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.5.8
 </code></pre></div>
@@ -1347,7 +1346,7 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 <p>And finally install BunkerWeb 1.5.8 :</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.5.8
 </code></pre></div>
@@ -1369,7 +1368,7 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 <p>And finally install BunkerWeb 1.5.8 :</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
 sed<span class="w"> </span><span class="s1">&#39;s/yum install -y pygpgme --disablerepo=&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;bunkerity_bunkerweb&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;/yum install -y python-gnupg/g&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
 sed<span class="w"> </span><span class="s1">&#39;s/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1406,7 +1405,7 @@ module_hotfixes=true
 </code></pre></div>
 <p>And finally install BunkerWeb 1.5.8 :</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-curl<span class="w"> </span>-s<span class="w"> </span>https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-1.5.8
 </code></pre></div>
