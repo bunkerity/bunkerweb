@@ -114,7 +114,6 @@ with app.app_context():
     app.config["SESSION_COOKIE_HTTPONLY"] = True  # Recommended for security
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Or 'Strict' for stricter settings
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
-    app.config["PREFERRED_URL_SCHEME"] = "https"
 
     login_manager = LoginManager()
     login_manager.session_protection = "strong"
