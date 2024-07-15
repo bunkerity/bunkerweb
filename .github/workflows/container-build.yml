@@ -48,10 +48,10 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
-        run: ./misc/update-version.sh ${{ inputs.RELEASE }}
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
       - name: Replace VERSION 1.6
         if: inputs.RELEASE == '1.6'
-        run: ./misc/update-version.sh dev
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh dev
       - name: Setup SSH for ARM node
         if: inputs.CACHE_SUFFIX == 'arm'
         run: |

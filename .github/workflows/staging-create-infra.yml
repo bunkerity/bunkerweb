@@ -41,7 +41,7 @@ jobs:
         run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner,1.18.7 && ansible-galaxy collection install --timeout 120 community.general && ansible-galaxy collection install --timeout 120 community.docker
         if: inputs.TYPE != 'k8s'
       # Create infra
-      - run: ./tests/create.sh ${{ inputs.TYPE }}
+      - run: chmod +x ./tests/create.sh && ./tests/create.sh ${{ inputs.TYPE }}
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
       - run: |

@@ -115,4 +115,5 @@ jobs:
           cd tests/core/${{ inputs.TEST }}
           find . -name "requirements.txt" -exec pip install --break-system-packages --no-cache-dir --require-hashes --no-deps -r {} \;
           sudo truncate -s 0 /var/log/bunkerweb/error.log
+          chmod +x ./test.sh
           ./test.sh "linux"

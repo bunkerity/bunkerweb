@@ -33,4 +33,5 @@ jobs:
           cd ./tests/core/${{ inputs.TEST }}
           find . -type f -name 'docker-compose.*' -exec sed -i "s@bunkerity/bunkerweb:.*@bunkerweb-tests@" {} \;
           find . -type f -name 'docker-compose.*' -exec sed -i "s@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@" {} \;
+          chmod +x ./test.sh
           ./test.sh "docker" "${{ inputs.TEST }}"

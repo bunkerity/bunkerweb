@@ -40,10 +40,10 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
-        run: ./misc/update-version.sh ${{ inputs.RELEASE }}
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
       - name: Replace VERSION 1.6
         if: inputs.RELEASE == '1.6'
-        run: ./misc/update-version.sh dev
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh dev
       - name: Extract arch
         run: |
           echo "ARCH=${{ env.PLATFORMS }}" | sed 's/linux//g' | sed 's@/@@g' >> "$GITHUB_ENV"
@@ -119,7 +119,7 @@ jobs:
       # Generate package
       - name: Generate package
         if: startsWith(env.ARCH, 'arm') == false
-        run: ./src/linux/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
+        run: chmod +x ./src/linux/package.sh && ./src/linux/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
         env:
           LARCH: ${{ env.LARCH }}
       - name: Generate package (ARM)
