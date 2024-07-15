@@ -42,9 +42,7 @@ import { v4 as uuidv4 } from "uuid";
           inpType: "input",
         },
       ],
-  @param {object} template - Template object with plugin and settings data.
-  @param {string} containerClass - Container
-  @param {object} columns - Columns object.
+h
 */
 
 const advancedForm = useAdvancedForm();

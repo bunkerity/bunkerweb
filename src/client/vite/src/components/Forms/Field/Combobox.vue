@@ -152,6 +152,14 @@ const props = defineProps({
   },
 });
 
+// Case we have another value set from the parent for any reason
+// (like a filter that removed some values or forced a value)
+watch(
+  () => props.value,
+  () => {
+    select.value = props.value;
+  }
+);
 const inp = reactive({
   id: "",
   value: "",
