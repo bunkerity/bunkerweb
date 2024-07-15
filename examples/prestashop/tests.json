@@ -6,7 +6,7 @@
   "tests": [
     {
       "type": "string",
-      "url": "https://www.example.com/administration",
+      "url": "https://www.example.com",
       "string": "prestashop",
       "tls": "www.example.com"
     }
