@@ -32,6 +32,24 @@
       "regex": "^.*$",
       "type": "text"
     },
+    "REVERSE_PROXY_SSL_SNI": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable or disable sending SNI to upstream server.",
+      "id": "reverse-proxy-ssl-server-name",
+      "label": "SSL SNI",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "REVERSE_PROXY_SSL_SNI_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sets the SNI host to send to upstream server.",
+      "id": "reverse-proxy-ssl-sni-name",
+      "label": "SSL SNI name",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "REVERSE_PROXY_HOST": {
       "context": "multisite",
       "default": "",
