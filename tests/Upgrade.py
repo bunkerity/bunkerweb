@@ -428,7 +428,7 @@ if distro == "ubuntu":
     http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
     sudo apt update && sudo apt install -y nginx=1.20.2-1~jammy
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+    curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
     sudo apt install -y bunkerweb=1.4.5
     """
@@ -948,7 +948,7 @@ elif distro == "debian":
     http://nginx.org/packages/debian `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
     sudo apt update && sudo apt install -y nginx=1.26.1-2~bookworm
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+    curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
     sudo apt install -y bunkerweb=1.4.5
     """
@@ -2010,7 +2010,7 @@ elif distro.startswith("rhel"):
     #         "systemd-rhel",
     #         "bash",
     #         "-c",
-    #         "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash",
+    #         "curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash",
     #     ]
     # )
     # subprocess.run(
@@ -2526,7 +2526,7 @@ elif distro == "centos":
             "systemd-centos",
             "bash",
             "-c",
-            "curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash",
+            "curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash",
         ]
     )
     subprocess.run(
