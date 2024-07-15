@@ -464,7 +464,7 @@ function useUpdateTempMultiples(template, inpId, inpValue, target) {
 }
 
 /**
-  @name useDeleteMultGroup
+  @name useDelAdvancedMult
   @description This function will delete a group of multiples in the template.
   The way the backend is working is that to delete a group, we need to send the group name with all default values.
   This function needs to be call from the multiples component parent with the template and the group name to delete.
@@ -473,18 +473,50 @@ function useUpdateTempMultiples(template, inpId, inpValue, target) {
   @param multName - Input id to update
   @param groupName - Input value to update
 */
-function useDeleteMultGroup(template, multName, groupName) {}
+function useDelAdvancedMult(template, multName, groupName) {
+  for (let i = 0; i < template.length; i++) {
+    const plugin = template[i];
+    const multiples = plugin?.multiples;
+    if (!multiples) continue;
+    if (!(multName in multiples)) continue;
+    if (!(groupName in multiples[multName])) continue;
+    delete multiples[multName][groupName];
+    return;
+  }
+}
 
 /**
-  @name useAddMultGroup
+  @name useAddAdvancedMult
   @description This function will add a group of multiple in the template with default values.
   Each plugin has a key "multiples_schema" with each multiples group and their default values.
   We will retrieve the wanted multiple group and add it on the "multiples" key that contains the multiples that apply to the plugin.
   @param template - Template with plugins list and detail settings
   @param multName - Input id to update
 */
-function useAddMultGroup(template, multName) {
-  // TODO : add to format multiples_schema
+function useAddAdvancedMult(template, multName) {
+  // Get the right multiple schema
+  let multipleSchema = {};
+  let plugin;
+  let nextGroupId;
+  for (let i = 0; i < template.length; i++) {
+    plugin = template[i];
+    const multiples = plugin?.multiples;
+    if (!multiples) continue;
+    if (!(multName in multiples)) continue;
+    multipleSchema = plugin?.multiples_schema[multName];
+    console.log(multipleSchema);
+    // Get the highest id in Object.keys(plugin?.multiples[multName])
+    nextGroupId = Math.max(...Object.keys(plugin?.multiples[multName])) + 1;
+    if (!multipleSchema) return;
+    break;
+  }
+  // Set the default values as value
+  for (const [key, value] of Object.entries(multipleSchema)) {
+    value.value = value.default;
+  }
+  // Add new group as first key of plugin.multiples.multName
+  plugin.multiples[multName][nextGroupId] = multipleSchema;
+  console.log(plugin.multiples[multName]);
 }
 
 export {
@@ -496,6 +528,6 @@ export {
   useUpdateTemp,
   useListenTempFields,
   useUnlistenTempFields,
-  useDeleteMultGroup,
-  useAddMultGroup,
+  useDelAdvancedMult,
+  useAddAdvancedMult,
 };

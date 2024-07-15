@@ -11,12 +11,13 @@ import Text from "@components/Widget/Text.vue";
 import Filter from "@components/Widget/Filter.vue";
 import GroupMultiple from "@components/Forms/Group/Multiple.vue";
 import { plugin_types } from "@utils/variables";
-
 import {
   useCheckPluginsValidity,
   useUpdateTemp,
   useListenTempFields,
   useUnlistenTempFields,
+  useDelAdvancedMult,
+  useAddAdvancedMult,
 } from "@utils/form.js";
 import { v4 as uuidv4 } from "uuid";
 /**
@@ -305,7 +306,15 @@ onUnmounted(() => {
             <Fields :setting="setting" />
           </template>
         </Container>
-        <GroupMultiple v-if="plugin.multiples" :multiples="plugin.multiples" />
+        <GroupMultiple
+          @delete="
+            (multName, groupName) =>
+              useDelAdvancedMult(data.base, multName, groupName)
+          "
+          @add="(multName) => useAddAdvancedMult(data.base, multName)"
+          v-if="plugin.multiples"
+          :multiples="plugin.multiples"
+        />
       </Container>
     </template>
     <Button

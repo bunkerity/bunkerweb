@@ -3320,6 +3320,8 @@ def set_multiples(template, format_plugins, service_settings):
             del plugin["settings"][setting]
 
         if len(multiples):
+            # Add multiple schema with default values to plugin
+            plugin["multiples_schema"] = multiples
             # Now that we have for each plugin the multiples settings, we need to do the following
             # Get all settings from template that are multiples
             template_multiples = get_multiple_from_template(template, multiples)

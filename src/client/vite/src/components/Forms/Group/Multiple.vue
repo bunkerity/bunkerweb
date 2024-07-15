@@ -2,6 +2,7 @@
 import { reactive, defineProps, defineEmits } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
+import Button from "@components/Widget/Button.vue";
 import Fields from "@components/Form/Fields.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Container from "@components/Widget/Container.vue";
@@ -177,7 +178,6 @@ const props = defineProps({
 });
 
 const multiples = reactive({
-  data: props.multiples,
   invisible: [],
 });
 
@@ -242,7 +242,7 @@ const emits = defineEmits(["delete", "add"]);
 </script>
 
 <template>
-  <template :key="multObj" v-for="(multObj, multName, id) in multiples.data">
+  <template :key="multName" v-for="(multObj, multName, id) in props.multiples">
     <Container
       data-is="multiple"
       class="layout-settings-multiple"
@@ -251,15 +251,22 @@ const emits = defineEmits(["delete", "add"]);
     >
       <Container class="col-span-12 flex items-center">
         <Subtitle :subtitle="multName.replaceAll('-', ' ')" />
-        <ButtonGroup
-          @click="toggleVisible(`${multName}${id}`)"
-          :buttons="[buttonAdd, buttonToggle]"
-        />
+        <div class="flex justify-center">
+          <Button
+            v-bind="buttonAdd"
+            @click="$emit('add', multName)"
+            class="mx-2"
+          />
+          <Button
+            @click="toggleVisible(`${multName}${id}`)"
+            v-bind="buttonToggle"
+          />
+        </div>
       </Container>
 
       <template
         :key="groupId"
-        v-for="(group, groupName, groupId) in multiples.data[multName]"
+        v-for="(group, groupName, groupId) in props.multiples[multName]"
       >
         <Container
           data-group="multiple"
