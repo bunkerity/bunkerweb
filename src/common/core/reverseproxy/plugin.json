@@ -47,7 +47,7 @@
       "help": "Sets the SNI host to send to upstream server.",
       "id": "reverse-proxy-ssl-sni-name",
       "label": "SSL SNI name",
-      "regex": "^(yes|no)$",
+      "regex": "^.*$",
       "type": "check"
     },
     "REVERSE_PROXY_HOST": {
