@@ -4,6 +4,12 @@
 
 - [BUGFIX] Fix compatibility issues with mysql 8.4+ version and the `backup` plugin by adding the `mariadb-connector-c` dependency to the scheduler Dockerfile (on alpine)
 - [BUGFIX] Fix potential issues with multiple settings in helpers.load_variables when multiple settings have the same suffix (the issue is only present in future external plugins)
+- [BUGFIX] Fix issues with kubernetes integration when were setting a global multisite setting it was not applied to the services
+- [FEATURE] Add REVERSE_PROXY_SSL_SNI and REVERSE_PROXY_SSL_SNI_NAME to support SNI-based upstreams
+- [UI] Update web UI setup wizard to handle when a reverse proxy already exists but no admin user is configured
+- [UI] Fix issues with multiple settings on the global_config not being able to be deleted in specific cases
+- [AUTOCONF] Fix issues with globally set settings overridden by default values not being saved correctly in database
+- [LINUX] Update Linux repository to repo.bunkerweb.io
 - [SECURITY] Update security headers in default pages and error pages for improved security
 - [DEPS] Updated LuaJIT version to v2.1-20240626
 - [DEPS] Updated coreruleset-v4 version to v4.4.0

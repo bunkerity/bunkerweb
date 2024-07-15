@@ -336,8 +336,6 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 
 Please ensure that you have **NGINX 1.26.1 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
-To simplify the installation process, Linux package repositories for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb). They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer.
-
 === "Debian"
 
     The first step is to add NGINX official repository :
@@ -374,7 +372,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     And finally install BunkerWeb 1.6.0-beta :
 
     ```shell
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+    curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
     sudo -E apt install -y bunkerweb=1.6.0-beta
     ```
@@ -421,7 +419,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     And finally install BunkerWeb 1.6.0-beta :
 
     ```shell
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
+    curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
     sudo -E apt install -y bunkerweb=1.6.0-beta
     ```
@@ -456,7 +454,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     And finally install BunkerWeb 1.6.0-beta :
 
     ```shell
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | \
+    curl -s https://repo.bunkerweb.io/install/script.rpm.sh | \
   	sed 's/yum install -y pygpgme --disablerepo='\''bunkerity_bunkerweb'\''/yum install -y python-gnupg/g' | \
   	sed 's/pypgpme_check=`rpm -qa | grep -qw pygpgme`/python-gnupg_check=`rpm -qa | grep -qw python-gnupg`/g' | sudo bash && \
   	sudo dnf makecache && \
@@ -508,7 +506,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
 
     ```shell
 	  sudo dnf install -y epel-release && \
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+    curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
     sudo -E dnf install -y bunkerweb-1.6.0-beta
     ```

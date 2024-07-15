@@ -180,105 +180,117 @@
                             {% else %}
                                 <h6 class="col-span-12 block text-left font-bold mb-4 mt-2">🧑‍🚀 An admin user already exists</h6>
                             {% endif %}
-                            <h2 class="col-span-12 block text-left font-bold mb-4 mt-2 text-2xl">Settings</h2>
-                            <!-- ui host-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
-                                    UI Host (REVERSE_PROXY_HOST)<strong class="required-mark">*</strong>
-                                </h5>
-                                <label class="sr-only" for="ui_host">ui host</label>
-                                <input tabindex="1"
-                                       type="text"
-                                       id="ui_host"
-                                       name="ui_host"
-                                       value="{{ ui_host }}"
-                                       class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                       placeholder="http://[hostname](:[port])"
-                                       pattern="^https?:\/\/.{1,255}(:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4})))?$"
-                                       required />
-                            </div>
-                            <!-- end ui host-->
-                            <!-- ui url-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
-                                    UI URL (REVERSE_PROXY_URL)<strong class="required-mark">*</strong>
-                                </h5>
-                                <label class="sr-only" for="ui_url">ui url</label>
-                                <input tabindex="1"
-                                       type="text"
-                                       id="ui_url"
-                                       name="ui_url"
-                                       class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                       placeholder="/admin"
-                                       value="{{ random_url }}"
-                                       pattern="^\/([\/a-zA-Z0-9\-]{0,255})$"
-                                       required />
-                            </div>
-                            <!-- end ui url-->
-                            <!-- server name-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
-                                    Server name<strong class="required-mark">*</strong>
-                                </h5>
-                                <label class="sr-only" for="server_name">server name</label>
-                                <input tabindex="1"
-                                       type="text"
-                                       id="server_name"
-                                       name="server_name"
-                                       class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                                       placeholder="www.example.com"
-                                       value="www.example.com"
-                                       pattern=".*"
-                                       minlength="1"
-                                       required />
-                            </div>
-                            <!-- end server name-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Check server name DNS</h5>
-                                <div class="flex justify-start items-center">
-                                    <button tabindex="1"
-                                            id="check-server-name"
-                                            class="flex justify-start w-fit tracking-wide inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
-                                        <span>check</span>
-                                        <span aria-check-color
-                                              class="block ml-2 rounded-full w-4 h-4 bg-gray-300"
-                                              aria-description="show state of server name"></span>
-                                        <span class="sr-only" aria-check-result></span>
-                                    </button>
-                                </div>
-                                <p class="mt-4">In case of issues, you can also click <a id="check_url" class="privacy-link" href="https://www.example.com/setup/check" target="_blank">here</a> to perform a manual check.</p>
-                            </div>
-                            <!-- auto let's encrypt-->
-                            <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
-                                <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Auto let's encrypt</h5>
-                                <label class="sr-only" for="auto_lets_encrypt">auto let's encrypt</label>
-                                <div data-checkbox-handler="auto_lets_encrypt"
-                                     class="relative mb-7 md:mb-0 z-10">
+                            {% if not ui_reverse_proxy %}
+                                <h2 class="col-span-12 block text-left font-bold mb-4 mt-2 text-2xl">Settings</h2>
+                                <!-- ui host-->
+                                <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                                    <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                        UI Host (REVERSE_PROXY_HOST)<strong class="required-mark">*</strong>
+                                    </h5>
+                                    <label class="sr-only" for="ui_host">ui host</label>
                                     <input tabindex="1"
-                                           data-check
-                                           type="checkbox"
-                                           id="auto_lets_encrypt"
-                                           name="auto_lets_encrypt"
-                                           data-checked="false"
-                                           class="checkbox"
-                                           value="no" />
-                                    <svg data-checkbox-handler="auto_lets_encrypt"
-                                         class="pointer-events-none absolute fill-white left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         viewBox="0 0 512 512">
-                                        <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
-                                        </path>
-                                    </svg>
+                                           type="text"
+                                           id="ui_host"
+                                           name="ui_host"
+                                           value="{{ ui_host }}"
+                                           class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                           placeholder="http://[hostname](:[port])"
+                                           pattern="^https?:\/\/.{1,255}(:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4})))?$"
+                                           required />
                                 </div>
-                            </div>
-                            <!-- end auto let's encrypt-->
-                            <div class="p-2 col-span-12 bg-gray-200 mt-4 md:mt-6 mb-1 py-2 px-2 rounded flex flex-col justify-center items-center w-full max-w-[400px] overflow-hidden">
-                                <h5 class="text-sm md:text-base text-center mt-1 mb-2 transition duration-300 ease-in-out text-md font-bold m-0">
-                                    Your BunkerWeb UI final URL will be
-                                </h5>
-                                <p class="family-text text-center text-sm md:text-base break-words w-full px-4"
-                                   data-resume>https://</p>
-                            </div>
+                                <!-- end ui host-->
+                                <!-- ui url-->
+                                <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                                    <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                        UI URL (REVERSE_PROXY_URL)<strong class="required-mark">*</strong>
+                                    </h5>
+                                    <label class="sr-only" for="ui_url">ui url</label>
+                                    <input tabindex="1"
+                                           type="text"
+                                           id="ui_url"
+                                           name="ui_url"
+                                           class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                           placeholder="/admin"
+                                           value="{{ random_url }}"
+                                           pattern="^\/([\/a-zA-Z0-9\-]{0,255})$"
+                                           required />
+                                </div>
+                                <!-- end ui url-->
+                                <!-- server name-->
+                                <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                                    <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">
+                                        Server name<strong class="required-mark">*</strong>
+                                    </h5>
+                                    <label class="sr-only" for="server_name">server name</label>
+                                    <input tabindex="1"
+                                           type="text"
+                                           id="server_name"
+                                           name="server_name"
+                                           class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                                           placeholder="www.example.com"
+                                           value="www.example.com"
+                                           pattern=".*"
+                                           minlength="1"
+                                           required />
+                                </div>
+                                <!-- end server name-->
+                                <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                                    <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Check server name DNS</h5>
+                                    <div class="flex justify-start items-center">
+                                        <button tabindex="1"
+                                                id="check-server-name"
+                                                class="flex justify-start w-fit tracking-wide inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                                            <span>check</span>
+                                            <span aria-check-color
+                                                  class="block ml-2 rounded-full w-4 h-4 bg-gray-300"
+                                                  aria-description="show state of server name"></span>
+                                            <span class="sr-only" aria-check-result></span>
+                                        </button>
+                                    </div>
+                                    <p class="mt-4">
+                                        In case of issues, you can also click <a id="check_url"
+    class="privacy-link"
+    href="https://www.example.com/setup/check"
+    target="_blank">here</a> to perform a manual check.
+                                    </p>
+                                </div>
+                                <!-- auto let's encrypt-->
+                                <div class="flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full">
+                                    <h5 class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0">Auto let's encrypt</h5>
+                                    <label class="sr-only" for="auto_lets_encrypt">auto let's encrypt</label>
+                                    <div data-checkbox-handler="auto_lets_encrypt"
+                                         class="relative mb-7 md:mb-0 z-10">
+                                        <input tabindex="1"
+                                               data-check
+                                               type="checkbox"
+                                               id="auto_lets_encrypt"
+                                               name="auto_lets_encrypt"
+                                               data-checked="{% if auto_lets_encrypt %}true{% else %}false{% endif %}"
+                                               {% if auto_lets_encrypt %}checked{% endif %}
+                                               class="checkbox"
+                                               value="no" />
+                                        <svg data-checkbox-handler="auto_lets_encrypt"
+                                             class="pointer-events-none absolute fill-white left-0 top-0 translate-x-1 translate-y-2 h-3 w-3"
+                                             xmlns="http://www.w3.org/2000/svg"
+                                             viewBox="0 0 512 512">
+                                            <path class="pointer-events-none" d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <!-- end auto let's encrypt-->
+                                <div class="p-2 col-span-12 bg-gray-200 mt-4 md:mt-6 mb-1 py-2 px-2 rounded flex flex-col justify-center items-center w-full max-w-[400px] overflow-hidden">
+                                    <h5 class="text-sm md:text-base text-center mt-1 mb-2 transition duration-300 ease-in-out text-md font-bold m-0">
+                                        Your BunkerWeb UI final URL will be
+                                    </h5>
+                                    <p class="family-text text-center text-sm md:text-base break-words w-full px-4"
+                                       data-resume>https://</p>
+                                </div>
+                            {% else %}
+                                <h6 class="col-span-12 block text-left font-bold mb-4 mt-2">
+                                    ↪️ A reverse proxy is already configured for the web interface
+                                </h6>
+                            {% endif %}
                             <h2 class="col-span-12 block text-left font-bold my-4 text-2xl">Newsletter</h2>
                             <!-- email inpt-->
                             <div class="flex flex-col relative col-span-12 mx-2 max-w-[400px] w-full">
@@ -350,6 +362,7 @@
                 </form>
             </main>
             <script nonce="{{ script_nonce }}">
+      {% if not ui_reverse_proxy %}
       class ServerCheck {
         constructor() {
           this.servInp = document.querySelector("#server_name");
@@ -472,41 +485,6 @@
         }
       }
 
-      class Loader {
-        constructor() {
-          this.menuContainer = document.querySelector("[data-menu-container]");
-          this.loaderContainer = document.querySelector("[data-loader]");
-          this.logoEl = document.querySelector("[data-loader-img]");
-          this.isLoading = true;
-          this.init();
-        }
-
-        init() {
-          this.loaderContainer.setAttribute("aria-hidden", "false");
-          this.loading();
-          window.addEventListener("load", (e) => {
-            setTimeout(() => {
-              this.loaderContainer.classList.add("opacity-0");
-            }, 550);
-
-            setTimeout(() => {
-              this.isLoading = false;
-              this.loaderContainer.classList.add("hidden");
-              this.loaderContainer.setAttribute("aria-hidden", "true");
-            }, 850);
-          });
-        }
-
-        loading() {
-          if ((this.isLoading = true)) {
-            setTimeout(() => {
-              this.logoEl.classList.toggle("scale-105");
-              this.loading();
-            }, 300);
-          }
-        }
-      }
-
       class Checkbox {
         constructor() {
           this.init();
@@ -549,18 +527,56 @@
           });
         }
       }
+      {% endif %}
+
+      class Loader {
+        constructor() {
+          this.menuContainer = document.querySelector("[data-menu-container]");
+          this.loaderContainer = document.querySelector("[data-loader]");
+          this.logoEl = document.querySelector("[data-loader-img]");
+          this.isLoading = true;
+          this.init();
+        }
+
+        init() {
+          this.loaderContainer.setAttribute("aria-hidden", "false");
+          this.loading();
+          window.addEventListener("load", (e) => {
+            setTimeout(() => {
+              this.loaderContainer.classList.add("opacity-0");
+            }, 550);
+
+            setTimeout(() => {
+              this.isLoading = false;
+              this.loaderContainer.classList.add("hidden");
+              this.loaderContainer.setAttribute("aria-hidden", "true");
+            }, 850);
+          });
+        }
+
+        loading() {
+          if ((this.isLoading = true)) {
+            setTimeout(() => {
+              this.logoEl.classList.toggle("scale-105");
+              this.loading();
+            }, 300);
+          }
+        }
+      }
 
       class SubmitForm {
         constructor() {
+          this.formEl = document.querySelector("#setup-form");
           {% if not ui_user %}
             this.pwEl = document.querySelector("#admin_password");
             this.pwCheckEl = document.querySelector("#admin_password_check");
             this.pwAlertEl = document.querySelector("[data-pw-alert]");
           {% endif %}
-          this.formEl = document.querySelector("#setup-form");
+          {% if not ui_reverse_proxy %}
           this.servInp = document.querySelector("#server_name");
           this.sslCheck = document.querySelector("#auto_lets_encrypt");
           this.urlInp = document.querySelector("#ui_url");
+          {% endif %}
           this.newsForm = document.querySelector("#newsletter-form");
           this.emailInp = document.querySelector("#newsletter-email")
           this.checkEmailInp = document.querySelector("#newsletter-check");
@@ -623,7 +639,8 @@
             }
 
             // send form and wait for response
-            let api = `https://${this.servInp.value}`;
+            {% if not ui_reverse_proxy %}
+            var api = `https://${this.servInp.value}`;
             if (!this.urlInp.value.startsWith("/")) {
               api = `${api}/`;
             }
@@ -631,6 +648,10 @@
             if (!api.endsWith("/")) {
               api = `${api}/`;
             }
+            var redirect = `https://${this.servInp.value}/setup/loading?target_uri=${this.urlInp.value}`;
+            {% else %}
+            var redirect = window.location.href.replace("setup", "login");
+            {% endif %}
 
             fetch(window.location.href, {
               method: "POST",
@@ -639,7 +660,7 @@
             })
               .then((res) => {
                 if (res.status === 200) {
-                  window.location.href = `https://${this.servInp.value}/setup/loading?target_uri=${this.urlInp.value}`;
+                  window.location.href = redirect;
                 }
               })
               .catch((err) => {
@@ -759,11 +780,13 @@
         }
       }
 
-      const setFlash = new FlashMsg()
-      const setLoader = new Loader();
+      const setFlash = new FlashMsg();
+      {% if not ui_reverse_proxy %}
       const setResume = new Resume();
       const setCheck = new Checkbox();
       const setStateServ = new ServerCheck();
+      {% endif %}
+      const setLoader = new Loader();
       const setSubmit = new SubmitForm();
             </script>
         </body>

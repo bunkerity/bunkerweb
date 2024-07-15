@@ -243,7 +243,7 @@ You can manually unban an IP which can be useful when doing some tests but it ne
 
 ## Whitelisting
 
-If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](security-tuning.md#blacklisting-and-whitelisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
+If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](security-tuning.md#blacklisting-whitelisting-and-greylisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
 
 - Healthcheck / status bot
 - Callback like IPN or webhook

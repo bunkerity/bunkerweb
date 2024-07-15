@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from datetime import datetime
+from itertools import chain
 from os import getenv
 from time import sleep
 from typing import Any, Dict, List, Optional
@@ -42,16 +43,22 @@ class Config:
             self._settings.update(plugin["settings"])
 
     def __get_full_env(self) -> dict:
+        env_instances = {"SERVER_NAME": ""}
+        for instance in self.__instances:
+            for variable, value in instance["env"].items():
+                env_instances[variable] = value
+
         config = {"SERVER_NAME": "", "MULTISITE": "yes"}
         for service in self.__services:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
                 continue
-            for variable, value in service.items():
+            for variable, value in chain(env_instances.items(), service.items()):
                 if variable.startswith("CUSTOM_CONF") or not variable.isupper():
                     continue
                 if not self._db.is_setting(variable, multisite=True):
-                    self.__logger.warning(f"Variable {variable}: {value} is not a valid multisite setting, ignoring it")
+                    if variable in service:
+                        self.__logger.warning(f"Variable {variable}: {value} is not a valid multisite setting, ignoring it")
                     continue
                 config[f"{server_name}_{variable}"] = value
             config["SERVER_NAME"] += f" {server_name}"
@@ -87,10 +94,14 @@ class Config:
             if isinstance(db_metadata, str):
                 if not startup:
                     self.__logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
-            elif db_metadata["is_initialized"] and not any(
-                v
-                for k, v in db_metadata.items()
-                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
+            elif (
+                db_metadata["is_initialized"]
+                and db_metadata["first_config_saved"]
+                and not any(
+                    v
+                    for k, v in db_metadata.items()
+                    if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
+                )
             ):
                 ready = True
                 continue

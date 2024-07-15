@@ -50,7 +50,7 @@ try:
 
     if not services:
         LOGGER.warning("No services found, exiting...")
-        sys_exit(2)
+        sys_exit(0)
 
     services = services.split(" ")
     services_plugin_urls = {}

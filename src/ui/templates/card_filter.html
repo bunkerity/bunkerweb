@@ -5,7 +5,7 @@
     else 'col-span-12 md:col-span-6 2xl:col-span-4'  if attribute_name == 'plugins'
     else 'col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-5'  if attribute_name == 'reports'
     else 'col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-4'  if attribute_name == 'services'
-    else 'col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-4' %}
+else 'col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-4' %}
 <div data-{{ attribute_name }}-filter class="{% if is_filter_hidden %} hidden {% endif %} h-fit {{ grid_cols }} p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
     <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
     <div class="mx-2 grid grid-cols-12 gap-4">

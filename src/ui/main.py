@@ -110,7 +110,6 @@ with app.app_context():
     app.config["SESSION_COOKIE_HTTPONLY"] = True  # Recommended for security
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Or 'Strict' for stricter settings
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
-    app.config["PREFERRED_URL_SCHEME"] = "https"
 
     login_manager = LoginManager()
     login_manager.session_protection = "strong"
@@ -202,7 +201,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         elif operation == "delete":
             operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
     elif method == "global_config":
-        operation, error = app.config["CONFIG"].edit_global_conf(args[0])
+        operation, error = app.config["CONFIG"].edit_global_conf(args[0], check_changes=True)
 
     if operation == "reload":
         operation = app.config["INSTANCES"].reload_instance(args[0])
@@ -542,15 +541,19 @@ def check():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
-    db_config = app.config["CONFIG"].get_config(methods=False, filtered_settings=("SERVER_NAME", "USE_UI", "UI_HOST"))
-
-    for server_name in db_config["SERVER_NAME"].split(" "):
-        if db_config.get(f"{server_name}_USE_UI", "no") == "yes":
-            return redirect(url_for("login"), 301)
+    db_config = app.config["CONFIG"].get_config(methods=False, filtered_settings=("SERVER_NAME", "MULTISITE", "USE_UI", "UI_HOST", "AUTO_LETS_ENCRYPT"))
 
     admin_user = app.config["DB"].get_ui_user()
     if admin_user:
         admin_user = User(**admin_user)
+
+    ui_reverse_proxy = False
+    for server_name in db_config["SERVER_NAME"].split(" "):
+        if server_name and db_config.get(f"{server_name}_USE_UI", db_config.get("USE_UI", "no")) == "yes":
+            if admin_user:
+                return redirect(url_for("login"), 301)
+            ui_reverse_proxy = True
+            break
 
     if request.method == "POST":
         if app.config["DB"].readonly:
@@ -558,7 +561,9 @@ def setup():
 
         is_request_form("setup")
 
-        required_keys = ["server_name", "ui_host", "ui_url"]
+        required_keys = []
+        if not ui_reverse_proxy:
+            required_keys.extend(["server_name", "ui_host", "ui_url"])
         if not admin_user:
             required_keys.extend(["admin_username", "admin_password", "admin_password_check"])
 
@@ -578,18 +583,6 @@ def setup():
                     "setup",
                 )
 
-        server_names = db_config["SERVER_NAME"].split(" ")
-        if request.form["server_name"] in server_names:
-            return redirect_flash_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
-        else:
-            for server_name in server_names:
-                if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split(" "):
-                    return redirect_flash_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
-
-        if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
-            return redirect_flash_error("The hostname is not valid.", "setup")
-
-        if not admin_user:
             admin_user = User(request.form["admin_username"], request.form["admin_password"], method="ui")
 
             ret = app.config["DB"].create_ui_user(request.form["admin_username"], admin_user.password_hash, method="ui")
@@ -598,45 +591,62 @@ def setup():
 
             flash("The admin user was created successfully", "success")
 
-        ui_data = get_ui_data()
-        ui_data["RELOADING"] = True
-        ui_data["LAST_RELOAD"] = time()
-        # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
-        Thread(
-            target=manage_bunkerweb,
-            name="Reloading instances",
-            args=(
-                "services",
-                {
-                    "SERVER_NAME": request.form["server_name"],
-                    "USE_UI": "yes",
-                    "USE_REVERSE_PROXY": "yes",
-                    "REVERSE_PROXY_HOST": request.form["ui_host"],
-                    "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
-                    "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
-                    "USE_CUSTOM_SSL": "yes" if request.form.get("auto_lets_encrypt", "no") == "no" else "no",
-                    "CUSTOM_SSL_CERT": "/var/cache/bunkerweb/misc/default-server-cert.pem" if request.form.get("auto_lets_encrypt", "no") == "no" else "",
-                    "CUSTOM_SSL_KEY": "/var/cache/bunkerweb/misc/default-server-cert.key" if request.form.get("auto_lets_encrypt", "no") == "no" else "",
-                    "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
-                    "MAX_CLIENT_SIZE": "50m",
-                },
-                request.form["server_name"],
-                request.form["server_name"],
-            ),
-            kwargs={"operation": "new", "threaded": True},
-        ).start()
+        if not ui_reverse_proxy:
+            server_names = db_config["SERVER_NAME"].split(" ")
+            if request.form["server_name"] in server_names:
+                return redirect_flash_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
+            else:
+                for server_name in server_names:
+                    if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split(" "):
+                        return redirect_flash_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
 
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+            if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
+                return redirect_flash_error("The hostname is not valid.", "setup")
+
+            ui_data = get_ui_data()
+            ui_data["RELOADING"] = True
+            ui_data["LAST_RELOAD"] = time()
+
+            config = {
+                "SERVER_NAME": request.form["server_name"],
+                "USE_UI": "yes",
+                "USE_REVERSE_PROXY": "yes",
+                "REVERSE_PROXY_HOST": request.form["ui_host"],
+                "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
+                "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
+                "MAX_CLIENT_SIZE": "50m",
+            }
+
+            if request.form.get("auto_lets_encrypt", "no") == "yes":
+                config["AUTO_LETS_ENCRYPT"] = "yes"
+            else:
+                config["GENERATE_SELF_SIGNED_SSL"] = "yes"
+                config["SELF_SIGNED_SSL_SUBJ"] = f"/CN={request.form['server_name']}/"
+
+            if not config.get("MULTISITE", "no") == "yes":
+                app.config["CONFIG"].edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
+
+            # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
+            Thread(
+                target=manage_bunkerweb,
+                name="Reloading instances",
+                args=("services", config, request.form["server_name"], request.form["server_name"]),
+                kwargs={"operation": "new", "threaded": True},
+            ).start()
+
+            with LOCK:
+                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         return Response(status=200)
 
     return render_template(
         "setup.html",
         ui_user=admin_user,
+        ui_reverse_proxy=ui_reverse_proxy,
         username=getenv("ADMIN_USERNAME", ""),
         password=getenv("ADMIN_PASSWORD", ""),
         ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
+        auto_lets_encrypt=db_config.get("AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) == "yes",
         random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}",
     )
 
@@ -2583,6 +2593,7 @@ def login():
 
         if admin_user.get_id() == request.form["username"] and admin_user.check_password(request.form["password"]):
             # log the user in
+            session.permanent = True
             session["ip"] = request.remote_addr
             session["user_agent"] = request.headers.get("User-Agent")
             session["totp_validated"] = False

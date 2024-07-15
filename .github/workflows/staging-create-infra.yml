@@ -30,7 +30,7 @@ jobs:
         with:
           version: "v1.29.1"
       - name: Set up Python 3.12
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
         if: inputs.TYPE != 'k8s'
         with:
           python-version: "3.12"
@@ -52,7 +52,7 @@ jobs:
         if: always()
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      - uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         if: always()
         with:
           name: tf-${{ inputs.TYPE }}

@@ -45,6 +45,9 @@ files=("requirements.in" "../autoconf/requirements.in" "../scheduler/requirement
 shopt -s globstar
 for file in ../{common,../{docs,misc,tests}}/**/requirements*.in
 do
+    if echo "$file" | grep "ansible"; then
+        continue
+    fi
     files+=("$file")
 done
 shopt -u globstar
