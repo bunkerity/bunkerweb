@@ -87,6 +87,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
     chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ && \
     chmod 750 gen/*.py scheduler/*.py cli/*.py ui/*.py ui/src/*.py helpers/*.sh /var/www/ && \
     find core/*/jobs/* -type f -exec chmod 750 {} \; && \
+    find core/*/bwcli/* -type f -exec chmod 750 {} \; && \
     chmod 755 .
 
 # Cleanup
