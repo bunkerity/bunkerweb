@@ -209,7 +209,7 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@X_DNS_PREFETCH_CONTROL: "off"@X_DNS_PREFETCH_CONTROL: "on"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@X_DNS_PREFETCH_CONTROL: "on"@X_DNS_PREFETCH_CONTROL: "off"@' {} \;
         else
             sudo sed -i 's@COOKIE_FLAGS=.*$@COOKIE_FLAGS=* SameSite=Lax@' /etc/bunkerweb/variables.env
             sudo sed -i 's@CUSTOM_HEADER=.*$@CUSTOM_HEADER=@' /etc/bunkerweb/variables.env
@@ -225,7 +225,7 @@ do
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@X_DNS_PREFETCH_CONTROL=.*$@X_DNS_PREFETCH_CONTROL=on@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@X_DNS_PREFETCH_CONTROL=.*$@X_DNS_PREFETCH_CONTROL=off@' /etc/bunkerweb/variables.env
             export COOKIE_FLAGS="* SameSite=Lax"
             export KEEP_UPSTREAM_HEADERS="Content-Security-Policy Permission-Policy X-Frame-Options"
             unset CUSTOM_HEADER
