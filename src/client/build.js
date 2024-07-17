@@ -2,7 +2,7 @@ const { execSync } = require("child_process");
 const { resolve } = require("path");
 const fs = require("fs");
 
-const frontDir = "/vite";
+const frontDir = "/dashboard";
 const clientBuildDir = "static";
 const appStaticDir = "../ui/static";
 const appTempDir = "../ui/templates";
@@ -181,6 +181,12 @@ async function delPrevDirs() {
   delElRecursive(`${appStaticDir}/img`);
 }
 
+async function buildSetup() {
+  // Build setup
+  runCommand("/setup", "npm install");
+  runCommand("/setup", "npm run build");
+}
+
 async function build() {
   // Build client and setup
   await delPrevDirs();
@@ -188,6 +194,7 @@ async function build() {
   await updateClientDir();
   await setBuildTempToUI();
   await moveBuildStaticToUI();
+  await buildSetup();
 }
 
 build();

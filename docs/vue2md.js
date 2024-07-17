@@ -4,7 +4,7 @@ const path = require("path");
 // Merge all components md on this file name
 const finalFile = "ui-components.md";
 // Where we have all SFC components
-const inputFolder = path.join(__dirname, "../src/client/vite/src/components");
+const inputFolder = path.join(__dirname, "../src/client/dashboard/src/components");
 // Where we want to output md components file
 const ouputFolder = path.join(__dirname, "components");
 
