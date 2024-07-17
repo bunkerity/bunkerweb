@@ -5,6 +5,6 @@
 */
 
 const plugin_types = ["core", "external", "pro"];
-const default_modes = ["scheduler", "autoconf", "ui", "default"];
+const default_modes = ["scheduler", "autoconf", "ui", "default", "manual"];
 
 export { plugin_types, default_modes };

@@ -5,7 +5,7 @@ import Container from "@components/Widget/Container.vue";
 import Input from "@components/Forms/Field/Input.vue";
 import Select from "@components/Forms/Field/Select.vue";
 
-import { useFilter } from "@utils/form.js";
+import { useFilter } from "@utils/filter.js";
 /**
   @name Widget/Filter.vue
   @description This component allow to filter any data object or array with a list of filters.

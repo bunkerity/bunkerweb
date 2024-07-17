@@ -49,7 +49,6 @@ const props = defineProps({
     required: true,
     default: {},
   },
-
   containerClass: {
     type: String,
     required: false,
