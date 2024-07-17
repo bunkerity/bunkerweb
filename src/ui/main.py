@@ -2022,7 +2022,7 @@ def logs_container(container_id):
 
     logs = []
     tmp_logs = []
-    if docker_client:
+    if INTEGRATION in ("Docker", "Swarm", "Autoconf"):
         try:
             if INTEGRATION != "Swarm":
                 docker_logs = docker_client.containers.get(container_id).logs(  # type: ignore
@@ -2041,6 +2041,7 @@ def logs_container(container_id):
 
             tmp_logs = docker_logs.decode("utf-8", errors="replace").split("\n")[0:-1]
         except docker_NotFound:
+            app.logger.exception(f"Could not get logs for container {container_id}")
             return (
                 jsonify(
                     {
@@ -2050,7 +2051,7 @@ def logs_container(container_id):
                 ),
                 404,
             )
-    elif kubernetes_client:
+    elif INTEGRATION == "Kubernetes":
         try:
             kubernetes_logs = kubernetes_client.read_namespaced_pod_log(
                 container_id,
@@ -2060,6 +2061,7 @@ def logs_container(container_id):
             )
             tmp_logs = kubernetes_logs.split("\n")[0:-1]
         except kube_ApiException:
+            app.logger.exception(f"Could not get logs for pod {container_id}")
             return (
                 jsonify(
                     {
