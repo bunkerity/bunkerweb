@@ -418,10 +418,21 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
         resources: ["ingresses"]
         verbs: ["get", "watch", "list"]
     ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      namespace: default
+      name: role-bunkerweb-logs
+    rules:
+      - apiGroups: [""]
+        resources: ["pods/log"]
+        verbs: ["get"]
+    ---
     apiVersion: v1
     kind: ServiceAccount
     metadata:
       name: sa-bunkerweb
+      namespace: default
     ---
     apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
@@ -435,6 +446,20 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
     roleRef:
       kind: ClusterRole
       name: cr-bunkerweb
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: rolebinding-bunkerweb-logs
+      namespace: default
+    subjects:
+      - kind: ServiceAccount
+        name: sa-bunkerweb
+        namespace: default
+    roleRef:
+      kind: Role
+      name: role-bunkerweb-logs
       apiGroup: rbac.authorization.k8s.io
     ---
     apiVersion: apps/v1
@@ -453,6 +478,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           annotations:
             bunkerweb.io/INSTANCE: "yes"
         spec:
+          serviceAccountName: sa-bunkerweb
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
@@ -534,7 +560,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               env:
                 - name: KUBERNETES_MODE
                   value: "yes"
-                - name: "DATABASE_URI"
+                - name: DATABASE_URI
                   value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
     ---
     apiVersion: apps/v1
@@ -561,7 +587,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               env:
                 - name: KUBERNETES_MODE
                   value: "yes"
-                - name: "DATABASE_URI"
+                - name: DATABASE_URI
                   value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
     ---
     apiVersion: apps/v1
@@ -608,14 +634,14 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               env:
                 - name: MYSQL_RANDOM_ROOT_PASSWORD
                   value: "yes"
-                - name: "MYSQL_DATABASE"
+                - name: MYSQL_DATABASE
                   value: "db"
-                - name: "MYSQL_USER"
+                - name: MYSQL_USER
                   value: "bunkerweb"
-                - name: "MYSQL_PASSWORD"
+                - name: MYSQL_PASSWORD
                   value: "changeme"
               volumeMounts:
-                - mountPath: "/var/lib/mysql"
+                - mountPath: /var/lib/mysql
                   name: vol-db
           volumes:
             - name: vol-db
@@ -646,7 +672,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               env:
                 - name: KUBERNETES_MODE
                   value: "YES"
-                - name: "DATABASE_URI"
+                - name: DATABASE_URI
                   value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
     ---
     apiVersion: v1
@@ -1264,10 +1290,21 @@ After a successful login/password combination, you will be prompted to enter you
         resources: ["ingresses"]
         verbs: ["get", "watch", "list"]
     ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      namespace: default
+      name: role-bunkerweb-logs
+    rules:
+      - apiGroups: [""]
+        resources: ["pods/log"]
+        verbs: ["get"]
+    ---
     apiVersion: v1
     kind: ServiceAccount
     metadata:
       name: sa-bunkerweb
+      namespace: default
     ---
     apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
@@ -1281,6 +1318,20 @@ After a successful login/password combination, you will be prompted to enter you
     roleRef:
       kind: ClusterRole
       name: cr-bunkerweb
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: rolebinding-bunkerweb-logs
+      namespace: default
+    subjects:
+      - kind: ServiceAccount
+        name: sa-bunkerweb
+        namespace: default
+    roleRef:
+      kind: Role
+      name: role-bunkerweb-logs
       apiGroup: rbac.authorization.k8s.io
     ---
     apiVersion: apps/v1
@@ -1299,6 +1350,7 @@ After a successful login/password combination, you will be prompted to enter you
           annotations:
             bunkerweb.io/INSTANCE: "yes"
         spec:
+          serviceAccountName: sa-bunkerweb
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
@@ -1377,7 +1429,7 @@ After a successful login/password combination, you will be prompted to enter you
               env:
                 - name: KUBERNETES_MODE
                   value: "yes"
-                - name: "DATABASE_URI"
+                - name: DATABASE_URI
                   value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
     ---
     apiVersion: apps/v1
@@ -1404,7 +1456,7 @@ After a successful login/password combination, you will be prompted to enter you
               env:
                 - name: KUBERNETES_MODE
                   value: "yes"
-                - name: "DATABASE_URI"
+                - name: DATABASE_URI
                   value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
     ---
     apiVersion: apps/v1
@@ -1451,14 +1503,14 @@ After a successful login/password combination, you will be prompted to enter you
               env:
                 - name: MYSQL_RANDOM_ROOT_PASSWORD
                   value: "yes"
-                - name: "MYSQL_DATABASE"
+                - name: MYSQL_DATABASE
                   value: "db"
-                - name: "MYSQL_USER"
+                - name: MYSQL_USER
                   value: "bunkerweb"
-                - name: "MYSQL_PASSWORD"
+                - name: MYSQL_PASSWORD
                   value: "changeme"
               volumeMounts:
-                - mountPath: "/var/lib/mysql"
+                - mountPath: /var/lib/mysql
                   name: vol-db
           volumes:
             - name: vol-db
@@ -1493,7 +1545,7 @@ After a successful login/password combination, you will be prompted to enter you
                   value: "changeme"
                 - name: KUBERNETES_MODE
                   value: "YES"
-                - name: "DATABASE_URI"
+                - name: DATABASE_URI
                   value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
     ---
     apiVersion: v1
@@ -1564,6 +1616,9 @@ After a successful login/password combination, you will be prompted to enter you
     metadata:
       name: ingress
       annotations:
+        bunkerweb.io/www.example.com_SERVE_FILES: "no"
+        bunkerweb.io/www.example.com_USE_CLIENT_CACHE: "yes"
+        bunkerweb.io/www.example.com_USE_GZIP: "yes"
         bunkerweb.io/www.example.com_USE_UI: "yes"
         bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: '400 404 405 413 429 500 501 502 503 504'
         bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: '50m'
