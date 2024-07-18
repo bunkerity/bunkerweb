@@ -183,8 +183,10 @@ async function delPrevDirs() {
 
 async function buildSetup() {
   // Build setup
-  runCommand("/setup", "npm install");
-  runCommand("/setup", "npm run build");
+  await runCommand("/setup", "npm install");
+  await runCommand("/setup", "npm run build");
+  // Move /setup/output/index.html to ui/templates/setup.html
+  await moveFile("./setup/output/index.html", "../ui/templates/setup.html");
 }
 
 async function build() {
