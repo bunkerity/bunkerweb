@@ -68,38 +68,43 @@ async function buildVite() {
 // Change dir structure for flask app
 async function updateClientDir() {
   const srcDir = resolve(`./${clientBuildDir}/dashboard/pages`);
-  const dirToRem = resolve(`./${clientBuildDir}/dashboard`);
+  const temporaryTemp = resolve(`./templatestemp`);
+  const baseTemp = resolve(`./${clientBuildDir}/dashboard/`);
   const staticTemp = resolve(`./${clientBuildDir}/templates`);
 
   try {
-    await createDirIfNotExists(staticTemp);
-    await copyDir(srcDir, staticTemp);
-    await delElRecursive(dirToRem);
-    await changeOutputTemplates();
+    createDirIfNotExists(staticTemp);
+    copyDir(srcDir, temporaryTemp);
+    changeOutputTemplates();
+    // Delete templatestemp dir
+    delElRecursive(baseTemp);
   } catch (err) {
     console.log(err);
   }
 }
 
 async function changeOutputTemplates() {
-  const templateDir = resolve(`./${clientBuildDir}/templates`);
-  fs.readdir(templateDir, (err, subdirs) => {
+  const templateTempDir = resolve(`./templatestemp`);
+  fs.readdir(templateTempDir, (err, subdirs) => {
     subdirs.forEach((subdir) => {
       // Get absolute path of current subdir
-      const currPath = resolve(`./${clientBuildDir}/templates/${subdir}`);
+      const currPath = resolve(`./templatestemp/${subdir}`);
       // Rename index.html by subdir name
-      moveFile(`${currPath}/index.html`, `./templates/${subdir}.html`);
+      moveFile(
+        `${currPath}/index.html`,
+        `./${clientBuildDir}/templates/${subdir}.html`
+      );
     });
   });
 }
 
 async function setBuildTempToUI() {
   // Run all files in /templates and get data
-  fs.readdir(resolve("./templates"), (err, files) => {
+  fs.readdir(resolve(`./${clientBuildDir}/templates`), (err, files) => {
     // Read content
     files.forEach((file) => {
       fs.readFile(
-        resolve(`./templates/${file}`),
+        resolve(`./${clientBuildDir}/templates/${file}`),
         {
           encoding: "utf8",
           flag: "r",
@@ -155,14 +160,12 @@ async function setBuildTempToUI() {
         }
       );
     });
-    // Delete templates to avoid to add it to static
-    delElRecursive("./dashboard/templates");
   });
 }
 
 async function moveBuildStaticToUI() {
   // move build static subdir to app ui static dir
-  const srcDir = resolve(`./dashboard`);
+  const srcDir = resolve(`./${clientBuildDir}`);
   const destDir = resolve(appStaticDir);
   fs.readdir(srcDir, (err, dirs) => {
     dirs.forEach((dir) => {
@@ -194,7 +197,7 @@ async function build() {
   await delPrevDirs();
   await buildVite();
   await updateClientDir();
-  // await setBuildTempToUI();
+  await setBuildTempToUI();
   // await moveBuildStaticToUI();
   // await buildSetup();
 }
