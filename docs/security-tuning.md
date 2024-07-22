@@ -1414,3 +1414,32 @@ To manually initialize a migration, execute the following command:
         ```
 
 This command seamlessly migrates your BunkerWeb data to precisely match the configuration outlined in the migration file.
+
+## Security.txt
+
+STREAM support :white_check_mark:
+
+The Security.txt plugin allows you to easily create a `security.txt` file for your website, providing a standardized method for security researchers and others to report security vulnerabilities. By enabling this feature, you can enhance your site's security posture and streamline the reporting process for potential security issues.
+
+**List of features**
+
+- **Streamlined and Standardized Reporting:** Implement a standardized and user-friendly method for security researchers to report vulnerabilities, ensuring clear communication and timely responses.
+- **Enhanced Security Posture and Transparency:** Strengthen your site's security by providing clear guidelines for reporting security issues, fostering transparency and trust within the security community.
+- **Customizable and User-Friendly Configuration:** Customize the `security.txt` file to include specific contact information and security policies, and manage it easily through a user-friendly web interface.
+- **Compliance with Best Practices:** Align with industry best practices by implementing a `security.txt` file, demonstrating your commitment to security and fostering a collaborative security culture.
+
+**List of settings**
+
+| Setting                        | Default                     | Context   | Multiple | Description                                                                                                                                                                                                                                                              |
+| ------------------------------ | --------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_SECURITYTXT`              | `no`                        | multisite | no       | Enable security.txt file.                                                                                                                                                                                                                                                |
+| `SECURITYTXT_URI`              | `/.well-known/security.txt` | multisite | no       | Indicates the URI where the "security.txt" file will be accessible from.                                                                                                                                                                                                 |
+| `SECURITYTXT_CONTACT`          |                             | multisite | yes      | Indicates a method that researchers should use for reporting security vulnerabilities such as an email address, a phone number, and/or a web page with contact information. (If the value is empty, the security.txt file will not be created as it is a required field) |
+| `SECURITYTXT_EXPIRES`          |                             | multisite | no       | Indicates the date and time after which the data contained in the "security.txt" file is considered stale and should not be used (If the value is empty, the value will always be the current date and time + 1 year).                                                   |
+| `SECURITYTXT_ENCRYPTION`       |                             | multisite | yes      | Indicates an encryption key that security researchers should use for encrypted communication.                                                                                                                                                                            |
+| `SECURITYTXT_ACKNOWLEDGEMENTS` |                             | multisite | yes      | Indicates a link to a page where security researchers are recognized for their reports.                                                                                                                                                                                  |
+| `SECURITYTXT_PREFERRED_LANG`   | `en`                        | multisite | no       | Can be used to indicate a set of natural languages that are preferred when submitting security reports.                                                                                                                                                                  |
+| `SECURITYTXT_CANONICAL`        |                             | multisite | yes      | Indicates the canonical URIs where the "security.txt" file is located, which is usually something like "https://example.com/.well-known/security.txt". (If the value is empty, the default value will be automatically generated from the site URL + SECURITYTXT_URI)    |
+| `SECURITYTXT_POLICY`           |                             | multisite | yes      | Indicates a link to where the vulnerability disclosure policy is located.                                                                                                                                                                                                |
+| `SECURITYTXT_HIRING`           |                             | multisite | yes      | Used for linking to the vendor's security-related job positions.                                                                                                                                                                                                         |
+| `SECURITYTXT_CSAF`             |                             | multisite | yes      | A link to the provider-metadata.json of your CSAF (Common Security Advisory Framework) provider.                                                                                                                                                                         |
