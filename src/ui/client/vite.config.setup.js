@@ -14,6 +14,9 @@ export default defineConfig({
     }),
   ],
   resolve: {
+    // https://vitejs.dev/config/#resolve-extensions
+    // Reduce the amount of extensions that Vite will try to resolve
+    extensions: [".js", ".json", ".vue", ".css"],
     alias: {
       "@store": resolve(__dirname, "./dashboard/store"),
       "@utils": resolve(__dirname, "./dashboard/utils"),
@@ -25,6 +28,8 @@ export default defineConfig({
     },
   },
   build: {
+    minify: "esbuild",
+    chunkSizeWarningLimit: 1024,
     outDir: "./opt-setup",
     emptyOutDir: "./opt-setup",
     rollupOptions: {

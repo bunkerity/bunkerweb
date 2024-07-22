@@ -11,3 +11,7 @@ node_modules
 /package*.json
 /src/client/static
 /src/client/templates
+/src/ui/static/assets
+/src/ui/static/css
+/src/ui/static/flags
+/src/ui/static/img

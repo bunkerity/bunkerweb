@@ -3,6 +3,7 @@ from subprocess import Popen, PIPE
 import os
 import shutil
 import re
+import asyncio
 
 # get current directory
 current_directory = os.path.dirname(os.path.realpath(__file__))
@@ -19,6 +20,21 @@ ui_dir_templates = f"{current_directory}/../templates"
 statics = ("assets", "css", "flags", "img", "js")
 
 
+def reset():
+    asyncio.run(remove_dir(opt_dir))
+    asyncio.run(remove_dir(opt_dir_dashboard))
+    asyncio.run(remove_dir(opt_dir_setup))
+
+
+def set_dashboard():
+    move_template(opt_dir_dashboard_pages, ui_dir_templates)
+    move_statics(opt_dir_dashboard, ui_dir_static)
+
+
+def set_setup():
+    move_template(opt_dir_setup_page, ui_dir_templates)
+
+
 def run_command(command, need_wait=False):
     process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory, shell=True)
     if need_wait:
@@ -26,24 +42,22 @@ def run_command(command, need_wait=False):
 
     out, err = process.communicate()
     if err:
-        print("Error: ", err)
-    print(out)
+        print(err)
 
 
-def remove_dir(directory):
+async def remove_dir(directory):
     if os.path.exists(directory):
         shutil.rmtree(directory)
 
 
-def reset():
-    remove_dir(opt_dir)
-    remove_dir(opt_dir_dashboard)
-    remove_dir(opt_dir_setup)
+async def create_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True)
 
 
 def create_base_dirs():
-    os.makedirs(opt_dir, exist_ok=True)
-    os.makedirs(opt_dir_templates, exist_ok=True)
+    asyncio.run(create_dir(opt_dir))
+    asyncio.run(create_dir(opt_dir_dashboard))
 
 
 def move_template(folder, target_folder):
@@ -63,67 +77,70 @@ def move_template(folder, target_folder):
   </body>
 </html>"""
 
+    async def move_template_file(root, file, target_folder, base_html):
+        file_path = os.path.join(root, file)
+
+        def format_template(m):
+            replace = m.group(0).replace('href="/', 'href="').replace('src="/', 'src="')
+            if ".js" in replace:
+                replace = ' nonce="{{ script_nonce }}" ' + replace
+            return replace
+
+        # get file content
+        content = ""
+        with open(file_path, "r") as f:
+            content = f.read()
+            content = re.sub(r'(href|src)="\/(css|js|img|favicon|assets|js)\/[^<]*?(?=<|\/>)', format_template, content)
+            # get the content before <body>
+            content = content[: content.index("<body>")] + base_html
+            # write the new content
+
+        with open(file_path, "w") as f:
+            f.write(content)
+
+        # remove previous file if exists
+        if os.path.exists(f"{target_folder}/{os.path.basename(root)}.html"):
+            os.remove(f"{target_folder}/{os.path.basename(root)}.html")
+
+        shutil.copy(file_path, f"{target_folder}/{os.path.basename(root)}.html")
+
+    # I want to run this asynchronusly
     # I want to get all subfollder of a folder
     for root, dirs, files in os.walk(folder):
         for file in files:
-            file_path = os.path.join(root, file)
-
-            # get file content
-            content = ""
-            with open(file_path, "r") as f:
-                content = f.read()
-                # I want to replace all paths using regex like this : /href="\/(css|js|img|favicon|assets|js)|src="\/(assets|js)/g
-                regex_paths = """/href="\/(css|js|img|favicon|assets|js)|src="\/(assets|js)/g"""
-                content = re.sub(regex_paths, "", content)
-                regex_script = """/<script/g"""
-                content = re.sub(regex_script, '<script nonce="{{ script_nonce }}" ', content)
-                # get index of <body>
-                index = content.index("<body>")
-                # get the content before <body>
-                content = content[:index] + base_html
-                # write the new content
-            with open(file_path, "w") as f:
-                f.write(content)
-
-            # remove previous file if exists
-            if os.path.exists(f"{target_folder}/{os.path.basename(root)}.html"):
-                os.remove(f"{target_folder}/{os.path.basename(root)}.html")
-
-            shutil.copy(file_path, f"{target_folder}/{os.path.basename(root)}.html")
+            asyncio.run(move_template_file(root, file, target_folder, base_html))
 
 
 def move_statics(folder, target_folder):
+
+    async def move_static_file(root, dir, target_folder):
+        dir = os.path.join(root, dir)
+
+        # remove previous folder if exists
+        if os.path.exists(f"{target_folder}/{os.path.basename(dir)}"):
+            shutil.rmtree(f"{target_folder}/{os.path.basename(dir)}")
+        # rename index.html by the name of the folder
+        shutil.move(dir, f"{target_folder}/{os.path.basename(dir)}")
+
     # I want to get all subfollder of a folder
     for root, dirs, files in os.walk(folder):
         for dir in dirs:
             if dir not in statics:
                 continue
-            dir = os.path.join(root, dir)
-
-            # remove previous folder if exists
-            if os.path.exists(f"{target_folder}/{os.path.basename(dir)}"):
-                shutil.rmtree(f"{target_folder}/{os.path.basename(dir)}")
-            # rename index.html by the name of the folder
-            shutil.move(dir, f"{target_folder}/{os.path.basename(dir)}")
-
-
-def set_dashboard():
-    move_template(opt_dir_dashboard_pages, ui_dir_templates)
-    move_statics(opt_dir_dashboard, ui_dir_static)
-
-
-def set_setup():
-    move_template(opt_dir_setup_page, ui_dir_templates)
+            asyncio.run(move_static_file(root, dir, target_folder))
 
 
 def build():
     reset()
     create_base_dirs()
-    run_command(["npm", "install"], True)
+    # Check if node modules exists
+    if not os.path.exists(f"{current_directory}/node_modules"):
+        run_command(["npm", "install"], True)
+    # Create the build
     run_command(["npm", "run", "build-dashboard"], True)
+    set_dashboard()
     # run_command(["npm", "run", "build-dashboard"])
     # run_command(["npm", "run", "build-setup"], True)
-    set_dashboard()
     # set_setup()
 
 

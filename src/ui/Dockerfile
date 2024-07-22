@@ -21,6 +21,9 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
+# Install node and npm to build vite frontend
+RUN apk add --no-cache nodejs npm
+
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
 COPY src/common/api api
@@ -33,6 +36,13 @@ COPY src/common/helpers helpers
 COPY src/common/templates templates
 COPY src/ui ui
 COPY src/VERSION VERSION
+
+# This will build the frontend and add files to the UI folder
+WORKDIR /usr/share/bunkerweb/ui/client
+RUN python3 build.py
+
+# We can delete the client folder after building the frontend
+RUN rm -rf /usr/share/bunkerweb/ui/client
 
 FROM python:3.12.4-alpine3.19@sha256:ef3397d09070efd36583e83d2619cf8006158641e5b6b629d4d92a9778f5aa1c
 
@@ -53,7 +63,7 @@ RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client po
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
+  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:ui INTEGRATION /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod 750 gen/*.py ui/*.py ui/src/*.py helpers/*.sh deps/python/bin/* && \
@@ -66,7 +76,7 @@ RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_cl
 RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.0-beta"
+LABEL version="1.5.9"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

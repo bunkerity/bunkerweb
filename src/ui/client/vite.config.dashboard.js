@@ -17,6 +17,9 @@ export default defineConfig({
     port: 3000,
   },
   resolve: {
+    // https://vitejs.dev/config/#resolve-extensions
+    // Reduce the amount of extensions that Vite will try to resolv
+    extensions: [".js", ".json", ".vue", ".css"],
     alias: {
       "@": resolve(__dirname, "./dashboard"),
       "@store": resolve(__dirname, "./dashboard/store"),
@@ -30,6 +33,7 @@ export default defineConfig({
     },
   },
   build: {
+    minify: "esbuild",
     chunkSizeWarningLimit: 1024,
     outDir: "./opt-dashboard",
     emptyOutDir: "./opt-dashboard",
