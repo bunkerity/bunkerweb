@@ -714,6 +714,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: sa-bunkerweb
+  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -745,6 +746,7 @@ spec:
       annotations:
         bunkerweb.io/INSTANCE: "yes"
     spec:
+      serviceAccountName: sa-bunkerweb
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
