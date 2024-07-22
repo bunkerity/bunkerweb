@@ -4,9 +4,9 @@ import fs from "fs";
 
 const __dirname = import.meta.dirname;
 
-const clientBuildDir = "dashboard";
-const appStaticDir = "../ui/static";
-const appTempDir = "../ui/templates";
+const clientBuildDir = "opt-dashboard";
+const appStaticDir = "../static";
+const appTempDir = "../templates";
 
 async function moveFile(src, dest) {
   fs.renameSync(src, dest, (err) => {
@@ -61,20 +61,20 @@ async function runCommand(dir, command) {
 // Install deps and build vite (work for client and setup)
 async function buildVite() {
   // Install packages
-  await runCommand("", "npm run build-setup");
+  await runCommand("", "npm install");
   await runCommand("", "npm run build-dashboard");
 }
 
 // Change dir structure for flask app
 async function updateClientDir() {
-  const srcDir = resolve(`./${clientBuildDir}/src/pages`);
-  const dirToRem = resolve(`./${clientBuildDir}/src`);
+  const srcDir = resolve(`./${clientBuildDir}/dashboard/pages`);
+  const dirToRem = resolve(`./${clientBuildDir}/dashboard`);
   const staticTemp = resolve(`./${clientBuildDir}/templates`);
 
   try {
+    await createDirIfNotExists(`./templates`);
     await copyDir(srcDir, staticTemp);
     await delElRecursive(dirToRem);
-    await createDirIfNotExists("./templates");
     await changeOutputTemplates();
   } catch (err) {
     console.log(err);
@@ -156,7 +156,7 @@ async function setBuildTempToUI() {
       );
     });
     // Delete templates to avoid to add it to static
-    delElRecursive("./dashbord/templates");
+    delElRecursive("./dashboard/templates");
   });
 }
 
@@ -195,8 +195,8 @@ async function build() {
   await buildVite();
   await updateClientDir();
   await setBuildTempToUI();
-  await moveBuildStaticToUI();
-  await buildSetup();
+  // await moveBuildStaticToUI();
+  // await buildSetup();
 }
 
 build();
