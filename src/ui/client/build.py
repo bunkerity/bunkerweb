@@ -8,7 +8,6 @@ import asyncio
 # get current directory
 current_directory = os.path.dirname(os.path.realpath(__file__))
 # needed dirs
-opt_dir = f"{current_directory}/output"
 opt_dir_templates = f"{current_directory}/output/templates"
 opt_dir_dashboard = f"{current_directory}/opt-dashboard"
 opt_dir_dashboard_pages = f"{current_directory}/opt-dashboard/dashboard/pages"
@@ -21,21 +20,24 @@ statics = ("assets", "css", "flags", "img", "js")
 
 
 def reset():
-    asyncio.run(remove_dir(opt_dir))
+    """Remove previous directories if exists"""
     asyncio.run(remove_dir(opt_dir_dashboard))
     asyncio.run(remove_dir(opt_dir_setup))
 
 
 def set_dashboard():
+    """Utils to run needed steps to set the dashboard pages (move statics, update and rename templates)"""
     move_template(opt_dir_dashboard_pages, ui_dir_templates)
     move_statics(opt_dir_dashboard, ui_dir_static)
 
 
 def set_setup():
+    """Utils to run needed steps to set the setup page (all-in-one html page)"""
     move_template(opt_dir_setup_page, ui_dir_templates)
 
 
 def run_command(command, need_wait=False):
+    """Utils to run a subprocess command. This is usefull to run npm commands to build vite project"""
     process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory, shell=True)
     if need_wait:
         process.wait()
@@ -46,21 +48,25 @@ def run_command(command, need_wait=False):
 
 
 async def remove_dir(directory):
+    """Utils function to remove a directory if exists"""
     if os.path.exists(directory):
         shutil.rmtree(directory)
 
 
 async def create_dir(directory):
+    """Utils function to create a directory if not exists"""
     if not os.path.exists(directory):
         os.makedirs(directory, exist_ok=True)
 
 
 def create_base_dirs():
-    asyncio.run(create_dir(opt_dir))
+    """Create the base directories we will need to build front end and add them to flask app"""
     asyncio.run(create_dir(opt_dir_dashboard))
 
 
 def move_template(folder, target_folder):
+    """For the define folder, loop on each files and move them to the target folder with some modification (replace relative path to absolute path for example)"""
+
     base_html = """ 
   <body>
   {% set data_server_flash = [] %}
@@ -78,6 +84,7 @@ def move_template(folder, target_folder):
 </html>"""
 
     async def move_template_file(root, file, target_folder, base_html):
+        """Move the template file to the target folder. This will replace relative path on file to absolute path to work with flask static"""
         file_path = os.path.join(root, file)
 
         def format_template(m):
@@ -112,8 +119,10 @@ def move_template(folder, target_folder):
 
 
 def move_statics(folder, target_folder):
+    """For the define folder, loop on each files and move them to the target folder."""
 
     async def move_static_file(root, dir, target_folder):
+        """Move the static file to the target folder."""
         dir = os.path.join(root, dir)
 
         # remove previous folder if exists
@@ -131,12 +140,12 @@ def move_statics(folder, target_folder):
 
 
 def build():
+    """All steps to build the front end and set it to the flask app"""
     reset()
     create_base_dirs()
-    # Check if node modules exists
+    # Only install packages if not already installed
     if not os.path.exists(f"{current_directory}/node_modules"):
         run_command(["npm", "install"], True)
-    # Create the build
     run_command(["npm", "run", "build-dashboard"], True)
     set_dashboard()
     # run_command(["npm", "run", "build-dashboard"])
