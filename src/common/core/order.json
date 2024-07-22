@@ -5,7 +5,8 @@
     "blacklist",
     "greylist",
     "bunkernet",
-    "limit"
+    "limit",
+    "securitytxt"
   ],
   "init_worker": [
     "redis",
