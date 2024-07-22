@@ -8,7 +8,7 @@ import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
 import { useCheckPluginsValidity } from "@utils/form.js";
-import { useEasyForm } from "@store/easy.js";
+import { useEasyForm } from "@store/form.js";
 
 /**
   @name Form/Easy.vue
@@ -138,7 +138,7 @@ onUnmounted(() => {
     <Title type="card" :title="'dashboard_easy_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
 
-    <template v-for="(step, id) in easyForm.templateUI">
+    <template v-for="(step, id) in easyForm.templateUIFormat">
       <Container
         data-is="content"
         data-easy-form-step
