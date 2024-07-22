@@ -17,7 +17,7 @@ For example, you need to execute `npm run dev-dashboard` to run a vite dev serve
 
 In case you want to run the BunkerWeb UI, try to update front-end and get the modifications on your app, you need to do the following :
 - go to `misc/dev` path and run `docker compose -f docker-compose.ui.yml up --build` in order to create BunkerWeb with UI looking for local static and templates folder
-- update front-end in dev mode and run inside `cd/src/ui/client` : `node ./build.js` to rebuild setup and dashboard pages.
+- update front-end in dev mode and run inside `cd/src/ui/client` : `python build.py` to rebuild setup and dashboard pages.
 
 # Prod mode
 
