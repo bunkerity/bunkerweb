@@ -25,8 +25,8 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "./setup",
-    emptyOutDir: "./setup",
+    outDir: "./opt-setup",
+    emptyOutDir: "./opt-setup",
     rollupOptions: {
       input: {
         setup: resolve(__dirname, "./setup/index.html"),

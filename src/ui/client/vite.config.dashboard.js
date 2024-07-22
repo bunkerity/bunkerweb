@@ -31,8 +31,8 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1024,
-    outDir: "../dashboard",
-    emptyOutDir: "../dashboard",
+    outDir: "./opt-dashboard",
+    emptyOutDir: "./opt-dashboard",
     rollupOptions: {
       input: {
         home: resolve(__dirname, "./dashboard/pages/home/index.html"),

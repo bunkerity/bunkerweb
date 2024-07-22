@@ -72,7 +72,7 @@ async function updateClientDir() {
   const staticTemp = resolve(`./${clientBuildDir}/templates`);
 
   try {
-    await createDirIfNotExists(`./templates`);
+    await createDirIfNotExists(staticTemp);
     await copyDir(srcDir, staticTemp);
     await delElRecursive(dirToRem);
     await changeOutputTemplates();
@@ -194,7 +194,7 @@ async function build() {
   await delPrevDirs();
   await buildVite();
   await updateClientDir();
-  await setBuildTempToUI();
+  // await setBuildTempToUI();
   // await moveBuildStaticToUI();
   // await buildSetup();
 }
