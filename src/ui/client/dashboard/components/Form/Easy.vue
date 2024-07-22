@@ -8,6 +8,7 @@ import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
 import { useCheckPluginsValidity } from "@utils/form.js";
+import { useEasyForm } from "@store/easy.js";
 
 /**
   @name Form/Easy.vue
@@ -41,6 +42,8 @@ import { useCheckPluginsValidity } from "@utils/form.js";
   @param {string} containerClass - Container
   @param {object} columns - Columns object.
 */
+
+const easyForm = useEasyForm();
 
 const props = defineProps({
   // id && value && method
@@ -78,17 +81,12 @@ const data = reactive({
 
 function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
-    useCheckPluginsValidity(data.base);
+    useCheckPluginsValidity(easyForm.templateUI);
 
   data.stepErr = id;
   data.isRegErr = isRegErr;
   data.isReqErr = isReqErr;
   data.settingErr = `"${settingNameErr}"`;
-}
-
-function updateTemplate(e) {
-  if (!e.target.closest("[data-easy-form-step]")) return;
-  useUpdateTemp(e, data.base);
 }
 
 const buttonSave = {
@@ -116,13 +114,15 @@ const buttonNext = {
 
 onMounted(() => {
   // Restart step one every time the component is mounted
+  easyForm.setTemplate(props.template);
   data.currStep = 0;
   setValidity();
-  useListenTempFields(updateTemplate);
+  // I want updatInp to access event, data.base and the container attribut
+  easyForm.useListenTempFields();
 });
 
 onUnmounted(() => {
-  useUnlistenTempFields(updateTemplate);
+  easyForm.useUnlistenTempFields();
 });
 </script>
 
@@ -138,7 +138,7 @@ onUnmounted(() => {
     <Title type="card" :title="'dashboard_easy_mode'" />
     <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
 
-    <template v-for="(step, id) in data.base">
+    <template v-for="(step, id) in easyForm.templateUI">
       <Container
         data-is="content"
         data-easy-form-step
