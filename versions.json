@@ -7,11 +7,16 @@
     ]
   },
   {
-    "version": "1.5.8",
-    "title": "1.5.8",
+    "version": "1.5.9",
+    "title": "1.5.9",
     "aliases": [
       "latest"
     ]
+  },
+  {
+    "version": "1.5.8",
+    "title": "1.5.8",
+    "aliases": []
   },
   {
     "version": "1.5.7",
