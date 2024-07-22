@@ -14,7 +14,7 @@ Preferred-Languages: {*preferred_lang*}
 Canonical: {*ca*}
   {% end %}
 {% else %}
-Canonical: {*scheme*}://{*server_name*}{*uri*}
+Canonical: https://{*server_name*}{*uri*}
 {% end %}
 {% for _, p in ipairs(policy) do %}
 Policy: {*p*}

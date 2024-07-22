@@ -4,6 +4,7 @@ local utils = require "bunkerweb.utils"
 
 local ngx = ngx
 local ERR = ngx.ERR
+local OK = ngx.OK
 local get_phase = ngx.get_phase
 local subsystem = ngx.config.subsystem
 local get_multiple_variables = utils.get_multiple_variables
@@ -109,6 +110,13 @@ function securitytxt:init()
 	return self:ret(true, "successfully loaded security policies")
 end
 
+function securitytxt:access()
+	if self.ctx.bw.uri ~= self.variables["SECURITYTXT_URI"] and self.ctx.bw.uri ~= "/security.txt" then
+		return self:ret(true, "success")
+	end
+	return self:ret(true, "security.txt requested", OK)
+end
+
 function securitytxt:content()
 	-- Check if content is needed
 	if self.variables["USE_SECURITYTXT"] == "no" then
@@ -126,7 +134,6 @@ function securitytxt:content()
 	end
 
 	local data = {
-		server_name = self.ctx.bw.server_name,
 		scheme = self.ctx.bw.scheme,
 	}
 

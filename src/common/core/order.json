@@ -37,6 +37,7 @@
     "limit",
     "misc",
     "cors",
+    "securitytxt",
     "antibot"
   ],
   "headers": [
