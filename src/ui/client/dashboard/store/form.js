@@ -30,10 +30,24 @@ export const createFormStore = (storeName, formType) => {
   */
     function setTemplate(template) {
       if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
+
       template.value = template;
       templateBase.value = template;
-      templateUI.value = JSON.parse(JSON.stringify(template));
-      templateUIFormat.value = JSON.parse(JSON.stringify(template));
+      templateUI.value = template;
+      templateUIFormat.value = template;
+
+      // console.log("template", type.value, template);
+      // console.log(typeof template);
+      // const formattedData = {};
+      // // Loop dict items
+      // for (const [key, value] of Object.entries(template)) {
+      //   //  Case key "value" is here, we are directly on the right level (and maybe on the raw mode)
+      //   if (value?.value) {
+      //   }
+      //   console.log(key, value);
+      //   formattedData[key] = value;
+      //   if (!value?.settings || value?.multiples) continue;
+      // }
     }
 
     /**
@@ -292,6 +306,8 @@ export const createFormStore = (storeName, formType) => {
   */
     function submitForm() {
       if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
+      console.log("submitForm");
+      const formattedData = {};
     }
 
     /**

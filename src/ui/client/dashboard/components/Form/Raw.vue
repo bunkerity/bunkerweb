@@ -79,10 +79,11 @@ const data = reactive({
     jsonReady = "{" + jsonReady.slice(0, -1) + "}";
 
     try {
-      const data = JSON.parse(jsonReady);
-      rawForm.setTemplate(data);
+      const json = JSON.parse(jsonReady);
+      rawForm.setTemplate(json);
       return true;
     } catch (e) {
+      console.log(e);
       return false;
     }
   }),
@@ -116,7 +117,6 @@ function json2raw(json) {
 }
 
 const editorData = {
-  value: data.str,
   name: `raw-editor-${uuidv4()}`,
   label: `raw-editor-${uuidv4()}`,
   hideLabel: true,
@@ -150,7 +150,11 @@ onBeforeMount(() => {
     <Subtitle type="card" :subtitle="'dashboard_raw_mode_subtitle'" />
 
     <Container class="form-raw-editor-container layout-settings">
-      <Editor @inp="(v) => (data.str = v)" v-bind="editorData" />
+      <Editor
+        @inp="(v) => (data.str = v)"
+        v-bind="editorData"
+        :value="data.str"
+      />
     </Container>
     <Button :disabled="data.isValid ? false : true" v-bind="buttonSave" />
 
