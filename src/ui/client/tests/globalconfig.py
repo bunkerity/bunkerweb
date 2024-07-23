@@ -3667,6 +3667,9 @@ def format_setting(
     if setting_name in settings and not "multiple" in setting_value:
         setting_value["value"] = settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
         setting_value["method"] = settings[setting_name].get("method", "ui")
+    
+    # Add prev_value in order to check if value has changed to submit it
+    setting_value["prev_value"] = setting_value.get("value")
 
     # Then override by service settings
     if setting_name in settings:

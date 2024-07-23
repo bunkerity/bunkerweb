@@ -15,10 +15,10 @@ import { useRawForm } from "@store/form.js";
   @example
   {
    "IS_LOADING": "no",
-   "NGINX_PREFIX": "/etc/nginx/", 
-   "HTTP_PORT": "8080", 
-   "HTTPS_PORT": "8443", 
-   "MULTISITE": "yes" 
+   "NGINX_PREFIX": "/etc/nginx/",
+   "HTTP_PORT": "8080",
+   "HTTPS_PORT": "8443",
+   "MULTISITE": "yes"
   }
   @param {object} template - Template object with plugin and settings data.
   @param {string} containerClass - Container
@@ -47,47 +47,47 @@ const props = defineProps({
 });
 
 const data = reactive({
-  str: "",
-  // Check if the raw data is valid when trying to revert from raw to JSON
-  // Case this is invalid, we will display an error message and disabled save button
-  // Case this is valid, we will store the JSON in the store and enable the save button
-  isValid: computed(() => {
-    // Transform to a possible valid JSON
-    let dataToCheck = data.str;
-    // Replace quotes "" with quotes ''
-    dataToCheck = dataToCheck.replace(/"/g, "'");
-
-    let isValidRaw = true;
-    let jsonReady = "";
-
-    // loop on each line
-    dataToCheck = dataToCheck.split("\n");
-    dataToCheck = dataToCheck.map((line) => {
-      // Get index of the first equal sign
-      const index = line.indexOf("=");
-      // Case no equal sign in a line, this is invalid
-      if (index === -1) isValidRaw = false;
-
-      // Update at this index with a colon
-      jsonReady +=
-        '"' + line.slice(0, index) + '":"' + line.slice(index + 1) + '",';
-    });
-
-    if (!isValidRaw) return false;
-
-    // Try to parse the JSON
-    jsonReady = "{" + jsonReady.slice(0, -1) + "}";
-
-    try {
-      const json = JSON.parse(jsonReady);
-      rawForm.setTemplate(json);
-      return true;
-    } catch (e) {
-      console.log(e);
-      return false;
-    }
-  }),
+  isValid: true,
 });
+
+function updateRaw(v) {
+  console.log("update");
+  // Transform to a possible valid JSON
+  rawForm.setRawData(v, true);
+  let dataToCheck = v;
+  // Replace quotes "" with quotes ''
+  dataToCheck = dataToCheck.replace(/"/g, "'");
+
+  let isValidRaw = true;
+  let jsonReady = "";
+
+  // loop on each line
+  dataToCheck = dataToCheck.split("\n");
+  dataToCheck = dataToCheck.map((line) => {
+    // Get index of the first equal sign
+    const index = line.indexOf("=");
+    // Case no equal sign in a line, this is invalid
+    if (index === -1) isValidRaw = false;
+
+    // Update at this index with a colon
+    jsonReady +=
+      '"' + line.slice(0, index) + '":"' + line.slice(index + 1) + '",';
+  });
+
+  if (!isValidRaw) return (data.isValid = false);
+
+  // Try to parse the JSON
+  jsonReady = "{" + jsonReady.slice(0, -1) + "}";
+
+  try {
+    const json = JSON.parse(jsonReady);
+    rawForm.setTemplate(json, true);
+    data.isValid = true;
+  } catch (e) {
+    console.log(e);
+    data.isValid = false;
+  }
+}
 
 function json2raw(json) {
   let dataStr = JSON.stringify(json);
@@ -133,7 +133,7 @@ const buttonSave = {
 };
 
 onBeforeMount(() => {
-  data.str = json2raw(props.template);
+  rawForm.setRawData(json2raw(props.template));
 });
 </script>
 
@@ -151,12 +151,16 @@ onBeforeMount(() => {
 
     <Container class="form-raw-editor-container layout-settings">
       <Editor
-        @inp="(v) => (data.str = v)"
+        @inp="(v) => updateRaw(v)"
         v-bind="editorData"
-        :value="data.str"
+        :value="rawForm.rawData"
       />
     </Container>
-    <Button :disabled="data.isValid ? false : true" v-bind="buttonSave" />
+    <Button
+      @click="rawForm.submit()"
+      :disabled="data.isValid ? false : rawForm.isUpdateData ? false : true"
+      v-bind="buttonSave"
+    />
 
     <div class="flex justify-center items-center" data-is="form-error">
       <Text

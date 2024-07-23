@@ -57,6 +57,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -88,6 +89,7 @@
                                             "disabled": false,
                                             "value": "/etc/nginx/",
                                             "method": "default",
+                                            "prev_value": "/etc/nginx/",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -119,6 +121,7 @@
                                             "disabled": false,
                                             "value": "8080",
                                             "method": "default",
+                                            "prev_value": "8080",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -150,6 +153,7 @@
                                             "disabled": false,
                                             "value": "8443",
                                             "method": "default",
+                                            "prev_value": "8443",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -181,6 +185,7 @@
                                             "disabled": true,
                                             "value": "yes",
                                             "method": "scheduler",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -216,6 +221,7 @@
                                             "disabled": false,
                                             "value": "app1.example.com www.example.com",
                                             "method": "default",
+                                            "prev_value": "app1.example.com www.example.com",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -247,6 +253,7 @@
                                             "disabled": false,
                                             "value": "auto",
                                             "method": "default",
+                                            "prev_value": "auto",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -278,6 +285,7 @@
                                             "disabled": false,
                                             "value": "2048",
                                             "method": "default",
+                                            "prev_value": "2048",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -309,6 +317,7 @@
                                             "disabled": false,
                                             "value": "1024",
                                             "method": "default",
+                                            "prev_value": "1024",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -340,6 +349,7 @@
                                             "disabled": false,
                                             "value": "$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
                                             "method": "default",
+                                            "prev_value": "$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -381,6 +391,7 @@
                                             "disabled": true,
                                             "value": "info",
                                             "method": "scheduler",
+                                            "prev_value": "info",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -416,6 +427,7 @@
                                             "disabled": false,
                                             "value": "127.0.0.11",
                                             "method": "default",
+                                            "prev_value": "127.0.0.11",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -447,6 +459,7 @@
                                             "disabled": false,
                                             "value": "64m",
                                             "method": "default",
+                                            "prev_value": "64m",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -478,6 +491,7 @@
                                             "disabled": false,
                                             "value": "64m",
                                             "method": "default",
+                                            "prev_value": "64m",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -509,6 +523,7 @@
                                             "disabled": false,
                                             "value": "16m",
                                             "method": "default",
+                                            "prev_value": "16m",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -540,6 +555,7 @@
                                             "disabled": false,
                                             "value": "16m",
                                             "method": "default",
+                                            "prev_value": "16m",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -571,6 +587,7 @@
                                             "disabled": false,
                                             "value": "16m",
                                             "method": "default",
+                                            "prev_value": "16m",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -602,6 +619,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -633,6 +651,7 @@
                                             "disabled": false,
                                             "value": "5000",
                                             "method": "default",
+                                            "prev_value": "5000",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -664,6 +683,7 @@
                                             "disabled": false,
                                             "value": "0.0.0.0",
                                             "method": "default",
+                                            "prev_value": "0.0.0.0",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -695,6 +715,7 @@
                                             "disabled": false,
                                             "value": "bwapi",
                                             "method": "default",
+                                            "prev_value": "bwapi",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -726,6 +747,7 @@
                                             "disabled": true,
                                             "value": "127.0.0.0/24 10.20.30.0/24",
                                             "method": "scheduler",
+                                            "prev_value": "127.0.0.0/24 10.20.30.0/24",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -761,6 +783,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -792,6 +815,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -823,6 +847,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -858,6 +883,7 @@
                                             "disabled": false,
                                             "value": "http",
                                             "method": "default",
+                                            "prev_value": "http",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -889,6 +915,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -920,6 +947,7 @@
                                             "disabled": false,
                                             "value": "1337",
                                             "method": "default",
+                                            "prev_value": "1337",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -951,6 +979,7 @@
                                             "disabled": false,
                                             "value": "4242",
                                             "method": "default",
+                                            "prev_value": "4242",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -982,6 +1011,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1013,6 +1043,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -1044,6 +1075,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1085,6 +1117,7 @@
                                             "disabled": false,
                                             "value": "debug",
                                             "method": "default",
+                                            "prev_value": "debug",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -1116,6 +1149,7 @@
                                             "disabled": true,
                                             "value": "bunkerweb",
                                             "method": "scheduler",
+                                            "prev_value": "bunkerweb",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -1173,6 +1207,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1204,6 +1239,7 @@
                                             "disabled": false,
                                             "value": "/challenge",
                                             "method": "default",
+                                            "prev_value": "/challenge",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1235,6 +1271,7 @@
                                             "disabled": false,
                                             "value": "60",
                                             "method": "default",
+                                            "prev_value": "60",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1266,6 +1303,7 @@
                                             "disabled": false,
                                             "value": "86400",
                                             "method": "default",
+                                            "prev_value": "86400",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1297,6 +1335,7 @@
                                             "disabled": false,
                                             "value": "0.7",
                                             "method": "default",
+                                            "prev_value": "0.7",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1328,6 +1367,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1359,6 +1399,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1390,6 +1431,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1421,6 +1463,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1452,6 +1495,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1483,6 +1527,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1527,6 +1572,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1558,6 +1604,7 @@
                                             "disabled": false,
                                             "value": "sitewide",
                                             "method": "default",
+                                            "prev_value": "sitewide",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1589,6 +1636,7 @@
                                             "disabled": false,
                                             "value": "changeme",
                                             "method": "default",
+                                            "prev_value": "changeme",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1620,6 +1668,7 @@
                                             "disabled": false,
                                             "value": "changeme",
                                             "method": "default",
+                                            "prev_value": "changeme",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1651,6 +1700,7 @@
                                             "disabled": false,
                                             "value": "Restricted area",
                                             "method": "default",
+                                            "prev_value": "Restricted area",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1695,6 +1745,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -1731,6 +1782,7 @@
                                             "disabled": false,
                                             "value": "daily",
                                             "method": "default",
+                                            "prev_value": "daily",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -1762,6 +1814,7 @@
                                             "disabled": false,
                                             "value": "7",
                                             "method": "default",
+                                            "prev_value": "7",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -1793,6 +1846,7 @@
                                             "disabled": false,
                                             "value": "/var/lib/bunkerweb/backups",
                                             "method": "default",
+                                            "prev_value": "/var/lib/bunkerweb/backups",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -1842,6 +1896,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1873,6 +1928,7 @@
                                             "disabled": false,
                                             "value": "400 401 403 404 405 429 444",
                                             "method": "default",
+                                            "prev_value": "400 401 403 404 405 429 444",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1904,6 +1960,7 @@
                                             "disabled": false,
                                             "value": "10",
                                             "method": "default",
+                                            "prev_value": "10",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1935,6 +1992,7 @@
                                             "disabled": false,
                                             "value": "60",
                                             "method": "default",
+                                            "prev_value": "60",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -1966,6 +2024,7 @@
                                             "disabled": false,
                                             "value": "86400",
                                             "method": "default",
+                                            "prev_value": "86400",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2010,6 +2069,7 @@
                                             "disabled": true,
                                             "value": "no",
                                             "method": "scheduler",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -2045,6 +2105,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2076,6 +2137,7 @@
                                             "disabled": false,
                                             "value": ".shodan.io .censys.io",
                                             "method": "default",
+                                            "prev_value": ".shodan.io .censys.io",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2107,6 +2169,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2138,6 +2201,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2169,6 +2233,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2200,6 +2265,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2231,6 +2297,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2262,6 +2329,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2293,6 +2361,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2324,6 +2393,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2355,6 +2425,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2386,6 +2457,7 @@
                                             "disabled": false,
                                             "value": "https://www.dan.me.uk/torlist/?exit",
                                             "method": "default",
+                                            "prev_value": "https://www.dan.me.uk/torlist/?exit",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2417,6 +2489,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2448,6 +2521,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2479,6 +2553,7 @@
                                             "disabled": false,
                                             "value": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
                                             "method": "default",
+                                            "prev_value": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2510,6 +2585,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2541,6 +2617,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2572,6 +2649,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2603,6 +2681,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2634,6 +2713,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2665,6 +2745,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2709,6 +2790,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2740,6 +2822,7 @@
                                             "disabled": false,
                                             "value": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
                                             "method": "default",
+                                            "prev_value": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2771,6 +2854,7 @@
                                             "disabled": false,
                                             "value": "1000",
                                             "method": "default",
+                                            "prev_value": "1000",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2816,6 +2900,7 @@
                                             "disabled": false,
                                             "value": "6",
                                             "method": "default",
+                                            "prev_value": "6",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2860,6 +2945,7 @@
                                             "disabled": true,
                                             "value": "no",
                                             "method": "scheduler",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -2895,6 +2981,7 @@
                                             "disabled": false,
                                             "value": "https://api.bunkerweb.io",
                                             "method": "default",
+                                            "prev_value": "https://api.bunkerweb.io",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -2939,6 +3026,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -2970,6 +3058,7 @@
                                             "disabled": false,
                                             "value": "self",
                                             "method": "default",
+                                            "prev_value": "self",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3001,6 +3090,7 @@
                                             "disabled": false,
                                             "value": "GET, POST, OPTIONS",
                                             "method": "default",
+                                            "prev_value": "GET, POST, OPTIONS",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3032,6 +3122,7 @@
                                             "disabled": false,
                                             "value": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
                                             "method": "default",
+                                            "prev_value": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3063,6 +3154,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3094,6 +3186,7 @@
                                             "disabled": false,
                                             "value": "Content-Length,Content-Range",
                                             "method": "default",
+                                            "prev_value": "Content-Length,Content-Range",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3131,6 +3224,7 @@
                                             "disabled": false,
                                             "value": "same-origin",
                                             "method": "default",
+                                            "prev_value": "same-origin",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3168,6 +3262,7 @@
                                             "disabled": false,
                                             "value": "require-corp",
                                             "method": "default",
+                                            "prev_value": "require-corp",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3205,6 +3300,7 @@
                                             "disabled": false,
                                             "value": "same-site",
                                             "method": "default",
+                                            "prev_value": "same-site",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3236,6 +3332,7 @@
                                             "disabled": false,
                                             "value": "86400",
                                             "method": "default",
+                                            "prev_value": "86400",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3267,6 +3364,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3311,6 +3409,7 @@
                                             "disabled": true,
                                             "value": "yes",
                                             "method": "scheduler",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -3346,6 +3445,7 @@
                                             "disabled": false,
                                             "value": "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
                                             "method": "default",
+                                            "prev_value": "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -3377,6 +3477,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3408,6 +3509,7 @@
                                             "disabled": false,
                                             "value": "public, max-age=15552000",
                                             "method": "default",
+                                            "prev_value": "public, max-age=15552000",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3452,6 +3554,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3483,6 +3586,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3527,6 +3631,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3558,6 +3663,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3589,6 +3695,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3620,6 +3727,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3651,6 +3759,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3695,6 +3804,7 @@
                                             "disabled": false,
                                             "value": "sqlite:////var/lib/bunkerweb/db.sqlite3",
                                             "method": "default",
+                                            "prev_value": "sqlite:////var/lib/bunkerweb/db.sqlite3",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -3726,6 +3836,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -3764,6 +3875,7 @@
                                             "disabled": false,
                                             "value": "warning",
                                             "method": "default",
+                                            "prev_value": "warning",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -3808,6 +3920,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3839,6 +3952,7 @@
                                             "disabled": false,
                                             "value": "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
                                             "method": "default",
+                                            "prev_value": "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -3883,6 +3997,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3914,6 +4029,7 @@
                                             "disabled": false,
                                             "value": "400 401 403 404 405 413 429 500 501 502 503 504",
                                             "method": "default",
+                                            "prev_value": "400 401 403 404 405 413 429 500 501 502 503 504",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3958,6 +4074,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -3989,6 +4106,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4020,6 +4138,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4051,6 +4170,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4082,6 +4202,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4113,6 +4234,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4144,6 +4266,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4175,6 +4298,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -4206,6 +4330,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -4236,6 +4361,7 @@
                                             },
                                             "disabled": false,
                                             "value": "",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -4267,6 +4393,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -4298,6 +4425,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -4342,6 +4470,7 @@
                                             "disabled": true,
                                             "value": "yes",
                                             "method": "scheduler",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -4377,6 +4506,7 @@
                                             "disabled": false,
                                             "value": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
                                             "method": "default",
+                                            "prev_value": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4408,6 +4538,7 @@
                                             "disabled": false,
                                             "value": "1000",
                                             "method": "default",
+                                            "prev_value": "1000",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4450,6 +4581,7 @@
                                             "disabled": false,
                                             "value": "5",
                                             "method": "default",
+                                            "prev_value": "5",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4481,6 +4613,7 @@
                                             "disabled": false,
                                             "value": "no-cache no-store private expired auth",
                                             "method": "default",
+                                            "prev_value": "no-cache no-store private expired auth",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4525,6 +4658,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4569,6 +4703,7 @@
                                             "disabled": false,
                                             "value": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins",
                                             "method": "default",
+                                            "prev_value": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4600,6 +4735,7 @@
                                             "disabled": false,
                                             "value": "Content-Security-Policy Permissions-Policy X-Frame-Options",
                                             "method": "default",
+                                            "prev_value": "Content-Security-Policy Permissions-Policy X-Frame-Options",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4631,6 +4767,7 @@
                                             "disabled": false,
                                             "value": "max-age=31536000; includeSubDomains; preload",
                                             "method": "default",
+                                            "prev_value": "max-age=31536000; includeSubDomains; preload",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4662,6 +4799,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4693,6 +4831,7 @@
                                             "disabled": false,
                                             "value": "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
                                             "method": "default",
+                                            "prev_value": "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4724,6 +4863,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4755,6 +4895,7 @@
                                             "disabled": false,
                                             "value": "strict-origin-when-cross-origin",
                                             "method": "default",
+                                            "prev_value": "strict-origin-when-cross-origin",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4786,6 +4927,7 @@
                                             "disabled": false,
                                             "value": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",
                                             "method": "default",
+                                            "prev_value": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4816,6 +4958,7 @@
                                             },
                                             "disabled": false,
                                             "value": "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
+                                            "prev_value": "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4852,6 +4995,7 @@
                                             "disabled": false,
                                             "value": "SAMEORIGIN",
                                             "method": "default",
+                                            "prev_value": "SAMEORIGIN",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4887,6 +5031,7 @@
                                             "disabled": false,
                                             "value": "nosniff",
                                             "method": "default",
+                                            "prev_value": "nosniff",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4918,6 +5063,7 @@
                                             "disabled": false,
                                             "value": "1; mode=block",
                                             "method": "default",
+                                            "prev_value": "1; mode=block",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -4952,6 +5098,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "",
+                                                "prev_value": "",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -4985,6 +5132,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "* HttpOnly SameSite=Lax",
+                                                "prev_value": "* HttpOnly SameSite=Lax",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -5021,6 +5169,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "",
+                                                    "prev_value": "",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -5057,6 +5206,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "* HttpOnly SameSite=Lax",
+                                                    "prev_value": "* HttpOnly SameSite=Lax",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -5116,6 +5266,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5147,6 +5298,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5178,6 +5330,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5209,6 +5362,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -5253,6 +5407,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5284,6 +5439,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5315,6 +5471,7 @@
                                             "disabled": false,
                                             "value": "10",
                                             "method": "default",
+                                            "prev_value": "10",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5346,6 +5503,7 @@
                                             "disabled": false,
                                             "value": "100",
                                             "method": "default",
+                                            "prev_value": "100",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5377,6 +5535,7 @@
                                             "disabled": false,
                                             "value": "10",
                                             "method": "default",
+                                            "prev_value": "10",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5411,6 +5570,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "/",
+                                                "prev_value": "/",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -5442,6 +5602,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "2r/s",
+                                                "prev_value": "2r/s",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -5478,6 +5639,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "/",
+                                                    "prev_value": "/",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -5509,6 +5671,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "2r/s",
+                                                    "prev_value": "2r/s",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -5556,6 +5719,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5587,6 +5751,7 @@
                                             "disabled": false,
                                             "value": "16m",
                                             "method": "default",
+                                            "prev_value": "16m",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -5618,6 +5783,7 @@
                                             "disabled": false,
                                             "value": "100",
                                             "method": "default",
+                                            "prev_value": "100",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -5662,6 +5828,7 @@
                                             "disabled": true,
                                             "value": "yes",
                                             "method": "scheduler",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -5697,6 +5864,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -5728,6 +5896,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5759,6 +5928,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5790,6 +5960,7 @@
                                             "disabled": false,
                                             "value": "GET|POST|HEAD",
                                             "method": "default",
+                                            "prev_value": "GET|POST|HEAD",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5821,6 +5992,7 @@
                                             "disabled": false,
                                             "value": "10m",
                                             "method": "default",
+                                            "prev_value": "10m",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5852,6 +6024,7 @@
                                             "disabled": true,
                                             "value": "no",
                                             "method": "scheduler",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -5887,6 +6060,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5918,6 +6092,7 @@
                                             "disabled": false,
                                             "value": "TLSv1.2 TLSv1.3",
                                             "method": "default",
+                                            "prev_value": "TLSv1.2 TLSv1.3",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5949,6 +6124,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -5980,6 +6156,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6011,6 +6188,7 @@
                                             "disabled": false,
                                             "value": "443",
                                             "method": "default",
+                                            "prev_value": "443",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6042,6 +6220,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6073,6 +6252,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6104,6 +6284,7 @@
                                             "disabled": false,
                                             "value": "max=1000 inactive=20s",
                                             "method": "default",
+                                            "prev_value": "max=1000 inactive=20s",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6135,6 +6316,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6166,6 +6348,7 @@
                                             "disabled": false,
                                             "value": "2",
                                             "method": "default",
+                                            "prev_value": "2",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6197,6 +6380,7 @@
                                             "disabled": false,
                                             "value": "30s",
                                             "method": "default",
+                                            "prev_value": "30s",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6228,6 +6412,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -6263,6 +6448,7 @@
                                             "disabled": false,
                                             "value": "403",
                                             "method": "default",
+                                            "prev_value": "403",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -6294,6 +6480,7 @@
                                             "disabled": true,
                                             "value": "no",
                                             "method": "scheduler",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -6342,6 +6529,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6373,6 +6561,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6409,6 +6598,7 @@
                                             "disabled": false,
                                             "value": "4",
                                             "method": "default",
+                                            "prev_value": "4",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6445,6 +6635,7 @@
                                             "disabled": false,
                                             "value": "RelevantOnly",
                                             "method": "default",
+                                            "prev_value": "RelevantOnly",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6481,6 +6672,7 @@
                                             "disabled": false,
                                             "value": "On",
                                             "method": "default",
+                                            "prev_value": "On",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6512,6 +6704,7 @@
                                             "disabled": false,
                                             "value": "ABCFHZ",
                                             "method": "default",
+                                            "prev_value": "ABCFHZ",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6556,6 +6749,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6587,6 +6781,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6618,6 +6813,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6649,6 +6845,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6693,6 +6890,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -6737,6 +6935,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6768,6 +6967,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6799,6 +6999,7 @@
                                             "disabled": false,
                                             "value": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
                                             "method": "default",
+                                            "prev_value": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6830,6 +7031,7 @@
                                             "disabled": false,
                                             "value": "X-Forwarded-For",
                                             "method": "default",
+                                            "prev_value": "X-Forwarded-For",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6861,6 +7063,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6892,6 +7095,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -6936,6 +7140,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -6967,6 +7172,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7002,6 +7208,7 @@
                                             "disabled": false,
                                             "value": "301",
                                             "method": "default",
+                                            "prev_value": "301",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7046,6 +7253,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7077,6 +7285,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7108,6 +7317,7 @@
                                             "disabled": false,
                                             "value": "6379",
                                             "method": "default",
+                                            "prev_value": "6379",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7139,6 +7349,7 @@
                                             "disabled": false,
                                             "value": "0",
                                             "method": "default",
+                                            "prev_value": "0",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7170,6 +7381,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7201,6 +7413,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7232,6 +7445,7 @@
                                             "disabled": false,
                                             "value": "1000",
                                             "method": "default",
+                                            "prev_value": "1000",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7263,6 +7477,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7294,6 +7509,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7325,6 +7541,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7356,6 +7573,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7387,6 +7605,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7418,6 +7637,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7449,6 +7669,7 @@
                                             "disabled": false,
                                             "value": "30000",
                                             "method": "default",
+                                            "prev_value": "30000",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7480,6 +7701,7 @@
                                             "disabled": false,
                                             "value": "10",
                                             "method": "default",
+                                            "prev_value": "10",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7524,6 +7746,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7555,6 +7778,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7586,6 +7810,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7617,6 +7842,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7648,6 +7874,7 @@
                                             "disabled": false,
                                             "value": "1:2",
                                             "method": "default",
+                                            "prev_value": "1:2",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7679,6 +7906,7 @@
                                             "disabled": false,
                                             "value": "10m",
                                             "method": "default",
+                                            "prev_value": "10m",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7710,6 +7938,7 @@
                                             "disabled": false,
                                             "value": "max_size=100m",
                                             "method": "default",
+                                            "prev_value": "max_size=100m",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -7741,6 +7970,7 @@
                                             "disabled": false,
                                             "value": "GET HEAD",
                                             "method": "default",
+                                            "prev_value": "GET HEAD",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7772,6 +8002,7 @@
                                             "disabled": false,
                                             "value": "2",
                                             "method": "default",
+                                            "prev_value": "2",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7803,6 +8034,7 @@
                                             "disabled": false,
                                             "value": "$scheme$host$request_uri",
                                             "method": "default",
+                                            "prev_value": "$scheme$host$request_uri",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7834,6 +8066,7 @@
                                             "disabled": false,
                                             "value": "200=24h 301=1h 302=24h",
                                             "method": "default",
+                                            "prev_value": "200=24h 301=1h 302=24h",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7865,6 +8098,7 @@
                                             "disabled": false,
                                             "value": "$http_pragma $http_authorization",
                                             "method": "default",
+                                            "prev_value": "$http_pragma $http_authorization",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7896,6 +8130,7 @@
                                             "disabled": false,
                                             "value": "0",
                                             "method": "default",
+                                            "prev_value": "0",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -7930,6 +8165,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "",
+                                                "prev_value": "",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -7961,6 +8197,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "/",
+                                                "prev_value": "/",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -7992,6 +8229,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "no",
+                                                "prev_value": "no",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8023,6 +8261,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "",
+                                                "prev_value": "",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8054,6 +8293,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "",
+                                                "prev_value": "",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8085,6 +8325,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "yes",
+                                                "prev_value": "yes",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8116,6 +8357,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "no",
+                                                "prev_value": "no",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8147,6 +8389,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "",
+                                                "prev_value": "",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8178,6 +8421,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "",
+                                                "prev_value": "",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8209,6 +8453,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "",
+                                                "prev_value": "",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8240,6 +8485,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "60s",
+                                                "prev_value": "60s",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8271,6 +8517,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "60s",
+                                                "prev_value": "60s",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8302,6 +8549,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "60s",
+                                                "prev_value": "60s",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8333,6 +8581,7 @@
                                                 },
                                                 "disabled": false,
                                                 "value": "",
+                                                "prev_value": "",
                                                 "popovers": [
                                                     {
                                                         "iconName": "disk",
@@ -8369,6 +8618,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "",
+                                                    "prev_value": "",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8400,6 +8650,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "/",
+                                                    "prev_value": "/",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8431,6 +8682,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "no",
+                                                    "prev_value": "no",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8462,6 +8714,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "",
+                                                    "prev_value": "",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8493,6 +8746,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "",
+                                                    "prev_value": "",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8524,6 +8778,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "yes",
+                                                    "prev_value": "yes",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8555,6 +8810,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "no",
+                                                    "prev_value": "no",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8586,6 +8842,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "",
+                                                    "prev_value": "",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8617,6 +8874,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "",
+                                                    "prev_value": "",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8648,6 +8906,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "",
+                                                    "prev_value": "",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8679,6 +8938,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "60s",
+                                                    "prev_value": "60s",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8710,6 +8970,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "60s",
+                                                    "prev_value": "60s",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8741,6 +9002,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "60s",
+                                                    "prev_value": "60s",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8772,6 +9034,7 @@
                                                     },
                                                     "disabled": false,
                                                     "value": "",
+                                                    "prev_value": "",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8819,6 +9082,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -8850,6 +9114,7 @@
                                             "disabled": false,
                                             "value": "22 80 443 3128 8000 8080",
                                             "method": "default",
+                                            "prev_value": "22 80 443 3128 8000 8080",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -8881,6 +9146,7 @@
                                             "disabled": false,
                                             "value": "500",
                                             "method": "default",
+                                            "prev_value": "500",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -8925,6 +9191,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -8956,6 +9223,7 @@
                                             "disabled": false,
                                             "value": "365",
                                             "method": "default",
+                                            "prev_value": "365",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -8987,6 +9255,7 @@
                                             "disabled": false,
                                             "value": "/CN=www.example.com/",
                                             "method": "default",
+                                            "prev_value": "/CN=www.example.com/",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -9031,6 +9300,7 @@
                                             "disabled": false,
                                             "value": "random",
                                             "method": "default",
+                                            "prev_value": "random",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9062,6 +9332,7 @@
                                             "disabled": false,
                                             "value": "random",
                                             "method": "default",
+                                            "prev_value": "random",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9093,6 +9364,7 @@
                                             "disabled": false,
                                             "value": "1800",
                                             "method": "default",
+                                            "prev_value": "1800",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9124,6 +9396,7 @@
                                             "disabled": false,
                                             "value": "3600",
                                             "method": "default",
+                                            "prev_value": "3600",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9155,6 +9428,7 @@
                                             "disabled": false,
                                             "value": "86400",
                                             "method": "default",
+                                            "prev_value": "86400",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9186,6 +9460,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9217,6 +9492,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9261,6 +9537,7 @@
                                             "disabled": false,
                                             "value": "no",
                                             "method": "default",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -9292,6 +9569,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9336,6 +9614,7 @@
                                             "disabled": true,
                                             "value": "no",
                                             "method": "scheduler",
+                                            "prev_value": "no",
                                             "popovers": [
                                                 {
                                                     "iconName": "trespass",
@@ -9371,6 +9650,7 @@
                                             "disabled": false,
                                             "value": "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
                                             "method": "default",
+                                            "prev_value": "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -9402,6 +9682,7 @@
                                             "disabled": false,
                                             "value": ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
                                             "method": "default",
+                                            "prev_value": ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -9433,6 +9714,7 @@
                                             "disabled": false,
                                             "value": "yes",
                                             "method": "default",
+                                            "prev_value": "yes",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -9464,6 +9746,7 @@
                                             "disabled": false,
                                             "value": "32934",
                                             "method": "default",
+                                            "prev_value": "32934",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -9495,6 +9778,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -9526,6 +9810,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "disk",
@@ -9557,6 +9842,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9588,6 +9874,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9619,6 +9906,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9650,6 +9938,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",
@@ -9681,6 +9970,7 @@
                                             "disabled": false,
                                             "value": "",
                                             "method": "default",
+                                            "prev_value": "",
                                             "popovers": [
                                                 {
                                                     "iconName": "globe",

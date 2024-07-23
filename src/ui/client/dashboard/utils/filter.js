@@ -36,6 +36,7 @@
 ];
   @param {object} plugins - Object with the plugins data.
   @param {array} filters - Array with the filters data.
+  @returns {array} - Array with the filtered data.
 */
 function useFilter(items, filters) {
   // loop on filters to determine types
@@ -82,6 +83,7 @@ function useFilter(items, filters) {
   },
 ];
   @param filters - Array of filters to remove default filters
+  @returns {array} - Array of filters without default filters
 */
 function removeDefaultFilters(filters) {
   // Remove filters with type "select" and "all" as value
@@ -113,6 +115,7 @@ function removeDefaultFilters(filters) {
   }
   @param filters - Array of filters
   @param items - Array of items
+  @returns {boolean} - True if at least one key match with the filter value
 */
 function isItemKeyword(filters, item) {
   // Match if at least one match
@@ -166,6 +169,7 @@ function isItemKeyword(filters, item) {
   }
   @param filters - Array of filters
   @param items - Array of items
+  @returns {boolean} - True if at least one key match exactly the filter value
 */
 function isItemSelect(filters, item) {
   for (let j = 0; j < filters.length; j++) {

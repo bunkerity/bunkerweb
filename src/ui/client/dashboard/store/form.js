@@ -1,13 +1,15 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { useSubmitForm } from "@utils/form.js";
 
 /**
   @name createFormStore
   @description This is a factory function that will create a form store.
   This store contains all the logic to manage the form template and update it.
   By defining the form type, this will update some function to avoid errors.  
-  @param storeName - Name of the store, must be unique.
-  @param formType - Type of form, can be "advanced", "raw" or "easy".
+  @param {string} storeName - Name of the store, must be unique.
+  @param {string} formType - Type of form, can be "advanced", "raw" or "easy".
+  @returns {store} - Return a form store with all the logic to manage the form template and update it.
 */
 export const createFormStore = (storeName, formType) => {
   return defineStore(storeName, () => {
@@ -22,33 +24,44 @@ export const createFormStore = (storeName, formType) => {
     const templateUI = ref({});
     // UI template will keep the data that will be render on UI with additionnal format like filtering.
     const templateUIFormat = ref({});
+    // Store any raw information that can be usefull for the form.
+    const rawData = ref("");
+    // Increment when some functions are updating template to force rerendering when attach to a component using the reactive value.
     const updateCount = ref(0);
+    // After a submit attempt or an event listener updating a template, check if a date is updating (different from default and previous value).
+    const isUpdateData = ref(false);
+    // Data we gonna submit
+    const formattedData = ref({});
+
     /**
     @name setTemplate
     @description Set the template we are going to use to generate the form and update it (like adding multiples).
-    @param template - Template with plugins list and detail settings
+    @param {object} tempData - Template with plugins list and detail settings
+    @param {boolean} [force=false] - Force to update the template even if already set before
+    @returns {void}
   */
-    function setTemplate(template) {
+    function setTemplate(tempData, force = false) {
       if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
+      if (Object.keys(template.value).length > 0 && !force) return;
+      // Unlink the template
+      template.value = JSON.parse(JSON.stringify(tempData));
+      templateBase.value = JSON.parse(JSON.stringify(tempData));
+      templateUI.value = JSON.parse(JSON.stringify(tempData));
+      templateUIFormat.value = templateUI.value;
+      _updateTempState();
+    }
 
-      const copyTemplate = JSON.parse(JSON.stringify(template));
-      template.value = copyTemplate;
-      templateBase.value = template;
-      templateUI.value = template;
-      templateUIFormat.value = template;
-
-      // console.log("template", type.value, template);
-      // console.log(typeof template);
-      // const formattedData = {};
-      // // Loop dict items
-      // for (const [key, value] of Object.entries(template)) {
-      //   //  Case key "value" is here, we are directly on the right level (and maybe on the raw mode)
-      //   if (value?.value) {
-      //   }
-      //   console.log(key, value);
-      //   formattedData[key] = value;
-      //   if (!value?.settings || value?.multiples) continue;
-      // }
+    /**
+    @name setRawData
+    @description Set raw data that can be usefull for the form.
+    @param {array} data - Template with plugins list and detail settings
+    @param {boolean} [force=false] - Template with plugins list and detail settings
+    @returns {void}
+  */
+    function setRawData(data, force = false) {
+      if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
+      if (rawData.value && !force) return;
+      rawData.value = data;
     }
 
     /**
@@ -57,9 +70,10 @@ export const createFormStore = (storeName, formType) => {
     The way the backend is working is that to delete a group, we need to send the group name with all default values.
     This function needs to be call from the multiples component parent with the template and the group name to delete.
     We will update the values of the group to default values.
-    @param pluginId - id of the plugin on the template array.
-    @param multName - Input id to update
-    @param groupName - Input value to update
+    @param {string} pluginId - id of the plugin on the template array.
+    @param {string} multName - Input id to update
+    @param {string|number} groupName - Input value to update
+    @returns {void}
   */
     function delMultiple(pluginId, multName, groupName) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
@@ -79,6 +93,8 @@ export const createFormStore = (storeName, formType) => {
       // For UI, we can delete the group to avoid rendering it
       delete templateUI.value[index].multiples[multName][groupName];
       updateCount.value++;
+
+      _updateTempState();
     }
 
     /**
@@ -86,8 +102,9 @@ export const createFormStore = (storeName, formType) => {
     @description This function will add a group of multiple in the template with default values.
     Each plugin has a key "multiples_schema" with each multiples group and their default values.
     We will retrieve the wanted multiple group and add it on the "multiples" key that contains the multiples that apply to the plugin.
-    @param pluginId - id of the plugin on the template array.
-    @param multName - multiple group name to add
+    @param {string} pluginId - id of the plugin on the template array.
+    @param {string} multName - multiple group name to add
+    @returns {void}
   */
     function addMultiple(pluginId, multName) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
@@ -119,6 +136,7 @@ export const createFormStore = (storeName, formType) => {
       // We need to show the new group on UI too
       templateUI.value[index].multiples[multName][nextGroupId] = newMultiple;
       updateCount.value++;
+      _updateTempState();
     }
 
     /**
@@ -130,6 +148,7 @@ export const createFormStore = (storeName, formType) => {
       if (!e.target.closest("[data-advanced-form-plugin]")) return;
       _useUpdateTemp(e, data.base);
     }
+    @returns {void}
   */
     function useListenTempFields() {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
@@ -147,6 +166,7 @@ export const createFormStore = (storeName, formType) => {
       if (!e.target.closest("[data-advanced-form-plugin]")) return;
       _useUpdateTemp(e, data.base);
     }
+    @returns {void}
   */
     function useUnlistenTempFields() {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
@@ -172,6 +192,7 @@ export const createFormStore = (storeName, formType) => {
     },
   ];
     @param e - Event object, get it by default in the event listener.
+    @returns {void}
   */
     function _useUpdateTemp(e) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
@@ -208,6 +229,7 @@ export const createFormStore = (storeName, formType) => {
         // update settings
         _useUpdateTempSettings(templates, inpId, inpValue, e.target);
         _useUpdateTempMultiples(templates, inpId, inpValue, e.target);
+        _updateTempState();
       }, 50);
     }
 
@@ -216,9 +238,10 @@ export const createFormStore = (storeName, formType) => {
     @description This function will loop on template settings in order to update the setting value.
     This will check each plugin.settings (what I call regular) instead of other type of settings like multiples (in plugin.multiples).
     This function needs to be call in _useUpdateTemp.
-    @param templates - Templates array with plugins list and detail settings
-    @param inpId - Input id to update
-    @param inpValue - Input value to update
+    @param {array} templates - Templates array with plugins list and detail settings
+    @param {string|number} inpId - Input id to update
+    @param {string|number} inpValue - Input value to update
+    @returns {void}
   */
     function _useUpdateTempSettings(templates, inpId, inpValue, target) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
@@ -252,9 +275,10 @@ export const createFormStore = (storeName, formType) => {
     @description This function will loop on template multiples in order to update the setting value.
     This will check each plugin.multiples that can be found in the template.
     This function needs to be call in _useUpdateTemp.
-    @param templates - Templates array with plugins list and detail settings
-    @param inpId - Input id to update
-    @param inpValue - Input value to update
+    @param {array} templates - Templates array with plugins list and detail settings
+    @param {string|number} inpId - Input id to update
+    @param {string|number} inpValue - Input value to update
+    @returns {void}
   */
     function _useUpdateTempMultiples(templates, inpId, inpValue, target) {
       if (!_isFormTypeAllowed(["advanced", "easy"])) return;
@@ -298,22 +322,101 @@ export const createFormStore = (storeName, formType) => {
     }
 
     /**
-    @name submitForm
-    @description This function will format the template base on the form type in order to render a form to submit.
-    The send data will change depending on the form type.
-    Case raw mode, we will send the raw data as it is.
-    Case easy / advanced mode, we will filter value to send only the needed one (enabled and not default).
-    After formatting, we will use the utils useSubmitForm from @utils/form to submit the form.
+    @name submit
+    @description Case we have at least one setting updating, we will allow to submit the form.
+    @returns {void}
   */
-    function submitForm() {
+    function submit() {
       if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
-      console.log("submitForm");
-      const formattedData = {};
+      _updateTempState();
+      if (!isUpdateData.value) return;
+      return useSubmitForm(formattedData.value);
+    }
+
+    /**
+    @name _updateTempState
+    @description This function will run after a template update and will do two things :
+    1. Format the template to send needed data to the backend.
+    2. Check if at least one setting is updating. Case true, we will allow to submit the form.
+    @returns {void}
+  */
+    function _updateTempState() {
+      formattedData.value = {};
+
+      // Loop dict items
+      for (const [key, value] of Object.entries(templateBase.value)) {
+        //  Case we have a primitive value as value, we can stop here
+        if (typeof value !== "object") {
+          formattedData.value = templateBase.value;
+          break;
+        }
+
+        // Case no wanted keys, continue
+        if (!value?.settings && !value?.multiples) continue;
+
+        _getPluginSettingsValue(value, formattedData.value);
+        _getPluginMultiplesValue(value, formattedData.value);
+      }
+
+      isUpdateData.value = Object.keys(formattedData.value).length > 0;
+    }
+
+    /**
+    @name _getPluginMultiplesValue
+    @description Case we have a multiples key, we have a plugin object.
+    We will loop on each multiples settings and check if the value is different from the previous value in order to add it to the formattedData.
+    @returns {void}
+  */
+    function _getPluginMultiplesValue(value) {
+      // Get multiples value
+      if (!value?.multiples) return;
+      for (const [multName, multGroups] of Object.entries(value.multiples)) {
+        for (const [groupName, group] of Object.entries(multGroups)) {
+          _checkSettingToAddValue(group, groupName);
+        }
+      }
+    }
+
+    /**
+    @name _getPluginSettingsValue
+    @description Case we have a settings key, we have a plugin object.
+    We will loop on each settings and check if the value is different from the previous value in order to add it to the formattedData.
+    @returns {void}
+  */
+    function _getPluginSettingsValue(value) {
+      if (!value?.settings) return;
+
+      for (const [settName, setting] of Object.entries(value.settings)) {
+        _checkSettingToAddValue(setting, settName);
+      }
+    }
+
+    /**
+    @name _checkSettingToAddValue
+    @description Check if the setting value is different from the previous value in order to add it to the formattedData.
+    @returns {void}
+  */
+    function _checkSettingToAddValue(setting, settingName) {
+      // Case current value is the same as previous, we don't need to send it
+      if (setting?.value === setting?.prev_value) return;
+      formattedData.value[settingName] = setting?.value;
+    }
+
+    /**
+    @name _isFormTypeAllowed
+    @description Set in on the top of other functions, this will get the function name that called it and check if the form type is allowed to execute this function.
+    Case a function is not register, we will not allow it.
+    @returns {boolean} - Return true if the form type is allowed to execute the function.
+  */
+    function _isFormTypeAllowed(allowTypes) {
+      if (!allowTypes.includes(type.value)) return false;
+      return true;
     }
 
     /**
     @name $reset
     @description Will reset the template to the original one using the default template. The default template need to be set once.
+    @returns {void}
   */
     function $reset() {
       if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
@@ -323,26 +426,18 @@ export const createFormStore = (storeName, formType) => {
       updateCount.value++;
     }
 
-    /**
-    @name _isFormTypeAllowed
-    @description Set in on the top of other functions, this will get the function name that called it and check if the form type is allowed to execute this function.
-    Case a function is not register, we will not allow it.
-  */
-    function _isFormTypeAllowed(allowTypes) {
-      if (!allowTypes.includes(type.value)) return false;
-      return true;
-    }
-
     return {
       templateBase,
       templateUI,
       templateUIFormat,
+      rawData,
       setTemplate,
+      setRawData,
       addMultiple,
       delMultiple,
       useListenTempFields,
       useUnlistenTempFields,
-      submitForm,
+      submit,
       $reset,
     };
   });

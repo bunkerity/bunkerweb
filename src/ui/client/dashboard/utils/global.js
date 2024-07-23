@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
   @name useGlobal
   @description   This function is a wrapper that contains all the global utils functions.
   This function handle global click and keydown events to manage some states like show/hide elements, focus modals, and close modals.
+  @returns {void}
 */
 function useGlobal() {
   setShowHideElA11y();
@@ -38,6 +39,7 @@ function useGlobal() {
   @name setShowHideElA11y
   @description  This function will check if aria-controls and aria-expanded attributes are present on elements that controls an element visibility.
   Case they are not present, the function will create them.
+  @returns {void}
 */
 function setShowHideElA11y() {
   // Wait that elements are mounted and ids are set
@@ -65,6 +67,7 @@ function setShowHideElA11y() {
   <button data-close-el="modal">Close modal</button>
   <div id="modal" class="">Modal content</div>
   @param {Event} e - The event object.
+  @returns {void}
 */
 function useHideEl(e) {
   if (!e.target.hasAttribute("data-hide-el")) return;
@@ -86,6 +89,7 @@ function useHideEl(e) {
   <button data-show-el="modal">Open modal</button>
   <div id="modal" class="hidden">Modal content</div>
   @param {Event} e - The event object.
+  @returns {void}
 */
 function useShowEl(e) {
   if (!e.target.hasAttribute("data-show-el")) return;
@@ -103,6 +107,7 @@ function useShowEl(e) {
   If it's the case, the function will focus the element.
   Case there is already a focused element inside the modal, avoid to focus it again.
   @param {String} modalId - The id of the modal element.
+  @returns {void}
 */
 function useFocusModal() {
   setTimeout(() => {
@@ -123,6 +128,7 @@ function useFocusModal() {
   @name useCloseModal
   @description This function check if a modal is present and will close it.
   This is a shortcut to close a modal when the escape key is pressed, for example.
+  @returns {void}
 */
 function useCloseModal() {
   // Check if a data-modal element without hidden class is present
@@ -136,6 +142,7 @@ function useCloseModal() {
   @name isElHidden
   @description   This function is a util that checks if an element is hidden.
   This will check for multiple ways to hide an element like aria-hidden, hidden class, display none, visibility hidden, and !hidden class.
+  @returns {boolean} - True if the element is hidden, false if not.
 */
 function isElHidden(el) {
   return el.hasAttribute("aria-hidden")
@@ -159,6 +166,7 @@ function isElHidden(el) {
   Adding random number to avoid duplicate uuids when some components are rendered at the same time.
   We can pass a possible existing id, the function will only generate one if the id is empty.
   @param {String} [id=""] - Possible existing id, check if it's empty to generate a new one.
+  @retrurns {String} - The unique identifier.
 */
 function useUUID(id = "") {
   if (id) return id;

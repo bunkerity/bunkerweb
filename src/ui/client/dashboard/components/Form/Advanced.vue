@@ -14,6 +14,7 @@ import { plugin_types } from "@utils/variables";
 import { useAdvancedForm } from "@store/form.js";
 import { useCheckPluginsValidity } from "@utils/form.js";
 import { v4 as uuidv4 } from "uuid";
+
 /**
   @name Form/Advanced.vue
   @description This component is used to create a complete advanced form with plugin selection.
@@ -190,13 +191,17 @@ const filters = [
 
 function filter(filterData) {
   advancedForm.templateUIFormat = filterData;
-  setValidity();
+  updateStates();
+}
+
+function updateStates() {
   data.plugins = getPluginNames(advancedForm.templateUIFormat);
   // Check after a filter if previous plugin is still in the list and if at least one plugin is available
   // Update if not the case
   data.currPlugin = data.plugins.includes(data.currPlugin)
     ? data.currPlugin
     : getFirstPlugin(advancedForm.templateUIFormat);
+  setValidity();
 }
 
 function setValidity() {
@@ -231,13 +236,9 @@ function getPluginNames(template) {
 }
 
 onMounted(() => {
+  // SetTemplate only if first time we mount it
   advancedForm.setTemplate(props.template);
-  // Get first props.forms template name
-  data.currPlugin = getFirstPlugin(advancedForm.templateUIFormat);
-  data.plugins = getPluginNames(advancedForm.templateUIFormat);
-  setValidity();
-  // Store update data on
-
+  updateStates();
   // I want updatInp to access event, data.base and the container attribut
   advancedForm.useListenTempFields();
 });
@@ -271,7 +272,7 @@ onUnmounted(() => {
         @inp="data.currPlugin = $event"
       />
     </Filter>
-    <MessageUnmatch v-if="!advancedForm.templateUIFormat.length" />
+    <MessageUnmatch v-if="!Object.keys(advancedForm.templateUIFormat).length" />
     <template v-for="(plugin, pluginId) in advancedForm.templateUIFormat">
       <Container
         data-is="content"
@@ -301,15 +302,23 @@ onUnmounted(() => {
       </Container>
     </template>
     <Button
-      v-if="advancedForm.templateUIFormat.length"
+      v-if="Object.keys(advancedForm.templateUIFormat).length"
       v-bind="buttonSave"
-      :disabled="data.isReqErr || data.isRegErr ? true : false"
+      :disabled="
+        data.isReqErr || data.isRegErr
+          ? true
+          : advancedForm.isUpdateData
+          ? false
+          : true
+      "
+      @click="advancedForm.submit()"
     />
     <div class="flex justify-center items-center" data-is="form-error">
       <Text
         v-if="
-          (advancedForm.templateUIFormat.length && data.isRegErr) ||
-          (advancedForm.templateUIFormat.length && data.isReqErr)
+          (Object.keys(advancedForm.templateUIFormat).length &&
+            data.isRegErr) ||
+          (Object.keys(advancedForm.templateUIFormat).length && data.isReqErr)
         "
         :text="
           data.isReqErr

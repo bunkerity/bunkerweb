@@ -8,6 +8,7 @@
   @name useForm
   @description  This function is a composable wrapper that contains all the form utils functions.
  This function will for example look for JSON-type in the data-submit-form attribute of an element and submit the form with the data object.
+  @returns {void}
 */
 function useForm() {
   window.addEventListener("click", (e) => {
@@ -31,6 +32,7 @@ function useForm() {
     operation: "delete",
   }
   @param {object} data - Object with the form data to submit.
+  @returns {void}
 */
 function useSubmitForm(data) {
   // Create a form element
@@ -73,6 +75,7 @@ function useSubmitForm(data) {
     },
   },
   @param template - Template with plugins list and detail settings
+  @returns {array} - Array with error flags and error details
 */
 function useCheckPluginsValidity(template) {
   let isRegErr = false;
@@ -108,4 +111,4 @@ function useCheckPluginsValidity(template) {
   return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
 }
 
-export { useForm, useCheckPluginsValidity };
+export { useForm, useSubmitForm, useCheckPluginsValidity };

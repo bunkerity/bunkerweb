@@ -16,6 +16,7 @@ const availablesLangs = ["en", "fr"];
 /**
   @name getAllLang
   @description  Return all the languages json data available in the application.
+  @returns {object} - Object with all the languages data.
 */
 function getAllLang() {
   return { en: en, fr: fr };
@@ -26,6 +27,7 @@ function getAllLang() {
   @description   Filter the needed translations for the current page in order to reduce the size of the i18n object.
   @example ["dashboard", "settings", "profile"]
   @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
+  @returns {object} - Object with the languages data for the current page.
 */
 function getAllLangCurrPage(pagesArr) {
   const langs = getAllLang();
@@ -47,6 +49,7 @@ function getAllLangCurrPage(pagesArr) {
   @description  Return the i18n object with the translations needed for the current page for all available languages.
   @example ["dashboard", "settings", "profile"]
   @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
+  @returns {object} - Object with the i18n object.
 */
 function getI18n(pagesArr = []) {
   const messages =
@@ -73,6 +76,7 @@ function getI18n(pagesArr = []) {
 /**
   @name getLocalLang
   @description  This will return the user langage checking the store, the browser, or the default lang.
+  @returns {string} - The user langage.
 */
 function getLocalLang() {
   // get store lang, or local, or default
