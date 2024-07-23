@@ -7,9 +7,10 @@ import Editor from "@components/Forms/Field/Editor.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
+import { useRawForm } from "@store/form.js";
 
 /**
-  @name Form/RAW.vue
+  @name Form/Raw.vue
   @description This component is used to create a complete raw form with settings as JSON format.
   @example
   {
@@ -23,6 +24,8 @@ import { v4 as uuidv4 } from "uuid";
   @param {string} containerClass - Container
   @param {object} columns - Columns object.
 */
+
+const rawForm = useRawForm();
 
 const props = defineProps({
   // id && value && method
@@ -45,7 +48,9 @@ const props = defineProps({
 
 const data = reactive({
   str: "",
-  // Data retrieve from editor after creation
+  // Check if the raw data is valid when trying to revert from raw to JSON
+  // Case this is invalid, we will display an error message and disabled save button
+  // Case this is valid, we will store the JSON in the store and enable the save button
   isValid: computed(() => {
     // Transform to a possible valid JSON
     let dataToCheck = data.str;
@@ -74,10 +79,10 @@ const data = reactive({
     jsonReady = "{" + jsonReady.slice(0, -1) + "}";
 
     try {
-      JSON.parse(jsonReady);
+      const data = JSON.parse(jsonReady);
+      rawForm.setTemplate(data);
       return true;
     } catch (e) {
-      console.log(e);
       return false;
     }
   }),

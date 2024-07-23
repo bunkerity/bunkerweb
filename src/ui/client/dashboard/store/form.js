@@ -29,6 +29,7 @@ export const createFormStore = (storeName, formType) => {
     @param template - Template with plugins list and detail settings
   */
     function setTemplate(template) {
+      if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
       template.value = template;
       templateBase.value = template;
       templateUI.value = JSON.parse(JSON.stringify(template));
@@ -46,6 +47,8 @@ export const createFormStore = (storeName, formType) => {
     @param groupName - Input value to update
   */
     function delMultiple(pluginId, multName, groupName) {
+      if (!_isFormTypeAllowed(["advanced", "easy"])) return;
+
       // Get the index of plugin using pluginId
       const index = templateBase.value.findIndex(
         (plugin) => plugin.id === pluginId
@@ -72,6 +75,8 @@ export const createFormStore = (storeName, formType) => {
     @param multName - multiple group name to add
   */
     function addMultiple(pluginId, multName) {
+      if (!_isFormTypeAllowed(["advanced", "easy"])) return;
+
       // Get the index of plugin using pluginId
       const index = templateBase.value.findIndex(
         (plugin) => plugin.id === pluginId
@@ -106,15 +111,16 @@ export const createFormStore = (storeName, formType) => {
     @description  This will add an handler to all needed event listeners to listen to input, select... fields in order to update the template settings.
     @example 
     function hander(e) {
-      // some code before calling useUpdateTemp
+      // some code before calling _useUpdateTemp
       if (!e.target.closest("[data-advanced-form-plugin]")) return;
-      useUpdateTemp(e, data.base);
+      _useUpdateTemp(e, data.base);
     }
   */
     function useListenTempFields() {
-      window.addEventListener("input", useUpdateTemp);
-      window.addEventListener("change", useUpdateTemp);
-      window.addEventListener("click", useUpdateTemp);
+      if (!_isFormTypeAllowed(["advanced", "easy"])) return;
+      window.addEventListener("input", _useUpdateTemp);
+      window.addEventListener("change", _useUpdateTemp);
+      window.addEventListener("click", _useUpdateTemp);
     }
 
     /**
@@ -122,18 +128,19 @@ export const createFormStore = (storeName, formType) => {
     @description  This will stop listening to input, select... fields. Performance optimization and avoid duplicate calls conflicts.
     @example 
     function hander(e) {
-      // some code before calling useUpdateTemp
+      // some code before calling _useUpdateTemp
       if (!e.target.closest("[data-advanced-form-plugin]")) return;
-      useUpdateTemp(e, data.base);
+      _useUpdateTemp(e, data.base);
     }
   */
     function useUnlistenTempFields() {
-      window.removeEventListener("change", useUpdateTemp);
-      window.removeEventListener("click", useUpdateTemp);
+      if (!_isFormTypeAllowed(["advanced", "easy"])) return;
+      window.removeEventListener("change", _useUpdateTemp);
+      window.removeEventListener("click", _useUpdateTemp);
     }
 
     /**
-    @name useUpdateTemp
+    @name _useUpdateTemp
     @description This function will check if the target is a setting input-like field.
     In case it is, it will get the id and value for each field case, this will allow to update the template settings.
     @example 
@@ -150,10 +157,11 @@ export const createFormStore = (storeName, formType) => {
     },
   ];
     @param e - Event object, get it by default in the event listener.
-    @param templates - Array of templates to update
   */
-    function useUpdateTemp(e, templates) {
-      templates = [templateBase.value, templateUI.value];
+    function _useUpdateTemp(e) {
+      if (!_isFormTypeAllowed(["advanced", "easy"])) return;
+
+      const templates = [templateBase.value, templateUI.value];
       // Filter to avoid multiple calls
       if (!e.target.closest("[data-advanced-form-plugin]")) return;
       if (e.type === "change" && e.target.tagName === "INPUT") return;
@@ -183,21 +191,23 @@ export const createFormStore = (storeName, formType) => {
         if (!inpId) return;
 
         // update settings
-        useUpdateTempSettings(templates, inpId, inpValue, e.target);
-        useUpdateTempMultiples(templates, inpId, inpValue, e.target);
+        _useUpdateTempSettings(templates, inpId, inpValue, e.target);
+        _useUpdateTempMultiples(templates, inpId, inpValue, e.target);
       }, 50);
     }
 
     /**
-    @name useUpdateTempSettings
+    @name _useUpdateTempSettings
     @description This function will loop on template settings in order to update the setting value.
     This will check each plugin.settings (what I call regular) instead of other type of settings like multiples (in plugin.multiples).
-    This function needs to be call in useUpdateTemp.
+    This function needs to be call in _useUpdateTemp.
     @param templates - Templates array with plugins list and detail settings
     @param inpId - Input id to update
     @param inpValue - Input value to update
   */
-    function useUpdateTempSettings(templates, inpId, inpValue, target) {
+    function _useUpdateTempSettings(templates, inpId, inpValue, target) {
+      if (!_isFormTypeAllowed(["advanced", "easy"])) return;
+
       // Case get data-group attribut, this is not a regular setting
       if (target.closest("[data-group]")) return;
 
@@ -223,15 +233,16 @@ export const createFormStore = (storeName, formType) => {
     }
 
     /**
-    @name useUpdateTempMultiples
+    @name _useUpdateTempMultiples
     @description This function will loop on template multiples in order to update the setting value.
     This will check each plugin.multiples that can be found in the template.
-    This function needs to be call in useUpdateTemp.
+    This function needs to be call in _useUpdateTemp.
     @param templates - Templates array with plugins list and detail settings
     @param inpId - Input id to update
     @param inpValue - Input value to update
   */
-    function useUpdateTempMultiples(templates, inpId, inpValue, target) {
+    function _useUpdateTempMultiples(templates, inpId, inpValue, target) {
+      if (!_isFormTypeAllowed(["advanced", "easy"])) return;
       // Case get data-group attribut, this is not a regular setting
       if (!target.closest("[data-group='multiple']")) return;
       const multName =
@@ -272,13 +283,37 @@ export const createFormStore = (storeName, formType) => {
     }
 
     /**
+    @name submitForm
+    @description This function will format the template base on the form type in order to render a form to submit.
+    The send data will change depending on the form type.
+    Case raw mode, we will send the raw data as it is.
+    Case easy / advanced mode, we will filter value to send only the needed one (enabled and not default).
+    After formatting, we will use the utils useSubmitForm from @utils/form to submit the form.
+  */
+    function submitForm() {
+      if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
+    }
+
+    /**
     @name $reset
     @description Will reset the template to the original one using the default template. The default template need to be set once.
   */
     function $reset() {
+      if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
+
       templateBase.value = template.value;
       templateUI.value = template.value;
       updateCount.value++;
+    }
+
+    /**
+    @name _isFormTypeAllowed
+    @description Set in on the top of other functions, this will get the function name that called it and check if the form type is allowed to execute this function.
+    Case a function is not register, we will not allow it.
+  */
+    function _isFormTypeAllowed(allowTypes) {
+      if (!allowTypes.includes(type.value)) return false;
+      return true;
     }
 
     return {
@@ -290,6 +325,7 @@ export const createFormStore = (storeName, formType) => {
       delMultiple,
       useListenTempFields,
       useUnlistenTempFields,
+      submitForm,
       $reset,
     };
   });
@@ -297,3 +333,4 @@ export const createFormStore = (storeName, formType) => {
 
 export const useAdvancedForm = createFormStore("advanced", "advanced");
 export const useEasyForm = createFormStore("easy", "easy");
+export const useRawForm = createFormStore("raw", "raw");
