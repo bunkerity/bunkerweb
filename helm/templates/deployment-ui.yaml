@@ -29,6 +29,10 @@ spec:
       containers:
       - name: bunkerweb-ui
         env:
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
         {{- if .Values.ui.env }}
         {{- range $key, $val := .Values.ui.env }}
           - name: {{ $key }}
