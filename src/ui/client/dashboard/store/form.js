@@ -31,7 +31,8 @@ export const createFormStore = (storeName, formType) => {
     function setTemplate(template) {
       if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
 
-      template.value = template;
+      const copyTemplate = JSON.parse(JSON.stringify(template));
+      template.value = copyTemplate;
       templateBase.value = template;
       templateUI.value = template;
       templateUIFormat.value = template;
