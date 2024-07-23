@@ -2,7 +2,7 @@ import json
 import copy
 import base64
 
-# Default plugins from docker-compose.ui.yml
+
 plugins = [
     {
         "id": "general",
@@ -3002,334 +3002,64 @@ plugins = [
     },
 ]
 
-# Default global config with methods=True from docker-compose.ui.yml
-global_config = {
-    "ERRORS": {"value": "", "global": True, "method": "default"},
-    "USE_UI": {"value": "no", "global": True, "method": "default"},
-    "USE_CORS": {"value": "no", "global": True, "method": "default"},
-    "USE_GZIP": {"value": "yes", "global": True, "method": "scheduler"},
-    "USE_DNSBL": {"value": "yes", "global": True, "method": "default"},
-    "USE_REDIS": {"value": "no", "global": True, "method": "default"},
-    "IS_LOADING": {"value": "no", "global": True, "method": "default"},
-    "REMOTE_PHP": {"value": "", "global": True, "method": "default"},
-    "USE_BACKUP": {"value": "yes", "global": True, "method": "default"},
-    "USE_BROTLI": {"value": "no", "global": True, "method": "default"},
-    "INJECT_BODY": {"value": "", "global": True, "method": "default"},
-    "REDIRECT_TO": {"value": "", "global": True, "method": "default"},
-    "USE_ANTIBOT": {"value": "no", "global": True, "method": "default"},
-    "USE_METRICS": {"value": "yes", "global": True, "method": "default"},
-    "USE_REAL_IP": {"value": "no", "global": True, "method": "default"},
-    "DATABASE_URI": {"value": "sqlite:////var/lib/bunkerweb/db.sqlite3", "global": True, "method": "default"},
-    "USE_GREYLIST": {"value": "no", "global": True, "method": "default"},
-    "CUSTOM_HEADER": {"value": "", "global": True, "method": "default"},
-    "USE_BLACKLIST": {"value": "no", "global": True, "method": "scheduler"},
-    "USE_BUNKERNET": {"value": "no", "global": True, "method": "scheduler"},
-    "USE_LIMIT_REQ": {"value": "yes", "global": True, "method": "default"},
-    "USE_WHITELIST": {"value": "no", "global": True, "method": "scheduler"},
-    "USE_AUTH_BASIC": {"value": "no", "global": True, "method": "default"},
-    "USE_CUSTOM_SSL": {"value": "no", "global": True, "method": "default"},
-    "PRO_LICENSE_KEY": {"value": "", "global": True, "method": "default"},
-    "SESSIONS_SECRET": {"value": "random", "global": True, "method": "default"},
-    "USE_MODSECURITY": {"value": "yes", "global": True, "method": "default"},
-    "USE_BAD_BEHAVIOR": {"value": "yes", "global": True, "method": "default"},
-    "USE_CLIENT_CACHE": {"value": "yes", "global": True, "method": "scheduler"},
-    "USE_REVERSE_SCAN": {"value": "no", "global": True, "method": "default"},
-    "AUTO_LETS_ENCRYPT": {"value": "no", "global": True, "method": "default"},
-    "BLACKLIST_COUNTRY": {"value": "", "global": True, "method": "default"},
-    "USE_REVERSE_PROXY": {"value": "no", "global": True, "method": "default"},
-    "DISABLE_DEFAULT_SERVER": {"value": "yes", "global": True, "method": "scheduler"},
-    "GENERATE_SELF_SIGNED_SSL": {"value": "no", "global": True, "method": "default"},
-    "UI_HOST": {"value": "", "global": True, "method": "default"},
-    "DNSBL_LIST": {"value": "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org", "global": True, "method": "default"},
-    "GZIP_TYPES": {
-        "value": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
-        "global": True,
-        "method": "default",
-    },
-    "REDIS_HOST": {"value": "", "global": True, "method": "default"},
-    "ANTIBOT_URI": {"value": "/challenge", "global": True, "method": "default"},
-    "GREYLIST_IP": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_IP": {"value": "", "global": True, "method": "default"},
-    "BROTLI_TYPES": {
-        "value": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
-        "global": True,
-        "method": "default",
-    },
-    "NGINX_PREFIX": {"value": "/etc/nginx/", "global": True, "method": "default"},
-    "WHITELIST_IP": {
-        "value": "20.191.45.212 40.88.21.235 40.76.173.151 40.76.163.7 20.185.79.47 52.142.26.175 20.185.79.15 52.142.24.149 40.76.162.208 40.76.163.23 40.76.162.191 40.76.162.247",
-        "global": True,
-        "method": "default",
-    },
-    "LIMIT_REQ_URL": {"value": "/", "global": True, "method": "default"},
-    "SESSIONS_NAME": {"value": "random", "global": True, "method": "default"},
-    "REMOVE_HEADERS": {"value": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins", "global": True, "method": "default"},
-    "BACKUP_SCHEDULE": {"value": "daily", "global": True, "method": "default"},
-    "CUSTOM_SSL_CERT": {"value": "", "global": True, "method": "default"},
-    "REMOTE_PHP_PATH": {"value": "", "global": True, "method": "default"},
-    "BUNKERNET_SERVER": {"value": "https://api.bunkerweb.io", "global": True, "method": "default"},
-    "CORS_ALLOW_ORIGIN": {"value": "self", "global": True, "method": "default"},
-    "WHITELIST_COUNTRY": {"value": "", "global": True, "method": "default"},
-    "EMAIL_LETS_ENCRYPT": {"value": "", "global": True, "method": "default"},
-    "REVERSE_SCAN_PORTS": {"value": "22 80 443 3128 8000 8080", "global": True, "method": "default"},
-    "USE_PROXY_PROTOCOL": {"value": "no", "global": True, "method": "default"},
-    "AUTH_BASIC_LOCATION": {"value": "sitewide", "global": True, "method": "default"},
-    "METRICS_MEMORY_SIZE": {"value": "16m", "global": True, "method": "default"},
-    "USE_MODSECURITY_CRS": {"value": "yes", "global": True, "method": "default"},
-    "DATABASE_URI_READONLY": {"value": "", "global": True, "method": "default"},
-    "SELF_SIGNED_SSL_EXPIRY": {"value": "365", "global": True, "method": "default"},
-    "CLIENT_CACHE_EXTENSIONS": {"value": "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2", "global": True, "method": "default"},
-    "INTERCEPTED_ERROR_CODES": {"value": "400 401 403 404 405 413 429 500 501 502 503 504", "global": True, "method": "default"},
-    "REDIRECT_TO_REQUEST_URI": {"value": "no", "global": True, "method": "default"},
-    "BAD_BEHAVIOR_STATUS_CODES": {"value": "400 401 403 404 405 429 444", "global": True, "method": "default"},
-    "REVERSE_PROXY_INTERCEPT_ERRORS": {"value": "yes", "global": True, "method": "default"},
-    "DISABLE_DEFAULT_SERVER_STRICT_SNI": {"value": "no", "global": True, "method": "default"},
-    "HTTP_PORT": {"value": "8080", "global": True, "method": "default"},
-    "LOCAL_PHP": {"value": "", "global": True, "method": "default"},
-    "REDIS_PORT": {"value": "6379", "global": True, "method": "default"},
-    "REAL_IP_FROM": {"value": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8", "global": True, "method": "default"},
-    "GREYLIST_RDNS": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_RDNS": {"value": ".shodan.io .censys.io", "global": True, "method": "default"},
-    "CUSTOM_SSL_KEY": {"value": "", "global": True, "method": "default"},
-    "LIMIT_REQ_RATE": {"value": "2r/s", "global": True, "method": "default"},
-    "WHITELIST_RDNS": {
-        "value": ".google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com",
-        "global": True,
-        "method": "default",
-    },
-    "AUTH_BASIC_USER": {"value": "changeme", "global": True, "method": "default"},
-    "BACKUP_ROTATION": {"value": "7", "global": True, "method": "default"},
-    "GZIP_MIN_LENGTH": {"value": "1000", "global": True, "method": "default"},
-    "BROTLI_MIN_LENGTH": {"value": "1000", "global": True, "method": "default"},
-    "CLIENT_CACHE_ETAG": {"value": "yes", "global": True, "method": "default"},
-    "CORS_ALLOW_METHODS": {"value": "GET, POST, OPTIONS", "global": True, "method": "default"},
-    "DATABASE_LOG_LEVEL": {"value": "warning", "global": True, "method": "default"},
-    "ANTIBOT_TIME_RESOLVE": {"value": "60", "global": True, "method": "default"},
-    "REVERSE_SCAN_TIMEOUT": {"value": "500", "global": True, "method": "default"},
-    "SELF_SIGNED_SSL_SUBJ": {"value": "/CN=www.example.com/", "global": True, "method": "default"},
-    "KEEP_UPSTREAM_HEADERS": {"value": "Content-Security-Policy Permissions-Policy X-Frame-Options", "global": True, "method": "default"},
-    "BAD_BEHAVIOR_THRESHOLD": {"value": "10", "global": True, "method": "default"},
-    "REDIRECT_HTTP_TO_HTTPS": {"value": "no", "global": True, "method": "default"},
-    "REDIRECT_TO_STATUS_CODE": {"value": "301", "global": True, "method": "default"},
-    "SESSIONS_IDLING_TIMEOUT": {"value": "1800", "global": True, "method": "default"},
-    "USE_LETS_ENCRYPT_STAGING": {"value": "no", "global": True, "method": "default"},
-    "REVERSE_PROXY_CUSTOM_HOST": {"value": "", "global": True, "method": "default"},
-    "USE_MODSECURITY_CRS_PLUGINS": {"value": "yes", "global": True, "method": "default"},
-    "METRICS_MAX_BLOCKED_REQUESTS": {"value": "100", "global": True, "method": "default"},
-    "HTTPS_PORT": {"value": "8443", "global": True, "method": "default"},
-    "LOCAL_PHP_PATH": {"value": "", "global": True, "method": "default"},
-    "REAL_IP_HEADER": {"value": "X-Forwarded-For", "global": True, "method": "default"},
-    "REDIS_DATABASE": {"value": "0", "global": True, "method": "default"},
-    "USE_LIMIT_CONN": {"value": "yes", "global": True, "method": "default"},
-    "GZIP_COMP_LEVEL": {"value": "5", "global": True, "method": "default"},
-    "BACKUP_DIRECTORY": {"value": "/var/lib/bunkerweb/backups", "global": True, "method": "default"},
-    "BROTLI_COMP_LEVEL": {"value": "6", "global": True, "method": "default"},
-    "ANTIBOT_TIME_VALID": {"value": "86400", "global": True, "method": "default"},
-    "CORS_ALLOW_HEADERS": {"value": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range", "global": True, "method": "default"},
-    "AUTH_BASIC_PASSWORD": {"value": "changeme", "global": True, "method": "default"},
-    "CLIENT_CACHE_CONTROL": {"value": "public, max-age=15552000", "global": True, "method": "default"},
-    "CUSTOM_SSL_CERT_DATA": {"value": "", "global": True, "method": "default"},
-    "GREYLIST_RDNS_GLOBAL": {"value": "yes", "global": True, "method": "default"},
-    "BLACKLIST_RDNS_GLOBAL": {"value": "yes", "global": True, "method": "default"},
-    "REVERSE_PROXY_SSL_SNI": {"value": "no", "global": True, "method": "default"},
-    "WHITELIST_RDNS_GLOBAL": {"value": "yes", "global": True, "method": "default"},
-    "BAD_BEHAVIOR_COUNT_TIME": {"value": "60", "global": True, "method": "default"},
-    "MODSECURITY_CRS_VERSION": {"value": "4", "global": True, "method": "default"},
-    "SESSIONS_ROLLING_TIMEOUT": {"value": "3600", "global": True, "method": "default"},
-    "STRICT_TRANSPORT_SECURITY": {"value": "max-age=31536000; includeSubDomains; preload", "global": True, "method": "default"},
-    "AUTO_REDIRECT_HTTP_TO_HTTPS": {"value": "yes", "global": True, "method": "default"},
-    "LETS_ENCRYPT_CLEAR_OLD_CERTS": {"value": "no", "global": True, "method": "default"},
-    "MULTISITE": {"value": "yes", "global": True, "method": "scheduler"},
-    "REDIS_SSL": {"value": "no", "global": True, "method": "default"},
-    "COOKIE_FLAGS": {"value": "* HttpOnly SameSite=Lax", "global": True, "method": "default"},
-    "GREYLIST_ASN": {"value": "", "global": True, "method": "default"},
-    "GZIP_PROXIED": {"value": "no-cache no-store private expired auth", "global": True, "method": "default"},
-    "BLACKLIST_ASN": {"value": "", "global": True, "method": "default"},
-    "WHITELIST_ASN": {"value": "32934", "global": True, "method": "default"},
-    "ALLOWED_METHODS": {"value": "GET|POST|HEAD", "global": True, "method": "default"},
-    "AUTH_BASIC_TEXT": {"value": "Restricted area", "global": True, "method": "default"},
-    "REAL_IP_RECURSIVE": {"value": "yes", "global": True, "method": "default"},
-    "CUSTOM_SSL_KEY_DATA": {"value": "", "global": True, "method": "default"},
-    "LIMIT_CONN_MAX_HTTP1": {"value": "10", "global": True, "method": "default"},
-    "BAD_BEHAVIOR_BAN_TIME": {"value": "86400", "global": True, "method": "default"},
-    "CORS_ALLOW_CREDENTIALS": {"value": "no", "global": True, "method": "default"},
-    "ANTIBOT_RECAPTCHA_SCORE": {"value": "0.7", "global": True, "method": "default"},
-    "SESSIONS_ABSOLUTE_TIMEOUT": {"value": "86400", "global": True, "method": "default"},
-    "REVERSE_PROXY_SSL_SNI_NAME": {"value": "", "global": True, "method": "default"},
-    "MODSECURITY_CRS_PLUGIN_URLS": {"value": "", "global": True, "method": "default"},
-    "SERVER_NAME": {"value": "app1.example.com www.example.com", "global": True, "method": "default"},
-    "MAX_CLIENT_SIZE": {"value": "10m", "global": True, "method": "default"},
-    "REDIS_SSL_VERIFY": {"value": "no", "global": True, "method": "default"},
-    "REAL_IP_FROM_URLS": {"value": "", "global": True, "method": "default"},
-    "SESSIONS_CHECK_IP": {"value": "yes", "global": True, "method": "default"},
-    "REVERSE_PROXY_HOST": {"value": "", "global": True, "method": "default"},
-    "CORS_EXPOSE_HEADERS": {"value": "Content-Length,Content-Range", "global": True, "method": "default"},
-    "GREYLIST_USER_AGENT": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_USER_AGENT": {"value": "", "global": True, "method": "default"},
-    "LIMIT_CONN_MAX_HTTP2": {"value": "100", "global": True, "method": "default"},
-    "WHITELIST_USER_AGENT": {"value": "", "global": True, "method": "default"},
-    "COOKIE_AUTO_SECURE_FLAG": {"value": "yes", "global": True, "method": "default"},
-    "ANTIBOT_RECAPTCHA_SITEKEY": {"value": "", "global": True, "method": "default"},
-    "MODSECURITY_SEC_AUDIT_ENGINE": {"value": "RelevantOnly", "global": True, "method": "default"},
-    "SERVE_FILES": {"value": "no", "global": True, "method": "scheduler"},
-    "GREYLIST_URI": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_URI": {"value": "", "global": True, "method": "default"},
-    "REDIS_TIMEOUT": {"value": "1000", "global": True, "method": "default"},
-    "WHITELIST_URI": {"value": "", "global": True, "method": "default"},
-    "WORKER_PROCESSES": {"value": "auto", "global": True, "method": "default"},
-    "REVERSE_PROXY_URL": {"value": "/", "global": True, "method": "default"},
-    "LIMIT_CONN_MAX_STREAM": {"value": "10", "global": True, "method": "default"},
-    "CONTENT_SECURITY_POLICY": {"value": "object-src 'none'; form-action 'self'; frame-ancestors 'self';", "global": True, "method": "default"},
-    "ANTIBOT_RECAPTCHA_SECRET": {"value": "", "global": True, "method": "default"},
-    "SESSIONS_CHECK_USER_AGENT": {"value": "yes", "global": True, "method": "default"},
-    "CROSS_ORIGIN_OPENER_POLICY": {"value": "same-origin", "global": True, "method": "default"},
-    "MODSECURITY_SEC_RULE_ENGINE": {"value": "On", "global": True, "method": "default"},
-    "ROOT_FOLDER": {"value": "", "global": True, "method": "default"},
-    "REDIS_USERNAME": {"value": "", "global": True, "method": "default"},
-    "GREYLIST_IP_URLS": {"value": "", "global": True, "method": "default"},
-    "REVERSE_PROXY_WS": {"value": "no", "global": True, "method": "default"},
-    "WHITELIST_IP_URLS": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_IP": {"value": "", "global": True, "method": "default"},
-    "WORKER_RLIMIT_NOFILE": {"value": "2048", "global": True, "method": "default"},
-    "ANTIBOT_HCAPTCHA_SITEKEY": {"value": "", "global": True, "method": "default"},
-    "CROSS_ORIGIN_EMBEDDER_POLICY": {"value": "require-corp", "global": True, "method": "default"},
-    "MODSECURITY_SEC_AUDIT_LOG_PARTS": {"value": "ABCFHZ", "global": True, "method": "default"},
-    "CONTENT_SECURITY_POLICY_REPORT_ONLY": {"value": "no", "global": True, "method": "default"},
-    "SSL_PROTOCOLS": {"value": "TLSv1.2 TLSv1.3", "global": True, "method": "default"},
-    "REDIS_PASSWORD": {"value": "", "global": True, "method": "default"},
-    "REFERRER_POLICY": {"value": "strict-origin-when-cross-origin", "global": True, "method": "default"},
-    "GREYLIST_RDNS_URLS": {"value": "", "global": True, "method": "default"},
-    "WORKER_CONNECTIONS": {"value": "1024", "global": True, "method": "default"},
-    "WHITELIST_RDNS_URLS": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_RDNS": {"value": "", "global": True, "method": "default"},
-    "REVERSE_PROXY_HEADERS": {"value": "", "global": True, "method": "default"},
-    "ANTIBOT_HCAPTCHA_SECRET": {"value": "", "global": True, "method": "default"},
-    "CROSS_ORIGIN_RESOURCE_POLICY": {"value": "same-site", "global": True, "method": "default"},
-    "HTTP2": {"value": "yes", "global": True, "method": "default"},
-    "LOG_FORMAT": {
-        "value": '$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"',
-        "global": True,
-        "method": "default",
-    },
-    "CORS_MAX_AGE": {"value": "86400", "global": True, "method": "default"},
-    "GR2024-07-23T07:35:15.190324876Z EYLIST_ASN_URLS": {"value": "", "global": True, "method": "default"},
-    "PERMISSIONS_POLICY": {
-        "value": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",
-        "global": True,
-        "method": "default",
-    },
-    "WHITELIST_ASN_URLS": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_ASN": {"value": "", "global": True, "method": "default"},
-    "REDIS_SENTINEL_HOSTS": {"value": "", "global": True, "method": "default"},
-    "ANTIBOT_TURNSTILE_SITEKEY": {"value": "", "global": True, "method": "default"},
-    "REVERSE_PROXY_HEADERS_CLIENT": {"value": "", "global": True, "method": "default"},
-    "HTTP3": {"value": "no", "global": True, "method": "default"},
-    "LOG_LEVEL": {"value": "info", "global": True, "method": "scheduler"},
-    "DISABLE_FLOC": {"value": "yes", "global": True, "method": "default"},
-    "CORS_DENY_REQUEST": {"value": "yes", "global": True, "method": "default"},
-    "REDIS_SENTINEL_USERNAME": {"value": "", "global": True, "method": "default"},
-    "REVERSE_PROXY_BUFFERING": {"value": "yes", "global": True, "method": "default"},
-    "ANTIBOT_TURNSTILE_SECRET": {"value": "", "global": True, "method": "default"},
-    "GREYLIST_USER_AGENT_URLS": {"value": "", "global": True, "method": "default"},
-    "WHITELIST_USER_AGENT_URLS": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_USER_AGENT": {"value": "", "global": True, "method": "default"},
-    "DNS_RESOLVERS": {"value": "127.0.0.11", "global": True, "method": "default"},
-    "X_FRAME_OPTIONS": {"value": "SAMEORIGIN", "global": True, "method": "default"},
-    "GREYLIST_URI_URLS": {"value": "", "global": True, "method": "default"},
-    "HTTP3_ALT_SVC_PORT": {"value": "443", "global": True, "method": "default"},
-    "WHITELIST_URI_URLS": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_URI": {"value": "", "global": True, "method": "default"},
-    "REDIS_SENTINEL_PASSWORD": {"value": "", "global": True, "method": "default"},
-    "REVERSE_PROXY_KEEPALIVE": {"value": "no", "global": True, "method": "default"},
-    "LISTEN_HTTP": {"value": "yes", "global": True, "method": "default"},
-    "BLACKLIST_IP_URLS": {"value": "https://www.dan.me.uk/torlist/?exit", "global": True, "method": "default"},
-    "DATASTORE_MEMORY_SIZE": {"value": "64m", "global": True, "method": "default"},
-    "REDIS_SENTINEL_MASTER": {"value": "", "global": True, "method": "default"},
-    "X_CONTENT_TYPE_OPTIONS": {"value": "nosniff", "global": True, "method": "default"},
-    "REVERSE_PROXY_AUTH_REQUEST": {"value": "", "global": True, "method": "default"},
-    "X_XSS_PROTECTION": {"value": "1; mode=block", "global": True, "method": "default"},
-    "BLACKLIST_RDNS_URLS": {"value": "", "global": True, "method": "default"},
-    "USE_OPEN_FILE_CACHE": {"value": "no", "global": True, "method": "default"},
-    "REDIS_KEEPALIVE_IDLE": {"value": "30000", "global": True, "method": "default"},
-    "CACHESTORE_MEMORY_SIZE": {"value": "64m", "global": True, "method": "default"},
-    "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {"value": "", "global": True, "method": "default"},
-    "OPEN_FILE_CACHE": {"value": "max=1000 inactive=20s", "global": True, "method": "default"},
-    "BLACKLIST_ASN_URLS": {"value": "", "global": True, "method": "default"},
-    "REDIS_KEEPALIVE_POOL": {"value": "10", "global": True, "method": "default"},
-    "X_DNS_PREFETCH_CONTROL": {"value": "off", "global": True, "method": "default"},
-    "CACHESTORE_IPC_MEMORY_SIZE": {"value": "16m", "global": True, "method": "default"},
-    "REVERSE_PROXY_AUTH_REQUEST_SET": {"value": "", "global": True, "method": "default"},
-    "OPEN_FILE_CACHE_ERRORS": {"value": "yes", "global": True, "method": "default"},
-    "BLACKLIST_USER_AGENT_URLS": {
-        "value": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
-        "global": True,
-        "method": "default",
-    },
-    "CACHESTORE_MISS_MEMORY_SIZE": {"value": "16m", "global": True, "method": "default"},
-    "REVERSE_PROXY_CONNECT_TIMEOUT": {"value": "60s", "global": True, "method": "default"},
-    "BLACKLIST_URI_URLS": {"value": "", "global": True, "method": "default"},
-    "OPEN_FILE_CACHE_MIN_USES": {"value": "2", "global": True, "method": "default"},
-    "REVERSE_PROXY_READ_TIMEOUT": {"value": "60s", "global": True, "method": "default"},
-    "CACHESTORE_LOCKS_MEMORY_SIZE": {"value": "16m", "global": True, "method": "default"},
-    "USE_API": {"value": "yes", "global": True, "method": "default"},
-    "OPEN_FILE_CACHE_VALID": {"value": "30s", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_IP_URLS": {"value": "", "global": True, "method": "default"},
-    "REVERSE_PROXY_SEND_TIMEOUT": {"value": "60s", "global": True, "method": "default"},
-    "API_HTTP_PORT": {"value": "5000", "global": True, "method": "default"},
-    "EXTERNAL_PLUGIN_URLS": {"value": "", "global": True, "method": "default"},
-    "REVERSE_PROXY_INCLUDES": {"value": "", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_RDNS_URLS": {"value": "", "global": True, "method": "default"},
-    "API_LISTEN_IP": {"value": "0.0.0.0", "global": True, "method": "default"},
-    "DENY_HTTP_STATUS": {"value": "403", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_ASN_URLS": {"value": "", "global": True, "method": "default"},
-    "REVERSE_PROXY_PASS_REQUEST_BODY": {"value": "yes", "global": True, "method": "default"},
-    "API_SERVER_NAME": {"value": "bwapi", "global": True, "method": "default"},
-    "USE_PROXY_CACHE": {"value": "no", "global": True, "method": "default"},
-    "SEND_ANONYMOUS_REPORT": {"value": "no", "global": True, "method": "scheduler"},
-    "BLACKLIST_IGNORE_USER_AGENT_URLS": {"value": "", "global": True, "method": "default"},
-    "API_WHITELIST_IP": {"value": "127.0.0.0/24 10.20.30.0/24", "global": True, "method": "scheduler"},
-    "PROXY_CACHE_PATH_LEVELS": {"value": "1:2", "global": True, "method": "default"},
-    "BLACKLIST_IGNORE_URI_URLS": {"value": "", "global": True, "method": "default"},
-    "AUTOCONF_MODE": {"value": "no", "global": True, "method": "default"},
-    "PROXY_CACHE_PATH_ZONE_SIZE": {"value": "10m", "global": True, "method": "default"},
-    "SWARM_MODE": {"value": "no", "global": True, "method": "default"},
-    "PROXY_CACHE_PATH_PARAMS": {"value": "max_size=100m", "global": True, "method": "default"},
-    "KUBERNETES_MODE": {"value": "no", "global": True, "method": "default"},
-    "PROXY_CACHE_METHODS": {"value": "GET HEAD", "global": True, "method": "default"},
-    "SERVER_TYPE": {"value": "http", "global": True, "method": "default"},
-    "PROXY_CACHE_MIN_USES": {"value": "2", "global": True, "method": "default"},
-    "LISTEN_STREAM": {"value": "yes", "global": True, "method": "default"},
-    "PROXY_CACHE_KEY": {"value": "$scheme$host$request_uri", "global": True, "method": "default"},
-    "PROXY_CACHE_VALID": {"value": "200=24h 301=1h 302=24h", "global": True, "method": "default"},
-    "LISTEN_STREAM_PORT": {"value": "1337", "global": True, "method": "default"},
-    "PROXY_NO_CACHE": {"value": "$http_pragma $http_authorization", "global": True, "method": "default"},
-    "LISTEN_STREAM_PORT_SSL": {"value": "4242", "global": True, "method": "default"},
-    "USE_UDP": {"value": "no", "global": True, "method": "default"},
-    "PROXY_CACHE_BYPASS": {"value": "0", "global": True, "method": "default"},
-    "USE_IPV6": {"value": "no", "global": True, "method": "default"},
-    "IS_DRAFT": {"value": "no", "global": True, "method": "default"},
-    "TIMERS_LOG_LEVEL": {"value": "debug", "global": True, "method": "default"},
-    "BUNKERWEB_INSTANCES": {"value": "bunkerweb", "global": True, "method": "scheduler"},
+template_settings = {
+    "ERRORS": "",
+    "USE_UI": "no",
+    "USE_CORS": "no",
+    "REVERSE_PROXY_HOST_1": "template1",
+    "REVERSE_PROXY_HOST_2": "template2",
+}
+
+# Service settings
+service_settings = {
+    "ERRORS": {"value": "", "global": True, "method": "scheduler"},
+    "USE_UI": {"value": "yes", "global": True, "method": "ui"},
+    "USE_CORS": {"value": "yes", "global": True, "method": "scheduler"},
+    "REVERSE_PROXY_HOST_1": {"value": "yes", "global": True, "method": "scheduler"},
+    "REVERSE_PROXY_HOST": {"value": "no", "global": True, "method": "ui"},
 }
 
 
-def get_forms(templates=[], plugins=[], settings={}):
-    """
-    Will generate every needed form using templates, plugins and settings.
-    We will run on each plugins, set template value if one, and override by the custom settings value if exists.
-    We will format to fit each form type (easy, advanced, raw).
-    """
+# Default template
+default_template = {
+    "name": "default",
+    "steps": [
+        {
+            "title": "Title 1",
+            "subtitle": "subtitle 1",
+            "settings": ["USE_UI", "USE_CORS"],
+        },
+        {
+            "title": "Title 2",
+            "subtitle": "subtitle 2",
+            "settings": ["USE_UI", "USE_CORS"],
+        },
+    ],
+    "configs": {},
+    "settings": {
+        "USE_UI": "no",
+        "USE_CORS": "no",
+        "USE_GZIP": "dsfrgrdgrdgrdhgd",
+        "REVERSE_PROXY_HOST_1": "template1",
+        "REVERSE_PROXY_HOST_2": "template2",
+        "REVERSE_PROXY_HOST": "template",
+    },
+}
+
+
+def get_forms(templates=[], plugins=[], service_settings={}):
+
     forms = {"advanced": {}, "easy": {}, "raw": {}}
 
     for template in templates:
-        forms["advanced"][template.get("name")] = set_advanced(template, plugins, settings)
-        forms["raw"][template.get("name")] = set_raw(template, plugins, settings)
-        forms["easy"][template.get("name")] = set_easy(template, plugins, settings)
+        forms["advanced"][template.get("name")] = set_advanced(template, plugins, service_settings)
+        forms["raw"][template.get("name")] = set_raw(template, plugins, service_settings)
+        forms["easy"][template.get("name")] = set_easy(template, plugins, service_settings)
 
     return forms
 
 
-def set_easy(template, plugins_base, settings):
+def set_easy(template, plugins_base, service_settings):
     """
     Prepare the easy form based on the template and plugins data.
     We need to loop on each steps and prepare settings and configs for each step.
@@ -3365,7 +3095,7 @@ def set_easy(template, plugins_base, settings):
                 len(step_settings),
                 loop_id,
                 template_settings,
-                settings,
+                service_settings,
             )
 
             step_settings_output[setting] = plugin_setting
@@ -3375,12 +3105,13 @@ def set_easy(template, plugins_base, settings):
     return steps
 
 
-def set_raw(template, plugins_base, settings):
+def set_raw(template, plugins_base, service_settings):
     """
     Set the raw form based on the template and plugins data.
     It consists of keeping only the value or default value for each plugin settings.
     """
     template_settings = template.get("settings")
+    settings = template.get("settings")
     raw_settings = {}
     # Copy of the plugins base
     plugins = copy.deepcopy(plugins_base)
@@ -3388,10 +3119,10 @@ def set_raw(template, plugins_base, settings):
     for plugin in plugins:
         for setting, value in plugin.get("settings").items():
             # avoid some methods from services_settings
-            if setting in settings and settings[setting].get("method", "ui") not in ("ui", "default", "manual"):
+            if setting in service_settings and service_settings[setting].get("method", "ui") not in ("ui", "default", "manual"):
                 continue
 
-            raw_value = None
+            raw_value = False
 
             # Start by setting template value if exists
             if setting in template_settings:
@@ -3399,8 +3130,8 @@ def set_raw(template, plugins_base, settings):
                 raw_value = template_settings.get(setting, value.get("default"))
 
             # Then override by service settings
-            if setting in settings:
-                raw_value = settings[setting].get("value", value.get("value", value.get("default")))
+            if setting in service_settings:
+                raw_value = service_settings[setting].get("value", value.get("value", value.get("default")))
 
             # Add value only if exists
             if raw_value:
@@ -3409,7 +3140,7 @@ def set_raw(template, plugins_base, settings):
     return raw_settings
 
 
-def set_advanced(template, plugins_base, settings):
+def set_advanced(template, plugins_base, service_settings):
     """
     Set the advanced form based on the template and plugins data.
     It consists of formatting each plugin settings to be used in the advanced form.
@@ -3429,10 +3160,10 @@ def set_advanced(template, plugins_base, settings):
                 total_settings,
                 loop_id,
                 template_settings,
-                settings,
+                service_settings,
             )
 
-    set_multiples(template, plugins, settings)
+    set_multiples(template, plugins, service_settings)
 
     return plugins
 
@@ -3691,20 +3422,10 @@ def format_setting(
     return setting_value
 
 
-def global_config_builder(plugins, settings):
-    """Render forms with global config data.
-    ATM we don't need templates but we need to pass at least one to the function (it will simply not override anything).
-    """
+templates = [default_template]
 
-    templates = [
-        {
-            "name": "default",
-            "steps": [],
-            "configs": {},
-            "settings": {},
-        }
-    ]
 
+def global_config_builder():
     builder = [
         {
             "type": "card",
@@ -3721,7 +3442,7 @@ def global_config_builder(plugins, settings):
                 {
                     "type": "Templates",
                     "data": {
-                        "templates": get_forms(templates, plugins, settings),
+                        "templates": get_forms(templates, plugins, service_settings),
                     },
                 },
             ],
@@ -3729,11 +3450,9 @@ def global_config_builder(plugins, settings):
     ]
 
     return builder
-    # return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
 
 
-output = global_config_builder(plugins, global_config)
-print(output)
+output = global_config_builder()
 with open("globalconfig.json", "w") as f:
     json.dump(output, f, indent=4)
 

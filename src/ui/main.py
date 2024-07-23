@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import base64
 from contextlib import suppress
 from math import floor
 from os import _exit, getenv, listdir, sep, urandom
@@ -11,7 +10,8 @@ from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 from typing import Union
 from uuid import uuid4
-from builder import home_builder, instances_builder
+from builder import home_builder, instances_builder, global_config_builder
+
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -906,6 +906,7 @@ def account():
         totp_qr_image=totp_qr_image,
     )
 
+
 @app.route("/instances", methods=["GET", "POST"])
 @login_required
 def instances():
@@ -1233,8 +1234,11 @@ def global_config():
 
     # Display global config
     global_config = app.config["DB"].get_config(global_only=True, methods=True)
+    # Display global config
+    plugins = app.config["CONFIG"].get_plugins()
     print(global_config, flush=True)
-    return render_template("global_config.html", global_config=global_config, dumped_global_config=dumps(global_config))
+    data_server_builder = global_config_builder(plugins, global_config)
+    return render_template("global_config.html", data_server_builder=global_config, dumped_global_config=dumps(global_config))
 
 
 @app.route("/configs", methods=["GET", "POST"])

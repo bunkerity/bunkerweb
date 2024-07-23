@@ -60,7 +60,7 @@ const props = defineProps({
   columns: {
     type: Object,
     required: false,
-    default: {},
+    default: { pc: 12, tablet: 12, mobile: 12 },
   },
 });
 
@@ -90,7 +90,7 @@ function setValidity() {
 }
 
 const buttonSave = {
-  id: uuidv4(),
+  id: `easy-mode-${uuidv4()}`,
   text: "action_save",
   color: "success",
   size: "normal",
@@ -99,14 +99,14 @@ const buttonSave = {
 };
 
 const buttonPrev = {
-  id: uuidv4(),
+  id: `easy-mode-${uuidv4()}`,
   text: "action_previous",
   color: "info",
   size: "normal",
 };
 
 const buttonNext = {
-  id: uuidv4(),
+  id: `easy-mode-${uuidv4()}`,
   text: "action_next",
   color: "info",
   size: "normal",

@@ -100,11 +100,7 @@ const buttonSave = {
   color: "success",
   size: "normal",
   type: "button",
-  attrs: {
-    "data-submit-form": JSON.stringify(advancedForm.templateBase),
-  },
   containerClass: "flex justify-center",
-  iconName: "plus",
 };
 
 const filters = [

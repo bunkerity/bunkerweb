@@ -39,7 +39,7 @@ const props = defineProps({
   columns: {
     type: Object,
     required: false,
-    default: {},
+    default: { pc: 12, tablet: 12, mobile: 12 },
   },
 });
 
@@ -126,12 +126,6 @@ const buttonSave = {
   color: "success",
   size: "normal",
   containerClass: "flex justify-center",
-  attrs: data.isValid
-    ? {
-        "data-submit-form":
-          data.inp.replace(/\n/g, "") || data.entry.replace(/\n/g, ""),
-      }
-    : {},
 };
 </script>
 
