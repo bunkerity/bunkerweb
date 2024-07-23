@@ -1,5 +1,6 @@
 <script setup>
-import { reactive, onBeforeMount } from "vue";
+import { reactive, onBeforeMount, onMounted } from "vue";
+import { useGlobal } from "@utils/global.js";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderGlobalConfig from "@components/Builder/GlobalConfig.vue";
 
@@ -22,6 +23,10 @@ onBeforeMount(() => {
       ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
       : {};
   globalConfig.builder = data;
+});
+
+onMounted(() => {
+  useGlobal();
 });
 </script>
 

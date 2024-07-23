@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, computed } from "vue";
+import { defineProps, reactive, onMounted, computed, onBeforeMount } from "vue";
 import Container from "@components/Widget/Container.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
@@ -44,39 +44,11 @@ const props = defineProps({
 });
 
 const data = reactive({
-  str: JSON.stringify(props.template),
-  // Data on creation of editor
-  entry: computed(() => {
-    let dataStr = data.str;
-    // Remove first and last curly brackets
-    dataStr = dataStr.slice(1, -1);
-    // Remove all '\"' from stringified JSON
-    dataStr = dataStr.replace(/\\"/g, '"');
-    // Remove all newlines inside values
-    dataStr = dataStr.replace(/\n/g, "");
-    // Add new line only at the end of each key value
-    dataStr = dataStr.replace(/",/g, "\n");
-
-    const lines = dataStr.split("\n");
-    dataStr = lines.map((line) => {
-      // Get index of the first colon
-      const index = line.indexOf(":");
-      // Update colon by equal sign and remove quotes
-      return line.slice(1, index - 1) + "=" + line.slice(index + 2);
-    });
-    dataStr = dataStr.join("\n");
-    // Remove first char if it is a quote
-    dataStr = dataStr[0] === '"' ? dataStr.slice(1) : dataStr;
-    // Remove last char if it is a quote
-    dataStr = dataStr.slice(-1) === '"' ? dataStr.slice(0, -1) : dataStr;
-
-    return dataStr;
-  }),
+  str: "",
   // Data retrieve from editor after creation
-  inp: "",
   isValid: computed(() => {
     // Transform to a possible valid JSON
-    let dataToCheck = data.inp || data.entry;
+    let dataToCheck = data.str;
     // Replace quotes "" with quotes ''
     dataToCheck = dataToCheck.replace(/"/g, "'");
 
@@ -111,8 +83,35 @@ const data = reactive({
   }),
 });
 
+function json2raw(json) {
+  let dataStr = JSON.stringify(json);
+  // Remove first and last curly brackets
+  dataStr = dataStr.slice(1, -1);
+  // Remove all '\"' from stringified JSON
+  dataStr = dataStr.replace(/\\"/g, '"');
+  // Remove all newlines inside values
+  dataStr = dataStr.replace(/\n/g, "");
+  // Add new line only at the end of each key value
+  dataStr = dataStr.replace(/",/g, "\n");
+
+  const lines = dataStr.split("\n");
+  dataStr = lines.map((line) => {
+    // Get index of the first colon
+    const index = line.indexOf(":");
+    // Update colon by equal sign and remove quotes
+    return line.slice(1, index - 1) + "=" + line.slice(index + 2);
+  });
+  dataStr = dataStr.join("\n");
+  // Remove first char if it is a quote
+  dataStr = dataStr[0] === '"' ? dataStr.slice(1) : dataStr;
+  // Remove last char if it is a quote
+  dataStr = dataStr.slice(-1) === '"' ? dataStr.slice(0, -1) : dataStr;
+
+  return dataStr;
+}
+
 const editorData = {
-  value: data.inp || data.entry,
+  value: data.str,
   name: `raw-editor-${uuidv4()}`,
   label: `raw-editor-${uuidv4()}`,
   hideLabel: true,
@@ -127,6 +126,10 @@ const buttonSave = {
   size: "normal",
   containerClass: "flex justify-center",
 };
+
+onBeforeMount(() => {
+  data.str = json2raw(props.template);
+});
 </script>
 
 <template>
@@ -142,7 +145,7 @@ const buttonSave = {
     <Subtitle type="card" :subtitle="'dashboard_raw_mode_subtitle'" />
 
     <Container class="form-raw-editor-container layout-settings">
-      <Editor @inp="(v) => (data.inp = v)" v-bind="editorData" />
+      <Editor @inp="(v) => (data.str = v)" v-bind="editorData" />
     </Container>
     <Button :disabled="data.isValid ? false : true" v-bind="buttonSave" />
 

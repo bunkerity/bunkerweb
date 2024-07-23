@@ -41,6 +41,10 @@ export default defineConfig({
       input: {
         home: resolve(__dirname, "./dashboard/pages/home/index.html"),
         instances: resolve(__dirname, "./dashboard/pages/instances/index.html"),
+        global_config: resolve(
+          __dirname,
+          "./dashboard/pages/global-config/index.html"
+        ),
       },
     },
   },

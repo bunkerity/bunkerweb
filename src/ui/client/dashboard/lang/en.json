@@ -108,7 +108,7 @@
   "inp_input_error_taken": "value already taken",
   "inp_popover_multisite": "This setting is multisite.",
   "inp_popover_global": "This setting is global.",
-  "inp_popover_method_disabled": "This setting method (scheduler, autoconf...) unable value change.",
+  "inp_popover_method_disabled": "The setting method disabled any change.",
   "inp_combobox": "Combobox input for relate select radio group.",
   "inp_select_dropdown_button_desc": "Toggle hide/show radio group (dropdown) to change value.",
   "inp_select_dropdown_desc": "Radio group (dropdown) to change value.",

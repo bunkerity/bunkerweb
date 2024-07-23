@@ -1161,7 +1161,7 @@ def services():
     )
 
 
-@app.route("/global_config", methods=["GET", "POST"])
+@app.route("/global-config", methods=["GET", "POST"])
 @login_required
 def global_config():
     if request.method == "POST":
@@ -1232,13 +1232,10 @@ def global_config():
             )
         )
 
-    # Display global config
     global_config = app.config["DB"].get_config(global_only=True, methods=True)
-    # Display global config
     plugins = app.config["CONFIG"].get_plugins()
-    print(global_config, flush=True)
     data_server_builder = global_config_builder(plugins, global_config)
-    return render_template("global_config.html", data_server_builder=global_config, dumped_global_config=dumps(global_config))
+    return render_template("global-config.html", data_server_builder=data_server_builder)
 
 
 @app.route("/configs", methods=["GET", "POST"])

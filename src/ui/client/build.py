@@ -67,7 +67,9 @@ def create_base_dirs():
 def move_template(folder, target_folder):
     """For the define folder, loop on each files and move them to the target folder with some modification (replace relative path to absolute path for example)"""
 
-    base_html = """ 
+    async def move_template_file(root, file, target_folder):
+        """Move the template file to the target folder. This will replace relative path on file to absolute path to work with flask static"""
+        base_html = """ 
   <body>
   {% set data_server_flash = [] %}
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -83,8 +85,9 @@ def move_template(folder, target_folder):
   </body>
 </html>"""
 
-    async def move_template_file(root, file, target_folder, base_html):
-        """Move the template file to the target folder. This will replace relative path on file to absolute path to work with flask static"""
+        if "global-config" in root:
+            base_html = base_html.replace("data_server_builder[1:-1]", "data_server_builder")
+
         file_path = os.path.join(root, file)
 
         def format_template(m):
@@ -115,7 +118,7 @@ def move_template(folder, target_folder):
     # I want to get all subfollder of a folder
     for root, dirs, files in os.walk(folder):
         for file in files:
-            asyncio.run(move_template_file(root, file, target_folder, base_html))
+            asyncio.run(move_template_file(root, file, target_folder))
 
 
 def move_statics(folder, target_folder):

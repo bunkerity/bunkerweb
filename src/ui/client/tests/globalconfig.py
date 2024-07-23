@@ -1,6 +1,7 @@
 import json
 import copy
 import base64
+from typing import Union
 
 # Default plugins from docker-compose.ui.yml
 plugins = [
@@ -3313,23 +3314,30 @@ global_config = {
 }
 
 
-def get_forms(templates=[], plugins=[], settings={}):
+def get_forms(templates: list = [], plugins: list = [], settings: dict = {}, render_forms: tuple = ("advanced", "easy", "raw")) -> dict:
     """
     Will generate every needed form using templates, plugins and settings.
     We will run on each plugins, set template value if one, and override by the custom settings value if exists.
-    We will format to fit each form type (easy, advanced, raw).
+    We will format to fit each form type (easy, advanced, raw) in case
     """
-    forms = {"advanced": {}, "easy": {}, "raw": {}}
+    forms = {}
+    for form in render_forms:
+        forms[form] = {}
 
     for template in templates:
-        forms["advanced"][template.get("name")] = set_advanced(template, plugins, settings)
-        forms["raw"][template.get("name")] = set_raw(template, plugins, settings)
-        forms["easy"][template.get("name")] = set_easy(template, plugins, settings)
+        if "advanced" in forms:
+            forms["advanced"][template.get("name")] = set_advanced(template, plugins, settings)
+
+        if "raw" in forms:
+            forms["raw"][template.get("name")] = set_raw(template, plugins, settings)
+
+        if "easy" in forms:
+            forms["easy"][template.get("name")] = set_easy(template, plugins, settings)
 
     return forms
 
 
-def set_easy(template, plugins_base, settings):
+def set_easy(template: list, plugins_base: list, settings: dict) -> dict:
     """
     Prepare the easy form based on the template and plugins data.
     We need to loop on each steps and prepare settings and configs for each step.
@@ -3375,7 +3383,7 @@ def set_easy(template, plugins_base, settings):
     return steps
 
 
-def set_raw(template, plugins_base, settings):
+def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
     """
     Set the raw form based on the template and plugins data.
     It consists of keeping only the value or default value for each plugin settings.
@@ -3400,7 +3408,14 @@ def set_raw(template, plugins_base, settings):
 
             # Then override by service settings
             if setting in settings:
-                raw_value = settings[setting].get("value", value.get("value", value.get("default")))
+                val = settings[setting].get("value", value.get("value"))
+
+            
+            # Check if value is same as default
+            # If case, we don't need to add it
+            default_val = value.get("default")
+            if val == default_val:
+                raw_value = None
 
             # Add value only if exists
             if raw_value:
@@ -3409,7 +3424,7 @@ def set_raw(template, plugins_base, settings):
     return raw_settings
 
 
-def set_advanced(template, plugins_base, settings):
+def set_advanced(template: list, plugins_base: list, settings: dict) -> dict:
     """
     Set the advanced form based on the template and plugins data.
     It consists of formatting each plugin settings to be used in the advanced form.
@@ -3554,7 +3569,7 @@ def get_multiple_from_settings(settings, multiples):
     return multiple_settings
 
 
-def set_multiples(template, format_plugins, service_settings):
+def set_multiples(template, format_plugins, settings):
     """
     Set the multiples settings for each plugin.
     """
@@ -3593,7 +3608,7 @@ def set_multiples(template, format_plugins, service_settings):
             # Get all settings from template that are multiples
             template_multiples = get_multiple_from_template(template, multiples)
             # Get all settings from service settings / global config that are multiples
-            service_multiples = get_multiple_from_settings(service_settings, multiples)
+            service_multiples = get_multiple_from_settings(settings, multiples)
             # Get service multiples if at least one, else use template multiples
             plugin["multiples"] = service_multiples if len(service_multiples) else template_multiples
 
@@ -3601,13 +3616,13 @@ def set_multiples(template, format_plugins, service_settings):
 
 
 def format_setting(
-    setting_name,
-    setting_value,
-    total_settings,
-    loop_id,
-    template_settings,
-    service_settings,
-):
+    setting_name: str,
+    setting_value: Union[str, int],
+    total_settings: Union[str, int],
+    loop_id: Union[str, int],
+    template_settings: dict,
+    settings: dict,
+) -> dict:
     """
     Format a setting in order to be used with form builder.
     This will only set value for none multiple settings.
@@ -3652,18 +3667,18 @@ def format_setting(
 
     # Then override by service settings if not a multiple
     # Case multiple, we need to keep the default value and override only each multiple group
-    if setting_name in service_settings and not "multiple" in setting_value:
-        setting_value["value"] = service_settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
-        setting_value["method"] = service_settings[setting_name].get("method", "ui")
+    if setting_name in settings and not "multiple" in setting_value:
+        setting_value["value"] = settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
+        setting_value["method"] = settings[setting_name].get("method", "ui")
 
     # Then override by service settings
-    if setting_name in service_settings:
-        setting_value["disabled"] = False if service_settings[setting_name].get("method", "ui") in ("ui", "default", "manual") else True
+    if setting_name in settings:
+        setting_value["disabled"] = False if settings[setting_name].get("method", "ui") in ("ui", "default", "manual") else True
 
     # Prepare popover checking "help", "context"
     popovers = []
 
-    if (setting_value.get("disabled", False)) and service_settings[setting_name].get("method", "ui") not in ("ui", "default", "manual"):
+    if (setting_value.get("disabled", False)) and settings[setting_name].get("method", "ui") not in ("ui", "default", "manual"):
         popovers.append(
             {
                 "iconName": "trespass",
@@ -3691,7 +3706,7 @@ def format_setting(
     return setting_value
 
 
-def global_config_builder(plugins, settings):
+def global_config_builder(plugins: list, settings: dict) -> str:
     """Render forms with global config data.
     ATM we don't need templates but we need to pass at least one to the function (it will simply not override anything).
     """
@@ -3721,19 +3736,17 @@ def global_config_builder(plugins, settings):
                 {
                     "type": "Templates",
                     "data": {
-                        "templates": get_forms(templates, plugins, settings),
+                        "templates": get_forms(templates, plugins, settings, ("advanced", "raw")),
                     },
                 },
             ],
         }
     ]
-
     return builder
     # return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
 
 
 output = global_config_builder(plugins, global_config)
-print(output)
 with open("globalconfig.json", "w") as f:
     json.dump(output, f, indent=4)
 
