@@ -10,11 +10,11 @@ const header = reactive({
   splitPath: [],
   currPath: computed(() => {
     if (header.splitPath.length === 0) return "page";
-    return header.splitPath[header.splitPath.length - 1];
+    return header.splitPath[header.splitPath.length - 1].replaceAll(" ", "_");
   }),
   lastPath: computed(() => {
     if (header.splitPath.length === 0) return "page";
-    return header.splitPath[header.splitPath.length - 1];
+    return header.splitPath[header.splitPath.length - 1].replaceAll(" ", "_");
   }),
 });
 
