@@ -269,13 +269,11 @@ def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
 
             # Then override by service settings
             if setting in settings:
-                val = settings[setting].get("value", value.get("value"))
-
-            # Check if value is same as default
-            # If case, we don't need to add it
-            default_val = value.get("default")
-            if val == default_val:
-                raw_value = None
+                # Check if the service setting is not default value to add it
+                default_val = value.get("default")
+                val = settings[setting].get("value", value.get("value", value.get("default")))
+                if val != default_val:
+                    raw_value = val
 
             # Add value only if exists
             if raw_value:
