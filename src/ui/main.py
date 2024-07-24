@@ -2402,8 +2402,6 @@ def jobs_download():
     if not plugin_id or not job_name or not file_name:
         return jsonify({"status": "ko", "message": "plugin_id, job_name and file_name are required"}), 422
 
-    file_name = secure_filename(file_name)
-
     cache_file = app.config["DB"].get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
 
     if not cache_file:
