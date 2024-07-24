@@ -9,9 +9,9 @@
     },
     {
       "id": "coreruleset-v4",
-      "name": "Coreruleset v4.4.0",
+      "name": "Coreruleset v4.5.0",
       "url": "https://github.com/coreruleset/coreruleset.git",
-      "commit": "b3bc1a2138922e43a00875b39f1b0e46a5da89c1",
+      "commit": "a6913506683b3972ce18940f32298711f217fa54",
       "post_install": "rm -rf files/coreruleset-v4/tests && cp files/coreruleset-v4/crs-setup.conf.example files/crs-setup-v4.conf"
     }
   ]

@@ -16,8 +16,13 @@
   \b\s+
   ##!=>
 
+  ##! match flags
+  (?:[+\-][a-z]+\+?\s+)?
+  ##!=>
+
   ##! match the alias name
-  ['"\w!%,@]+
+  ##! The '.' and '-' character match payloads like "alias ls-al='ls -al'" and "alias ..='cd ..'"
+  [.'"\w!%\-,@]+
   ##!=>
 
   ##! match equals something
