@@ -215,7 +215,9 @@ function _M:set_{{ f.field }}(toset)
   return true
   {%- else %}
   {%- if modname == "x509.csr" %}
-  return replace_extension(self.ctx, NID_{{ f.field }}, toset)
+  -- avoid tail call return as `toset.ctx` may got GC'ed early
+  local ok, err = replace_extension(self.ctx, NID_{{ f.field }}, toset)
+  return ok, err
   {%- else %}
   -- x509v3.h: # define X509V3_ADD_REPLACE              2L
   if C.X509_add1_ext_i2d(self.ctx, NID_{{ f.field }}, toset, 0, 0x2) ~= 1 then

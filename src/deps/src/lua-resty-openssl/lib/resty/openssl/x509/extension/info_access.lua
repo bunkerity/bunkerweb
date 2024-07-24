@@ -66,7 +66,7 @@ function _M.dup(ctx)
 
   return setmetatable({
     ctx = dup_ctx,
-    cast = ffi_cast("AUTHORITY_INFO_ACCESS*", dup_ctx),
+    cast = ffi_cast(authority_info_access_ptr_ct, dup_ctx),
     -- don't let lua gc the original stack to keep its elements
     _dupped_from = ctx,
     _is_shallow_copy = true,

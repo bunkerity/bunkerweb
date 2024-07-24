@@ -60,8 +60,8 @@ cwIDAQAB
   -- since there seems no way to increase ref count for a GENERAL_NAME
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("GENERAL_NAME"))
-  got = ffi_cast("GENERAL_NAMES*", got_ref)''',
+  got = ffi_cast("GENERAL_NAMES*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("GENERAL_NAME"))''',
 },
 ]
 }

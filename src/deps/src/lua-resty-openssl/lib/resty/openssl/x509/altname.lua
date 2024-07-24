@@ -121,7 +121,7 @@ function _M.dup(ctx)
   end
 
   return setmetatable({
-    cast = ffi_cast("GENERAL_NAMES*", dup_ctx),
+    cast = ffi_cast(general_names_ptr_ct, dup_ctx),
     ctx = dup_ctx,
     -- don't let lua gc the original stack to keep its elements
     _dupped_from = ctx,

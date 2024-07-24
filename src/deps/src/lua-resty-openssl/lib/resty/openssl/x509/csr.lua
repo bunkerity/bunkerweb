@@ -168,6 +168,15 @@ local function get_extension(ctx, nid_txt, last_pos)
     return nil, nil, format_error("X509v3_get_ext")
   end
 
+  -- the extension is not duplicated when returned by X509v3_get_ext
+  -- so we need to copy it
+  ctx = C.X509_EXTENSION_dup(ctx)
+  if ctx == nil then
+    return nil, nil, "X509_EXTENSION_dup() failed"
+  end
+
+  ffi_gc(ctx, C.X509_EXTENSION_free)
+
   return ctx, ext_idx, nil
 end
 
@@ -190,13 +199,14 @@ end
 
 local function modify_extension(replace, ctx, nid, toset, crit)
   local extensions_ptr = stack_ptr_type()
-  extensions_ptr[0] = C.X509_REQ_get_extensions(ctx)
-  local need_cleanup = extensions_ptr[0] ~= nil and
+  local extension = C.X509_REQ_get_extensions(ctx)
+  extensions_ptr[0] = extension
+  local need_cleanup = extension ~= nil and
   -- extensions_ptr being nil is fine: it may just because there's no extension yet
   -- https://github.com/openssl/openssl/commit/2039ac07b401932fa30a05ade80b3626e189d78a
   -- introduces a change that a empty stack instead of NULL will be returned in no extension
   -- is found. so we need to double check the number if it's not NULL.
-                        C.OPENSSL_sk_num(extensions_ptr[0]) > 0
+                        C.OPENSSL_sk_num(extension) > 0
 
   local flag
   if replace then
@@ -208,12 +218,12 @@ local function modify_extension(replace, ctx, nid, toset, crit)
   end
 
   local code = C.X509V3_add1_i2d(extensions_ptr, nid, toset, crit and 1 or 0, flag)
-  -- when the stack is newly allocated, we want to cleanup the newly created stack as well
-  -- setting the gc handler here as it's mutated in X509V3_add1_i2d if it's pointing to NULL
-  ffi_gc(extensions_ptr[0], x509_extensions_gc)
   if code ~= 1 then
     return false, format_error("X509V3_add1_i2d", code)
   end
+  -- when the stack is newly allocated, we want to cleanup the newly created stack as well
+  -- setting the gc handler here as it's mutated in X509V3_add1_i2d if it's pointing to NULL
+  ffi_gc(extension, x509_extensions_gc)
 
   if need_cleanup then
     -- cleanup old attributes
@@ -224,7 +234,7 @@ local function modify_extension(replace, ctx, nid, toset, crit)
     end
   end
 
-  code = C.X509_REQ_add_extensions(ctx, extensions_ptr[0])
+  code = C.X509_REQ_add_extensions(ctx, extension)
   if code ~= 1 then
     return false, format_error("X509_REQ_add_extensions", code)
   end
@@ -250,7 +260,9 @@ function _M:add_extension(extension)
 
   local nid = extension:get_object().nid
   local toset = extension_lib.to_data(extension, nid)
-  return add_extension(self.ctx, nid, toset.ctx, extension:get_critical())
+  -- avoid tail call return as `toset.ctx` may got GC'ed early
+  local ok, err = add_extension(self.ctx, nid, toset.ctx, extension:get_critical())
+  return ok, err
 end
 
 function _M:set_extension(extension)
@@ -260,7 +272,9 @@ function _M:set_extension(extension)
 
   local nid = extension:get_object().nid
   local toset = extension_lib.to_data(extension, nid)
-  return replace_extension(self.ctx, nid, toset.ctx, extension:get_critical())
+  -- avoid tail call return as `toset.ctx` may got GC'ed early
+  local ok, err = replace_extension(self.ctx, nid, toset.ctx, extension:get_critical())
+  return ok, err
 end
 
 function _M:set_extension_critical(nid_txt, crit, last_pos)
@@ -277,7 +291,9 @@ function _M:set_extension_critical(nid_txt, crit, last_pos)
   local toset = extension_lib.to_data({
     ctx = extension
   }, nid)
-  return replace_extension(self.ctx, nid, toset.ctx, crit and 1 or 0)
+  -- avoid tail call return as `toset.ctx` may got GC'ed early
+  local ok, err = replace_extension(self.ctx, nid, toset.ctx, crit and 1 or 0)
+  return ok, err
 end
 
 function _M:get_extension_critical(nid_txt, last_pos)
@@ -430,8 +446,8 @@ function _M:get_subject_alt_name()
   -- since there seems no way to increase ref count for a GENERAL_NAME
   -- we left the elements referenced by the new-dup'ed stack
   local got_ref = got
-  ffi_gc(got_ref, stack_lib.gc_of("GENERAL_NAME"))
   got = ffi_cast("GENERAL_NAMES*", got_ref)
+  ffi_gc(got, stack_lib.gc_of("GENERAL_NAME"))
   local lib = require("resty.openssl.x509.altname")
   -- the internal ptr is returned, ie we need to copy it
   return lib.dup(got)
@@ -444,7 +460,9 @@ function _M:set_subject_alt_name(toset)
     return false, "x509.csr:set_subject_alt_name: expect a x509.altname instance at #1"
   end
   toset = toset.ctx
-  return replace_extension(self.ctx, NID_subject_alt_name, toset)
+  -- avoid tail call return as `toset.ctx` may got GC'ed early
+  local ok, err = replace_extension(self.ctx, NID_subject_alt_name, toset)
+  return ok, err
 end
 
 -- AUTO GENERATED: EXTENSIONS

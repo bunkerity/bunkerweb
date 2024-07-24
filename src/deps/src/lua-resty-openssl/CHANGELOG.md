@@ -2,6 +2,21 @@
 ## [Unreleased]
 
 
+<a name="1.5.0"></a>
+## [1.5.0] - 2024-07-23
+### bug fixes
+- **asn1:** correct time_t to be 64 bits type ([#171](https://github.com/fffonion/lua-resty-openssl/issues/171)) [7d6d8b5](https://github.com/fffonion/lua-resty-openssl/commit/7d6d8b5d241374427da2231612e1e4552ff4cf1d)
+- **bn:** fix potential use-after-free in bn.new ([#177](https://github.com/fffonion/lua-resty-openssl/issues/177)) [224fae6](https://github.com/fffonion/lua-resty-openssl/commit/224fae68ca8716fbd97a2a94d194237aaa2eaa58)
+- **objects:** fix a buffer overflow issue in find_sigid_algs. ([#175](https://github.com/fffonion/lua-resty-openssl/issues/175)) [d94064c](https://github.com/fffonion/lua-resty-openssl/commit/d94064cc7754c744b325fcd2908bfce26915b76e)
+- **param:** fix issue when gettable schema may be overwritten by settable schema [7669555](https://github.com/fffonion/lua-resty-openssl/commit/766955521cee5c7ed6a7e64a1439e3ca38c2f958)
+- **param:** save converted value to prevent potential use-after-free [8c366c2](https://github.com/fffonion/lua-resty-openssl/commit/8c366c22c796b0b44bc49d4953084a09bcba4e6c)
+- **pkey:** fix potential use-after-free in pkey.paramgen ([#176](https://github.com/fffonion/lua-resty-openssl/issues/176)) [e924ee0](https://github.com/fffonion/lua-resty-openssl/commit/e924ee0454e1d95b63f62b660d6c0090bfeabb26)
+- **x509.\*:** fix potential use-after-free when get or set subject_alt_name, info_access and dist_points [407d31e](https://github.com/fffonion/lua-resty-openssl/commit/407d31ec31f2fe8cb968b1d7d140f717ef620290)
+- **x509.csr:** fix potential use-after-free in set_extension and add_extension [a0711de](https://github.com/fffonion/lua-resty-openssl/commit/a0711de99cf57e6d8fa62f03abba46e02360063d)
+- **x509.store:** fix potential use-after-free in store:verify and store:check_revocation [b16f759](https://github.com/fffonion/lua-resty-openssl/commit/b16f759c28ed9929d53516af34804d39f49661bf)
+- **x509.store:** fix the string is not NUL terminated in set_purpose ([#174](https://github.com/fffonion/lua-resty-openssl/issues/174)) [a88f1ba](https://github.com/fffonion/lua-resty-openssl/commit/a88f1ba30761e91cc1c2ec1dda3a82f8f4898422)
+
+
 <a name="1.4.0"></a>
 ## [1.4.0] - 2024-05-27
 ### bug fixes
@@ -601,7 +616,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.4.0...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.5.0...HEAD
+[1.5.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.1...1.4.0
 [1.3.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.2.1...1.3.0

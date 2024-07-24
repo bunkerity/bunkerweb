@@ -337,7 +337,7 @@ function _M:derive(outlen, options, options_count)
   end
 
   if self.buf_size and outlen then
-    return nil, string.format("kdf:derive: this KDF has fixed output size %d, ".. 
+    return nil, string.format("kdf:derive: this KDF has fixed output size %d, "..
                               "it can't be set manually", self.buf_size)
   end
 
