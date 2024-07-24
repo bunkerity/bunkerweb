@@ -405,8 +405,9 @@ def inject_variables():
 
 
 @app.after_request
-def set_csp_header(response):
-    """Set the Content-Security-Policy header to prevent XSS attacks."""
+def set_security_headers(response):
+    """Set the security headers."""
+    # * Content-Security-Policy header to prevent XSS attacks
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
@@ -416,8 +417,25 @@ def set_csp_header(response):
         + " img-src 'self' data: https://assets.bunkerity.com;"
         + " font-src 'self' data:;"
         + " base-uri 'self';"
+        + " block-all-mixed-content;"
         + (" connect-src *;" if request.path.startswith(("/check", "/setup")) else "")
     )
+
+    if request.headers.get("X-Forwarded-Proto") == "https":
+        if not request.path.startswith("/setup/loading"):
+            response.headers["Content-Security-Policy"] += " upgrade-insecure-requests;"
+
+        # * Strict-Transport-Security header to force HTTPS if accessed via a reverse proxy
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
+
+    # * X-Frames-Options header to prevent clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+
+    # * X-Content-Type-Options header to prevent MIME sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+
+    # * Referrer-Policy header to prevent leaking of sensitive data
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     return response
 
@@ -617,6 +635,7 @@ def setup():
                 "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
                 "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
                 "MAX_CLIENT_SIZE": "50m",
+                "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Strict-Transport-Security X-Frame-Options X-Content-Type-Options Referrer-Policy",
             }
 
             if request.form.get("auto_lets_encrypt", "no") == "yes":
