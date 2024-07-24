@@ -29,9 +29,10 @@ __DATA__
 --- config
     location =/t {
         content_by_lua_block {
+            local p
             if require("resty.openssl.version").OPENSSL_3X then
                 local pro = require "resty.openssl.provider"
-                myassert(pro.load("legacy"))
+                p = myassert(pro.load("legacy"))
             end
 
             local pkcs12 = require "resty.openssl.pkcs12"
@@ -42,6 +43,10 @@ __DATA__
 
             ngx.say(r.key:get_parameters().d:to_hex())
             ngx.say(r.cert:get_serial_number():to_hex())
+
+            if p then
+                myassert(p:unload())
+            end
         }
     }
 --- request
@@ -59,9 +64,10 @@ __DATA__
 --- config
     location =/t {
         content_by_lua_block {
+            local p
             if require("resty.openssl.version").OPENSSL_3X then
                 local pro = require "resty.openssl.provider"
-                myassert(pro.load("legacy"))
+                p = myassert(pro.load("legacy"))
             end
 
             local pkcs12 = require "resty.openssl.pkcs12"
@@ -75,6 +81,10 @@ __DATA__
             local r, err = pkcs12.decode(pp)
             ngx.say(r == nil)
             ngx.say(err)
+
+            if p then
+                myassert(p:unload())
+            end
         }
     }
 --- request
@@ -95,9 +105,10 @@ pkcs12.decode.+mac verify failure.*
 --- config
     location =/t {
         content_by_lua_block {
+            local p
             if require("resty.openssl.version").OPENSSL_3X then
                 local pro = require "resty.openssl.provider"
-                myassert(pro.load("legacy"))
+                p = myassert(pro.load("legacy"))
             end
 
             local pkcs12 = require "resty.openssl.pkcs12"
@@ -133,6 +144,10 @@ pkcs12.decode.+mac verify failure.*
                 cert = cert,
             }))
             ngx.say(#r)
+
+            if p then
+                myassert(p:unload())
+            end
         }
     }
 --- request
@@ -153,9 +168,10 @@ pkcs12.decode.+mac verify failure.*
 --- config
     location =/t {
         content_by_lua_block {
+            local p
             if require("resty.openssl.version").OPENSSL_3X then
                 local pro = require "resty.openssl.provider"
-                myassert(pro.load("legacy"))
+                p = myassert(pro.load("legacy"))
             end
     
             local pkcs12 = require "resty.openssl.pkcs12"
@@ -183,6 +199,10 @@ pkcs12.decode.+mac verify failure.*
             local r, err = pkcs12.decode(p12, "extrapassword")
             ngx.say(r == nil)
             ngx.say(err)
+
+            if p then
+                myassert(p:unload())
+            end
         }
     }
 --- request
@@ -205,9 +225,10 @@ pkcs12.decode.+mac verify failure.*
 --- config
     location =/t {
         content_by_lua_block {
+            local p
             if require("resty.openssl.version").OPENSSL_3X then
                 local pro = require "resty.openssl.provider"
-                myassert(pro.load("legacy"))
+                p = myassert(pro.load("legacy"))
             end
 
             local pkcs12 = require "resty.openssl.pkcs12"
@@ -221,6 +242,10 @@ pkcs12.decode.+mac verify failure.*
                 cacerts = { ca1, ca2 }
             }, "test-pkcs12")
             ngx.say(r == nil, err)
+
+            if p then
+                myassert(p:unload())
+            end
         }
     }
 --- request

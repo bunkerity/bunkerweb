@@ -57,6 +57,7 @@ local function set_bn(ctx, s, base)
     if C.BN_set_word(ctx, s) ~= 1 then
       return nil, format_error("set_bn")
     end
+    return ctx
   elseif type(s) == 'string' then
     if not base or base == 10 then
       return set_dec(ctx, s)
@@ -65,7 +66,7 @@ local function set_bn(ctx, s, base)
     elseif base == 2 then
       return set_binary(ctx, s)
     elseif base == 0 then
-      ctx = set_mpi(ctx, s)
+      return set_mpi(ctx, s)
     else
       return nil, "set_bn: unsupported base: " .. base
     end
@@ -73,14 +74,18 @@ local function set_bn(ctx, s, base)
     return nil, "set_bn: expect nil, a number or a string at #1"
   end
 
-  return ctx
+  -- fall through
+  return ctx 
 end
 
 function _M.new(some, base)
   local ctx = C.BN_new()
   ffi_gc(ctx, C.BN_free)
 
-  local ctx, err = set_bn(ctx, some, base)
+  -- local ctx, err = set_bn(ctx, some, base)
+  -- The above expression set ctx to a new cdata return by
+  -- set_bn, the origin cdata would be GC at any time.
+  local _, err = set_bn(ctx, some, base)
   if err then
     return nil, "bn.new: " .. err
   end
