@@ -1,10 +1,11 @@
-![GHA build main](https://github.com/coreruleset/coreruleset/workflows/Regression%20Tests/badge.svg?branch=main)</br>
-![GHA build v4.0/dev](https://github.com/coreruleset/coreruleset/workflows/Regression%20Tests/badge.svg?branch=v4.0%2Fdev)
-![GHA build v3.3/dev](https://github.com/coreruleset/coreruleset/workflows/Regression%20Tests/badge.svg?branch=v3.3%2Fdev)
 [![OWASP Flagship](https://img.shields.io/badge/owasp-flagship%20project-38a047.svg)](https://owasp.org/projects/)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1390/badge)](https://bestpractices.coreinfrastructure.org/projects/1390)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+| Branch | Status |
+---------|-------|
+| main | ![GHA build main](https://github.com/coreruleset/coreruleset/actions/workflows/test.yml/badge.svg?branch=main) |
+| v3.3/master | ![GHA build v3.3/master](https://github.com/coreruleset/coreruleset/workflows/Regression%20Tests/badge.svg?branch=v3.3%2Fmaster) |
 
 
 # OWASP CRS

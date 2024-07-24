@@ -16,7 +16,7 @@ on:
 
 # Pin tool versions to prevent problems
 env:
-  GO_FTW_VERSION: '0.6.4'
+  GO_FTW_VERSION: '1.0.3'
 
 jobs:
   regression:
@@ -36,22 +36,27 @@ jobs:
             -p "ftw_${{ env.GO_FTW_VERSION }}_linux_amd64.tar.gz" -O - | tar -xzvf - ftw
 
       - name: "Run tests for ${{ matrix.modsec_version }}"
-        env:
-          FTW_LOGFILE: './tests/logs/${{ matrix.modsec_version }}/error.log'
         run: |
           mkdir -p "tests/logs/${{ matrix.modsec_version }}/{nginx,apache2}"
-          chmod -R o+rw "tests/logs"
           docker-compose -f ./tests/docker-compose.yml up -d "${{ matrix.modsec_version }}"
           docker-compose -f ./tests/docker-compose.yml logs
-          [ "$(docker inspect ${{ matrix.modsec_version }} --format='{{.State.Running}}')" = "true" ]
-          ./ftw check -d tests/regression/tests
-          ./ftw run -d tests/regression/tests --show-failures-only
+          if ! [ "$(docker inspect ${{ matrix.modsec_version }} --format='{{.State.Running}}')" = "true" ]; then
+            echo "Web server failed to start. Aborting."
+            exit 1
+          fi
 
-      - name: "Change permissions if failed"
+          ./ftw check -d tests/regression/tests
+          ./ftw run \
+            -d tests/regression/tests \
+            --log-file "tests/logs/${{ matrix.modsec_version }}/error.log" \
+            --overrides tests/regression/httpd-overrides.yaml \
+            --show-failures-only
+
+      - name: "Change permissions of artifacts for upload"
         if: failure()
         run: |
-            # we want to get the audit log, so change permissions (file is only for root on docker)
-            sudo chmod 644 tests/logs/${{ matrix.modsec_version }}/modsec_audit.log
+          # Files created from the container will belong to root
+          sudo chmod -R a+r tests/logs
 
       - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         if: failure()

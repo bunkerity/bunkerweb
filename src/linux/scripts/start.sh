@@ -106,6 +106,18 @@ function start() {
         chown nginx:nginx /var/run/bunkerweb
     fi
 
+    # Create TMP folder
+    if [ ! -f /var/tmp/bunkerweb ] ; then
+        mkdir -p /var/tmp/bunkerweb
+        chown nginx:nginx /var/tmp/bunkerweb
+    fi
+
+    # Create LOG folder
+    if [ ! -f /var/log/bunkerweb ] ; then
+        mkdir -p /var/log/bunkerweb
+        chown nginx:nginx /var/log/bunkerweb
+    fi
+
     # Stop scheduler if it's running
     stop_scheduler
 

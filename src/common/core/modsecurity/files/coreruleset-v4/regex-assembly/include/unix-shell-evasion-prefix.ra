@@ -39,8 +39,10 @@
 \r
 ##! $(ifconfig)
 \$\(
-##! $((ifconfig))
+##! $((1+2)) arithmetic expansion
 \$\(\(
+##! $[1+2] arithmetic expansion (deprecated in bash, but exists in other shells, like zsh)
+\$\[
 ##! `ifconfig`
 `
 ##! ${ifconfig}
