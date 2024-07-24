@@ -79,6 +79,12 @@ const data = reactive({
   }),
 });
 
+/**
+  @name setValidity
+  @description Check template settings and return if there is any error.
+  Error will disabled save button and display an error message.
+  @returns {void}
+*/
 function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
     useCheckPluginsValidity(easyForm.templateUI);

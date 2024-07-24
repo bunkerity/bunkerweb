@@ -77,6 +77,11 @@ const popover = reactive({
 const popoverContainer = ref();
 const popoverBtn = ref();
 
+/**
+  @name showPopover
+  @description Show the popover and set the position of the popover relative to the container.
+  @returns {void}
+*/
 function showPopover() {
   popover.isHover = true;
 
@@ -128,6 +133,11 @@ function showPopover() {
   }, 450);
 }
 
+/**
+  @name hidePopover
+  @description Hide the popover.
+  @returns {void}
+*/
 function hidePopover() {
   popover.isHover = false;
   popover.isOpen = false;

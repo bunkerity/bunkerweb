@@ -1,4 +1,26 @@
 import json
+import base64
+
+
+def title_widget(title):
+    return {
+        "type": "Title",
+        "data": {"title": title},
+    }
+
+
+def table_widget(positions, header, items, filters, minWidth, title):
+    return {
+        "type": "Table",
+        "data": {
+            "title": title,
+            "minWidth": minWidth,
+            "header": header,
+            "positions": positions,
+            "items": items,
+            "filters": filters,
+        },
+    }
 
 
 jobs = {
@@ -238,11 +260,7 @@ def get_jobs_list(jobs):
                 files = []
                 # loop on each cache item
                 for cache in v:
-                    file_name = (
-                        f"{cache['file_name']} ({value['plugin_id']}) [{cache['service_id']}]"
-                        if cache["service_id"]
-                        else f"{cache['file_name']} ({value['plugin_id']})"
-                    )
+                    file_name = f"{cache['file_name']} [{cache['service_id']}]" if cache["service_id"] else f"{cache['file_name']}"
                     files.append(file_name)
 
                 item.append(
@@ -251,6 +269,10 @@ def get_jobs_list(jobs):
                         "type": "Fields",
                         "data": {
                             "setting": {
+                                "attrs": {
+                                    "data-plugin-id": value.get("plugin_id", ""),
+                                    "data-job-name": key,
+                                },
                                 "id": f"{key}_cache",
                                 "label": f"{key}_cache",
                                 "hideLabel": True,
@@ -283,7 +305,7 @@ def get_jobs_list(jobs):
     return data
 
 
-def job_builder(jobs):
+def jobs_builder(jobs):
 
     jobs_list = get_jobs_list(jobs)
 
@@ -302,128 +324,126 @@ def job_builder(jobs):
             "type": "card",
             "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
             "widgets": [
-                {
-                    "type": "Title",
-                    "data": {"title": "jobs_title", "tag": "h1", "type": "card"},
-                },
-                {
-                    "type": "Table",
-                    "data": {
-                        "title": "jobs_table_title",
-                        "minWidth": "lg",
-                        "header": [
-                            "jobs_table_name",
-                            "jobs_table_plugin_id",
-                            "jobs_table_interval",
-                            "jobs_table_reload",
-                            "jobs_table_success",
-                            "jobs_table_last_run_date",
-                            "jobs_table_cache_downloadable",
-                        ],
-                        "positions": [2, 2, 1, 1, 1, 2, 3],
-                        "items": jobs_list,
-                        "filters": [
-                            {
-                                "filter": "table",
-                                "filterName": "keyword",
-                                "type": "keyword",
+                title_widget("jobs_title"),
+                table_widget(
+                    positions=[2, 2, 1, 1, 1, 2, 3],
+                    header=[
+                        "jobs_table_name",
+                        "jobs_table_plugin_id",
+                        "jobs_table_interval",
+                        "jobs_table_reload",
+                        "jobs_table_success",
+                        "jobs_table_last_run_date",
+                        "jobs_table_cache_downloadable",
+                    ],
+                    items=jobs_list,
+                    filters=[
+                        {
+                            "filter": "table",
+                            "filterName": "keyword",
+                            "type": "keyword",
+                            "value": "",
+                            "keys": ["name", "plugin_id", "last_run"],
+                            "field": {
+                                "id": "jobs-keyword",
                                 "value": "",
-                                "keys": ["name", "plugin_id", "last_run"],
-                                "field": {
-                                    "id": "jobs-keyword",
-                                    "value": "",
-                                    "type": "text",
-                                    "name": "jobs-keyword",
-                                    "label": "jobs_search",
-                                    "placeholder": "inp_keyword",
-                                    "isClipboard": False,
-                                    "popovers": [
-                                        {
-                                            "text": "jobs_search_desc",
-                                            "iconName": "info",
-                                        },
-                                    ],
-                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                },
+                                "type": "text",
+                                "name": "jobs-keyword",
+                                "label": "jobs_search",
+                                "placeholder": "inp_keyword",
+                                "isClipboard": False,
+                                "popovers": [
+                                    {
+                                        "text": "jobs_search_desc",
+                                        "iconName": "info",
+                                    },
+                                ],
+                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                             },
-                            {
-                                "filter": "table",
-                                "filterName": "every",
-                                "type": "select",
+                        },
+                        {
+                            "filter": "table",
+                            "filterName": "every",
+                            "type": "select",
+                            "value": "all",
+                            "keys": ["every"],
+                            "field": {
+                                "id": "jobs-every",
                                 "value": "all",
-                                "keys": ["every"],
-                                "field": {
-                                    "id": "jobs-every",
-                                    "value": "all",
-                                    "values": intervals,
-                                    "name": "jobs-every",
-                                    "onlyDown": True,
-                                    "label": "jobs_interval",
-                                    "popovers": [
-                                        {
-                                            "text": "jobs_interval_desc",
-                                            "iconName": "info",
-                                        },
-                                    ],
-                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                },
+                                "values": intervals,
+                                "name": "jobs-every",
+                                "onlyDown": True,
+                                "label": "jobs_interval",
+                                "popovers": [
+                                    {
+                                        "text": "jobs_interval_desc",
+                                        "iconName": "info",
+                                    },
+                                ],
+                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                             },
-                            {
-                                "filter": "table",
-                                "filterName": "reload",
-                                "type": "select",
+                        },
+                        {
+                            "filter": "table",
+                            "filterName": "reload",
+                            "type": "select",
+                            "value": "all",
+                            "keys": ["reload"],
+                            "field": {
+                                "id": "jobs-last-run",
                                 "value": "all",
-                                "keys": ["reload"],
-                                "field": {
-                                    "id": "jobs-last-run",
-                                    "value": "all",
-                                    "values": ["all", "success", "failed"],
-                                    "name": "jobs-last-run",
-                                    "onlyDown": True,
-                                    "label": "jobs_reload",
-                                    "popovers": [
-                                        {
-                                            "text": "jobs_reload_desc",
-                                            "iconName": "info",
-                                        },
-                                    ],
-                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                },
+                                "values": ["all", "success", "failed"],
+                                "name": "jobs-last-run",
+                                "onlyDown": True,
+                                "label": "jobs_reload",
+                                "popovers": [
+                                    {
+                                        "text": "jobs_reload_desc",
+                                        "iconName": "info",
+                                    },
+                                ],
+                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                             },
-                            {
-                                "filter": "table",
-                                "filterName": "success",
-                                "type": "select",
+                        },
+                        {
+                            "filter": "table",
+                            "filterName": "success",
+                            "type": "select",
+                            "value": "all",
+                            "keys": ["success"],
+                            "field": {
+                                "id": "jobs-success",
                                 "value": "all",
-                                "keys": ["success"],
-                                "field": {
-                                    "id": "jobs-success",
-                                    "value": "all",
-                                    "values": ["all", "success", "failed"],
-                                    "name": "jobs-success",
-                                    "onlyDown": True,
-                                    "label": "jobs_success",
-                                    "popovers": [
-                                        {
-                                            "text": "jobs_success_desc",
-                                            "iconName": "info",
-                                        },
-                                    ],
-                                    "columns": {"pc": 3, "tablet": 4, "mobile": 12},
-                                },
+                                "values": ["all", "success", "failed"],
+                                "name": "jobs-success",
+                                "onlyDown": True,
+                                "label": "jobs_success",
+                                "popovers": [
+                                    {
+                                        "text": "jobs_success_desc",
+                                        "iconName": "info",
+                                    },
+                                ],
+                                "columns": {"pc": 3, "tablet": 4, "mobile": 12},
                             },
-                        ],
-                    },
-                },
+                        },
+                    ],
+                    minWidth="lg",
+                    title="jobs_table_title",
+                ),
             ],
         }
     ]
-
     return builder
 
 
-output = job_builder(jobs)
+output = jobs_builder(jobs)
 
 # store on a file
 with open("jobs.json", "w") as f:
     json.dump(output, f, indent=4)
+output_base64_bytes = base64.b64encode(bytes(json.dumps(output), "utf-8"))
+output_base64_string = output_base64_bytes.decode("ascii")
+
+with open("jobs.txt", "w") as f:
+    f.write(output_base64_string)

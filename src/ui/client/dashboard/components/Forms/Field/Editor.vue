@@ -40,6 +40,7 @@ import "@assets/script/editor/theme-dawn.js";
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.  @param {string} label
   @param {string} value
+  @param {object} [attrs={}] - Additional attributes to add to the field
   @param {array} [popovers] - List of popovers to display more information
   @param {string} [inpType="editor"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
@@ -69,6 +70,11 @@ const props = defineProps({
   name: {
     type: String,
     required: true,
+  },
+  attrs: {
+    type: Object,
+    required: false,
+    default: {},
   },
   inpType: {
     type: String,
@@ -271,6 +277,11 @@ class Editor {
   }
 }
 
+/**
+  @name removeErrCSS
+  @description Remove useless CSS from the editor to avoid accessibility issues.
+  @returns {void}
+*/
 function removeErrCSS() {
   setTimeout(() => {
     try {
@@ -294,6 +305,11 @@ function removeErrCSS() {
   }, 100);
 }
 
+/**
+  @name setEditorAttrs
+  @description Override editor attributes by adding or deleting some for better accessibility.
+  @returns {void}
+*/
 function setEditorAttrs() {
   // Add tabindex to editor
   try {
@@ -370,6 +386,7 @@ onUnmounted(() => {
         class="input-editor-error"
       ></div>
       <div
+        v-bind="props.attrs"
         :class="[
           'input-editor',
           props.disabled ? 'disabled' : 'enabled',

@@ -215,8 +215,12 @@ const buttonDelete = {
 // emits
 const emits = defineEmits(["delete", "add"]);
 
-// Check if at least one input is disabled (this means a method different than ui, default or manual is used)
-// If true, disable the delete button
+/**
+  @name setDeleteState
+  @description Will determine if the group can be deleted. If at least one input is disabled, the delete button will be disabled.
+  @param {object} group - The multiple group with all settings
+  @returns {object} - Return delete button data
+*/
 function setDeleteState(group) {
   // Loop on group keys and check if at least one input is disabled
   let isDisabled = false;
@@ -231,18 +235,43 @@ function setDeleteState(group) {
   return delBtn;
 }
 
+/**
+  @name setInvisible
+  @description Will set a multiple group as invisible.
+  @param {string|number} id - The multiple group with all settings
+  @returns {void}
+*/
 function setInvisible(id) {
   multiples.invisible.push(id);
 }
 
+/**
+  @name delInvisible
+  @description Will remove a multiple group from invisible list.
+  @param {string|number} id - The multiple group with all settings
+  @returns {void}
+*/
 function delInvisible(id) {
   multiples.invisible = multiples.invisible.filter((v) => v !== id);
 }
 
+/**
+  @name toggleVisible
+  @description Will toggle a multiple group visibility.
+  @param {string|number} id - The multiple group with all settings
+  @returns {void}
+*/
 function toggleVisible(id) {
   multiples.invisible.includes(id) ? delInvisible(id) : setInvisible(id);
 }
 
+/**
+  @name delGroup
+  @description Will emit a delete event to the parent component. The parent will update the template and multiples, then the component will rerender.
+  @param {string} multName - The multiple group name
+  @param {string} groupName - The multiple group id
+  @returns {void}
+*/
 function delGroup(multName, groupName) {
   emits("delete", multName, groupName);
 }

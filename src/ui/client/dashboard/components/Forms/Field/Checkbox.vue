@@ -33,6 +33,7 @@ import { useUUID } from "@utils/global.js";
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
+  @param {object} [attrs={}] - Additional attributes to add to the field
   @param {array} [popovers] - List of popovers to display more information
   @param {string} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {boolean} [disabled=false]
@@ -85,6 +86,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  attrs: {
+    type: Object,
+    required: false,
+    default: {},
+  },
   name: {
     type: String,
     required: true,
@@ -126,6 +132,12 @@ const checkbox = reactive({
 
 const emits = defineEmits(["inp"]);
 
+/**
+  @name updateValue
+  @description This will convert the boolean checkbox value to a "yes" or "no" string value.
+  We will check the validity of the checkbox too.
+  @returns {string} - The new string value of the checkbox 'yes' or 'no'
+*/
 function updateValue() {
   checkbox.value = checkbox.value === "yes" ? "no" : "yes";
   checkbox.isValid = checkboxEl.value.checkValidity();
@@ -158,6 +170,7 @@ onMounted(() => {
 
     <div class="checkbox-container">
       <input
+        v-bind="props.attrs"
         ref="checkboxEl"
         :tabindex="props.tabId"
         @keyup.enter="$emit('inp', updateValue())"

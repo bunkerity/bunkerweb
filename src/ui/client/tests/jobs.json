@@ -10,9 +10,7 @@
             {
                 "type": "Title",
                 "data": {
-                    "title": "jobs_title",
-                    "tag": "h1",
-                    "type": "card"
+                    "title": "jobs_title"
                 }
             },
             {
@@ -542,10 +540,14 @@
                                 }
                             },
                             {
-                                "cache": "default-server-cert.pem (misc) default-server-cert.key (misc)",
+                                "cache": "default-server-cert.pem default-server-cert.key",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
+                                        "attrs": {
+                                            "data-plugin-id": "misc",
+                                            "data-job-name": "default-server-cert"
+                                        },
                                         "id": "default-server-cert_cache",
                                         "label": "default-server-cert_cache",
                                         "hideLabel": true,
@@ -553,8 +555,8 @@
                                         "name": "default-server-cert_cache",
                                         "value": "download file",
                                         "values": [
-                                            "default-server-cert.pem (misc)",
-                                            "default-server-cert.key (misc)"
+                                            "default-server-cert.pem",
+                                            "default-server-cert.key"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -720,10 +722,14 @@
                                 }
                             },
                             {
-                                "cache": "folder:/var/tmp/bunkerweb/failover.tgz (jobs)",
+                                "cache": "folder:/var/tmp/bunkerweb/failover.tgz",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
+                                        "attrs": {
+                                            "data-plugin-id": "jobs",
+                                            "data-job-name": "failover-backup"
+                                        },
                                         "id": "failover-backup_cache",
                                         "label": "failover-backup_cache",
                                         "hideLabel": true,
@@ -731,7 +737,7 @@
                                         "name": "failover-backup_cache",
                                         "value": "download file",
                                         "values": [
-                                            "folder:/var/tmp/bunkerweb/failover.tgz (jobs)"
+                                            "folder:/var/tmp/bunkerweb/failover.tgz"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -846,10 +852,14 @@
                                 }
                             },
                             {
-                                "cache": "asn.mmdb (jobs)",
+                                "cache": "asn.mmdb",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
+                                        "attrs": {
+                                            "data-plugin-id": "jobs",
+                                            "data-job-name": "mmdb-asn"
+                                        },
                                         "id": "mmdb-asn_cache",
                                         "label": "mmdb-asn_cache",
                                         "hideLabel": true,
@@ -857,7 +867,7 @@
                                         "name": "mmdb-asn_cache",
                                         "value": "download file",
                                         "values": [
-                                            "asn.mmdb (jobs)"
+                                            "asn.mmdb"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -921,10 +931,14 @@
                                 }
                             },
                             {
-                                "cache": "country.mmdb (jobs)",
+                                "cache": "country.mmdb",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
+                                        "attrs": {
+                                            "data-plugin-id": "jobs",
+                                            "data-job-name": "mmdb-country"
+                                        },
                                         "id": "mmdb-country_cache",
                                         "label": "mmdb-country_cache",
                                         "hideLabel": true,
@@ -932,7 +946,7 @@
                                         "name": "mmdb-country_cache",
                                         "value": "download file",
                                         "values": [
-                                            "country.mmdb (jobs)"
+                                            "country.mmdb"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -1047,10 +1061,14 @@
                                 }
                             },
                             {
-                                "cache": "cert.pem (selfsigned) [www.example.com] key.pem (selfsigned) [www.example.com]",
+                                "cache": "cert.pem [www.example.com] key.pem [www.example.com]",
                                 "type": "Fields",
                                 "data": {
                                     "setting": {
+                                        "attrs": {
+                                            "data-plugin-id": "selfsigned",
+                                            "data-job-name": "self-signed"
+                                        },
                                         "id": "self-signed_cache",
                                         "label": "self-signed_cache",
                                         "hideLabel": true,
@@ -1058,8 +1076,8 @@
                                         "name": "self-signed_cache",
                                         "value": "download file",
                                         "values": [
-                                            "cert.pem (selfsigned) [www.example.com]",
-                                            "key.pem (selfsigned) [www.example.com]"
+                                            "cert.pem [www.example.com]",
+                                            "key.pem [www.example.com]"
                                         ],
                                         "columns": {
                                             "pc": 12,
@@ -1198,7 +1216,6 @@
                                 "value": "",
                                 "type": "text",
                                 "name": "jobs-keyword",
-                                "containerClass": "setting",
                                 "label": "jobs_search",
                                 "placeholder": "inp_keyword",
                                 "isClipboard": false,
@@ -1235,7 +1252,6 @@
                                 "name": "jobs-every",
                                 "onlyDown": true,
                                 "label": "jobs_interval",
-                                "containerClass": "setting",
                                 "popovers": [
                                     {
                                         "text": "jobs_interval_desc",
@@ -1267,7 +1283,6 @@
                                 ],
                                 "name": "jobs-last-run",
                                 "onlyDown": true,
-                                "containerClass": "setting",
                                 "label": "jobs_reload",
                                 "popovers": [
                                     {
@@ -1300,7 +1315,6 @@
                                 ],
                                 "name": "jobs-success",
                                 "onlyDown": true,
-                                "containerClass": "setting",
                                 "label": "jobs_success",
                                 "popovers": [
                                     {

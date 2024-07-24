@@ -83,6 +83,13 @@ watch(
   { deep: true }
 );
 
+/**
+  @name startFilter
+  @description  Filter the given data using the available filters from a filter object.
+  @param {object} filter - Filter object to apply.
+  @param {string} value - Value to filter.
+  @returns {emits} - Emit a filter event with the filtered data.
+*/
 function startFilter(filter = {}, value) {
   // Case we have new filter value, update it
   // Loop on filter.base and update the "value" key when matching filterName
@@ -140,8 +147,14 @@ function startFilter(filter = {}, value) {
   emits("filter", template);
 }
 
-// Case we are changing a filter value
-// We only have to check data for this filter
+/**
+  @name filterData
+  @description Add a buffer to wait for multiple inputs before filtering the data.
+  Then filter data with the given filter and value.
+  @param {object} filter - Filter object to apply.
+  @param {string} value - Value to filter.
+  @returns {void}
+*/
 function filterData(filter = {}, value = null) {
   // Wait for buffer input
   filters.bufferCount++;
@@ -154,6 +167,13 @@ function filterData(filter = {}, value = null) {
   }, 50);
 }
 
+/**
+  @name filterRegularSettings
+  @description Allow to filter plugin settings from a regular template.
+  @param {object} filterSettings - Filters to apply
+  @param {object} template - Template to filter
+  @returns {void}
+*/
 function filterRegularSettings(filterSettings, template) {
   template.forEach((plugin, id) => {
     // loop on plugin settings dict
@@ -172,6 +192,13 @@ function filterRegularSettings(filterSettings, template) {
   });
 }
 
+/**
+  @name filterMultiplesSettings
+  @description Allow to filter plugin multiples settings from a regular template.
+  @param {object} filterSettings - Filters to apply
+  @param {object} template - Template to filter
+  @returns {void}
+*/
 function filterMultiplesSettings(filterSettings, template) {
   const multiples = [];
   // Format to filter

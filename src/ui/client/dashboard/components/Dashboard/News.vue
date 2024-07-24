@@ -18,6 +18,11 @@ const news = reactive({
   posts: [],
 });
 
+/**
+  @name loadNews
+  @description Retrieve blog news from storage or fetch from the API.
+  @returns {void}
+*/
 function loadNews() {
   // Check if data, and if case, that data is not older than one hour
   // Case it is, refetch

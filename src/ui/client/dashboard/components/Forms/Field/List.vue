@@ -38,6 +38,7 @@ import ErrorDropdown from "@components/Forms/Error/Dropdown.vue";
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
+  @param {object} [attrs={}] - Additional attributes to add to the field
   @param {string} [separator=" "] - Separator to split the value, by default it is a space
   @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
   @param {array} [popovers] - List of popovers to display more information
@@ -69,6 +70,11 @@ const props = defineProps({
   value: {
     type: String,
     required: true,
+  },
+  attrs: {
+    type: Object,
+    required: false,
+    default: {},
   },
   separator: {
     type: String,
@@ -187,7 +193,11 @@ const inputEl = ref();
 const selectWidth = ref("");
 const selectDropdown = ref();
 
-// EVENTS
+/**
+  @name openSelect
+  @description Open select dropdown, calculate the dropdown position and update it if needed.
+  @returns {void}
+*/
 function openSelect() {
   inp.isOpen = true;
   // Reset input value
@@ -226,8 +236,13 @@ function openSelect() {
   }, 10);
 }
 
-// Close select when clicked outside logic
-function closeOutside(e) {
+/**
+  @name closeOutside
+  @description This function is linked to a click event and will check if the target is part of the select component.
+  Case not and select is open, will close the select.
+  @param {event} e - The event object.
+  @returns {void}
+*/ function closeOutside(e) {
   if (
     e.target.hasAttribute("data-select-item") ||
     e.target.hasAttribute("data-delete-entry")
@@ -242,6 +257,12 @@ function closeOutside(e) {
   }
 }
 
+/**
+  @name closeScroll
+  @description This function is linked to a scroll event and will close the select in case a scroll is detected and the scroll is not the dropdown.
+  @param {event} e - The event object.
+  @returns {void}
+*/
 function closeScroll(e) {
   if (!e.target) return;
   // Case not a DOM element (like the document itself)
@@ -255,13 +276,24 @@ function closeScroll(e) {
   inp.isOpen = false;
 }
 
+/**
+  @name closeEscape
+  @description This function is linked to a key event and will close the select in case "Escape" key is pressed.
+  @param {event} e - The event object.
+  @returns {void}
+*/
 function closeEscape(e) {
   if (e.key !== "Escape") return;
   inp.isOpen = false;
 }
 
-// Check after a key is pressed if the current active element is the select button
-// If not close the select
+/**
+  @name closeTab
+  @description This function is linked to a key event and will listen to tabindex change.
+  In case the new tabindex is not part of the select component, will close the select.
+  @param {event} e - The event object.
+  @returns {void}
+*/
 function closeTab(e) {
   if (e.key !== "Tab" && e.key !== "Shift-Tab") return;
   setTimeout(() => {
@@ -276,7 +308,12 @@ function closeTab(e) {
   }, 10);
 }
 
-// Case the entry is focus and value is valid, add it to the list
+/**
+  @name addEntry
+  @description When clicking add entry or key "Enter", will add the current input value to list.
+  @param {e} e - The event object.
+  @returns {void}
+*/
 function addEntry(e) {
   // check if keyboard event
   if (e.key && e.key !== "Enter") return;
@@ -292,8 +329,12 @@ function addEntry(e) {
   inputEl.value.focus();
 }
 
-// Case the entry is focus and value is valid, add it to the list
-function deleteValue(value) {
+/**
+  @name deleteValue
+  @description Delete a value from the list.
+  @param {string} value - The value to delete.
+  @returns {void}
+*/ function deleteValue(value) {
   inp.value = inp.value
     .split(props.separator)
     .filter((val) => val !== value)
@@ -357,6 +398,7 @@ const emits = defineEmits(["inp"]);
     <div class="relative">
       <div data-input-container class="input-regular-container">
         <input
+          v-bind="props.attrs"
           data-toggle-dropdown
           :aria-controls="`${inp.id}-custom`"
           :aria-expanded="inp.isOpen ? 'true' : 'false'"

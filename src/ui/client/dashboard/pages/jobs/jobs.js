@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { getI18n } from "@utils/lang.js";
-import Jobs from "./jobs.vue";
+import Jobs from "./Jobs.vue";
 
 const pinia = createPinia();
 

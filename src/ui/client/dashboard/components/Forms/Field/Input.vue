@@ -44,6 +44,7 @@ import { useUUID } from "@utils/global.js";
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.  @param {string} label
   @param {string} value
+  @param {object} [attrs={}] - Additional attributes to add to the field
   @param {array} [popovers] - List of popovers to display more information
   @param {string} [inpType="input"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
@@ -79,6 +80,11 @@ const props = defineProps({
   type: {
     type: String,
     required: true,
+  },
+  attrs: {
+    type: Object,
+    required: false,
+    default: {},
   },
   inpType: {
     type: String,
@@ -195,6 +201,7 @@ onMounted(() => {
 
     <div class="input-regular-container">
       <input
+        v-bind="props.attrs"
         :tabindex="props.tabId"
         ref="inputEl"
         v-model="inp.value"

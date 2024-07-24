@@ -45,6 +45,7 @@ import "@assets/css/flatpickr.dark.min.css";
   @param {string} label - The label of the field. Can be a translation key or by default raw text.
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {array} popovers - List of popovers to display more information
+  @param {object} [attrs={}] - Additional attributes to add to the field
   @param {string} [inpType="datepicker"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
   @param {number<timestamp>} [value=""] - Default date when instanciate
   @param {number<timestamp>} [minDate=""] - Impossible to pick a date before this date. 
@@ -78,6 +79,11 @@ const props = defineProps({
     type: [String, Number, Date],
     required: false,
     default: "",
+  },
+  attrs: {
+    type: Object,
+    required: false,
+    default: {},
   },
   popovers: {
     type: Array,
@@ -158,9 +164,16 @@ const picker = reactive({
 
 let datepicker;
 
-function setMonthSelect(calendar, id) {
-  // Hide default select and optionss
-  const defaultSelect = calendar.querySelector(
+/**
+  @name setMonthSelect
+  @description Create a custom select for month dropdown and hide default one.
+  @param {element} calendarEl - The calendar element.
+  @param {string} id - The id of the datepicker.
+  @returns {void}
+*/
+function setMonthSelect(calendarEl, id) {
+  // Hide default select and options
+  const defaultSelect = calendarEl.querySelector(
     ".flatpickr-monthDropdown-months"
   );
   defaultSelect.classList.add("hidden");
@@ -195,7 +208,7 @@ function setMonthSelect(calendar, id) {
   optCtnr.classList.add("select-dropdown-container", "hidden", "flex");
   container.appendChild(optCtnr);
   // Options
-  calendar
+  calendarEl
     .querySelector(".flatpickr-monthDropdown-months")
     .querySelectorAll("option")
     .forEach((option) => {
@@ -229,6 +242,13 @@ function setMonthSelect(calendar, id) {
   defaultSelect.parentNode.insertBefore(container, defaultSelect.nextSibling);
 }
 
+/**
+  @name setPickerAtt
+  @description Set attributes to the calendar element to make it more accessible.
+  @param {element} calendarEl - The calendar element.
+  @param {string|boolean} [id=false] - The id of the datepicker.
+  @returns {void}
+*/
 function setPickerAtt(calendarEl, id = false) {
   // change error non-standard attributes
   const inps = calendarEl.querySelectorAll(
@@ -258,6 +278,16 @@ function setPickerAtt(calendarEl, id = false) {
   }
 }
 
+/**
+  @name handleEvents
+  @description Handle events on the calendar element, like tabindex.
+  This will update the tabindex and focus on the right element.
+  This will update the custom select and options.
+  @param {element} calendarEl - The calendar element.
+  @param {string} id - The id of the datepicker.
+  @param {object} datepicker - The datepicker instance.
+  @returns {void}
+*/
 function handleEvents(calendarEl, id, datepicker) {
   calendarEl.addEventListener("click", (e) => {
     // Close dropdown month select if click outside
@@ -471,6 +501,14 @@ function handleEvents(calendarEl, id, datepicker) {
   });
 }
 
+/**
+  @name toggleSelect
+  @description Toggle the custom select dropdown.
+  @param {element} calendarEl - The calendar element.
+  @param {string} id - The id of the datepicker.
+  @param {event} e - The event.
+  @returns {void}
+*/
 function toggleSelect(calendar, id, e) {
   if (e.target.hasAttribute("data-months-select")) {
     const optCtnr = calendar.querySelector(`#${id}-custom`);
@@ -482,6 +520,14 @@ function toggleSelect(calendar, id, e) {
   }
 }
 
+/**
+  @name closeSelectByDefault
+  @description Close the custom select dropdown by default.
+  @param {element} calendarEl - The calendar element.
+  @param {string} id - The id of the datepicker.
+  @param {event} e - The event.
+  @returns {void}
+*/
 function closeSelectByDefault(calendar, id, e) {
   if (!e.target.hasAttribute("data-months-select")) {
     const optCtnr = calendar.querySelector(`#${id}-custom`);
@@ -492,6 +538,15 @@ function closeSelectByDefault(calendar, id, e) {
   }
 }
 
+/**
+  @name updateMonth
+  @description Update the month when click on custom select option.
+  @param {element} calendarEl - The calendar element.
+  @param {string} id - The id of the datepicker.
+  @param {event} e - The event.
+  @param {object} datepicker - The datepicker instance.
+  @returns {void}
+*/
 function updateMonth(calendar, id, e, datepicker) {
   if (e.target.hasAttribute("data-month")) {
     // Close dropdown
@@ -523,6 +578,13 @@ function updateMonth(calendar, id, e, datepicker) {
   }
 }
 
+/**
+  @name updateIndex
+  @description Update the tabindex on the calendar element.
+  @param {element} calendarEl - The calendar element.
+  @param {string} target - The event target.
+  @returns {void}
+*/
 function updateIndex(calendarEl, target) {
   if (target.hasAttribute("tabindex")) {
     calendarEl.querySelectorAll("[data-tabindex-active]").forEach((el) => {
@@ -533,6 +595,13 @@ function updateIndex(calendarEl, target) {
   }
 }
 
+/**
+  @name setIndex
+  @description Set the tabindex on the calendar element to work with keyboard.
+  @param {element} calendarEl - The calendar element.
+  @param {string} tabindex - the tabindex to set.
+  @returns {void}
+*/
 function setIndex(calendarEl, tabindex) {
   try {
     const days = calendarEl.querySelectorAll(".flatpickr-day");
@@ -675,6 +744,7 @@ onUnmounted(() => {
 
     <div class="relative flex flex-col items-start">
       <input
+        v-bind="props.attrs"
         :data-timestamp="date.currStamp"
         :tabindex="props.tabId"
         :aria-controls="`${date.id}-calendar`"

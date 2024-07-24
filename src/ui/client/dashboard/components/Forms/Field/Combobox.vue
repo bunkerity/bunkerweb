@@ -43,6 +43,7 @@ import { useUUID } from "@utils/global.js";
   @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
   @param {string} value
   @param {array} values
+  @param {object} [attrs={}] - Additional attributes to add to the field
   @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
   @param {array} [popovers] - List of popovers to display more information
   @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
@@ -79,6 +80,11 @@ const props = defineProps({
     type: Array,
     required: true,
     default: [],
+  },
+  attrs: {
+    type: Object,
+    required: false,
+    default: {},
   },
   maxBtnChars: {
     type: [String, Number],
@@ -194,7 +200,11 @@ const selectBtn = ref();
 const selectWidth = ref("");
 const selectDropdown = ref();
 
-// EVENTS
+/**
+  @name toggleSelect
+  @description This will toggle the custom select dropdown component.
+  @returns {void}
+*/
 function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
   // Position dropdown relative to btn on open on fixed position
@@ -240,10 +250,22 @@ function toggleSelect() {
   }
 }
 
+/**
+  @name closeSelect
+  @description This will close the custom select dropdown component.
+  @returns {void}
+*/
 function closeSelect() {
   select.isOpen = false;
 }
 
+/**
+  @name changeValue
+  @description This will change the value of the select when a new value is selected from dropdown button.
+  Check the validity of the select too. Close select after it.
+  @param {string} newValue - The new value to set to the select.
+  @returns {string} - The new value of the select
+*/
 function changeValue(newValue) {
   // Allow on template to switch from prop value to component own value
   // Then send the new value to parent
@@ -260,7 +282,13 @@ function changeValue(newValue) {
   return newValue;
 }
 
-// Close select when clicked outside logic
+/**
+  @name closeOutside
+  @description This function is linked to a click event and will check if the target is part of the select component.
+  Case not and select is open, will close the select.
+  @param {event} e - The event object.
+  @returns {void}
+*/
 function closeOutside(e) {
   try {
     if (e.target !== selectBtn.value && e.target !== inputEl.value) {
@@ -271,6 +299,12 @@ function closeOutside(e) {
   }
 }
 
+/**
+  @name closeScroll
+  @description This function is linked to a scroll event and will close the select in case a scroll is detected and the scroll is not the dropdown.
+  @param {event} e - The event object.
+  @returns {void}
+*/
 function closeScroll(e) {
   if (!e.target) return;
   // Case not a DOM element (like the document itself)
@@ -284,13 +318,24 @@ function closeScroll(e) {
   select.isOpen = false;
 }
 
+/**
+  @name closeEscape
+  @description This function is linked to a key event and will close the select in case "Escape" key is pressed.
+  @param {event} e - The event object.
+  @returns {void}
+*/
 function closeEscape(e) {
   if (e.key !== "Escape") return;
   select.isOpen = false;
 }
 
-// Check after a key is pressed if the current active element is the select button
-// If not close the select
+/**
+  @name closeTab
+  @description This function is linked to a key event and will listen to tabindex change.
+  In case the new tabindex is not part of the select component, will close the select.
+  @param {event} e - The event object.
+  @returns {void}
+*/
 function closeTab(e) {
   if (e.key !== "Tab" && e.key !== "Shift-Tab") return;
   setTimeout(() => {
@@ -371,6 +416,7 @@ const emits = defineEmits(["inp"]);
     <!--custom-->
     <div class="relative">
       <button
+        v-bind="props.attrs"
         data-toggle-dropdown
         :name="`${props.name}-custom`"
         :tabindex="props.tabId"

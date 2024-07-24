@@ -45,6 +45,7 @@ export default defineConfig({
           __dirname,
           "./dashboard/pages/global-config/index.html"
         ),
+        jobs: resolve(__dirname, "./dashboard/pages/jobs/index.html"),
       },
     },
   },

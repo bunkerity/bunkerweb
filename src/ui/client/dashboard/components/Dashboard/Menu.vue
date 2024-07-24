@@ -109,6 +109,11 @@ const menu = reactive({
   username: "",
 });
 
+/**
+  @name getDarkMode
+  @description Get the dark mode state from the session storage or the user's preferences.
+  @returns {void}
+*/
 function getDarkMode() {
   let darkMode = false;
   // Case on storage
@@ -129,12 +134,22 @@ function getDarkMode() {
   return darkMode;
 }
 
+/**
+  @name switchMode
+  @description Switch between dark and light mode. Handle by a button.
+  @returns {void}
+*/
 function switchMode() {
   menu.darkMode = menu.darkMode ? false : true;
   sessionStorage.setItem("mode", menu.darkMode ? "dark" : "light");
   updateMode();
 }
 
+/**
+  @name updateMode
+  @description Update the mode of the page.
+  @returns {void}
+*/
 function updateMode() {
   try {
     menu.darkMode
@@ -143,10 +158,20 @@ function updateMode() {
   } catch (err) {}
 }
 
+/**
+  @name closeMenu
+  @description Close menu when we are on mobile device (else always visible).
+  @returns {void}
+*/
 function closeMenu() {
   menu.isActive = false;
 }
 
+/**
+  @name closeMenu
+  @description Toggle menu when we are on mobile device (else always visible).
+  @returns {void}
+*/
 function toggleMenu() {
   menu.isActive = menu.isActive ? false : true;
 }

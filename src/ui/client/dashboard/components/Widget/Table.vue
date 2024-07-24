@@ -141,6 +141,11 @@ const table = reactive({
   itemsFormat: JSON.parse(JSON.stringify(props.items)),
 });
 
+/**
+  @name setUnmatchWidth
+  @description Determine the width of the unmatch element based on the parent container.
+  @returns {void}
+*/
 function setUnmatchWidth() {
   try {
     const value = tableBody.value.closest("[data-is='card']").clientWidth - 60;
@@ -148,6 +153,11 @@ function setUnmatchWidth() {
   } catch (e) {}
 }
 
+/**
+  @name getOverflow
+  @description Handle the overflow of the table and update padding in consequence.
+  @returns {void}
+*/
 function getOverflow() {
   setTimeout(() => {
     const overflow =

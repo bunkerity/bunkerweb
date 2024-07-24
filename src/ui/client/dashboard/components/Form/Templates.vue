@@ -77,10 +77,20 @@ const data = reactive({
   }),
 });
 
+/**
+  @name getFirstTemplateName
+  @description Get the first template name from the first mode.
+  @returns {string} - The first template name
+*/
 function getFirstTemplateName() {
   return Object.keys(props.templates[data.currModeName])[0];
 }
 
+/**
+  @name getFirstTemplateName
+  @description Get the first mode name from the first key in props.templates dict.
+  @returns {string} - The first mode name
+*/
 function getFirstModeName() {
   // Get first key in props.templates dict
   return Object.keys(props.templates)[0];

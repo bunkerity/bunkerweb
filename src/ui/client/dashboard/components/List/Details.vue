@@ -61,13 +61,23 @@ const gridClass = computed(() => {
   return `col-span-${props.columns.mobile} md:col-span-${props.columns.tablet} lg:col-span-${props.columns.pc}`;
 });
 
-// When we focus or pointerover an item, we will add a higher z-index than others items in order to avoid to crop popovers
-// In case we leave the item, for few moments the item will get an higher z-index than this in order to get a smooth transition
+/**
+  @name indexUp
+  @description   When we focus or pointerover an item, we will add a higher z-index than others items in order to avoid to crop popovers.
+  In case we leave the item, for few moments the item will get an higher z-index than this in order to get a smooth transition.
+  @param {string|number} id - The id of the item.
+  @returns {void}
+*/
 function indexUp(id) {
   data.upIndex = id;
 }
 
-// This will add a higher z-index for 100ms when cursor is out of the item in order to avoid to crop popovers
+/**
+  @name indexPending
+  @description  This will add a higher z-index for 100ms when cursor is out of the item in order to avoid to crop popovers.
+  @param {string|number} id - The id of the item.
+  @returns {void}
+*/
 function indexPending(id) {
   data.pendingIndex.push(id);
   // Remove id from pendingIndex after a moment

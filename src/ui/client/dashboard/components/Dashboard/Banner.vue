@@ -50,8 +50,11 @@ const banner = reactive({
   }),
 });
 
-// I want to replace the content class content by banner-item-text
-
+/**
+  @name setupBanner
+  @description This function will try to retrieve banner news from the local storage, and in case it is not available or older than one hour, it will fetch the news from the api.
+  @returns {void}
+*/
 function setupBanner() {
   // Check if data, and if case, that data is not older than one hour
   // Case it is, refetch
@@ -94,7 +97,11 @@ function setupBanner() {
     });
 }
 
-// Banner animation effect
+/**
+  @name runBanner
+  @description Run the banner animation to display all news at a regular interval.
+  @returns {void}
+*/
 function runBanner() {
   const nextDelay = 8000;
   const transDuration = 1000;
@@ -129,8 +136,12 @@ function runBanner() {
     runBanner();
   }, nextDelay);
 }
-// Observe banner and set is visible or not to
-// Update float button and menu position
+
+/**
+  @name observeBanner
+  @description Check if the banner is visible in the viewport and set the state in the global bannerStore to update related components.
+  @returns {void}
+*/
 function observeBanner() {
   const options = {
     root: null,
@@ -148,6 +159,11 @@ function observeBanner() {
   observer.observe(document.getElementById("banner"));
 }
 
+/**
+  @name noTabindex
+  @description Stop highlighting a banner item that was focused with tabindex.
+  @returns {void}
+*/
 function noTabindex() {
   const bannerItems = document.querySelectorAll(".banner-item");
   bannerItems.forEach((item) => {
@@ -155,6 +171,11 @@ function noTabindex() {
   });
 }
 
+/**
+  @name isTabindex
+  @description Highlighting a banner item that is focused with tabindex.
+  @returns {void}
+*/
 function isTabindex() {
   const activeElement = document.activeElement;
   const bannerItems = document.querySelectorAll(".banner-item");
@@ -171,9 +192,13 @@ function isTabindex() {
     .classList.remove("banner-tabindex-hide");
 }
 
-// Focus with tabindex break banner animation
-// When a banner is focused, we need to add in front of the current banner the focus element
-// And remove it when the focus is lost
+/**
+  @name isTabindex
+  @description Focus with tabindex break banner animation.
+  When a banner is focused, we need to add in front of the current banner the focus element.
+  And remove it when the focus is lost.
+  @returns {void}
+*/
 function handleTabIndex() {
   // Get the active element after tabindex click
   document.addEventListener("keyup", (e) => {

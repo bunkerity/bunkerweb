@@ -16,6 +16,11 @@ const loader = reactive({
 const logo = ref();
 const logoContainer = ref();
 
+/**
+  @name loading
+  @description This function will toggle the loading animation.
+  @returns {void}
+*/
 function loading() {
   // delay before stopping the loading
   setTimeout(() => {

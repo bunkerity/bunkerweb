@@ -189,11 +189,24 @@ const filters = [
   },
 ];
 
+/**
+  @name filter
+  @description Get the filter data from the <Filter /> component and store the result in the advanced store.
+  After that, update some UI states like disabled state.
+  @param {object} filterData - The filter data from the <Filter /> component.
+  @returns {void}
+*/
 function filter(filterData) {
   advancedForm.templateUIFormat = filterData;
   updateStates();
 }
 
+/**
+  @name updateStates
+  @description Update some UI states, usually after a filter, a reload, a remount or a change in the template.
+  We will check to set the current plugins available and update the current plugin if needed.
+  @returns {void}
+*/
 function updateStates() {
   data.plugins = getPluginNames(advancedForm.templateUIFormat);
   // Check after a filter if previous plugin is still in the list and if at least one plugin is available
@@ -204,15 +217,27 @@ function updateStates() {
   setValidity();
 }
 
+/**
+  @name setValidity
+  @description Check template settings and return if there is any error.
+  Error will disabled save button and display an error message.
+  @returns {void}
+*/
 function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
-    useCheckPluginsValidity(advancedForm.templateUI);
+    useCheckPluginsValidity(advancedForm.templateBase);
   data.isRegErr = isRegErr;
   data.isReqErr = isReqErr;
   data.settingErr = settingErr;
   data.pluginErr = pluginErr;
 }
 
+/**
+  @name getFirstPlugin
+  @description Get the first available plugin in the template.
+  @param {object} template - The template object.
+  @returns {string} - The first plugin name.
+*/
 function getFirstPlugin(template) {
   try {
     return template[0]["name"];
@@ -221,6 +246,12 @@ function getFirstPlugin(template) {
   }
 }
 
+/**
+  @name getPluginNames
+  @description Get the first available plugin in the template.
+  @param {object} template - The template object.
+  @returns {array} - The list of plugin names.
+*/
 function getPluginNames(template) {
   try {
     const pluginNames = [];

@@ -57,6 +57,7 @@ const props = defineProps({
     :headerClass="props.setting.headerClass || ''"
     :inpClass="props.setting.inpClass || ''"
     :tabId="props.setting.tabId || contentIndex"
+    :attrs="props.setting.attrs || {}"
   />
   <Select
     v-if="props.setting.inpType === 'select'"
@@ -79,6 +80,7 @@ const props = defineProps({
     :headerClass="props.setting.headerClass || ''"
     :inpClass="props.setting.inpClass || ''"
     :tabId="props.setting.tabId || contentIndex"
+    :attrs="props.setting.attrs || {}"
   />
   <Datepicker
     v-if="props.setting.inpType === 'datepicker'"
@@ -99,6 +101,7 @@ const props = defineProps({
     :disabled="props.setting.disabled || false"
     :required="props.setting.required || false"
     :tabId="props.setting.tabId || contentIndex"
+    :attrs="props.setting.attrs || {}"
   />
   <Input
     v-if="props.setting.inpType === 'input'"
@@ -121,6 +124,7 @@ const props = defineProps({
     :headerClass="props.setting.headerClass || ''"
     :inpClass="props.setting.inpClass || ''"
     :tabId="props.setting.tabId || contentIndex"
+    :attrs="props.setting.attrs || {}"
   />
   <Editor
     v-if="props.setting.inpType === 'editor'"
@@ -140,5 +144,6 @@ const props = defineProps({
     :headerClass="props.setting.headerClass || ''"
     :editorClass="props.setting.editorClass || ''"
     :tabId="props.setting.tabId || contentIndex"
+    :attrs="props.setting.attrs || {}"
   />
 </template>

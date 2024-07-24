@@ -10,7 +10,7 @@ from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 from typing import Union
 from uuid import uuid4
-from builder import home_builder, instances_builder, global_config_builder
+from builder import home_builder, instances_builder, global_config_builder, jobs_builder
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -2388,7 +2388,8 @@ def bans():
 @app.route("/jobs", methods=["GET"])
 @login_required
 def jobs():
-    return render_template("jobs.html", jobs=app.config["DB"].get_jobs(), jobs_errors=app.config["DB"].get_plugins_errors(), username=current_user.get_id())
+    data_server_builder = jobs_builder(app.config["DB"].get_jobs())
+    return render_template("jobs.html", data_server_builder=data_server_builder)
 
 
 @app.route("/jobs/download", methods=["GET"])
