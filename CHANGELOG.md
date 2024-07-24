@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.5.9 - ????/??/??
+## v1.5.9 - 2024/07/22
 
 - [BUGFIX] Fix compatibility issues with mysql 8.4+ version and the `backup` plugin by adding the `mariadb-connector-c` dependency to the scheduler Dockerfile (on alpine)
 - [BUGFIX] Fix potential issues with multiple settings in helpers.load_variables when multiple settings have the same suffix (the issue is only present in future external plugins)
@@ -12,7 +12,7 @@
 - [LINUX] Update Linux repository to repo.bunkerweb.io
 - [SECURITY] Update security headers in default pages and error pages for improved security
 - [DEPS] Updated LuaJIT version to v2.1-20240626
-- [DEPS] Updated coreruleset-v4 version to v4.4.0
+- [DEPS] Updated coreruleset-v4 version to v4.5.0
 
 ## v1.5.8 - 2024/06/19
 
