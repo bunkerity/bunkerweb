@@ -1,10 +1,12 @@
-/var/log/bunkerweb/*.log
+/var/log/bunkerweb/*.log /var/log/bunkerweb/*.log.*
 {
     su nginx nginx
     daily
+    size 100M
     rotate 7
     copytruncate
     compress
+    delaycompress
     missingok
     notifempty
     dateext
