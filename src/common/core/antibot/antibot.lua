@@ -90,6 +90,7 @@ function antibot:header()
 	for directive, value in pairs(csp_directives) do
 		csp_content = csp_content .. directive .. " " .. value .. "; "
 	end
+	csp_content = csp_content .. "block-all-mixed-content; upgrade-insecure-requests;"
 	ngx.header["Content-Security-Policy"] = csp_content
 	return self:ret(true, "successfully overridden CSP header")
 end
