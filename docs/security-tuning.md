@@ -41,7 +41,9 @@ STREAM support :x:
 
 You can control the allowed HTTP methods by listing them (separated with "|") in the `ALLOWED_METHODS` setting (default : `GET|POST|HEAD`). Clients sending a method which is not listed will get a "405 - Method Not Allowed".
 
-Note that if `POST` is required, then `OPTIONS` should also be specified to allow for the CORS pre-flight request.
+!!! note Using POST
+
+    If `POST` is required, then `OPTIONS` should also be specified to allow for the CORS pre-flight request.
 
 ### Max sizes
 
