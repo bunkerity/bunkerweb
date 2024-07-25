@@ -24,7 +24,7 @@
         {% for item in inp_items %}
             <option {% if not item %}label="empty"{% endif %}
                     value="{{ item }}"
-                    {% if global_config_value and global_config_value == item or not global_config_value and inp_default == item %} selected{% endif %}>
+                    {% if global_config_value != None and global_config_value == item or global_config_value == None and inp_default == item %} selected{% endif %}>
                 {{ item }}
             </option>
         {% endfor %}
@@ -42,11 +42,11 @@
                 type="button"
                 class="custom-select-btn">
             {% for item in inp_items %}
-                {% if global_config_value and
+                {% if global_config_value != None and
                     global_config_value == item %}
                     <span data-setting-select-text="{{ inp_id }}"
                           data-value="{{ global_config_value }}">{{ global_config_value }}</span>
-                {% elif not global_config_value and inp_default == item %}
+                {% elif global_config_value == None and inp_default == item %}
                     <span aria-description="current value"
                           data-setting-select-text="{{ inp_id }}"
                           data-value="{{ inp_default }}">{{ inp_default }}</span>
@@ -67,8 +67,8 @@
              data-setting-select-dropdown="{{ inp_id }}"
              class="hidden z-[20] fixed h-full flex-col mt-2 max-h-[200px] overflow-auto">
             {% for item in inp_items %}
-                {% if global_config_value and
-                    global_config_value == item or not global_config_value
+                {% if global_config_value != None and
+                    global_config_value == item or global_config_value == None
                     and inp_default == item %}
                     <button role="option"
                             value="{{ item }}"
