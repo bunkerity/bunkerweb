@@ -124,7 +124,7 @@ local options_schema = {
   scrypt_p      = { TYPE_NUMBER, nil, NID_id_scrypt },
 }
 
-local outlen = ctypes.ptr_of_uint64()
+local outlen = ctypes.ptr_of_size_t()
 
 function _M.derive(options)
   local typ = options.type
