@@ -2,6 +2,9 @@
 ## [Unreleased]
 
 
+<a name="1.5.1"></a>
+## [1.5.1] - 2024-07-25
+
 <a name="1.5.0"></a>
 ## [1.5.0] - 2024-07-23
 ### bug fixes
@@ -616,7 +619,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.5.0...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.5.1...HEAD
+[1.5.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.1...1.4.0
 [1.3.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.3.0...1.3.1
