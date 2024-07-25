@@ -22,7 +22,7 @@
                id="{{ inp_name_mult }}"
                name="{{ inp_name_mult }}"
                class="regular-input"
-               value="{% if global_config_value %} {{ global_config_value }} {% else %} {{ inp_default }} {% endif %}"
+               value="{% if global_config_value != None %} {{ global_config_value }} {% else %} {{ inp_default }} {% endif %}"
                type="{{ inp_type }}"
                pattern="{{ inp_regex|safe }}"
                {% if is_multiple %}data-is-multiple{% endif %} />
