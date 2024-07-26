@@ -295,7 +295,7 @@ class Database:
                         self.retry_connection(fallback=True, pool_timeout=1)
                         self.retry_connection(fallback=True, log=False)
                         self.readonly = True
-                    raise
+                raise
             finally:
                 if session:
                     session.remove()
@@ -1076,13 +1076,20 @@ class Database:
     def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> Union[str, Set[str]]:
         """Save the config in the database"""
         to_put = []
+
+        db_config = {}
+        if method == "autoconf":
+            db_config = self.get_non_default_settings(with_drafts=True)
+
         with self.__db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            self.logger.debug(f"Saving config for method {method}")
             changed_plugins = set()
             changed_services = False
 
+            self.logger.debug(f"Cleaning up {method} old global settings")
             for db_global_config in session.query(Global_values).filter_by(method=method).all():
                 key = db_global_config.setting_id
                 if db_global_config.suffix:
@@ -1095,6 +1102,7 @@ class Database:
                     if key == "SERVER_NAME":
                         changed_services = True
 
+            self.logger.debug(f"Cleaning up {method} old services settings")
             for db_service_config in session.query(Services_settings).filter_by(method=method).all():
                 key = f"{db_service_config.service_id}_{db_service_config.setting_id}"
                 if db_service_config.suffix:
@@ -1105,11 +1113,9 @@ class Database:
                     changed_plugins.add(session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first().plugin_id)
 
             if config:
-                db_global_config = {}
-                if method == "autoconf":
-                    db_global_config = self.get_non_default_settings(global_only=True)
-
                 config.pop("DATABASE_URI", None)
+
+                self.logger.debug("Checking if the services have changed")
                 db_services = session.query(Services).with_entities(Services.id, Services.method, Services.is_draft).all()
                 db_ids: Dict[str, dict] = {service.id: {"method": service.method, "is_draft": service.is_draft} for service in db_services}
                 missing_ids = []
@@ -1126,6 +1132,7 @@ class Database:
                     missing_ids = [service.id for service in db_services if service.method == method and service.id not in services]
 
                     if missing_ids:
+                        self.logger.debug(f"Removing {len(missing_ids)} services that are no longer in the list")
                         # Remove services that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_ids)).delete()
                         session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete()
@@ -1136,6 +1143,7 @@ class Database:
                         )
                         changed_services = True
 
+                self.logger.debug("Checking if the drafts have changed")
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
                 db_drafts = {service.id for service in db_services if service.is_draft}
 
@@ -1145,6 +1153,7 @@ class Database:
                     ]
 
                     if missing_drafts:
+                        self.logger.debug(f"Removing {len(missing_drafts)} drafts that are no longer in the list")
                         # Remove drafts that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_drafts)).update({Services.is_draft: False})
                         changed_services = True
@@ -1152,13 +1161,16 @@ class Database:
                 for draft in drafts:
                     if draft not in db_drafts:
                         if draft not in db_ids:
+                            self.logger.debug(f"Adding draft {draft}")
                             to_put.append(Services(id=draft, method=method, is_draft=True))
                             db_ids[draft] = {"method": method, "is_draft": True}
                         elif method == db_ids[draft]["method"]:
+                            self.logger.debug(f"Updating draft {draft}")
                             session.query(Services).filter(Services.id == draft).update({Services.is_draft: True})
                             changed_services = True
 
                 if config.get("MULTISITE", "no") == "yes":
+                    self.logger.debug("Checking if the multisite settings have changed")
                     global_values = []
                     for key, value in config.copy().items():
                         suffix = 0
@@ -1176,6 +1188,7 @@ class Database:
                                 continue
 
                             if server_name not in db_ids:
+                                self.logger.debug(f"Adding service {server_name}")
                                 to_put.append(Services(id=server_name, method=method, is_draft=server_name in drafts))
                                 db_ids[server_name] = {"method": method, "is_draft": server_name in drafts}
                                 if server_name not in drafts:
@@ -1186,6 +1199,7 @@ class Database:
                             setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
 
                             if not setting:
+                                self.logger.debug(f"Setting {key} does not exist")
                                 continue
 
                             service_setting = (
@@ -1197,12 +1211,13 @@ class Database:
 
                             if not service_setting:
                                 if key != "SERVER_NAME" and (
-                                    (original_key not in config and original_key not in db_global_config and value == setting.default)
+                                    (original_key not in config and original_key not in db_config and value == setting.default)
                                     or (original_key in config and value == config[original_key])
-                                    or (original_key in db_global_config and value == db_global_config[original_key])
+                                    or (original_key in db_config and value == db_config[original_key])
                                 ):
                                     continue
 
+                                self.logger.debug(f"Adding setting {key} for service {server_name}")
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Services_settings(service_id=server_name, setting_id=key, value=value, suffix=suffix, method=method))
                             elif (
@@ -1216,13 +1231,15 @@ class Database:
                                 )
 
                                 if key != "SERVER_NAME" and (
-                                    (original_key not in config and original_key not in db_global_config and value == setting.default)
+                                    (original_key not in config and original_key not in db_config and value == setting.default)
                                     or (original_key in config and value == config[original_key])
-                                    or (original_key in db_global_config and value == db_global_config[original_key])
+                                    or (original_key in db_config and value == db_config[original_key])
                                 ):
+                                    self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     query.delete()
                                     continue
 
+                                self.logger.debug(f"Updating setting {key} for service {server_name}")
                                 query.update({Services_settings.value: value, Services_settings.method: method})
                         elif setting and original_key not in global_values:
                             global_values.append(original_key)
@@ -1237,6 +1254,7 @@ class Database:
                                 if value == setting.default:
                                     continue
 
+                                self.logger.debug(f"Adding global setting {key}")
                                 changed_plugins.add(setting.plugin_id)
                                 to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
                             elif (
@@ -1246,10 +1264,14 @@ class Database:
                                 query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
                                 if value == setting.default:
+                                    self.logger.debug(f"Removing global setting {key}")
                                     query.delete()
                                     continue
+
+                                self.logger.debug(f"Updating global setting {key}")
                                 query.update({Global_values.value: value, Global_values.method: method})
                 elif method != "autoconf":
+                    self.logger.debug("Checking if non multisite settings have changed")
                     if (
                         config.get("SERVER_NAME", "www.example.com")
                         and not session.query(Services)
@@ -1257,6 +1279,7 @@ class Database:
                         .filter_by(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0])
                         .first()
                     ):
+                        self.logger.debug("Adding service www.example.com")
                         to_put.append(Services(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0], method=method))
                         changed_services = True
 
@@ -1282,6 +1305,7 @@ class Database:
                             if value == setting.default:
                                 continue
 
+                            self.logger.debug(f"Adding global setting {key}")
                             changed_plugins.add(setting.plugin_id)
                             to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
                         elif (
@@ -1291,8 +1315,11 @@ class Database:
                             query = session.query(Global_values).filter(Global_values.setting_id == key, Global_values.suffix == suffix)
 
                             if value == setting.default:
+                                self.logger.debug(f"Removing global setting {key}")
                                 query.delete()
                                 continue
+
+                            self.logger.debug(f"Updating global setting {key}")
                             query.update({Global_values.value: value, Global_values.method: method})
 
             if changed_services:

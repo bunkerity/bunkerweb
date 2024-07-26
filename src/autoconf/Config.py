@@ -14,7 +14,7 @@ from logger import setup_logger  # type: ignore
 class Config:
     def __init__(self):
         super().__init__()
-        self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
+        self.__logger = setup_logger("Config", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
         self.__instances = []
         self.__services = []
         self._supported_config_types = (

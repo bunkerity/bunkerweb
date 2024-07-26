@@ -21,7 +21,7 @@ class Controller(Config):
         self._instances = []
         self._services = []
         self._configs = {config_type: {} for config_type in self._supported_config_types}
-        self._logger = setup_logger(f"{self._type}-controller", getenv("LOG_LEVEL", "INFO"))
+        self._logger = setup_logger(f"{self._type}-controller", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
     def wait(self, wait_time: int) -> list:
         all_ready = False
@@ -46,11 +46,11 @@ class Controller(Config):
 
     @abstractmethod
     def _get_controller_instances(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _to_instances(self, controller_instance):
-        pass
+        raise NotImplementedError
 
     def get_instances(self):
         instances = []
@@ -60,11 +60,11 @@ class Controller(Config):
 
     @abstractmethod
     def _get_controller_services(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _to_services(self, controller_service):
-        pass
+        raise NotImplementedError
 
     def _set_autoconf_load_db(self):
         if not self._loaded:
@@ -85,15 +85,15 @@ class Controller(Config):
 
     @abstractmethod
     def get_configs(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def apply_config(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def process_events(self):
-        pass
+        raise NotImplementedError
 
     def _is_service_present(self, server_name):
         for service in self._services:
