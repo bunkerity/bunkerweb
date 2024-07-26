@@ -733,7 +733,7 @@ if __name__ == "__main__":
 
             if RUN_JOBS_ONCE:
                 # Only run jobs once
-                if not SCHEDULER.reload(env, changed_plugins=changed_plugins):
+                if not SCHEDULER.reload(env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", env.get("LOG_LEVEL", "notice"))}, changed_plugins=changed_plugins):
                     LOGGER.error("At least one job in run_once() failed")
                 else:
                     LOGGER.info("All jobs in run_once() were successful")
