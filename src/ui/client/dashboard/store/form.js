@@ -357,8 +357,8 @@ export const createFormStore = (storeName, formType) => {
         _getPluginSettingsValue(value, formattedData.value);
         _getPluginMultiplesValue(value, formattedData.value);
       }
-
-      isUpdateData.value = Object.keys(formattedData.value).length > 0;
+      isUpdateData.value =
+        Object.keys(formattedData.value).length > 0 ? true : false;
     }
 
     /**
@@ -372,7 +372,9 @@ export const createFormStore = (storeName, formType) => {
       if (!value?.multiples) return;
       for (const [multName, multGroups] of Object.entries(value.multiples)) {
         for (const [groupName, group] of Object.entries(multGroups)) {
-          _checkSettingToAddValue(group, groupName);
+          for (const [settName, setting] of Object.entries(group)) {
+            _checkSettingToAddValue(setting, settName);
+          }
         }
       }
     }
@@ -431,6 +433,7 @@ export const createFormStore = (storeName, formType) => {
       templateUI,
       templateUIFormat,
       rawData,
+      isUpdateData,
       setTemplate,
       setRawData,
       addMultiple,
