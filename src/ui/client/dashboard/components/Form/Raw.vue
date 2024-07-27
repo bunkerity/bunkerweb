@@ -57,7 +57,6 @@ const data = reactive({
   @returns {void}
 */
 function updateRaw(v) {
-  console.log("update");
   // Transform to a possible valid JSON
   rawForm.setRawData(v, true);
   let dataToCheck = v;
@@ -90,7 +89,7 @@ function updateRaw(v) {
     rawForm.setTemplate(json, true);
     data.isValid = true;
   } catch (e) {
-    console.log(e);
+    console.error(e);
     data.isValid = false;
   }
 }

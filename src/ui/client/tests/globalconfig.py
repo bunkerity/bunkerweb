@@ -3032,6 +3032,7 @@ global_config = {
     "PRO_LICENSE_KEY": {"value": "", "global": True, "method": "default"},
     "SESSIONS_SECRET": {"value": "random", "global": True, "method": "default"},
     "USE_MODSECURITY": {"value": "yes", "global": True, "method": "default"},
+    "USE_SECURITYTXT": {"value": "no", "global": True, "method": "default"},
     "USE_BAD_BEHAVIOR": {"value": "yes", "global": True, "method": "default"},
     "USE_CLIENT_CACHE": {"value": "yes", "global": True, "method": "scheduler"},
     "USE_REVERSE_SCAN": {"value": "no", "global": True, "method": "default"},
@@ -3068,6 +3069,7 @@ global_config = {
     "BACKUP_SCHEDULE": {"value": "daily", "global": True, "method": "default"},
     "CUSTOM_SSL_CERT": {"value": "", "global": True, "method": "default"},
     "REMOTE_PHP_PATH": {"value": "", "global": True, "method": "default"},
+    "SECURITYTXT_URI": {"value": "/.well-known/security.txt", "global": True, "method": "default"},
     "BUNKERNET_SERVER": {"value": "https://api.bunkerweb.io", "global": True, "method": "default"},
     "CORS_ALLOW_ORIGIN": {"value": "self", "global": True, "method": "default"},
     "WHITELIST_COUNTRY": {"value": "", "global": True, "method": "default"},
@@ -3105,6 +3107,7 @@ global_config = {
     "CLIENT_CACHE_ETAG": {"value": "yes", "global": True, "method": "default"},
     "CORS_ALLOW_METHODS": {"value": "GET, POST, OPTIONS", "global": True, "method": "default"},
     "DATABASE_LOG_LEVEL": {"value": "warning", "global": True, "method": "default"},
+    "SECURITYTXT_CONTACT": {"value": "", "global": True, "method": "default"},
     "ANTIBOT_TIME_RESOLVE": {"value": "60", "global": True, "method": "default"},
     "REVERSE_SCAN_TIMEOUT": {"value": "500", "global": True, "method": "default"},
     "SELF_SIGNED_SSL_SUBJ": {"value": "/CN=www.example.com/", "global": True, "method": "default"},
@@ -3128,6 +3131,7 @@ global_config = {
     "ANTIBOT_TIME_VALID": {"value": "86400", "global": True, "method": "default"},
     "CORS_ALLOW_HEADERS": {"value": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range", "global": True, "method": "default"},
     "AUTH_BASIC_PASSWORD": {"value": "changeme", "global": True, "method": "default"},
+    "SECURITYTXT_EXPIRES": {"value": "", "global": True, "method": "default"},
     "CLIENT_CACHE_CONTROL": {"value": "public, max-age=15552000", "global": True, "method": "default"},
     "CUSTOM_SSL_CERT_DATA": {"value": "", "global": True, "method": "default"},
     "GREYLIST_RDNS_GLOBAL": {"value": "yes", "global": True, "method": "default"},
@@ -3154,6 +3158,7 @@ global_config = {
     "LIMIT_CONN_MAX_HTTP1": {"value": "10", "global": True, "method": "default"},
     "BAD_BEHAVIOR_BAN_TIME": {"value": "86400", "global": True, "method": "default"},
     "CORS_ALLOW_CREDENTIALS": {"value": "no", "global": True, "method": "default"},
+    "SECURITYTXT_ENCRYPTION": {"value": "", "global": True, "method": "default"},
     "ANTIBOT_RECAPTCHA_SCORE": {"value": "0.7", "global": True, "method": "default"},
     "SESSIONS_ABSOLUTE_TIMEOUT": {"value": "86400", "global": True, "method": "default"},
     "REVERSE_PROXY_SSL_SNI_NAME": {"value": "", "global": True, "method": "default"},
@@ -3163,7 +3168,7 @@ global_config = {
     "REDIS_SSL_VERIFY": {"value": "no", "global": True, "method": "default"},
     "REAL_IP_FROM_URLS": {"value": "", "global": True, "method": "default"},
     "SESSIONS_CHECK_IP": {"value": "yes", "global": True, "method": "default"},
-    "REVERSE_PROXY_HOST": {"value": "", "global": True, "method": "default"},
+    "REVERSE_PROXY_HOST": {"value": "dzq", "global": True, "method": "ui"},
     "CORS_EXPOSE_HEADERS": {"value": "Content-Length,Content-Range", "global": True, "method": "default"},
     "GREYLIST_USER_AGENT": {"value": "", "global": True, "method": "default"},
     "BLACKLIST_USER_AGENT": {"value": "", "global": True, "method": "default"},
@@ -3172,6 +3177,7 @@ global_config = {
     "COOKIE_AUTO_SECURE_FLAG": {"value": "yes", "global": True, "method": "default"},
     "ANTIBOT_RECAPTCHA_SITEKEY": {"value": "", "global": True, "method": "default"},
     "MODSECURITY_SEC_AUDIT_ENGINE": {"value": "RelevantOnly", "global": True, "method": "default"},
+    "SECURITYTXT_ACKNOWLEDGEMENTS": {"value": "", "global": True, "method": "default"},
     "SERVE_FILES": {"value": "no", "global": True, "method": "scheduler"},
     "GREYLIST_URI": {"value": "", "global": True, "method": "default"},
     "BLACKLIST_URI": {"value": "", "global": True, "method": "default"},
@@ -3184,6 +3190,7 @@ global_config = {
     "ANTIBOT_RECAPTCHA_SECRET": {"value": "", "global": True, "method": "default"},
     "SESSIONS_CHECK_USER_AGENT": {"value": "yes", "global": True, "method": "default"},
     "CROSS_ORIGIN_OPENER_POLICY": {"value": "same-origin", "global": True, "method": "default"},
+    "SECURITYTXT_PREFERRED_LANG": {"value": "en", "global": True, "method": "default"},
     "MODSECURITY_SEC_RULE_ENGINE": {"value": "On", "global": True, "method": "default"},
     "ROOT_FOLDER": {"value": "", "global": True, "method": "default"},
     "REDIS_USERNAME": {"value": "", "global": True, "method": "default"},
@@ -3192,6 +3199,7 @@ global_config = {
     "WHITELIST_IP_URLS": {"value": "", "global": True, "method": "default"},
     "BLACKLIST_IGNORE_IP": {"value": "", "global": True, "method": "default"},
     "WORKER_RLIMIT_NOFILE": {"value": "2048", "global": True, "method": "default"},
+    "SECURITYTXT_CANONICAL": {"value": "", "global": True, "method": "default"},
     "ANTIBOT_HCAPTCHA_SITEKEY": {"value": "", "global": True, "method": "default"},
     "CROSS_ORIGIN_EMBEDDER_POLICY": {"value": "require-corp", "global": True, "method": "default"},
     "MODSECURITY_SEC_AUDIT_LOG_PARTS": {"value": "ABCFHZ", "global": True, "method": "default"},
@@ -3200,8 +3208,9 @@ global_config = {
     "REDIS_PASSWORD": {"value": "", "global": True, "method": "default"},
     "REFERRER_POLICY": {"value": "strict-origin-when-cross-origin", "global": True, "method": "default"},
     "GREYLIST_RDNS_URLS": {"value": "", "global": True, "method": "default"},
+    "SECURITYTXT_POLICY": {"value": "", "global": True, "method": "default"},
     "WORKER_CONNECTIONS": {"value": "1024", "global": True, "method": "default"},
-    "WHITELIST_RDNS_URLS": {"value": "", "global": True, "method": "default"},
+    "WHITELIST_2024-07-27T15:51:01.203516525Z RDNS_URLS": {"value": "", "global": True, "method": "default"},
     "BLACKLIST_IGNORE_RDNS": {"value": "", "global": True, "method": "default"},
     "REVERSE_PROXY_HEADERS": {"value": "", "global": True, "method": "default"},
     "ANTIBOT_HCAPTCHA_SECRET": {"value": "", "global": True, "method": "default"},
@@ -3213,12 +3222,13 @@ global_config = {
         "method": "default",
     },
     "CORS_MAX_AGE": {"value": "86400", "global": True, "method": "default"},
-    "GR2024-07-23T07:35:15.190324876Z EYLIST_ASN_URLS": {"value": "", "global": True, "method": "default"},
+    "GREYLIST_ASN_URLS": {"value": "", "global": True, "method": "default"},
     "PERMISSIONS_POLICY": {
         "value": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",
         "global": True,
         "method": "default",
     },
+    "SECURITYTXT_HIRING": {"value": "", "global": True, "method": "default"},
     "WHITELIST_ASN_URLS": {"value": "", "global": True, "method": "default"},
     "BLACKLIST_IGNORE_ASN": {"value": "", "global": True, "method": "default"},
     "REDIS_SENTINEL_HOSTS": {"value": "", "global": True, "method": "default"},
@@ -3227,6 +3237,7 @@ global_config = {
     "HTTP3": {"value": "no", "global": True, "method": "default"},
     "LOG_LEVEL": {"value": "info", "global": True, "method": "scheduler"},
     "DISABLE_FLOC": {"value": "yes", "global": True, "method": "default"},
+    "SECURITYTXT_CSAF": {"value": "", "global": True, "method": "default"},
     "CORS_DENY_REQUEST": {"value": "yes", "global": True, "method": "default"},
     "REDIS_SENTINEL_USERNAME": {"value": "", "global": True, "method": "default"},
     "REVERSE_PROXY_BUFFERING": {"value": "yes", "global": True, "method": "default"},
@@ -3473,34 +3484,41 @@ def get_multiple_from_template(template, multiples):
             format_setting = "_".join(setting_split[:-1])
         # loop on settings of a multiple group
         for mult_name, mult_settings in multiple_plugin.items():
-            # Check if at least one multiple plugin setting is matching the template setting
-            if format_setting in mult_settings:
-                if not mult_name in multiple_template:
-                    multiple_template[mult_name] = {}
-                # Case it is, we will check if already a group with the right prefix exists
-                # If not, we will create it
-                if not prefix in multiple_template[mult_name]:
-                    # We want each settings to have the prefix if exists
-                    # We will get the value of the setting without the prefix and create a prefix key with the same value
-                    # And after that we can delete the original setting
-                    new_multiple_group = {}
-                    for multSett, multValue in mult_settings.items():
-                        new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    new_multiple_group = copy.deepcopy(new_multiple_group)
+            # Check if at least one settign is matching a multiple setting
+            if not format_setting in mult_settings:
+                continue
 
-                    # Update id for each settings
-                    for multSett, multValue in new_multiple_group.items():
-                        multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
+            # Case we have at least one multiple setting, we can check if multiple name exists or create it
+            if not mult_name in multiple_template:
+                multiple_template[mult_name] = {}
+                
+            # Case it is, we will check if already a group with the right prefix exists
+            # If not, we will create it
+            if not prefix in multiple_template[mult_name]:
+                # We want each settings to have the prefix if exists
+                # We will get the value of the setting without the prefix and create a prefix key with the same value
+                # And after that we can delete the original setting
+                new_multiple_group = {}
+                for multSett, multValue in mult_settings.items():
+                    new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    multiple_template[mult_name][prefix] = new_multiple_group
+                new_multiple_group = copy.deepcopy(new_multiple_group)
 
-                # We can now add the template value to setting using the same setting name with prefix
-                multiple_template[mult_name][prefix][setting]["value"] = value
+                # Update id for each settings
+                for multSett, multValue in new_multiple_group.items():
+                    multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
 
-                # Sort key incrementally
-                for mult_name, mult_settings in multiple_template.items():
-                    multiple_template[mult_name] = dict(sorted(mult_settings.items(), key=lambda item: int(item[0])))
+                multiple_template[mult_name][prefix] = new_multiple_group
+
+            # We can now add the template value to setting using the same setting name with prefix
+            multiple_template[mult_name][prefix][setting]["value"] = value
+            multiple_template[mult_name][prefix][setting]["prev_value"] = value
+            multiple_template[mult_name][prefix][setting]["method"] = "default"
+
+            # Sort key incrementally
+            for mult_name, mult_settings in multiple_template.items():
+                multiple_template[mult_name] = dict(sorted(mult_settings.items(), key=lambda item: int(item[0])))
     return multiple_template
 
 
@@ -3527,42 +3545,53 @@ def get_multiple_from_settings(settings, multiples):
         if setting_split[-1].isdigit():
             prefix = setting_split[-1]
             format_setting = "_".join(setting_split[:-1])
+
         # loop on settings of a multiple group
         for mult_name, mult_settings in multiple_plugins.items():
-            # Check if at least one multiple plugin setting is matching the template setting
-            if format_setting in mult_settings:
 
-                if not mult_name in multiple_settings:
-                    multiple_settings[mult_name] = {}
-                # Case it is, we will check if already a group with the right prefix exists
-                # If not, we will create it
-                if not prefix in multiple_settings:
-                    # We want each settings to have the prefix if exists
-                    # We will get the value of the setting without the prefix and create a prefix key with the same value
-                    # And after that we can delete the original setting
-                    new_multiple_group = {}
-                    for multSett, multValue in mult_settings.items():
-                        new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
+            # Check if at least one settign is matching a multiple setting
+            if not format_setting in mult_settings:
+                continue
 
-                    new_multiple_group = copy.deepcopy(new_multiple_group)
+            # Case we have at least one multiple setting, we can check if multiple name exists or create it
+            if not mult_name in multiple_settings:
+                multiple_settings[mult_name] = {}
+            # Now check if prefix exist for this mult
+            if not prefix in multiple_settings[mult_name]:
+                # We want each settings to have the prefix if exists
+                # We will get the value of the setting without the prefix and create a prefix key with the same value
+                # And after that we can delete the original setting
+                new_multiple_group = {}
+                for multSett, multValue in mult_settings.items():
+                    new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    # Update id for each settings
-                    for multSett, multValue in new_multiple_group.items():
-                        multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
+                new_multiple_group = copy.deepcopy(new_multiple_group)
 
-                    multiple_settings[mult_name][prefix] = new_multiple_group
+                # Update id for each settings
+                for multSett, multValue in new_multiple_group.items():
+                    multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
 
-                # We can now add the template value to setting using the same setting name with prefix
-                multiple_settings[mult_name][prefix][setting]["value"] = value.get("value", multiple_settings[mult_name][prefix][setting]["value"])
-                multiple_settings[mult_name][prefix][setting]["method"] = value.get("method", "ui")
-                multiple_settings[mult_name][prefix][setting]["disabled"] = False if value.get("method", "ui") in ("ui", "default", "manual") else True
-                if multiple_settings[mult_name][prefix][setting].get("disabled", False):
-                    multiple_settings[mult_name][prefix][setting]["popovers"] = [
-                        {
-                            "iconName": "trespass",
-                            "text": "inp_popover_method_disabled",
-                        }
-                    ] + multiple_settings[mult_name][prefix][setting].get("popovers", [])
+                multiple_settings[mult_name][prefix] = new_multiple_group
+
+            # Update multiple template with real data
+            multiple_settings[mult_name][prefix][setting]["value"] = value.get("value", multiple_settings[mult_name][prefix][setting]["value"])
+            multiple_settings[mult_name][prefix][setting]["prev_value"] = value.get("value", multiple_settings[mult_name][prefix][setting]["value"])
+            multiple_settings[mult_name][prefix][setting]["method"] = value.get("method", "ui")
+            multiple_settings[mult_name][prefix][setting]["disabled"] = False if value.get("method", "ui") in ("ui", "default", "manual") else True
+
+            # Add popovers if setting is disabled else stop
+            if not multiple_settings[mult_name][prefix][setting].get("disabled", False):
+                continue
+
+            multiple_settings[mult_name][prefix][setting]["popovers"] = [
+                {
+                    "iconName": "trespass",
+                    "text": "inp_popover_method_disabled",
+                }
+            ] + multiple_settings[
+                mult_name
+            ][prefix][setting].get("popovers", [])
+
     return multiple_settings
 
 
@@ -3592,6 +3621,7 @@ def set_multiples(template, format_plugins, settings):
                 multiples[mult_name] = {}
 
             multiples[mult_name][setting] = value
+
             settings_to_delete.append(setting)
 
         # Delete multiple settings from regular settings
@@ -3667,7 +3697,7 @@ def format_setting(
     if setting_name in settings and not "multiple" in setting_value:
         setting_value["value"] = settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
         setting_value["method"] = settings[setting_name].get("method", "ui")
-    
+
     # Add prev_value in order to check if value has changed to submit it
     setting_value["prev_value"] = setting_value.get("value")
 

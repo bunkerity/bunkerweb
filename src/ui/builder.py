@@ -355,34 +355,41 @@ def get_multiple_from_template(template, multiples):
             format_setting = "_".join(setting_split[:-1])
         # loop on settings of a multiple group
         for mult_name, mult_settings in multiple_plugin.items():
-            # Check if at least one multiple plugin setting is matching the template setting
-            if format_setting in mult_settings:
-                if not mult_name in multiple_template:
-                    multiple_template[mult_name] = {}
-                # Case it is, we will check if already a group with the right prefix exists
-                # If not, we will create it
-                if not prefix in multiple_template[mult_name]:
-                    # We want each settings to have the prefix if exists
-                    # We will get the value of the setting without the prefix and create a prefix key with the same value
-                    # And after that we can delete the original setting
-                    new_multiple_group = {}
-                    for multSett, multValue in mult_settings.items():
-                        new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    new_multiple_group = copy.deepcopy(new_multiple_group)
+            # Check if at least one settign is matching a multiple setting
+            if not format_setting in mult_settings:
+                continue
 
-                    # Update id for each settings
-                    for multSett, multValue in new_multiple_group.items():
-                        multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
+            # Case we have at least one multiple setting, we can check if multiple name exists or create it
+            if not mult_name in multiple_template:
+                multiple_template[mult_name] = {}
 
-                    multiple_template[mult_name][prefix] = new_multiple_group
+            # Case it is, we will check if already a group with the right prefix exists
+            # If not, we will create it
+            if not prefix in multiple_template[mult_name]:
+                # We want each settings to have the prefix if exists
+                # We will get the value of the setting without the prefix and create a prefix key with the same value
+                # And after that we can delete the original setting
+                new_multiple_group = {}
+                for multSett, multValue in mult_settings.items():
+                    new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                # We can now add the template value to setting using the same setting name with prefix
-                multiple_template[mult_name][prefix][setting]["value"] = value
+                new_multiple_group = copy.deepcopy(new_multiple_group)
 
-                # Sort key incrementally
-                for mult_name, mult_settings in multiple_template.items():
-                    multiple_template[mult_name] = dict(sorted(mult_settings.items(), key=lambda item: int(item[0])))
+                # Update id for each settings
+                for multSett, multValue in new_multiple_group.items():
+                    multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
+
+                multiple_template[mult_name][prefix] = new_multiple_group
+
+            # We can now add the template value to setting using the same setting name with prefix
+            multiple_template[mult_name][prefix][setting]["value"] = value
+            multiple_template[mult_name][prefix][setting]["prev_value"] = value
+            multiple_template[mult_name][prefix][setting]["method"] = "default"
+
+            # Sort key incrementally
+            for mult_name, mult_settings in multiple_template.items():
+                multiple_template[mult_name] = dict(sorted(mult_settings.items(), key=lambda item: int(item[0])))
     return multiple_template
 
 
@@ -409,42 +416,53 @@ def get_multiple_from_settings(settings, multiples):
         if setting_split[-1].isdigit():
             prefix = setting_split[-1]
             format_setting = "_".join(setting_split[:-1])
+
         # loop on settings of a multiple group
         for mult_name, mult_settings in multiple_plugins.items():
-            # Check if at least one multiple plugin setting is matching the template setting
-            if format_setting in mult_settings:
 
-                if not mult_name in multiple_settings:
-                    multiple_settings[mult_name] = {}
-                # Case it is, we will check if already a group with the right prefix exists
-                # If not, we will create it
-                if not prefix in multiple_settings:
-                    # We want each settings to have the prefix if exists
-                    # We will get the value of the setting without the prefix and create a prefix key with the same value
-                    # And after that we can delete the original setting
-                    new_multiple_group = {}
-                    for multSett, multValue in mult_settings.items():
-                        new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
+            # Check if at least one settign is matching a multiple setting
+            if not format_setting in mult_settings:
+                continue
 
-                    new_multiple_group = copy.deepcopy(new_multiple_group)
+            # Case we have at least one multiple setting, we can check if multiple name exists or create it
+            if not mult_name in multiple_settings:
+                multiple_settings[mult_name] = {}
+            # Now check if prefix exist for this mult
+            if not prefix in multiple_settings[mult_name]:
+                # We want each settings to have the prefix if exists
+                # We will get the value of the setting without the prefix and create a prefix key with the same value
+                # And after that we can delete the original setting
+                new_multiple_group = {}
+                for multSett, multValue in mult_settings.items():
+                    new_multiple_group[f"{multSett}{f'_{prefix}' if prefix != '0' else ''}"] = multValue
 
-                    # Update id for each settings
-                    for multSett, multValue in new_multiple_group.items():
-                        multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
+                new_multiple_group = copy.deepcopy(new_multiple_group)
 
-                    multiple_settings[mult_name][prefix] = new_multiple_group
+                # Update id for each settings
+                for multSett, multValue in new_multiple_group.items():
+                    multValue["id"] = f"{multValue['id']}{f'-{prefix}' if prefix != '0' else ''}"
 
-                # We can now add the template value to setting using the same setting name with prefix
-                multiple_settings[mult_name][prefix][setting]["value"] = value.get("value", multiple_settings[mult_name][prefix][setting]["value"])
-                multiple_settings[mult_name][prefix][setting]["method"] = value.get("method", "ui")
-                multiple_settings[mult_name][prefix][setting]["disabled"] = False if value.get("method", "ui") in ("ui", "default", "manual") else True
-                if multiple_settings[mult_name][prefix][setting].get("disabled", False):
-                    multiple_settings[mult_name][prefix][setting]["popovers"] = [
-                        {
-                            "iconName": "trespass",
-                            "text": "inp_popover_method_disabled",
-                        }
-                    ] + multiple_settings[mult_name][prefix][setting].get("popovers", [])
+                multiple_settings[mult_name][prefix] = new_multiple_group
+
+            # Update multiple template with real data
+            multiple_settings[mult_name][prefix][setting]["value"] = value.get("value", multiple_settings[mult_name][prefix][setting]["value"])
+            multiple_settings[mult_name][prefix][setting]["prev_value"] = value.get("value", multiple_settings[mult_name][prefix][setting]["value"])
+            multiple_settings[mult_name][prefix][setting]["method"] = value.get("method", "ui")
+            multiple_settings[mult_name][prefix][setting]["disabled"] = False if value.get("method", "ui") in ("ui", "default", "manual") else True
+
+            # Add popovers if setting is disabled else stop
+            if not multiple_settings[mult_name][prefix][setting].get("disabled", False):
+                continue
+
+            multiple_settings[mult_name][prefix][setting]["popovers"] = [
+                {
+                    "iconName": "trespass",
+                    "text": "inp_popover_method_disabled",
+                }
+            ] + multiple_settings[
+                mult_name
+            ][prefix][setting].get("popovers", [])
+
     return multiple_settings
 
 

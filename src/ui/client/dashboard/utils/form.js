@@ -17,7 +17,7 @@ function useForm() {
       const data = JSON.parse(e.target.getAttribute("data-submit-form"));
       useSubmitForm(data);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   });
 }

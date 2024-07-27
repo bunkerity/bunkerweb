@@ -84,16 +84,14 @@ export const createFormStore = (storeName, formType) => {
       );
 
       // For back end, we need to keep the group but updating values to default in order to delete it
-      for (const [key, value] of Object.entries(
+      for (const [settName, setting] of Object.entries(
         templateBase.value[index].multiples[multName][groupName]
       )) {
-        value.value = value.default;
+        setting.value = setting.default;
       }
 
       // For UI, we can delete the group to avoid rendering it
       delete templateUI.value[index].multiples[multName][groupName];
-      updateCount.value++;
-
       _updateTempState();
     }
 

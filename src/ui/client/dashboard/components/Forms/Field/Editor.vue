@@ -198,7 +198,7 @@ class Editor {
             currTabIndex++;
           }
         } catch (err) {
-          console.log(err);
+          console.error(err);
         }
       },
       readOnly: true,
@@ -228,7 +228,7 @@ class Editor {
             currTabIndex++;
           }
         } catch (err) {
-          console.log(err);
+          console.error(err);
         }
       },
       readOnly: true,
@@ -300,7 +300,7 @@ function removeErrCSS() {
         editor.style = dictStyle;
       });
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }, 100);
 }
@@ -327,7 +327,7 @@ function setEditorAttrs() {
       editorEl.editor.gotoLine(editorRange.start.row, editorRange.start.column);
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

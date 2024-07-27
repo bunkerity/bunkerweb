@@ -27,6 +27,9 @@ export default defineConfig({
       "@public": resolve(__dirname, "./public"),
     },
   },
+  esbuild: {
+    drop: ["console.log", "console.info", "console.warn"],
+  },
   build: {
     minify: "esbuild",
     chunkSizeWarningLimit: 1024,

@@ -4,7 +4,7 @@ class Ping {
     btnEl = null, // disabled while fethching
     statusTextEl = null, // update text with fetching result
     statusColorEl = null, // update color with fetching result
-    key_to_check = "ping", // key to check in response data
+    key_to_check = "ping" // key to check in response data
   ) {
     this.url = url;
     this.btnEl = btnEl;
@@ -48,7 +48,7 @@ class Ping {
       ],
       "bg-sky-500 p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:shadow-dark-xl bg-clip-border",
       "",
-      "",
+      ""
     );
 
     // Status
@@ -57,7 +57,7 @@ class Ping {
       [["data-fetch-status", ""]],
       "text-lg mb-0 text-white dark:text-gray-300",
       "Fetching",
-      this.alertEl,
+      this.alertEl
     );
 
     this.alertMsgEl = this.createEl(
@@ -65,7 +65,7 @@ class Ping {
       [["data-fetch-msg", ""]],
       "text-white dark:text-gray-300 mb-0 text-sm",
       "Please wait...",
-      this.alertEl,
+      this.alertEl
     );
 
     document.body.appendChild(this.alertEl);
@@ -87,7 +87,7 @@ class Ping {
     // Show error
     if (data?.error) {
       const error = data?.error || "Action exception, no details available";
-      console.log(error);
+      console.error(error);
       // Remove previous data-action-error
       const prevError = document.querySelectorAll("[data-action-error]");
       if (prevError.length) prevError.forEach((el) => el.remove());
@@ -124,7 +124,7 @@ class Ping {
         "226",
       ];
       const isSuccess = successValues.includes(
-        data[this.key_to_check].toString(),
+        data[this.key_to_check].toString()
       );
 
       if (isSuccess) {

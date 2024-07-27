@@ -4361,6 +4361,7 @@
                                             },
                                             "disabled": false,
                                             "value": "",
+                                            "method": "default",
                                             "prev_value": "",
                                             "popovers": [
                                                 {
@@ -5650,7 +5651,8 @@
                                                             "text": "URL (PCRE regex) where the limit request will be applied or special value / for all requests."
                                                         }
                                                     ],
-                                                    "containerClass": "z-6"
+                                                    "containerClass": "z-6",
+                                                    "method": "default"
                                                 },
                                                 "LIMIT_REQ_RATE": {
                                                     "context": "multisite",
@@ -8617,8 +8619,8 @@
                                                         "mobile": 12
                                                     },
                                                     "disabled": false,
-                                                    "value": "",
-                                                    "prev_value": "",
+                                                    "value": "dzq",
+                                                    "prev_value": "dzq",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -8629,7 +8631,8 @@
                                                             "text": "Full URL of the proxied resource (proxy_pass)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-26"
+                                                    "containerClass": "z-26",
+                                                    "method": "ui"
                                                 },
                                                 "REVERSE_PROXY_URL": {
                                                     "context": "multisite",
@@ -8661,7 +8664,8 @@
                                                             "text": "Location URL that will be proxied."
                                                         }
                                                     ],
-                                                    "containerClass": "z-25"
+                                                    "containerClass": "z-25",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_WS": {
                                                     "context": "multisite",
@@ -8693,7 +8697,8 @@
                                                             "text": "Enable websocket on the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-24"
+                                                    "containerClass": "z-24",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_HEADERS": {
                                                     "context": "multisite",
@@ -8725,7 +8730,8 @@
                                                             "text": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-23"
+                                                    "containerClass": "z-23",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_HEADERS_CLIENT": {
                                                     "context": "multisite",
@@ -8757,7 +8763,8 @@
                                                             "text": "List of HTTP headers to send to client separated with semicolons (values for add_header directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-22"
+                                                    "containerClass": "z-22",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_BUFFERING": {
                                                     "context": "multisite",
@@ -8789,7 +8796,8 @@
                                                             "text": "Enable or disable buffering of responses from proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-21"
+                                                    "containerClass": "z-21",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_KEEPALIVE": {
                                                     "context": "multisite",
@@ -8821,7 +8829,8 @@
                                                             "text": "Enable or disable keepalive connections with the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-20"
+                                                    "containerClass": "z-20",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST": {
                                                     "context": "multisite",
@@ -8853,7 +8862,8 @@
                                                             "text": "Enable authentication using an external provider (value of auth_request directive)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-19"
+                                                    "containerClass": "z-19",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
                                                     "context": "multisite",
@@ -8885,7 +8895,8 @@
                                                             "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-18"
+                                                    "containerClass": "z-18",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_AUTH_REQUEST_SET": {
                                                     "context": "multisite",
@@ -8917,7 +8928,8 @@
                                                             "text": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives)."
                                                         }
                                                     ],
-                                                    "containerClass": "z-17"
+                                                    "containerClass": "z-17",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_CONNECT_TIMEOUT": {
                                                     "context": "multisite",
@@ -8949,7 +8961,8 @@
                                                             "text": "Timeout when connecting to the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-16"
+                                                    "containerClass": "z-16",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_READ_TIMEOUT": {
                                                     "context": "multisite",
@@ -8981,7 +8994,8 @@
                                                             "text": "Timeout when reading from the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-15"
+                                                    "containerClass": "z-15",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_SEND_TIMEOUT": {
                                                     "context": "multisite",
@@ -9013,7 +9027,8 @@
                                                             "text": "Timeout when sending to the proxied resource."
                                                         }
                                                     ],
-                                                    "containerClass": "z-14"
+                                                    "containerClass": "z-14",
+                                                    "method": "default"
                                                 },
                                                 "REVERSE_PROXY_INCLUDES": {
                                                     "context": "multisite",
@@ -9873,7 +9888,6 @@
                                             },
                                             "disabled": false,
                                             "value": "",
-                                            "method": "default",
                                             "prev_value": "",
                                             "popovers": [
                                                 {
@@ -9998,7 +10012,8 @@
                                 "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Permissions-Policy X-Frame-Options",
                                 "STRICT_TRANSPORT_SECURITY": "max-age=31536000; includeSubDomains; preload",
                                 "PERMISSIONS_POLICY": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",
-                                "MODSECURITY_CRS_VERSION": "4"
+                                "MODSECURITY_CRS_VERSION": "4",
+                                "REVERSE_PROXY_HOST": "dzq"
                             }
                         }
                     }
