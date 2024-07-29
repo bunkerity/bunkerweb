@@ -284,7 +284,7 @@ onBeforeMount(() => {
           "
           aria-labelledby="logo-link-label"
           class="menu-logo-link-container"
-          :href="menu.currPath === '/home' ? '#' : '/home'"
+          :href="menu.currPath === 'home' ? '#' : 'home'"
         >
           <span id="logo-link-label" class="sr-only">
             {{ $t("dashboard_logo_link_label") }}
@@ -314,7 +314,7 @@ onBeforeMount(() => {
             menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
           "
           class="menu-account-link"
-          href="/account"
+          href="account"
           >{{ $t("dashboard_manage_account") }}</a
         >
       </div>
@@ -432,15 +432,15 @@ onBeforeMount(() => {
 
       <!-- logout-->
       <div class="menu-logout-content">
-        <button
+        <a
           :tabindex="
             menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
           "
-          @click="getlogout()"
+          href="logout"
           class="menu-logout"
         >
           {{ $t("dashboard_menu_log_out") }}
-        </button>
+        </a>
       </div>
       <!-- end logout-->
     </div>
