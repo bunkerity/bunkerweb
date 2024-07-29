@@ -34,7 +34,7 @@ export default defineConfig({
     },
   },
   esbuild: {
-    drop: ["console.log"],
+    drop: ["console.log", "console.info", "console.warn"],
   },
   build: {
     minify: "esbuild",
