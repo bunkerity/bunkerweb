@@ -1056,6 +1056,124 @@ def get_service_data():
     return config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged
 
 
+# @app.route("/services", methods=["GET", "POST"])
+# @login_required
+# def services():
+#     if request.method == "POST":
+#         if app.config["DB"].readonly:
+#             return handle_error("Database is in read-only mode", "services")
+
+#         verify_data_in_form(
+#             data={"operation": ("edit", "new", "delete")},
+#             err_message="Invalid operation parameter on /services.",
+#             redirect_url="services",
+#         )
+
+#         config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data()
+
+#         if request.form["operation"] == "edit":
+#             if is_draft_unchanged and len(variables) == 1 and "SERVER_NAME" in variables and server_name == old_server_name:
+#                 return handle_error("The service was not edited because no values were changed.", "services", True)
+
+#         if request.form["operation"] == "new" and not variables:
+#             return handle_error("The service was not created because all values had the default value.", "services", True)
+
+#         # Delete
+#         if request.form["operation"] == "delete":
+
+#             is_service = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
+
+#             if not is_service:
+#                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
+
+#             if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
+#                 return handle_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
+
+#         db_metadata = app.config["DB"].get_metadata()
+
+#         def update_services(threaded: bool = False):
+#             wait_applying()
+
+#             manage_bunkerweb(
+#                 "services",
+#                 variables,
+#                 old_server_name,
+#                 variables.get("SERVER_NAME", ""),
+#                 operation=operation,
+#                 is_draft=is_draft,
+#                 was_draft=was_draft,
+#                 threaded=threaded,
+#             )
+
+#         ui_data = get_ui_data()
+
+#         if any(
+#             v
+#             for k, v in db_metadata.items()
+#             if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
+#         ):
+#             ui_data["RELOADING"] = True
+#             ui_data["LAST_RELOAD"] = time()
+#             Thread(target=update_services, args=(True,)).start()
+#         else:
+#             update_services()
+
+#         ui_data["CONFIG_CHANGED"] = True
+
+#         with LOCK:
+#             TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
+
+#         message = ""
+
+#         if request.form["operation"] == "new":
+#             message = f"Creating {'draft ' if is_draft else ''}service {variables.get('SERVER_NAME', '').split(' ')[0]}"
+#         elif request.form["operation"] == "edit":
+#             message = f"Saving configuration for {'draft ' if is_draft else ''}service {old_server_name.split(' ')[0]}"
+#         elif request.form["operation"] == "delete":
+#             message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
+
+#         return redirect(url_for("loading", next=url_for("services"), message=message))
+
+#     # Display services
+#     services = []
+#     tmp_config = app.config["DB"].get_config(methods=True, with_drafts=True).copy()
+#     service_names = tmp_config["SERVER_NAME"]["value"].split(" ")
+
+#     table_settings = (
+#         "USE_REVERSE_PROXY",
+#         "IS_DRAFT",
+#         "SERVE_FILES",
+#         "REMOTE_PHP",
+#         "AUTO_LETS_ENCRYPT",
+#         "USE_CUSTOM_SSL",
+#         "USE_MODSECURITY",
+#         "USE_BAD_BEHAVIOR",
+#         "USE_LIMIT_REQ",
+#         "USE_DNSBL",
+#         "SERVER_NAME",
+#     )
+
+#     for service in service_names:
+#         service_settings = {}
+
+#         # For each needed setting, get the service value if one, else the global (value), else defautl value
+#         for setting in table_settings:
+#             value = tmp_config.get(f"{service}_{setting}", tmp_config.get(setting, {"value": None}))["value"]
+#             method = tmp_config.get(f"{service}_{setting}", tmp_config.get(setting, {"method": None}))["method"]
+#             is_global = tmp_config.get(f"{service}_{setting}", tmp_config.get(setting, {"global": None}))["global"]
+#             service_settings[setting] = {"value": value, "method": method, "global": is_global}
+
+#         services.append(service_settings)
+
+#     services.sort(key=lambda x: x["SERVER_NAME"]["value"])
+
+#     return render_template(
+#         "services.html",
+#         services=services,
+#         global_config=global_config,
+#     )
+
+
 @app.route("/services", methods=["GET", "POST"])
 @login_required
 def services():

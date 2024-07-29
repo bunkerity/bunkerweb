@@ -262,5 +262,18 @@
   "bans_table_reason": "Reason",
   "bans_table_remain": "Remain",
   "bans_table_term": "Term",
-  "bans_table_select": "Select"
+  "bans_table_select": "Select",
+  "services_title": "Services",
+  "services_table_name": "Name",
+  "services_table_method": "Method",
+  "services_table_settings": "Settings",
+  "services_table_manage": "Manage",
+  "services_table_is_draft": "Draft status",
+  "services_table_delete": "Delete",
+  "services_search": "Search services",
+  "services_search_desc": "Search within service name",
+  "services_methods": "Methods",
+  "services_methods_desc": "Only show services of the chosen method",
+  "services_draft": "Draft status",
+  "services_draft_desc": "Only show services of the chosen draft status"
 }
