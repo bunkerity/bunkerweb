@@ -68,57 +68,50 @@ def get_services_list(services):
         item.append({"method": server_method, "type": "Text", "data": {"text": server_method}})
         item.append(
             {
-                "type": "Button",
+                "type": "ButtonGroup",
                 "data": {
-                    "id": f"open-modal-settings-{index}",
-                    "text": "settings",
-                    "hideText": False,
-                    " color": "info",
-                    "size": "normal",
-                    "iconName": "settings",
-                },
-            }
-        )
-        item.append(
-            {
-                "type": "Button",
-                "data": {
-                    "attrs": {"data-server-name": server_name},
-                    "id": f"open-modal-manage-{index}",
-                    "text": "manage",
-                    "hideText": False,
-                    " color": "green",
-                    "size": "normal",
-                    "iconName": "manage",
-                },
-            }
-        )
-        item.append(
-            {
-                "type": "Button",
-                "data": {
-                    "attrs": {"data-server-name": server_name, "data-is-draft": "yes" if is_draft else "no"},
-                    "id": f"open-modal-draft-{index}",
-                    "text": "draft" if is_draft else "online",
-                    "hideText": False,
-                    " color": "cyan",
-                    "size": "normal",
-                    "iconName": "draft" if is_draft else "online",
-                },
-            }
-        )
-        item.append(
-            {
-                "type": "Button",
-                "data": {
-                    "attrs": {"data-server-name": server_name},
-                    "id": f"open-modal-delete-{index}",
-                    "text": "delete",
-                    "disabled": not is_deletable,
-                    "hideText": False,
-                    " color": "red",
-                    "size": "normal",
-                    "iconName": "trash",
+                    "buttons": [
+                        {
+                            "id": f"open-modal-settings-{index}",
+                            "text": "settings",
+                            "hideText": True,
+                            "color": "info",
+                            "size": "normal",
+                            "iconName": "settings",
+                            "iconColor": "white",
+                        },
+                        {
+                            "attrs": {"data-server-name": server_name},
+                            "id": f"open-modal-manage-{index}",
+                            "text": "manage",
+                            "hideText": True,
+                            "color": "success",
+                            "size": "normal",
+                            "iconName": "gear",
+                            "iconColor": "white",
+                        },
+                        {
+                            "attrs": {"data-server-name": server_name, "data-is-draft": "yes" if is_draft else "no"},
+                            "id": f"open-modal-draft-{index}",
+                            "text": "draft" if is_draft else "online",
+                            "hideText": True,
+                            "color": "cyan",
+                            "size": "normal",
+                            "iconName": "pen" if is_draft else "globe",
+                            "iconColor": "white",
+                        },
+                        {
+                            "attrs": {"data-server-name": server_name},
+                            "id": f"open-modal-delete-{index}",
+                            "text": "delete",
+                            "disabled": not is_deletable,
+                            "hideText": True,
+                            "color": "red",
+                            "size": "normal",
+                            "iconName": "trash",
+                            "iconColor": "white",
+                        },
+                    ]
                 },
             }
         )
@@ -141,14 +134,11 @@ def services_builder(services):
             "widgets": [
                 title_widget("services_title"),
                 table_widget(
-                    positions=[2, 2, 2, 2, 2, 2],
+                    positions=[4, 4, 4],
                     header=[
                         "services_table_name",
                         "services_table_method",
-                        "services_table_settings",
-                        "services_table_manage",
-                        "services_table_is_draft",
-                        "services_table_delete",
+                        "services_table_actions",
                     ],
                     items=services_list,
                     filters=[
@@ -220,7 +210,7 @@ def services_builder(services):
                             },
                         },
                     ],
-                    minWidth="lg",
+                    minWidth="md",
                     title="services_table_title",
                 ),
             ],

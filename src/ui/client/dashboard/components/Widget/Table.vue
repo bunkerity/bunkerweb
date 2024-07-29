@@ -3,10 +3,7 @@ import { reactive, computed, ref, onMounted, watch } from "vue";
 import { v4 as uuidv4 } from "uuid";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
 import Container from "@components/Widget/Container.vue";
-import Text from "@components/Widget/Text.vue";
-import Icons from "@components/Widget/Icons.vue";
-import Fields from "@components/Form/Fields.vue";
-import Button from "@components/Widget/Button.vue";
+import Cell from "@components/Widget/Cell.vue";
 import Filter from "@components/Widget/Filter.vue";
 
 /**
@@ -240,10 +237,7 @@ onMounted(() => {
                   `col-span-${props.positions[id]}`,
                 ]"
               >
-                <Text v-if="col.type === 'Text'" v-bind="col.data" />
-                <Icons v-if="col.type === 'Icons'" v-bind="col.data" />
-                <Fields v-if="col.type === 'Fields'" v-bind="col.data" />
-                <Button v-if="col.type === 'Button'" v-bind="col.data" />
+                <Cell :data="col.data" :type="col.type" />
               </td>
             </template>
           </tr>

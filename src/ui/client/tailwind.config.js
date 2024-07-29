@@ -3,8 +3,8 @@ const plugin = require("tailwindcss/plugin");
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./src/pages/**/*.{js,vue,ts,jsx,tsx,mdx, html}",
-    "./src/components/**/*.{js,vue,ts,jsx,tsx,mdx}",
+    "./dashboard/pages/**/*.{js,vue,ts,jsx,tsx,mdx, html}",
+    "./dashboard/components/**/*.{js,vue,ts,jsx,tsx,mdx}",
     "../setup/src/*.{js,vue,ts,jsx,tsx,mdx}",
   ],
   safelist: [

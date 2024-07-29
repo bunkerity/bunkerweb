@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, reactive, onMounted, ref } from "vue";
+import { defineProps, reactive, onMounted, ref, computed } from "vue";
 import Box from "@components/Icons/Box.vue";
 import Carton from "@components/Icons/Carton.vue";
 import Core from "@components/Icons/Core.vue";
@@ -82,6 +82,7 @@ const props = defineProps({
 const icon = reactive({
   color: props.color,
   class: props.iconClass,
+  name: computed(() => props.iconName.toLowerCase()),
 });
 
 const iconEl = ref();
@@ -96,197 +97,197 @@ onMounted(() => {
 <template>
   <div ref="iconEl" :class="[props.isStick ? 'stick' : '', 'icon-container']">
     <Exclamation
-      v-if="props.iconName === 'exclamation'"
+      v-if="icon.name === 'exclamation'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Box
-      v-if="props.iconName === 'box'"
+      v-if="icon.name === 'box'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Carton
-      v-if="props.iconName === 'carton'"
+      v-if="icon.name === 'carton'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Core
-      v-if="props.iconName === 'core'"
+      v-if="icon.name === 'core'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <External
-      v-if="props.iconName === 'external'"
+      v-if="icon.name === 'external'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Search
-      v-if="props.iconName === 'search'"
+      v-if="icon.name === 'search'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Trash
-      v-if="props.iconName === 'trash'"
+      v-if="icon.name === 'trash'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Lock
-      v-if="props.iconName === 'lock'"
+      v-if="icon.name === 'lock'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Crown
-      v-if="props.iconName === 'crown'"
+      v-if="icon.name === 'crown'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Discord
-      v-if="props.iconName === 'discord'"
+      v-if="icon.name === 'discord'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Disk
-      v-if="props.iconName === 'disk'"
+      v-if="icon.name === 'disk'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Disks
-      v-if="props.iconName === 'disks'"
+      v-if="icon.name === 'disks'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Globe
-      v-if="props.iconName === 'globe'"
+      v-if="icon.name === 'globe'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Info
-      v-if="props.iconName === 'info'"
+      v-if="icon.name === 'info'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Flag
-      v-if="props.iconName === 'flag'"
+      v-if="icon.name === 'flag'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Gear
-      v-if="props.iconName === 'gear'"
+      v-if="icon.name === 'gear'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Github
-      v-if="props.iconName === 'github'"
+      v-if="icon.name === 'github'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <House
-      v-if="props.iconName === 'house'"
+      v-if="icon.name === 'house'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <List
-      v-if="props.iconName === 'list'"
+      v-if="icon.name === 'list'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Key
-      v-if="props.iconName === 'key'"
+      v-if="icon.name === 'key'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Linkedin
-      v-if="props.iconName === 'linkedin'"
+      v-if="icon.name === 'linkedin'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Plus
-      v-if="props.iconName === 'plus'"
+      v-if="icon.name === 'plus'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Puzzle
-      v-if="props.iconName === 'puzzle'"
+      v-if="icon.name === 'puzzle'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Settings
-      v-if="props.iconName === 'settings'"
+      v-if="icon.name === 'settings'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Task
-      v-if="props.iconName === 'task'"
+      v-if="icon.name === 'task'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Trespass
-      v-if="props.iconName === 'trespass'"
+      v-if="icon.name === 'trespass'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Check
-      v-if="props.iconName === 'check'"
+      v-if="icon.name === 'check'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Cross
-      v-if="props.iconName === 'cross'"
+      v-if="icon.name === 'cross'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Twitter
-      v-if="props.iconName === 'twitter'"
+      v-if="icon.name === 'twitter'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Wire
-      v-if="props.iconName === 'wire'"
+      v-if="icon.name === 'wire'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Funnel
-      v-if="props.iconName === 'funnel'"
+      v-if="icon.name === 'funnel'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
     <Redirect
-      v-if="props.iconName === 'redirect'"
+      v-if="icon.name === 'redirect'"
       :iconClass="icon.class"
       :color="props.color"
       :disabled="props.disabled"
     />
-    <Close v-if="props.iconName === 'close'" :iconClass="icon.class" />
+    <Close v-if="icon.name === 'close'" :iconClass="icon.class" />
   </div>
 </template>

@@ -17,22 +17,16 @@
                 "type": "Table",
                 "data": {
                     "title": "services_table_title",
-                    "minWidth": "lg",
+                    "minWidth": "md",
                     "header": [
                         "services_table_name",
                         "services_table_method",
-                        "services_table_settings",
-                        "services_table_manage",
-                        "services_table_is_draft",
-                        "services_table_delete"
+                        "services_table_actions"
                     ],
                     "positions": [
-                        2,
-                        2,
-                        2,
-                        2,
-                        2,
-                        2
+                        4,
+                        4,
+                        4
                     ],
                     "items": [
                         [
@@ -51,58 +45,57 @@
                                 }
                             },
                             {
-                                "type": "Button",
+                                "type": "ButtonGroup",
                                 "data": {
-                                    "id": "open-modal-settings-0",
-                                    "text": "settings",
-                                    "hideText": false,
-                                    " color": "info",
-                                    "size": "normal",
-                                    "iconName": "settings"
-                                }
-                            },
-                            {
-                                "type": "Button",
-                                "data": {
-                                    "attrs": {
-                                        "data-server-name": "app1.example.com"
-                                    },
-                                    "id": "open-modal-manage-0",
-                                    "text": "manage",
-                                    "hideText": false,
-                                    " color": "green",
-                                    "size": "normal",
-                                    "iconName": "manage"
-                                }
-                            },
-                            {
-                                "type": "Button",
-                                "data": {
-                                    "attrs": {
-                                        "data-server-name": "app1.example.com",
-                                        "data-is-draft": "no"
-                                    },
-                                    "id": "open-modal-draft-0",
-                                    "text": "online",
-                                    "hideText": false,
-                                    " color": "cyan",
-                                    "size": "normal",
-                                    "iconName": "online"
-                                }
-                            },
-                            {
-                                "type": "Button",
-                                "data": {
-                                    "attrs": {
-                                        "data-server-name": "app1.example.com"
-                                    },
-                                    "id": "open-modal-delete-0",
-                                    "text": "delete",
-                                    "disabled": true,
-                                    "hideText": false,
-                                    " color": "red",
-                                    "size": "normal",
-                                    "iconName": "trash"
+                                    "buttons": [
+                                        {
+                                            "id": "open-modal-settings-0",
+                                            "text": "settings",
+                                            "hideText": true,
+                                            "color": "info",
+                                            "size": "normal",
+                                            "iconName": "settings",
+                                            "iconColor": "white"
+                                        },
+                                        {
+                                            "attrs": {
+                                                "data-server-name": "app1.example.com"
+                                            },
+                                            "id": "open-modal-manage-0",
+                                            "text": "manage",
+                                            "hideText": true,
+                                            "color": "success",
+                                            "size": "normal",
+                                            "iconName": "gear",
+                                            "iconColor": "white"
+                                        },
+                                        {
+                                            "attrs": {
+                                                "data-server-name": "app1.example.com",
+                                                "data-is-draft": "no"
+                                            },
+                                            "id": "open-modal-draft-0",
+                                            "text": "online",
+                                            "hideText": true,
+                                            "color": "cyan",
+                                            "size": "normal",
+                                            "iconName": "globe",
+                                            "iconColor": "white"
+                                        },
+                                        {
+                                            "attrs": {
+                                                "data-server-name": "app1.example.com"
+                                            },
+                                            "id": "open-modal-delete-0",
+                                            "text": "delete",
+                                            "disabled": true,
+                                            "hideText": true,
+                                            "color": "red",
+                                            "size": "normal",
+                                            "iconName": "trash",
+                                            "iconColor": "white"
+                                        }
+                                    ]
                                 }
                             }
                         ],
@@ -122,58 +115,57 @@
                                 }
                             },
                             {
-                                "type": "Button",
+                                "type": "ButtonGroup",
                                 "data": {
-                                    "id": "open-modal-settings-1",
-                                    "text": "settings",
-                                    "hideText": false,
-                                    " color": "info",
-                                    "size": "normal",
-                                    "iconName": "settings"
-                                }
-                            },
-                            {
-                                "type": "Button",
-                                "data": {
-                                    "attrs": {
-                                        "data-server-name": "www.example.com"
-                                    },
-                                    "id": "open-modal-manage-1",
-                                    "text": "manage",
-                                    "hideText": false,
-                                    " color": "green",
-                                    "size": "normal",
-                                    "iconName": "manage"
-                                }
-                            },
-                            {
-                                "type": "Button",
-                                "data": {
-                                    "attrs": {
-                                        "data-server-name": "www.example.com",
-                                        "data-is-draft": "no"
-                                    },
-                                    "id": "open-modal-draft-1",
-                                    "text": "online",
-                                    "hideText": false,
-                                    " color": "cyan",
-                                    "size": "normal",
-                                    "iconName": "online"
-                                }
-                            },
-                            {
-                                "type": "Button",
-                                "data": {
-                                    "attrs": {
-                                        "data-server-name": "www.example.com"
-                                    },
-                                    "id": "open-modal-delete-1",
-                                    "text": "delete",
-                                    "disabled": true,
-                                    "hideText": false,
-                                    " color": "red",
-                                    "size": "normal",
-                                    "iconName": "trash"
+                                    "buttons": [
+                                        {
+                                            "id": "open-modal-settings-1",
+                                            "text": "settings",
+                                            "hideText": true,
+                                            "color": "info",
+                                            "size": "normal",
+                                            "iconName": "settings",
+                                            "iconColor": "white"
+                                        },
+                                        {
+                                            "attrs": {
+                                                "data-server-name": "www.example.com"
+                                            },
+                                            "id": "open-modal-manage-1",
+                                            "text": "manage",
+                                            "hideText": true,
+                                            "color": "success",
+                                            "size": "normal",
+                                            "iconName": "gear",
+                                            "iconColor": "white"
+                                        },
+                                        {
+                                            "attrs": {
+                                                "data-server-name": "www.example.com",
+                                                "data-is-draft": "no"
+                                            },
+                                            "id": "open-modal-draft-1",
+                                            "text": "online",
+                                            "hideText": true,
+                                            "color": "cyan",
+                                            "size": "normal",
+                                            "iconName": "globe",
+                                            "iconColor": "white"
+                                        },
+                                        {
+                                            "attrs": {
+                                                "data-server-name": "www.example.com"
+                                            },
+                                            "id": "open-modal-delete-1",
+                                            "text": "delete",
+                                            "disabled": true,
+                                            "hideText": true,
+                                            "color": "red",
+                                            "size": "normal",
+                                            "iconName": "trash",
+                                            "iconColor": "white"
+                                        }
+                                    ]
                                 }
                             }
                         ]
