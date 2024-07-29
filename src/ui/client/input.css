@@ -520,7 +520,7 @@ body {
 }
 
 .layout-modal {
-  @apply relative min-w-[300px] sm:min-w-[450px] max-w-screen-xl max-h-[80vh] transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out  px-6 py-4 overflow-hidden break-words grid grid-cols-12;
+  @apply relative min-w-[400px] sm:min-w-[450px] max-w-[80vw] md:max-w-[800px] max-h-[80vh]  transition dark:brightness-110 shadow-md bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border transform duration-300 ease-in-out  px-6 py-4 overflow-hidden break-words grid grid-cols-12;
 }
 
 .layout-modal-button-container {
@@ -1142,7 +1142,7 @@ body {
 }
 
 .button-group-modal {
-  @apply flex justify-center items-center mt-4 mx-4;
+  @apply col-span-12 flex justify-center items-center mt-4 mx-4;
 }
 
 .button-group-table {

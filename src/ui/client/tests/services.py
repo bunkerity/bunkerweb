@@ -1,5 +1,6 @@
 import json
 import base64
+from typing import Union
 
 services = [
     {
@@ -52,6 +53,115 @@ def table_widget(positions, header, items, filters, minWidth, title):
             "filters": filters,
         },
     }
+
+
+def services_action(server_name: str = "", operation: str = "", title: str = "", subtitle: str = "", is_draft: Union[bool, None] = None) -> dict:
+
+    buttons = [
+        {
+            "id": f"close-service-btn-{server_name}",
+            "text": "action_close",
+            "disabled": False,
+            "color": "close",
+            "size": "normal",
+        },
+    ]
+
+    if operation == "delete":
+        buttons.append(
+            {
+                "id": f"{operation}-service-btn-{server_name}",
+                "text": f"action_{operation}",
+                "disabled": False,
+                "color": "delete",
+                "size": "normal",
+                "attrs": {
+                    "data-submit-form": f"""{{"SERVER_NAME" : {server_name}, "operation" : "{operation}" }}""",
+                },
+            },
+        )
+
+    if operation == "edit":
+        draft_value = "yes" if is_draft else "no"
+        buttons.append(
+            {
+                "id": f"{operation}-service-btn-{server_name}",
+                "text": f"action_{operation}",
+                "disabled": False,
+                "color": "cyan",
+                "size": "normal",
+                "attrs": {
+                    "data-submit-form": f"""{{"SERVER_NAME" : {server_name}, "OLD_SERVER_NAME" : {server_name}, "operation" : "edit", "IS_DRAFT" : {draft_value} }}""",
+                },
+            },
+        )
+
+    content = [
+        {
+            "type": "Title",
+            "data": {
+                "title": title,
+                "type": "modal",
+            },
+        },
+    ]
+
+    if operation == "delete" or operation == "edit":
+        content.append(
+            {
+                "type": "Text",
+                "data": {
+                    "text": subtitle,
+                },
+            }
+        )
+        content.append(
+            {
+                "type": "Text",
+                "data": {
+                    "text": "",
+                    "bold": True,
+                    "text": server_name,
+                },
+            }
+        )
+
+    if operation == "manage":
+        modes = ("easy", "advanced", "raw")
+        for mode in modes:
+            content.append(
+                {
+                    "type": "ButtonGroup",
+                    "data": {
+                        "buttons": {
+                            "id": f"{operation}-service-btn-{server_name}",
+                            "text": f"services_{mode}",
+                            "disabled": False,
+                            "color": "green",
+                            "size": "normal",
+                            "attrs": {
+                                "role": "link",
+                                "data-link": f"services/{mode}/{server_name}",
+                            },
+                        },
+                    },
+                },
+            )
+
+    content.append(
+        {
+            "type": "ButtonGroup",
+            "data": {"buttons": buttons},
+        },
+    )
+
+    modal = {
+        "type": "modal",
+        "id": f"modal-{operation}-{server_name}",
+        "widgets": content,
+    }
+
+    return modal
 
 
 def get_services_list(services):
