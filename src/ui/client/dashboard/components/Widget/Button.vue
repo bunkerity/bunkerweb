@@ -1,11 +1,12 @@
 <script setup>
 import { computed, ref, reactive, onBeforeMount } from "vue";
+import Modal from "@components/Widget/Modal.vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Icons from "@components/Widget/Icons.vue";
 import { useUUID } from "@utils/global.js";
 
-/** 
+/**
   @name Widget/Button.vue
   @description This component is a standard button.
   @example
@@ -18,18 +19,18 @@ import { useUUID } from "@utils/global.js";
     size: "normal",
     iconName: "modal",
     attrs: { data-toggle: "modal", "data-target": "#modal"},
-    
   }
   @param {string} [id=uuidv4()] - Unique id of the button
   @param {string} text - Content of the button. Can be a translation key or by default raw text.
   @param {string} [type="button"] - Can be of type button || submit
   @param {boolean} [disabled=false]
   @param {boolean} [hideText=false] - Hide text to only display icon
-  @param {string} [color="primary"] 
+  @param {string} [color="primary"]
   @param {string} [iconColor=""] - Color we want to apply to the icon. If falsy value, default icon color is applied.
   @param {string} [size="normal"] - Can be of size sm || normal || lg || xl
   @param {string} [iconName=""] - Name in lowercase of icons store on /Icons. If falsy value, no icon displayed.
   @param {Object} [attrs={}] - List of attributs to add to the button. Some attributs will conduct to additionnal script
+  @param {Object|boolean} [modal=false] - We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal.
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
 */
 
@@ -90,6 +91,11 @@ const props = defineProps({
     required: false,
     default: {},
   },
+  modal: {
+    type: [Object, Boolean],
+    required: false,
+    default: false,
+  },
   containerClass: {
     type: String,
     required: false,
@@ -104,6 +110,8 @@ const props = defineProps({
 
 const btn = reactive({
   id: "",
+  openModal: false,
+  modalId: props.modal ? `${props.id}-modal` : "",
 });
 
 const btnEl = ref();
@@ -116,6 +124,11 @@ const buttonClass = computed(() => {
 
 onBeforeMount(() => {
   btn.id = useUUID(props.id);
+  // Case modal, add accessibility data
+  if (props.modal) {
+    btnEl.value.setAttribute("data-target", `#${btn.modalId}`);
+    btnEl.value.setAttribute("aria-expanded", btn.openModal ? "true" : "false");
+  }
 });
 </script>
 
@@ -133,6 +146,9 @@ onBeforeMount(() => {
       @click="
         (e) => {
           if (e.target.getAttribute('type') !== 'submit') e.preventDefault();
+          if (props.modal) {
+            btn.openModal = true;
+          }
         }
       "
       v-bind="props.attrs || {}"
@@ -158,4 +174,11 @@ onBeforeMount(() => {
       />
     </button>
   </Container>
+  <Modal
+    :aria-hidden="btn.openModal ? 'false' : 'true'"
+    :id="`${btn.id}-modal`"
+    v-if="btn.openModal"
+    :isOpen="btn.openModal"
+    @close="() => (btn.openModal = false)"
+  />
 </template>

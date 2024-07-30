@@ -1,4 +1,5 @@
 <script setup>
+import { defineProps, defineEmits } from "vue";
 // Containers
 import Grid from "@components/Widget/Grid.vue";
 import Title from "@components/Widget/Title.vue";
@@ -73,6 +74,11 @@ import MessageUnmatch from "@components/Message/Unmatch.vue";
 */
 
 const props = defineProps({
+  id: {
+    type: String,
+    required: false,
+    default: "",
+  },
   widgets: {
     type: Array,
     required: true,
@@ -83,6 +89,8 @@ const props = defineProps({
     default: false,
   },
 });
+
+const emits = defineEmits(["close"]);
 </script>
 
 <template>
@@ -98,6 +106,7 @@ const props = defineProps({
       <div class="layout-modal">
         <div class="layout-modal-button-container">
           <Button
+            @click="$emit('close')"
             :attrs="{ 'data-hide-el': props.id }"
             :text="'action_close_modal'"
             :hideText="true"
