@@ -498,7 +498,7 @@
             {% if is_totp or not is_totp %}
                 <!-- username inpt-->
                 <div class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
-                    <h5 class="input-title">2FA code</h5>
+                    <h5 class="input-title">2FA code or Backup code</h5>
                     <label class="sr-only" for="totp_token">totp code</label>
                     <input {% if is_readonly %}disabled{% endif %}
                            type="text"

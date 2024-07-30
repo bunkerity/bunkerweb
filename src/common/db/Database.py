@@ -29,7 +29,6 @@ from model import (
     Jobs_cache,
     Custom_configs,
     Selects,
-    Users,
     BwcliCommands,
     Metadata,
 )
@@ -84,7 +83,7 @@ class Database:
         if pool:
             self.logger.warning("The pool parameter is deprecated, it will be removed in the next version")
 
-        self.__session_factory = None
+        self._session_factory = None
         self.sql_engine = None
 
         if not sqlalchemy_string:
@@ -212,8 +211,8 @@ class Database:
 
     def __del__(self) -> None:
         """Close the database"""
-        if self.__session_factory:
-            self.__session_factory.close_all()
+        if self._session_factory:
+            self._session_factory.close_all()
 
         if self.sql_engine:
             self.sql_engine.dispose()
@@ -221,13 +220,13 @@ class Database:
     def test_read(self):
         """Test the read access to the database"""
         self.logger.debug("Testing read access to the database ...")
-        with self.__db_session() as session:
+        with self._db_session() as session:
             session.execute(text("SELECT 1"))
 
     def test_write(self):
         """Test the write access to the database"""
         self.logger.debug("Testing write access to the database ...")
-        with self.__db_session() as session:
+        with self._db_session() as session:
             table_name = uuid4().hex
             session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
             session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
@@ -259,7 +258,7 @@ class Database:
             conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
     @contextmanager
-    def __db_session(self) -> Any:
+    def _db_session(self) -> Any:
         try:
             assert self.sql_engine is not None
         except AssertionError:
@@ -302,7 +301,7 @@ class Database:
 
     def is_setting(self, setting: str, *, multisite: bool = False) -> bool:
         """Check if the setting exists in the database and optionally if it's multisite"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             try:
                 multiple = False
                 if self.suffix_rx.search(setting):
@@ -323,7 +322,7 @@ class Database:
 
     def set_failover(self, value: bool = True) -> str:
         """Set the failover value"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -342,7 +341,7 @@ class Database:
 
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -397,7 +396,7 @@ class Database:
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
-        with self.__db_session() as session:
+        with self._db_session() as session:
             try:
                 database = self.database_uri.split(":")[0].split("+")[0]
                 data["database_version"] = (
@@ -422,7 +421,7 @@ class Database:
 
     def set_metadata(self, data: Dict[str, Any]) -> str:
         """Set the metadata values"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -453,7 +452,7 @@ class Database:
         """Set changed bit for config, custom configs, instances and plugins"""
         changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"]
         plugins_changes = plugins_changes or set()
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -536,14 +535,14 @@ class Database:
                         has_all_tables = False
                         continue
 
-                    with self.__db_session() as session:
+                    with self._db_session() as session:
                         old_data[table_name] = session.query(metadata.tables[table_name]).all()
 
                 # Rename the old tables
                 db_version_id = db_version.replace(".", "_")
                 for table_name in metadata.tables.keys():
                     if table_name in Base.metadata.tables:
-                        with self.__db_session() as session:
+                        with self._db_session() as session:
                             if inspector.has_table(f"{table_name}_{db_version_id}"):
                                 self.logger.warning(f'Table "{table_name}" already exists, dropping it to make room for the new one')
                                 session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
@@ -561,7 +560,7 @@ class Database:
             return False, str(e)
 
         to_put = []
-        with self.__db_session() as session:
+        with self._db_session() as session:
             db_plugins = session.query(Plugins).with_entities(Plugins.id).all()
 
             db_ids = []
@@ -1048,7 +1047,7 @@ class Database:
                     if table_name == "bw_plugins" and "external" in row:
                         row["type"] = "external" if row.pop("external") else "core"
 
-                    with self.__db_session() as session:
+                    with self._db_session() as session:
                         try:
                             if table_name == "bw_metadata":
                                 existing_row = session.query(Metadata).filter_by(id=1).first()
@@ -1081,7 +1080,7 @@ class Database:
         if method == "autoconf":
             db_config = self.get_non_default_settings(with_drafts=True)
 
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -1365,7 +1364,7 @@ class Database:
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -1453,7 +1452,7 @@ class Database:
         if filtered_settings and not global_only:
             filtered_settings.update(("SERVER_NAME", "MULTISITE"))
 
-        with self.__db_session() as session:
+        with self._db_session() as session:
             config = original_config or {}
             multisite = original_multisite or set()
 
@@ -1550,7 +1549,7 @@ class Database:
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             config = {}
             multisite = set()
 
@@ -1585,7 +1584,7 @@ class Database:
 
     def get_custom_configs(self) -> List[Dict[str, Any]]:
         """Get the custom configs from the database"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             return [
                 {
                     "service_id": custom_config.service_id,
@@ -1630,7 +1629,7 @@ class Database:
 
     def update_job(self, plugin_id: str, job_name: str, success: bool) -> str:
         """Update the job last_run in the database"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -1657,7 +1656,7 @@ class Database:
         if service_id:
             filters["service_id"] = service_id
 
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -1680,7 +1679,7 @@ class Database:
         """Update the plugin cache in the database"""
         job_name = job_name or argv[0].replace(".py", "")
         service_id = service_id or None
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -1713,7 +1712,7 @@ class Database:
         """Update external plugins from the database"""
         to_put = []
         changes = False
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -2226,7 +2225,7 @@ class Database:
     def get_plugins(self, *, _type: Literal["all", "external", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
         """Get all plugins from the database."""
         plugins = []
-        with self.__db_session() as session:
+        with self._db_session() as session:
             entities = [Plugins.id, Plugins.stream, Plugins.name, Plugins.description, Plugins.version, Plugins.type, Plugins.method, Plugins.checksum]
             if with_data:
                 entities.append(Plugins.data)  # type: ignore
@@ -2292,12 +2291,12 @@ class Database:
 
     def get_plugins_errors(self) -> int:
         """Get plugins errors."""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             return session.query(Jobs).filter(Jobs.success == False).count()  # noqa: E712
 
     def get_jobs(self) -> Dict[str, Dict[str, Any]]:
         """Get jobs."""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             return {
                 job.name: {
                     "plugin_id": job.plugin_id,
@@ -2346,7 +2345,7 @@ class Database:
         if service_id:
             filters["service_id"] = service_id
 
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if plugin_id:
                 job = session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first()
                 if not job:
@@ -2368,7 +2367,7 @@ class Database:
 
     def get_jobs_cache_files(self, *, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
         """Get jobs cache files."""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             filters = {}
             query = session.query(Jobs_cache).with_entities(Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.data)
 
@@ -2413,7 +2412,7 @@ class Database:
 
     def add_instance(self, hostname: str, port: int, server_name: str, method: str, changed: Optional[bool] = True) -> str:
         """Add instance."""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -2441,7 +2440,7 @@ class Database:
     def update_instances(self, instances: List[Dict[str, Any]], method: str, changed: Optional[bool] = True) -> str:
         """Update instances."""
         to_put = []
-        with self.__db_session() as session:
+        with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
@@ -2474,7 +2473,7 @@ class Database:
 
     def get_instances(self, *, method: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get instances."""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             query = session.query(Instances)
             if method:
                 query = query.filter_by(method=method)
@@ -2491,7 +2490,7 @@ class Database:
 
     def get_plugin_actions(self, plugin: str) -> Optional[Any]:
         """get actions file for the plugin"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             page = session.query(Plugin_pages).with_entities(Plugin_pages.actions_file).filter_by(plugin_id=plugin).first()
 
             if not page:
@@ -2501,7 +2500,7 @@ class Database:
 
     def get_plugin_template(self, plugin: str) -> Optional[Any]:
         """get template file for the plugin"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             page = session.query(Plugin_pages).with_entities(Plugin_pages.template_file).filter_by(plugin_id=plugin).first()
 
             if not page:
@@ -2511,73 +2510,10 @@ class Database:
 
     def get_plugin_obfuscation(self, plugin: str) -> Optional[Any]:
         """get obfuscation file for the plugin"""
-        with self.__db_session() as session:
+        with self._db_session() as session:
             page = session.query(Plugin_pages).with_entities(Plugin_pages.obfuscation_file).filter_by(plugin_id=plugin).first()
 
             if not page:
                 return None
 
             return page.obfuscation_file
-
-    def get_ui_user(self) -> Optional[dict]:
-        """Get ui user."""
-        with self.__db_session() as session:
-            user = (
-                session.query(Users)
-                .with_entities(Users.username, Users.password, Users.is_two_factor_enabled, Users.secret_token, Users.method)
-                .filter_by(id=1)
-                .first()
-            )
-            if not user:
-                return None
-            return {
-                "username": user.username,
-                "password_hash": user.password.encode("utf-8"),
-                "is_two_factor_enabled": user.is_two_factor_enabled,
-                "secret_token": user.secret_token,
-                "method": user.method,
-            }
-
-    def create_ui_user(self, username: str, password: bytes, *, secret_token: Optional[str] = None, method: str = "manual") -> str:
-        """Create ui user."""
-        with self.__db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
-
-            user = session.query(Users).filter_by(id=1).first()
-            if user:
-                return "User already exists"
-
-            session.add(Users(id=1, username=username, password=password.decode("utf-8"), secret_token=secret_token, method=method))
-
-            try:
-                session.commit()
-            except BaseException as e:
-                return str(e)
-
-        return ""
-
-    def update_ui_user(
-        self, username: str, password: bytes, is_two_factor_enabled: bool = False, secret_token: Optional[str] = None, method: str = "ui"
-    ) -> str:
-        """Update ui user."""
-        with self.__db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
-
-            user = session.query(Users).filter_by(id=1).first()
-            if not user:
-                return "User not found"
-
-            user.username = username
-            user.password = password.decode("utf-8")
-            user.is_two_factor_enabled = is_two_factor_enabled
-            user.secret_token = secret_token
-            user.method = method
-
-            try:
-                session.commit()
-            except BaseException as e:
-                return str(e)
-
-        return ""

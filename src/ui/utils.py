@@ -3,10 +3,17 @@
 from base64 import b64encode
 from io import BytesIO
 from os.path import join
+from threading import Lock
 from typing import List, Optional
 
+from bcrypt import checkpw, gensalt, hashpw
 from magic import Magic
+from passlib.pwd import genword
 from qrcode.main import QRCode
+from regex import compile as re_compile
+
+USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+LOCK = Lock()
 
 
 def get_remain(seconds):
@@ -205,6 +212,19 @@ def path_to_dict(
 
 def check_settings(settings: dict, check: str) -> bool:
     return any(setting["context"] == check for setting in settings.values())
+
+
+def gen_password_hash(password: str) -> bytes:
+    return hashpw(password.encode("utf-8"), gensalt(rounds=13))
+
+
+def check_password(password: str, hashed: bytes) -> bool:
+    return checkpw(password.encode("utf-8"), hashed)
+
+
+def gen_recovery_codes() -> List[str]:
+    pwds = genword(length=16, charset="hex", returns=5)
+    return ["-".join([pwd[i : i + 4] for i in range(0, len(pwd), 4)]) for pwd in pwds]  # noqa: E203
 
 
 def get_b64encoded_qr_image(data: str):

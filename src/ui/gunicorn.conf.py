@@ -6,7 +6,6 @@ from os.path import join
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from threading import Lock
-from regex import compile as re_compile
 from sys import path as sys_path
 from time import sleep
 
@@ -14,10 +13,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from Database import Database  # type: ignore
+from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 
-from src.User import User
+from ui_database import UIDatabase  # type: ignore
+from utils import USER_PASSWORD_RX, check_password, gen_password_hash
+
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 RUN_DIR = Path(sep, "var", "run", "bunkerweb")
@@ -58,7 +59,7 @@ def on_starting(server):
 
     LOGGER = setup_logger("UI")
 
-    db = Database(LOGGER, ui=True)
+    db = UIDatabase(LOGGER)
 
     ready = False
     while not ready:
@@ -70,57 +71,85 @@ def on_starting(server):
             continue
         sleep(5)
 
-    USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+    ret, err = db.init_ui_tables(get_version())
 
-    USER = "Error"
-    while USER == "Error":
-        with suppress(Exception):
-            USER = db.get_ui_user()
+    if not ret and err:
+        LOGGER.error(f"Exception while checking database tables : {err}")
+        exit(1)
+    elif not ret:
+        LOGGER.info("Database ui tables didn't change, skipping update ...")
+    else:
+        LOGGER.info("Database ui tables successfully updated")
 
-    if USER:
-        USER = User(**USER)
+    if not db.get_ui_roles(as_dict=True):
+        ret = db.create_ui_role("admin", "Admin can create account, manager software and read data.", ["manage", "write", "read"])
+        if ret:
+            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
+            exit(1)
 
-        if getenv("ADMIN_USERNAME") or getenv("ADMIN_PASSWORD"):
+        ret = db.create_ui_role("writer", "Write can manage software and read data but can't create account.", ["write", "read"])
+        if ret:
+            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
+            exit(1)
+
+        ret = db.create_ui_role("reader", "Reader can read data but can't proceed to any actions.", ["read"])
+        if ret:
+            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
+            exit(1)
+
+    ADMIN_USER = "Error"
+    while ADMIN_USER == "Error":
+        try:
+            ADMIN_USER = db.get_ui_user(as_dict=True)
+        except BaseException as e:
+            LOGGER.debug(f"Couldn't get the admin user: {e}")
+            sleep(1)
+
+    env_admin_username = getenv("ADMIN_USERNAME", "")
+    env_admin_password = getenv("ADMIN_PASSWORD", "")
+
+    if ADMIN_USER:
+        if env_admin_username or env_admin_password:
             override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
-            if USER.method == "manual" or override_admin_creds:
+            if ADMIN_USER["method"] == "manual" or override_admin_creds:
                 updated = False
-                if getenv("ADMIN_USERNAME", "") and USER.get_id() != getenv("ADMIN_USERNAME", ""):
-                    USER.id = getenv("ADMIN_USERNAME", "")
+                if env_admin_username and ADMIN_USER["username"] != env_admin_username:
+                    ADMIN_USER["username"] = env_admin_username
                     updated = True
-                if getenv("ADMIN_PASSWORD", "") and not USER.check_password(getenv("ADMIN_PASSWORD", "")):
-                    if not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "")):
+
+                if env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
+                    if not USER_PASSWORD_RX.match(env_admin_password):
                         LOGGER.warning(
                             "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). It will not be updated."
                         )
                     else:
-                        USER.update_password(getenv("ADMIN_PASSWORD", ""))
+                        ADMIN_USER["password"] = gen_password_hash(env_admin_password)
                         updated = True
 
                 if updated:
                     if override_admin_creds:
                         LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
-                    err = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token, method="manual")
+                    err = db.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], ADMIN_USER["totp_secret"], method="manual")
                     if err:
                         LOGGER.error(f"Couldn't update the admin user in the database: {err}")
                     else:
                         LOGGER.info("The admin user was updated successfully")
             else:
                 LOGGER.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
-    elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
+    elif env_admin_username and env_admin_password:
+        user_name = env_admin_username or "admin"
+
         if not getenv("FLASK_DEBUG", False):
-            if len(getenv("ADMIN_USERNAME", "admin")) > 256:
+            if len(user_name) > 256:
                 LOGGER.error("The admin username is too long. It must be less than 256 characters.")
                 exit(1)
-            elif not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "changeme")):
+            elif not USER_PASSWORD_RX.match(env_admin_password):
                 LOGGER.error(
                     "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
                 )
                 exit(1)
 
-        user_name = getenv("ADMIN_USERNAME", "admin")
-        USER = User(user_name, getenv("ADMIN_PASSWORD", "changeme"))
-        ret = db.create_ui_user(user_name, USER.password_hash)
-
+        ret = db.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
         if ret:
             LOGGER.error(f"Couldn't create the admin user in the database: {ret}")
             exit(1)
