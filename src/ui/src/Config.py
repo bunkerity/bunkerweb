@@ -141,6 +141,10 @@ class Config:
             elif setting not in config and plugins_settings[setting]["default"] == v:
                 variables.pop(k)
                 continue
+            elif config[setting]["method"] not in ("default", "ui"):
+                flash(f"Variable {k} is not editable as is it managed by the {config[setting]['method']}, ignoring it", "error")
+                variables.pop(k)
+                continue
 
             try:
                 if re_search(plugins_settings[setting]["regex"], v):
