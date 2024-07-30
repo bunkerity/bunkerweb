@@ -1,6 +1,5 @@
 <script setup>
 import { computed, ref, onMounted, reactive, onBeforeMount } from "vue";
-import Button from "@components/Widget/Button.vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useUUID } from "@utils/global.js";
 
@@ -17,7 +16,7 @@ import { useUUID } from "@utils/global.js";
     columns: { pc: 12, tablet: 12, mobile: 12},
     gridLayoutClass: "items-start"
   }
-  @param {string} [type="card"] - Type of layout component, we can have "card" or "modal"
+  @param {string} [type="card"] - Type of layout component, we can have "card"
   @param {string} [id=uuidv4()] - Id of the layout component, will be used to identify the component.
   @param {string} [title=""] - Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title.
   @param {string} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
@@ -74,7 +73,6 @@ const container = reactive({
 
 const containerClass = computed(() => {
   if (props.type === "card") return "layout-card";
-  if (props.type === "modal") return "layout-modal";
   return "";
 });
 
@@ -101,49 +99,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- modal -->
-  <template v-if="props.type === 'modal'">
-    <div
-      :data-is="`${props.type}`"
-      data-modal
-      class="layout-modal-container hidden"
-      :id="container.id"
-    >
-      <div class="layout-backdrop"></div>
-      <div class="layout-modal-wrap" :data-hide-el="container.id">
-        <div class="layout-modal">
-          <div class="layout-modal-button-container">
-            <Button
-              :attrs="{ 'data-hide-el': container.id }"
-              :text="'action_close_modal'"
-              :hideText="true"
-              :iconName="'close'"
-              :color="'transparent'"
-            />
-          </div>
-          <slot></slot>
-        </div>
-      </div>
-    </div>
-  </template>
-  <!-- end modal -->
-
-  <!-- card or elements on the document flow -->
-  <template v-if="props.type !== 'modal'">
-    <component
-      ref="flowEl"
-      :id="container.id"
-      :is="props.link ? 'a' : 'div'"
-      :data-is="`${props.type}`"
-      :class="[
-        containerClass,
-        gridClass,
-        props.gridLayoutClass,
-        'layout-grid-layout',
-      ]"
-    >
-      <slot></slot>
-    </component>
-  </template>
+  <component
+    ref="flowEl"
+    :id="container.id"
+    :is="props.link ? 'a' : 'div'"
+    :data-is="`${props.type}`"
+    :class="[
+      containerClass,
+      gridClass,
+      props.gridLayoutClass,
+      'layout-grid-layout',
+    ]"
+  >
+    <slot></slot>
+  </component>
   <!-- end card or elements on the document flow -->
 </template>

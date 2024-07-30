@@ -47,13 +47,25 @@ const props = defineProps({
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
         <MessageUnmatch
-          v-if="widget.type === 'MessageUnmatch'"
+          v-if="widget.type.toLowerCase() === 'messageunmatch'"
           v-bind="widget.data"
         />
-        <Title v-if="widget.type === 'Title'" v-bind="widget.data" />
-        <Subtitle v-if="widget.type === 'Subtitle'" v-bind="widget.data" />
-        <Table v-if="widget.type === 'Table'" v-bind="widget.data" />
-        <ListPairs v-if="widget.type === 'ListPairs'" v-bind="widget.data" />
+        <Title
+          v-if="widget.type.toLowerCase() === 'title'"
+          v-bind="widget.data"
+        />
+        <Subtitle
+          v-if="widget.type.toLowerCase() === 'subtitle'"
+          v-bind="widget.data"
+        />
+        <Table
+          v-if="widget.type.toLowerCase() === 'table'"
+          v-bind="widget.data"
+        />
+        <ListPairs
+          v-if="widget.type.toLowerCase() === 'listpairs'"
+          v-bind="widget.data"
+        />
       </template>
     </Grid>
   </GridLayout>

@@ -314,8 +314,14 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <Table v-if="widget.type === 'Table'" v-bind="widget.data" />
-        <Title v-if="widget.type === 'Title'" v-bind="widget.data" />
+        <Table
+          v-if="widget.type.toLowerCase() === 'table'"
+          v-bind="widget.data"
+        />
+        <Title
+          v-if="widget.type.toLowerCase() === 'title'"
+          v-bind="widget.data"
+        />
       </template>
     </Grid>
   </GridLayout>

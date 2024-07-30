@@ -69,14 +69,20 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <Title v-if="widget.type === 'Title'" v-bind="widget.data" />
-        <ListDetails
-          v-if="widget.type === 'ListDetails'"
+        <Title
+          v-if="widget.type.toLowerCase() === 'title'"
           v-bind="widget.data"
         />
-        <Text v-if="widget.type === 'Text'" v-bind="widget.data" />
+        <ListDetails
+          v-if="widget.type.toLowerCase() === 'listdetails'"
+          v-bind="widget.data"
+        />
+        <Text
+          v-if="widget.type.toLowerCase() === 'text'"
+          v-bind="widget.data"
+        />
         <ButtonGroup
-          v-if="widget.type === 'ButtonGroup'"
+          v-if="widget.type.toLowerCase() === 'buttongroup'"
           v-bind="widget.data"
         />
       </template>
