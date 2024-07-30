@@ -6,6 +6,7 @@ import ListDetails from "@components/List/Details.vue";
 import Title from "@components/Widget/Title.vue";
 import Text from "@components/Widget/Text.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
+import { useEqualStr } from "@utils/global.js";
 
 /**
   @name Builder/PLugin.vue
@@ -69,20 +70,14 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <Title
-          v-if="widget.type.toLowerCase() === 'title'"
-          v-bind="widget.data"
-        />
+        <Title v-if="useEqualStr(widget.type, 'Title')" v-bind="widget.data" />
         <ListDetails
-          v-if="widget.type.toLowerCase() === 'listdetails'"
+          v-if="useEqualStr(widget.type, 'ListDetails')"
           v-bind="widget.data"
         />
-        <Text
-          v-if="widget.type.toLowerCase() === 'text'"
-          v-bind="widget.data"
-        />
+        <Text v-if="useEqualStr(widget.type, 'Text')" v-bind="widget.data" />
         <ButtonGroup
-          v-if="widget.type.toLowerCase() === 'buttongroup'"
+          v-if="useEqualStr(widget.type, 'ButtonGroup')"
           v-bind="widget.data"
         />
       </template>

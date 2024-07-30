@@ -5,6 +5,7 @@ import GridLayout from "@components/Widget/GridLayout.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Templates from "@components/Form/Templates.vue";
+import { useEqualStr } from "@utils/global.js";
 
 /**
   @name Builder/GlobalConfig.vue
@@ -62,16 +63,13 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <Title
-          v-if="widget.type.toLowerCase() === 'title'"
-          v-bind="widget.data"
-        />
+        <Title v-if="useEqualStr(widget.type, 'Title')" v-bind="widget.data" />
         <Subtitle
-          v-if="widget.type.toLowerCase() === 'subtitle'"
+          v-if="useEqualStr(widget.type, 'Subtitle')"
           v-bind="widget.data"
         />
         <Templates
-          v-if="widget.type.toLowerCase() === 'templates'"
+          v-if="useEqualStr(widget.type, 'Templates')"
           v-bind="widget.data"
         />
       </template>

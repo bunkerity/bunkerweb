@@ -1,5 +1,14 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import {
+  defineProps,
+  defineEmits,
+  Teleport,
+  ref,
+  watch,
+  onMounted,
+  onUnmounted,
+} from "vue";
+import { useEqualStr } from "@utils/global.js";
 // Containers
 import Grid from "@components/Widget/Grid.vue";
 import Title from "@components/Widget/Title.vue";
@@ -80,7 +89,7 @@ const props = defineProps({
     default: "",
   },
   widgets: {
-    type: Array,
+    type: Object,
     required: true,
   },
   isOpen: {
@@ -90,60 +99,117 @@ const props = defineProps({
   },
 });
 
+const modalEl = ref();
+
+function useCloseModal() {
+  emits("close");
+}
+
+/**
+  @name useFocusModal
+  @description Check if the modal is present and a focusable element is present inside it.
+  If it's the case, the function will focus the element.
+  Case there is already a focused element inside the modal, avoid to focus it again.
+  @param {string} modalId - The id of the modal element.
+  @returns {void}
+*/
+function useFocusModal() {
+  setTimeout(() => {
+    if (!modalEl.value) return;
+    // Get the current active element
+    const activeEl = document.activeElement;
+    // Check if the active element is inside the modal
+    if (modalEl.value.contains(activeEl)) return;
+    // Case not, focus first focusable element inside the modal
+    const focusable = modalEl.value.querySelector("[tabindex]");
+    if (focusable) focusable.focus();
+  }, 1);
+}
+
+function modalKeyboardEvents(e) {
+  if (e.key === "Escape") useCloseModal();
+  if (e.key === "Tab" || e.key === "Shift-Tab") useFocusModal();
+}
+
+function modalClickEvents(e) {
+  if (e.target.closest("[data-modal]") !== modalEl.value && modalEl.value)
+    return;
+  if (e.target.hasAttribute("data-close-modal")) useCloseModal();
+}
+
+function setEvents() {
+  window.addEventListener("keydown", modalKeyboardEvents, true);
+  window.addEventListener("click", modalClickEvents);
+}
+
+function unsetEvents() {
+  window.removeEventListener("keydown", modalKeyboardEvents, true);
+  window.removeEventListener("click", modalClickEvents);
+}
+
+onMounted(() => {
+  setEvents();
+});
+
+onUnmounted(() => {
+  unsetEvents();
+});
+
 const emits = defineEmits(["close"]);
 </script>
 
 <template>
-  <div
-    :data-is="'modal'"
-    data-modal
-    :class="['layout-modal-container', props.isOpen ? '' : 'hidden']"
-    class="layout-modal-container hidden"
-    :id="props.id"
-  >
-    <div class="layout-backdrop"></div>
-    <div class="layout-modal-wrap" :data-hide-el="props.id">
-      <div class="layout-modal">
-        <div class="layout-modal-button-container">
-          <Button
-            @click="$emit('close')"
-            :attrs="{ 'data-hide-el': props.id }"
-            :text="'action_close_modal'"
-            :hideText="true"
-            :iconName="'close'"
-            :color="'transparent'"
-          />
-        </div>
-        <Grid>
-          <!-- widget element -->
-          <template v-for="(widget, index) in props.widgets" :key="index">
-            <MessageUnmatch
-              v-if="widget.type.toLowerCase() === 'messageunmatch'"
-              v-bind="widget.data"
-            />
-            <Title
-              v-if="widget.type.toLowerCase() === 'title'"
-              v-bind="widget.data"
-            />
-            <Text
-              v-if="widget.type.toLowerCase() === 'text'"
-              v-bind="widget.data"
-            />
-            <Subtitle
-              v-if="widget.type.toLowerCase() === 'subtitle'"
-              v-bind="widget.data"
-            />
+  <Teleport to="#app">
+    <div
+      ref="modalEl"
+      :data-is="'modal'"
+      data-modal
+      :class="['layout-modal-container', props.isOpen ? '' : 'hidden']"
+      :id="props.id"
+    >
+      <div data-close-modal class="layout-backdrop"></div>
+      <div class="layout-modal-wrap">
+        <div class="layout-modal">
+          <div class="layout-modal-button-container">
             <Button
-              v-if="widget.type.toLowerCase() === 'button'"
-              v-bind="widget.data"
+              data-close-modal
+              :text="'action_close_modal'"
+              :hideText="true"
+              :iconName="'close'"
+              :color="'transparent'"
             />
-            <ButtonGroup
-              v-if="widget.type.toLowerCase() === 'buttongroup'"
-              v-bind="widget.data"
-            />
-          </template>
-        </Grid>
+          </div>
+          <Grid>
+            <!-- widget element -->
+            <template v-for="(widget, index) in props.widgets">
+              <MessageUnmatch
+                v-if="useEqualStr(widget.type, 'MessageUnmatch')"
+                v-bind="widget.data"
+              />
+              <Title
+                v-if="useEqualStr(widget.type, 'Title')"
+                v-bind="widget.data"
+              />
+              <Text
+                v-if="useEqualStr(widget.type, 'Text')"
+                v-bind="widget.data"
+              />
+              <Subtitle
+                v-if="useEqualStr(widget.type, 'Subtitle')"
+                v-bind="widget.data"
+              />
+              <Button
+                v-if="useEqualStr(widget.type, 'Button')"
+                v-bind="widget.data"
+              />
+              <ButtonGroup
+                v-if="useEqualStr(widget.type, 'ButtonGroup')"
+                v-bind="widget.data"
+              />
+            </template>
+          </Grid>
+        </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>

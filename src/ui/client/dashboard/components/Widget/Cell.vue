@@ -5,6 +5,7 @@ import Icons from "@components/Widget/Icons.vue";
 import Fields from "@components/Form/Fields.vue";
 import Button from "@components/Widget/Button.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
+import { useEqualStr } from "@utils/global.js";
 
 /**
   @name Builder/Cell.vue
@@ -43,9 +44,12 @@ const cell = reactive({
 </script>
 
 <template>
-  <Text v-if="cell.name === 'text'" v-bind="props.data" />
-  <Icons v-if="cell.name === 'icons'" v-bind="props.data" />
-  <Fields v-if="cell.name === 'fields'" v-bind="props.data" />
-  <Button v-if="cell.name === 'button'" v-bind="props.data" />
-  <ButtonGroup v-if="cell.name === 'buttongroup'" v-bind="props.data" />
+  <Text v-if="useEqualStr(cell.name, 'Text')" v-bind="props.data" />
+  <Icons v-if="useEqualStr(cell.name, 'Icons')" v-bind="props.data" />
+  <Fields v-if="useEqualStr(cell.name, 'Fields')" v-bind="props.data" />
+  <Button v-if="useEqualStr(cell.name, 'Button')" v-bind="props.data" />
+  <ButtonGroup
+    v-if="useEqualStr(cell.name, 'ButtonGroup')"
+    v-bind="props.data"
+  />
 </template>

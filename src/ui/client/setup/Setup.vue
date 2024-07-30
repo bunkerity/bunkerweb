@@ -1,6 +1,5 @@
 <script setup>
 import { reactive, onBeforeMount, onMounted } from "vue";
-import { useGlobal } from "@utils/global.js";
 import BuilderSetup from "@components/Builder/Setup.vue";
 
 /** 
@@ -22,10 +21,6 @@ onBeforeMount(() => {
       ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
       : {};
   setup.builder = data;
-});
-
-onMounted(() => {
-  useGlobal();
 });
 </script>
 

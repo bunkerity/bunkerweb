@@ -2,8 +2,6 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderReports from "@components/Builder/Reports.vue";
-import { useGlobal } from "@utils/global.js";
-import { useForm } from "@utils/form.js";
 
 /**
   @name Page/Reports.vue
@@ -24,11 +22,6 @@ onBeforeMount(() => {
       ? JSON.parse(dataEl.getAttribute(dataAtt))
       : {};
   reports.builder = data;
-});
-
-onMounted(() => {
-  useGlobal();
-  useForm();
 });
 
 const builder = [

@@ -55,7 +55,34 @@
                                             "color": "info",
                                             "size": "normal",
                                             "iconName": "settings",
-                                            "iconColor": "white"
+                                            "iconColor": "white",
+                                            "modal": {
+                                                "widgets": [
+                                                    {
+                                                        "type": "Title",
+                                                        "data": {
+                                                            "title": "services_settings_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "close-service-btn-app1.example.com",
+                                                                    "text": "action_close",
+                                                                    "disabled": false,
+                                                                    "color": "close",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-close-modal": ""
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
                                         },
                                         {
                                             "attrs": {
@@ -67,7 +94,74 @@
                                             "color": "success",
                                             "size": "normal",
                                             "iconName": "gear",
-                                            "iconColor": "white"
+                                            "iconColor": "white",
+                                            "modal": {
+                                                "widgets": [
+                                                    {
+                                                        "type": "Title",
+                                                        "data": {
+                                                            "title": "services_manage_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "manage-service-btn-app1.example.com",
+                                                                    "text": "services_easy",
+                                                                    "disabled": false,
+                                                                    "color": "green",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "role": "link",
+                                                                        "data-link": "services/easy/app1.example.com"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "id": "manage-service-btn-app1.example.com",
+                                                                    "text": "services_advanced",
+                                                                    "disabled": false,
+                                                                    "color": "green",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "role": "link",
+                                                                        "data-link": "services/advanced/app1.example.com"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "id": "manage-service-btn-app1.example.com",
+                                                                    "text": "services_raw",
+                                                                    "disabled": false,
+                                                                    "color": "green",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "role": "link",
+                                                                        "data-link": "services/raw/app1.example.com"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "close-service-btn-app1.example.com",
+                                                                    "text": "action_close",
+                                                                    "disabled": false,
+                                                                    "color": "close",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-close-modal": ""
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
                                         },
                                         {
                                             "attrs": {
@@ -80,7 +174,57 @@
                                             "color": "cyan",
                                             "size": "normal",
                                             "iconName": "globe",
-                                            "iconColor": "white"
+                                            "iconColor": "white",
+                                            "modal": {
+                                                "widgets": [
+                                                    {
+                                                        "type": "Title",
+                                                        "data": {
+                                                            "title": "services_edit_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "services_edit_subtitle"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "app1.example.com",
+                                                            "bold": true
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "close-service-btn-app1.example.com",
+                                                                    "text": "action_close",
+                                                                    "disabled": false,
+                                                                    "color": "close",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-close-modal": ""
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "id": "edit-service-btn-app1.example.com",
+                                                                    "text": "action_edit",
+                                                                    "disabled": false,
+                                                                    "color": "cyan",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-submit-form": "{\"SERVER_NAME\" : app1.example.com, \"OLD_SERVER_NAME\" : app1.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : no }"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
                                         },
                                         {
                                             "attrs": {
@@ -93,7 +237,57 @@
                                             "color": "red",
                                             "size": "normal",
                                             "iconName": "trash",
-                                            "iconColor": "white"
+                                            "iconColor": "white",
+                                            "modal": {
+                                                "widgets": [
+                                                    {
+                                                        "type": "Title",
+                                                        "data": {
+                                                            "title": "services_delete_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "services_delete_subtitle"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "app1.example.com",
+                                                            "bold": true
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "close-service-btn-app1.example.com",
+                                                                    "text": "action_close",
+                                                                    "disabled": false,
+                                                                    "color": "close",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-close-modal": ""
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "id": "delete-service-btn-app1.example.com",
+                                                                    "text": "action_delete",
+                                                                    "disabled": false,
+                                                                    "color": "delete",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-submit-form": "{\"SERVER_NAME\" : app1.example.com, \"operation\" : \"delete\" }"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
                                         }
                                     ]
                                 }
@@ -125,7 +319,34 @@
                                             "color": "info",
                                             "size": "normal",
                                             "iconName": "settings",
-                                            "iconColor": "white"
+                                            "iconColor": "white",
+                                            "modal": {
+                                                "widgets": [
+                                                    {
+                                                        "type": "Title",
+                                                        "data": {
+                                                            "title": "services_settings_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "close-service-btn-www.example.com",
+                                                                    "text": "action_close",
+                                                                    "disabled": false,
+                                                                    "color": "close",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-close-modal": ""
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
                                         },
                                         {
                                             "attrs": {
@@ -137,7 +358,74 @@
                                             "color": "success",
                                             "size": "normal",
                                             "iconName": "gear",
-                                            "iconColor": "white"
+                                            "iconColor": "white",
+                                            "modal": {
+                                                "widgets": [
+                                                    {
+                                                        "type": "Title",
+                                                        "data": {
+                                                            "title": "services_manage_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "manage-service-btn-www.example.com",
+                                                                    "text": "services_easy",
+                                                                    "disabled": false,
+                                                                    "color": "green",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "role": "link",
+                                                                        "data-link": "services/easy/www.example.com"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "id": "manage-service-btn-www.example.com",
+                                                                    "text": "services_advanced",
+                                                                    "disabled": false,
+                                                                    "color": "green",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "role": "link",
+                                                                        "data-link": "services/advanced/www.example.com"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "id": "manage-service-btn-www.example.com",
+                                                                    "text": "services_raw",
+                                                                    "disabled": false,
+                                                                    "color": "green",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "role": "link",
+                                                                        "data-link": "services/raw/www.example.com"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "close-service-btn-www.example.com",
+                                                                    "text": "action_close",
+                                                                    "disabled": false,
+                                                                    "color": "close",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-close-modal": ""
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
                                         },
                                         {
                                             "attrs": {
@@ -150,7 +438,57 @@
                                             "color": "cyan",
                                             "size": "normal",
                                             "iconName": "globe",
-                                            "iconColor": "white"
+                                            "iconColor": "white",
+                                            "modal": {
+                                                "widgets": [
+                                                    {
+                                                        "type": "Title",
+                                                        "data": {
+                                                            "title": "services_edit_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "services_edit_subtitle"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "www.example.com",
+                                                            "bold": true
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "close-service-btn-www.example.com",
+                                                                    "text": "action_close",
+                                                                    "disabled": false,
+                                                                    "color": "close",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-close-modal": ""
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "id": "edit-service-btn-www.example.com",
+                                                                    "text": "action_edit",
+                                                                    "disabled": false,
+                                                                    "color": "cyan",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-submit-form": "{\"SERVER_NAME\" : www.example.com, \"OLD_SERVER_NAME\" : www.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : no }"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
                                         },
                                         {
                                             "attrs": {
@@ -163,7 +501,57 @@
                                             "color": "red",
                                             "size": "normal",
                                             "iconName": "trash",
-                                            "iconColor": "white"
+                                            "iconColor": "white",
+                                            "modal": {
+                                                "widgets": [
+                                                    {
+                                                        "type": "Title",
+                                                        "data": {
+                                                            "title": "services_delete_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "services_delete_subtitle"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "www.example.com",
+                                                            "bold": true
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "ButtonGroup",
+                                                        "data": {
+                                                            "buttons": [
+                                                                {
+                                                                    "id": "close-service-btn-www.example.com",
+                                                                    "text": "action_close",
+                                                                    "disabled": false,
+                                                                    "color": "close",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-close-modal": ""
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "id": "delete-service-btn-www.example.com",
+                                                                    "text": "action_delete",
+                                                                    "disabled": false,
+                                                                    "color": "delete",
+                                                                    "size": "normal",
+                                                                    "attrs": {
+                                                                        "data-submit-form": "{\"SERVER_NAME\" : www.example.com, \"operation\" : \"delete\" }"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
                                         }
                                     ]
                                 }

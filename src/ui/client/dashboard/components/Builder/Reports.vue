@@ -7,6 +7,7 @@ import Subtitle from "@components/Widget/Subtitle.vue";
 import Table from "@components/Widget/Table.vue";
 import ListPairs from "@components/List/Pairs.vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
+import { useEqualStr } from "@utils/global.js";
 
 /**
   @name Builder/Reports.vue
@@ -47,23 +48,17 @@ const props = defineProps({
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
         <MessageUnmatch
-          v-if="widget.type.toLowerCase() === 'messageunmatch'"
+          v-if="useEqualStr(widget.type, 'messageunmatch')"
           v-bind="widget.data"
         />
-        <Title
-          v-if="widget.type.toLowerCase() === 'title'"
-          v-bind="widget.data"
-        />
+        <Title v-if="useEqualStr(widget.type, 'title')" v-bind="widget.data" />
         <Subtitle
-          v-if="widget.type.toLowerCase() === 'subtitle'"
+          v-if="useEqualStr(widget.type, 'subtitle')"
           v-bind="widget.data"
         />
-        <Table
-          v-if="widget.type.toLowerCase() === 'table'"
-          v-bind="widget.data"
-        />
+        <Table v-if="useEqualStr(widget.type, 'table')" v-bind="widget.data" />
         <ListPairs
-          v-if="widget.type.toLowerCase() === 'listpairs'"
+          v-if="useEqualStr(widget.type, 'listpairs')"
           v-bind="widget.data"
         />
       </template>

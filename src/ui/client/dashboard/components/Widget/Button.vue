@@ -1,11 +1,19 @@
 <script setup>
-import { computed, ref, reactive, onBeforeMount } from "vue";
+import {
+  computed,
+  ref,
+  reactive,
+  onBeforeMount,
+  onMounted,
+  onUnmounted,
+  watch,
+} from "vue";
 import Modal from "@components/Widget/Modal.vue";
 import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Icons from "@components/Widget/Icons.vue";
 import { useUUID } from "@utils/global.js";
-
+import { useForm } from "@utils/form.js";
 /**
   @name Widget/Button.vue
   @description This component is a standard button.
@@ -125,10 +133,32 @@ const buttonClass = computed(() => {
 onBeforeMount(() => {
   btn.id = useUUID(props.id);
   // Case modal, add accessibility data
-  if (props.modal) {
-    btnEl.value.setAttribute("data-target", `#${btn.modalId}`);
-    btnEl.value.setAttribute("aria-expanded", btn.openModal ? "true" : "false");
+});
+
+onMounted(() => {
+  window.addEventListener("click", useForm);
+  // Case modal, add accessibility data
+  if (typeof props.modal === "object") {
+    btnEl.value.setAttribute("aria-controls", btn.modalId);
+    btnEl.value.setAttribute(
+      "aria-expanded",
+      props.openModal ? "true" : "false"
+    );
   }
+});
+
+// watch openModal to add accessibility data
+watch(
+  () => btn.openModal,
+  (value) => {
+    if (typeof props.modal === "object") {
+      btnEl.value.setAttribute("aria-expanded", value ? "true" : "false");
+    }
+  }
+);
+
+onUnmounted(() => {
+  window.removeEventListener("click", useForm);
 });
 </script>
 
@@ -146,7 +176,7 @@ onBeforeMount(() => {
       @click="
         (e) => {
           if (e.target.getAttribute('type') !== 'submit') e.preventDefault();
-          if (props.modal) {
+          if (typeof props.modal === 'object') {
             btn.openModal = true;
           }
         }
@@ -173,12 +203,12 @@ onBeforeMount(() => {
         :disabled="props.disabled || false"
       />
     </button>
+
+    <Modal
+      :id="`${btn.id}-modal`"
+      v-if="btn.openModal"
+      :widgets="props.modal.widgets"
+      :isOpen="btn.openModal"
+    />
   </Container>
-  <Modal
-    :aria-hidden="btn.openModal ? 'false' : 'true'"
-    :id="`${btn.id}-modal`"
-    v-if="btn.openModal"
-    :isOpen="btn.openModal"
-    @close="() => (btn.openModal = false)"
-  />
 </template>

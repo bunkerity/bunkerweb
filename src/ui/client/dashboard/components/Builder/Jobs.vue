@@ -4,6 +4,7 @@ import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import Table from "@components/Widget/Table.vue";
 import Title from "@components/Widget/Title.vue";
+import { useEqualStr } from "@utils/global.js";
 
 /**
   @name Builder/Jobs.vue
@@ -84,14 +85,8 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <Table
-          v-if="widget.type.toLowerCase() === 'table'"
-          v-bind="widget.data"
-        />
-        <Title
-          v-if="widget.type.toLowerCase() === 'title'"
-          v-bind="widget.data"
-        />
+        <Table v-if="useEqualStr(widget.type, 'Table')" v-bind="widget.data" />
+        <Title v-if="useEqualStr(widget.type, 'Title')" v-bind="widget.data" />
       </template>
     </Grid>
   </GridLayout>

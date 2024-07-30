@@ -2,6 +2,7 @@
 // Containers
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
+import { useEqualStr } from "@utils/global.js";
 
 /**
   @name Builder/Setup.vue

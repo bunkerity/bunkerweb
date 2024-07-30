@@ -64,6 +64,7 @@ def services_action(server_name: str = "", operation: str = "", title: str = "",
             "disabled": False,
             "color": "close",
             "size": "normal",
+            "attrs": {"data-close-modal": ""},
         },
     ]
 
@@ -101,7 +102,6 @@ def services_action(server_name: str = "", operation: str = "", title: str = "",
             "type": "Title",
             "data": {
                 "title": title,
-                "type": "modal",
             },
         },
     ]
@@ -128,25 +128,28 @@ def services_action(server_name: str = "", operation: str = "", title: str = "",
 
     if operation == "manage":
         modes = ("easy", "advanced", "raw")
+        mode_buttons = []
         for mode in modes:
-            content.append(
+            mode_buttons.append(
                 {
-                    "type": "ButtonGroup",
-                    "data": {
-                        "buttons": {
-                            "id": f"{operation}-service-btn-{server_name}",
-                            "text": f"services_{mode}",
-                            "disabled": False,
-                            "color": "green",
-                            "size": "normal",
-                            "attrs": {
-                                "role": "link",
-                                "data-link": f"services/{mode}/{server_name}",
-                            },
-                        },
+                    "id": f"{operation}-service-btn-{server_name}",
+                    "text": f"services_{mode}",
+                    "disabled": False,
+                    "color": "green",
+                    "size": "normal",
+                    "attrs": {
+                        "role": "link",
+                        "data-link": f"services/{mode}/{server_name}",
                     },
                 },
             )
+
+        content.append(
+            {
+                "type": "ButtonGroup",
+                "data": {"buttons": mode_buttons},
+            }
+        )
 
     content.append(
         {
@@ -156,8 +159,6 @@ def services_action(server_name: str = "", operation: str = "", title: str = "",
     )
 
     modal = {
-        "type": "modal",
-        "id": f"modal-{operation}-{server_name}",
         "widgets": content,
     }
 
@@ -189,6 +190,9 @@ def get_services_list(services):
                             "size": "normal",
                             "iconName": "settings",
                             "iconColor": "white",
+                            "modal": services_action(
+                                server_name=server_name, operation="settings", title="services_settings_title", subtitle="services_settings_subtitle"
+                            ),
                         },
                         {
                             "attrs": {"data-server-name": server_name},
@@ -199,6 +203,9 @@ def get_services_list(services):
                             "size": "normal",
                             "iconName": "gear",
                             "iconColor": "white",
+                            "modal": services_action(
+                                server_name=server_name, operation="manage", title="services_manage_title", subtitle="services_manage_subtitle"
+                            ),
                         },
                         {
                             "attrs": {"data-server-name": server_name, "data-is-draft": "yes" if is_draft else "no"},
@@ -209,6 +216,9 @@ def get_services_list(services):
                             "size": "normal",
                             "iconName": "pen" if is_draft else "globe",
                             "iconColor": "white",
+                            "modal": services_action(
+                                server_name=server_name, operation="edit", title="services_edit_title", subtitle="services_edit_subtitle", is_draft=is_draft
+                            ),
                         },
                         {
                             "attrs": {"data-server-name": server_name},
@@ -220,6 +230,9 @@ def get_services_list(services):
                             "size": "normal",
                             "iconName": "trash",
                             "iconColor": "white",
+                            "modal": services_action(
+                                server_name=server_name, operation="delete", title="services_delete_title", subtitle="services_delete_subtitle"
+                            ),
                         },
                     ]
                 },

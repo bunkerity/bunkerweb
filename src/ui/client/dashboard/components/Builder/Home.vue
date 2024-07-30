@@ -3,6 +3,7 @@
 import Grid from "@components/Widget/Grid.vue";
 import GridLayout from "@components/Widget/GridLayout.vue";
 import Stat from "@components/Widget/Stat.vue";
+import { useEqualStr } from "@utils/global.js";
 
 /**
   @name Builder/Home.vue
@@ -54,10 +55,7 @@ const props = defineProps({
     <Grid>
       <!-- widget element -->
       <template v-for="(widget, index) in container.widgets" :key="index">
-        <Stat
-          v-if="widget.type.toLowerCase() === 'stat'"
-          v-bind="widget.data"
-        />
+        <Stat v-if="useEqualStr(widget.type, 'Stat')" v-bind="widget.data" />
       </template>
     </Grid>
   </GridLayout>

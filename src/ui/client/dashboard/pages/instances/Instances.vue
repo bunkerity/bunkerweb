@@ -2,8 +2,6 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderInstances from "@components/Builder/Instances.vue";
-import { useGlobal } from "@utils/global.js";
-import { useForm } from "@utils/form.js";
 
 /**
   @name Page/Instances.vue
@@ -24,11 +22,6 @@ onBeforeMount(() => {
       ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
       : {};
   instances.builder = data;
-});
-
-onMounted(() => {
-  useGlobal();
-  useForm();
 });
 
 // const data = [

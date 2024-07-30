@@ -6,20 +6,18 @@
 
 /**
   @name useForm
-  @description  This function is a composable wrapper that contains all the form utils functions.
- This function will for example look for JSON-type in the data-submit-form attribute of an element and submit the form with the data object.
+  @description  This function needs to be attach to an event like a click event.
+  This will check if the target element contains a data-submit-form attribute and try to parse it to submit the form.
   @returns {void}
 */
-function useForm() {
-  window.addEventListener("click", (e) => {
-    if (!e.target.hasAttribute("data-submit-form")) return;
-    try {
-      const data = JSON.parse(e.target.getAttribute("data-submit-form"));
-      useSubmitForm(data);
-    } catch (e) {
-      console.error(e);
-    }
-  });
+function useForm(e) {
+  if (!e.target.hasAttribute("data-submit-form")) return;
+  try {
+    const data = JSON.parse(e.target.getAttribute("data-submit-form"));
+    useSubmitForm(data);
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 /**
