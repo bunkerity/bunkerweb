@@ -2,6 +2,7 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderInstances from "@components/Builder/Instances.vue";
+import { useGlobal } from "@utils/global";
 
 /**
   @name Page/Instances.vue
@@ -24,6 +25,10 @@ onBeforeMount(() => {
   instances.builder = data;
 });
 
+onMounted(() => {
+  // Set the page title
+  useGlobal();
+});
 // const data = [
 // {
 //         type: "Instance",

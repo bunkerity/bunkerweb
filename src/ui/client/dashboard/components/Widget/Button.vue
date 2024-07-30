@@ -13,7 +13,6 @@ import { contentIndex } from "@utils/tabindex.js";
 import Container from "@components/Widget/Container.vue";
 import Icons from "@components/Widget/Icons.vue";
 import { useUUID } from "@utils/global.js";
-import { useForm } from "@utils/form.js";
 /**
   @name Widget/Button.vue
   @description This component is a standard button.
@@ -136,7 +135,6 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  window.addEventListener("click", useForm);
   // Case modal, add accessibility data
   if (typeof props.modal === "object") {
     btnEl.value.setAttribute("aria-controls", btn.modalId);
@@ -156,10 +154,6 @@ watch(
     }
   }
 );
-
-onUnmounted(() => {
-  window.removeEventListener("click", useForm);
-});
 </script>
 
 <template>
@@ -209,6 +203,7 @@ onUnmounted(() => {
       v-if="btn.openModal"
       :widgets="props.modal.widgets"
       :isOpen="btn.openModal"
+      @close="btn.openModal = false"
     />
   </Container>
 </template>

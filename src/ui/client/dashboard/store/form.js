@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { useSubmitForm } from "@utils/form.js";
+import { useSubmitForm } from "@utils/global.js";
 
 /**
   @name createFormStore

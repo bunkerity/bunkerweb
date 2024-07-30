@@ -3007,9 +3007,7 @@ def plugins_builder(plugins, data={}):
     plugins_details = []
     for plugin in plugins:
 
-        can_be_delete = plugin.get("type", "ui") == "external" and plugin.get(
-            "method", "ui"
-        ) in (
+        can_be_delete = plugin.get("type", "ui") == "external" and plugin.get("method", "ui") in (
             "manual",
             "default",
             "ui",
@@ -3021,18 +3019,11 @@ def plugins_builder(plugins, data={}):
             "attrs": {
                 "data-plugin-id": plugin.get("id"),
                 "data-plugin-delete": "true" if can_be_delete else "false",
-                "data-plugin-redirect": (
-                    "true" if plugin.get("page", False) else "false"
-                ),
+                "data-plugin-redirect": ("true" if plugin.get("page", False) else "false"),
                 "data-plugin-type": plugin.get("type", "").lower(),
                 "data-plugin-name": plugin.get("name"),
             },
-            "disabled": (
-                True
-                if is_readonly
-                or (plugin.get("type", "ui") == "pro" and not is_pro_version)
-                else False
-            ),
+            "disabled": (True if is_readonly or (plugin.get("type", "ui") == "pro" and not is_pro_version) else False),
             "popovers": [],
         }
 

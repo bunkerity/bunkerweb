@@ -49,19 +49,25 @@
                                 "data": {
                                     "buttons": [
                                         {
-                                            "id": "open-modal-settings-0",
-                                            "text": "settings",
+                                            "id": "open-modal-plugins-0",
+                                            "text": "plugins",
                                             "hideText": true,
-                                            "color": "info",
+                                            "color": "success",
                                             "size": "normal",
-                                            "iconName": "settings",
+                                            "iconName": "eye",
                                             "iconColor": "white",
                                             "modal": {
                                                 "widgets": [
                                                     {
                                                         "type": "Title",
                                                         "data": {
-                                                            "title": "services_settings_title"
+                                                            "title": "services_plugins_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "services_plugins_subtitle"
                                                         }
                                                     },
                                                     {
@@ -91,9 +97,9 @@
                                             "id": "open-modal-manage-0",
                                             "text": "manage",
                                             "hideText": true,
-                                            "color": "success",
+                                            "color": "edit",
                                             "size": "normal",
-                                            "iconName": "gear",
+                                            "iconName": "pen",
                                             "iconColor": "white",
                                             "modal": {
                                                 "widgets": [
@@ -104,14 +110,20 @@
                                                         }
                                                     },
                                                     {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "services_manage_subtitle"
+                                                        }
+                                                    },
+                                                    {
                                                         "type": "ButtonGroup",
                                                         "data": {
                                                             "buttons": [
                                                                 {
                                                                     "id": "manage-service-btn-app1.example.com",
-                                                                    "text": "services_easy",
+                                                                    "text": "services_mode_easy",
                                                                     "disabled": false,
-                                                                    "color": "green",
+                                                                    "color": "info",
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
@@ -120,9 +132,9 @@
                                                                 },
                                                                 {
                                                                     "id": "manage-service-btn-app1.example.com",
-                                                                    "text": "services_advanced",
+                                                                    "text": "services_mode_advanced",
                                                                     "disabled": false,
-                                                                    "color": "green",
+                                                                    "color": "info",
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
@@ -131,9 +143,9 @@
                                                                 },
                                                                 {
                                                                     "id": "manage-service-btn-app1.example.com",
-                                                                    "text": "services_raw",
+                                                                    "text": "services_mode_raw",
                                                                     "disabled": false,
-                                                                    "color": "green",
+                                                                    "color": "info",
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
@@ -171,7 +183,7 @@
                                             "id": "open-modal-draft-0",
                                             "text": "online",
                                             "hideText": true,
-                                            "color": "cyan",
+                                            "color": "blue",
                                             "size": "normal",
                                             "iconName": "globe",
                                             "iconColor": "white",
@@ -180,20 +192,20 @@
                                                     {
                                                         "type": "Title",
                                                         "data": {
-                                                            "title": "services_edit_title"
+                                                            "title": "services_online"
                                                         }
                                                     },
                                                     {
                                                         "type": "Text",
                                                         "data": {
-                                                            "text": "services_edit_subtitle"
+                                                            "text": "services_online_subtitle"
                                                         }
                                                     },
                                                     {
                                                         "type": "Text",
                                                         "data": {
-                                                            "text": "app1.example.com",
-                                                            "bold": true
+                                                            "bold": true,
+                                                            "text": "services_online_switch_subtitle"
                                                         }
                                                     },
                                                     {
@@ -212,9 +224,9 @@
                                                                 },
                                                                 {
                                                                     "id": "edit-service-btn-app1.example.com",
-                                                                    "text": "action_edit",
+                                                                    "text": "action_switch",
                                                                     "disabled": false,
-                                                                    "color": "cyan",
+                                                                    "color": "success",
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "data-submit-form": "{\"SERVER_NAME\" : app1.example.com, \"OLD_SERVER_NAME\" : app1.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : no }"
@@ -302,10 +314,10 @@
                                 }
                             },
                             {
-                                "method": "scheduler",
+                                "method": "ui",
                                 "type": "Text",
                                 "data": {
-                                    "text": "scheduler"
+                                    "text": "ui"
                                 }
                             },
                             {
@@ -313,19 +325,25 @@
                                 "data": {
                                     "buttons": [
                                         {
-                                            "id": "open-modal-settings-1",
-                                            "text": "settings",
+                                            "id": "open-modal-plugins-1",
+                                            "text": "plugins",
                                             "hideText": true,
-                                            "color": "info",
+                                            "color": "success",
                                             "size": "normal",
-                                            "iconName": "settings",
+                                            "iconName": "eye",
                                             "iconColor": "white",
                                             "modal": {
                                                 "widgets": [
                                                     {
                                                         "type": "Title",
                                                         "data": {
-                                                            "title": "services_settings_title"
+                                                            "title": "services_plugins_title"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "services_plugins_subtitle"
                                                         }
                                                     },
                                                     {
@@ -355,9 +373,9 @@
                                             "id": "open-modal-manage-1",
                                             "text": "manage",
                                             "hideText": true,
-                                            "color": "success",
+                                            "color": "edit",
                                             "size": "normal",
-                                            "iconName": "gear",
+                                            "iconName": "pen",
                                             "iconColor": "white",
                                             "modal": {
                                                 "widgets": [
@@ -368,14 +386,20 @@
                                                         }
                                                     },
                                                     {
+                                                        "type": "Text",
+                                                        "data": {
+                                                            "text": "services_manage_subtitle"
+                                                        }
+                                                    },
+                                                    {
                                                         "type": "ButtonGroup",
                                                         "data": {
                                                             "buttons": [
                                                                 {
                                                                     "id": "manage-service-btn-www.example.com",
-                                                                    "text": "services_easy",
+                                                                    "text": "services_mode_easy",
                                                                     "disabled": false,
-                                                                    "color": "green",
+                                                                    "color": "info",
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
@@ -384,9 +408,9 @@
                                                                 },
                                                                 {
                                                                     "id": "manage-service-btn-www.example.com",
-                                                                    "text": "services_advanced",
+                                                                    "text": "services_mode_advanced",
                                                                     "disabled": false,
-                                                                    "color": "green",
+                                                                    "color": "info",
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
@@ -395,9 +419,9 @@
                                                                 },
                                                                 {
                                                                     "id": "manage-service-btn-www.example.com",
-                                                                    "text": "services_raw",
+                                                                    "text": "services_mode_raw",
                                                                     "disabled": false,
-                                                                    "color": "green",
+                                                                    "color": "info",
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
@@ -430,34 +454,34 @@
                                         {
                                             "attrs": {
                                                 "data-server-name": "www.example.com",
-                                                "data-is-draft": "no"
+                                                "data-is-draft": "yes"
                                             },
                                             "id": "open-modal-draft-1",
-                                            "text": "online",
+                                            "text": "draft",
                                             "hideText": true,
-                                            "color": "cyan",
+                                            "color": "blue",
                                             "size": "normal",
-                                            "iconName": "globe",
+                                            "iconName": "document",
                                             "iconColor": "white",
                                             "modal": {
                                                 "widgets": [
                                                     {
                                                         "type": "Title",
                                                         "data": {
-                                                            "title": "services_edit_title"
+                                                            "title": "services_draft"
                                                         }
                                                     },
                                                     {
                                                         "type": "Text",
                                                         "data": {
-                                                            "text": "services_edit_subtitle"
+                                                            "text": "services_draft_subtitle"
                                                         }
                                                     },
                                                     {
                                                         "type": "Text",
                                                         "data": {
-                                                            "text": "www.example.com",
-                                                            "bold": true
+                                                            "bold": true,
+                                                            "text": "services_draft_switch_subtitle"
                                                         }
                                                     },
                                                     {
@@ -476,12 +500,12 @@
                                                                 },
                                                                 {
                                                                     "id": "edit-service-btn-www.example.com",
-                                                                    "text": "action_edit",
+                                                                    "text": "action_switch",
                                                                     "disabled": false,
-                                                                    "color": "cyan",
+                                                                    "color": "success",
                                                                     "size": "normal",
                                                                     "attrs": {
-                                                                        "data-submit-form": "{\"SERVER_NAME\" : www.example.com, \"OLD_SERVER_NAME\" : www.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : no }"
+                                                                        "data-submit-form": "{\"SERVER_NAME\" : www.example.com, \"OLD_SERVER_NAME\" : www.example.com, \"operation\" : \"edit\", \"IS_DRAFT\" : yes }"
                                                                     }
                                                                 }
                                                             ]
@@ -496,7 +520,7 @@
                                             },
                                             "id": "open-modal-delete-1",
                                             "text": "delete",
-                                            "disabled": true,
+                                            "disabled": false,
                                             "hideText": true,
                                             "color": "red",
                                             "size": "normal",
@@ -600,6 +624,7 @@
                                 "id": "services-methods",
                                 "value": "all",
                                 "values": [
+                                    "ui",
                                     "scheduler"
                                 ],
                                 "name": "services-methods",

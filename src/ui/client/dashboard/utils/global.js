@@ -7,6 +7,123 @@ import { v4 as uuidv4 } from "uuid";
 */
 
 /**
+  @name useGlobal
+  @description This function needs to be apply on global level and will do some logic related to form, attributes, and other global actions.
+  For example, it will check if the target element has a data-link attribute and redirect the user to the define link.
+  It will check if the target element has a data-submit-form attribute and try to parse it to submit the form.
+  @returns {void}
+*/
+function useGlobal() {
+  window.addEventListener("click", useDataLinkAttr);
+  window.addEventListener("click", useSubmitAttr);
+}
+
+/**
+  @name useSubmitAttr
+  @description  This function needs to be attach to an event like a click event.
+  This will check if the target element contains a data-submit-form attribute and try to parse it to submit the form.
+  @returns {void}
+*/
+function useSubmitAttr(e) {
+  if (!e.target.hasAttribute("data-submit-form")) return;
+  try {
+    const data = JSON.parse(e.target.getAttribute("data-submit-form"));
+    useSubmitForm(data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+/**
+  @name useSubmitForm
+  @description   Create programmatically a form element and submit it with the given data object of type {key: value}.
+  This will create a FormData and append data arguments to it, retrieve the csrf token and send it with a regular form.
+      @example
+  {
+    instance: "1",
+    operation: "delete",
+  }
+  @param {object} data - Object with the form data to submit.
+  @returns {void}
+*/
+function useSubmitForm(data) {
+  // Create a form element
+  const form = document.createElement("form");
+  form.style.display = "none";
+  form.method = "POST";
+  // Retrieve csrf token form data-crfs-token
+  try {
+    const csrfToken = document.querySelector("[data-csrf-token]");
+    if (csrfToken) {
+      data.csrf_token = csrfToken.getAttribute("data-csrf-token");
+    }
+  } catch (e) {}
+  // Add input elements with the data object
+  for (const key in data) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = key;
+    input.value = data[key];
+    form.appendChild(input);
+  }
+  // Append to be able to submit
+  document.querySelector("body").appendChild(form);
+  form.submit();
+}
+
+/**
+  @name useCheckPluginsValidity
+  @description  Check all items keys if at least one match exactly the filter value.
+  @example 
+    const template = [
+  {
+    name: "test",
+    settings: {
+      test: {
+        required: true,
+        value: "",
+        pattern: "^[a-zA-Z0-9]*$",
+      },
+    },
+  },
+  @param template - Template with plugins list and detail settings
+  @returns {array} - Array with error flags and error details
+*/
+function useCheckPluginsValidity(template) {
+  let isRegErr = false;
+  let isReqErr = false;
+  let settingErr = "";
+  let pluginErr = "";
+  let settingNameErr = "";
+  let id = 0;
+
+  template.forEach((plugin, index) => {
+    id = index;
+    for (const [key, value] of Object.entries(plugin.settings)) {
+      if (value.required && !value.value) {
+        isReqErr = true;
+        settingErr = key;
+        settingNameErr = value.name;
+        pluginErr = plugin.name;
+        break;
+      }
+      if (value.pattern && value.value) {
+        const regex = new RegExp(value.pattern);
+        if (!regex.test(value.value)) {
+          isRegErr = true;
+          settingErr = key;
+          settingNameErr = value.name;
+          pluginErr = plugin.name;
+          break;
+        }
+      }
+    }
+  });
+
+  return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id];
+}
+
+/**
   @name useUUID
   @description This function return a unique identifier using uuidv4 and a random number.
   Adding random number to avoid duplicate uuids when some components are rendered at the same time.
@@ -39,4 +156,23 @@ function useEqualStr(type, compare) {
   }
 }
 
-export { useUUID, useEqualStr };
+/**
+  @name useDataLinkAttr
+  @description Check from event if the target has a data-link attribute. Case it is, it will be used to redirect the user to the define link.
+  This is useful to avoid using the <a> tag and use a <div> or <button> instead.
+  @param {e} event - The event to attach the function logic
+  @returns {void}
+*/
+function useDataLinkAttr(e) {
+  if (!e.target.hasAttribute("data-link")) return;
+  const link = e.target.getAttribute("data-link");
+  window.location.href = link;
+}
+
+export {
+  useGlobal,
+  useUUID,
+  useEqualStr,
+  useSubmitForm,
+  useCheckPluginsValidity,
+};

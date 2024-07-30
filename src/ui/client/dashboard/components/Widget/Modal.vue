@@ -132,7 +132,10 @@ function modalKeyboardEvents(e) {
 }
 
 function modalClickEvents(e) {
-  if (e.target.closest("[data-modal]") !== modalEl.value && modalEl.value)
+  if (
+    (e.target.closest("[data-modal]") !== modalEl.value && modalEl.value) ||
+    !modalEl.value
+  )
     return;
   if (e.target.hasAttribute("data-close-modal")) useCloseModal();
 }
@@ -167,12 +170,12 @@ const emits = defineEmits(["close"]);
       :class="['layout-modal-container', props.isOpen ? '' : 'hidden']"
       :id="props.id"
     >
-      <div data-close-modal class="layout-backdrop"></div>
-      <div class="layout-modal-wrap">
+      <div class="layout-backdrop"></div>
+      <div data-close-modal class="layout-modal-wrap">
         <div class="layout-modal">
           <div class="layout-modal-button-container">
             <Button
-              data-close-modal
+              :attrs="{ 'data-close-modal': '' }"
               :text="'action_close_modal'"
               :hideText="true"
               :iconName="'close'"

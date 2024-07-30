@@ -7,7 +7,7 @@ import Subtitle from "@components/Widget/Subtitle.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
 import { v4 as uuidv4 } from "uuid";
-import { useCheckPluginsValidity } from "@utils/form.js";
+import { useCheckPluginsValidity } from "@utils/global.js";
 import { useEasyForm } from "@store/form.js";
 
 /**

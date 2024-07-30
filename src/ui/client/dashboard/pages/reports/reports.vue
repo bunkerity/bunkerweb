@@ -2,6 +2,7 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderReports from "@components/Builder/Reports.vue";
+import { useGlobal } from "@utils/global";
 
 /**
   @name Page/Reports.vue
@@ -22,6 +23,11 @@ onBeforeMount(() => {
       ? JSON.parse(dataEl.getAttribute(dataAtt))
       : {};
   reports.builder = data;
+});
+
+onMounted(() => {
+  // Set the page title
+  useGlobal();
 });
 
 const builder = [

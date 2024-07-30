@@ -2,6 +2,7 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderHome from "@components/Builder/Home.vue";
+import { useGlobal } from "@utils/global";
 
 /** 
   @name Page/Home.vue
@@ -24,6 +25,10 @@ onBeforeMount(() => {
   home.builder = data;
 });
 
+onMounted(() => {
+  // Set the page title
+  useGlobal();
+});
 // const data = [
 //   {
 //     type: "card",

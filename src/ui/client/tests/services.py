@@ -18,7 +18,7 @@ services = [
     },
     {
         "USE_REVERSE_PROXY": {"value": "yes", "method": "scheduler", "global": False},
-        "IS_DRAFT": {"value": "no", "method": "default", "global": False},
+        "IS_DRAFT": {"value": "yes", "method": "default", "global": False},
         "SERVE_FILES": {"value": "no", "method": "scheduler", "global": True},
         "REMOTE_PHP": {"value": "", "method": "default", "global": True},
         "AUTO_LETS_ENCRYPT": {"value": "no", "method": "default", "global": True},
@@ -27,7 +27,7 @@ services = [
         "USE_BAD_BEHAVIOR": {"value": "yes", "method": "default", "global": True},
         "USE_LIMIT_REQ": {"value": "yes", "method": "default", "global": True},
         "USE_DNSBL": {"value": "yes", "method": "default", "global": True},
-        "SERVER_NAME": {"value": "www.example.com", "method": "scheduler", "global": False},
+        "SERVER_NAME": {"value": "www.example.com", "method": "ui", "global": False},
     },
 ]
 
@@ -55,7 +55,9 @@ def table_widget(positions, header, items, filters, minWidth, title):
     }
 
 
-def services_action(server_name: str = "", operation: str = "", title: str = "", subtitle: str = "", is_draft: Union[bool, None] = None) -> dict:
+def services_action(
+    server_name: str = "", operation: str = "", title: str = "", subtitle: str = "", additionnal: str = "", is_draft: Union[bool, None] = None
+) -> dict:
 
     buttons = [
         {
@@ -87,9 +89,9 @@ def services_action(server_name: str = "", operation: str = "", title: str = "",
         buttons.append(
             {
                 "id": f"{operation}-service-btn-{server_name}",
-                "text": f"action_{operation}",
+                "text": "action_switch",
                 "disabled": False,
-                "color": "cyan",
+                "color": "success",
                 "size": "normal",
                 "attrs": {
                     "data-submit-form": f"""{{"SERVER_NAME" : {server_name}, "OLD_SERVER_NAME" : {server_name}, "operation" : "edit", "IS_DRAFT" : {draft_value} }}""",
@@ -104,17 +106,26 @@ def services_action(server_name: str = "", operation: str = "", title: str = "",
                 "title": title,
             },
         },
+        {
+            "type": "Text",
+            "data": {
+                "text": subtitle,
+            },
+        },
     ]
 
-    if operation == "delete" or operation == "edit":
+    if additionnal:
         content.append(
             {
                 "type": "Text",
                 "data": {
-                    "text": subtitle,
+                    "bold": True,
+                    "text": additionnal,
                 },
             }
         )
+
+    if operation == "delete":
         content.append(
             {
                 "type": "Text",
@@ -133,9 +144,9 @@ def services_action(server_name: str = "", operation: str = "", title: str = "",
             mode_buttons.append(
                 {
                     "id": f"{operation}-service-btn-{server_name}",
-                    "text": f"services_{mode}",
+                    "text": f"services_mode_{mode}",
                     "disabled": False,
-                    "color": "green",
+                    "color": "info",
                     "size": "normal",
                     "attrs": {
                         "role": "link",
@@ -183,15 +194,15 @@ def get_services_list(services):
                 "data": {
                     "buttons": [
                         {
-                            "id": f"open-modal-settings-{index}",
-                            "text": "settings",
+                            "id": f"open-modal-plugins-{index}",
+                            "text": "plugins",
                             "hideText": True,
-                            "color": "info",
+                            "color": "success",
                             "size": "normal",
-                            "iconName": "settings",
+                            "iconName": "eye",
                             "iconColor": "white",
                             "modal": services_action(
-                                server_name=server_name, operation="settings", title="services_settings_title", subtitle="services_settings_subtitle"
+                                server_name=server_name, operation="plugins", title="services_plugins_title", subtitle="services_plugins_subtitle"
                             ),
                         },
                         {
@@ -199,9 +210,9 @@ def get_services_list(services):
                             "id": f"open-modal-manage-{index}",
                             "text": "manage",
                             "hideText": True,
-                            "color": "success",
+                            "color": "edit",
                             "size": "normal",
-                            "iconName": "gear",
+                            "iconName": "pen",
                             "iconColor": "white",
                             "modal": services_action(
                                 server_name=server_name, operation="manage", title="services_manage_title", subtitle="services_manage_subtitle"
@@ -212,12 +223,17 @@ def get_services_list(services):
                             "id": f"open-modal-draft-{index}",
                             "text": "draft" if is_draft else "online",
                             "hideText": True,
-                            "color": "cyan",
+                            "color": "blue",
                             "size": "normal",
-                            "iconName": "pen" if is_draft else "globe",
+                            "iconName": "document" if is_draft else "globe",
                             "iconColor": "white",
                             "modal": services_action(
-                                server_name=server_name, operation="edit", title="services_edit_title", subtitle="services_edit_subtitle", is_draft=is_draft
+                                server_name=server_name,
+                                operation="edit",
+                                title="services_draft" if is_draft else "services_online",
+                                subtitle="services_draft_subtitle" if is_draft else "services_online_subtitle",
+                                additionnal="services_draft_switch_subtitle" if is_draft else "services_online_switch_subtitle",
+                                is_draft=is_draft,
                             ),
                         },
                         {

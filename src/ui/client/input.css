@@ -527,6 +527,10 @@ body {
   @apply absolute right-4 top-4 z-[30];
 }
 
+.layout-modal-content {
+  @apply gap-2 col-span-12 grid grid-cols-12 w-full relative;
+}
+
 .layout-settings {
   @apply py-4 sm:gap-x-8 gap-y-8 col-span-12 grid grid-cols-12 w-full relative;
 }
@@ -1142,7 +1146,11 @@ body {
 }
 
 .button-group-modal {
-  @apply col-span-12 flex justify-center items-center mt-4 mx-4;
+  @apply col-span-12 flex justify-center items-center my-1 mx-4;
+}
+
+.button-group-modal.last {
+  @apply mt-5 mb-0;
 }
 
 .button-group-table {
@@ -1234,7 +1242,7 @@ body {
 }
 
 .no-subtitle.title-modal {
-  @apply mb-6;
+  @apply mb-4;
 }
 
 .no-subtitle.title-container {

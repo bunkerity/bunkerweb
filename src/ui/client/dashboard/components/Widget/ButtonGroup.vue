@@ -64,6 +64,15 @@ onMounted(() => {
           .closest("[data-is]")
           .getAttribute("data-is")}`
       : "button-group-default";
+
+  // Additionnal class for modal
+  if (group.class.includes("modal")) {
+    // Check if next sibling exists
+    // Else, this is the last element, we can add a margin top because this is main modal action buttons
+    if (!groupEl.value.nextElementSibling) {
+      group.class += " last";
+    }
+  }
 });
 </script>
 

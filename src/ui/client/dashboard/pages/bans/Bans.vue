@@ -1,7 +1,8 @@
 <script setup>
-import { reactive, onBeforeMount } from "vue";
+import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderBans from "@components/Builder/Bans.vue";
+import { useGlobal } from "@utils/global";
 
 /**
   @name Page/Bans.vue
@@ -22,6 +23,10 @@ onBeforeMount(() => {
       ? JSON.parse(dataEl.getAttribute(dataAtt))
       : {};
   bans.builder = data;
+});
+
+onMounted(() => {
+  useGlobal();
 });
 
 const builder = [

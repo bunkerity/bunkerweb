@@ -2,6 +2,7 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderGlobalConfig from "@components/Builder/GlobalConfig.vue";
+import { useGlobal } from "@utils/global";
 
 /**
   @name Page/GlobalConfig.vue
@@ -22,6 +23,11 @@ onBeforeMount(() => {
       ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
       : {};
   globalConfig.builder = data;
+});
+
+onMounted(() => {
+  // Set the page title
+  useGlobal();
 });
 </script>
 

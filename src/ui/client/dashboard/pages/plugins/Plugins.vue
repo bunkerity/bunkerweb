@@ -2,7 +2,7 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderPlugins from "@components/Builder/Plugins.vue";
-import { useForm } from "@utils/form.js";
+import { useGlobal } from "@utils/global";
 
 /**
   @name Page/PLugins.vue
@@ -99,6 +99,7 @@ onBeforeMount(() => {
 onMounted(() => {
   redirectPlugin();
   deletePlugin();
+  useGlobal();
 });
 
 const builder = [

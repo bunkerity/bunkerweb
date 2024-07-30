@@ -2,6 +2,7 @@
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
 import BuilderJobs from "@components/Builder/Jobs.vue";
+import { useGlobal } from "@utils/global";
 
 /**
   @name Page/Jobs.vue
@@ -88,6 +89,7 @@ function downloadCacheEvent() {
 
 onMounted(() => {
   downloadCacheEvent();
+  useGlobal();
 });
 </script>
 

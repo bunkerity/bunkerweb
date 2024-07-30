@@ -12,7 +12,7 @@ import Filter from "@components/Widget/Filter.vue";
 import GroupMultiple from "@components/Forms/Group/Multiple.vue";
 import { plugin_types } from "@utils/variables";
 import { useAdvancedForm } from "@store/form.js";
-import { useCheckPluginsValidity } from "@utils/form.js";
+import { useCheckPluginsValidity } from "@utils/global.js";
 import { v4 as uuidv4 } from "uuid";
 
 /**
