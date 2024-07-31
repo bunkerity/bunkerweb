@@ -817,10 +817,10 @@ def totp():
         verify_data_in_form(data={"totp_token": None}, err_message="No token provided on /totp.", redirect_url="totp")
 
         if not app.totp.verify_totp(request.form["totp_token"], user=current_user):
-            if not app.totp.verify_recovery_code(request.form["totp_token"], user=current_user):
+            recovery_code = app.totp.verify_recovery_code(request.form["totp_token"], user=current_user)
+            if not recovery_code:
                 return handle_error("The token is invalid.", "totp")
-            else:
-                DB.use_ui_user_recovery_code(current_user.get_id(), app.totp.encrypt_recovery_code(request.form["totp_token"]))
+            DB.use_ui_user_recovery_code(current_user.get_id(), recovery_code)
 
         session["totp_validated"] = True
         redirect(url_for("loading", next=request.form.get("next") or url_for("home")))
@@ -1016,6 +1016,13 @@ def account():
 
             if totp_secret and totp_secret != current_user.totp_secret:
                 totp_recovery_codes = app.totp.generate_recovery_codes()
+                current_user.totp_refreshed = True
+                current_user.list_recovery_codes = totp_recovery_codes
+                flash(
+                    "The recovery codes have been refreshed.\nPlease save them in a safe place. They will not be displayed again."
+                    + "\n".join(app.totp.decrypt_recovery_codes(current_user)),
+                    "info",
+                )  # TODO: Remove this when we have a way to display the recovery codes
 
             app.logger.debug(f"totp recovery codes: {totp_recovery_codes}")
 
@@ -1051,8 +1058,7 @@ def account():
         is_totp=bool(current_user.totp_secret),
         secret_token=app.totp.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
         totp_qr_image=totp_qr_image,
-        totp_refrehed=current_user.totp_refreshed,
-        totp_recovery_codes=app.totp.decrypt_recovery_codes(current_user) if current_user.totp_refreshed else [],
+        recovery_codes_needs_refresh=bool(current_user.totp_secret) and not current_user.list_recovery_codes,
     )
 
 

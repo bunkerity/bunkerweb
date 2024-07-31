@@ -50,20 +50,15 @@ class Totp:
     def decrypt_recovery_codes(self, user: Users) -> List[str]:
         return [self.decrypt_recovery_code(code) for code in user.list_recovery_codes]
 
-    def encrypt_recovery_code(self, code: str) -> Optional[str]:
-        if not self.cryptor:
-            return code
-        return self.cryptor.encrypt(code.encode()).decode()
-
-    def verify_recovery_code(self, code: str, user: Users) -> bool:
+    def verify_recovery_code(self, code: str, user: Users) -> Optional[str]:
         """Check if recovery code is valid for user."""
         if not user.list_recovery_codes:
-            return False
+            return
 
         with suppress(InvalidToken):
-            if code in self.decrypt_recovery_codes(user):
-                return True
-        return False
+            for i, decrypted_code in enumerate(self.decrypt_recovery_codes(user)):
+                if code == decrypted_code:
+                    return user.list_recovery_codes.pop(i)
 
     def verify_totp(self, token: str, *, totp_secret: Optional[str] = None, user: Optional[Users] = None) -> bool:
         """Verifies token for specific user."""
