@@ -41,7 +41,7 @@ def run_command(command: List[str]) -> int:
     """Utils to run a subprocess command. This is usefull to run npm commands to build vite project"""
     print(f"Running command: {command}", flush=True)
     try:
-        process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory, text=True)
+        process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory.as_posix(), text=True)
         while process.poll() is None:
             if process.stdout is not None:
                 for line in process.stdout:
