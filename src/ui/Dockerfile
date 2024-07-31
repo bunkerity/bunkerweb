@@ -39,7 +39,7 @@ COPY src/VERSION VERSION
 
 # This will build the frontend and add files to the UI folder
 WORKDIR /usr/share/bunkerweb/ui/client
-RUN python3 build.py
+RUN DOCKERFILE=yes python3 build.py
 
 # We can delete the client folder after building the frontend
 RUN rm -rf /usr/share/bunkerweb/ui/client

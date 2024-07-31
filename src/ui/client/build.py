@@ -1,4 +1,5 @@
 # I want to run process
+from os import getenv
 from shutil import copy, move, rmtree
 from subprocess import PIPE, Popen
 from pathlib import Path
@@ -41,7 +42,7 @@ def run_command(command: List[str]) -> int:
     """Utils to run a subprocess command. This is usefull to run npm commands to build vite project"""
     print(f"Running command: {command}", flush=True)
     try:
-        process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory.as_posix(), text=True)
+        process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory.as_posix(), shell=not bool(getenv("DOCKERFILE", "")), text=True)
         while process.poll() is None:
             if process.stdout is not None:
                 for line in process.stdout:
@@ -49,8 +50,8 @@ def run_command(command: List[str]) -> int:
 
         if process.returncode != 0:
             print("Error while running command", flush=True)
-            print(process.stdout, flush=True)
-            print(process.stderr, flush=True)
+            print(process.stdout.read(), flush=True)
+            print(process.stderr.read(), flush=True)
             return 1
     except BaseException as e:
         print(f"Error while running command: {e}", flush=True)
