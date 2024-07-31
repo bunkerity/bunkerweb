@@ -120,7 +120,8 @@ def move_template(folder: Path, target_folder: Path):
 
         copy(file.as_posix(), target_folder.joinpath(f"{file.parent.name}.html").as_posix())
 
-    rmtree(folder.parent.as_posix())
+    if folder.parent.is_dir():
+        rmtree(folder.parent.as_posix())
 
 
 def move_statics(folder: Path, target_folder: Path):
@@ -138,11 +139,11 @@ def build():
     create_base_dirs()
     # Only install packages if not already installed
     if not current_directory.joinpath("node_modules").exists():
-        if not run_command(["/usr/bin/npm", "install"]):
-            if not run_command(["npm", "install"]):
+        if run_command(["/usr/bin/npm", "install"]):
+            if run_command(["npm", "install"]):
                 exit(1)
-    if not run_command(["/usr/bin/npm", "run", "build-dashboard"]):
-        if not run_command(["npm", "run", "build-dashboard"]):
+    if run_command(["/usr/bin/npm", "run", "build-dashboard"]):
+        if run_command(["npm", "run", "build-dashboard"]):
             exit(1)
     set_dashboard()
     # run_command(["/usr/bin/npm", "run", "build-setup"])
