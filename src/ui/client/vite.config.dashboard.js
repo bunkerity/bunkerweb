@@ -50,6 +50,7 @@ export default defineConfig({
           "./dashboard/pages/global-config/index.html"
         ),
         jobs: resolve(__dirname, "./dashboard/pages/jobs/index.html"),
+        services: resolve(__dirname, "./dashboard/pages/services/index.html"),
       },
     },
   },

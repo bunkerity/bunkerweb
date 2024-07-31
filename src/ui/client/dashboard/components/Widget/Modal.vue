@@ -17,6 +17,7 @@ import Subtitle from "@components/Widget/Subtitle.vue";
 import Button from "@components/Widget/Button.vue";
 import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
+import Table from "@components/Widget/Table.vue";
 
 /**
   @name Builder/Modal.vue
@@ -207,6 +208,10 @@ const emits = defineEmits(["close"]);
               />
               <ButtonGroup
                 v-if="useEqualStr(widget.type, 'ButtonGroup')"
+                v-bind="widget.data"
+              />
+              <Table
+                v-if="useEqualStr(widget.type, 'Table')"
                 v-bind="widget.data"
               />
             </template>

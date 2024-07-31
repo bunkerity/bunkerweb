@@ -37,19 +37,15 @@ const props = defineProps({
     required: true,
   },
 });
-
-const cell = reactive({
-  name: computed(() => props.type.toLowerCase()),
-});
 </script>
 
 <template>
-  <Text v-if="useEqualStr(cell.name, 'Text')" v-bind="props.data" />
-  <Icons v-if="useEqualStr(cell.name, 'Icons')" v-bind="props.data" />
-  <Fields v-if="useEqualStr(cell.name, 'Fields')" v-bind="props.data" />
-  <Button v-if="useEqualStr(cell.name, 'Button')" v-bind="props.data" />
+  <Text v-if="useEqualStr(props.type, 'Text')" v-bind="props.data" />
+  <Icons v-if="useEqualStr(props.type, 'Icons')" v-bind="props.data" />
+  <Fields v-if="useEqualStr(props.type, 'Fields')" v-bind="props.data" />
+  <Button v-if="useEqualStr(props.type, 'Button')" v-bind="props.data" />
   <ButtonGroup
-    v-if="useEqualStr(cell.name, 'ButtonGroup')"
+    v-if="useEqualStr(props.type, 'ButtonGroup')"
     v-bind="props.data"
   />
 </template>

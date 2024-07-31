@@ -136,6 +136,7 @@ const table = reactive({
   itemsBase: JSON.parse(JSON.stringify(props.items)),
   // items that can be filtered
   itemsFormat: JSON.parse(JSON.stringify(props.items)),
+  bodyClass: "",
 });
 
 /**
@@ -180,6 +181,12 @@ watch(
 onMounted(() => {
   getOverflow();
   setUnmatchWidth();
+
+  table.bodyClass = tableBody.value.closest("[data-is]:not([data-is='table'])")
+    ? `table-content-${tableBody.value
+        .closest("[data-is]:not([data-is='table'])")
+        .getAttribute("data-is")}`
+    : "table-content";
 });
 </script>
 
@@ -220,7 +227,7 @@ onMounted(() => {
           :aria-hidden="!table.itemsFormat.length ? 'true' : 'false'"
           data-table-body
           ref="tableBody"
-          class="table-content"
+          :class="[table.bodyClass]"
         >
           <tr
             v-for="rowId in table.rowLength"

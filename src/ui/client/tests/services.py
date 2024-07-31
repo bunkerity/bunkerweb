@@ -55,8 +55,51 @@ def table_widget(positions, header, items, filters, minWidth, title):
     }
 
 
+def services_settings(settings: dict) -> dict:
+    # deep copy settings dict
+    settings = settings.copy()
+    # remove "SERVER_NAME" and "IS_DRAFT" key
+    settings.pop("SERVER_NAME", None)
+    settings.pop("IS_DRAFT", None)
+    # Create table with settings remaining keys
+    settings_table_items = []
+    for key, value in settings.items():
+        format_key = key.replace("USE_", "").replace("_", " ")
+        settings_table_items.append(
+            [
+                {
+                    "type": "Text",
+                    "data": {"text": format_key},
+                },
+                {
+                    "type": "Icons",
+                    "data": {
+                        "iconName": "check" if value.get("value") == "yes" else "cross",
+                    },
+                },
+            ]
+        )
+
+    table = table_widget(
+        positions=[8, 4],
+        header=["services_settings_table_name", "services_settings_table_status"],
+        items=settings_table_items,
+        filters=[],
+        minWidth="",
+        title="services_settings_table_title",
+    )
+
+    return table
+
+
 def services_action(
-    server_name: str = "", operation: str = "", title: str = "", subtitle: str = "", additionnal: str = "", is_draft: Union[bool, None] = None
+    server_name: str = "",
+    operation: str = "",
+    title: str = "",
+    subtitle: str = "",
+    additionnal: str = "",
+    is_draft: Union[bool, None] = None,
+    service: dict = None,
 ) -> dict:
 
     buttons = [
@@ -84,7 +127,7 @@ def services_action(
             },
         )
 
-    if operation == "edit":
+    if operation == "draft":
         draft_value = "yes" if is_draft else "no"
         buttons.append(
             {
@@ -106,13 +149,17 @@ def services_action(
                 "title": title,
             },
         },
-        {
-            "type": "Text",
-            "data": {
-                "text": subtitle,
-            },
-        },
     ]
+
+    if subtitle:
+        content.append(
+            {
+                "type": "Text",
+                "data": {
+                    "text": subtitle,
+                },
+            },
+        )
 
     if additionnal:
         content.append(
@@ -124,6 +171,10 @@ def services_action(
                 },
             }
         )
+
+    if operation == "plugins":
+        settings = services_settings(service)
+        content.append(settings)
 
     if operation == "delete":
         content.append(
@@ -137,7 +188,7 @@ def services_action(
             }
         )
 
-    if operation == "manage":
+    if operation == "edit" or operation == "create":
         modes = ("easy", "advanced", "raw")
         mode_buttons = []
         for mode in modes:
@@ -202,7 +253,11 @@ def get_services_list(services):
                             "iconName": "eye",
                             "iconColor": "white",
                             "modal": services_action(
-                                server_name=server_name, operation="plugins", title="services_plugins_title", subtitle="services_plugins_subtitle"
+                                server_name=server_name,
+                                operation="plugins",
+                                title="services_plugins_title",
+                                subtitle="",
+                                service=service,
                             ),
                         },
                         {
@@ -215,7 +270,11 @@ def get_services_list(services):
                             "iconName": "pen",
                             "iconColor": "white",
                             "modal": services_action(
-                                server_name=server_name, operation="manage", title="services_manage_title", subtitle="services_manage_subtitle"
+                                server_name=server_name,
+                                operation="edit",
+                                title="services_edit_title",
+                                subtitle="services_edit_subtitle",
+                                additionnal=server_name,
                             ),
                         },
                         {
@@ -229,8 +288,8 @@ def get_services_list(services):
                             "iconColor": "white",
                             "modal": services_action(
                                 server_name=server_name,
-                                operation="edit",
-                                title="services_draft" if is_draft else "services_online",
+                                operation="draft",
+                                title="services_draft_title",
                                 subtitle="services_draft_subtitle" if is_draft else "services_online_subtitle",
                                 additionnal="services_draft_switch_subtitle" if is_draft else "services_online_switch_subtitle",
                                 is_draft=is_draft,
@@ -272,6 +331,19 @@ def services_builder(services):
             "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
             "widgets": [
                 title_widget("services_title"),
+                {
+                    "type": "Button",
+                    "data": {
+                        "id": "services-new",
+                        "text": "services_new",
+                        "color": "success",
+                        "size": "normal",
+                        "iconName": "plus",
+                        "iconColor": "white",
+                        "modal": services_action(server_name="new", operation="create", title="services_create_title", subtitle="services_create_subtitle"),
+                        "containerClass": "col-span-12 flex justify-center",
+                    },
+                },
                 table_widget(
                     positions=[4, 4, 4],
                     header=[
@@ -353,7 +425,7 @@ def services_builder(services):
                     title="services_table_title",
                 ),
             ],
-        }
+        },
     ]
     return builder
 

@@ -1621,8 +1621,12 @@ body {
   @apply appearance-none block dark:text-gray-300 pb-1 text-left text-sm font-bold m-0 border-b border-gray-400;
 }
 
-.table-content {
+.table-content-card {
   @apply relative appearance-none dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[600px] min-h-[460px];
+}
+
+.table-content-modal {
+  @apply relative appearance-none dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px] min-h-[200px];
 }
 
 .table-content-item {

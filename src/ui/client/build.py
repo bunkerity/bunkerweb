@@ -85,7 +85,7 @@ def move_template(folder, target_folder):
   </body>
 </html>"""
 
-        if "global-config" in root or "jobs" in root:
+        if "global-config" in root or "jobs" in root or "services" in root:
             base_html = base_html.replace("data_server_builder[1:-1]", "data_server_builder")
 
         file_path = os.path.join(root, file)

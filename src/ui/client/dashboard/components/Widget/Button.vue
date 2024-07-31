@@ -39,6 +39,7 @@ import { useUUID } from "@utils/global.js";
   @param {Object} [attrs={}] - List of attributs to add to the button. Some attributs will conduct to additionnal script
   @param {Object|boolean} [modal=false] - We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal.
   @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+  @param {string} [containerClass=""] - Additionnal class to the container
 */
 
 const props = defineProps({
