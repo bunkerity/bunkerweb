@@ -105,13 +105,14 @@ def move_template(folder: Path, target_folder: Path):
         return replace
 
     for file in folder.rglob("index.html"):
+        file_html = base_html
         if "global-config" in file.parts or "jobs" in file.parts or "services" in file.parts:
-            base_html = base_html.replace("data_server_builder[1:-1]", "data_server_builder")
+            file_html = base_html.replace("data_server_builder[1:-1]", "data_server_builder")
 
         content = file.read_text()
         content = sub(r'(href|src)="\/(css|js|img|favicon|assets|js)\/[^<]*?(?=<|\/>)', format_template, content)
         # get the content before <body>
-        content = content[: content.index("<body>")] + base_html
+        content = content[: content.index("<body>")] + file_html
 
         # write the new content
         file.write_text(content)

@@ -11,7 +11,7 @@ from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 from typing import Union
 from uuid import uuid4
-from builder import home_builder, instances_builder, global_config_builder, jobs_builder, services_builder
+
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -49,6 +49,12 @@ from src.ConfigFiles import ConfigFiles
 from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.Templates import get_ui_templates
+
+from builder.home import home_builder
+from builder.instances import instances_builder
+from builder.global_config import global_config_builder
+from builder.jobs import jobs_builder
+from builder.services import services_builder
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
