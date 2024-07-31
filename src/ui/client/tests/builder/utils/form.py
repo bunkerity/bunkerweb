@@ -2,6 +2,28 @@ import copy
 from typing import Union
 
 
+def get_service_settings(service_name: str, global_config: dict, total_config: dict) -> dict:
+    """
+    total_config is a dict that contains global settings and services settings (format SERVICE_NAME_SETTING - www.example.com_USE_ANTIBOT for example -).
+    We will only keep settings that are related to the service_name (with prefix SERVICE_NAME_).
+    Then we will loop on global key and override value from global config by service config if exists.
+    """
+
+    # Get service settings
+    service_settings = {}
+    for key, value in total_config.items():
+        if not key.startswith(f"{service_name}_"):
+            continue
+
+        service_settings[key.replace(f"{service_name}_", "")] = value
+
+    # Loop on global settings to override by service settings
+    for key, value in service_settings.items():
+        global_config[key] = value
+
+    return global_config
+
+
 def get_forms(templates: list = [], plugins: list = [], settings: dict = {}, render_forms: tuple = ("advanced", "easy", "raw")) -> dict:
     """
     Will generate every needed form using templates, plugins and settings.
@@ -83,22 +105,24 @@ def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
     # Update settings with global config data
     for plugin in plugins:
         for setting, value in plugin.get("settings").items():
+
             # avoid some methods from services_settings
             if setting in settings and settings[setting].get("method", "ui") not in ("ui", "default", "manual"):
                 continue
-
             raw_value = None
 
             # Start by setting template value if exists
             if setting in template_settings:
                 # Update value or set default as value
-                raw_value = template_settings.get(setting, value.get("default"))
+                raw_value = template_settings.get(setting, None)
 
             # Then override by service settings
             if setting in settings:
+
                 # Check if the service setting is not default value to add it
                 default_val = value.get("default")
                 val = settings[setting].get("value", value.get("value", value.get("default")))
+
                 if val != default_val:
                     raw_value = val
 

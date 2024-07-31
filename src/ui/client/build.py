@@ -106,7 +106,7 @@ def move_template(folder: Path, target_folder: Path):
 
     for file in folder.rglob("index.html"):
         file_html = base_html
-        if "global-config" in file.parts or "jobs" in file.parts or "services" in file.parts:
+        if "global-config" in file.parts or "jobs" in file.parts or "services" in file.parts or "raw" in file.parts:
             file_html = base_html.replace("data_server_builder[1:-1]", "data_server_builder")
 
         content = file.read_text()
