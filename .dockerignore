@@ -1,6 +1,7 @@
 .git
 .idea/
 .vscode/
-__pycache__
-env
-node_modules
+__pycache__/
+env/
+src/ui/client/node_modules/
+src/ui/client/opt-dashboard/
