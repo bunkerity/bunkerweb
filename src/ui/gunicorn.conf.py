@@ -1,23 +1,11 @@
-from contextlib import suppress
-from hashlib import sha256
-from json import JSONDecodeError, dumps, loads
-from os import cpu_count, getenv, getpid, sep, urandom
+from os import cpu_count, getenv, getpid, sep
 from os.path import join
 from pathlib import Path
-from signal import SIGINT, SIGTERM, signal
-from threading import Lock
 from sys import path as sys_path
-from time import sleep
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
-
-from common_utils import get_version  # type: ignore
-from logger import setup_logger  # type: ignore
-
-from ui_database import UIDatabase  # type: ignore
-from utils import USER_PASSWORD_RX, check_password, gen_password_hash
 
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
@@ -31,6 +19,7 @@ proc_name = "bunkerweb-ui"
 accesslog = "/var/log/bunkerweb/ui-access.log"
 access_log_format = '%({x-forwarded-for}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 errorlog = "/var/log/bunkerweb/ui.log"
+preload_app = True
 reuse_port = True
 worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = join(sep, "var", "tmp", "bunkerweb", "ui")
@@ -49,136 +38,6 @@ if DEBUG:
     reload = True
     reload_extra_files = [file.as_posix() for file in Path(sep, "usr", "share", "bunkerweb", "ui", "templates").iterdir()]
 
-LOCK = Lock()
-
-
-def on_starting(server):
-    TMP_DIR.mkdir(parents=True, exist_ok=True)
-    if not getenv("FLASK_SECRET") and not TMP_DIR.joinpath(".flask_secret").is_file():
-        TMP_DIR.joinpath(".flask_secret").write_text(sha256(urandom(32)).hexdigest(), encoding="utf-8")
-
-    LOGGER = setup_logger("UI")
-
-    db = UIDatabase(LOGGER)
-
-    ready = False
-    while not ready:
-        db_metadata = db.get_metadata()
-        if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
-            LOGGER.warning("Database is not initialized, retrying in 5s ...")
-        else:
-            ready = True
-            continue
-        sleep(5)
-
-    ret, err = db.init_ui_tables(get_version())
-
-    if not ret and err:
-        LOGGER.error(f"Exception while checking database tables : {err}")
-        exit(1)
-    elif not ret:
-        LOGGER.info("Database ui tables didn't change, skipping update ...")
-    else:
-        LOGGER.info("Database ui tables successfully updated")
-
-    if not db.get_ui_roles(as_dict=True):
-        ret = db.create_ui_role("admin", "Admin can create account, manager software and read data.", ["manage", "write", "read"])
-        if ret:
-            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
-            exit(1)
-
-        ret = db.create_ui_role("writer", "Write can manage software and read data but can't create account.", ["write", "read"])
-        if ret:
-            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
-            exit(1)
-
-        ret = db.create_ui_role("reader", "Reader can read data but can't proceed to any actions.", ["read"])
-        if ret:
-            LOGGER.error(f"Couldn't create the admin role in the database: {ret}")
-            exit(1)
-
-    ADMIN_USER = "Error"
-    while ADMIN_USER == "Error":
-        try:
-            ADMIN_USER = db.get_ui_user(as_dict=True)
-        except BaseException as e:
-            LOGGER.debug(f"Couldn't get the admin user: {e}")
-            sleep(1)
-
-    env_admin_username = getenv("ADMIN_USERNAME", "")
-    env_admin_password = getenv("ADMIN_PASSWORD", "")
-
-    if ADMIN_USER:
-        if env_admin_username or env_admin_password:
-            override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
-            if ADMIN_USER["method"] == "manual" or override_admin_creds:
-                updated = False
-                if env_admin_username and ADMIN_USER["username"] != env_admin_username:
-                    ADMIN_USER["username"] = env_admin_username
-                    updated = True
-
-                if env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
-                    if not USER_PASSWORD_RX.match(env_admin_password):
-                        LOGGER.warning(
-                            "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). It will not be updated."
-                        )
-                    else:
-                        ADMIN_USER["password"] = gen_password_hash(env_admin_password)
-                        updated = True
-
-                if updated:
-                    if override_admin_creds:
-                        LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
-                    err = db.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], ADMIN_USER["totp_secret"], method="manual")
-                    if err:
-                        LOGGER.error(f"Couldn't update the admin user in the database: {err}")
-                    else:
-                        LOGGER.info("The admin user was updated successfully")
-            else:
-                LOGGER.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
-    elif env_admin_username and env_admin_password:
-        user_name = env_admin_username or "admin"
-
-        if not getenv("FLASK_DEBUG", False):
-            if len(user_name) > 256:
-                LOGGER.error("The admin username is too long. It must be less than 256 characters.")
-                exit(1)
-            elif not USER_PASSWORD_RX.match(env_admin_password):
-                LOGGER.error(
-                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
-                )
-                exit(1)
-
-        ret = db.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
-        if ret:
-            LOGGER.error(f"Couldn't create the admin user in the database: {ret}")
-            exit(1)
-
-    LOGGER.info("UI is ready")
-
-
-def handle_stop(signum=None, frame=None):
-    if not TMP_DIR.joinpath(".ui.json").is_file():
-        return
-
-    ui_data = "Error"
-    while ui_data == "Error":
-        with suppress(JSONDecodeError):
-            ui_data = loads(TMP_DIR.joinpath(".ui.json").read_text(encoding="utf-8"))
-
-    ui_data["SERVER_STOPPING"] = True
-
-    with LOCK:
-        TMP_DIR.joinpath(".ui.json").write_text(dumps(ui_data), encoding="utf-8")
-
-
-signal(SIGINT, handle_stop)
-signal(SIGTERM, handle_stop)
-
-
-def on_reload(server):
-    handle_stop()
-
 
 def when_ready(server):
     RUN_DIR.mkdir(parents=True, exist_ok=True)
@@ -190,4 +49,3 @@ def on_exit(server):
     RUN_DIR.joinpath("ui.pid").unlink(missing_ok=True)
     TMP_DIR.joinpath("ui.healthy").unlink(missing_ok=True)
     TMP_DIR.joinpath(".flask_secret").unlink(missing_ok=True)
-    TMP_DIR.joinpath(".ui.json").unlink(missing_ok=True)

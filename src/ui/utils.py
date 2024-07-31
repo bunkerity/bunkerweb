@@ -13,6 +13,7 @@ from qrcode.main import QRCode
 from regex import compile as re_compile
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 LOCK = Lock()
 
 

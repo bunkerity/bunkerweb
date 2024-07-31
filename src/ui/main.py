@@ -2,9 +2,10 @@
 import json
 from contextlib import suppress
 from math import floor
+from multiprocessing import Manager
 from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, isabs, join
-from secrets import choice
+from secrets import choice, token_urlsafe
 from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
@@ -49,17 +50,15 @@ from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.Templates import get_ui_templates
 
-from utils import check_settings, gen_password_hash, get_b64encoded_qr_image, path_to_dict, get_remain
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 
 from models import AnonymousUser
 from ui_database import UIDatabase
+from utils import USER_PASSWORD_RX, PLUGIN_KEYS, check_password, check_settings, gen_password_hash, get_b64encoded_qr_image, path_to_dict, get_remain
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 TMP_DIR.mkdir(parents=True, exist_ok=True)
-
-TMP_DATA_FILE = TMP_DIR.joinpath(".ui.json")
 
 LOCK = Lock()
 
@@ -99,11 +98,10 @@ with app.app_context():
     app.logger = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
     FLASK_SECRET = getenv("FLASK_SECRET")
-
     if not FLASK_SECRET:
         if not TMP_DIR.joinpath(".flask_secret").is_file():
-            app.logger.error("The .flask_secret file is missing")
-            stop(1)
+            app.logger.warning("The FLASK_SECRET environment variable is missing or the .flask_secret file is missing, generating a random one ...")
+            TMP_DIR.joinpath(".flask_secret").write_text(token_urlsafe(32), encoding="utf-8")
         FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
     app.config["SECRET_KEY"] = FLASK_SECRET
@@ -118,11 +116,101 @@ with app.app_context():
     login_manager.init_app(app)
     login_manager.login_view = "login"
     login_manager.anonymous_user = AnonymousUser
-    PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 
-    DB = UIDatabase(app.logger, log=False)
+    DB = UIDatabase(app.logger)
 
-    USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+    ready = False
+    while not ready:
+        db_metadata = DB.get_metadata()
+        if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
+            app.logger.warning("Database is not initialized, retrying in 5s ...")
+        else:
+            ready = True
+            continue
+        sleep(5)
+
+    ret, err = DB.init_ui_tables(get_version())
+
+    if not ret and err:
+        app.logger.error(f"Exception while checking database tables : {err}")
+        exit(1)
+    elif not ret:
+        app.logger.info("Database ui tables didn't change, skipping update ...")
+    else:
+        app.logger.info("Database ui tables successfully updated")
+
+    if not DB.get_ui_roles(as_dict=True):
+        ret = DB.create_ui_role("admin", "Admin can create account, manager software and read data.", ["manage", "write", "read"])
+        if ret:
+            app.logger.error(f"Couldn't create the admin role in the database: {ret}")
+            exit(1)
+
+        ret = DB.create_ui_role("writer", "Write can manage software and read data but can't create account.", ["write", "read"])
+        if ret:
+            app.logger.error(f"Couldn't create the admin role in the database: {ret}")
+            exit(1)
+
+        ret = DB.create_ui_role("reader", "Reader can read data but can't proceed to any actions.", ["read"])
+        if ret:
+            app.logger.error(f"Couldn't create the admin role in the database: {ret}")
+            exit(1)
+
+    ADMIN_USER = "Error"
+    while ADMIN_USER == "Error":
+        try:
+            ADMIN_USER = DB.get_ui_user(as_dict=True)
+        except BaseException as e:
+            app.logger.debug(f"Couldn't get the admin user: {e}")
+            sleep(1)
+
+    env_admin_username = getenv("ADMIN_USERNAME", "")
+    env_admin_password = getenv("ADMIN_PASSWORD", "")
+
+    if ADMIN_USER:
+        if env_admin_username or env_admin_password:
+            override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
+            if ADMIN_USER["method"] == "manual" or override_admin_creds:
+                updated = False
+                if env_admin_username and ADMIN_USER["username"] != env_admin_username:
+                    ADMIN_USER["username"] = env_admin_username
+                    updated = True
+
+                if env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
+                    if not USER_PASSWORD_RX.match(env_admin_password):
+                        app.logger.warning(
+                            "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). It will not be updated."
+                        )
+                    else:
+                        ADMIN_USER["password"] = gen_password_hash(env_admin_password)
+                        updated = True
+
+                if updated:
+                    if override_admin_creds:
+                        app.logger.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
+                    err = DB.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], ADMIN_USER["totp_secret"], method="manual")
+                    if err:
+                        app.logger.error(f"Couldn't update the admin user in the database: {err}")
+                    else:
+                        app.logger.info("The admin user was updated successfully")
+            else:
+                app.logger.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
+    elif env_admin_username and env_admin_password:
+        user_name = env_admin_username or "admin"
+
+        if not getenv("FLASK_DEBUG", False):
+            if len(user_name) > 256:
+                app.logger.error("The admin username is too long. It must be less than 256 characters.")
+                exit(1)
+            elif not USER_PASSWORD_RX.match(env_admin_password):
+                app.logger.error(
+                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
+                )
+                exit(1)
+
+        ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
+        if ret:
+            app.logger.error(f"Couldn't create the admin user in the database: {ret}")
+            exit(1)
 
     bw_version = get_version()
 
@@ -152,8 +240,12 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
+    ui_data = Manager().dict()
+
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
+
+app.logger.info("UI is ready")
 
 
 def wait_applying():
@@ -178,18 +270,9 @@ def wait_applying():
         app.logger.error("Too many retries while waiting for scheduler to apply configuration...")
 
 
-def get_ui_data():
-    ui_data = "Error"
-    while ui_data == "Error":
-        with suppress(JSONDecodeError):
-            ui_data = json_loads(TMP_DATA_FILE.read_text(encoding="utf-8"))
-    return ui_data
-
-
 def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False, threaded: bool = False) -> int:
     # Do the operation
     error = 0
-    ui_data = get_ui_data()
 
     if "TO_FLASH" not in ui_data:
         ui_data["TO_FLASH"] = []
@@ -234,8 +317,6 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         ui_data["TO_FLASH"] = []
 
     ui_data["RELOADING"] = False
-    with LOCK:
-        TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
     return error
 
@@ -366,7 +447,6 @@ def error_message(msg: str):
 
 @app.context_processor
 def inject_variables():
-    ui_data = get_ui_data()
     metadata = DB.get_metadata()
 
     changes_ongoing = any(
@@ -374,11 +454,9 @@ def inject_variables():
         for k, v in DB.get_metadata().items()
         if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
     )
-    changes = False
 
     if not changes_ongoing and ui_data.get("PRO_LOADING"):
         ui_data["PRO_LOADING"] = False
-        changes = True
 
     if not changes_ongoing and metadata["failover"]:
         flash(
@@ -388,11 +466,6 @@ def inject_variables():
     elif not changes_ongoing and not metadata["failover"] and ui_data.get("CONFIG_CHANGED", False):
         flash("The last changes have been applied successfully.", "success")
         ui_data["CONFIG_CHANGED"] = False
-        changes = True
-
-    if changes:
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
     # check that is value is in tuple
     return dict(
@@ -444,6 +517,8 @@ def set_security_headers(response):
     # * Referrer-Policy header to prevent leaking of sensitive data
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
+    app.logger.debug(f"UI data: {ui_data}")
+
     return response
 
 
@@ -481,8 +556,6 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
-    ui_data = get_ui_data()
-
     if ui_data.get("SERVER_STOPPING", False):
         response = make_response(jsonify({"message": "Server is shutting down, try again later."}), 503)
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
@@ -514,23 +587,21 @@ def before_request():
                             DB.retry_connection(fallback=True, pool_timeout=1)
                             DB.retry_connection(fallback=True, log=False)
                 ui_data["READONLY_MODE"] = True
-            ui_data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat()
+            ui_data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
         elif not ui_data.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
                 DB.test_write()
                 ui_data["READONLY_MODE"] = False
             except BaseException:
                 ui_data["READONLY_MODE"] = True
-                ui_data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat()
+                ui_data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
         else:
             try:
                 DB.test_read()
             except BaseException:
-                ui_data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat()
+                ui_data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
 
         DB.readonly = ui_data.get("READONLY_MODE", False)
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         if DB.readonly:
             flash("Database connection is in read-only mode : no modification possible.", "error")
@@ -631,7 +702,6 @@ def setup():
             if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
                 return handle_error("The hostname is not valid.", "setup")
 
-            ui_data = get_ui_data()
             ui_data["RELOADING"] = True
             ui_data["LAST_RELOAD"] = time()
 
@@ -662,9 +732,6 @@ def setup():
                 args=("services", config, request.form["server_name"], request.form["server_name"]),
                 kwargs={"operation": "new", "threaded": True},
             ).start()
-
-            with LOCK:
-                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         return Response(status=200)
 
@@ -825,7 +892,6 @@ def account():
                     else:
                         flash(message)
 
-            ui_data = get_ui_data()
             ui_data["PRO_LOADING"] = True
             ui_data["CONFIG_CHANGED"] = True
 
@@ -835,9 +901,6 @@ def account():
                 Thread(target=update_global_config, args=(True,)).start()
             else:
                 update_global_config()
-
-            with LOCK:
-                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
             return redirect(url_for("account"))
 
@@ -883,8 +946,6 @@ def account():
         if request.form["operation"] == "totp":
             verify_data_in_form(data={"totp_token": None}, err_message="Missing totp token parameter on /account.", redirect_url="account")
 
-            ui_data = get_ui_data()
-
             if request.form["totp_token"] not in current_user.list_recovery_codes and not current_user.check_otp(
                 request.form["totp_token"], secret=session.get("tmp_totp_secret")
             ):
@@ -893,9 +954,6 @@ def account():
             session["totp_validated"] = not bool(current_user.totp_secret)
             secret_token = None if bool(current_user.totp_secret) else session.get("tmp_totp_secret")
             session["tmp_totp_secret"] = None
-
-            with LOCK:
-                TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         ret = DB.update_ui_user(username, gen_password_hash(password), secret_token, current_user.method if request.form["operation"] == "totp" else "ui")
         if ret:
@@ -948,7 +1006,6 @@ def instances():
             next=True,
         )
 
-        ui_data = get_ui_data()
         ui_data["RELOADING"] = True
         ui_data["LAST_RELOAD"] = time()
         Thread(
@@ -957,9 +1014,6 @@ def instances():
             args=("instances", request.form["INSTANCE_ID"]),
             kwargs={"operation": request.form["operation"], "threaded": True},
         ).start()
-
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         return redirect(
             url_for(
@@ -1101,8 +1155,6 @@ def services():
                 threaded=threaded,
             )
 
-        ui_data = get_ui_data()
-
         if any(
             v
             for k, v in db_metadata.items()
@@ -1115,9 +1167,6 @@ def services():
             update_services()
 
         ui_data["CONFIG_CHANGED"] = True
-
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         message = ""
 
@@ -1217,8 +1266,6 @@ def services_raw(service_name: str):
                 threaded=threaded,
             )
 
-        ui_data = get_ui_data()
-
         if any(
             v
             for k, v in db_metadata.items()
@@ -1231,9 +1278,6 @@ def services_raw(service_name: str):
             update_services()
 
         ui_data["CONFIG_CHANGED"] = True
-
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         message = ""
 
@@ -1333,8 +1377,6 @@ def global_config():
 
             manage_bunkerweb("global_config", variables, threaded=threaded)
 
-        ui_data = get_ui_data()
-
         if "PRO_LICENSE_KEY" in variables:
             ui_data["PRO_LOADING"] = True
 
@@ -1350,9 +1392,6 @@ def global_config():
             update_global_config()
 
         ui_data["CONFIG_CHANGED"] = True
-
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         with suppress(BaseException):
             if config["PRO_LICENSE_KEY"]["value"] != variables["PRO_LICENSE_KEY"]:
@@ -1470,10 +1509,7 @@ def configs():
             app.logger.error(f"Could not save custom configs: {error}")
             return handle_error("Couldn't save custom configs", "configs", True)
 
-        ui_data = get_ui_data()
         ui_data["CONFIG_CHANGED"] = True
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
         flash(operation)
 
@@ -1528,8 +1564,6 @@ def plugins():
                     if plugin["id"] == variables["name"]:
                         del plugins[x]
 
-                ui_data = get_ui_data()
-
                 err = DB.update_external_plugins(plugins)
                 if err:
                     message = f"Couldn't update external plugins to database: {err}"
@@ -1545,19 +1579,14 @@ def plugins():
                         flash(message)
 
                 ui_data["RELOADING"] = False
-                with LOCK:
-                    TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
             if any(
                 v
                 for k, v in db_metadata.items()
                 if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
             ):
-                ui_data = get_ui_data()
                 ui_data["RELOADING"] = True
                 ui_data["LAST_RELOAD"] = time()
-                with LOCK:
-                    TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
                 Thread(target=update_plugins, args=(True,)).start()
             else:
@@ -1742,8 +1771,6 @@ def plugins():
                         flash(f"Plugin {plugin['id']} already exists", "error")
                         del new_plugins[new_plugins_ids.index(plugin["id"])]
 
-                ui_data = get_ui_data()
-
                 err = DB.update_external_plugins(new_plugins, delete_missing=False)
                 if err:
                     message = f"Couldn't update external plugins to database: {err}"
@@ -1759,19 +1786,14 @@ def plugins():
                         flash("Plugins uploaded successfully")
 
                 ui_data["RELOADING"] = False
-                with LOCK:
-                    TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
             if any(
                 v
                 for k, v in db_metadata.items()
                 if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
             ):
-                ui_data = get_ui_data()
                 ui_data["RELOADING"] = True
                 ui_data["LAST_RELOAD"] = time()
-                with LOCK:
-                    TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
                 Thread(target=update_plugins, args=(True,)).start()
             else:
@@ -2380,12 +2402,12 @@ def bans():
                 socket_keepalive=True,
                 max_connections=redis_keepalive_pool,
             )
-            redis_client = sentinel.slave_for(sentinel_master, db=redis_db, username=username, password=password)
+            redis_client = sentinel.slave_for(sentinel_master, DB=redis_db, username=username, password=password)
         else:
             redis_client = Redis(
                 host=redis_host,
                 port=redis_port,
-                db=redis_db,
+                DB=redis_db,
                 username=username,
                 password=password,
                 socket_timeout=redis_timeout,
@@ -2585,8 +2607,6 @@ def login():
 @app.route("/check_reloading")
 @login_required
 def check_reloading():
-    ui_data = get_ui_data()
-
     if not ui_data.get("RELOADING", False) or ui_data.get("LAST_RELOAD", 0) + 60 < time():
         if ui_data.get("RELOADING", False):
             app.logger.warning("Reloading took too long, forcing the state to be reloaded")
@@ -2600,9 +2620,6 @@ def check_reloading():
                 flash(f["content"])
 
         ui_data["TO_FLASH"] = []
-
-        with LOCK:
-            TMP_DATA_FILE.write_text(dumps(ui_data), encoding="utf-8")
 
     return jsonify({"reloading": ui_data.get("RELOADING", False)})
 
