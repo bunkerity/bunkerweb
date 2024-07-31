@@ -13,13 +13,12 @@ from pathlib import Path
 from typing import Union
 from uuid import uuid4
 
-from bcrypt import gensalt
-from builder import home_builder, instances_builder, global_config_builder, jobs_builder, services_builder
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from bcrypt import gensalt
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from cryptography.fernet import Fernet
@@ -53,6 +52,12 @@ from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.Templates import get_ui_templates
 from src.totp import Totp
+
+from builder.home import home_builder
+from builder.instances import instances_builder
+from builder.global_config import global_config_builder
+from builder.jobs import jobs_builder
+from builder.services import services_builder
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
