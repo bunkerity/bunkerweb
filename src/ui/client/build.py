@@ -100,13 +100,16 @@ def move_template(folder: Path, target_folder: Path):
         if "global-config" in file.parts or "jobs" in file.parts or "services" in file.parts:
             base_html = base_html.replace("data_server_builder[1:-1]", "data_server_builder")
 
-        content = file.read_text()
+        with file.open("r") as f:
+            content = f.read()
+
         content = sub(r'(href|src)="\/(css|js|img|favicon|assets|js)\/[^<]*?(?=<|\/>)', format_template, content)
         # get the content before <body>
         content = content[: content.index("<body>")] + base_html
 
         # write the new content
-        file.write_text(content)
+        with file.open("w") as f:
+            f.write(content)
 
         if target_folder.joinpath(f"{file.parent.name}.html").exists():
             target_folder.joinpath(f"{file.parent.name}.html").unlink()
