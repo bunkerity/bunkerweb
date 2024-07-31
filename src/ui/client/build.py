@@ -64,7 +64,7 @@ def remove_dir(directory: Path):
     """Utils function to remove a directory if exists"""
     if directory.exists():
         print(f"Removing {directory}", flush=True)
-        rmtree(directory)
+        rmtree(directory.as_posix())
 
 
 def create_dir(directory: Path):
@@ -118,9 +118,9 @@ def move_template(folder: Path, target_folder: Path):
         if target_folder.joinpath(f"{file.parent.name}.html").exists():
             target_folder.joinpath(f"{file.parent.name}.html").unlink()
 
-        copy(file, target_folder.joinpath(f"{file.parent.name}.html"))
+        copy(file.as_posix(), target_folder.joinpath(f"{file.parent.name}.html").as_posix())
 
-    rmtree(folder.parent)
+    rmtree(folder.parent.as_posix())
 
 
 def move_statics(folder: Path, target_folder: Path):
@@ -128,8 +128,8 @@ def move_statics(folder: Path, target_folder: Path):
 
     for file in folder.glob("*"):
         if target_folder.joinpath(file.name).is_dir():
-            rmtree(target_folder.joinpath(file.name))
-        move(file, target_folder.joinpath(file.name))
+            rmtree(target_folder.joinpath(file.name).as_posix())
+        move(file.as_posix(), target_folder.joinpath(file.name).as_posix())
 
 
 def build():
