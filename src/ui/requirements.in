@@ -5,7 +5,6 @@ Flask-Login==0.6.3
 Flask_WTF==1.2.1
 gunicorn[gthread]==22.0.0
 passlib==1.7.4
-pyotp==2.9.0
 python-magic==0.4.27
 python_dateutil==2.9.0.post0
 qrcode==7.4.2

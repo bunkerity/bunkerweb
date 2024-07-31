@@ -16,7 +16,6 @@ from sqlalchemy.exc import IntegrityError
 
 from Database import Database  # type: ignore
 from models import Base, Users, Roles, RolesUsers, UserRecoveryCodes, RolesPermissions, Permissions
-from utils import gen_recovery_codes
 
 
 class UIDatabase(Database):
@@ -167,6 +166,7 @@ class UIDatabase(Database):
         email: Optional[str] = None,
         *,
         totp_secret: Optional[str] = None,
+        totp_recovery_codes: Optional[List[str]] = None,
         method: str = "manual",
         admin: bool = False,
     ) -> str:
@@ -199,9 +199,8 @@ class UIDatabase(Database):
                 )
             )
 
-            if totp_secret:
-                for code in gen_recovery_codes():
-                    session.add(UserRecoveryCodes(user_name=username, code=code))
+            for code in totp_recovery_codes or []:
+                session.add(UserRecoveryCodes(user_name=username, code=code))
 
             try:
                 session.commit()
@@ -210,7 +209,9 @@ class UIDatabase(Database):
 
         return ""
 
-    def update_ui_user(self, username: str, password: bytes, totp_secret: Optional[str], method: str = "manual") -> str:
+    def update_ui_user(
+        self, username: str, password: bytes, totp_secret: Optional[str], *, totp_recovery_codes: Optional[List[str]] = None, method: str = "manual"
+    ) -> str:
         """Update ui user."""
         with self._db_session() as session:
             if self.readonly:
@@ -233,8 +234,8 @@ class UIDatabase(Database):
                 return str(e)
 
         if user.totp_refreshed:
-            if totp_secret:
-                self.refresh_ui_user_recovery_codes(username)
+            if totp_recovery_codes:
+                self.refresh_ui_user_recovery_codes(username, totp_recovery_codes or [])
             else:
                 self.delete_ui_user_recovery_codes(username)
 
@@ -325,7 +326,7 @@ class UIDatabase(Database):
 
             return roles_data
 
-    def refresh_ui_user_recovery_codes(self, username: str) -> str:
+    def refresh_ui_user_recovery_codes(self, username: str, codes: List[str]) -> str:
         """Refresh ui user recovery codes."""
         with self._db_session() as session:
             if self.readonly:
@@ -335,10 +336,15 @@ class UIDatabase(Database):
             if not user:
                 return f"User {username} doesn't exist"
 
+            if not codes:
+                return "No recovery codes provided"
+
             session.query(UserRecoveryCodes).filter_by(user_name=username).delete()
 
-            for code in gen_recovery_codes():
+            for code in codes:
                 session.add(UserRecoveryCodes(user_name=username, code=code))
+
+            user.totp_refreshed = True
 
             try:
                 session.commit()
@@ -404,3 +410,19 @@ class UIDatabase(Database):
                 session.commit()
             except BaseException as e:
                 return str(e)
+
+    def set_ui_user_recovery_code_refreshed(self, username: str, value: bool) -> str:
+        """Set ui user recovery code refreshed."""
+        with self._db_session() as session:
+            user = session.query(Users).filter_by(username=username).first()
+            if not user:
+                return f"User {username} doesn't exist"
+
+            user.totp_refreshed = value
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""

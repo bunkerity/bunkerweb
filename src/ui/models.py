@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from functools import partial
 from os.path import join, sep
 from sys import path as sys_path
-from typing import Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("db",))]:
     if deps_path not in sys_path:
@@ -10,9 +9,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from bcrypt import checkpw
 from flask_login import AnonymousUserMixin, UserMixin
-from pyotp.totp import TOTP
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, func
+from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText, func
 
 
 from model import METHODS_ENUM  # type: ignore
@@ -30,16 +28,18 @@ class AnonymousUser(AnonymousUserMixin):
     last_login_ip = None
     login_count = 0
     totp_secret = None
+    totp_refreshed = False
     creation_date = datetime.now(timezone.utc)
     update_date = datetime.now(timezone.utc)
+    list_roles = []
+    list_permissions = []
+    list_recovery_codes = []
+
+    def get_id(self):
+        return self.username
 
     def check_password(self, password: str) -> bool:
         return False
-
-    def check_otp(self, otp: str, *, secret: Optional[str] = None) -> bool:
-        if not secret:
-            raise ValueError("Secret is required for anonymous user")
-        return TOTP(secret).verify(otp, valid_window=3)
 
 
 class Users(Base, UserMixin):
@@ -57,7 +57,7 @@ class Users(Base, UserMixin):
     login_count = Column(Integer, default=0, nullable=False)
 
     # 2FA
-    totp_secret = Column(String(32), nullable=True)
+    totp_secret = Column(String(256), nullable=True)
     totp_refreshed = Column(Boolean, nullable=False, default=False)
 
     creation_date = Column(DateTime(), nullable=False, server_default=func.now())
@@ -74,11 +74,6 @@ class Users(Base, UserMixin):
 
     def check_password(self, password: str) -> bool:
         return checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
-
-    def check_otp(self, otp: str, *, secret: Optional[str] = None) -> bool:
-        if secret:
-            return TOTP(secret).verify(otp, valid_window=3)
-        return TOTP(self.totp_secret).verify(otp, valid_window=3)
 
 
 class Roles(Base):
@@ -107,7 +102,7 @@ class UserRecoveryCodes(Base):
 
     id = Column(Integer, primary_key=True)
     user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
-    code = Column(String(19), nullable=False)
+    code = Column(UnicodeText, nullable=False)
 
     user = relationship("Users", back_populates="recovery_codes")
 

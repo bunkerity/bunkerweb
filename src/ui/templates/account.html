@@ -436,7 +436,7 @@
                      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full">
                     <h5 class="input-title text-center">2FA QR CODE</h5>
                     <div class="flex justify-center mt-2">
-                        <img src="data:image/png;base64, {{ totp_qr_image }}"
+                        <img src="{{ totp_qr_image }}"
                              alt="Secret Token"
                              style="width: 200px;
                                     height: 200px" />
