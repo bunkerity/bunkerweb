@@ -37,7 +37,7 @@ def set_setup():
     move_template(opt_dir_setup_page, ui_dir_templates)
 
 
-def run_command(command: List[str]):
+def run_command(command: List[str]) -> int:
     """Utils to run a subprocess command. This is usefull to run npm commands to build vite project"""
     print(f"Running command: {command}", flush=True)
     process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory, text=True)
@@ -50,7 +50,10 @@ def run_command(command: List[str]):
         print("Error while running command", flush=True)
         print(process.stdout, flush=True)
         print(process.stderr, flush=True)
-        exit(1)
+        return 1
+
+    print("Command executed successfully", flush=True)
+    return 0
 
 
 def remove_dir(directory: Path):
@@ -100,16 +103,13 @@ def move_template(folder: Path, target_folder: Path):
         if "global-config" in file.parts or "jobs" in file.parts or "services" in file.parts:
             base_html = base_html.replace("data_server_builder[1:-1]", "data_server_builder")
 
-        with file.open("r") as f:
-            content = f.read()
-
+        content = file.read_text()
         content = sub(r'(href|src)="\/(css|js|img|favicon|assets|js)\/[^<]*?(?=<|\/>)', format_template, content)
         # get the content before <body>
         content = content[: content.index("<body>")] + base_html
 
         # write the new content
-        with file.open("w") as f:
-            f.write(content)
+        file.write_text(content)
 
         if target_folder.joinpath(f"{file.parent.name}.html").exists():
             target_folder.joinpath(f"{file.parent.name}.html").unlink()
@@ -134,10 +134,13 @@ def build():
     create_base_dirs()
     # Only install packages if not already installed
     if not current_directory.joinpath("node_modules").exists():
-        run_command(["/usr/bin/npm", "install"])
-    run_command(["/usr/bin/npm", "run", "build-dashboard"])
+        if not run_command(["/usr/bin/npm", "install"]):
+            if not run_command(["npm", "install"]):
+                exit(1)
+    if not run_command(["/usr/bin/npm", "run", "build-dashboard"]):
+        if not run_command(["npm", "run", "build-dashboard"]):
+            exit(1)
     set_dashboard()
-    # run_command(["/usr/bin/npm", "run", "build-dashboard"])
     # run_command(["/usr/bin/npm", "run", "build-setup"])
     # set_setup()
 
