@@ -2483,10 +2483,35 @@ class Database:
                     "hostname": instance.hostname,
                     "port": instance.port,
                     "server_name": instance.server_name,
+                    "status": instance.status,
                     "method": instance.method,
+                    "creation_date": instance.creation_date,
+                    "last_seen": instance.last_seen,
                 }
                 for instance in query
             ]
+
+    def get_instance(self, hostname: str, *, method: Optional[str] = None) -> Dict[str, Any]:
+        """Get instance."""
+        with self._db_session() as session:
+            query = session.query(Instances).filter_by(hostname=hostname)
+            if method:
+                query = query.filter_by(method=method)
+
+            instance = query.first()
+
+            if not instance:
+                return {}
+
+            return {
+                "hostname": instance.hostname,
+                "port": instance.port,
+                "server_name": instance.server_name,
+                "status": instance.status,
+                "method": instance.method,
+                "creation_date": instance.creation_date,
+                "last_seen": instance.last_seen,
+            }
 
     def get_plugin_actions(self, plugin: str) -> Optional[Any]:
         """get actions file for the plugin"""

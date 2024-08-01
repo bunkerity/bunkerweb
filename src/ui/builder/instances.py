@@ -3,15 +3,18 @@ import json
 
 from os.path import join, sep
 from sys import path as sys_path
+from typing import List
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from src.instance import Instance
+
 from builder.utils.widgets import instance_widget
 
 
-def instances_builder(instances: list) -> str:
+def instances_builder(instances: List[Instance]) -> str:
     """
     It returns the needed format from data to render the instances page in JSON format for the Vue.js builder
     """
@@ -21,18 +24,18 @@ def instances_builder(instances: list) -> str:
         # setup actions buttons
         actions = (
             ["restart", "stop"]
-            if instance._type == "local" and instance.health
+            if instance.hostname in ("localhost", "127.0.0.1") and instance.status == "up"
             else (
                 ["reload", "stop"]
-                if not instance._type == "local" and instance.health
-                else ["start"] if instance._type == "local" and not instance.health else []
+                if instance.hostname not in ("localhost", "127.0.0.1") and instance.status == "up"
+                else ["start"] if instance.hostname in ("localhost", "127.0.0.1") and instance.status != "up" else []
             )
         )
 
         buttons = [
             {
                 "attrs": {
-                    "data-submit-form": f"""{{"INSTANCE_ID" : "{instance._id}", "operation" : "{action}" }}""",
+                    "data-submit-form": f"""{{"INSTANCE_ID" : "{instance.hostname}", "operation" : "{action}" }}""",
                 },
                 "text": f"action_{action}",
                 "color": "success" if action == "start" else "error" if action == "stop" else "warning",
@@ -43,15 +46,15 @@ def instances_builder(instances: list) -> str:
         instance = instance_widget(
             containerColumns={"pc": 6, "tablet": 6, "mobile": 12},
             pairs=[
-                {"key": "instances_hostname", "value": instance.hostname},
-                {"key": "instances_type", "value": instance._type},
-                {"key": "instances_status", "value": "instances_active" if instance.health else "instances_inactive"},
+                {"key": "instances_method", "value": instance.method},
+                {"key": "instances_creation_date", "value": instance.creation_date.strftime("%d-%m-%Y %H:%M:%S")},
+                {"key": "instances_last_seen", "value": instance.last_seen.strftime("%d-%m-%Y %H:%M:%S")},
             ],
-            status="success" if instance.health else "error",
-            title=instance.name,
+            status="success" if instance.status == "up" else "error",
+            title=instance.hostname,
             buttons=buttons,
         )
 
         builder.append(instance)
 
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return base64.b64encode(json.dumps(builder).encode("utf-8")).decode("ascii")

@@ -3,7 +3,7 @@ import json
 from contextlib import suppress
 from math import floor
 from multiprocessing import Manager
-from os import _exit, getenv, listdir, sep, urandom
+from os import _exit, getenv, listdir, sep
 from os.path import basename, dirname, isabs, join
 from random import randint
 from secrets import choice, token_urlsafe
@@ -46,11 +46,10 @@ from time import sleep, time
 from werkzeug.utils import secure_filename
 from zipfile import BadZipFile, ZipFile
 
-from src.Instances import Instances
-from src.ConfigFiles import ConfigFiles
-from src.Config import Config
-from src.ReverseProxied import ReverseProxied
-from src.Templates import get_ui_templates
+from src.instance import Instance, InstancesUtils
+from src.custom_config import CustomConfig
+from src.config import Config
+from src.reverse_proxied import ReverseProxied
 from src.totp import Totp
 
 from builder.home import home_builder
@@ -170,6 +169,10 @@ with app.app_context():
     app.config["SESSION_COOKIE_HTTPONLY"] = True  # Recommended for security
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
+    app.config["WTF_CSRF_SSL_STRICT"] = False
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
+    app.config["SCRIPT_NONCE"] = ""
+
     login_manager = LoginManager()
     login_manager.session_protection = "strong"
     login_manager.init_app(app)
@@ -273,20 +276,6 @@ with app.app_context():
             app.logger.error(f"Couldn't create the admin user in the database: {ret}")
             exit(1)
 
-    try:
-        app.config.update(
-            INSTANCES=Instances(DB),
-            CONFIG=Config(DB),
-            CONFIGFILES=ConfigFiles(),
-            WTF_CSRF_SSL_STRICT=False,
-            SEND_FILE_MAX_AGE_DEFAULT=86400,
-            SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
-            UI_TEMPLATES=get_ui_templates(),
-        )
-    except FileNotFoundError as e:
-        app.logger.error(repr(e), e.filename)
-        stop(1)
-
     # Declare functions for jinja2
     app.jinja_env.globals.update(check_settings=check_settings)
 
@@ -294,8 +283,11 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
+    app.bw_instances_utils = InstancesUtils(DB)
+    app.bw_config = Config(DB)
+    app.bw_custom_configs = CustomConfig()
     app.data = Manager().dict()
-    app.totp = Totp(app, TOTP_SECRETS, [key.encode() for key in MF_RECOVERY_CODES_KEYS])
+    app.totp = Totp(app, TOTP_SECRETS, [key.encode("utf-8") for key in MF_RECOVERY_CODES_KEYS])
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
@@ -334,22 +326,38 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
 
     if method == "services":
         if operation == "new":
-            operation, error = app.config["CONFIG"].new_service(args[0], is_draft=is_draft)
+            operation, error = app.bw_config.new_service(args[0], is_draft=is_draft)
         elif operation == "edit":
-            operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
+            operation, error = app.bw_config.edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
         elif operation == "delete":
-            operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
+            operation, error = app.bw_config.delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft))
     elif method == "global_config":
-        operation, error = app.config["CONFIG"].edit_global_conf(args[0], check_changes=True)
+        operation, error = app.bw_config.edit_global_conf(args[0], check_changes=True)
 
     if operation == "reload":
-        operation = app.config["INSTANCES"].reload_instance(args[0])
+        instance = Instance.from_hostname(args[0], DB)
+        if instance:
+            operation = instance.reload()
+        else:
+            operation = "The instance does not exist."
     elif operation == "start":
-        operation = app.config["INSTANCES"].start_instance(args[0])
+        instance = Instance.from_hostname(args[0], DB)
+        if instance:
+            operation = instance.start()
+        else:
+            operation = "The instance does not exist."
     elif operation == "stop":
-        operation = app.config["INSTANCES"].stop_instance(args[0])
+        instance = Instance.from_hostname(args[0], DB)
+        if instance:
+            operation = instance.stop()
+        else:
+            operation = "The instance does not exist."
     elif operation == "restart":
-        operation = app.config["INSTANCES"].restart_instance(args[0])
+        instance = Instance.from_hostname(args[0], DB)
+        if instance:
+            operation = instance.restart()
+        else:
+            operation = "The instance does not exist."
     elif not error:
         operation = "The scheduler will be in charge of applying the changes."
 
@@ -531,7 +539,7 @@ def inject_variables():
         pro_services=metadata["pro_services"],
         pro_expire=metadata["pro_expire"].strftime("%d-%m-%Y") if metadata["pro_expire"] else "Unknown",
         pro_overlapped=metadata["pro_overlapped"],
-        plugins=app.config["CONFIG"].get_plugins(),
+        plugins=app.bw_config.get_plugins(),
         pro_loading=app.data.get("PRO_LOADING", False),
         bw_version=metadata["version"],
         is_readonly=app.data.get("READONLY_MODE", False),
@@ -617,7 +625,7 @@ def before_request():
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
         return response
 
-    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
+    app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
     if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
         if (
@@ -702,7 +710,7 @@ def check():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
-    db_config = app.config["CONFIG"].get_config(methods=False, filtered_settings=("SERVER_NAME", "MULTISITE", "USE_UI", "UI_HOST", "AUTO_LETS_ENCRYPT"))
+    db_config = app.bw_config.get_config(methods=False, filtered_settings=("SERVER_NAME", "MULTISITE", "USE_UI", "UI_HOST", "AUTO_LETS_ENCRYPT"))
 
     admin_user = DB.get_ui_user()
 
@@ -781,7 +789,7 @@ def setup():
                 config["SELF_SIGNED_SSL_SUBJ"] = f"/CN={request.form['server_name']}/"
 
             if not config.get("MULTISITE", "no") == "yes":
-                app.config["CONFIG"].edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
+                app.bw_config.edit_global_conf({"MULTISITE": "yes"}, check_changes=False)
 
             # deepcode ignore MissingAPI: We don't need to check to wait for the thread to finish
             Thread(
@@ -854,13 +862,13 @@ def home():
     if r and r.status_code == 200:
         remote_version = basename(r.url).strip().replace("v", "")
 
-    config = app.config["CONFIG"].get_config(with_drafts=True, filtered_settings=("SERVER_NAME",))
-    instances = app.config["INSTANCES"].get_instances()
+    config = app.bw_config.get_config(with_drafts=True, filtered_settings=("SERVER_NAME",))
+    instances = app.bw_instances_utils.get_instances()
 
     instance_health_count = 0
 
     for instance in instances:
-        if instance.health is True:
+        if instance.status == "up":
             instance_health_count += 1
 
     services = 0
@@ -895,7 +903,7 @@ def home():
         "pro_status": metadata["pro_status"],
         "pro_services": metadata["pro_services"],
         "pro_overlapped": metadata["pro_overlapped"],
-        "plugins_number": len(app.config["CONFIG"].get_plugins()),
+        "plugins_number": len(app.bw_config.get_plugins()),
         "plugins_errors": DB.get_plugins_errors(),
     }
 
@@ -927,7 +935,7 @@ def account():
             variable = {}
             variable["PRO_LICENSE_KEY"] = request.form["license"]
 
-            variable = app.config["CONFIG"].check_variables(variable, {"PRO_LICENSE_KEY": request.form["license"]})
+            variable = app.bw_config.check_variables(variable, {"PRO_LICENSE_KEY": request.form["license"]})
 
             if not variable:
                 return handle_error("The license key variable checks returned error", "account", True)
@@ -1101,7 +1109,7 @@ def instances():
         )
 
     # Display instances
-    instances = app.config["INSTANCES"].get_instances()
+    instances = app.bw_instances_utils.get_instances()
 
     data_server_builder = instances_builder(instances)
     return render_template("instances.html", title="Instances", data_server_builder=json.dumps(data_server_builder))
@@ -1179,7 +1187,7 @@ def get_service_data():
         ):
             del variables[variable]
 
-    variables = app.config["CONFIG"].check_variables(variables, config)
+    variables = app.bw_config.check_variables(variables, config)
     return config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged
 
 
@@ -1208,7 +1216,7 @@ def services():
         # Delete
         if request.form["operation"] == "delete":
 
-            is_service = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
+            is_service = app.bw_config.check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
 
             if not is_service:
                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
@@ -1319,7 +1327,7 @@ def services_raw(service_name: str):
         # Delete
         if request.form["operation"] == "delete":
 
-            is_service = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
+            is_service = app.bw_config.check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
 
             if not is_service:
                 error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
@@ -1436,7 +1444,7 @@ def global_config():
                 del variables[variable]
                 continue
 
-        variables = app.config["CONFIG"].check_variables(variables, config)
+        variables = app.bw_config.check_variables(variables, config)
 
         if not variables:
             return handle_error("The global configuration was not edited because no values were changed.", "global_config", True)
@@ -1483,7 +1491,7 @@ def global_config():
         )
 
     global_config = DB.get_config(global_only=True, methods=True)
-    plugins = app.config["CONFIG"].get_plugins()
+    plugins = app.bw_config.get_plugins()
     data_server_builder = global_config_builder(plugins, global_config)
     return render_template("global-config.html", data_server_builder=data_server_builder)
 
@@ -1513,7 +1521,9 @@ def configs():
         if variables["type"] != "file":
             return handle_error("Invalid type parameter on /configs.", "configs", True)
 
-        operation = app.config["CONFIGFILES"].check_path(variables["path"])
+        # TODO: revamp this to use a path but a form to edit the content
+
+        operation = app.bw_custom_configs.check_path(variables["path"])
 
         if operation:
             return handle_error(operation, "configs", True)
@@ -1543,7 +1553,7 @@ def configs():
 
         # New or edit a config
         if request.form["operation"] in ("new", "edit"):
-            if not app.config["CONFIGFILES"].check_name(name):
+            if not app.bw_custom_configs.check_name(name):
                 return handle_error(
                     f"Invalid {variables['type']} name. (Can only contain numbers, letters, underscores, dots and hyphens (min 4 characters and max 64))",
                     "configs",
@@ -1598,7 +1608,7 @@ def configs():
             path_to_dict(
                 join(sep, "etc", "bunkerweb", "configs"),
                 db_data=db_configs,
-                services=app.config["CONFIG"].get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
+                services=app.bw_config.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
     )
@@ -1636,7 +1646,7 @@ def plugins():
             def update_plugins(threaded: bool = False):  # type: ignore
                 wait_applying()
 
-                plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
+                plugins = app.bw_config.get_plugins(_type="external", with_data=True)
                 for x, plugin in enumerate(plugins):
                     if plugin["id"] == variables["name"]:
                         del plugins[x]
@@ -1758,7 +1768,7 @@ def plugins():
 
                     folder_name = plugin_file["id"]
 
-                    if not app.config["CONFIGFILES"].check_name(folder_name):
+                    if not app.bw_custom_configs.check_name(folder_name):
                         errors += 1
                         error = 1
                         flash(
@@ -1842,7 +1852,7 @@ def plugins():
             def update_plugins(threaded: bool = False):
                 wait_applying()
 
-                plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
+                plugins = app.bw_config.get_plugins(_type="external", with_data=True)
                 for plugin in deepcopy(plugins):
                     if plugin["id"] in new_plugins_ids:
                         flash(f"Plugin {plugin['id']} already exists", "error")
@@ -1882,7 +1892,7 @@ def plugins():
     if tmp_ui_path.is_dir():
         rmtree(tmp_ui_path, ignore_errors=True)
 
-    plugins = app.config["CONFIG"].get_plugins()
+    plugins = app.bw_config.get_plugins()
     plugins_internal = 0
     plugins_external = 0
     plugins_pro = 0
@@ -1992,7 +2002,7 @@ def custom_plugin(plugin: str):
             return error_message("The plugin does not have a template"), 404
 
         # Case template, prepare data
-        plugins = app.config["CONFIG"].get_plugins()
+        plugins = app.bw_config.get_plugins()
         plugin_id = None
         curr_plugin = {}
         is_used = False
@@ -2119,7 +2129,7 @@ def cache():
                 join(sep, "var", "cache", "bunkerweb"),
                 is_cache=True,
                 db_data=DB.get_jobs_cache_files(),
-                services=app.config["CONFIG"].get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
+                services=app.bw_config.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
     )
@@ -2128,8 +2138,7 @@ def cache():
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    instances = app.config["INSTANCES"].get_instances()
-    return render_template("logs.html", instances=instances, username=current_user.get_id())
+    return render_template("logs.html", instances=app.bw_instances_utils.get_instances(), username=current_user.get_id())
 
 
 @app.route("/logs/local", methods=["GET"])
@@ -2370,7 +2379,7 @@ def logs_container(container_id):
 @app.route("/reports", methods=["GET"])
 @login_required
 def reports():
-    reports = app.config["INSTANCES"].get_reports()
+    reports = app.bw_instances_utils.get_reports()
     total_reports = len(reports)
     reports = reports[:100]
 
@@ -2413,7 +2422,7 @@ def bans():
         verify_data_in_form(data={"data": None}, err_message="Missing data parameter on /bans.", redirect_url="bans")
 
     redis_client = None
-    db_config = app.config["CONFIG"].get_config(
+    db_config = app.bw_config.get_config(
         global_only=True,
         methods=False,
         filtered_settings=(
@@ -2528,7 +2537,7 @@ def bans():
                 if not redis_client.delete(f"bans_ip_{unban['ip']}"):
                     flash(f"Couldn't unban {unban['ip']} on redis", "error")
 
-            resp = app.config["INSTANCES"].unban(unban["ip"])
+            resp = app.bw_instances_utils.unban(unban["ip"])
             if resp:
                 flash(f"Couldn't unban {unban['ip']} on the following instances: {', '.join(resp)}", "error")
             else:
@@ -2560,7 +2569,7 @@ def bans():
                     flash(f"Couldn't ban {ban['ip']} on redis", "error")
                 redis_client.expire(f"bans_ip_{ban['ip']}", int(ban_end))
 
-            resp = app.config["INSTANCES"].ban(ban["ip"], ban_end, reason)
+            resp = app.bw_instances_utils.ban(ban["ip"], ban_end, reason)
             if resp:
                 flash(f"Couldn't ban {ban['ip']} on the following instances: {', '.join(resp)}", "error")
             else:
@@ -2577,7 +2586,7 @@ def bans():
                 continue
             exp = redis_client.ttl(key)
             bans.append({"ip": ip, "exp": exp} | json_loads(data))  # type: ignore
-    instance_bans = app.config["INSTANCES"].get_bans()
+    instance_bans = app.bw_instances_utils.get_bans()
 
     # Prepare data
     reasons = {}

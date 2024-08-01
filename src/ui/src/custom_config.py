@@ -8,7 +8,7 @@ from re import compile as re_compile
 from utils import path_to_dict
 
 
-class ConfigFiles:
+class CustomConfig:
     def __init__(self):
         self.__name_regex = re_compile(r"^[\w.-]{4,64}$")
         self.__root_dirs = [child["name"] for child in path_to_dict(join(sep, "etc", "bunkerweb", "configs"))["children"]]

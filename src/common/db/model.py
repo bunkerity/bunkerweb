@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from datetime import datetime, timezone
+from functools import partial
 from sqlalchemy import (
     TEXT,
     Boolean,
@@ -12,6 +14,7 @@ from sqlalchemy import (
     LargeBinary,
     PrimaryKeyConstraint,
     String,
+    func,
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -46,6 +49,7 @@ INTEGRATIONS_ENUM = Enum(
 STREAM_TYPES_ENUM = Enum("no", "yes", "partial", name="stream_types_enum")
 PLUGIN_TYPES_ENUM = Enum("core", "external", "pro", name="plugin_types_enum")
 PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
+INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", name="instance_status_enum")
 Base = declarative_base()
 
 
@@ -206,7 +210,10 @@ class Instances(Base):
     hostname = Column(String(256), primary_key=True)
     port = Column(Integer, nullable=False)
     server_name = Column(String(256), nullable=False)
+    status = Column(INSTANCE_STATUS_ENUM, nullable=True, default="up")
     method = Column(METHODS_ENUM, nullable=False, default="manual")
+    creation_date = Column(DateTime, nullable=False, server_default=func.now())
+    last_seen = Column(DateTime, nullable=True, server_default=func.now(), onupdate=partial(datetime.now, timezone.utc))
 
 
 class BwcliCommands(Base):

@@ -15,8 +15,8 @@
                         {% for instance in instances %}
                             {% if loop.first %}
                                 {% if
-                                    instance.name %}
-                                    {{ instance.name }}
+                                    instance.hostname %}
+                                    {{ instance.hostname }}
                                 {% else %}
                                     no instance
                                 {% endif %}
@@ -32,8 +32,8 @@
                 <!-- dropdown-->
                 <div data-{{ attribute_name }}-setting-select-dropdown="instances" class="mt-1 hidden z-100 absolute flex-col w-full translate-y-16 max-h-[350px] overflow-hidden overflow-y-auto">
                     {% for instance in instances %}
-                        <button data-{{ attribute_name }}-setting-select-dropdown-btn="instances" value="{{ instance.name }}" data-_type="{{ instance._type }}" class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
-                            {{ instance.name }}
+                        <button data-{{ attribute_name }}-setting-select-dropdown-btn="instances" value="{{ instance.hostname }}" data-_type="{{ instance._type }}" class="{% if loop.first %}dark:bg-primary bg-primary text-gray-300 border-t rounded-t {% else %} bg-white dark:bg-slate-700 {% endif %} {% if loop.last %}rounded-b{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300">
+                            {{ instance.hostname }}
                         </button>
                     {% endfor %}
                 </div>
