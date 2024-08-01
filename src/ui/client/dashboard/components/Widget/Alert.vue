@@ -2,27 +2,27 @@
 import { defineProps, reactive, onMounted, onBeforeMount } from "vue";
 
 import { useUUID } from "@utils/global.js";
-/** 
-  @name Forms/Error/Field.vue
-  @description This component is an alert type to send feedback to the user.
-  We can used it as a fixed alert or we can use it in a container as a list.
-  @example
-  {
-    position : "fixed",
-    type: "success",
-    title: "Success",
-    message: "Your action has been successfully completed",
-    delayToClose: 5000,
-  }
-  @param {string} title - The title of the alert. Can be a translation key or by default raw text.
-  @param {string} message - The message of the alert. Can be a translation key or by default raw text.
-  @param {boolean} [canClose=true] - Determine if the alert can be closed by user (add a close button), by default it is closable
-  @param {string} [id=`feedback-alert-${message.substring(0, 10)}`]
-  @param {string} [isFixed=false] - Determine if the alert is fixed (visible bottom right of page) or relative (inside a container)
-  @param {string} [type="info"] - The type of the alert, can be success, error, warning or info
-  @param {number} [delayToClose=0] - The delay to auto close alert in ms, by default always visible
-  @param {string} [tabId="-1"] - The tabindex of the alert
-*/
+/**
+ *  @name Forms/Error/Field.vue
+ *  @description This component is an alert type to send feedback to the user.
+ *  We can used it as a fixed alert or we can use it in a container as a list.
+ *  @example
+ *  {
+ *    position : "fixed",
+ *    type: "success",
+ *    title: "Success",
+ *    message: "Your action has been successfully completed",
+ *    delayToClose: 5000,
+ *  }
+ *  @param {string} title - The title of the alert. Can be a translation key or by default raw text.
+ *  @param {string} message - The message of the alert. Can be a translation key or by default raw text.
+ *  @param {boolean} [canClose=true] - Determine if the alert can be closed by user (add a close button), by default it is closable
+ *  @param {string} [id=`feedback-alert-${message.substring(0, 10)}`]
+ *  @param {string} [isFixed=false] - Determine if the alert is fixed (visible bottom right of page) or relative (inside a container)
+ *  @param {string} [type="info"] - The type of the alert, can be success, error, warning or info
+ *  @param {number} [delayToClose=0] - The delay to auto close alert in ms, by default always visible
+ *  @param {string} [tabId="-1"] - The tabindex of the alert
+ */
 
 const props = defineProps({
   isFixed: {

@@ -1,164 +1,156 @@
 <script setup>
-import {
-  reactive,
-  defineProps,
-  defineEmits,
-  watch,
-  computed,
-  onMounted,
-} from "vue";
+import { reactive, defineProps, defineEmits } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
-import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import Button from "@components/Widget/Button.vue";
 import Fields from "@components/Form/Fields.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Container from "@components/Widget/Container.vue";
 
 /**
-  @name Forms/Group/Multiple.vue
-  @description This Will regroup all multiples settings with add and remove logic.
-  This component under the hood is rendering default fields but by group with possibility to add or remove a multiple group.
-  @example
-  {
-   "columns": {"pc": 6, "tablet": 12, "mobile": 12},
-    "multiples": {
-        "reverse-proxy": {
-            "0": {
-                "REVERSE_PROXY_HOST": {
-                    "context": "multisite",
-                    "default": "",
-                    "help": "Full URL of the proxied resource (proxy_pass).",
-                    "id": "reverse-proxy-host",
-                    "label": "Reverse proxy host",
-                    "regex": "^.*$",
-                    "type": "text",
-                    "multiple": "reverse-proxy",
-                    "pattern": "^.*$",
-                    "inpType": "input",
-                    "name": "Reverse proxy host",
-                    "columns": {
-                        "pc": 4,
-                        "tablet": 6,
-                        "mobile": 12
-                    },
-                    "disabled": false,
-                    "value": "service",
-                    "popovers": [
-                        {
-                            "iconName": "disk",
-                            "text": "inp_popover_multisite"
-                        },
-                        {
-                            "iconName": "info",
-                            "text": "Full URL of the proxied resource (proxy_pass)."
-                        }
-                    ],
-                    "containerClass": "z-26",
-                    "method": "ui"
-                },
-                "REVERSE_PROXY_KEEPALIVE": {
-                    "context": "multisite",
-                    "default": "no",
-                    "help": "Enable or disable keepalive connections with the proxied resource.",
-                    "id": "reverse-proxy-keepalive",
-                    "label": "Reverse proxy keepalive",
-                    "regex": "^(yes|no)$",
-                    "type": "check",
-                    "multiple": "reverse-proxy",
-                    "pattern": "^(yes|no)$",
-                    "inpType": "checkbox",
-                    "name": "Reverse proxy keepalive",
-                    "columns": {
-                        "pc": 4,
-                        "tablet": 6,
-                        "mobile": 12
-                    },
-                    "disabled": false,
-                    "value": "no",
-                    "popovers": [
-                        {
-                            "iconName": "disk",
-                            "text": "inp_popover_multisite"
-                        },
-                        {
-                            "iconName": "info",
-                            "text": "Enable or disable keepalive connections with the proxied resource."
-                        }
-                    ],
-                    "containerClass": "z-20"
-                },
-                "REVERSE_PROXY_AUTH_REQUEST": {
-                    "context": "multisite",
-                    "default": "",
-                    "help": "Enable authentication using an external provider (value of auth_request directive).",
-                    "id": "reverse-proxy-auth-request",
-                    "label": "Reverse proxy auth request",
-                    "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
-                    "type": "text",
-                    "multiple": "reverse-proxy",
-                    "pattern": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
-                    "inpType": "input",
-                    "name": "Reverse proxy auth request",
-                    "columns": {
-                        "pc": 4,
-                        "tablet": 6,
-                        "mobile": 12
-                    },
-                    "disabled": false,
-                    "value": "",
-                    "popovers": [
-                        {
-                            "iconName": "disk",
-                            "text": "inp_popover_multisite"
-                        },
-                        {
-                            "iconName": "info",
-                            "text": "Enable authentication using an external provider (value of auth_request directive)."
-                        }
-                    ],
-                    "containerClass": "z-19"
-                },
-                "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
-                    "context": "multisite",
-                    "default": "",
-                    "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
-                    "id": "reverse-proxy-auth-request-signin-url",
-                    "label": "Auth request signin URL",
-                    "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
-                    "type": "text",
-                    "multiple": "reverse-proxy",
-                    "pattern": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
-                    "inpType": "input",
-                    "name": "Auth request signin URL",
-                    "columns": {
-                        "pc": 4,
-                        "tablet": 6,
-                        "mobile": 12
-                    },
-                    "disabled": false,
-                    "value": "",
-                    "popovers": [
-                        {
-                            "iconName": "disk",
-                            "text": "inp_popover_multisite"
-                        },
-                        {
-                            "iconName": "info",
-                            "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
-                        }
-                    ],
-                    "containerClass": "z-18"
-                  },
-                },
-            }
-        }
-    }
-    },
-    @param {object<object>} multiples - The multiples settings to display. This needs to be a dict of settings using default field format.
-    @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
-    @param {string} [containerClass=""] - Additionnal class to add to the container
-    @param {string} [tadId=contentIndex] - The tabindex of the field, by default it is the contentIndex
-*/
+ *  @name Forms/Group/Multiple.vue
+ *  @description This Will regroup all multiples settings with add and remove logic.
+ *  This component under the hood is rendering default fields but by group with possibility to add or remove a multiple group.
+ *  @example
+ *  {
+ *    "columns": {"pc": 6, "tablet": 12, "mobile": 12},
+ *      "multiples": {
+ *          "reverse-proxy": {
+ *              "0": {
+ *                  "REVERSE_PROXY_HOST": {
+ *                      "context": "multisite",
+ *                      "default": "",
+ *                      "help": "Full URL of the proxied resource (proxy_pass).",
+ *                      "id": "reverse-proxy-host",
+ *                      "label": "Reverse proxy host",
+ *                      "regex": "^.*$",
+ *                      "type": "text",
+ *                      "multiple": "reverse-proxy",
+ *                      "pattern": "^.*$",
+ *                      "inpType": "input",
+ *                      "name": "Reverse proxy host",
+ *                      "columns": {
+ *                          "pc": 4,
+ *                          "tablet": 6,
+ *                          "mobile": 12
+ *                      },
+ *                      "disabled": false,
+ *                      "value": "service",
+ *                      "popovers": [
+ *                          {
+ *                              "iconName": "disk",
+ *                              "text": "inp_popover_multisite"
+ *                          },
+ *                          {
+ *                              "iconName": "info",
+ *                              "text": "Full URL of the proxied resource (proxy_pass)."
+ *                          }
+ *                      ],
+ *                      "containerClass": "z-26",
+ *                      "method": "ui"
+ *                  },
+ *                  "REVERSE_PROXY_KEEPALIVE": {
+ *                      "context": "multisite",
+ *                      "default": "no",
+ *                      "help": "Enable or disable keepalive connections with the proxied resource.",
+ *                      "id": "reverse-proxy-keepalive",
+ *                      "label": "Reverse proxy keepalive",
+ *                      "regex": "^(yes|no)$",
+ *                      "type": "check",
+ *                      "multiple": "reverse-proxy",
+ *                      "pattern": "^(yes|no)$",
+ *                      "inpType": "checkbox",
+ *                      "name": "Reverse proxy keepalive",
+ *                      "columns": {
+ *                          "pc": 4,
+ *                          "tablet": 6,
+ *                          "mobile": 12
+ *                      },
+ *                      "disabled": false,
+ *                      "value": "no",
+ *                      "popovers": [
+ *                          {
+ *                              "iconName": "disk",
+ *                              "text": "inp_popover_multisite"
+ *                          },
+ *                          {
+ *                              "iconName": "info",
+ *                              "text": "Enable or disable keepalive connections with the proxied resource."
+ *                          }
+ *                      ],
+ *                      "containerClass": "z-20"
+ *                  },
+ *                  "REVERSE_PROXY_AUTH_REQUEST": {
+ *                      "context": "multisite",
+ *                      "default": "",
+ *                      "help": "Enable authentication using an external provider (value of auth_request directive).",
+ *                      "id": "reverse-proxy-auth-request",
+ *                      "label": "Reverse proxy auth request",
+ *                      "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+ *                      "type": "text",
+ *                      "multiple": "reverse-proxy",
+ *                      "pattern": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+ *                      "inpType": "input",
+ *                      "name": "Reverse proxy auth request",
+ *                      "columns": {
+ *                          "pc": 4,
+ *                          "tablet": 6,
+ *                          "mobile": 12
+ *                      },
+ *                      "disabled": false,
+ *                      "value": "",
+ *                      "popovers": [
+ *                          {
+ *                              "iconName": "disk",
+ *                              "text": "inp_popover_multisite"
+ *                          },
+ *                          {
+ *                              "iconName": "info",
+ *                              "text": "Enable authentication using an external provider (value of auth_request directive)."
+ *                          }
+ *                      ],
+ *                      "containerClass": "z-19"
+ *                  },
+ *                  "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+ *                      "context": "multisite",
+ *                      "default": "",
+ *                      "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+ *                      "id": "reverse-proxy-auth-request-signin-url",
+ *                      "label": "Auth request signin URL",
+ *                      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+ *                      "type": "text",
+ *                      "multiple": "reverse-proxy",
+ *                      "pattern": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+ *                      "inpType": "input",
+ *                      "name": "Auth request signin URL",
+ *                      "columns": {
+ *                          "pc": 4,
+ *                          "tablet": 6,
+ *                          "mobile": 12
+ *                      },
+ *                      "disabled": false,
+ *                      "value": "",
+ *                      "popovers": [
+ *                          {
+ *                              "iconName": "disk",
+ *                              "text": "inp_popover_multisite"
+ *                          },
+ *                          {
+ *                              "iconName": "info",
+ *                              "text": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401)."
+ *                          }
+ *                      ],
+ *                      "containerClass": "z-18"
+ *                    },
+ *                  },
+ *              }
+ *          }
+ *        }
+ *    },
+ *  @param {object<object>} multiples - The multiples settings to display. This needs to be a dict of settings using default field format.
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {string} [containerClass=""] - Additionnal class to add to the container
+ *  @param {string} [tadId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ */
 
 const props = defineProps({
   // id && value && method
@@ -216,11 +208,11 @@ const buttonDelete = {
 const emits = defineEmits(["delete", "add"]);
 
 /**
-  @name setDeleteState
-  @description Will determine if the group can be deleted. If at least one input is disabled, the delete button will be disabled.
-  @param {object} group - The multiple group with all settings
-  @returns {object} - Return delete button data
-*/
+ *  @name setDeleteState
+ *  @description Will determine if the group can be deleted. If at least one input is disabled, the delete button will be disabled.
+ *  @param {object} group - The multiple group with all settings
+ *  @returns {object} - Return delete button data
+ */
 function setDeleteState(group) {
   // Loop on group keys and check if at least one input is disabled
   let isDisabled = false;
@@ -236,42 +228,42 @@ function setDeleteState(group) {
 }
 
 /**
-  @name setInvisible
-  @description Will set a multiple group as invisible.
-  @param {string|number} id - The multiple group with all settings
-  @returns {void}
-*/
+ *  @name setInvisible
+ *  @description Will set a multiple group as invisible.
+ *  @param {string|number} id - The multiple group with all settings
+ *  @returns {void}
+ */
 function setInvisible(id) {
   multiples.invisible.push(id);
 }
 
 /**
-  @name delInvisible
-  @description Will remove a multiple group from invisible list.
-  @param {string|number} id - The multiple group with all settings
-  @returns {void}
-*/
+ *  @name delInvisible
+ *  @description Will remove a multiple group from invisible list.
+ *  @param {string|number} id - The multiple group with all settings
+ *  @returns {void}
+ */
 function delInvisible(id) {
   multiples.invisible = multiples.invisible.filter((v) => v !== id);
 }
 
 /**
-  @name toggleVisible
-  @description Will toggle a multiple group visibility.
-  @param {string|number} id - The multiple group with all settings
-  @returns {void}
-*/
+ *  @name toggleVisible
+ *  @description Will toggle a multiple group visibility.
+ *  @param {string|number} id - The multiple group with all settings
+ *  @returns {void}
+ */
 function toggleVisible(id) {
   multiples.invisible.includes(id) ? delInvisible(id) : setInvisible(id);
 }
 
 /**
-  @name delGroup
-  @description Will emit a delete event to the parent component. The parent will update the template and multiples, then the component will rerender.
-  @param {string} multName - The multiple group name
-  @param {string} groupName - The multiple group id
-  @returns {void}
-*/
+ *  @name delGroup
+ *  @description Will emit a delete event to the parent component. The parent will update the template and multiples, then the component will rerender.
+ *  @param {string} multName - The multiple group name
+ *  @param {string} groupName - The multiple group id
+ *  @returns {void}
+ */
 function delGroup(multName, groupName) {
   emits("delete", multName, groupName);
 }

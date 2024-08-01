@@ -8,36 +8,36 @@ import Templates from "@components/Form/Templates.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
-  @name Builder/GlobalConfig.vue
-  @description This component is lightweight builder containing only the necessary components to create the instances page.
-  @example
-  [
-  {
-    type: "card",
-    containerColumns: { pc: 12, tablet: 12, mobile: 12 },
-    widgets: [
-    {
-    type: "Title",
-    data : {
-      title: "dashboard_global_config",
-      type: "card"
-    },
-    },
-      {
-        type: "Templates",
-        data: {
-          title: "home_version",
-          subtitle: "home_all_features_available" if is_pro_version else "home_upgrade_pro",
-          subtitleColor: "success" is is_pro_version else "warning",
-          stat: "home_pro" if is_pro_version else "home_free",
-          iconName: "crown" if is_pro_version else "core",
-        },
-      },
-    ],
-  },
-];
-  @param {array} builder - Array of containers and widgets
-*/
+ * @name Builder/GlobalConfig.vue
+ * @description This component is lightweight builder containing only the necessary components to create the instances page.
+ * @example
+ *   [
+ *   {
+ *     type: "card",
+ *     containerColumns: { pc: 12, tablet: 12, mobile: 12 },
+ *     widgets: [
+ *     {
+ *     type: "Title",
+ *     data : {
+ *       title: "dashboard_global_config",
+ *       type: "card"
+ *     },
+ *     },
+ *       {
+ *         type: "Templates",
+ *         data: {
+ *           title: "home_version",
+ *           subtitle: "home_all_features_available" if is_pro_version else "home_upgrade_pro",
+ *           subtitleColor: "success" is is_pro_version else "warning",
+ *           stat: "home_pro" if is_pro_version else "home_free",
+ *           iconName: "crown" if is_pro_version else "core",
+ *         },
+ *       },
+ *     ],
+ *   },
+ * ];
+ * @param {array} builder - Array of containers and widgets
+ */
 
 const props = defineProps({
   builder: {

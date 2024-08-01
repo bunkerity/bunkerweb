@@ -1,16 +1,16 @@
 <script setup>
 import { defineProps, reactive } from "vue";
-/** 
-  @name Icons/Eye.vue
-  @description This component is a svg icon representing eye.
-  @example
-  {
-    color: 'green',
-  }
-  @param {string} [iconClass="icon-default"] - The class of the icon.
-   @param {string} [color="cyan"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
-  @param {boolean} [disabled=false] - If true, the icon will be disabled.
-  */
+/**
+ *  @name Icons/Eye.vue
+ *  @description This component is a svg icon representing eye.
+ *  @example
+ *  {
+ *    color: 'green',
+ *  }
+ *  @param {string} [iconClass="icon-default"] - The class of the icon.
+ *  @param {string} [color="cyan"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
+ *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+ */
 
 const props = defineProps({
   iconClass: {

@@ -3,11 +3,11 @@ import { onMounted, reactive } from "vue";
 import { newsIndex } from "@utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
 
-/** 
-  @name Dashboard/News.vue
-  @description This component will display news from BunkerWeb blog and allow users to subscribe to the newsletter.
-  Case the news API is not available, it will display a message.
-*/
+/**
+ **  @name Dashboard/News.vue
+ **  @description This component will display news from BunkerWeb blog and allow users to subscribe to the newsletter.
+ *  Case the news API is not available, it will display a message.
+ */
 
 // Use to update position when banner is visible or not
 const bannerStore = useBannerStore();
@@ -19,10 +19,10 @@ const news = reactive({
 });
 
 /**
-  @name loadNews
-  @description Retrieve blog news from storage or fetch from the API.
-  @returns {void}
-*/
+ * @name loadNews
+ **  @description Retrieve blog news from storage or fetch from the API.
+ * @returns {void}
+ */
 function loadNews() {
   // Check if data, and if case, that data is not older than one hour
   // Case it is, refetch

@@ -5,13 +5,14 @@ import GridLayout from "@components/Widget/GridLayout.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
-  @name Builder/Setup.vue
-  @description This component is lightweight builder containing only the necessary components to create the setup page.
-  @example
-  [
-
-  @param {array} builder - Array of containers and widgets
-*/
+ * @name Builder/Setup.vue
+ * @description This component is lightweight builder containing only the necessary components to create the setup page.
+ * @example
+ *
+ *
+ *
+ *@param {array} builder - Array of containers and widgets
+ */
 
 const props = defineProps({
   builder: {

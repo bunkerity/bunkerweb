@@ -5,23 +5,23 @@ import { useClipboard } from "@vueuse/core";
 import { useUUID } from "@utils/global.js";
 
 /**
-  @name Forms/Feature/Clipboard.vue
-  @description This component can be add to some fields to allow to copy the value of the field.
-  Additionnal clipboardClass and copyClass can be added to fit the parent container.
-  @example
-  {
-    id: 'test-input',
-    isClipboard: true,
-    valueToCopy: 'yes',
-    clipboadClass: 'mx-2',
-    copyClass: 'mt-2',
-  }
-  @param {id} [id=uuidv4()] - Unique id
-  @param {isClipboard} [isClipboard=false] - Display a clipboard button to copy a value
-  @param {valueToCopy} [valueToCopy=""] - The value to copy
-  @param {clipboadClass} [clipboadClass=""] - Additional class for the clipboard container. Useful to fit the component in a specific container.
-  @param {copyClass} [copyClass=""] - The class of the copy message. Useful to fit the component in a specific container.
-*/
+ *  @name Forms/Feature/Clipboard.vue
+ *  @description This component can be add to some fields to allow to copy the value of the field.
+ *  Additionnal clipboardClass and copyClass can be added to fit the parent container.
+ *  @example
+ *  {
+ *    id: 'test-input',
+ *    isClipboard: true,
+ *    valueToCopy: 'yes',
+ *    clipboadClass: 'mx-2',
+ *    copyClass: 'mt-2',
+ *  }
+ *  @param {id} [id=uuidv4()] - Unique id
+ *  @param {isClipboard} [isClipboard=false] - Display a clipboard button to copy a value
+ *  @param {valueToCopy} [valueToCopy=""] - The value to copy
+ *  @param {clipboadClass} [clipboadClass=""] - Additional class for the clipboard container. Useful to fit the component in a specific container.
+ *  @param {copyClass} [copyClass=""] - The class of the copy message. Useful to fit the component in a specific container.
+ */
 
 const { text, copy, copied, isSupported } = useClipboard({ legacy: true });
 

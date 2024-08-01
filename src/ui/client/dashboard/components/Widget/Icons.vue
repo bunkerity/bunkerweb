@@ -39,22 +39,22 @@ import Document from "@components/Icons/Document.vue";
 import Eye from "@components/Icons/Eye.vue";
 
 /**
-  @name Widget/Icons.vue
-  @description This component is a wrapper that contains all the icons available in the application (Icons folder).
-  This component is used to display the icon based on the icon name.
-  This component is mainly use inside others widgets.
-  @example
-  {
-    iconName: 'box',
-    iconClass: 'base',
-   color: 'amber',
-  }
-  @param {string} iconName - The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
-  @param {string} [iconClass="base"] - Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically.
-  @param {string} [color=""] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
-  @param {boolean} [isStick=false] - If true, the icon will be stick to the top right of the parent container.
-  @param {boolean} [disabled=false] - If true, the icon will be disabled.
-  */
+ *  @name Widget/Icons.vue
+ *  @description This component is a wrapper that contains all the icons available in the application (Icons folder).
+ *  This component is used to display the icon based on the icon name.
+ *  This component is mainly use inside others widgets.
+ *  @example
+ *  {
+ *    iconName: 'box',
+ *    iconClass: 'base',
+ *    color: 'amber',
+ *  }
+ *  @param {string} iconName - The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
+ *  @param {string} [iconClass="base"] - Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically.
+ *  @param {string} [color=""] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
+ *  @param {boolean} [isStick=false] - If true, the icon will be stick to the top right of the parent container.
+ *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+ */
 
 const props = defineProps({
   iconName: {

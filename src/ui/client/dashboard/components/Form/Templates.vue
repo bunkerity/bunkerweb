@@ -10,21 +10,21 @@ import Easy from "@components/Form/Easy.vue";
 import { v4 as uuidv4 } from "uuid";
 
 /**
-  @name Form/Templates.vue
-  @description This component is used to create a complete  settings form with all modes (advanced, raw, easy).
-  @example
-  const data = {
-    advanced : {
-      default : [{SETTING_1}, {SETTING_2}...],
-      low : [{SETTING_1}, {SETTING_2}...],
-    },
-    easy : {
-      default : [...],
-      low : [...],
-    }
-  }
-  @param {object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
-*/
+ **  @name Form/Templates.vue
+ **  @description This component is used to create a complete  settings form with all modes (advanced, raw, easy).
+ **  @example
+ *  {
+ *    advanced : {
+ *      default : [{SETTING_1}, {SETTING_2}...],
+ *      low : [{SETTING_1}, {SETTING_2}...],
+ *    },
+ *    easy : {
+ *      default : [...],
+ *      low : [...],
+ *    }
+ *  }
+ **  @param {object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
+ */
 
 const props = defineProps({
   templates: {
@@ -78,19 +78,19 @@ const data = reactive({
 });
 
 /**
-  @name getFirstTemplateName
-  @description Get the first template name from the first mode.
-  @returns {string} - The first template name
-*/
+ **  @name getFirstTemplateName
+ **  @description Get the first template name from the first mode.
+ **  @returns {string} - The first template name
+ */
 function getFirstTemplateName() {
   return Object.keys(props.templates[data.currModeName])[0];
 }
 
 /**
-  @name getFirstTemplateName
-  @description Get the first mode name from the first key in props.templates dict.
-  @returns {string} - The first mode name
-*/
+ **  @name getFirstTemplateName
+ **  @description Get the first mode name from the first key in props.templates dict.
+ **  @returns {string} - The first mode name
+ */
 function getFirstModeName() {
   // Get first key in props.templates dict
   return Object.keys(props.templates)[0];

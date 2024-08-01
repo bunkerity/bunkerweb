@@ -20,40 +20,40 @@ import "@assets/script/editor/theme-dracula.js";
 import "@assets/script/editor/theme-dawn.js";
 
 /**
-  @name Forms/Field/Editor.vue
-  @description This component is used to create a complete editor field  with error handling and label.
-  We can also add popover to display more information.
-  It is mainly use in forms.
-  @example
-  {
-  id: "test-editor",
-  value: "yes",
-  name: "test-editor",
-  disabled: false,
-  required: true,
-  pattern: "(test)",
-  label: "Test editor",
-  tabId: "1",
-  columns: { pc: 12, tablet: 12, mobile: 12 },
-};
-  @param {string} [id=uuidv4()] - Unique id
-  @param {string} label - The label of the field. Can be a translation key or by default raw text.
-  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.  @param {string} label
-  @param {string} value
-  @param {object} [attrs={}] - Additional attributes to add to the field
-  @param {array} [popovers] - List of popovers to display more information
-  @param {string} [inpType="editor"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
-  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
-  @param {string} [pattern=""]
-  @param {boolean} [disabled=false]
-  @param {boolean} [required=false]
-  @param {boolean} [isClipboard=true] - allow to copy the input value
-  @param {boolean} [hideLabel=false]
-  @param {string} [containerClass=""]
-  @param {string} [editorClass=""]
-  @param {string} [headerClass=""]
-  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
-*/
+ *  @name Forms/Field/Editor.vue
+ *  @description This component is used to create a complete editor field  with error handling and label.
+ *  We can also add popover to display more information.
+ *  It is mainly use in forms.
+ *  @example
+ *  {
+ *    id: "test-editor",
+ *    value: "yes",
+ *    name: "test-editor",
+ *    disabled: false,
+ *    required: true,
+ *    pattern: "(test)",
+ *    label: "Test editor",
+ *    tabId: "1",
+ *    columns: { pc: 12, tablet: 12, mobile: 12 },
+ *  };
+ *  @param {string} [id=uuidv4()] - Unique id
+ *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.*  @param {string} label
+ *  @param {string} value
+ *  @param {object} [attrs={}] - Additional attributes to add to the field
+ *  @param {array} [popovers] - List of popovers to display more information
+ *  @param {string} [inpType="editor"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {string} [pattern=""]
+ *  @param {boolean} [disabled=false]
+ *  @param {boolean} [required=false]
+ *  @param {boolean} [isClipboard=true] - allow to copy the input value
+ *  @param {boolean} [hideLabel=false]
+ *  @param {string} [containerClass=""]
+ *  @param {string} [editorClass=""]
+ *  @param {string} [headerClass=""]
+ *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ */
 
 const props = defineProps({
   // id && value && method
@@ -278,10 +278,10 @@ class Editor {
 }
 
 /**
-  @name removeErrCSS
-  @description Remove useless CSS from the editor to avoid accessibility issues.
-  @returns {void}
-*/
+ *  @name removeErrCSS
+ *  @description Remove useless CSS from the editor to avoid accessibility issues.
+ *  @returns {void}
+ */
 function removeErrCSS() {
   setTimeout(() => {
     try {
@@ -306,10 +306,10 @@ function removeErrCSS() {
 }
 
 /**
-  @name setEditorAttrs
-  @description Override editor attributes by adding or deleting some for better accessibility.
-  @returns {void}
-*/
+ *  @name setEditorAttrs
+ *  @description Override editor attributes by adding or deleting some for better accessibility.
+ *  @returns {void}
+ */
 function setEditorAttrs() {
   // Add tabindex to editor
   try {

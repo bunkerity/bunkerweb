@@ -1,9 +1,9 @@
 /**
-  @name utils/tabIndex.js
-  @description This file contains the tab indexes for the main components of the application.
-  Tab indexes are used to navigate through the application using the keyboard.
-  This is useful for people with disabilities or people who prefer to use the keyboard instead of the mouse.
-*/
+ *  @name utils/tabIndex.js
+ *  @description This file contains the tab indexes for the main components of the application.
+ *  Tab indexes are used to navigate through the application using the keyboard.
+ *  This is useful for people with disabilities or people who prefer to use the keyboard instead of the mouse.
+ */
 
 const bannerIndex = "-1";
 const menuIndex = "1";

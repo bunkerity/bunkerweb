@@ -5,8 +5,8 @@ import BuilderBans from "@components/Builder/Bans.vue";
 import { useGlobal } from "@utils/global";
 
 /**
-  @name Page/Bans.vue
-  @description This component is the ban page.
+*  @name Page/Bans.vue
+*  @description This component is the ban page.
   This page displays global information about bans, and allow to delete or upload some bans.
 */
 

@@ -5,9 +5,10 @@ import logo2 from "@assets/img/logo-menu-2.png";
 // Change path on PROD removing '/' in order to get the right path
 const logoMenu2 = logo2.substring(import.meta.env.DEV ? 0 : 1);
 /**
-  @name Dashboard/Loader.vue
-  @description This component is a loader used to transition between pages.
-*/
+ * @name Dashboard/Loader.vue
+ * @description This component is a loader used to transition between pages.
+ *
+ */
 
 const loader = reactive({
   isActive: true,
@@ -17,10 +18,10 @@ const logo = ref();
 const logoContainer = ref();
 
 /**
-  @name loading
-  @description This function will toggle the loading animation.
-  @returns {void}
-*/
+ * @name loading
+ * @description This function will toggle the loading animation.
+ * @returns {void}
+ */
 function loading() {
   // delay before stopping the loading
   setTimeout(() => {

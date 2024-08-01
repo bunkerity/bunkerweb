@@ -2,12 +2,12 @@
 import { onMounted, reactive } from "vue";
 import { langIndex } from "@utils/tabindex.js";
 
-/** 
-  @name Dashboard/LangSwitch.vue
-  @description This component is a float element with a flag of the current language.
-  When clicked, it will display a list of available languages, clicking on one will change the language.
-  Your language isn't here ? You can contribute by following the part of the documentation about translations.
-*/
+/**
+ * @name Dashboard/LangSwitch.vue
+ *  @description This component is a float element with a flag of the current language.
+ *  When clicked, it will display a list of available languages, clicking on one will change the language.
+ * Your language isn't here ? You can contribute by following the part of the documentation about translations.
+ */
 
 const lang = reactive({
   isOpen: false,
@@ -15,12 +15,12 @@ const lang = reactive({
 });
 
 /**
-  @name updateLangStorage
-  @description This function will update the language in the session storage and reload the page.
-  On reload, we will retrieve the language from the session storage and set it.
-  @param {string} lang - The language to set.
-  @returns {void}
-*/
+ * @name updateLangStorage
+ * @description This function will update the language in the session storage and reload the page.
+ * On reload, we will retrieve the language from the session storage and set it.
+ * @param {string} lang - The language to set.
+ * @returns {void}
+ */
 function updateLangStorage(lang) {
   sessionStorage.setItem("lang", lang);
   document.location.reload();

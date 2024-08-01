@@ -5,8 +5,8 @@ import BuilderGlobalConfig from "@components/Builder/GlobalConfig.vue";
 import { useGlobal } from "@utils/global";
 
 /**
-  @name Page/GlobalConfig.vue
-  @description This component is the global config page.
+*  @name Page/GlobalConfig.vue
+*  @description This component is the global config page.
   This page displays the global configuration of the server and allow to manage it.
 */
 

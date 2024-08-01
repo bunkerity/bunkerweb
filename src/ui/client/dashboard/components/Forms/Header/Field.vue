@@ -2,32 +2,32 @@
 import { defineProps, onMounted, ref } from "vue";
 import PopoverGroup from "@components/Widget/PopoverGroup.vue";
 
-/** 
-  @name Forms/Header/Field.vue
-  @description This component is used with field in order to link a label to field type.
-  We can add popover to display more information.
-  Always use with field component.
-  @example
-  {
-    label: 'Test',
-    version : "0.1.0",
-    name: 'test-input',
-    required: true,
-    popovers : [
-      {
-        text: "This is a popover text",
-        iconName: "info",
-      },
-    ],
-  }
-  @param {string} label - The label of the field. Can be a translation key or by default raw text.
-  @param {string} id - The id of the field. This is used to link the label to the field.
-  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-  @param {array} [popovers] - List of popovers to display more information
-  @param {boolean} [required=false]
-  @param {boolean} [hideLabel=false]
-  @param {string} [headerClass=""]
-*/
+/**
+ *  @name Forms/Header/Field.vue
+ *  @description This component is used with field in order to link a label to field type.
+ *  We can add popover to display more information.
+ *  Always use with field component.
+ *  @example
+ *  {
+ *    label: 'Test',
+ *    version : "0.1.0",
+ *    name: 'test-input',
+ *    required: true,
+ *    popovers : [
+ *      {
+ *        text: "This is a popover text",
+ *        iconName: "info",
+ *      },
+ *    ],
+ *  }
+ *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {string} id - The id of the field. This is used to link the label to the field.
+ *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+ *  @param {array} [popovers] - List of popovers to display more information
+ *  @param {boolean} [required=false]
+ *  @param {boolean} [hideLabel=false]
+ *  @param {string} [headerClass=""]
+ */
 
 const props = defineProps({
   label: {

@@ -5,8 +5,8 @@ import BuilderHome from "@components/Builder/Home.vue";
 import { useGlobal } from "@utils/global";
 
 /** 
-  @name Page/Home.vue
-  @description This component is the home page.
+*  @name Page/Home.vue
+*  @description This component is the home page.
   This page displays an overview of multiple stats related to BunkerWeb.
 */
 

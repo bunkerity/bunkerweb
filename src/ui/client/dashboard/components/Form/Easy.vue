@@ -11,37 +11,39 @@ import { useCheckPluginsValidity } from "@utils/global.js";
 import { useEasyForm } from "@store/form.js";
 
 /**
-  @name Form/Easy.vue
-  @description This component is used to create a complete easy form with plugin selection.
-  @example
-  template: [
-        {
-          columns: { pc: 6, tablet: 12, mobile: 12 },
-          id: "test-check",
-          value: "yes",
-          label: "Checkbox",
-          name: "checkbox",
-          required: true,
-          hideLabel: false,
-          headerClass: "text-red-500",
-          inpType: "checkbox",
-        },
-        {
-          id: "test-input",
-          value: "yes",
-          type: "text",
-          name: "test-input",
-          disabled: false,
-          required: true,
-          label: "Test input",
-          pattern: "(test)",
-          inpType: "input",
-        },
-      ],
-  @param {object} template - Template object with plugin and settings data.
-  @param {string} containerClass - Container
-  @param {object} columns - Columns object.
-*/
+ * @name Form/Easy.vue
+ * @description This component is used to create a complete easy form with plugin selection.
+ * @example
+ * {
+ *   template: [
+ *         {
+ *           columns: { pc: 6, tablet: 12, mobile: 12 },
+ *           id: "test-check",
+ *           value: "yes",
+ *           label: "Checkbox",
+ *           name: "checkbox",
+ *           required: true,
+ *           hideLabel: false,
+ *           headerClass: "text-red-500",
+ *           inpType: "checkbox",
+ *         },
+ *         {
+ *           id: "test-input",
+ *           value: "yes",
+ *           type: "text",
+ *           name: "test-input",
+ *           disabled: false,
+ *           required: true,
+ *           label: "Test input",
+ *           pattern: "(test)",
+ *           inpType: "input",
+ *         },
+ *   ],
+ * }
+ **  @param {object} template - Template object with plugin and settings data.
+ * @param {string} containerClass - Container
+ * @param {object} columns - Columns object.
+ */
 
 const easyForm = useEasyForm();
 
@@ -80,11 +82,11 @@ const data = reactive({
 });
 
 /**
-  @name setValidity
-  @description Check template settings and return if there is any error.
-  Error will disabled save button and display an error message.
-  @returns {void}
-*/
+ * @name setValidity
+ * @description Check template settings and return if there is any error.
+ * Error will disabled save button and display an error message.
+ * @returns {void}
+ */
 function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
     useCheckPluginsValidity(easyForm.templateUI);

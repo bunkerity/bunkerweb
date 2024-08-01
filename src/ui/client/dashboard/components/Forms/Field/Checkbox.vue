@@ -6,45 +6,45 @@ import Header from "@components/Forms/Header/Field.vue";
 import ErrorField from "@components/Forms/Error/Field.vue";
 import { useUUID } from "@utils/global.js";
 
-/** 
-  @name Forms/Field/Checkbox.vue
-  @description This component is used to create a complete checkbox field input with error handling and label.
-  We can also add popover to display more information.
-  It is mainly use in forms.
-  @example
-  { 
-  columns : {"pc": 6, "tablet": 12, "mobile": 12}, 
-  id:"test-check", 
-  value: "yes", 
-  label: "Checkbox", 
-  name: "checkbox", 
-  required: true, 
-  hideLabel: false, 
-  inpType: "checkbox",
-  headerClass: "text-red-500" 
-  popovers : [
-    {
-      text: "This is a popover text",
-      iconName: "info",
-    },
-  ]
-  }
-  @param {string} [id=uuidv4()] - Unique id 
-  @param {string} label - The label of the field. Can be a translation key or by default raw text.
-  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-  @param {string} value
-  @param {object} [attrs={}] - Additional attributes to add to the field
-  @param {array} [popovers] - List of popovers to display more information
-  @param {string} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
-  @param {boolean} [disabled=false]
-  @param {boolean} [required=false]
-  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
-  @param {boolean} [hideLabel=false]
-  @param {string} [containerClass=""]
-  @param {string} [headerClass=""]
-  @param {string} [inpClass=""] 
-  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
-*/
+/**
+ *  @name Forms/Field/Checkbox.vue
+ *  @description This component is used to create a complete checkbox field input with error handling and label.
+ *  We can also add popover to display more information.
+ *  It is mainly use in forms.
+ *  @example
+ *  {
+ *    columns : {"pc": 6, "tablet": 12, "mobile": 12},
+ *    id:"test-check",
+ *    value: "yes",
+ *    label: "Checkbox",
+ *    name: "checkbox",
+ *    required: true,
+ *    hideLabel: false,
+ *    inpType: "checkbox",
+ *    headerClass: "text-red-500"
+ *    popovers : [
+ *      {
+ *        text: "This is a popover text",
+ *        iconName: "info",
+ *      },
+ *    ]
+ *  }
+ *  @param {string} [id=uuidv4()] - Unique id
+ *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+ *  @param {string} value
+ *  @param {object} [attrs={}] - Additional attributes to add to the field
+ *  @param {array} [popovers] - List of popovers to display more information
+ *  @param {string} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+ *  @param {boolean} [disabled=false]
+ *  @param {boolean} [required=false]
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {boolean} [hideLabel=false]
+ *  @param {string} [containerClass=""]
+ *  @param {string} [headerClass=""]
+ *  @param {string} [inpClass=""]
+ *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ */
 
 const props = defineProps({
   // id && value && method
@@ -133,11 +133,11 @@ const checkbox = reactive({
 const emits = defineEmits(["inp"]);
 
 /**
-  @name updateValue
-  @description This will convert the boolean checkbox value to a "yes" or "no" string value.
-  We will check the validity of the checkbox too.
-  @returns {string} - The new string value of the checkbox 'yes' or 'no'
-*/
+ *  @name updateValue
+ *  @description This will convert the boolean checkbox value to a "yes" or "no" string value.
+ *  We will check the validity of the checkbox too.
+ *  @returns {string} - The new string value of the checkbox 'yes' or 'no'
+ */
 function updateValue() {
   checkbox.value = checkbox.value === "yes" ? "no" : "yes";
   checkbox.isValid = checkboxEl.value.checkValidity();

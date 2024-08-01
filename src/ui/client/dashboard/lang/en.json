@@ -35,6 +35,7 @@
   "dashboard_reports": "reports",
   "dashboard_cache": "cache",
   "dashboard_logs": "logs",
+  "dashboard_raw": "raw mode",
   "dashboard_feedback_toggle_sidebar": "Toggle feedback sidebar.",
   "dashboard_feedback_close_sidebar": "Close feedback sidebar.",
   "dashboard_feedback_alert_close": "Close feedback alert",

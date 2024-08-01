@@ -5,8 +5,8 @@ import BuilderJobs from "@components/Builder/Jobs.vue";
 import { useGlobal } from "@utils/global";
 
 /**
-  @name Page/Jobs.vue
-  @description This component is the jobs page.
+*  @name Page/Jobs.vue
+*  @description This component is the jobs page.
   This page displays some useful information about the jobs.
 */
 
@@ -26,12 +26,12 @@ onBeforeMount(() => {
 });
 
 /**
-  @name getLastArrItem
-  @description Get the last item if the first and last characters are matching params.
-  @param {string} startStr - The start string to check.
-  @param {string} endStr - The end string to check.
-  @returns {null|string} - The last item or null.
-*/
+ *  @name getLastArrItem
+ *  @description Get the last item if the first and last characters are matching params.
+ *  @param {string} startStr - The start string to check.
+ *  @param {string} endStr - The end string to check.
+ *  @returns {null|string} - The last item or null.
+ */
 function getLastArrItem(startStr, endStr, array) {
   return array[array.length - 1].startsWith(startStr) &&
     array[array.length - 1].endsWith(endStr)
@@ -40,10 +40,10 @@ function getLastArrItem(startStr, endStr, array) {
 }
 
 /**
-  @name downloadCacheEvent
-  @description Get the needed cache file information from a job and create a download link to download the file.
-  @returns {void}
-*/
+ *  @name downloadCacheEvent
+ *  @description Get the needed cache file information from a job and create a download link to download the file.
+ *  @returns {void}
+ */
 function downloadCacheEvent() {
   window.addEventListener(
     "click",

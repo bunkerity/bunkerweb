@@ -8,24 +8,25 @@ import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
-  @name Builder/Cell.vue
-  @description This component includes all elements that can be shown in a table cell.
-  @example
-   { type : "button",
-     data : {
-       id: "open-modal-btn",
-       text: "Open modal",
-       disabled: false,
-       hideText: true,
-       color: "green",
-       size: "normal",
-       iconName: "modal",
-       attrs: { data-toggle: "modal", "data-target": "#modal"},
-     }
-  }
-  @param {string} type - The type of the cell. This needs to be a Vue component.
-  @param {object} data - The data to display in the cell. This needs to be the props of the Vue component.
-*/
+ *  @name Builder/Cell.vue
+ *  @description This component includes all elements that can be shown in a table cell.
+ *  @example
+ *   {
+ *     type : "button",
+ *     data : {
+ *       id: "open-modal-btn",
+ *       text: "Open modal",
+ *       disabled: false,
+ *       hideText: true,
+ *       color: "green",
+ *       size: "normal",
+ *       iconName: "modal",
+ *       attrs: { data-toggle: "modal", "data-target": "#modal"},
+ *     }
+ *  }
+ *  @param {string} type - The type of the cell. This needs to be a Vue component.
+ *  @param {object} data - The data to display in the cell. This needs to be the props of the Vue component.
+ */
 
 const props = defineProps({
   type: {

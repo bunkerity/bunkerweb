@@ -7,47 +7,46 @@ import Select from "@components/Forms/Field/Select.vue";
 
 import { useFilter } from "@utils/filter.js";
 /**
-  @name Widget/Filter.vue
-  @description This component allow to filter any data object or array with a list of filters.
-  For the moment, we have 2 types of filters: select and keyword.
-  We have default values that avoid filter ("all" for select and "" for keyword).
-  Filters are fields so we need to provide a "field" key with same structure as a Field.
-  We have to define "keys" that will be the keys the filter value will check.
-  We can set filter "default" in order to filter the base keys of an object.
-  We can set filter "settings" in order to filter settings, data must be an advanced template.
-  We can set filter "table" in order to filter table items.
-  Check example for more details.
-  @example
-    [
-      {
-        filter: "default", // or "settings"  or "table"
-        type: "select",
-        value: "all",
-        keys: ["type"],
-        field: {
-          inpType: "select",
-          id: uuidv4(),
-          value: "all",
-          // add 'all' as first value
-          values: ["all"].concat(plugin_types),
-          name: uuidv4(),
-          onlyDown: true,
-          label: "inp_select_plugin_type",
-          popovers: [
-            {
-              text: "inp_select_plugin_type_desc",
-              iconName: "info",
-            },
-          ],
-          columns: { pc: 3, tablet: 4, mobile: 12 },
-        },
-      },
-      ...
-    ]
-  @param {array} [filters=[]] - Fields with additional data to be used as filters.
-  @param {object|array} [data={}] - Data object or array to filter. Emit a filter event with the filtered data.
-  @param {string} [containerClass=""] - Additional class for the container.
-  */
+ *  @name Widget/Filter.vue
+ *  @description This component allow to filter any data object or array with a list of filters.
+ *  For the moment, we have 2 types of filters: select and keyword.
+ *  We have default values that avoid filter ("all" for select and "" for keyword).
+ *  Filters are fields so we need to provide a "field" key with same structure as a Field.
+ *  We have to define "keys" that will be the keys the filter value will check.
+ *  We can set filter "default" in order to filter the base keys of an object.
+ *  We can set filter "settings" in order to filter settings, data must be an advanced template.
+ *  We can set filter "table" in order to filter table items.
+ *  Check example for more details.
+ *  @example
+ *    [
+ *      {
+ *        filter: "default", // or "settings"  or "table"
+ *        type: "select",
+ *        value: "all",
+ *        keys: ["type"],
+ *        field: {
+ *          inpType: "select",
+ *          id: uuidv4(),
+ *          value: "all",
+ *          // add 'all' as first value
+ *          values: ["all"].concat(plugin_types),
+ *          name: uuidv4(),
+ *          onlyDown: true,
+ *          label: "inp_select_plugin_type",
+ *          popovers: [
+ *            {
+ *              text: "inp_select_plugin_type_desc",
+ *              iconName: "info",
+ *            },
+ *          ],
+ *          columns: { pc: 3, tablet: 4, mobile: 12 },
+ *        },
+ *      },
+ *    ]
+ *  @param {array} [filters=[]] - Fields with additional data to be used as filters.
+ *  @param {object|array} [data={}] - Data object or array to filter. Emit a filter event with the filtered data.
+ *  @param {string} [containerClass=""] - Additional class for the container.
+ */
 
 const props = defineProps({
   filters: {
@@ -84,12 +83,12 @@ watch(
 );
 
 /**
-  @name startFilter
-  @description  Filter the given data using the available filters from a filter object.
-  @param {object} filter - Filter object to apply.
-  @param {string} value - Value to filter.
-  @returns {emits} - Emit a filter event with the filtered data.
-*/
+ *  @name startFilter
+ *  @description  Filter the given data using the available filters from a filter object.
+ *  @param {object} filter - Filter object to apply.
+ *  @param {string} value - Value to filter.
+ *  @returns {emits} - Emit a filter event with the filtered data.
+ */
 function startFilter(filter = {}, value) {
   // Case we have new filter value, update it
   // Loop on filter.base and update the "value" key when matching filterName
@@ -148,13 +147,13 @@ function startFilter(filter = {}, value) {
 }
 
 /**
-  @name filterData
-  @description Add a buffer to wait for multiple inputs before filtering the data.
-  Then filter data with the given filter and value.
-  @param {object} filter - Filter object to apply.
-  @param {string} value - Value to filter.
-  @returns {void}
-*/
+ *  @name filterData
+ *  @description Add a buffer to wait for multiple inputs before filtering the data.
+ *  Then filter data with the given filter and value.
+ *  @param {object} filter - Filter object to apply.
+ *  @param {string} value - Value to filter.
+ *  @returns {void}
+ */
 function filterData(filter = {}, value = null) {
   // Wait for buffer input
   filters.bufferCount++;
@@ -168,12 +167,12 @@ function filterData(filter = {}, value = null) {
 }
 
 /**
-  @name filterRegularSettings
-  @description Allow to filter plugin settings from a regular template.
-  @param {object} filterSettings - Filters to apply
-  @param {object} template - Template to filter
-  @returns {void}
-*/
+ *  @name filterRegularSettings
+ *  @description Allow to filter plugin settings from a regular template.
+ *  @param {object} filterSettings - Filters to apply
+ *  @param {object} template - Template to filter
+ *  @returns {void}
+ */
 function filterRegularSettings(filterSettings, template) {
   template.forEach((plugin, id) => {
     // loop on plugin settings dict
@@ -193,12 +192,12 @@ function filterRegularSettings(filterSettings, template) {
 }
 
 /**
-  @name filterMultiplesSettings
-  @description Allow to filter plugin multiples settings from a regular template.
-  @param {object} filterSettings - Filters to apply
-  @param {object} template - Template to filter
-  @returns {void}
-*/
+ *  @name filterMultiplesSettings
+ *  @description Allow to filter plugin multiples settings from a regular template.
+ *  @param {object} filterSettings - Filters to apply
+ *  @param {object} template - Template to filter
+ *  @returns {void}
+ */
 function filterMultiplesSettings(filterSettings, template) {
   const multiples = [];
   // Format to filter

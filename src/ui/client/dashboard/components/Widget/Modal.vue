@@ -20,68 +20,68 @@ import MessageUnmatch from "@components/Message/Unmatch.vue";
 import Table from "@components/Widget/Table.vue";
 
 /**
-  @name Builder/Modal.vue
-  @description This component contains all widgets needed on a modal.
-  This is different from a page builder as we don't need to define the container and grid layout.
-  We can't create multiple grids or containers in a modal.
-  @example
-[
-  "id": "modal-delete-plugin",
-  "widgets": [
-      {
-          "type": "Title",
-          "data": {
-              "title": "plugins_modal_delete_title",
-              "type": "modal"
-          }
-      },
-      {
-          "type": "Text",
-          "data": {
-              "text": "plugins_modal_delete_confirm"
-          }
-      },
-      {
-          "type": "Text",
-          "data": {
-              "text": "",
-              "bold": true,
-              "attrs": {
-                  "data-modal-plugin-name": "true"
-              }
-          }
-      },
-      {
-          "type": "ButtonGroup",
-          "data": {
-              "buttons": [
-                  {
-                      "id": "delete-plugin-btn",
-                      "text": "action_close",
-                      "disabled": false,
-                      "color": "close",
-                      "size": "normal",
-                      "attrs": {
-                          "data-hide-el": "modal-delete-plugin"
-                      }
-                  },
-                  {
-                      "id": "delete-plugin-btn",
-                      "text": "action_delete",
-                      "disabled": false,
-                      "color": "delete",
-                      "size": "normal",
-                      "attrs": {
-                          "data-delete-plugin-submit": ""
-                      }
-                  }
-              ],
-          }
-      }
-  ]
-];
-  @param {array} widgets - Array of containers and widgets
-*/
+ *  @name Builder/Modal.vue
+ *  @description This component contains all widgets needed on a modal.
+ * This is different from a page builder as we don't need to define the container and grid layout.
+ * We can't create multiple grids or containers in a modal.
+ *  @example
+ * [
+ *   "id": "modal-delete-plugin",
+ *   "widgets": [
+ *       {
+ *           "type": "Title",
+ *           "data": {
+ *               "title": "plugins_modal_delete_title",
+ *               "type": "modal"
+ *           }
+ *       },
+ *       {
+ *           "type": "Text",
+ *           "data": {
+ *               "text": "plugins_modal_delete_confirm"
+ *           }
+ *       },
+ *       {
+ *           "type": "Text",
+ *           "data": {
+ *               "text": "",
+ *               "bold": true,
+ *               "attrs": {
+ *                   "data-modal-plugin-name": "true"
+ *               }
+ *           }
+ *       },
+ *       {
+ *           "type": "ButtonGroup",
+ *           "data": {
+ *               "buttons": [
+ *                   {
+ *                       "id": "delete-plugin-btn",
+ *                       "text": "action_close",
+ *                       "disabled": false,
+ *                       "color": "close",
+ *                       "size": "normal",
+ *                       "attrs": {
+ *                           "data-hide-el": "modal-delete-plugin"
+ *                       }
+ *                   },
+ *                   {
+ *                       "id": "delete-plugin-btn",
+ *                       "text": "action_delete",
+ *                       "disabled": false,
+ *                       "color": "delete",
+ *                       "size": "normal",
+ *                       "attrs": {
+ *                           "data-delete-plugin-submit": ""
+ *                       }
+ *                   }
+ *               ],
+ *           }
+ *       }
+ *   ]
+ * ];
+ *  @param {array} widgets - Array of containers and widgets
+ */
 
 const props = defineProps({
   id: {
@@ -107,12 +107,12 @@ function useCloseModal() {
 }
 
 /**
-  @name useFocusModal
-  @description Check if the modal is present and a focusable element is present inside it.
+*  @name useFocusModal
+*  @description Check if the modal is present and a focusable element is present inside it.
   If it's the case, the function will focus the element.
   Case there is already a focused element inside the modal, avoid to focus it again.
-  @param {string} modalId - The id of the modal element.
-  @returns {void}
+*  @param {string} modalId - The id of the modal element.
+*  @returns {void}
 */
 function useFocusModal() {
   setTimeout(() => {

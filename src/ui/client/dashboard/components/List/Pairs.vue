@@ -1,16 +1,18 @@
 <script setup>
 import { computed, defineProps } from "vue";
-/** 
-  @name List/Pairs.vue
-  @description This component is used to display key value information in a list.
-    @example
-  {
-    pairs : [{key: "Total Users", value: "100"}],
-    columns: {pc: 12, tablet: 12, mobile: 12}
-  }
-  @param {array} pairs - The list of key value information. The key and value can be a translation key or a raw text.
-  @param {object} [columns={pc: 12, tablet: 12, mobile: 12}] - Determine the  position of the items in the grid system.
-*/
+/**
+ *  @name List/Pairs.vue
+ *  @description This component is used to display key value information in a list.
+ *  @example
+ *  {
+ *    pairs : [
+ *              { key: "Total Users", value: "100" }
+ *            ],
+ *    columns: { pc: 12, tablet: 12, mobile: 12 }
+ *  }
+ *  @param {array} pairs - The list of key value information. The key and value can be a translation key or a raw text.
+ *  @param {object} [columns={pc: 12, tablet: 12, mobile: 12}] - Determine the  position of the items in the grid system.
+ */
 
 const props = defineProps({
   pairs: {

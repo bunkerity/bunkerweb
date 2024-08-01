@@ -5,8 +5,8 @@ import BuilderServices from "@components/Builder/Services.vue";
 import { useGlobal } from "@utils/global";
 
 /**
-  @name Page/Services.vue
-  @description This component is the services page.
+*  @name Page/Services.vue
+*  @description This component is the services page.
   This page displays services and forms to manage them.
 */
 

@@ -5,8 +5,8 @@ import BuilderPlugins from "@components/Builder/Plugins.vue";
 import { useGlobal } from "@utils/global";
 
 /**
-  @name Page/PLugins.vue
-  @description This component is the plugin page.
+*  @name Page/PLugins.vue
+*  @description This component is the plugin page.
   This page displays global information about plugins, and allow to delete or upload some plugins.
 */
 

@@ -5,8 +5,8 @@ import BuilderReports from "@components/Builder/Reports.vue";
 import { useGlobal } from "@utils/global";
 
 /**
-  @name Page/Reports.vue
-  @description This component is the report page.
+*  @name Page/Reports.vue
+*  @description This component is the report page.
   This page displays global information about reports, and allow to delete or upload some reports.
 */
 

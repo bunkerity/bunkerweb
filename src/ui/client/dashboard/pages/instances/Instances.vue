@@ -5,8 +5,8 @@ import BuilderInstances from "@components/Builder/Instances.vue";
 import { useGlobal } from "@utils/global";
 
 /**
-  @name Page/Instances.vue
-  @description This component is the instances page.
+*  @name Page/Instances.vue
+*  @description This component is the instances page.
   This page displays current instances and allows to manage them.
 */
 

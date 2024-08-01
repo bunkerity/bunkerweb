@@ -1,10 +1,10 @@
 <script setup>
 import { reactive, onMounted, computed } from "vue";
 
-/** 
-  @name Dashboard/Header.vue
-  @description This component is a header displaying the current page endpoint.
-*/
+/**
+ * @name Dashboard/Header.vue
+ * @description This component is a header displaying the current page endpoint.
+ */
 
 const header = reactive({
   splitPath: [],

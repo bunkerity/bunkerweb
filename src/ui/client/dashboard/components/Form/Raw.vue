@@ -10,20 +10,20 @@ import { v4 as uuidv4 } from "uuid";
 import { useRawForm } from "@store/form.js";
 
 /**
-  @name Form/Raw.vue
-  @description This component is used to create a complete raw form with settings as JSON format.
-  @example
-  {
-   "IS_LOADING": "no",
-   "NGINX_PREFIX": "/etc/nginx/",
-   "HTTP_PORT": "8080",
-   "HTTPS_PORT": "8443",
-   "MULTISITE": "yes"
-  }
-  @param {object} template - Template object with plugin and settings data.
-  @param {string} containerClass - Container
-  @param {object} columns - Columns object.
-*/
+ **  @name Form/Raw.vue
+ **  @description This component is used to create a complete raw form with settings as JSON format.
+ **  @example
+ *   {
+ *    "IS_LOADING": "no",
+ *    "NGINX_PREFIX": "/etc/nginx/",
+ *    "HTTP_PORT": "8080",
+ *    "HTTPS_PORT": "8443",
+ *    "MULTISITE": "yes"
+ *   }
+ **  @param {object} template - Template object with plugin and settings data.
+ **  @param {string} containerClass - Container
+ **  @param {object} columns - Columns object.
+ */
 
 const rawForm = useRawForm();
 
@@ -51,11 +51,11 @@ const data = reactive({
 });
 
 /**
-  @name updateRaw
-  @description Get the raw data from editor, update the raw store with it and check if it is valid JSON.
-  @param {string} v - The raw data to update.
-  @returns {void}
-*/
+ **  @name updateRaw
+ **  @description Get the raw data from editor, update the raw store with it and check if it is valid JSON.
+ **  @param {string} v - The raw data to update.
+ **  @returns {void}
+ */
 function updateRaw(v) {
   // Transform to a possible valid JSON
   rawForm.setRawData(v, true);
@@ -95,13 +95,13 @@ function updateRaw(v) {
 }
 
 /**
-  @name json2raw
-  @description Convert a JSON object to a raw string that can be passed to the editor.
-  This will convert JSON to key value pairs (format key=value).
-  This is only used at first mount when there is no raw data.
-  @param {string} json  - The template json to convert
-  @returns {string} - The raw string
-*/
+ **  @name json2raw
+ **  @description Convert a JSON object to a raw string that can be passed to the editor.
+ *  This will convert JSON to key value pairs (format key=value).
+ *  This is only used at first mount when there is no raw data.
+ **  @param {string} json  - The template json to convert
+ **  @returns {string} - The raw string
+ */
 function json2raw(json) {
   let dataStr = JSON.stringify(json);
   // Remove first and last curly brackets

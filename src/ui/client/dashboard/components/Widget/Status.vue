@@ -3,18 +3,18 @@ import { defineProps, computed, onBeforeMount, reactive } from "vue";
 import { useUUID } from "@utils/global.js";
 
 /**
-  @name Icon/Status.vue
-  @description This component is a icon used with status.
-    @example
-  {
-    id: "instance-1",
-    status: "success",
-    statusClass: "col-span-12",
-  }
-  @param {string} id - The id of the status icon.
-  @param {string} [status="info"] - The color of the icon between error, success, warning, info
-  @param {string} [statusClass=""] - Additional class, for example to use with grid system.
-*/
+ *  @name Icon/Status.vue
+ *  @description This component is a icon used with status.
+ *  @example
+ *  {
+ *    id: "instance-1",
+ *    status: "success",
+ *    statusClass: "col-span-12",
+ *  }
+ *  @param {string} id - The id of the status icon.
+ *  @param {string} [status="info"] - The color of the icon between error, success, warning, info
+ *  @param {string} [statusClass=""] - Additional class, for example to use with grid system.
+ */
 
 const props = defineProps({
   id: {

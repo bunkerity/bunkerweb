@@ -18,42 +18,43 @@ import Icons from "@components/Widget/Icons.vue";
 import ErrorDropdown from "@components/Forms/Error/Dropdown.vue";
 
 /**
-  @name Forms/Field/List.vue
-  @description This component is used display list of values in a dropdown, remove or add an item in an easy way.
-  We can also add popover to display more information.
-  @example
-  {
-    id: 'test-input',
-    value: 'yes no maybe',
-    name: 'test-list',
-    label: 'Test list',
-    inpType: "list",
-    popovers : [
-      {
-        text: "This is a popover text",
-        iconName: "info",
-      },]
-  }
-  @param {string} [id=uuidv4()] - Unique id
-  @param {string} label - The label of the field. Can be a translation key or by default raw text.
-  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-  @param {string} value
-  @param {object} [attrs={}] - Additional attributes to add to the field
-  @param {string} [separator=" "] - Separator to split the value, by default it is a space
-  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
-  @param {array} [popovers] - List of popovers to display more information
-  @param {string} [inpType="list"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
-  @param {boolean} [disabled=false]
-  @param {boolean} [required=false]
-  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
-  @param {boolean} [hideLabel=false]
-  @param {boolean} [onlyDown=false] - If the dropdown should stay down 
-  @param {boolean} [overflowAttrEl=""] - Attribute the element has to check for overflow
-  @param {string} [containerClass=""]
-  @param {string} [inpClass=""]
-  @param {string} [headerClass=""]
-  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
-*/
+ *  @name Forms/Field/List.vue
+ *  @description This component is used display list of values in a dropdown, remove or add an item in an easy way.
+ *  We can also add popover to display more information.
+ *  @example
+ *  {
+ *    id: 'test-input',
+ *    value: 'yes no maybe',
+ *    name: 'test-list',
+ *    label: 'Test list',
+ *    inpType: "list",
+ *    popovers : [
+ *      {
+ *        text: "This is a popover text",
+ *        iconName: "info",
+ *      },
+ *    ]
+ *  }
+ *  @param {string} [id=uuidv4()] - Unique id
+ *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+ *  @param {string} value
+ *  @param {object} [attrs={}] - Additional attributes to add to the field
+ *  @param {string} [separator=" "] - Separator to split the value, by default it is a space
+ *  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
+ *  @param {array} [popovers] - List of popovers to display more information
+ *  @param {string} [inpType="list"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+ *  @param {boolean} [disabled=false]
+ *  @param {boolean} [required=false]
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {boolean} [hideLabel=false]
+ *  @param {boolean} [onlyDown=false] - If the dropdown should stay down
+ *  @param {boolean} [overflowAttrEl=""] - Attribute the element has to check for overflow
+ *  @param {string} [containerClass=""]
+ *  @param {string} [inpClass=""]
+ *  @param {string} [headerClass=""]
+ *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ */
 
 const props = defineProps({
   // id && value && method
@@ -194,10 +195,10 @@ const selectWidth = ref("");
 const selectDropdown = ref();
 
 /**
-  @name openSelect
-  @description Open select dropdown, calculate the dropdown position and update it if needed.
-  @returns {void}
-*/
+ *  @name openSelect
+ *  @description Open select dropdown, calculate the dropdown position and update it if needed.
+ *  @returns {void}
+ */
 function openSelect() {
   inp.isOpen = true;
   // Reset input value
@@ -237,12 +238,12 @@ function openSelect() {
 }
 
 /**
-  @name closeOutside
-  @description This function is linked to a click event and will check if the target is part of the select component.
-  Case not and select is open, will close the select.
-  @param {event} e - The event object.
-  @returns {void}
-*/ function closeOutside(e) {
+ *  @name closeOutside
+ *  @description This function is linked to a click event and will check if the target is part of the select component.
+ *  Case not and select is open, will close the select.
+ *  @param {event} e - The event object.
+ *  @returns {void}
+ */ function closeOutside(e) {
   if (
     e.target.hasAttribute("data-select-item") ||
     e.target.hasAttribute("data-delete-entry")
@@ -258,11 +259,11 @@ function openSelect() {
 }
 
 /**
-  @name closeScroll
-  @description This function is linked to a scroll event and will close the select in case a scroll is detected and the scroll is not the dropdown.
-  @param {event} e - The event object.
-  @returns {void}
-*/
+ *  @name closeScroll
+ *  @description This function is linked to a scroll event and will close the select in case a scroll is detected and the scroll is not the dropdown.
+ *  @param {event} e - The event object.
+ *  @returns {void}
+ */
 function closeScroll(e) {
   if (!e.target) return;
   // Case not a DOM element (like the document itself)
@@ -277,23 +278,23 @@ function closeScroll(e) {
 }
 
 /**
-  @name closeEscape
-  @description This function is linked to a key event and will close the select in case "Escape" key is pressed.
-  @param {event} e - The event object.
-  @returns {void}
-*/
+ *  @name closeEscape
+ *  @description This function is linked to a key event and will close the select in case "Escape" key is pressed.
+ *  @param {event} e - The event object.
+ *  @returns {void}
+ */
 function closeEscape(e) {
   if (e.key !== "Escape") return;
   inp.isOpen = false;
 }
 
 /**
-  @name closeTab
-  @description This function is linked to a key event and will listen to tabindex change.
-  In case the new tabindex is not part of the select component, will close the select.
-  @param {event} e - The event object.
-  @returns {void}
-*/
+ *  @name closeTab
+ *  @description This function is linked to a key event and will listen to tabindex change.
+ *  In case the new tabindex is not part of the select component, will close the select.
+ *  @param {event} e - The event object.
+ *  @returns {void}
+ */
 function closeTab(e) {
   if (e.key !== "Tab" && e.key !== "Shift-Tab") return;
   setTimeout(() => {
@@ -309,11 +310,11 @@ function closeTab(e) {
 }
 
 /**
-  @name addEntry
-  @description When clicking add entry or key "Enter", will add the current input value to list.
-  @param {e} e - The event object.
-  @returns {void}
-*/
+ *  @name addEntry
+ *  @description When clicking add entry or key "Enter", will add the current input value to list.
+ *  @param {e} e - The event object.
+ *  @returns {void}
+ */
 function addEntry(e) {
   // check if keyboard event
   if (e.key && e.key !== "Enter") return;
@@ -330,11 +331,11 @@ function addEntry(e) {
 }
 
 /**
-  @name deleteValue
-  @description Delete a value from the list.
-  @param {string} value - The value to delete.
-  @returns {void}
-*/ function deleteValue(value) {
+ *  @name deleteValue
+ *  @description Delete a value from the list.
+ *  @param {string} value - The value to delete.
+ *  @returns {void}
+ */ function deleteValue(value) {
   inp.value = inp.value
     .split(props.separator)
     .filter((val) => val !== value)

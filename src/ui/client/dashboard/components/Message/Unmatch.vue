@@ -2,17 +2,17 @@
 import { onMounted, reactive, ref } from "vue";
 import Text from "@components/Widget/Text.vue";
 
-/** 
-  @name Message/Unmatch.vue
-  @description Display a default message "no match" with dedicated icon.
-  The message text can be overriden by passing a text prop.
-  @example
-  {
-    text: "dashboard_no_match",
-  }
-  @param {string} text - The text to display
-  @param {string} [unmatchClass=""] - The class to apply to the message. If not provided, the class will be based on the parent component.
-*/
+/**
+ *  @name Message/Unmatch.vue
+ *  @description Display a default message "no match" with dedicated icon.
+ *  The message text can be overriden by passing a text prop.
+ *  @example
+ *  {
+ *    text: "dashboard_no_match",
+ *  }
+ *  @param {string} text - The text to display
+ *  @param {string} [unmatchClass=""] - The class to apply to the message. If not provided, the class will be based on the parent component.
+ */
 
 const props = defineProps({
   text: {

@@ -1,29 +1,29 @@
 import { v4 as uuidv4 } from "uuid";
 
 /**
-  @name utils/global.js
-  @description This file contains global utils that will be used in the application by default.
-  This file contains functions related to accessibilities, cookies, and other global utils.
-*/
+ *  @name utils/global.js
+ *  @description This file contains global utils that will be used in the application by default.
+ *  This file contains functions related to accessibilities, cookies, and other global utils.
+ */
 
 /**
-  @name useGlobal
-  @description This function needs to be apply on global level and will do some logic related to form, attributes, and other global actions.
-  For example, it will check if the target element has a data-link attribute and redirect the user to the define link.
-  It will check if the target element has a data-submit-form attribute and try to parse it to submit the form.
-  @returns {void}
-*/
+ *  @name useGlobal
+ *  @description This function needs to be apply on global level and will do some logic related to form, attributes, and other global actions.
+ *  For example, it will check if the target element has a data-link attribute and redirect the user to the define link.
+ *  It will check if the target element has a data-submit-form attribute and try to parse it to submit the form.
+ *  @returns {void}
+ */
 function useGlobal() {
   window.addEventListener("click", useDataLinkAttr);
   window.addEventListener("click", useSubmitAttr);
 }
 
 /**
-  @name useSubmitAttr
-  @description  This function needs to be attach to an event like a click event.
-  This will check if the target element contains a data-submit-form attribute and try to parse it to submit the form.
-  @returns {void}
-*/
+ *  @name useSubmitAttr
+ *  @description  This function needs to be attach to an event like a click event.
+ *  This will check if the target element contains a data-submit-form attribute and try to parse it to submit the form.
+ *  @returns {void}
+ */
 function useSubmitAttr(e) {
   if (!e.target.hasAttribute("data-submit-form")) return;
   try {
@@ -35,17 +35,17 @@ function useSubmitAttr(e) {
 }
 
 /**
-  @name useSubmitForm
-  @description   Create programmatically a form element and submit it with the given data object of type {key: value}.
-  This will create a FormData and append data arguments to it, retrieve the csrf token and send it with a regular form.
-      @example
-  {
-    instance: "1",
-    operation: "delete",
-  }
-  @param {object} data - Object with the form data to submit.
-  @returns {void}
-*/
+ *  @name useSubmitForm
+ *  @description   Create programmatically a form element and submit it with the given data object of type {key: value}.
+ *  This will create a FormData and append data arguments to it, retrieve the csrf token and send it with a regular form.
+ *  @example
+ *  {
+ *    instance: "1",
+ *    operation: "delete",
+ *  }
+ *  @param {object} data - Object with the form data to submit.
+ *  @returns {void}
+ */
 function useSubmitForm(data) {
   // Create a form element
   const form = document.createElement("form");
@@ -72,23 +72,24 @@ function useSubmitForm(data) {
 }
 
 /**
-  @name useCheckPluginsValidity
-  @description  Check all items keys if at least one match exactly the filter value.
-  @example 
-    const template = [
-  {
-    name: "test",
-    settings: {
-      test: {
-        required: true,
-        value: "",
-        pattern: "^[a-zA-Z0-9]*$",
-      },
-    },
-  },
-  @param template - Template with plugins list and detail settings
-  @returns {array} - Array with error flags and error details
-*/
+ *  @name useCheckPluginsValidity
+ *  @description  Check all items keys if at least one match exactly the filter value.
+ *  @example
+ *    const template = [
+ *      {
+ *        name: "test",
+ *        settings: {
+ *          test: {
+ *            required: true,
+ *            value: "",
+ *            pattern: "^[a-zA-Z0-9]*$",
+ *          },
+ *        },
+ *      },
+ *    ];
+ *  @param template - Template with plugins list and detail settings
+ *  @returns {array} - Array with error flags and error details
+ */
 function useCheckPluginsValidity(template) {
   let isRegErr = false;
   let isReqErr = false;
@@ -124,13 +125,13 @@ function useCheckPluginsValidity(template) {
 }
 
 /**
-  @name useUUID
-  @description This function return a unique identifier using uuidv4 and a random number.
-  Adding random number to avoid duplicate uuids when some components are rendered at the same time.
-  We can pass a possible existing id, the function will only generate one if the id is empty.
-  @param {string} [id=""] - Possible existing id, check if it's empty to generate a new one.
-  @returns {string} - The unique identifier.
-*/
+ *  @name useUUID
+ *  @description This function return a unique identifier using uuidv4 and a random number.
+ *  Adding random number to avoid duplicate uuids when some components are rendered at the same time.
+ *  We can pass a possible existing id, the function will only generate one if the id is empty.
+ *  @param {string} [id=""] - Possible existing id, check if it's empty to generate a new one.
+ *  @returns {string} - The unique identifier.
+ */
 function useUUID(id = "") {
   if (id) return id;
   // Generate a random number between 0 and 10000 to avoid duplicate uuids when some components are rendered at the same time
@@ -140,12 +141,12 @@ function useUUID(id = "") {
 }
 
 /**
-  @name useEqualStr
-  @description Get the type of a widget and format it to lowercase if possible. Else return an empty string.
-  @param {any} type - Try to convert the type to a string in lowercase to compare it with wanted value.
-  @param {string} compare - The value to compare with, in general the component name.
-  @returns {boolean} - True if matching, false if not.
-*/
+ *  @name useEqualStr
+ *  @description Get the type of a widget and format it to lowercase if possible. Else return an empty string.
+ *  @param {any} type - Try to convert the type to a string in lowercase to compare it with wanted value.
+ *  @param {string} compare - The value to compare with, in general the component name.
+ *  @returns {boolean} - True if matching, false if not.
+ */
 function useEqualStr(type, compare) {
   // Check if valid string or can be converted to string
   try {
@@ -157,12 +158,12 @@ function useEqualStr(type, compare) {
 }
 
 /**
-  @name useDataLinkAttr
-  @description Check from event if the target has a data-link attribute. Case it is, it will be used to redirect the user to the define link.
-  This is useful to avoid using the <a> tag and use a <div> or <button> instead.
-  @param {e} event - The event to attach the function logic
-  @returns {void}
-*/
+ *  @name useDataLinkAttr
+ *  @description Check from event if the target has a data-link attribute. Case it is, it will be used to redirect the user to the define link.
+ * This is useful to avoid using the <a> tag and use a <div> or <button> instead.
+ *  @param {e} event - The event to attach the function logic
+ *  @returns {void}
+ */
 function useDataLinkAttr(e) {
   if (!e.target.hasAttribute("data-link")) return;
   const link = e.target.getAttribute("data-link");

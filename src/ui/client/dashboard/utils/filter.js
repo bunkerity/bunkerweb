@@ -1,43 +1,43 @@
 /**
-  @name utils/filter.js
-  @description This file contains filter utils that will be used in the application by default.
-*/
+ *  @name utils/filter.js
+ *  @description This file contains filter utils that will be used in the application by default.
+ */
 
 /**
-  @name useFilter
-  @description   Filter keys of an items list of objects with filters.
-  @example 
-  const filters = [
-  {
-    type: "keyword",
-    value: "whitelist_ip",
-    keys: ["id", "label", "name", "description", "help", "value"],
-  },
-  {
-    type: "select",
-    value: "core",
-    keys: ["type"],
-  },
-];
-
-  const data = [
-  {
-    id: "clientcache",
-    stream: "no",
-    name: "Client cache",
-    description: "Manage caching for clients.",
-},
-  {
-    id: "whitelist",
-    stream: "no",
-    name: "whitelist",
-    description: "Whitelist IP",
-}
-];
-  @param {object} plugins - Object with the plugins data.
-  @param {array} filters - Array with the filters data.
-  @returns {array} - Array with the filtered data.
-*/
+ *  @name useFilter
+ *  @description   Filter keys of an items list of objects with filters.
+ *  @example
+ *  const filters = [
+ *    {
+ *      type: "keyword",
+ *      value: "whitelist_ip",
+ *      keys: ["id", "label", "name", "description", "help", "value"],
+ *    },
+ *    {
+ *      type: "select",
+ *      value: "core",
+ *      keys: ["type"],
+ *    },
+ *  ];
+ *
+ *  const data = [
+ *    {
+ *      id: "clientcache",
+ *      stream: "no",
+ *      name: "Client cache",
+ *      description: "Manage caching for clients.",
+ *    },
+ *      {
+ *        id: "whitelist",
+ *        stream: "no",
+ *        name: "whitelist",
+ *        description: "Whitelist IP",
+ *    }
+ *  ];
+ *  @param {object} plugins - Object with the plugins data.
+ *  @param {array} filters - Array with the filters data.
+ *  @returns {array} - Array with the filtered data.
+ */
 function useFilter(items, filters) {
   // loop on filters to determine types
   filters = removeDefaultFilters(filters);
@@ -67,24 +67,24 @@ function useFilter(items, filters) {
 }
 
 /**
-  @name removeDefaultFilters
-  @description  Remove default filters from filters array for each filter type.
-  @example 
-    const filters = [
-  {
-    type: "keyword",
-    value: "",
-    keys: ["id", "label", "name", "description", "help", "value"],
-  },
-    {
-    type: "select",
-    value: "all",
-    keys: ["all", "core"],
-  },
-];
-  @param filters - Array of filters to remove default filters
-  @returns {array} - Array of filters without default filters
-*/
+ *  @name removeDefaultFilters
+ *  @description  Remove default filters from filters array for each filter type.
+ *  @example
+ *  const filters = [
+ *    {
+ *      type: "keyword",
+ *      value: "",
+ *      keys: ["id", "label", "name", "description", "help", "value"],
+ *    },
+ *      {
+ *      type: "select",
+ *      value: "all",
+ *      keys: ["all", "core"],
+ *    },
+ *  ];
+ *  @param filters - Array of filters to remove default filters
+ *  @returns {array} - Array of filters without default filters
+ */
 function removeDefaultFilters(filters) {
   // Remove filters with type "select" and "all" as value
   filters = filters.filter((filter) => {
@@ -98,25 +98,26 @@ function removeDefaultFilters(filters) {
 }
 
 /**
-  @name isItemKeyword
-  @description  Check all items keys if at least one match with the filter value.
-  @example 
-    const filters = [
-  {
-    type: "keyword",
-    value: "whitelist_ip",
-    keys: ["id", "label", "name", "description", "help", "value"],
-  },
-];
-  const items = {
-    id : "test",
-    label : "Test",
-    name : "test",
-  }
-  @param filters - Array of filters
-  @param items - Array of items
-  @returns {boolean} - True if at least one key match with the filter value
-*/
+ *  @name isItemKeyword
+ *  @description  Check all items keys if at least one match with the filter value.
+ *  @example
+ *  const filters = [
+ *    {
+ *      type: "keyword",
+ *      value: "whitelist_ip",
+ *      keys: ["id", "label", "name", "description", "help", "value"],
+ *    },
+ *  ];
+ *
+ *  const items = {
+ *    id : "test",
+ *    label : "Test",
+ *    name : "test",
+ *  }
+ *  @param filters - Array of filters
+ *  @param items - Array of items
+ *  @returns {boolean} - True if at least one key match with the filter value
+ */
 function isItemKeyword(filters, item) {
   // Match if at least one match
   for (let j = 0; j < filters.length; j++) {
@@ -152,25 +153,26 @@ function isItemKeyword(filters, item) {
 }
 
 /**
-  @name isItemSelect
-  @description  Check all items keys if at least one match exactly the filter value.
-  @example 
-    const filters = [
-  {
-    type: "select",
-    value: "core",
-    keys: ["type"],
-  },
-];
-  const items = {
-    id : "test",
-    label : "Test",
-    name : "test",
-  }
-  @param filters - Array of filters
-  @param items - Array of items
-  @returns {boolean} - True if at least one key match exactly the filter value
-*/
+ *  @name isItemSelect
+ *  @description  Check all items keys if at least one match exactly the filter value.
+ *  @example
+ *  const filters = [
+ *    {
+ *      type: "select",
+ *      value: "core",
+ *      keys: ["type"],
+ *    },
+ *  ];
+ *
+ *  const items = {
+ *    id : "test",
+ *    label : "Test",
+ *    name : "test",
+ *  }
+ *  @param filters - Array of filters
+ *  @param items - Array of items
+ *  @returns {boolean} - True if at least one key match exactly the filter value
+ */
 function isItemSelect(filters, item) {
   for (let j = 0; j < filters.length; j++) {
     const filter = filters[j];

@@ -4,31 +4,31 @@ import en from "@lang/en.json" assert { type: "json" };
 import fr from "@lang/fr.json" assert { type: "json" };
 
 /**
-  @name utils/lang.js
-  @description This file contains utils to manage the language of the application.
-  This is here that we retrieve json files to add translations.
-  This lang.js works with vue-i18n.
-  We need to instanciate the i18n object in the main file of the application inside /pages.
-*/
+ *  @name utils/lang.js
+ *  @description This file contains utils to manage the language of the application.
+ *  This is here that we retrieve json files to add translations.
+ *  This lang.js works with vue-i18n.
+ *  We need to instanciate the i18n object in the main file of the application inside /pages.
+ */
 
 const availablesLangs = ["en", "fr"];
 
 /**
-  @name getAllLang
-  @description  Return all the languages json data available in the application.
-  @returns {object} - Object with all the languages data.
-*/
+ *  @name getAllLang
+ *  @description  Return all the languages json data available in the application.
+ *  @returns {object} - Object with all the languages data.
+ */
 function getAllLang() {
   return { en: en, fr: fr };
 }
 
 /**
-  @name getAllLangCurrPage
-  @description   Filter the needed translations for the current page in order to reduce the size of the i18n object.
-  @example ["dashboard", "settings", "profile"]
-  @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
-  @returns {object} - Object with the languages data for the current page.
-*/
+ *  @name getAllLangCurrPage
+ *  @description   Filter the needed translations for the current page in order to reduce the size of the i18n object.
+ *  @example ["dashboard", "settings", "profile"]
+ *  @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
+ *  @returns {object} - Object with the languages data for the current page.
+ */
 function getAllLangCurrPage(pagesArr) {
   const langs = getAllLang();
   // for each lang
@@ -45,12 +45,12 @@ function getAllLangCurrPage(pagesArr) {
 }
 
 /**
-  @name getI18n
-  @description  Return the i18n object with the translations needed for the current page for all available languages.
-  @example ["dashboard", "settings", "profile"]
-  @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
-  @returns {object} - Object with the i18n object.
-*/
+ *  @name getI18n
+ *  @description  Return the i18n object with the translations needed for the current page for all available languages.
+ *  @example ["dashboard", "settings", "profile"]
+ *  @param {array} pagesArr -  Array of strings with the names of the prefixes of the translations needed.
+ *  @returns {object} - Object with the i18n object.
+ */
 function getI18n(pagesArr = []) {
   const messages =
     pagesArr.length > 0 ? getAllLangCurrPage(pagesArr) : getAllLang();
@@ -74,10 +74,10 @@ function getI18n(pagesArr = []) {
 }
 
 /**
-  @name getLocalLang
-  @description  This will return the user langage checking the store, the browser, or the default lang.
-  @returns {string} - The user langage.
-*/
+ *  @name getLocalLang
+ *  @description  This will return the user langage checking the store, the browser, or the default lang.
+ *  @returns {string} - The user langage.
+ */
 function getLocalLang() {
   // get store lang, or local, or default
   if (

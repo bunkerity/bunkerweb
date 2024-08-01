@@ -12,23 +12,23 @@ import { useUUID } from "@utils/global.js";
 import Icons from "@components/Widget/Icons.vue";
 
 /**
-  @name Widget/Popover.vue
-  @description This component is a standard popover.
-  @example
-  {
-    text: "This is a popover text",
-    href: "#",
-    iconName: "info",
-    attrs: { "data-popover": "test" },
-  }
-  @param {string} text - Content of the popover. Can be a translation key or by default raw text.
-  @param {string} [href="#"] - Link of the anchor. By default it is a # link.
-  @param {string} color - Color of the icon between tailwind colors
-  @param {object} [attrs={}] - List of attributs to add to the text.
-  @param {string} [tag="a"] - By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor
-  @param {string} [iconClass="icon-default"]
-  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
-*/
+ *  @name Widget/Popover.vue
+ *  @description This component is a standard popover.
+ *  @example
+ *  {
+ *    text: "This is a popover text",
+ *    href: "#",
+ *    iconName: "info",
+ *    attrs: { "data-popover": "test" },
+ *  }
+ *  @param {string} text - Content of the popover. Can be a translation key or by default raw text.
+ *  @param {string} [href="#"] - Link of the anchor. By default it is a # link.
+ *  @param {string} color - Color of the icon between tailwind colors
+ *  @param {object} [attrs={}] - List of attributs to add to the text.
+ *  @param {string} [tag="a"] - By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor
+ *  @param {string} [iconClass="icon-default"]
+ *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ */
 
 const props = defineProps({
   text: {
@@ -78,10 +78,10 @@ const popoverContainer = ref();
 const popoverBtn = ref();
 
 /**
-  @name showPopover
-  @description Show the popover and set the position of the popover relative to the container.
-  @returns {void}
-*/
+ *  @name showPopover
+ *  @description Show the popover and set the position of the popover relative to the container.
+ *  @returns {void}
+ */
 function showPopover() {
   popover.isHover = true;
 
@@ -134,10 +134,10 @@ function showPopover() {
 }
 
 /**
-  @name hidePopover
-  @description Hide the popover.
-  @returns {void}
-*/
+ *  @name hidePopover
+ *  @description Hide the popover.
+ *  @returns {void}
+ */
 function hidePopover() {
   popover.isHover = false;
   popover.isOpen = false;

@@ -10,18 +10,22 @@ import MessageUnmatch from "@components/Message/Unmatch.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
-  @name Builder/Bans.vue
-  @description This component is lightweight builder containing only the necessary components to create the bans page.
-  @example
-[
-  {
-    type: "card",
-    gridLayoutClass: "transparent",
-    widgets: [{ type: "MessageUnmatch", data: { text: "bans_not_found" } }],
-  },
-];
-  @param {array} builder - Array of containers and widgets
-*/
+ * @name Builder/Bans.vue
+ * @description This component is lightweight builder containing only the necessary components to create the bans page.
+ * @example
+ * [
+ *   {
+ *     type: "card",
+ *     gridLayoutClass: "transparent",
+ *     widgets: [
+ *                { type: "MessageUnmatch",
+ *                  data: { text: "bans_not_found" }
+ *               },
+ *    ],
+ *   },
+ * ];
+ * @param {array} builder - Array of containers and widgets
+ */
 
 const props = defineProps({
   builder: {

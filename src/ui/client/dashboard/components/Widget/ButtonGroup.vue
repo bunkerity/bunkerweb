@@ -2,41 +2,41 @@
 import Button from "@components/Widget/Button.vue";
 import { onMounted, reactive, ref } from "vue";
 
-/** 
-  @name Widget/ButtonGroup.vue
-  @description This component allow to display multiple buttons in the same row using flex.
-  We can define additional class too for the flex container.
-  We need a list of buttons to display.
-  @example
-  {
-    id: "group-btn",
-    boutonGroupClass : "justify-center",
-    buttons: [
-      {
-        id: "open-modal-btn",
-        text: "Open modal",
-        disabled: false,
-        hideText: true,
-        color: "green",
-        size: "normal",
-        iconName: "modal",
-        eventAttr: {"store" : "modal", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},
-      },
-      {
-        id: "close-modal-btn",
-        text: "Close modal",
-        disabled: false,
-        hideText: true,
-        color: "red",
-        size: "normal",
-        iconName: "modal",
-        eventAttr: {"store" : "modal", "value" : "close", "target" : "modal_id", "valueExpanded" : "close"},
-      },
-    ],
-  }
-  @param {array} buttons - List of buttons to display. Button component is used.
-  @param {string} [boutonGroupClass=""] - Additional class for the flex container
-*/
+/**
+ *  @name Widget/ButtonGroup.vue
+ *  @description This component allow to display multiple buttons in the same row using flex.
+ *  We can define additional class too for the flex container.
+ *  We need a list of buttons to display.
+ *  @example
+ *  {
+ *    id: "group-btn",
+ *    boutonGroupClass : "justify-center",
+ *    buttons: [
+ *      {
+ *        id: "open-modal-btn",
+ *        text: "Open modal",
+ *        disabled: false,
+ *        hideText: true,
+ *        color: "green",
+ *        size: "normal",
+ *        iconName: "modal",
+ *        eventAttr: {"store" : "modal", "value" : "open", "target" : "modal_id", "valueExpanded" : "open"},
+ *      },
+ *      {
+ *        id: "close-modal-btn",
+ *        text: "Close modal",
+ *        disabled: false,
+ *        hideText: true,
+ *        color: "red",
+ *        size: "normal",
+ *        iconName: "modal",
+ *        eventAttr: {"store" : "modal", "value" : "close", "target" : "modal_id", "valueExpanded" : "close"},
+ *      },
+ *    ],
+ *  }
+ *  @param {array} buttons - List of buttons to display. Button component is used.
+ *  @param {string} [boutonGroupClass=""] - Additional class for the flex container
+ */
 
 const props = defineProps({
   buttons: {

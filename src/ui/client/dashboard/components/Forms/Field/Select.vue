@@ -15,49 +15,50 @@ import ErrorField from "@components/Forms/Error/Field.vue";
 import { useUUID } from "@utils/global";
 
 /**
-  @name Forms/Field/Select.vue
-  @description This component is used to create a complete select field input with error handling and label.
-  We can be more precise by adding values that need to be selected to be valid.
-  We can also add popover to display more information.
-  It is mainly use in forms.
-  @example
-  {
-    id: 'test-input',
-    value: 'yes',
-    values : ['yes', 'no'],
-    name: 'test-input',
-    disabled: false,
-    required: true,
-    requiredValues : ['no'], // need required to be checked
-    label: 'Test select',
-    inpType: "select",
-    popovers : [
-      {
-        text: "This is a popover text",
-        iconName: "info",
-      },]
-  }
-  @param {string} [id=uuidv4()] - Unique id
-  @param {string} label - The label of the field. Can be a translation key or by default raw text.
-  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-  @param {string} value
-  @param {array} values
-  @param {object} [attrs={}] - Additional attributes to add to the field
-  @param {array} [popovers] - List of popovers to display more information
-  @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
-  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
-  @param {boolean} [disabled=false]
-  @param {boolean} [required=false]
-  @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
-  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
-  @param {boolean} [hideLabel=false]
-  @param {boolean} [onlyDown=false] - If the dropdown should check the bottom of the container
-  @param {boolean} [overflowAttrEl=""] - Attribut to select the container the element has to check for overflow
-  @param {string} [containerClass=""]
-  @param {string} [inpClass=""]
-  @param {string} [headerClass=""]
-  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
-*/
+ *  @name Forms/Field/Select.vue
+ *  @description This component is used to create a complete select field input with error handling and label.
+ *  We can be more precise by adding values that need to be selected to be valid.
+ *  We can also add popover to display more information.
+ *  It is mainly use in forms.
+ *  @example
+ *  {
+ *    id: 'test-input',
+ *    value: 'yes',
+ *    values : ['yes', 'no'],
+ *    name: 'test-input',
+ *    disabled: false,
+ *    required: true,
+ *    requiredValues : ['no'], // need required to be checked
+ *    label: 'Test select',
+ *    inpType: "select",
+ *    popovers : [
+ *      {
+ *        text: "This is a popover text",
+ *        iconName: "info",
+ *      },
+ *    ]
+ *  }
+ *  @param {string} [id=uuidv4()] - Unique id
+ *  @param {string} label - The label of the field. Can be a translation key or by default raw text.
+ *  @param {string} name - The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+ *  @param {string} value
+ *  @param {array} values
+ *  @param {object} [attrs={}] - Additional attributes to add to the field
+ *  @param {array} [popovers] - List of popovers to display more information
+ *  @param {string} [inpType="select"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
+ *  @param {string} [maxBtnChars=""] - Max char to display in the dropdown button handler.
+ *  @param {boolean} [disabled=false]
+ *  @param {boolean} [required=false]
+ *  @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {boolean} [hideLabel=false]
+ *  @param {boolean} [onlyDown=false] - If the dropdown should check the bottom of the container
+ *  @param {boolean} [overflowAttrEl=""] - Attribut to select the container the element has to check for overflow
+ *  @param {string} [containerClass=""]
+ *  @param {string} [inpClass=""]
+ *  @param {string} [headerClass=""]
+ *  @param {string|number} [tabId=contentIndex] - The tabindex of the field, by default it is the contentIndex
+ */
 
 const props = defineProps({
   // id && value && method
@@ -181,10 +182,10 @@ const selectWidth = ref("");
 const selectDropdown = ref();
 
 /**
-  @name toggleSelect
-  @description This will toggle the custom select dropdown component.
-  @returns {void}
-*/
+ *  @name toggleSelect
+ *  @description This will toggle the custom select dropdown component.
+ *  @returns {void}
+ */
 function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
   // Check if parent has overflow
@@ -228,20 +229,20 @@ function toggleSelect() {
 }
 
 /**
-  @name closeSelect
-  @description This will close the custom select dropdown component.
-  @returns {void}
-*/
+ *  @name closeSelect
+ *  @description This will close the custom select dropdown component.
+ *  @returns {void}
+ */
 function closeSelect() {
   select.isOpen = false;
 }
 
 /**
-  @name changeValue
-  @description This will change the value of the select when a new value is selected from dropdown button.
+*  @name changeValue
+*  @description This will change the value of the select when a new value is selected from dropdown button.
   Check the validity of the select too. Close select after it.
-  @param {string} newValue - The new value to set to the select.
-  @returns {string} - The new value of the select
+*  @param {string} newValue - The new value to set to the select.
+*  @returns {string} - The new value of the select
 */
 function changeValue(newValue) {
   // Allow on template to switch from prop value to component own value
@@ -260,12 +261,12 @@ function changeValue(newValue) {
 }
 
 /**
-  @name closeOutside
-  @description This function is linked to a click event and will check if the target is part of the select component.
-  Case not and select is open, will close the select.
-  @param {event} e - The event object.
-  @returns {void}
-*/
+ *  @name closeOutside
+ *  @description This function is linked to a click event and will check if the target is part of the select component.
+ *  Case not and select is open, will close the select.
+ *  @param {event} e - The event object.
+ *  @returns {void}
+ */
 function closeOutside(e) {
   try {
     if (e.target !== selectBtn.value) {
@@ -277,11 +278,11 @@ function closeOutside(e) {
 }
 
 /**
-  @name closeScroll
-  @description This function is linked to a scroll event and will close the select in case a scroll is detected and the scroll is not the dropdown.
-  @param {event} e - The event object.
-  @returns {void}
-*/
+ *  @name closeScroll
+ *  @description This function is linked to a scroll event and will close the select in case a scroll is detected and the scroll is not the dropdown.
+ *  @param {event} e - The event object.
+ *  @returns {void}
+ */
 function closeScroll(e) {
   if (!e.target) return;
   // Case not a DOM element (like the document itself)
@@ -292,11 +293,11 @@ function closeScroll(e) {
 }
 
 /**
-  @name closeEscape
-  @description This function is linked to a key event and will close the select in case "Escape" key is pressed.
-  @param {event} e - The event object.
-  @returns {void}
-*/
+ *  @name closeEscape
+ *  @description This function is linked to a key event and will close the select in case "Escape" key is pressed.
+ *  @param {event} e - The event object.
+ *  @returns {void}
+ */
 
 function closeEscape(e) {
   if (e.key !== "Escape") return;
@@ -304,12 +305,12 @@ function closeEscape(e) {
 }
 
 /**
-  @name closeTab
-  @description This function is linked to a key event and will listen to tabindex change.
-  In case the new tabindex is not part of the select component, will close the select.
-  @param {event} e - The event object.
-  @returns {void}
-*/
+ *  @name closeTab
+ *  @description This function is linked to a key event and will listen to tabindex change.
+ *  In case the new tabindex is not part of the select component, will close the select.
+ *  @param {event} e - The event object.
+ *  @returns {void}
+ */
 function closeTab(e) {
   if (e.key !== "Tab" && e.key !== "Shift-Tab") return;
   setTimeout(() => {

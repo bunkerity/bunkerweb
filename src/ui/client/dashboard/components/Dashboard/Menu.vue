@@ -11,11 +11,11 @@ import logo2 from "@assets/img/logo-menu-2.png";
 const logoMenu = logo.substring(import.meta.env.DEV ? 0 : 1);
 const logoMenu2 = logo2.substring(import.meta.env.DEV ? 0 : 1);
 
-/** 
-  @name Dashboard/Menu.vue
-  @description This component is a menu that display essential links.
-  You have all the links to the main pages, the plugins pages, the social links and the logout button.
-*/
+/**
+ * @name Dashboard/Menu.vue
+ * @description This component is a menu that display essential links.
+ * You have all the links to the main pages, the plugins pages, the social links and the logout button.
+ */
 
 // Use to update position when banner is visible or not
 const bannerStore = useBannerStore();
@@ -110,10 +110,10 @@ const menu = reactive({
 });
 
 /**
-  @name getDarkMode
-  @description Get the dark mode state from the session storage or the user's preferences.
-  @returns {void}
-*/
+ * @name getDarkMode
+ * @description Get the dark mode state from the session storage or the user's preferences.
+ * @returns {void}
+ */
 function getDarkMode() {
   let darkMode = false;
   // Case on storage
@@ -135,10 +135,10 @@ function getDarkMode() {
 }
 
 /**
-  @name switchMode
-  @description Switch between dark and light mode. Handle by a button.
-  @returns {void}
-*/
+ * @name switchMode
+ **  @description Switch between dark and light mode. Handle by a button.
+ **  @returns {void}
+ */
 function switchMode() {
   menu.darkMode = menu.darkMode ? false : true;
   sessionStorage.setItem("mode", menu.darkMode ? "dark" : "light");
@@ -146,10 +146,10 @@ function switchMode() {
 }
 
 /**
-  @name updateMode
-  @description Update the mode of the page.
-  @returns {void}
-*/
+ * @name updateMode
+ * @description Update the mode of the page.
+ * @returns {void}
+ */
 function updateMode() {
   try {
     menu.darkMode
@@ -159,19 +159,19 @@ function updateMode() {
 }
 
 /**
-  @name closeMenu
-  @description Close menu when we are on mobile device (else always visible).
-  @returns {void}
-*/
+ * @name closeMenu
+ * @description Close menu when we are on mobile device (else always visible).
+ * @returns {void}
+ */
 function closeMenu() {
   menu.isActive = false;
 }
 
 /**
-  @name closeMenu
-  @description Toggle menu when we are on mobile device (else always visible).
-  @returns {void}
-*/
+ * @name closeMenu
+ * @description Toggle menu when we are on mobile device (else always visible).
+ * @returns {void}
+ */
 function toggleMenu() {
   menu.isActive = menu.isActive ? false : true;
 }

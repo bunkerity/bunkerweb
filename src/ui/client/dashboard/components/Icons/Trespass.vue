@@ -2,16 +2,16 @@
 import { defineProps, reactive, onBeforeMount } from "vue";
 import { useUUID } from "@utils/global.js";
 /**
-  @name Icons/Trespass.vue
-  @description This component is a svg icon representing no trespassing.
-  @example
-  {
-    color: 'info',
-  }
-  @param {string} [iconClass="icon-default"] - The class of the icon.
-   @param {string} [color="error"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
-  @param {boolean} [disabled=false] - If true, the icon will be disabled.
-  */
+ *  @name Icons/Trespass.vue
+ *  @description This component is a svg icon representing no trespassing.
+ *  @example
+ *  {
+ *    color: 'info',
+ *  }
+ *  @param {string} [iconClass="icon-default"] - The class of the icon.
+ *  @param {string} [color="error"] - The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker').
+ *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+ */
 
 const props = defineProps({
   iconClass: {

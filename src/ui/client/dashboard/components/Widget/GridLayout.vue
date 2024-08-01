@@ -3,27 +3,27 @@ import { computed, ref, onMounted, reactive, onBeforeMount } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useUUID } from "@utils/global.js";
 
-/** 
-  @name Widget/GridLayout.vue
-  @description This component is used for top level page layout.
-  This will determine the position of layout components based on the grid system.
-  We can create card, modal, table and others top level layout using this component.
-  This component is mainly use as Grid parent component.
-  @example
-  {
-    type: "card",
-    title: "Test",
-    columns: { pc: 12, tablet: 12, mobile: 12},
-    gridLayoutClass: "items-start"
-  }
-  @param {string} [type="card"] - Type of layout component, we can have "card"
-  @param {string} [id=uuidv4()] - Id of the layout component, will be used to identify the component.
-  @param {string} [title=""] - Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title.
-  @param {string} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
-  @param {object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
-  @param {string} [gridLayoutClass="items-start"] - Additional class
-  @param {string} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
-*/
+/**
+ *  @name Widget/GridLayout.vue
+ *  @description This component is used for top level page layout.
+ *  This will determine the position of layout components based on the grid system.
+ *  We can create card, modal, table and others top level layout using this component.
+ *  This component is mainly use as Grid parent component.
+ *  @example
+ *  {
+ *    type: "card",
+ *    title: "Test",
+ *    columns: { pc: 12, tablet: 12, mobile: 12},
+ *    gridLayoutClass: "items-start"
+ *  }
+ *  @param {string} [type="card"] - Type of layout component, we can have "card"
+ *  @param {string} [id=uuidv4()] - Id of the layout component, will be used to identify the component.
+ *  @param {string} [title=""] - Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title.
+ *  @param {string} [link=""] - Will transform the container tag from a div to an a tag with the link as href. Useful with card type.
+ *  @param {object} [columns={"pc": 12, "tablet": 12, "mobile": 12}] - Work with grid system { pc: 12, tablet: 12, mobile: 12}
+ *  @param {string} [gridLayoutClass="items-start"] - Additional class
+ *  @param {string} [tabId=contentIndex] - Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex
+ */
 
 const props = defineProps({
   type: {

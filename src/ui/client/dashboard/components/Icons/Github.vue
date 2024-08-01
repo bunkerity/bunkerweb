@@ -1,17 +1,17 @@
 <script setup>
 import { defineProps, reactive, onBeforeMount } from "vue";
 import { useUUID } from "@utils/global.js";
-/** 
-  @name Icons/Github.vue
-  @description This component is a svg icon representing Github.
-  @example
-  {
-    color: 'info',
-  }
-  @param {string} [iconClass="icon-default"] - The class of the icon.
-  @param {string} [color="github"]
-  @param {boolean} [disabled=false] - If true, the icon will be disabled.
-  */
+/**
+ *  @name Icons/Github.vue
+ *  @description This component is a svg icon representing Github.
+ *  @example
+ *  {
+ *    color: 'info',
+ *  }
+ *  @param {string} [iconClass="icon-default"] - The class of the icon.
+ *  @param {string} [color="github"]
+ *  @param {boolean} [disabled=false] - If true, the icon will be disabled.
+ */
 
 const props = defineProps({
   iconClass: {

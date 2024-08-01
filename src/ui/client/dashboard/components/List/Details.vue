@@ -6,9 +6,9 @@ import Filter from "@components/Widget/Filter.vue";
 import Grid from "@components/Widget/Grid.vue";
 import MessageUnmatch from "@components/Message/Unmatch.vue";
 /** 
-  @name List/Details.vue
-  @description This component is a list of items separate on two columns : one for the title, and other for a list of popovers related to the plugin (type, link...)
-  @example
+*  @name List/Details.vue
+*  @description This component is a list of items separate on two columns : one for the title, and other for a list of popovers related to the plugin (type, link...)
+*  @example
   {
   details : [{
     text: "name",
@@ -28,9 +28,9 @@ import MessageUnmatch from "@components/Message/Unmatch.vue";
       },
     ],
 }]
-  @param {string} details  - List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
-  @param {array} [filters=[]] - List of filters to apply on the list of items.
-  @param {columns} [columns={pc: 4, tablet: 6, mobile: 12}] - Determine the position of the items in the grid system.
+*  @param {string} details  - List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
+*  @param {array} [filters=[]] - List of filters to apply on the list of items.
+*  @param {columns} [columns={pc: 4, tablet: 6, mobile: 12}] - Determine the position of the items in the grid system.
 */
 
 const props = defineProps({
@@ -62,22 +62,22 @@ const gridClass = computed(() => {
 });
 
 /**
-  @name indexUp
-  @description   When we focus or pointerover an item, we will add a higher z-index than others items in order to avoid to crop popovers.
-  In case we leave the item, for few moments the item will get an higher z-index than this in order to get a smooth transition.
-  @param {string|number} id - The id of the item.
-  @returns {void}
-*/
+ *  @name indexUp
+ *  @description   When we focus or pointerover an item, we will add a higher z-index than others items in order to avoid to crop popovers.
+ *  In case we leave the item, for few moments the item will get an higher z-index than this in order to get a smooth transition.
+ *  @param {string|number} id - The id of the item.
+ *  @returns {void}
+ */
 function indexUp(id) {
   data.upIndex = id;
 }
 
 /**
-  @name indexPending
-  @description  This will add a higher z-index for 100ms when cursor is out of the item in order to avoid to crop popovers.
-  @param {string|number} id - The id of the item.
-  @returns {void}
-*/
+ *  @name indexPending
+ *  @description  This will add a higher z-index for 100ms when cursor is out of the item in order to avoid to crop popovers.
+ *  @param {string|number} id - The id of the item.
+ *  @returns {void}
+ */
 function indexPending(id) {
   data.pendingIndex.push(id);
   // Remove id from pendingIndex after a moment

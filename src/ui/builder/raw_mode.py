@@ -18,20 +18,11 @@ def raw_mode_builder(templates: list[dict], plugins: list, global_config: dict, 
 
     # We need
     settings = get_service_settings(service_name, global_config, total_config)
-    print("settings", settings)
     builder = [
         {
             "type": "card",
             "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
             "widgets": [
-                {
-                    "type": "Title",
-                    "data": {"title": "services_mode_title", "type": "container"},
-                },
-                {
-                    "type": "Subtitle",
-                    "data": {"subtitle": "services_mode_subtitle", "type": "container"},
-                },
                 {
                     "type": "Templates",
                     "data": {
