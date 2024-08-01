@@ -293,5 +293,7 @@
   "services_delete_subtitle": "Are you sure you want to delete the service below ?",
   "services_settings_table_title": "Get the activate setting state of main plugins for this service.",
   "services_settings_table_name": "Plugin",
-  "services_settings_table_status": "Status"
+  "services_settings_table_status": "Status",
+  "services_mode_title": "Service mode",
+  "services_mode_subtitle": "Manage your service settings."
 }

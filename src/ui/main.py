@@ -57,6 +57,7 @@ from builder.instances import instances_builder
 from builder.global_config import global_config_builder
 from builder.jobs import jobs_builder
 from builder.services import services_builder
+from builder.raw_mode import raw_mode_builder
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -97,6 +98,17 @@ signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
 sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
+
+
+TEMPLATE_PLACEHOLDER = [
+    {
+        "name": "default",
+        "steps": [],
+        "configs": {},
+        "settings": {},
+    }
+]
+
 
 # Flask app
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
@@ -1191,54 +1203,40 @@ def get_service_data():
     return config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged
 
 
-@app.route("/services", methods=["GET", "POST"])
-@login_required
-def services():
-    if request.method == "POST":
-        if DB.readonly:
-            return handle_error("Database is in read-only mode", "services")
+def update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, redirect_name):
+    if request.form["operation"] == "edit":
+        if is_draft_unchanged and len(variables) == 1 and "SERVER_NAME" in variables and server_name == old_server_name:
+            return handle_error("The service was not edited because no values were changed.", "services", True)
 
-        verify_data_in_form(
-            data={"operation": ("edit", "new", "delete")},
-            err_message="Invalid operation parameter on /services.",
-            redirect_url="services",
+    if request.form["operation"] == "new" and not variables:
+        return handle_error("The service was not created because all values had the default value.", "services", True)
+
+    # Delete
+    if request.form["operation"] == "delete":
+
+        is_service = app.bw_config.check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
+
+        if not is_service:
+            error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
+
+        if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
+            return handle_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
+
+    db_metadata = DB.get_metadata()
+
+    def update_services(threaded: bool = False):
+        wait_applying()
+
+        manage_bunkerweb(
+            "services",
+            variables,
+            old_server_name,
+            variables.get("SERVER_NAME", ""),
+            operation=operation,
+            is_draft=is_draft,
+            was_draft=was_draft,
+            threaded=threaded,
         )
-
-        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data()
-
-        if request.form["operation"] == "edit":
-            if is_draft_unchanged and len(variables) == 1 and "SERVER_NAME" in variables and server_name == old_server_name:
-                return handle_error("The service was not edited because no values were changed.", "services", True)
-
-        if request.form["operation"] == "new" and not variables:
-            return handle_error("The service was not created because all values had the default value.", "services", True)
-
-        # Delete
-        if request.form["operation"] == "delete":
-
-            is_service = app.bw_config.check_variables({"SERVER_NAME": request.form["SERVER_NAME"]}, config)
-
-            if not is_service:
-                error_message(f"Error while deleting the service {request.form['SERVER_NAME']}")
-
-            if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
-                return handle_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
-
-        db_metadata = DB.get_metadata()
-
-        def update_services(threaded: bool = False):
-            wait_applying()
-
-            manage_bunkerweb(
-                "services",
-                variables,
-                old_server_name,
-                variables.get("SERVER_NAME", ""),
-                operation=operation,
-                is_draft=is_draft,
-                was_draft=was_draft,
-                threaded=threaded,
-            )
 
         if any(
             v
@@ -1253,16 +1251,69 @@ def services():
 
         app.data["CONFIG_CHANGED"] = True
 
-        message = ""
+    message = ""
 
-        if request.form["operation"] == "new":
-            message = f"Creating {'draft ' if is_draft else ''}service {variables.get('SERVER_NAME', '').split(' ')[0]}"
-        elif request.form["operation"] == "edit":
-            message = f"Saving configuration for {'draft ' if is_draft else ''}service {old_server_name.split(' ')[0]}"
-        elif request.form["operation"] == "delete":
-            message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
+    if request.form["operation"] == "new":
+        message = f"Creating {'draft ' if is_draft else ''}service {variables.get('SERVER_NAME', '').split(' ')[0]}"
+    elif request.form["operation"] == "edit":
+        message = f"Saving configuration for {'draft ' if is_draft else ''}service {old_server_name.split(' ')[0]}"
+    elif request.form["operation"] == "delete":
+        message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
 
-        return redirect(url_for("loading", next=url_for("services"), message=message))
+    return redirect(url_for("loading", next=url_for(redirect_name, service_name=[server_name]), message=message))
+
+
+@app.route("/raw-mode", methods=["GET", "POST"])
+@login_required
+def services_raw():
+    if request.method == "POST":
+        if DB.readonly:
+            return handle_error("Database is in read-only mode", "services")
+
+        verify_data_in_form(
+            data={"operation": ("edit", "new", "delete")},
+            err_message="Invalid operation parameter on /services.",
+            redirect_url="services",
+        )
+
+        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data()
+        update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, "raw-mode")
+
+    if not request.args.get("service_name"):
+        return handle_error("Service name missing to access raw mode.", "services")
+
+    service_name = request.args.get("service_name")
+    total_config = DB.get_config(methods=True, with_drafts=True)
+    service_names = total_config["SERVER_NAME"]["value"].split(" ")
+    # Case new service
+    service_names.append("new")
+
+    if service_name not in service_names:
+        return handle_error("Service name not found to access raw mode.", "services")
+
+    global_config = app.bw_config.get_config(global_only=True, methods=True)
+    plugins = app.bw_config.get_plugins()
+
+    data_server_builder = raw_mode_builder(TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name)
+
+    return render_template("raw.html", data_server_builder=data_server_builder)
+
+
+@app.route("/services", methods=["GET", "POST"])
+@login_required
+def services():
+    if request.method == "POST":
+        if DB.readonly:
+            return handle_error("Database is in read-only mode", "services")
+
+        verify_data_in_form(
+            data={"operation": ("edit", "new", "delete")},
+            err_message="Invalid operation parameter on /services.",
+            redirect_url="services",
+        )
+
+        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data()
+        update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, "services")
 
     # Display services
     services = []
@@ -1304,7 +1355,7 @@ def services():
 
 @app.route("/services/raw/{service_name}", methods=["GET", "POST"])
 @login_required
-def services_raw(service_name: str):
+def services_raw(service_name: str):  # noqa: F811
     if request.method == "POST":
         if DB.readonly:
             return handle_error("Database is in read-only mode", "services")
@@ -1490,9 +1541,9 @@ def global_config():
             )
         )
 
-    global_config = DB.get_config(global_only=True, methods=True)
+    global_config = app.bw_config.get_config(global_only=True, methods=True)
     plugins = app.bw_config.get_plugins()
-    data_server_builder = global_config_builder(plugins, global_config)
+    data_server_builder = global_config_builder(TEMPLATE_PLACEHOLDER, plugins, global_config)
     return render_template("global-config.html", data_server_builder=data_server_builder)
 
 
