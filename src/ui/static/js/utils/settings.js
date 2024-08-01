@@ -1367,7 +1367,7 @@ class SettingsMultiple extends Settings {
             const [containerSuffix, containerIsNum, containerName] =
               this.getSuffixData(ctnrName);
             if (containerIsNum && containerSuffix > topNum)
-              topNum = containerIsNum;
+              topNum = +containerSuffix;
           });
           //the final number is num
           //num is total - 1 because of hidden SCHEMA container
