@@ -2,7 +2,6 @@
 
 from contextlib import suppress
 from datetime import datetime
-from itertools import chain
 from os import getenv
 from time import sleep
 from typing import Any, Dict, List, Optional
@@ -43,18 +42,13 @@ class Config:
             self._settings.update(plugin["settings"])
 
     def __get_full_env(self) -> dict:
-        env_instances = {"SERVER_NAME": ""}
-        for instance in self.__instances:
-            for variable, value in instance["env"].items():
-                env_instances[variable] = value
-
         config = {"SERVER_NAME": "", "MULTISITE": "yes"}
         for service in self.__services:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
                 continue
-            for variable, value in chain(env_instances.items(), service.items()):
-                if variable.startswith("CUSTOM_CONF") or not variable.isupper():
+            for variable, value in service.items():
+                if variable == "NAMESPACE" or variable.startswith("CUSTOM_CONF") or not variable.isupper():
                     continue
                 if not self._db.is_setting(variable, multisite=True):
                     if variable in service:
@@ -155,12 +149,7 @@ class Config:
                         exploded = file.split("/")
                         site = exploded[0]
                         name = exploded[1]
-                    custom_configs.append(
-                        {
-                            "value": data,
-                            "exploded": [site, config_type, name.replace(".conf", "")],
-                        }
-                    )
+                    custom_configs.append({"value": data, "exploded": [site, config_type, name.replace(".conf", "")]})
 
         # update instances in database
         if "instances" in changes:

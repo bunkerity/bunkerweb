@@ -20,17 +20,29 @@ class IngressController(Controller):
         self.__networkingv1 = client.NetworkingV1Api()
 
     def _get_controller_instances(self) -> list:
-        return [
-            pod
-            for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items
-            if (pod.metadata.annotations and "bunkerweb.io/INSTANCE" in pod.metadata.annotations)
-        ]
+        instances = []
+        pods = self.__corev1.list_pod_for_all_namespaces(watch=False).items
+        for pod in pods:
+            if (
+                pod.metadata.annotations
+                and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
+                and (pod.metadata.namespace in self._namespaces if self._namespaces else True)
+            ):
+                instances.append(pod)
+        return instances
+
+    def _get_controller_services(self) -> list:
+        services = []
+        ingresses = self.__networkingv1.list_ingress_for_all_namespaces(watch=False).items
+        for ingress in ingresses:
+            if ingress.metadata.namespace in self._namespaces if self._namespaces else True:
+                services.append(ingress)
+        return services
 
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {
             "name": controller_instance.metadata.name,
             "hostname": controller_instance.metadata.name,
-            "env": self._get_scheduler_env(),
         }
         health = False
         if controller_instance.status.conditions:
@@ -52,17 +64,11 @@ class IngressController(Controller):
                 instance["env"][env.name] = env.value or ""
         for controller_service in self._get_controller_services():
             if controller_service.metadata.annotations:
-                for (
-                    annotation,
-                    value,
-                ) in controller_service.metadata.annotations.items():
+                for annotation, value in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
                     instance["env"][annotation.replace("bunkerweb.io/", "", 1)] = value
         return [instance]
-
-    def _get_controller_services(self) -> list:
-        return self.__networkingv1.list_ingress_for_all_namespaces(watch=False).items
 
     def _to_services(self, controller_service) -> List[dict]:
         if not controller_service.spec or not controller_service.spec.rules:
@@ -72,9 +78,7 @@ class IngressController(Controller):
         # parse rules
         for rule in controller_service.spec.rules:
             if not rule.host:
-                self._logger.warning(
-                    "Ignoring unsupported ingress rule without host.",
-                )
+                self._logger.warning("Ignoring unsupported ingress rule without host.")
                 continue
             service = {}
             service["SERVER_NAME"] = rule.host
@@ -84,35 +88,26 @@ class IngressController(Controller):
             location = 1
             for path in rule.http.paths:
                 if not path.path:
-                    self._logger.warning(
-                        "Ignoring unsupported ingress rule without path.",
-                    )
+                    self._logger.warning("Ignoring unsupported ingress rule without path.")
                     continue
                 elif not path.backend.service:
-                    self._logger.warning(
-                        "Ignoring unsupported ingress rule without backend service.",
-                    )
+                    self._logger.warning("Ignoring unsupported ingress rule without backend service.")
                     continue
                 elif not path.backend.service.port:
-                    self._logger.warning(
-                        "Ignoring unsupported ingress rule without backend service port.",
-                    )
+                    self._logger.warning("Ignoring unsupported ingress rule without backend service port.")
                     continue
                 elif not path.backend.service.port.number:
-                    self._logger.warning(
-                        "Ignoring unsupported ingress rule without backend service port number.",
-                    )
+                    self._logger.warning("Ignoring unsupported ingress rule without backend service port number.")
                     continue
 
-                service_list = self.__corev1.list_service_for_all_namespaces(
+                service_list = self.__corev1.list_namespaced_service(
+                    namespace,
                     watch=False,
-                    field_selector=f"metadata.name={path.backend.service.name},metadata.namespace={namespace}",
+                    field_selector=f"metadata.name={path.backend.service.name}",
                 ).items
 
                 if not service_list:
-                    self._logger.warning(
-                        f"Ignoring ingress rule with service {path.backend.service.name} : service not found.",
-                    )
+                    self._logger.warning(f"Ignoring ingress rule with service {path.backend.service.name} : service not found.")
                     continue
 
                 reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.cluster.local:{path.backend.service.port.number}"
@@ -129,17 +124,14 @@ class IngressController(Controller):
         # parse annotations
         if controller_service.metadata.annotations:
             for service in services:
-                for (
-                    annotation,
-                    value,
-                ) in controller_service.metadata.annotations.items():
+                for annotation, value in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
 
                     variable = annotation.replace("bunkerweb.io/", "", 1)
                     server_name = service["SERVER_NAME"].strip().split(" ")[0]
                     if not variable.startswith(f"{server_name}_"):
-                        continue
+                        variable = f"{server_name}_{variable}"  # ? Ingress specific global variables are applied to all services
                     service[variable.replace(f"{server_name}_", "", 1)] = value
 
         # parse tls
@@ -149,25 +141,21 @@ class IngressController(Controller):
                     for host in tls.hosts:
                         for service in services:
                             if host in service["SERVER_NAME"].split(" "):
-                                secrets_tls = self.__corev1.list_secret_for_all_namespaces(
+                                secrets_tls = self.__corev1.list_namespaced_secret(
+                                    namespace,
                                     watch=False,
-                                    field_selector=f"metadata.name={tls.secret_name},metadata.namespace={namespace}",
+                                    field_selector=f"metadata.name={tls.secret_name}",
                                 ).items
-                                if len(secrets_tls) == 0:
-                                    self._logger.warning(
-                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} not found.",
-                                    )
+                                if not secrets_tls:
+                                    self._logger.warning(f"Ignoring tls setting for {host} : secret {tls.secret_name} not found.")
                                     break
+
                                 secret_tls = secrets_tls[0]
                                 if not secret_tls.data:
-                                    self._logger.warning(
-                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} contains no data.",
-                                    )
+                                    self._logger.warning(f"Ignoring tls setting for {host} : secret {tls.secret_name} contains no data.")
                                     break
-                                if "tls.crt" not in secret_tls.data or "tls.key" not in secret_tls.data:
-                                    self._logger.warning(
-                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} is missing tls data.",
-                                    )
+                                elif "tls.crt" not in secret_tls.data or "tls.key" not in secret_tls.data:
+                                    self._logger.warning(f"Ignoring tls setting for {host} : secret {tls.secret_name} is missing tls data.")
                                     break
                                 service["USE_CUSTOM_SSL"] = "yes"
                                 service["CUSTOM_SSL_CERT_DATA"] = secret_tls.data["tls.crt"]
@@ -177,28 +165,30 @@ class IngressController(Controller):
     def get_configs(self) -> dict:
         configs = {config_type: {} for config_type in self._supported_config_types}
         for configmap in self.__corev1.list_config_map_for_all_namespaces(watch=False).items:
-            if not configmap.metadata.annotations or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations:
+            if (
+                not configmap.metadata.annotations
+                or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations
+                or not (configmap.metadata.namespace in self._namespaces if self._namespaces else True)
+            ):
                 continue
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
             if config_type not in self._supported_config_types:
-                self._logger.warning(
-                    f"Ignoring unsupported CONFIG_TYPE {config_type} for ConfigMap {configmap.metadata.name}",
-                )
+                self._logger.warning(f"Ignoring unsupported CONFIG_TYPE {config_type} for ConfigMap {configmap.metadata.name}")
                 continue
             elif not configmap.data:
-                self._logger.warning(
-                    f"Ignoring blank ConfigMap {configmap.metadata.name}",
-                )
+                self._logger.warning(f"Ignoring blank ConfigMap {configmap.metadata.name}")
                 continue
+
             config_site = ""
             if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
                 if not self._is_service_present(configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]):
                     self._logger.warning(
-                        f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist",
+                        f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist"
                     )
                     continue
                 config_site = f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
+
             for config_name, config_data in configmap.data.items():
                 configs[config_type][f"{config_site}{config_name}"] = config_data
         return configs
@@ -206,6 +196,10 @@ class IngressController(Controller):
     def __process_event(self, event):
         obj = event["object"]
         metadata = obj.metadata if obj else None
+
+        if metadata and self._namespaces and metadata.namespace not in self._namespaces:
+            return False
+
         annotations = metadata.annotations if metadata else None
         data = getattr(obj, "data", None) if obj else None
         if not obj:

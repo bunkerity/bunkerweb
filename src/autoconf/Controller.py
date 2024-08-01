@@ -22,6 +22,13 @@ class Controller(Config):
         self._services = []
         self._configs = {config_type: {} for config_type in self._supported_config_types}
         self._logger = setup_logger(f"{self._type}-controller", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self._namespaces = None
+        namespaces = getenv("NAMESPACES")
+        if namespaces:
+            self._namespaces = namespaces.strip().split(" ")
+            self._logger.info(
+                "Only instances and services in the " + ", ".join(f"{namespace!r}" for namespace in self._namespaces) + " namespace(s) will be considered."
+            )
 
     def wait(self, wait_time: int) -> list:
         all_ready = False

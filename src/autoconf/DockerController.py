@@ -17,10 +17,32 @@ class DockerController(Controller):
         self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_STREAM|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(.+)$")
 
     def _get_controller_instances(self) -> List[Container]:
-        return self.__client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
+        containers: List[Container] = self.__client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
+        if not self._namespaces:
+            return containers
+        return [
+            container
+            for container in containers
+            if any(
+                ({label: "" for label in container.labels} if isinstance(container.labels, list) else container.labels).get("bunkerweb.NAMESPACE", "")
+                == namespace
+                for namespace in self._namespaces
+            )
+        ]
 
     def _get_controller_services(self) -> List[Container]:
-        return self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"})
+        containers: List[Container] = self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"})
+        if not self._namespaces:
+            return containers
+        return [
+            container
+            for container in containers
+            if any(
+                ({label: "" for label in container.labels} if isinstance(container.labels, list) else container.labels).get("bunkerweb.NAMESPACE", "")
+                == namespace
+                for namespace in self._namespaces
+            )
+        ]
 
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {}
@@ -49,6 +71,9 @@ class DockerController(Controller):
             labels = container.labels  # type: ignore (labels is inside a container)
             if isinstance(labels, list):
                 labels = {label: "" for label in labels}
+
+            if self._namespaces and not any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces):
+                continue
 
             # extract server_name
             server_name = labels.get("bunkerweb.SERVER_NAME", "").split(" ")[0]
@@ -79,6 +104,7 @@ class DockerController(Controller):
             "Actor" in event
             and "Attributes" in event["Actor"]
             and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"] or "bunkerweb.SERVER_NAME" in event["Actor"]["Attributes"])
+            and (not self._namespaces or any(event["Actor"]["Attributes"].get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces))
         )
 
     def process_events(self):

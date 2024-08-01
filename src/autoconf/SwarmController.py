@@ -23,11 +23,25 @@ class SwarmController(Controller):
 
     def _get_controller_instances(self) -> List[Service]:
         self.__swarm_instances = []
-        return self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"})
+        services = self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"})
+        if not self._namespaces:
+            return services
+        return [
+            service
+            for service in services
+            if any(service.attrs["Spec"]["Labels"].get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces)
+        ]
 
     def _get_controller_services(self) -> List[Service]:
         self.__swarm_services = []
-        return self.__client.services.list(filters={"label": "bunkerweb.SERVER_NAME"})
+        services = self.__client.services.list(filters={"label": "bunkerweb.SERVER_NAME"})
+        if not self._namespaces:
+            return services
+        return [
+            service
+            for service in services
+            if any(service.attrs["Spec"]["Labels"].get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces)
+        ]
 
     def _to_instances(self, controller_instance) -> List[dict]:
         self.__swarm_instances.append(controller_instance.id)
@@ -46,7 +60,7 @@ class SwarmController(Controller):
                     "name": task["ID"],
                     "hostname": f"{controller_instance.name}.{task['NodeID']}.{task['ID']}",
                     "health": task["Status"]["State"] == "running",
-                    "env": self._get_scheduler_env(),
+                    "env": instance_env,
                 }
             )
         return instances
@@ -106,14 +120,19 @@ class SwarmController(Controller):
                 return True
             try:
                 labels = self.__client.services.get(event["Actor"]["ID"]).attrs["Spec"]["Labels"]
-                return "bunkerweb.INSTANCE" in labels or "bunkerweb.SERVER_NAME" in labels
+                return ("bunkerweb.INSTANCE" in labels or "bunkerweb.SERVER_NAME" in labels) and (
+                    not self._namespaces or any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces)
+                )
             except:
                 return False
         if event["Type"] == "config":
             if event["Actor"]["ID"] in self.__swarm_configs:
                 return True
             try:
-                return "bunkerweb.CONFIG_TYPE" in self.__client.configs.get(event["Actor"]["ID"]).attrs["Spec"]["Labels"]
+                labels = self.__client.services.get(event["Actor"]["ID"]).attrs["Spec"]["Labels"]
+                return "bunkerweb.CONFIG_TYPE" in labels and (
+                    not self._namespaces or any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces)
+                )
             except:
                 return False
         return False

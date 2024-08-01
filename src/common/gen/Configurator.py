@@ -210,6 +210,7 @@ class Configurator:
                     "PWD",
                     "SHLVL",
                     "SERVER_SOFTWARE",
+                    "NAMESPACE",
                 )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
