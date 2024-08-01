@@ -97,7 +97,7 @@
     },
     "HTTP3": {
       "context": "multisite",
-      "default": "no",
+      "default": "yes",
       "help": "Support HTTP3 protocol when HTTPS is enabled.",
       "id": "http3",
       "label": "HTTP3",
