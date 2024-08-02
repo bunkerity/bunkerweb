@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import Logger
-from os import getenv, sep
+from os import sep
 from os.path import join
 from sys import path as sys_path
 from time import sleep
@@ -109,15 +109,10 @@ class UIDatabase(Database):
                     row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() if hasattr(row, column)}
 
                     if table_name == "bw_ui_users" and two_factor_enabled is not None:
-                        message = "Detected old user model, as we implemented advanced security in the new model (custom salt for passwords, totp, etc.)"
-                        if row["method"] == "ui":
-                            self.logger.warning(message + ", you will have to re create the admin user.")
-                            continue
-                        elif getenv("PASSWORD_SALT", "").isdigit():
-                            self.logger.warning(message + " and you specified a custom PASSWORD_SALT, you will have to re create the admin user.")
-                            continue
-                        elif two_factor_enabled:
-                            self.logger.warning(message + ", you will have to re set the two factor authentication for the admin user.")
+                        if two_factor_enabled:
+                            self.logger.warning(
+                                "Detected old user model, as we implemented advanced security in the new model (custom salt for passwords, totp, etc.), you will have to re set the two factor authentication for the admin user."
+                            )
                         row["admin"] = True
 
                     with self._db_session() as session:

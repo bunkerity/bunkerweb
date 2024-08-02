@@ -11,7 +11,6 @@
 - [AUTOCONF] Add new `NAMESPACES` environment variable to allow setting the namespaces to watch for the autoconf feature which makes it possible to use multiple autoconf instances in the same cluster while keeping the configuration separated
 - [UI] Start refactoring the UI to make it more modular and easier to maintain with migration from Jinja to Vue.js
 - [UI] Add a `remember me` feature to the login page so that the user can stay logged in for a longer period of time (expires after 31 days)
-- [UI] Add new `PASSWORD_SALT` setting to allow setting a custom salt for the password hashing (default is generated via bcrypt)
 - [UI] Add new `TOTP_SECRETS` setting to encrypt the TOTP secrets in the database (if not set, we generate a random amount of secrets via passlib.totp) - ⚠ We highly recommend setting this setting to a custom value to prevent the secrets from being erased when the volumes are deleted
 - [UI] Add new `MF_RECOVERY_CODES_KEYS` and `MF_ENCRYPT_RECOVERY_CODES` settings to allow setting the encryption keys for the recovery codes and to enable/disable the encryption of the recovery codes (default is yes and if no keys are set, we generate random keys via cryptography.fernet.Fernet) - ⚠ We highly recommend setting these settings to custom values to prevent the recovery codes from being erased when the volumes are deleted
 - [UI] Start adding roles and permissions to the UI to allow different users to have different permissions in a multi-user environment for the near future

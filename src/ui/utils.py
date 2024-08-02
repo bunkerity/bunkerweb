@@ -6,7 +6,7 @@ from os.path import join
 from threading import Lock
 from typing import List, Optional
 
-from bcrypt import checkpw, hashpw
+from bcrypt import checkpw, gensalt, hashpw
 from magic import Magic
 from qrcode.main import QRCode
 from regex import compile as re_compile
@@ -215,8 +215,8 @@ def check_settings(settings: dict, check: str) -> bool:
     return any(setting["context"] == check for setting in settings.values())
 
 
-def gen_password_hash(password: str, salt: str) -> bytes:
-    return hashpw(password.encode("utf-8"), salt.encode("utf-8"))
+def gen_password_hash(password: str) -> bytes:
+    return hashpw(password.encode("utf-8"), gensalt(rounds=13))
 
 
 def check_password(password: str, hashed: bytes) -> bool:

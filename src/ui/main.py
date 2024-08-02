@@ -18,7 +18,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from bcrypt import gensalt
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from cryptography.fernet import Fernet
@@ -124,15 +123,6 @@ with app.app_context():
             app.logger.warning("The FLASK_SECRET environment variable is missing or the .flask_secret file is missing, generating a random one ...")
             TMP_DIR.joinpath(".flask_secret").write_text(token_urlsafe(32), encoding="utf-8")
         FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
-
-    PASSWORD_SALT = getenv("PASSWORD_SALT", "")
-    if not PASSWORD_SALT.isdigit():
-        if not LIB_DIR.joinpath(".password_salt").is_file():
-            app.logger.warning(
-                "The PASSWORD_SALT environment variable is missing or invalid (must be an integer) or the .password_salt file is missing, generating a random one ..."
-            )
-            LIB_DIR.joinpath(".password_salt").write_bytes(gensalt(rounds=13))
-        PASSWORD_SALT = LIB_DIR.joinpath(".password_salt").read_text(encoding="utf-8").strip()
 
     TOTP_SECRETS = getenv("TOTP_SECRETS", "")
     if TOTP_SECRETS:
@@ -257,7 +247,7 @@ with app.app_context():
                             "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). It will not be updated."
                         )
                     else:
-                        ADMIN_USER["password"] = gen_password_hash(env_admin_password, PASSWORD_SALT)
+                        ADMIN_USER["password"] = gen_password_hash(env_admin_password)
                         updated = True
 
                 if updated:
@@ -283,7 +273,7 @@ with app.app_context():
                 )
                 exit(1)
 
-        ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password, PASSWORD_SALT), ["admin"], admin=True)
+        ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
         if ret:
             app.logger.error(f"Couldn't create the admin user in the database: {ret}")
             exit(1)
@@ -760,9 +750,7 @@ def setup():
                     "setup",
                 )
 
-            ret = DB.create_ui_user(
-                request.form["admin_username"], gen_password_hash(request.form["admin_password"], PASSWORD_SALT), ["admin"], method="ui", admin=True
-            )
+            ret = DB.create_ui_user(request.form["admin_username"], gen_password_hash(request.form["admin_password"]), ["admin"], method="ui", admin=True)
             if ret:
                 return handle_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
@@ -1048,7 +1036,7 @@ def account():
 
         ret = DB.update_ui_user(
             username,
-            gen_password_hash(password, PASSWORD_SALT),
+            gen_password_hash(password),
             totp_secret,
             totp_recovery_codes=totp_recovery_codes,
             method=current_user.method if request.form["operation"] == "totp" else "ui",
