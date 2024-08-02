@@ -43,7 +43,7 @@ import "@assets/script/editor/theme-dawn.js";
  *  @param {object} [attrs={}] - Additional attributes to add to the field
  *  @param {array} [popovers] - List of popovers to display more information
  *  @param {string} [inpType="editor"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
  *  @param {string} [pattern=""]
  *  @param {boolean} [disabled=false]
  *  @param {boolean} [required=false]

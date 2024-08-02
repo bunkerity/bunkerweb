@@ -4,6 +4,7 @@ from subprocess import Popen, PIPE
 from typing import List
 from shutil import rmtree
 from re import search, sub
+from typing import Union
 
 # We want to get path of the folder where our components are
 # The path is "../src/client/dashboard/src/components" from here
@@ -11,6 +12,7 @@ from re import search, sub
 inputFolder = abspath("../client/dashboard/components")
 outputFolderMd = abspath("../client/.widgets-md")
 outputFolderPy = abspath("../client/.widgets")
+outputFolderWidgets = abspath("../client/widgets")
 
 
 def run_command(command: List[str]) -> int:
@@ -48,6 +50,8 @@ def reset():
     rmtree(outputFolderMd, ignore_errors=True)
     # Remove all files from the output folder
     rmtree(outputFolderPy, ignore_errors=True)
+    # remove outputfilename
+    rmtree(outputFolderWidgets, ignore_errors=True)
 
 
 def vue2js():
@@ -62,6 +66,13 @@ def vue2js():
             data = folder.read_text()
             # Get only the content between <script setup> and </script> tag
             script = data.split("<script setup>")[1].split("</script>")[0]
+            # Get index of jsdoc comments
+            first_doc_index_start = script.index("/**")
+            first_doc_index_end = script.index("*/")
+            if first_doc_index_start != -1 and first_doc_index_end != -1:
+                # get content before first_doc_index_end
+                script = script[first_doc_index_start : first_doc_index_end + 2]
+
             # Create a file on the output folder with the same name but with .js extension
             fileName = folder.name.replace(".vue", ".js")
             dest = Path(outputFolderMd) / fileName
@@ -97,46 +108,53 @@ def formatMd():
     # Create order using the tag title path of each file
     order = []
     for file in files:
-        # Get the title from first line
-        data = file.read_text()
-        # Remove everything after a [1]: tag
-        data = data.split("[1]:")[0]
-        # Remove ### Table of contents
-        data = data.replace("### Table of Contents", "")
-        # Remove everything before the first ## tag
-        index = data.index("## ")
-        data = data[index:]
+        try:
+            # Get the title from first line
+            data = file.read_text()
+            # Remove everything after a [1]: tag
+            data = data.split("[1]:")[0]
+            # Remove ### Table of contents
+            data = data.replace("### Table of Contents", "")
+            # Remove everything before the first ## tag
+            index = data.index("## ")
+            data = data[index:]
 
-        # I want to loop on each line
-        lines = data.split("\n")
-        line_result = []
-        for line in lines:
-            # remove space (so &#x20 or &#32)
-            line = line.replace("&#x20", "").replace("&#32", "")
+            # I want to loop on each line
+            lines = data.split("\n")
+            line_result = []
+            for line in lines:
+                # remove space (so &#x20 or &#32)
+                line = line.replace("&#x20", "").replace("&#32", "")
 
-            # Case not a param, keep the line as is
-            if not line.startswith("*"):
+                if line.startswith("#") and ".vue" in line and "\.vue" in line:
+                    line = line.replace("\.vue", ".vue")
+
+                # Case not a param, keep the line as is
+                if not line.startswith("*"):
+                    line_result.append(line)
+                    continue
+
+                # get line without first char
+                line = "-" + line[1:]
+
+                # remove each **[string][num]** pattern in a param by **string**
+                reg = r"\[\w+\]\[\d+\]"
+                while search(reg, line):
+                    # get data of the pattern
+                    pattern = search(reg, line).group()
+                    # get content of first bracket
+                    content = pattern.split("][")[0].replace("[", "")
+                    line = line.replace(pattern, f"{content}")
+
                 line_result.append(line)
-                continue
 
-            # get line without first char
-            line = "-" + line[1:]
-
-            # remove each **[string][num]** pattern in a param by **string**
-            reg = r"\[\w+\]\[\d+\]"
-            while search(reg, line):
-                # get data of the pattern
-                pattern = search(reg, line).group()
-                # get content of first bracket
-                content = pattern.split("][")[0].replace("[", "")
-                line = line.replace(pattern, f"{content}")
-
-            line_result.append(line)
-
-        # I can merge the lines
-        data = "\n".join(line_result)
-        # update the file with the new content
-        file.write_text(data)
+            # I can merge the lines
+            data = "\n".join(line_result)
+            # update the file with the new content
+            file.write_text(data)
+        except:
+            print("Error while parsing file", str(file.name))
+            continue
 
 
 def md2py():
@@ -151,16 +169,21 @@ def md2py():
         try:
             title = get_py_title(data)
             desc = get_py_desc(data)
-            params = convert_params(get_py_params(data))
+            params = get_py_params(data)
+            # Case not params, we don't need to generate the widget
+            if not params:
+                continue
+            params = convert_params(params)
             widget = create_widget(title, desc, params)
             Path(f"{outputFolderPy}/{title.capitalize()}.py").write_text(widget)
 
-        except:
+        except BaseException as e:
+            print(e)
             print("Error while parsing file", str(file.name))
             continue
 
     # Remove widgets-md
-    rmtree(outputFolderMd, ignore_errors=True)
+    # rmtree(outputFolderMd, ignore_errors=True)
 
 
 def get_py_title(data: str) -> str:
@@ -175,7 +198,7 @@ def get_py_title(data: str) -> str:
 
 def get_py_desc(data: str) -> str:
     # remove first line
-    desc = "RESUME\n" + "\n".join(data.split("\n")[1:])
+    desc = "\n".join(data.split("\n")[1:])
     # Get line where Parameters string is with at least one # tag before
     lines = desc.split("\n")
     new_lines = []
@@ -198,38 +221,44 @@ def get_py_desc(data: str) -> str:
     return desc
 
 
-def get_py_params(data: str) -> str:
-    # params will be between ### Parameters and ### Examples
-    params = data.split("### Parameters")[1].split("### Examples")[0]
-    list_params = []
-    lines = params.split("\n")
-    for line in lines:
-        if not line.startswith("-"):
-            continue
-        # Get first and second ` index
-        first = line.find("`")
-        second = line.find("`", first + 1)
-        param_name = line[first + 1 : second] or None
-        # Get first and second ** index
-        first = line.find("**")
-        second = line.find("**", first + 1)
-        param_type = line[first + 2 : second] or None
+def get_py_params(data: str) -> Union[str, bool]:
+    try:
+        # params will be between ### Parameters and ### Examples
+        if not "### Parameters" in data:
+            return False
+        params = data.split("### Parameters")[1].split("### Examples")[0]
+        list_params = []
+        lines = params.split("\n")
+        for line in lines:
+            if not line.startswith("-"):
+                continue
+            # Get first and second ` index
+            first = line.find("`")
+            second = line.find("`", first + 1)
+            param_name = line[first + 1 : second] or None
+            # Get first and second ** index
+            first = line.find("**")
+            second = line.find("**", first + 1)
+            param_type = line[first + 2 : second] or None
 
-        # Check if (optional is in line
-        default = None
-        if "(optional, default" in line:
-            first = line.find("(optional, default")
-            # get substring starting from the first index
-            opt_sub = line[first + len("(optional, default") :]
-            # get the first ` index
-            first = opt_sub.find("`")
-            # get the second ` index
-            default = opt_sub[first + 1 : opt_sub.find("`", first + 1)]
+            # Check if (optional is in line
+            default = None
+            if "(optional, default" in line:
+                first = line.find("(optional, default")
+                # get substring starting from the first index
+                opt_sub = line[first + len("(optional, default") :]
+                # get the first ` index
+                first = opt_sub.find("`")
+                # get the second ` index
+                default = opt_sub[first + 1 : opt_sub.find("`", first + 1)]
 
-        list_params.append({"name": param_name, "type": param_type, "default": default})
+            list_params.append({"name": param_name, "type": param_type, "default": default})
 
-    # remove default key if None
-    return list_params
+        # remove default key if None
+        return list_params
+    except BaseException as e:
+        print(e)
+        print("Error while parsing params")
 
 
 def convert_params(params: List[dict]) -> List[dict]:
@@ -246,105 +275,150 @@ def convert_params(params: List[dict]) -> List[dict]:
         "true": "True",
         "null": "None",
         "undefined": "None",
+        "uuidv4()": "",
+        "uuidv4": "",
+        "contentindex": "",
+        "contentIndex": "",
     }
+    try:
+        convert_params = []
+        for param in params:
+            if not param.get("name") or not param.get("type"):
+                continue
 
-    convert_params = []
-    for param in params:
-        if not param.get("name") or not param.get("type"):
-            continue
+            param_type = param.get("type").lower().strip()
 
-        param_type = param.get("type").lower().strip()
-        convert_type = None
-        if param_type and param_type in convert_types:
-            convert_type = convert_types[param_type]
+            convert_type = None
+            # Case we have only one type
+            if param_type and param_type and not "(" in param_type and param_type in convert_types:
+                convert_type = convert_types[param_type]
 
-        default = param.get("default")
-        if default and default in convert_values:
-            default = convert_values[default]
+            # Case we have multiple types
+            if param_type and param_type and "(" in param_type and "|" in param_type:
+                is_union = True
+                # We need to remove parenthesis
+                param_type = param_type.replace("(", "").replace(")", "")
+                # We need to split by |
+                param_types = param_type.split("|")
+                convert_type = "Union["
+                for param_value in param_types:
+                    if param_value.strip() in convert_types:
+                        convert_type += convert_types[param_value.strip()] + ", "
 
-        convert_params.append({"name": param.get("name"), "type": convert_type, "default": default})
+                # remove last ','
+                convert_type = convert_type[:-2]
+                convert_type += "]"
 
-    convert_params = [{k: v for k, v in d.items() if v is not None} for d in convert_params]
+            default = param.get("default")
+            if default and default in convert_values:
+                default = convert_values[default]
 
-    # order to get first params without "default"
-    convert_params = sorted(convert_params, key=lambda x: x.get("default") is not None)
+            convert_params.append({"name": param.get("name"), "type": convert_type, "default": default})
 
-    return convert_params
+        # remove None values
+        convert_params = [{k: v for k, v in d.items() if v is not None} for d in convert_params]
+
+        # sort to get first params without default or type, then params with type but without default, then others
+        convert_params = sorted(convert_params, key=lambda x: x.get("default") is not None)
+        convert_params = sorted(convert_params, key=lambda x: x.get("type") is not None)
+
+        return convert_params
+    except BaseException as e:
+        print(e)
+        print("Error while converting params")
 
 
 def create_widget(title: str, desc: str, params: List[dict]):
-    # Add indentation to desc
-    desc_lines = desc.split("\n")
-    desc_indent = []
-    for line in desc_lines:
-        desc_indent.append(f"    {line}")
-    desc = "\n".join(desc_indent)
-    desc = '\n    """\n' + desc + '\n   """\n'
+    try:
+        # Add indentation to desc
+        desc_lines = desc.split("\n")
+        desc_indent = []
+        for line in desc_lines:
+            desc_indent.append(f"    {line}")
+        desc = "\n".join(desc_indent)
+        desc = '    """' + desc + '   """\n'
 
-    # Create function params with type and optional value if exists
-    params_str = ""
-    for param in params:
-        param_name = param.get("name")
-        param_type = param.get("type")
-        param_default = '""' if param.get("default") == "" else param.get("default")
-        params_str += (
-            f"    {param_name}: {param_type} = {param_default},\n"
-            if "type" in param and "default" in param
-            else (f"    {param_name}: {param_type},\n" if "type" in param else f"    {param_name},\n")
-        )
+        # Create function params with type and optional value if exists
+        params_str = ""
+        for param in params:
+            param_name = param.get("name")
+            param_type = param.get("type")
+            param_default = '""' if param.get("default") == "" else param.get("default")
+            params_str += (
+                f"    {param_name}: {param_type} = {param_default},\n"
+                if "type" in param and "default" in param
+                else (f"    {param_name}: {param_type},\n" if "type" in param else f"    {param_name},\n")
+            )
 
-    # remove last ',' in params_str
-    params_str = params_str[:-2]
+        # remove last ',' in params_str
+        params_str = params_str[:-2]
 
-    # By default, we set on data dict the values without default value (means value are needed)
-    data = "    data = {\n"
-    for param in params:
-        if "default" in param:
-            continue
-        param_name = param.get("name")
-        data += f"""        "{param_name}" : {param_name},\n"""
-    data += "       }\n"
+        # By default, we set on data dict the values without default value (means value are needed)
+        data = "    data = {\n"
+        for param in params:
+            if "default" in param:
+                continue
+            param_name = param.get("name")
+            data += f"""        "{param_name}" : {param_name},\n"""
+        data += "       }\n"
 
-    # Check to add keys if value is not default value
-    add_keys_not_default = ""
-    for param in params:
-        if not "default" in param:
-            continue
-        param_name = param.get("name")
-        param_default = '""' if param.get("default") == "" else param.get("default")
-        add_keys_not_default += f"""    add_key_value("{param_name}", {param_name}, {param_default})\n"""
+        # Check to add keys if value is not default value
+        add_keys_not_default = ""
+        for param in params:
+            if not "default" in param:
+                continue
+            param_name = param.get("name")
+            param_default = '""' if param.get("default") == "" else param.get("default")
+            add_keys_not_default += f"""    add_key_value(data, "{param_name}", {param_name}, {param_default})\n"""
 
-    add_keys_not_default_function = ""
-    if add_keys_not_default:
-        add_keys_not_default = "    # List of params that will be add only if not default value\n" + add_keys_not_default
+        if add_keys_not_default:
+            add_keys_not_default = "    # List of params that will be add only if not default value\n" + add_keys_not_default
 
-        # Utils function to add key value to data dict if not default value
-        add_keys_not_default_function = """
-    # Add params to data dict only if value is not the default one
-    def add_key_value(key, value, default):
-        if value == default:
-            return
-        data[key] = value
-        """
-
-    widget_function = f"""
+        widget_function = f"""
 def {title}_widget(
 {params_str}
     ): 
 {desc}
 {data}
-{add_keys_not_default_function}
 {add_keys_not_default}
+    return {{ "type" : "{title.capitalize()}", "data" : data }}
+        """
+        return widget_function
 
-    return {{
-                "type" : "{title.capitalize()}",
-                "data" : data
-
-            }}
+    except BaseException as e:
+        print(e)
+        print("Error while creating widget")
 
 
-    """
-    return widget_function
+def merge_widgets():
+    # Create widgets.py file
+    Path(outputFolderWidgets).mkdir(parents=True, exist_ok=True)
+    # Create widgets.py
+    Path(f"{outputFolderWidgets}/widgets.py").write_text("")
+
+    content = """
+from typing import Union
+
+# Add params to data dict only if value is not the default one
+def add_key_value(data, key, value, default):
+    if value == default:
+        return
+    data[key] = value
+        """
+    # get all files from the output folder
+    files = list(Path(outputFolderPy).rglob("*"))
+    for file in files:
+        data = file.read_text()
+        content += data
+        content += "\n"
+    # Utils function to add key value to data dict if not default value
+
+    Path(f"{outputFolderWidgets}/widgets.py").write_text(content)
+
+    # Remove py folder
+    rmtree(outputFolderPy, ignore_errors=True)
+    # Remove md folder
+    rmtree(outputFolderMd, ignore_errors=True)
 
 
 # install_npm_packages()
@@ -353,3 +427,4 @@ vue2js()
 js2md()
 formatMd()
 md2py()
+merge_widgets()

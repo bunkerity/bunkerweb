@@ -9,7 +9,7 @@ import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
- * @name Builder/Raw.vue
+ * @name Builder/RawMode.vue
  * @description This component is lightweight builder containing only the necessary components to create the raw page.
  * @example
  * [
@@ -33,7 +33,7 @@ import { useEqualStr } from "@utils/global.js";
  *       ],
  *     },
  * ];
- **  @param {array} builder - Array of containers and widgets
+ * @param {array} builder - Array of containers and widgets
  */
 
 const props = defineProps({

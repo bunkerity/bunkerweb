@@ -7,9 +7,9 @@ import Datepicker from "@components/Forms/Field/Datepicker.vue";
 import Editor from "@components/Forms/Field/Editor.vue";
 import { contentIndex } from "@utils/tabindex.js";
 /**
- **  @name Form/Fields.vue
- **  @description This component wraps all available fields for a form.
- **  @example
+ *  @name Form/Fields.vue
+ *  @description This component wraps all available fields for a form.
+ *  @example
  *   {
  *    columns : {"pc": 6, "tablet": 12, "mobile": 12},
  *    id:"test-check",
@@ -27,7 +27,7 @@ import { contentIndex } from "@utils/tabindex.js";
  *      },
  *    ]
  *  }
- **  @param {object} setting - Setting needed to render a field.
+ *  @param {object} setting - Setting needed to render a field.
  */
 
 const props = defineProps({

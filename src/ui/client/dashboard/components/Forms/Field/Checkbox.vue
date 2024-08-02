@@ -38,7 +38,7 @@ import { useUUID } from "@utils/global.js";
  *  @param {string} [inpType="checkbox"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
  *  @param {boolean} [disabled=false]
  *  @param {boolean} [required=false]
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
  *  @param {boolean} [hideLabel=false]
  *  @param {string} [containerClass=""]
  *  @param {string} [headerClass=""]

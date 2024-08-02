@@ -1,14 +1,14 @@
 <script setup>
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
-import BuilderRaw from "@components/Builder/Raw.vue";
+import BuilderRaw from "@components/Builder/RawMode.vue";
 import { useGlobal } from "@utils/global";
 
 /**
-*  @name Page/Raw.vue
-*  @description This component is the raw page.
-  This page displays the raw form and additionnal actions to manage or create a service.
-*/
+ *  @name Page/Raw.vue
+ *  @description This component is the raw page.
+ *  This page displays the raw form and additionnal actions to manage or create a service.
+ */
 
 const raw = reactive({
   builder: "",

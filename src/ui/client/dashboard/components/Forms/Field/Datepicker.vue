@@ -52,7 +52,7 @@ import "@assets/css/flatpickr.dark.min.css";
  *  @param {number<timestamp>} [maxDate=""] - Impossible to pick a date after this date.
  *  @param {boolean} [isClipboard=true] - allow to copy the timestamp value
  *  @param {boolean} [hideLabel=false]
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
  *  @param {boolean} [disabled=false]
  *  @param {boolean} [required=false]
  *  @param {string} [headerClass=""]

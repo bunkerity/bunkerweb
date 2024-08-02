@@ -97,8 +97,7 @@ def formatMd():
     """Format each markdown file to remove useless data and format some data like params"""
     # Get all files from the output folder
     files = list(Path(outputFolder).rglob("*"))
-    # Create order using the tag title path of each file
-    order = []
+
     for file in files:
         # Get the title from first line
         data = file.read_text()
@@ -116,6 +115,9 @@ def formatMd():
         for line in lines:
             # remove space (so &#x20 or &#32)
             line = line.replace("&#x20", "").replace("&#32", "")
+
+            if line.startswith("#") and ".vue" in line and "\.vue" in line:
+                line = line.replace("\.vue", ".vue")
 
             # Case not a param, keep the line as is
             if not line.startswith("*"):

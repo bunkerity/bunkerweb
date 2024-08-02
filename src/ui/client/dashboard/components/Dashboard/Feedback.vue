@@ -5,8 +5,8 @@ import { feedbackIndex } from "@utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
 import { onBeforeMount } from "vue";
 /**
- **  @name Dashboard/Feedback.vue
- **  @description This component will display server feedbacks from the user.
+ *  @name Dashboard/Feedback.vue
+ *  @description This component will display server feedbacks from the user.
  * This component is working with flash messages under the hood.
  * This will display an ephemeral on the bottom right of the page and a sidebar with all the feedbacks.
  */

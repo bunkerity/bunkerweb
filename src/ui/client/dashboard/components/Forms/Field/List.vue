@@ -46,7 +46,7 @@ import ErrorDropdown from "@components/Forms/Error/Dropdown.vue";
  *  @param {string} [inpType="list"]  - The type of the field, useful when we have multiple fields in the same container to display the right field
  *  @param {boolean} [disabled=false]
  *  @param {boolean} [required=false]
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
  *  @param {boolean} [hideLabel=false]
  *  @param {boolean} [onlyDown=false] - If the dropdown should stay down
  *  @param {boolean} [overflowAttrEl=""] - Attribute the element has to check for overflow

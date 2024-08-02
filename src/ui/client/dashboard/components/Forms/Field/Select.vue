@@ -50,7 +50,7 @@ import { useUUID } from "@utils/global";
  *  @param {boolean} [disabled=false]
  *  @param {boolean} [required=false]
  *  @param {array} [requiredValues=[]] - values that need to be selected to be valid, works only if required is true
- *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12}] - Field has a grid system. This allow to get multiple field in the same row if needed.
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Field has a grid system. This allow to get multiple field in the same row if needed.
  *  @param {boolean} [hideLabel=false]
  *  @param {boolean} [onlyDown=false] - If the dropdown should check the bottom of the container
  *  @param {boolean} [overflowAttrEl=""] - Attribut to select the container the element has to check for overflow
