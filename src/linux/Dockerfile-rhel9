@@ -49,7 +49,10 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   python3 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
   python3 -m pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
-# Copy BW files
+# Install node and npm to build vite frontend
+RUN dnf install -y nodejs npm
+
+# Copy files
 # can't exclude deps from . so we are copying everything by hand
 COPY src/bw/loading loading
 COPY src/bw/lua lua
@@ -65,8 +68,24 @@ COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/common/templates templates
 COPY src/scheduler scheduler
-COPY src/ui ui
 COPY src/VERSION VERSION
+
+COPY src/ui/builder ui/builder
+COPY src/ui/client ui/client
+COPY src/ui/static ui/static
+COPY src/ui/templates ui/templates
+
+# This will build the frontend and add files to the UI folder
+WORKDIR /usr/share/bunkerweb/ui/client
+RUN DOCKERFILE=yes python3 build.py
+
+# We can delete the client folder after building the frontend
+RUN rm -rf /usr/share/bunkerweb/ui/client
+
+WORKDIR /usr/share/bunkerweb
+
+COPY src/ui/src ui/src
+COPY src/ui/*.py ui/
 
 FROM redhat/ubi9:9.4@sha256:1ee4d8c50d14d9c9e9229d9a039d793fcbc9aa803806d194c957a397cf1d2b17
 
