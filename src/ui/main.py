@@ -25,6 +25,7 @@ from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse as dateutil_parse
 from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
+from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from hashlib import sha256
 from importlib.machinery import SourceFileLoader
@@ -174,6 +175,14 @@ with app.app_context():
     app.config["WTF_CSRF_SSL_STRICT"] = False
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
     app.config["SCRIPT_NONCE"] = ""
+
+    principal = Principal()
+    principal.init_app(app)
+
+    admin_permission = Permission(TypeNeed("super_admin"))
+    manage_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"))
+    edit_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"), ActionNeed("write"))
+    read_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"), ActionNeed("write"), ActionNeed("read"))
 
     login_manager = LoginManager()
     login_manager.session_protection = "strong"
@@ -603,6 +612,24 @@ def load_user(username):
         ui_user.list_recovery_codes = DB.get_ui_user_recovery_codes(username)
 
     return ui_user
+
+
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    # Set the identity user object
+    identity.user = current_user
+
+    # Add the UserNeed to the identity
+    identity.provides.add(UserNeed(current_user.get_id()))
+
+    for role in current_user.list_roles:
+        identity.provides.add(RoleNeed(role))
+
+    for action in current_user.list_permissions:
+        identity.provides.add(ActionNeed(action))
+
+    if current_user.admin:
+        identity.provides.add(TypeNeed("super_admin"))
 
 
 @app.errorhandler(CSRFError)
