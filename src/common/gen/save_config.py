@@ -23,7 +23,7 @@ CUSTOM_CONF_RX = re_compile(
 )
 BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(http://)?(?P<hostname>(?<![:@])\b[^:@\s]+\b)(:(?P<port>\d+))?")
 
-LOGGER = setup_logger("Generator", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("Generator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
 
 if __name__ == "__main__":

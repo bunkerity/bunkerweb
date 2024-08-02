@@ -55,7 +55,7 @@ def format_remaining_time(seconds):
 
 class CLI(ApiCaller):
     def __init__(self):
-        self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
+        self.__logger = setup_logger("CLI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
         variables_path = Path(sep, "etc", "nginx", "variables.env")
         self.__variables = {}
         self.__db = None

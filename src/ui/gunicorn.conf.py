@@ -12,7 +12,7 @@ TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 RUN_DIR = Path(sep, "var", "run", "bunkerweb")
 
 MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
-LOG_LEVEL = getenv("LOG_LEVEL", "info")
+LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
 
 wsgi_app = "main:app"
 proc_name = "bunkerweb-ui"

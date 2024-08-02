@@ -18,7 +18,7 @@ from logger import setup_logger
 class ApiCaller:
     def __init__(self, apis: Optional[List[API]] = None):
         self.apis = apis or []
-        self.__logger = setup_logger("Api", getenv("LOG_LEVEL", "INFO"))
+        self.__logger = setup_logger("Api", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
     def send_to_apis(
         self,

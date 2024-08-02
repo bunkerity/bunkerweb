@@ -44,7 +44,7 @@ class JobScheduler(ApiCaller):
         apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
-        self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
+        self.__logger = logger or setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
         self.__integration = integration
         self.db = db or Database(self.__logger)
         self.__env = env or {}
