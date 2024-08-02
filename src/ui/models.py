@@ -10,7 +10,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from bcrypt import checkpw
 from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText, func
+from sqlalchemy import Boolean, DateTime, Column, Identity, Integer, String, ForeignKey, UnicodeText, func
 
 
 from model import METHODS_ENUM  # type: ignore
@@ -100,7 +100,7 @@ class RolesUsers(Base):
 class UserRecoveryCodes(Base):
     __tablename__ = "bw_ui_user_recovery_codes"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     user_name = Column(String(256), ForeignKey("bw_ui_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
     code = Column(UnicodeText, nullable=False)
 
