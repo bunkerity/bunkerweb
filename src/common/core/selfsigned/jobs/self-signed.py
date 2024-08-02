@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -42,13 +42,21 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
             LOGGER.info(f"Self-signed certificate already present for {first_server}")
 
             certificate = x509.load_pem_x509_certificate(JOB.get_cache("cert.pem", service_id=first_server), default_backend())
+
+            try:
+                not_valid_after = certificate.not_valid_after_utc
+                not_valid_before = certificate.not_valid_before_utc
+            except AttributeError:
+                not_valid_after = certificate.not_valid_after
+                not_valid_before = certificate.not_valid_before
+
             if sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
                 LOGGER.warning(f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
-            elif certificate.not_valid_after_utc - certificate.not_valid_before_utc != timedelta(days=int(days)):
+            elif not_valid_after - not_valid_before != timedelta(days=int(days)):
                 LOGGER.warning(
                     f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
                 )
-            elif certificate.not_valid_after_utc < datetime.now(tz=certificate.not_valid_after_utc.timetz().tzinfo):
+            elif not_valid_after < datetime.now(tz=timezone.utc):
                 LOGGER.warning(f"Self-signed certificate for {first_server} has expired, regenerating ...")
             else:
                 LOGGER.info(f"Self-signed certificate for {first_server} is valid")
