@@ -34,8 +34,12 @@ COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/common/helpers helpers
 COPY src/common/templates templates
-COPY src/ui ui
 COPY src/VERSION VERSION
+
+COPY src/ui/builder ui/builder
+COPY src/ui/client ui/client
+COPY src/ui/static ui/static
+COPY src/ui/templates ui/templates
 
 # This will build the frontend and add files to the UI folder
 WORKDIR /usr/share/bunkerweb/ui/client
@@ -43,6 +47,11 @@ RUN DOCKERFILE=yes python3 build.py
 
 # We can delete the client folder after building the frontend
 RUN rm -rf /usr/share/bunkerweb/ui/client
+
+WORKDIR /usr/share/bunkerweb
+
+COPY src/ui/src ui/src
+COPY src/ui/*.py ui/
 
 FROM python:3.12.4-alpine@sha256:7f15e22f496c65cffbbac5e30e7e98d60f3e3b9cc5ee5d51cf3c55ed604787c8
 
