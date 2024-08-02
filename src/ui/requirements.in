@@ -2,7 +2,8 @@ bcrypt==4.2.0
 beautifulsoup4==4.12.3
 Flask==3.0.3
 Flask-Login==0.6.3
-Flask_WTF==1.2.1
+Flask-Principal==0.4.0
+Flask-WTF==1.2.1
 gunicorn[gthread]==22.0.0
 passlib==1.7.4
 python-magic==0.4.27
@@ -10,4 +11,3 @@ python_dateutil==2.9.0.post0
 qrcode==7.4.2
 regex==2024.5.15
 werkzeug==3.0.3
-zipp>=3.19.1
