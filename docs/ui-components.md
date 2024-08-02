@@ -10,7 +10,7 @@ This component is lightweight builder containing only the necessary components t
 
 #### Parameters
 
-*   `builder` **[array][4]** Array of containers and widgets
+-   `builder` **array** Array of containers and widgets
 
 #### Examples
 
@@ -34,8 +34,8 @@ This component includes all elements that can be shown in a table cell.
 
 #### Parameters
 
-*   `type` **[string][4]** The type of the cell. This needs to be a Vue component.
-*   `data` **[object][5]** The data to display in the cell. This needs to be the props of the Vue component.
+-   `type` **string** The type of the cell. This needs to be a Vue component.
+-   `data` **object** The data to display in the cell. This needs to be the props of the Vue component.
 
 #### Examples
 
@@ -61,7 +61,7 @@ This component is lightweight builder containing only the necessary components t
 
 #### Parameters
 
-*   `builder` **[array][4]** Array of containers and widgets
+-   `builder` **array** Array of containers and widgets
 
 #### Examples
 
@@ -99,7 +99,7 @@ This component is lightweight builder containing only the necessary components t
 
 #### Parameters
 
-*   `builder` **[array][4]** Array of containers and widgets
+-   `builder` **array** Array of containers and widgets
 
 #### Examples
 
@@ -129,7 +129,7 @@ This component is lightweight builder containing only the necessary components t
 
 This component is lightweight builder containing only the necessary components to create the instances page.
 
-*   @example
+-   @example
     \[
     {
     type: "Instance",
@@ -152,7 +152,7 @@ This component is lightweight builder containing only the necessary components t
     },
     },
     ];
-*   @param {array} builder - Array of containers and widgets
+-   @param {array} builder - Array of containers and widgets
 
 ### Modal.vue
 
@@ -162,7 +162,7 @@ We can't create multiple grids or containers in a modal.
 
 #### Parameters
 
-*   `widgets` **[array][6]** Array of containers and widgets
+-   `widgets` **array** Array of containers and widgets
 
 #### Examples
 
@@ -232,9 +232,9 @@ Case there is already a focused element inside the modal, avoid to focus it agai
 
 #### Parameters
 
-*   `modalId` **[string][7]** The id of the modal element.
+-   `modalId` **string** The id of the modal element.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ### PLugin.vue
 
@@ -242,7 +242,7 @@ This component is lightweight builder containing only the necessary components t
 
 #### Parameters
 
-*   `builder` **[array][4]** Array of containers and widgets
+-   `builder` **array** Array of containers and widgets
 
 #### Examples
 
@@ -286,7 +286,7 @@ This component is lightweight builder containing only the necessary components t
 
 #### Parameters
 
-*   `builder` **[array][4]** Array of containers and widgets
+-   `builder` **array** Array of containers and widgets
 
 #### Examples
 
@@ -311,7 +311,7 @@ This component is lightweight builder containing only the necessary components t
 
 #### Parameters
 
-*   `builder` **[array][4]** Array of containers and widgets
+-   `builder` **array** Array of containers and widgets
 
 #### Examples
 
@@ -602,7 +602,7 @@ This component is lightweight builder containing only the necessary components t
 
 #### Parameters
 
-*   `builder` **[array][3]** Array of containers and widgets
+-   `builder` **array** Array of containers and widgets
 
 ##  Dashboard
 
@@ -615,40 +615,40 @@ The banner will display news from the api if available, otherwise it will displa
 
 This function will try to retrieve banner news from the local storage, and in case it is not available or older than one hour, it will fetch the news from the api.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## runBanner
 
 Run the banner animation to display all news at a regular interval.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## observeBanner
 
 Check if the banner is visible in the viewport and set the state in the global bannerStore to update related components.
 
-*   @returns {void}
+-   @returns {void}
 
 ## noTabindex
 
 Stop highlighting a banner item that was focused with tabindex.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## isTabindex
 
 Highlighting a banner item that is focused with tabindex.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## handleTabIndex
 
-*   @name isTabindex
-*   @description Focus with tabindex break banner animation.
+-   @name isTabindex
+-   @description Focus with tabindex break banner animation.
     When a banner is focused, we need to add in front of the current banner the focus element.
     And remove it when the focus is lost.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ### Footer.vue
 
@@ -672,9 +672,9 @@ On reload, we will retrieve the language from the session storage and set it.
 
 #### Parameters
 
-*   `lang` **[string][4]** The language to set.
+-   `lang` **string** The language to set.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ### Layout.vue
 
@@ -690,7 +690,7 @@ This component is a loader used to transition between pages.
 
 This function will toggle the loading animation.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ### Menu.vue
 
@@ -701,7 +701,7 @@ You have all the links to the main pages, the plugins pages, the social links an
 
 Get the dark mode state from the session storage or the user's preferences.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## switchMode
 
@@ -709,19 +709,19 @@ Returns **void**&#x20;
 
 Update the mode of the page.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeMenu
 
 Close menu when we are on mobile device (else always visible).
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeMenu
 
 Toggle menu when we are on mobile device (else always visible).
 
-Returns **void**&#x20;
+Returns **void**;
 
 ##  Form
 
@@ -762,51 +762,51 @@ This component is used to create a complete advanced form with plugin selection.
 
 ## filter
 
-*   @name filter
-*   @description Get the filter data from the <Filter /> component and store the result in the advanced store.
+-   @name filter
+-   @description Get the filter data from the <Filter /> component and store the result in the advanced store.
     After that, update some UI states like disabled state.
-*   @param {object} filterData - The filter data from the <Filter /> component.
-*   @returns {void}
+-   @param {object} filterData - The filter data from the <Filter /> component.
+-   @returns {void}
 
 #### Parameters
 
-*   `filterData` &#x20;
+-   `filterData` ;
 
 ## updateStates
 
-*   @name updateStates
-*   @description Update some UI states, usually after a filter, a reload, a remount or a change in the template.
+-   @name updateStates
+-   @description Update some UI states, usually after a filter, a reload, a remount or a change in the template.
     We will check to set the current plugins available and update the current plugin if needed.
-*   @returns {void}
+-   @returns {void}
 
 ## setValidity
 
 Check template settings and return if there is any error.
 Error will disabled save button and display an error message.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## getFirstPlugin
 
-*   @name getFirstPlugin
-*   @description Get the first available plugin in the template.
-*   @param {object} template - The template object.
-*   @returns {string} - The first plugin name.
+-   @name getFirstPlugin
+-   @description Get the first available plugin in the template.
+-   @param {object} template - The template object.
+-   @returns {string} - The first plugin name.
 
 #### Parameters
 
-*   `template` &#x20;
+-   `template` ;
 
 ## getPluginNames
 
-*   @name getPluginNames
-*   @description Get the first available plugin in the template.
-*   @param {object} template - The template object.
-*   @returns {array} - The list of plugin names.
+-   @name getPluginNames
+-   @description Get the first available plugin in the template.
+-   @param {object} template - The template object.
+-   @returns {array} - The list of plugin names.
 
 #### Parameters
 
-*   `template` &#x20;
+-   `template` ;
 
 ### Easy.vue
 
@@ -814,8 +814,8 @@ This component is used to create a complete easy form with plugin selection.
 
 #### Parameters
 
-*   `containerClass` **[string][5]** Container
-*   `columns` **[object][6]** Columns object.
+-   `containerClass` **string** Container
+-   `columns` **object** Columns object.
 
 #### Examples
 
@@ -846,7 +846,7 @@ This component is used to create a complete easy form with plugin selection.
         },
   ],
 }
-*  @param {object} template - Template object with plugin and settings data.
+-  @param {object} template - Template object with plugin and settings data.
 ```
 
 ## setValidity
@@ -854,7 +854,7 @@ This component is used to create a complete easy form with plugin selection.
 Check template settings and return if there is any error.
 Error will disabled save button and display an error message.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ##  Forms
 
@@ -867,10 +867,10 @@ It is used with /Forms/Field components.
 
 ##### Parameters
 
-*   `isValid` **[boolean][4]** Check if the field is valid (optional, default `false`)
-*   `isValue` **[boolean][4]** Check if the field has a value, display a different message if the field is empty or not (optional, default `false`)
-*   `isValueTaken` **[boolean][4]** Check if input is already taken. Use with list input. (optional, default `false`)
-*   `errorClass` **[string][5]** Additional class (optional, default `""`)
+-   `isValid` **boolean** Check if the field is valid (optional, default `false`)
+-   `isValue` **boolean** Check if the field has a value, display a different message if the field is empty or not (optional, default `false`)
+-   `isValueTaken` **boolean** Check if input is already taken. Use with list input. (optional, default `false`)
+-   `errorClass` **string** Additional class (optional, default `""`)
 
 ##### Examples
 
@@ -888,14 +888,14 @@ We can used it as a fixed alert or we can use it in a container as a list.
 
 ##### Parameters
 
-*   `title` **[string][4]** The title of the alert. Can be a translation key or by default raw text.
-*   `message` **[string][4]** The message of the alert. Can be a translation key or by default raw text.
-*   `canClose` **[boolean][5]** Determine if the alert can be closed by user (add a close button), by default it is closable (optional, default `true`)
-*   `id` **[string][4]**  (optional, default `` `feedback-alert-${message.substring(0,10)}` ``)
-*   `isFixed` **[string][4]** Determine if the alert is fixed (visible bottom right of page) or relative (inside a container) (optional, default `false`)
-*   `type` **[string][4]** The type of the alert, can be success, error, warning or info (optional, default `"info"`)
-*   `delayToClose` **[number][6]** The delay to auto close alert in ms, by default always visible (optional, default `0`)
-*   `tabId` **[string][4]** The tabindex of the alert (optional, default `"-1"`)
+-   `title` **string** The title of the alert. Can be a translation key or by default raw text.
+-   `message` **string** The message of the alert. Can be a translation key or by default raw text.
+-   `canClose` **boolean** Determine if the alert can be closed by user (add a close button), by default it is closable (optional, default `true`)
+-   `id` **string**  (optional, default `` `feedback-alert-${message.substring(0,10)}` ``)
+-   `isFixed` **string** Determine if the alert is fixed (visible bottom right of page) or relative (inside a container) (optional, default `false`)
+-   `type` **string** The type of the alert, can be success, error, warning or info (optional, default `"info"`)
+-   `delayToClose` **number** The delay to auto close alert in ms, by default always visible (optional, default `0`)
+-   `tabId` **string** The tabindex of the alert (optional, default `"-1"`)
 
 ##### Examples
 
@@ -918,11 +918,11 @@ Additionnal clipboardClass and copyClass can be added to fit the parent containe
 
 ##### Parameters
 
-*   `id` **id** Unique id (optional, default `uuidv4()`)
-*   `isClipboard` **isClipboard** Display a clipboard button to copy a value (optional, default `false`)
-*   `valueToCopy` **valueToCopy** The value to copy (optional, default `""`)
-*   `clipboadClass` **clipboadClass** Additional class for the clipboard container. Useful to fit the component in a specific container. (optional, default `""`)
-*   `copyClass` **copyClass** The class of the copy message. Useful to fit the component in a specific container. (optional, default `""`)
+-   `id` **id** Unique id (optional, default `uuidv4()`)
+-   `isClipboard` **isClipboard** Display a clipboard button to copy a value (optional, default `false`)
+-   `valueToCopy` **valueToCopy** The value to copy (optional, default `""`)
+-   `clipboadClass` **clipboadClass** Additional class for the clipboard container. Useful to fit the component in a specific container. (optional, default `""`)
+-   `copyClass` **copyClass** The class of the copy message. Useful to fit the component in a specific container. (optional, default `""`)
 
 ##### Examples
 
@@ -946,21 +946,21 @@ It is mainly use in forms.
 
 ##### Parameters
 
-*   `id` **[string][5]** Unique id (optional, default `uuidv4()`)
-*   `label` **[string][5]** The label of the field. Can be a translation key or by default raw text.
-*   `name` **[string][5]** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-*   `value` **[string][5]**&#x20;
-*   `attrs` **[object][6]** Additional attributes to add to the field (optional, default `{}`)
-*   `popovers` **[array][7]?** List of popovers to display more information
-*   `inpType` **[string][5]** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"checkbox"`)
-*   `disabled` **[boolean][8]**  (optional, default `false`)
-*   `required` **[boolean][8]**  (optional, default `false`)
-*   `columns` **[object][6]** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
-*   `hideLabel` **[boolean][8]**  (optional, default `false`)
-*   `containerClass` **[string][5]**  (optional, default `""`)
-*   `headerClass` **[string][5]**  (optional, default `""`)
-*   `inpClass` **[string][5]**  (optional, default `""`)
-*   `tabId` **([string][5] | [number][9])** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `id` **string** Unique id (optional, default `uuidv4()`)
+-   `label` **string** The label of the field. Can be a translation key or by default raw text.
+-   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+-   `value` **string**;
+-   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
+-   `popovers` **array?** List of popovers to display more information
+-   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"checkbox"`)
+-   `disabled` **boolean**  (optional, default `false`)
+-   `required` **boolean**  (optional, default `false`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `hideLabel` **boolean**  (optional, default `false`)
+-   `containerClass` **string**  (optional, default `""`)
+-   `headerClass` **string**  (optional, default `""`)
+-   `inpClass` **string**  (optional, default `""`)
+-   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
 ##### Examples
 
@@ -999,26 +999,26 @@ We can also add popover to display more information.
 
 ##### Parameters
 
-*   `id` **[string][16]** Unique id (optional, default `uuidv4()`)
-*   `label` **[string][16]** The label of the field. Can be a translation key or by default raw text.
-*   `name` **[string][16]** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-*   `value` **[string][16]**&#x20;
-*   `values` **[array][17]**&#x20;
-*   `attrs` **[object][18]** Additional attributes to add to the field (optional, default `{}`)
-*   `maxBtnChars` **[string][16]** Max char to display in the dropdown button handler. (optional, default `""`)
-*   `popovers` **[array][17]?** List of popovers to display more information
-*   `inpType` **[string][16]** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"select"`)
-*   `disabled` **[boolean][19]**  (optional, default `false`)
-*   `required` **[boolean][19]**  (optional, default `false`)
-*   `requiredValues` **[array][17]** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
-*   `columns` **[object][18]** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
-*   `hideLabel` **[boolean][19]**  (optional, default `false`)
-*   `onlyDown` **[boolean][19]** If the dropdown should check the bottom of the (optional, default `false`)
-*   `overflowAttrEl` **[boolean][19]** Attribut to select the container the element has to check for overflow (optional, default `""`)
-*   `containerClass` **[string][16]**  (optional, default `""`)
-*   `inpClass` **[string][16]**  (optional, default `""`)
-*   `headerClass` **[string][16]**  (optional, default `""`)
-*   `tabId` **([string][16] | [number][20])** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `id` **string** Unique id (optional, default `uuidv4()`)
+-   `label` **string** The label of the field. Can be a translation key or by default raw text.
+-   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+-   `value` **string**;
+-   `values` **array**;
+-   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
+-   `maxBtnChars` **string** Max char to display in the dropdown button handler. (optional, default `""`)
+-   `popovers` **array?** List of popovers to display more information
+-   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"select"`)
+-   `disabled` **boolean**  (optional, default `false`)
+-   `required` **boolean**  (optional, default `false`)
+-   `requiredValues` **array** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `hideLabel` **boolean**  (optional, default `false`)
+-   `onlyDown` **boolean** If the dropdown should check the bottom of the (optional, default `false`)
+-   `overflowAttrEl` **boolean** Attribut to select the container the element has to check for overflow (optional, default `""`)
+-   `containerClass` **string**  (optional, default `""`)
+-   `inpClass` **string**  (optional, default `""`)
+-   `headerClass` **string**  (optional, default `""`)
+-   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
 ##### Examples
 
@@ -1046,13 +1046,13 @@ We can also add popover to display more information.
 
 This will toggle the custom select dropdown component.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeSelect
 
 This will close the custom select dropdown component.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## changeValue
 
@@ -1061,7 +1061,7 @@ Check the validity of the select too. Close select after it.
 
 ##### Parameters
 
-*   `newValue` **[string][16]** The new value to set to the select.
+-   `newValue` **string** The new value to set to the select.
 
 Returns **[string][16]** The new value of the select
 
@@ -1072,9 +1072,9 @@ Case not and select is open, will close the select.
 
 ##### Parameters
 
-*   `e` **[event][21]** The event object.
+-   `e` **event** The event object.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeScroll
 
@@ -1082,9 +1082,9 @@ This function is linked to a scroll event and will close the select in case a sc
 
 ##### Parameters
 
-*   `e` **[event][21]** The event object.
+-   `e` **event** The event object.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeEscape
 
@@ -1092,9 +1092,9 @@ This function is linked to a key event and will close the select in case "Escape
 
 ##### Parameters
 
-*   `e` **[event][21]** The event object.
+-   `e` **event** The event object.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeTab
 
@@ -1103,9 +1103,9 @@ In case the new tabindex is not part of the select component, will close the sel
 
 ##### Parameters
 
-*   `e` **[event][21]** The event object.
+-   `e` **event** The event object.
 
-Returns **void**&#x20;
+Returns **void**;
 
 #### Datepicker.vue
 
@@ -1116,23 +1116,23 @@ It is mainly use in forms.
 
 ##### Parameters
 
-*   `id` **[string][20]** Unique id (optional, default `uuidv4()`)
-*   `label` **[string][20]** The label of the field. Can be a translation key or by default raw text.
-*   `name` **[string][20]** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-*   `popovers` **[array][21]** List of popovers to display more information
-*   `attrs` **[object][22]** Additional attributes to add to the field (optional, default `{}`)
-*   `inpType` **[string][20]** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"datepicker"`)
-*   `value` **[number][23]\<timestamp>** Default date when instanciate (optional, default `""`)
-*   `minDate` **[number][23]\<timestamp>** Impossible to pick a date before this date. (optional, default `""`)
-*   `maxDate` **[number][23]\<timestamp>** Impossible to pick a date after this date. (optional, default `""`)
-*   `isClipboard` **[boolean][24]** allow to copy the timestamp value (optional, default `true`)
-*   `hideLabel` **[boolean][24]**  (optional, default `false`)
-*   `columns` **[object][22]** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
-*   `disabled` **[boolean][24]**  (optional, default `false`)
-*   `required` **[boolean][24]**  (optional, default `false`)
-*   `headerClass` **[string][20]**  (optional, default `""`)
-*   `containerClass` **[string][20]**  (optional, default `""`)
-*   `tabId` **([string][20] | [number][23])** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `id` **string** Unique id (optional, default `uuidv4()`)
+-   `label` **string** The label of the field. Can be a translation key or by default raw text.
+-   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+-   `popovers` **array** List of popovers to display more information
+-   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
+-   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"datepicker"`)
+-   `value` **number\<timestamp>** Default date when instanciate (optional, default `""`)
+-   `minDate` **number\<timestamp>** Impossible to pick a date before this date. (optional, default `""`)
+-   `maxDate` **number\<timestamp>** Impossible to pick a date after this date. (optional, default `""`)
+-   `isClipboard` **boolean** allow to copy the timestamp value (optional, default `true`)
+-   `hideLabel` **boolean**  (optional, default `false`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `disabled` **boolean**  (optional, default `false`)
+-   `required` **boolean**  (optional, default `false`)
+-   `headerClass` **string**  (optional, default `""`)
+-   `containerClass` **string**  (optional, default `""`)
+-   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
 ##### Examples
 
@@ -1162,10 +1162,10 @@ Create a custom select for month dropdown and hide default one.
 
 ##### Parameters
 
-*   `calendarEl` **[element][25]** The calendar element.
-*   `id` **[string][20]** The id of the datepicker.
+-   `calendarEl` **element** The calendar element.
+-   `id` **string** The id of the datepicker.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## setPickerAtt
 
@@ -1173,10 +1173,10 @@ Set attributes to the calendar element to make it more accessible.
 
 ##### Parameters
 
-*   `calendarEl` **[element][25]** The calendar element.
-*   `id` **([string][20] | [boolean][24])** The id of the datepicker. (optional, default `false`)
+-   `calendarEl` **element** The calendar element.
+-   `id` **(string | boolean)** The id of the datepicker. (optional, default `false`)
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## handleEvents
 
@@ -1186,11 +1186,11 @@ This will update the custom select and options.
 
 ##### Parameters
 
-*   `calendarEl` **[element][25]** The calendar element.
-*   `id` **[string][20]** The id of the datepicker.
-*   `datepicker` **[object][22]** The datepicker instance.
+-   `calendarEl` **element** The calendar element.
+-   `id` **string** The id of the datepicker.
+-   `datepicker` **object** The datepicker instance.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## toggleSelect
 
@@ -1198,11 +1198,11 @@ Toggle the custom select dropdown.
 
 ##### Parameters
 
-*   `calendarEl` **[element][25]** The calendar element.
-*   `id` **[string][20]** The id of the datepicker.
-*   `e` **[event][26]** The event.
+-   `calendarEl` **element** The calendar element.
+-   `id` **string** The id of the datepicker.
+-   `e` **event** The event.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeSelectByDefault
 
@@ -1210,11 +1210,11 @@ Close the custom select dropdown by default.
 
 ##### Parameters
 
-*   `calendarEl` **[element][25]** The calendar element.
-*   `id` **[string][20]** The id of the datepicker.
-*   `e` **[event][26]** The event.
+-   `calendarEl` **element** The calendar element.
+-   `id` **string** The id of the datepicker.
+-   `e` **event** The event.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## updateMonth
 
@@ -1222,12 +1222,12 @@ Update the month when click on custom select option.
 
 ##### Parameters
 
-*   `calendarEl` **[element][25]** The calendar element.
-*   `id` **[string][20]** The id of the datepicker.
-*   `e` **[event][26]** The event.
-*   `datepicker` **[object][22]** The datepicker instance.
+-   `calendarEl` **element** The calendar element.
+-   `id` **string** The id of the datepicker.
+-   `e` **event** The event.
+-   `datepicker` **object** The datepicker instance.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## updateIndex
 
@@ -1235,10 +1235,10 @@ Update the tabindex on the calendar element.
 
 ##### Parameters
 
-*   `calendarEl` **[element][25]** The calendar element.
-*   `target` **[string][20]** The event target.
+-   `calendarEl` **element** The calendar element.
+-   `target` **string** The event target.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## setIndex
 
@@ -1246,10 +1246,10 @@ Set the tabindex on the calendar element to work with keyboard.
 
 ##### Parameters
 
-*   `calendarEl` **[element][25]** The calendar element.
-*   `tabindex` **[string][20]** the tabindex to set.
+-   `calendarEl` **element** The calendar element.
+-   `tabindex` **string** the tabindex to set.
 
-Returns **void**&#x20;
+Returns **void**;
 
 #### Editor.vue
 
@@ -1259,23 +1259,23 @@ It is mainly use in forms.
 
 ##### Parameters
 
-*   `id` **[string][6]** Unique id (optional, default `uuidv4()`)
-*   `label` **[string][6]** The label of the field. Can be a translation key or by default raw text.
-*   `name` **[string][6]** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.\*  @param {string} label
-*   `value` **[string][6]**&#x20;
-*   `attrs` **[object][7]** Additional attributes to add to the field (optional, default `{}`)
-*   `popovers` **[array][8]?** List of popovers to display more information
-*   `inpType` **[string][6]** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"editor"`)
-*   `columns` **[object][7]** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
-*   `pattern` **[string][6]**  (optional, default `""`)
-*   `disabled` **[boolean][9]**  (optional, default `false`)
-*   `required` **[boolean][9]**  (optional, default `false`)
-*   `isClipboard` **[boolean][9]** allow to copy the input value (optional, default `true`)
-*   `hideLabel` **[boolean][9]**  (optional, default `false`)
-*   `containerClass` **[string][6]**  (optional, default `""`)
-*   `editorClass` **[string][6]**  (optional, default `""`)
-*   `headerClass` **[string][6]**  (optional, default `""`)
-*   `tabId` **([string][6] | [number][10])** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `id` **string** Unique id (optional, default `uuidv4()`)
+-   `label` **string** The label of the field. Can be a translation key or by default raw text.
+-   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.\*  @param {string} label
+-   `value` **string**;
+-   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
+-   `popovers` **array?** List of popovers to display more information
+-   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"editor"`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `pattern` **string**  (optional, default `""`)
+-   `disabled` **boolean**  (optional, default `false`)
+-   `required` **boolean**  (optional, default `false`)
+-   `isClipboard` **boolean** allow to copy the input value (optional, default `true`)
+-   `hideLabel` **boolean**  (optional, default `false`)
+-   `containerClass` **string**  (optional, default `""`)
+-   `editorClass` **string**  (optional, default `""`)
+-   `headerClass` **string**  (optional, default `""`)
+-   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
 ##### Examples
 
@@ -1297,13 +1297,13 @@ It is mainly use in forms.
 
 Remove useless CSS from the editor to avoid accessibility issues.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## setEditorAttrs
 
 Override editor attributes by adding or deleting some for better accessibility.
 
-Returns **void**&#x20;
+Returns **void**;
 
 #### Input.vue
 
@@ -1315,26 +1315,26 @@ It is mainly use in forms.
 
 ##### Parameters
 
-*   `id` **[string][4]** Unique id (optional, default `uuidv4()`)
-*   `type` **[string][4]** text, email, password, number, tel, url
-*   `label` **[string][4]** The label of the field. Can be a translation key or by default raw text.
-*   `name` **[string][4]** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.\*  @param {string} label
-*   `value` **[string][4]**&#x20;
-*   `attrs` **[object][5]** Additional attributes to add to the field (optional, default `{}`)
-*   `popovers` **[array][6]?** List of popovers to display more information
-*   `inpType` **[string][4]** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"input"`)
-*   `columns` **[object][5]** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
-*   `disabled` **[boolean][7]**  (optional, default `false`)
-*   `required` **[boolean][7]**  (optional, default `false`)
-*   `placeholder` **[string][4]**  (optional, default `""`)
-*   `pattern` **[string][4]**  (optional, default `"(?.*)"`)
-*   `isClipboard` **[boolean][7]** allow to copy the input value (optional, default `true`)
-*   `readonly` **[boolean][7]** allow to read only the input value (optional, default `false`)
-*   `hideLabel` **[boolean][7]**  (optional, default `false`)
-*   `containerClass` **[string][4]**  (optional, default `""`)
-*   `inpClass` **[string][4]**  (optional, default `""`)
-*   `headerClass` **[string][4]**  (optional, default `""`)
-*   `tabId` **([string][4] | [number][8])** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `id` **string** Unique id (optional, default `uuidv4()`)
+-   `type` **string** text, email, password, number, tel, url
+-   `label` **string** The label of the field. Can be a translation key or by default raw text.
+-   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.\*  @param {string} label
+-   `value` **string**;
+-   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
+-   `popovers` **array?** List of popovers to display more information
+-   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"input"`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `disabled` **boolean**  (optional, default `false`)
+-   `required` **boolean**  (optional, default `false`)
+-   `placeholder` **string**  (optional, default `""`)
+-   `pattern` **string**  (optional, default `"(?.*)"`)
+-   `isClipboard` **boolean** allow to copy the input value (optional, default `true`)
+-   `readonly` **boolean** allow to read only the input value (optional, default `false`)
+-   `hideLabel` **boolean**  (optional, default `false`)
+-   `containerClass` **string**  (optional, default `""`)
+-   `inpClass` **string**  (optional, default `""`)
+-   `headerClass` **string**  (optional, default `""`)
+-   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
 ##### Examples
 
@@ -1367,26 +1367,26 @@ It is mainly use in forms.
 
 ##### Parameters
 
-*   `id` **[string][16]** Unique id (optional, default `uuidv4()`)
-*   `label` **[string][16]** The label of the field. Can be a translation key or by default raw text.
-*   `name` **[string][16]** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-*   `value` **[string][16]**&#x20;
-*   `values` **[array][17]**&#x20;
-*   `attrs` **[object][18]** Additional attributes to add to the field (optional, default `{}`)
-*   `popovers` **[array][17]?** List of popovers to display more information
-*   `inpType` **[string][16]** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"select"`)
-*   `maxBtnChars` **[string][16]** Max char to display in the dropdown button handler. (optional, default `""`)
-*   `disabled` **[boolean][19]**  (optional, default `false`)
-*   `required` **[boolean][19]**  (optional, default `false`)
-*   `requiredValues` **[array][17]** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
-*   `columns` **[object][18]** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
-*   `hideLabel` **[boolean][19]**  (optional, default `false`)
-*   `onlyDown` **[boolean][19]** If the dropdown should check the bottom of the container (optional, default `false`)
-*   `overflowAttrEl` **[boolean][19]** Attribut to select the container the element has to check for overflow (optional, default `""`)
-*   `containerClass` **[string][16]**  (optional, default `""`)
-*   `inpClass` **[string][16]**  (optional, default `""`)
-*   `headerClass` **[string][16]**  (optional, default `""`)
-*   `tabId` **([string][16] | [number][20])** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `id` **string** Unique id (optional, default `uuidv4()`)
+-   `label` **string** The label of the field. Can be a translation key or by default raw text.
+-   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+-   `value` **string**;
+-   `values` **array**;
+-   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
+-   `popovers` **array?** List of popovers to display more information
+-   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"select"`)
+-   `maxBtnChars` **string** Max char to display in the dropdown button handler. (optional, default `""`)
+-   `disabled` **boolean**  (optional, default `false`)
+-   `required` **boolean**  (optional, default `false`)
+-   `requiredValues` **array** values that need to be selected to be valid, works only if required is true (optional, default `[]`)
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `hideLabel` **boolean**  (optional, default `false`)
+-   `onlyDown` **boolean** If the dropdown should check the bottom of the container (optional, default `false`)
+-   `overflowAttrEl` **boolean** Attribut to select the container the element has to check for overflow (optional, default `""`)
+-   `containerClass` **string**  (optional, default `""`)
+-   `inpClass` **string**  (optional, default `""`)
+-   `headerClass` **string**  (optional, default `""`)
+-   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
 ##### Examples
 
@@ -1414,13 +1414,13 @@ It is mainly use in forms.
 
 This will toggle the custom select dropdown component.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeSelect
 
 This will close the custom select dropdown component.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## changeValue
 
@@ -1429,7 +1429,7 @@ Check the validity of the select too. Close select after it.
 
 ##### Parameters
 
-*   `newValue` **[string][16]** The new value to set to the select.
+-   `newValue` **string** The new value to set to the select.
 
 Returns **[string][16]** The new value of the select
 
@@ -1440,9 +1440,9 @@ Case not and select is open, will close the select.
 
 ##### Parameters
 
-*   `e` **[event][21]** The event object.
+-   `e` **event** The event object.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeScroll
 
@@ -1450,9 +1450,9 @@ This function is linked to a scroll event and will close the select in case a sc
 
 ##### Parameters
 
-*   `e` **[event][21]** The event object.
+-   `e` **event** The event object.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeEscape
 
@@ -1460,9 +1460,9 @@ This function is linked to a key event and will close the select in case "Escape
 
 ##### Parameters
 
-*   `e` **[event][21]** The event object.
+-   `e` **event** The event object.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## closeTab
 
@@ -1471,9 +1471,9 @@ In case the new tabindex is not part of the select component, will close the sel
 
 ##### Parameters
 
-*   `e` **[event][21]** The event object.
+-   `e` **event** The event object.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ###  Group
 
@@ -1484,10 +1484,10 @@ This component under the hood is rendering default fields but by group with poss
 
 ##### Parameters
 
-*   `multiples` **[object][14]<[object][14]>** The multiples settings to display. This needs to be a dict of settings using default field format.
-*   `columns` **[object][14]** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
-*   `containerClass` **[string][15]** Additionnal class to add to the container (optional, default `""`)
-*   `tadId` **[string][15]** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `multiples` **object<object>** The multiples settings to display. This needs to be a dict of settings using default field format.
+-   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12}`)
+-   `containerClass` **string** Additionnal class to add to the container (optional, default `""`)
+-   `tadId` **string** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
 ##### Examples
 
@@ -1635,7 +1635,7 @@ Will determine if the group can be deleted. If at least one input is disabled, t
 
 ##### Parameters
 
-*   `group` **[object][14]** The multiple group with all settings
+-   `group` **object** The multiple group with all settings
 
 Returns **[object][14]** Return delete button data
 
@@ -1645,9 +1645,9 @@ Will set a multiple group as invisible.
 
 ##### Parameters
 
-*   `id` **([string][15] | [number][16])** The multiple group with all settings
+-   `id` **(string | number)** The multiple group with all settings
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## delInvisible
 
@@ -1655,9 +1655,9 @@ Will remove a multiple group from invisible list.
 
 ##### Parameters
 
-*   `id` **([string][15] | [number][16])** The multiple group with all settings
+-   `id` **(string | number)** The multiple group with all settings
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## toggleVisible
 
@@ -1665,9 +1665,9 @@ Will toggle a multiple group visibility.
 
 ##### Parameters
 
-*   `id` **([string][15] | [number][16])** The multiple group with all settings
+-   `id` **(string | number)** The multiple group with all settings
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## delGroup
 
@@ -1675,10 +1675,10 @@ Will emit a delete event to the parent component. The parent will update the tem
 
 ##### Parameters
 
-*   `multName` **[string][15]** The multiple group name
-*   `groupName` **[string][15]** The multiple group id
+-   `multName` **string** The multiple group name
+-   `groupName` **string** The multiple group id
 
-Returns **void**&#x20;
+Returns **void**;
 
 ###  Header
 
@@ -1690,13 +1690,13 @@ Always use with field component.
 
 ##### Parameters
 
-*   `label` **[string][4]** The label of the field. Can be a translation key or by default raw text.
-*   `id` **[string][4]** The id of the field. This is used to link the label to the field.
-*   `name` **[string][4]** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
-*   `popovers` **[array][5]?** List of popovers to display more information
-*   `required` **[boolean][6]**  (optional, default `false`)
-*   `hideLabel` **[boolean][6]**  (optional, default `false`)
-*   `headerClass` **[string][4]**  (optional, default `""`)
+-   `label` **string** The label of the field. Can be a translation key or by default raw text.
+-   `id` **string** The id of the field. This is used to link the label to the field.
+-   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+-   `popovers` **array?** List of popovers to display more information
+-   `required` **boolean**  (optional, default `false`)
+-   `hideLabel` **boolean**  (optional, default `false`)
+-   `headerClass` **string**  (optional, default `""`)
 
 ##### Examples
 
@@ -1723,9 +1723,9 @@ This component is a icon used with status.
 
 #### Parameters
 
-*   `id` **[string][4]** The id of the status icon.
-*   `status` **[string][4]** The color of the icon between error, success, warning, info (optional, default `"info"`)
-*   `statusClass` **[string][4]** Additional class, for example to use with grid system. (optional, default `""`)
+-   `id` **string** The id of the status icon.
+-   `status` **string** The color of the icon between error, success, warning, info (optional, default `"info"`)
+-   `statusClass` **string** Additional class, for example to use with grid system. (optional, default `""`)
 
 #### Examples
 
@@ -1745,9 +1745,9 @@ This component is a svg icon representing box.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1763,9 +1763,9 @@ This component is a svg icon representing carton box.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange-darker"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange-darker"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1781,9 +1781,9 @@ This component is a svg icon representing a check mark.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1799,9 +1799,9 @@ This component is a svg icon representing a close mark.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1817,9 +1817,9 @@ This component is a svg icon representing core plugin.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan-darker"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan-darker"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1835,9 +1835,9 @@ This component is a svg icon representing core plugin.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1853,9 +1853,9 @@ This component is a svg icon representing a cross mark.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1871,9 +1871,9 @@ This component is a svg icon representing crown.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"amber"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"amber"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1889,9 +1889,9 @@ This component is a svg icon representing Discord.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]**  (optional, default `"discord"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string**  (optional, default `"discord"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1907,9 +1907,9 @@ This component is a svg icon representing disk.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1925,9 +1925,9 @@ This component is a svg icon representing disks.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1943,9 +1943,9 @@ This component is a svg icon representing document.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1961,9 +1961,9 @@ This component is a svg icon representing exclamation.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1979,9 +1979,9 @@ This component is a svg icon representing eye.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -1997,9 +1997,9 @@ This component is a svg icon representing flag.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"amber-dark"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"amber-dark"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2015,9 +2015,9 @@ This component is a svg icon representing funnel.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2033,9 +2033,9 @@ This component is a svg icon representing gear.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2051,9 +2051,9 @@ This component is a svg icon representing Github.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]**  (optional, default `"github"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string**  (optional, default `"github"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2069,9 +2069,9 @@ This component is a svg icon representing globe.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2087,9 +2087,9 @@ This component is a svg icon representing house.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan-darker"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan-darker"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2105,9 +2105,9 @@ This component is a svg icon representing info.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"info"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"info"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2123,9 +2123,9 @@ This component is a svg icon representing key.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `""`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `""`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2141,9 +2141,9 @@ This component is a svg icon representing Linkedin.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]**  (optional, default `"linkedin"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string**  (optional, default `"linkedin"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2159,9 +2159,9 @@ This component is a svg icon representing list.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2177,9 +2177,9 @@ This component is a svg icon representing lock.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, yellow, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"yellow"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, yellow, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"yellow"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2195,9 +2195,9 @@ This component is a svg icon representing pen.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2213,9 +2213,9 @@ This component is a svg icon representing addition (+).
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2231,9 +2231,9 @@ This component is a svg icon representing puzzle.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"yellow"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"yellow"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2249,9 +2249,9 @@ This component is a svg icon representing redirect.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2267,9 +2267,9 @@ This component is a svg icon representing search.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"info"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"info"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2285,9 +2285,9 @@ This component is a svg icon representing settings.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue-darker"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue-darker"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2303,9 +2303,9 @@ This component is a svg icon representing task.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2321,9 +2321,9 @@ This component is a svg icon representing trash.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2339,9 +2339,9 @@ This component is a svg icon representing no trespassing.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"error"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"error"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2357,9 +2357,9 @@ This component is a svg icon representing Twiiter.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]**  (optional, default `"twitter"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string**  (optional, default `"twitter"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2375,9 +2375,9 @@ This component is a svg icon representing wire.
 
 #### Parameters
 
-*   `iconClass` **[string][4]** The class of the icon. (optional, default `"icon-default"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, green, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"green"`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, green, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"green"`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2395,9 +2395,9 @@ This component is a list of items separate on two columns : one for the title, a
 
 #### Parameters
 
-*   `details` **[string][8]** List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
-*   `filters` **[array][9]** List of filters to apply on the list of items. (optional, default `[]`)
-*   `columns` **columns** Determine the position of the items in the grid system. (optional, default `{pc:4,tablet:6,mobile:12}`)
+-   `details` **string** List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
+-   `filters` **array** List of filters to apply on the list of items. (optional, default `[]`)
+-   `columns` **columns** Determine the position of the items in the grid system. (optional, default `{pc:4,tablet:6,mobile:12}`)
 
 #### Examples
 
@@ -2430,9 +2430,9 @@ In case we leave the item, for few moments the item will get an higher z-index t
 
 #### Parameters
 
-*   `id` **([string][8] | [number][10])** The id of the item.
+-   `id` **(string | number)** The id of the item.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## indexPending
 
@@ -2440,9 +2440,9 @@ This will add a higher z-index for 100ms when cursor is out of the item in order
 
 #### Parameters
 
-*   `id` **([string][8] | [number][10])** The id of the item.
+-   `id` **(string | number)** The id of the item.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ### Pairs.vue
 
@@ -2450,8 +2450,8 @@ This component is used to display key value information in a list.
 
 #### Parameters
 
-*   `pairs` **[array][4]** The list of key value information. The key and value can be a translation key or a raw text.
-*   `columns` **[object][5]** Determine the  position of the items in the grid system. (optional, default `{pc:12,tablet:12,mobile:12}`)
+-   `pairs` **array** The list of key value information. The key and value can be a translation key or a raw text.
+-   `columns` **object** Determine the  position of the items in the grid system. (optional, default `{pc:12,tablet:12,mobile:12}`)
 
 #### Examples
 
@@ -2473,8 +2473,8 @@ The message text can be overriden by passing a text prop.
 
 #### Parameters
 
-*   `text` **[string][4]** The text to display
-*   `unmatchClass` **[string][4]** The class to apply to the message. If not provided, the class will be based on the parent component. (optional, default `""`)
+-   `text` **string** The text to display
+-   `unmatchClass` **string** The class to apply to the message. If not provided, the class will be based on the parent component. (optional, default `""`)
 
 #### Examples
 
@@ -2492,19 +2492,19 @@ This component is a standard button.
 
 #### Parameters
 
-*   `id` **[string][4]** Unique id of the button (optional, default `uuidv4()`)
-*   `text` **[string][4]** Content of the button. Can be a translation key or by default raw text.
-*   `type` **[string][4]** Can be of type button || submit (optional, default `"button"`)
-*   `disabled` **[boolean][5]**  (optional, default `false`)
-*   `hideText` **[boolean][5]** Hide text to only display icon (optional, default `false`)
-*   `color` **[string][4]**  (optional, default `"primary"`)
-*   `iconColor` **[string][4]** Color we want to apply to the icon. If falsy value, default icon color is applied. (optional, default `""`)
-*   `size` **[string][4]** Can be of size sm || normal || lg || xl (optional, default `"normal"`)
-*   `iconName` **[string][4]** Name in lowercase of icons store on /Icons. If falsy value, no icon displayed. (optional, default `""`)
-*   `attrs` **[Object][6]** List of attributs to add to the button. Some attributs will conduct to additionnal script (optional, default `{}`)
-*   `modal` **([Object][6] | [boolean][5])** We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal. (optional, default `false`)
-*   `tabId` **([string][4] | [number][7])** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
-*   `containerClass` **[string][4]** Additionnal class to the container (optional, default `""`)
+-   `id` **string** Unique id of the button (optional, default `uuidv4()`)
+-   `text` **string** Content of the button. Can be a translation key or by default raw text.
+-   `type` **string** Can be of type button || submit (optional, default `"button"`)
+-   `disabled` **boolean**  (optional, default `false`)
+-   `hideText` **boolean** Hide text to only display icon (optional, default `false`)
+-   `color` **string**  (optional, default `"primary"`)
+-   `iconColor` **string** Color we want to apply to the icon. If falsy value, default icon color is applied. (optional, default `""`)
+-   `size` **string** Can be of size sm || normal || lg || xl (optional, default `"normal"`)
+-   `iconName` **string** Name in lowercase of icons store on /Icons. If falsy value, no icon displayed. (optional, default `""`)
+-   `attrs` **Object** List of attributs to add to the button. Some attributs will conduct to additionnal script (optional, default `{}`)
+-   `modal` **(Object | boolean)** We can link the button to a Modal component. We need to pass the widgets inside the modal. Button click will open the modal. (optional, default `false`)
+-   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `containerClass` **string** Additionnal class to the container (optional, default `""`)
 
 #### Examples
 
@@ -2529,8 +2529,8 @@ We need a list of buttons to display.
 
 #### Parameters
 
-*   `buttons` **[array][4]** List of buttons to display. Button component is used.
-*   `boutonGroupClass` **[string][5]** Additional class for the flex container (optional, default `""`)
+-   `buttons` **array** List of buttons to display. Button component is used.
+-   `boutonGroupClass` **string** Additional class for the flex container (optional, default `""`)
 
 #### Examples
 
@@ -2572,9 +2572,9 @@ This component is mainly use as widget container.
 
 #### Parameters
 
-*   `containerClass` **[string][4]** Additional class (optional, default `""`)
-*   `columns` **([object][5] | [boolean][6])** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `false`)
-*   `tag` **[string][4]** The tag for the container (optional, default `"div"`)
+-   `containerClass` **string** Additional class (optional, default `""`)
+-   `columns` **(object | boolean)** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `false`)
+-   `tag` **string** The tag for the container (optional, default `"div"`)
 
 #### Examples
 
@@ -2599,9 +2599,9 @@ Check example for more details.
 
 #### Parameters
 
-*   `filters` **[array][12]** Fields with additional data to be used as filters. (optional, default `[]`)
-*   `data` **([object][13] | [array][12])** Data object or array to filter. Emit a filter event with the filtered data. (optional, default `{}`)
-*   `containerClass` **[string][14]** Additional class for the container. (optional, default `""`)
+-   `filters` **array** Fields with additional data to be used as filters. (optional, default `[]`)
+-   `data` **(object | array)** Data object or array to filter. Emit a filter event with the filtered data. (optional, default `{}`)
+-   `containerClass` **string** Additional class for the container. (optional, default `""`)
 
 #### Examples
 
@@ -2639,8 +2639,8 @@ Filter the given data using the available filters from a filter object.
 
 #### Parameters
 
-*   `filter` **[object][13]** Filter object to apply.
-*   `value` **[string][14]** Value to filter.
+-   `filter` **object** Filter object to apply.
+-   `value` **string** Value to filter.
 
 Returns **emits** Emit a filter event with the filtered data.
 
@@ -2651,10 +2651,10 @@ Then filter data with the given filter and value.
 
 #### Parameters
 
-*   `filter` **[object][13]** Filter object to apply.
-*   `value` **[string][14]** Value to filter.
+-   `filter` **object** Filter object to apply.
+-   `value` **string** Value to filter.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## filterRegularSettings
 
@@ -2662,10 +2662,10 @@ Allow to filter plugin settings from a regular template.
 
 #### Parameters
 
-*   `filterSettings` **[object][13]** Filters to apply
-*   `template` **[object][13]** Template to filter
+-   `filterSettings` **object** Filters to apply
+-   `template` **object** Template to filter
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## filterMultiplesSettings
 
@@ -2673,10 +2673,10 @@ Allow to filter plugin multiples settings from a regular template.
 
 #### Parameters
 
-*   `filterSettings` **[object][13]** Filters to apply
-*   `template` **[object][13]** Template to filter
+-   `filterSettings` **object** Filters to apply
+-   `template` **object** Template to filter
 
-Returns **void**&#x20;
+Returns **void**;
 
 ### Grid.vue
 
@@ -2687,7 +2687,7 @@ This component is mainly use as widget container or as a child of a GridLayout.
 
 #### Parameters
 
-*   `gridClass` **[string][4]** Additional class (optional, default `"items-start"`)
+-   `gridClass` **string** Additional class (optional, default `"items-start"`)
 
 #### Examples
 
@@ -2707,13 +2707,13 @@ This component is mainly use as Grid parent component.
 
 #### Parameters
 
-*   `type` **[string][4]** Type of layout component, we can have "card" (optional, default `"card"`)
-*   `id` **[string][4]** Id of the layout component, will be used to identify the component. (optional, default `uuidv4()`)
-*   `title` **[string][4]** Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title. (optional, default `""`)
-*   `link` **[string][4]** Will transform the container tag from a div to an a tag with the link as href. Useful with card type. (optional, default `""`)
-*   `columns` **[object][5]** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `{"pc":12,"tablet":12,"mobile":12}`)
-*   `gridLayoutClass` **[string][4]** Additional class (optional, default `"items-start"`)
-*   `tabId` **[string][4]** Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex (optional, default `contentIndex`)
+-   `type` **string** Type of layout component, we can have "card" (optional, default `"card"`)
+-   `id` **string** Id of the layout component, will be used to identify the component. (optional, default `uuidv4()`)
+-   `title` **string** Title of the layout component, will be displayed at the top if exists. Type of layout component will determine the style of the title. (optional, default `""`)
+-   `link` **string** Will transform the container tag from a div to an a tag with the link as href. Useful with card type. (optional, default `""`)
+-   `columns` **object** Work with grid system { pc: 12, tablet: 12, mobile: 12} (optional, default `{"pc":12,"tablet":12,"mobile":12}`)
+-   `gridLayoutClass` **string** Additional class (optional, default `"items-start"`)
+-   `tabId` **string** Case the container is converted to an anchor with a link, we can define the tabId, by default it is the contentIndex (optional, default `contentIndex`)
 
 #### Examples
 
@@ -2734,11 +2734,11 @@ This component is mainly use inside others widgets.
 
 #### Parameters
 
-*   `iconName` **[string][4]** The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
-*   `iconClass` **[string][4]** Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically. (optional, default `"base"`)
-*   `color` **[string][4]** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `""`)
-*   `isStick` **[boolean][5]** If true, the icon will be stick to the top right of the parent container. (optional, default `false`)
-*   `disabled` **[boolean][5]** If true, the icon will be disabled. (optional, default `false`)
+-   `iconName` **string** The name of the icon to display. The icon name is the name of the file without the extension on lowercase.
+-   `iconClass` **string** Class to apply to the icon. In case the icon is related to a widget, the widget will set the right class automatically. (optional, default `"base"`)
+-   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `""`)
+-   `isStick` **boolean** If true, the icon will be stick to the top right of the parent container. (optional, default `false`)
+-   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
 
 #### Examples
 
@@ -2757,10 +2757,10 @@ This component is using the Container, TitleCard, IconStatus, ListPairs and Butt
 
 #### Parameters
 
-*   `title` **[string][4]**&#x20;
-*   `status` **[string][4]**&#x20;
-*   `details` **[array][5]** List of details to display
-*   `buttons` **[array][5]** List of buttons to display
+-   `title` **string**;
+-   `status` **string**;
+-   `details` **array** List of details to display
+-   `buttons` **array** List of buttons to display
 
 #### Examples
 
@@ -2794,13 +2794,13 @@ This component is a standard popover.
 
 #### Parameters
 
-*   `text` **[string][6]** Content of the popover. Can be a translation key or by default raw text.
-*   `href` **[string][6]** Link of the anchor. By default it is a # link. (optional, default `"#"`)
-*   `color` **[string][6]** Color of the icon between tailwind colors
-*   `attrs` **[object][7]** List of attributs to add to the text. (optional, default `{}`)
-*   `tag` **[string][6]** By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor (optional, default `"a"`)
-*   `iconClass` **[string][6]**  (optional, default `"icon-default"`)
-*   `tabId` **([string][6] | [number][8])** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
+-   `text` **string** Content of the popover. Can be a translation key or by default raw text.
+-   `href` **string** Link of the anchor. By default it is a # link. (optional, default `"#"`)
+-   `color` **string** Color of the icon between tailwind colors
+-   `attrs` **object** List of attributs to add to the text. (optional, default `{}`)
+-   `tag` **string** By default it is a anchor tag, but we can use other tag like div in case of popover on another anchor (optional, default `"a"`)
+-   `iconClass` **string**  (optional, default `"icon-default"`)
+-   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
 
 #### Examples
 
@@ -2817,13 +2817,13 @@ This component is a standard popover.
 
 Show the popover and set the position of the popover relative to the container.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## hidePopover
 
 Hide the popover.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ### PopoverGroup.vue
 
@@ -2833,8 +2833,8 @@ We need a list of popovers to display.
 
 #### Parameters
 
-*   `popovers` **[array][4]** List of popovers to display. Popover component is used.
-*   `groupClasss` **[string][5]** Additional class for the flex container (optional, default `""`)
+-   `popovers` **array** List of popovers to display. Popover component is used.
+-   `groupClasss` **string** Additional class for the flex container (optional, default `""`)
 
 #### Examples
 
@@ -2862,12 +2862,12 @@ This component is mainly use inside a blank card.
 
 #### Parameters
 
-*   `title` **[string][4]** The title of the stat. Can be a translation key or by default raw text.
-*   `value` **([string][4] | [number][5])** The value of the stat
-*   `subtitle` **[string][4]** The subtitle of the stat. Can be a translation key or by default raw text. (optional, default `""`)
-*   `iconName` **[string][4]** A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase. (optional, default `""`)
-*   `subtitleColor` **[string][4]** The color of the subtitle between error, success, warning, info (optional, default `"info"`)
-*   `statClass` **[string][4]** Additional class (optional, default `""`)
+-   `title` **string** The title of the stat. Can be a translation key or by default raw text.
+-   `value` **(string | number)** The value of the stat
+-   `subtitle` **string** The subtitle of the stat. Can be a translation key or by default raw text. (optional, default `""`)
+-   `iconName` **string** A top-right icon to display between icon available in Icons/Stat. Case falsy value, no icon displayed. The icon name is the name of the file without the extension on lowercase. (optional, default `""`)
+-   `subtitleColor` **string** The color of the subtitle between error, success, warning, info (optional, default `"info"`)
+-   `statClass` **string** Additional class (optional, default `""`)
 
 #### Examples
 
@@ -2888,13 +2888,13 @@ This component is a general subtitle wrapper.
 
 #### Parameters
 
-*   `subtitle` **[string][4]** Can be a translation key or by default raw text.
-*   `type` **[string][4]** The type of title between "container", "card", "content", "min" or "stat" (optional, default `"card"`)
-*   `tag` **[string][4]** The tag of the subtitle. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of subtitle. (optional, default `""`)
-*   `color` **[string][4]** The color of the subtitle between error, success, warning, info or tailwind color (optional, default `""`)
-*   `bold` **[boolean][5]** If the subtitle should be bold or not. (optional, default `false`)
-*   `uppercase` **[boolean][5]** If the subtitle should be uppercase or not. (optional, default `false`)
-*   `subtitleClass` **[string][4]** Additional class, useful when component is used directly on a grid system (optional, default `""`)
+-   `subtitle` **string** Can be a translation key or by default raw text.
+-   `type` **string** The type of title between "container", "card", "content", "min" or "stat" (optional, default `"card"`)
+-   `tag` **string** The tag of the subtitle. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of subtitle. (optional, default `""`)
+-   `color` **string** The color of the subtitle between error, success, warning, info or tailwind color (optional, default `""`)
+-   `bold` **boolean** If the subtitle should be bold or not. (optional, default `false`)
+-   `uppercase` **boolean** If the subtitle should be uppercase or not. (optional, default `false`)
+-   `subtitleClass` **string** Additional class, useful when component is used directly on a grid system (optional, default `""`)
 
 #### Examples
 
@@ -2917,15 +2917,15 @@ For example, Text, Icons, Icons, Buttons and Fields are supported.
 
 #### Parameters
 
-*   `title` **[string][6]** Determine the title of the table.
-*   `header` **[array][7]** Determine the header of the table.
-*   `positions` **[array][7]** Determine the position of each item in the table in a list of number based on 12 columns grid.
-*   `items` **[array][7]** items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
-*   `filters` **[array][7]** Determine the filters of the table. (optional, default `[]`)
-*   `minWidth` **[string][6]** Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl". (optional, default `"base"`)
-*   `containerClass` **[string][6]** Container additional class. (optional, default `""`)
-*   `containerWrapClass` **[string][6]** Container wrap additional class. (optional, default `""`)
-*   `tableClass` **[string][6]** Table additional class. (optional, default `""`)
+-   `title` **string** Determine the title of the table.
+-   `header` **array** Determine the header of the table.
+-   `positions` **array** Determine the position of each item in the table in a list of number based on 12 columns grid.
+-   `items` **array** items to render in the table. This need to be an array (row) of array (cols) with a cell being a regular widget.
+-   `filters` **array** Determine the filters of the table. (optional, default `[]`)
+-   `minWidth` **string** Determine the minimum size of the table. Can be "base", "sm", "md", "lg", "xl". (optional, default `"base"`)
+-   `containerClass` **string** Container additional class. (optional, default `""`)
+-   `containerWrapClass` **string** Container wrap additional class. (optional, default `""`)
+-   `tableClass` **string** Table additional class. (optional, default `""`)
 
 #### Examples
 
@@ -2980,13 +2980,13 @@ For example, Text, Icons, Icons, Buttons and Fields are supported.
 
 Determine the width of the unmatch element based on the parent container.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## getOverflow
 
 Handle the overflow of the table and update padding in consequence.
 
-Returns **void**&#x20;
+Returns **void**;
 
 ### Text.vue
 
@@ -2994,14 +2994,14 @@ This component is used for regular paragraph.
 
 #### Parameters
 
-*   `text` **[string][4]** The text value. Can be a translation key or by default raw text.
-*   `textClass` **[string][4]** Style of text. Can be replace by any class starting by 'text-' like 'text-stat'. (optional, default `""`)
-*   `color` **[string][4]** The color of the text between error, success, warning, info or tailwind color (optional, default `""`)
-*   `bold` **[boolean][5]** If the text should be bold or not. (optional, default `false`)
-*   `uppercase` **[boolean][5]** If the text should be uppercase or not. (optional, default `false`)
-*   `tag` **[string][4]** The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6 (optional, default `"p"`)
-*   `icon` **([boolean][5] | [object][6])** The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color. (optional, default `false`)
-*   `attrs` **[object][6]** List of attributs to add to the text. (optional, default `{}`)
+-   `text` **string** The text value. Can be a translation key or by default raw text.
+-   `textClass` **string** Style of text. Can be replace by any class starting by 'text-' like 'text-stat'. (optional, default `""`)
+-   `color` **string** The color of the text between error, success, warning, info or tailwind color (optional, default `""`)
+-   `bold` **boolean** If the text should be bold or not. (optional, default `false`)
+-   `uppercase` **boolean** If the text should be uppercase or not. (optional, default `false`)
+-   `tag` **string** The tag of the text. Can be p, span, div, h1, h2, h3, h4, h5, h6 (optional, default `"p"`)
+-   `icon` **(boolean | object)** The icon to add before the text. If true, will add a default icon. If object, will add the icon with the name and the color. (optional, default `false`)
+-   `attrs` **object** List of attributs to add to the text. (optional, default `{}`)
 
 #### Examples
 
@@ -3019,12 +3019,12 @@ This component is a general title wrapper.
 
 #### Parameters
 
-*   `title` **[string][4]** Can be a translation key or by default raw text.
-*   `type` **[string][4]** The type of title between "container", "card", "content", "min" or "stat" (optional, default `"card"`)
-*   `tag` **[string][4]** The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title. (optional, default `""`)
-*   `color` **[string][4]** The color of the title between error, success, warning, info or tailwind color (optional, default `""`)
-*   `uppercase` **[boolean][5]** If the title should be uppercase or not. (optional, default `false`)
-*   `titleClass` **[string][4]** Additional class, useful when component is used directly on a grid system (optional, default `""`)
+-   `title` **string** Can be a translation key or by default raw text.
+-   `type` **string** The type of title between "container", "card", "content", "min" or "stat" (optional, default `"card"`)
+-   `tag` **string** The tag of the title. Can be h1, h2, h3, h4, h5, h6 or p. If empty, will be determine by the type of title. (optional, default `""`)
+-   `color` **string** The color of the title between error, success, warning, info or tailwind color (optional, default `""`)
+-   `uppercase` **boolean** If the title should be uppercase or not. (optional, default `false`)
+-   `titleClass` **string** Additional class, useful when component is used directly on a grid system (optional, default `""`)
 
 #### Examples
 
@@ -3040,26 +3040,26 @@ This component is a general title wrapper.
 
 ## bannerStore
 
-*   @name Dashboard/News.vue
-*   @description This component will display news from BunkerWeb blog and allow users to subscribe to the newsletter.
+-   @name Dashboard/News.vue
+-   @description This component will display news from BunkerWeb blog and allow users to subscribe to the newsletter.
     Case the news API is not available, it will display a message.
 
 ## loadNews
 
-Returns **void**&#x20;
+Returns **void**;
 
 ## feedback
 
-*   @name Dashboard/Feedback.vue
-*   @description This component will display server feedbacks from the user.
+-   @name Dashboard/Feedback.vue
+-   @description This component will display server feedbacks from the user.
     This component is working with flash messages under the hood.
     This will display an ephemeral on the bottom right of the page and a sidebar with all the feedbacks.
 
 ## props
 
-*   @name Form/Fields.vue
-*   @description This component wraps all available fields for a form.
-*   @example
+-   @name Form/Fields.vue
+-   @description This component wraps all available fields for a form.
+-   @example
     {
     columns : {"pc": 6, "tablet": 12, "mobile": 12},
     id:"test-check",
@@ -3077,7 +3077,7 @@ Returns **void**&#x20;
     },
     ]
     }
-*   @param {object} setting - Setting needed to render a field.
+-   @param {object} setting - Setting needed to render a field.
 
 ## props
 
@@ -3085,7 +3085,7 @@ This component is lightweight builder containing only the necessary components t
 
 #### Parameters
 
-*   `builder` **[array][4]** Array of containers and widgets
+-   `builder` **array** Array of containers and widgets
 
 #### Examples
 
@@ -3142,9 +3142,9 @@ This component is lightweight builder containing only the necessary components t
 
 ## props
 
-*   @name Form/Templates.vue
-*   @description This component is used to create a complete  settings form with all modes (advanced, raw, easy).
-*   @example
+-   @name Form/Templates.vue
+-   @description This component is used to create a complete  settings form with all modes (advanced, raw, easy).
+-   @example
     {
     advanced : {
     default : \[{SETTING\_1}, {SETTING\_2}...],
@@ -3155,25 +3155,25 @@ This component is lightweight builder containing only the necessary components t
     low : \[...],
     }
     }
-*   @param {object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
+-   @param {object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
 
 ## getFirstTemplateName
 
-*   @name getFirstTemplateName
-*   @description Get the first template name from the first mode.
-*   @returns {string} - The first template name
+-   @name getFirstTemplateName
+-   @description Get the first template name from the first mode.
+-   @returns {string} - The first template name
 
 ## getFirstModeName
 
-*   @name getFirstTemplateName
-*   @description Get the first mode name from the first key in props.templates dict.
-*   @returns {string} - The first mode name
+-   @name getFirstTemplateName
+-   @description Get the first mode name from the first key in props.templates dict.
+-   @returns {string} - The first mode name
 
 ## rawForm
 
-*   @name Form/Raw\.vue
-*   @description This component is used to create a complete raw form with settings as JSON format.
-*   @example
+-   @name Form/Raw\.vue
+-   @description This component is used to create a complete raw form with settings as JSON format.
+-   @example
     {
     "IS\_LOADING": "no",
     "NGINX\_PREFIX": "/etc/nginx/",
@@ -3181,31 +3181,31 @@ This component is lightweight builder containing only the necessary components t
     "HTTPS\_PORT": "8443",
     "MULTISITE": "yes"
     }
-*   @param {object} template - Template object with plugin and settings data.
-*   @param {string} containerClass - Container
-*   @param {object} columns - Columns object.
+-   @param {object} template - Template object with plugin and settings data.
+-   @param {string} containerClass - Container
+-   @param {object} columns - Columns object.
 
 ## updateRaw
 
-*   @name updateRaw
-*   @description Get the raw data from editor, update the raw store with it and check if it is valid JSON.
-*   @param {string} v - The raw data to update.
-*   @returns {void}
+-   @name updateRaw
+-   @description Get the raw data from editor, update the raw store with it and check if it is valid JSON.
+-   @param {string} v - The raw data to update.
+-   @returns {void}
 
 #### Parameters
 
-*   `v` &#x20;
+-   `v` ;
 
 ## json2raw
 
-*   @name json2raw
-*   @description Convert a JSON object to a raw string that can be passed to the editor.
+-   @name json2raw
+-   @description Convert a JSON object to a raw string that can be passed to the editor.
     This will convert JSON to key value pairs (format key=value).
     This is only used at first mount when there is no raw data.
-*   @param {string} json  - The template json to convert
-*   @returns {string} - The raw string
+-   @param {string} json  - The template json to convert
+-   @returns {string} - The raw string
 
 #### Parameters
 
-*   `json` &#x20;
+-   `json` ;
 

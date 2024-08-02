@@ -3,7 +3,7 @@ from pathlib import Path
 from subprocess import Popen, PIPE
 from typing import List
 from shutil import rmtree
-
+from re import search
 
 outputFilename = "ui-components.md"
 # We want to get path of the folder where our components are
@@ -93,8 +93,8 @@ def js2md():
         file.unlink()
 
 
-def mergeMD():
-    """Merge all md files into one"""
+def formatMd():
+    """Format each markdown file to remove useless data and format some data like params"""
     # Get all files from the output folder
     files = list(Path(outputFolder).rglob("*"))
     # Create order using the tag title path of each file
@@ -109,9 +109,45 @@ def mergeMD():
         # Remove everything before the first ## tag
         index = data.index("## ")
         data = data[index:]
+
+        # I want to loop on each line
+        lines = data.split("\n")
+        line_result = []
+        for line in lines:
+            # remove space (so &#x20 or &#32)
+            line = line.replace("&#x20", "").replace("&#32", "")
+
+            # Case not a param, keep the line as is
+            if not line.startswith("*"):
+                line_result.append(line)
+                continue
+
+            # get line without first char
+            line = "-" + line[1:]
+
+            # remove each **[string][num]** pattern in a param by **string**
+            reg = r"\[\w+\]\[\d+\]"
+            while search(reg, line):
+                # get data of the pattern
+                pattern = search(reg, line).group()
+                # get content of first bracket
+                content = pattern.split("][")[0].replace("[", "")
+                line = line.replace(pattern, f"{content}")
+
+            line_result.append(line)
+
+        # I can merge the lines
+        data = "\n".join(line_result)
         # update the file with the new content
         file.write_text(data)
 
+
+def mergeMd():
+    """Merge all markdown files into one"""
+    # Get all files from the output folder
+    files = list(Path(outputFolder).rglob("*"))
+    # Create order using the tag title path of each file
+    order = []
     for file in files:
         # Get the title from first line
         data = file.read_text()
@@ -134,18 +170,18 @@ def mergeMD():
     rmtree(outputFolder, ignore_errors=True)
 
 
-def formatMd():
-    # ATM didn't convert the js function to python
-    # So I will run a command to format the file
+def formatMergeMd():
+    """ATM didn't convert the js function to python.
+    So I will run a command to format the file"""
+
     command = "node ./vue2md.js"
     run_command(command)
 
-
-# install_npm_packages()
 
 install_npm_packages()
 reset()
 vue2js()
 js2md()
-mergeMD()
 formatMd()
+mergeMd()
+formatMergeMd()

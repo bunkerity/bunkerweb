@@ -3,13 +3,14 @@ from pathlib import Path
 from subprocess import Popen, PIPE
 from typing import List
 from shutil import rmtree
-
+from re import search, sub
 
 # We want to get path of the folder where our components are
 # The path is "../src/client/dashboard/src/components" from here
 
 inputFolder = abspath("../client/dashboard/components")
-outputFolder = abspath("../client/.widgets")
+outputFolderMd = abspath("../client/.widgets-md")
+outputFolderPy = abspath("../client/.widgets")
 
 
 def run_command(command: List[str]) -> int:
@@ -44,13 +45,15 @@ def install_npm_packages():
 def reset():
     """Reset the docs folder"""
     # delete the output folder even if not empty
-    rmtree(outputFolder, ignore_errors=True)
+    rmtree(outputFolderMd, ignore_errors=True)
+    # Remove all files from the output folder
+    rmtree(outputFolderPy, ignore_errors=True)
 
 
 def vue2js():
     """Get the script part of a Vue file and create a JS file"""
     # Create outputFolder if not exists
-    Path(outputFolder).mkdir(parents=True, exist_ok=True)
+    Path(outputFolderMd).mkdir(parents=True, exist_ok=True)
     # Get every subfolders from the input folder
     for folder in Path(inputFolder).rglob("*"):
         # Get only files
@@ -61,14 +64,14 @@ def vue2js():
             script = data.split("<script setup>")[1].split("</script>")[0]
             # Create a file on the output folder with the same name but with .js extension
             fileName = folder.name.replace(".vue", ".js")
-            dest = Path(outputFolder) / fileName
+            dest = Path(outputFolderMd) / fileName
             dest.write_text(script)
 
 
 def js2md():
     """Run a command to render markdown from JS files"""
     # Get all files from the output folder
-    files = list(Path(outputFolder).rglob("*"))
+    files = list(Path(outputFolderMd).rglob("*"))
     process_list = []
     # Create a markdown file for each JS file
     for file in files:
@@ -87,10 +90,10 @@ def js2md():
         file.unlink()
 
 
-def formatMD():
-    """Format the markdown by removing useless content"""
+def formatMd():
+    """Format each markdown file to remove useless data and format some data like params"""
     # Get all files from the output folder
-    files = list(Path(outputFolder).rglob("*"))
+    files = list(Path(outputFolderMd).rglob("*"))
     # Create order using the tag title path of each file
     order = []
     for file in files:
@@ -103,45 +106,250 @@ def formatMD():
         # Remove everything before the first ## tag
         index = data.index("## ")
         data = data[index:]
+
+        # I want to loop on each line
+        lines = data.split("\n")
+        line_result = []
+        for line in lines:
+            # remove space (so &#x20 or &#32)
+            line = line.replace("&#x20", "").replace("&#32", "")
+
+            # Case not a param, keep the line as is
+            if not line.startswith("*"):
+                line_result.append(line)
+                continue
+
+            # get line without first char
+            line = "-" + line[1:]
+
+            # remove each **[string][num]** pattern in a param by **string**
+            reg = r"\[\w+\]\[\d+\]"
+            while search(reg, line):
+                # get data of the pattern
+                pattern = search(reg, line).group()
+                # get content of first bracket
+                content = pattern.split("][")[0].replace("[", "")
+                line = line.replace(pattern, f"{content}")
+
+            line_result.append(line)
+
+        # I can merge the lines
+        data = "\n".join(line_result)
         # update the file with the new content
         file.write_text(data)
 
+
+def md2py():
+    # create py folder if not exists
+    Path(outputFolderPy).mkdir(parents=True, exist_ok=True)
+    # Get all files from the output folder
+    files = list(Path(outputFolderMd).rglob("*"))
+    # Create order using the tag title path of each file
     for file in files:
         data = file.read_text()
         # Get the title from first line, after the ## tag
         try:
-            title = data.split("\n")[0].replace("## ", "")
-            # Case there is "/", split and get the last one
-            if "/" in title:
-                title = title.split("/")[-1]
-            # remove the extension
-            title = title.replace(".vue", "")
+            title = get_py_title(data)
+            desc = get_py_desc(data)
+            params = convert_params(get_py_params(data))
+            widget = create_widget(title, desc, params)
+            Path(f"{outputFolderPy}/{title.capitalize()}.py").write_text(widget)
 
-            # subtitle is after first line and before ### Parameters
-            subtitle = data.split("\n")[1]
-
-            # params will be between ### Parameters and ### Examples
-            params = data.split("### Parameters")[1].split("### Examples")[0]
-
-            # example will be between ### Examples and the next occurence of a # tag
-            example = data.split("### Examples")[1].split("#")[0]
-            print(title, subtitle, params, example)
-
-            # we need to format the params with format **[type][num]** => **[type]** here AND for documentation (because num is not needed - removed references)
-            # We need to update the vue to js by keeping only the first jsdoc comment occurence to avoid issues with documentation.js
-
-            # get each param, type and default value if exists
-            # create function that will parse the params with the type and default value if exists
-            # function name will be the title
-            # the start of the function is """<subtitle> \n <params> \n <example>"""
-            # We will create an object with that will be the default component format
         except:
             print("Error while parsing file", str(file.name))
             continue
+
+    # Remove widgets-md
+    rmtree(outputFolderMd, ignore_errors=True)
+
+
+def get_py_title(data: str) -> str:
+    title = data.split("\n")[0].replace("## ", "")
+    # Case there is "/", split and get the last one
+    if "/" in title:
+        title = title.split("/")[-1]
+    # remove the extension
+    title = title.replace(".vue", "").lower()
+    return title
+
+
+def get_py_desc(data: str) -> str:
+    # remove first line
+    desc = "RESUME\n" + "\n".join(data.split("\n")[1:])
+    # Get line where Parameters string is with at least one # tag before
+    lines = desc.split("\n")
+    new_lines = []
+    for line in lines:
+        if "# Parameters" in line:
+            new_lines.append("PARAMETERS")
+            continue
+
+        if "# Examples" in line:
+            new_lines.append("EXAMPLE")
+            continue
+
+        new_lines.append(line)
+
+    # merge
+    desc = "\n".join(new_lines)
+    # remove ```javascript and ``` from the string
+    desc = sub(r"```javascript\n", "", desc)
+    desc = sub(r"```\n", "", desc)
+    return desc
+
+
+def get_py_params(data: str) -> str:
+    # params will be between ### Parameters and ### Examples
+    params = data.split("### Parameters")[1].split("### Examples")[0]
+    list_params = []
+    lines = params.split("\n")
+    for line in lines:
+        if not line.startswith("-"):
+            continue
+        # Get first and second ` index
+        first = line.find("`")
+        second = line.find("`", first + 1)
+        param_name = line[first + 1 : second] or None
+        # Get first and second ** index
+        first = line.find("**")
+        second = line.find("**", first + 1)
+        param_type = line[first + 2 : second] or None
+
+        # Check if (optional is in line
+        default = None
+        if "(optional, default" in line:
+            first = line.find("(optional, default")
+            # get substring starting from the first index
+            opt_sub = line[first + len("(optional, default") :]
+            # get the first ` index
+            first = opt_sub.find("`")
+            # get the second ` index
+            default = opt_sub[first + 1 : opt_sub.find("`", first + 1)]
+
+        list_params.append({"name": param_name, "type": param_type, "default": default})
+
+    # remove default key if None
+    return list_params
+
+
+def convert_params(params: List[dict]) -> List[dict]:
+    convert_types = {
+        "string": "str",
+        "number": "int",
+        "boolean": "bool",
+        "array": "list",
+        "object": "dict",
+    }
+
+    convert_values = {
+        "false": "False",
+        "true": "True",
+        "null": "None",
+        "undefined": "None",
+    }
+
+    convert_params = []
+    for param in params:
+        if not param.get("name") or not param.get("type"):
+            continue
+
+        param_type = param.get("type").lower().strip()
+        convert_type = None
+        if param_type and param_type in convert_types:
+            convert_type = convert_types[param_type]
+
+        default = param.get("default")
+        if default and default in convert_values:
+            default = convert_values[default]
+
+        convert_params.append({"name": param.get("name"), "type": convert_type, "default": default})
+
+    convert_params = [{k: v for k, v in d.items() if v is not None} for d in convert_params]
+
+    # order to get first params without "default"
+    convert_params = sorted(convert_params, key=lambda x: x.get("default") is not None)
+
+    return convert_params
+
+
+def create_widget(title: str, desc: str, params: List[dict]):
+    # Add indentation to desc
+    desc_lines = desc.split("\n")
+    desc_indent = []
+    for line in desc_lines:
+        desc_indent.append(f"    {line}")
+    desc = "\n".join(desc_indent)
+    desc = '\n    """\n' + desc + '\n   """\n'
+
+    # Create function params with type and optional value if exists
+    params_str = ""
+    for param in params:
+        param_name = param.get("name")
+        param_type = param.get("type")
+        param_default = '""' if param.get("default") == "" else param.get("default")
+        params_str += (
+            f"    {param_name}: {param_type} = {param_default},\n"
+            if "type" in param and "default" in param
+            else (f"    {param_name}: {param_type},\n" if "type" in param else f"    {param_name},\n")
+        )
+
+    # remove last ',' in params_str
+    params_str = params_str[:-2]
+
+    # By default, we set on data dict the values without default value (means value are needed)
+    data = "    data = {\n"
+    for param in params:
+        if "default" in param:
+            continue
+        param_name = param.get("name")
+        data += f"""        "{param_name}" : {param_name},\n"""
+    data += "       }\n"
+
+    # Check to add keys if value is not default value
+    add_keys_not_default = ""
+    for param in params:
+        if not "default" in param:
+            continue
+        param_name = param.get("name")
+        param_default = '""' if param.get("default") == "" else param.get("default")
+        add_keys_not_default += f"""    add_key_value("{param_name}", {param_name}, {param_default})\n"""
+
+    add_keys_not_default_function = ""
+    if add_keys_not_default:
+        add_keys_not_default = "    # List of params that will be add only if not default value\n" + add_keys_not_default
+
+        # Utils function to add key value to data dict if not default value
+        add_keys_not_default_function = """
+    # Add params to data dict only if value is not the default one
+    def add_key_value(key, value, default):
+        if value == default:
+            return
+        data[key] = value
+        """
+
+    widget_function = f"""
+def {title}_widget(
+{params_str}
+    ): 
+{desc}
+{data}
+{add_keys_not_default_function}
+{add_keys_not_default}
+
+    return {{
+                "type" : "{title.capitalize()}",
+                "data" : data
+
+            }}
+
+
+    """
+    return widget_function
 
 
 # install_npm_packages()
 reset()
 vue2js()
 js2md()
-formatMD()
+formatMd()
+md2py()
