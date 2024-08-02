@@ -394,6 +394,7 @@ class Database:
             "last_instances_change": None,
             "integration": "unknown",
             "version": "1.6.0-beta",
+            "ui_version": "1.6.0-beta",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -562,7 +563,7 @@ class Database:
 
         to_put = []
         with self._db_session() as session:
-            db_plugins = session.query(Plugins).with_entities(Plugins.id).all()
+            db_plugins = old_data.get("bw_plugins", [])
 
             db_ids = []
             if db_plugins:
@@ -592,13 +593,9 @@ class Database:
                 if not isinstance(plugins, list):
                     plugins = [plugins]
 
-                db_values = [
-                    plugin.id
-                    for plugin in session.query(Plugins)
-                    .with_entities(Plugins.id)
-                    .filter(Plugins.id.in_([plugin["id"] for plugin in plugins if "id" in plugin]))
-                ]
-                missing_values = [plugin for plugin in db_values if plugin not in [plugin["id"] for plugin in plugins if "id" in plugin]]
+                plugin_filter = [plugin["id"] for plugin in plugins if "id" in plugin]
+                db_values = [plugin.id for plugin in old_data.get("bw_plugins", []) if plugin.id in plugin_filter]
+                missing_values = [plugin for plugin in db_values if plugin not in plugin_filter]
 
                 if missing_values:
                     # Remove plugins that are no longer in the list
@@ -616,6 +613,12 @@ class Database:
                         session.query(Services_settings).filter(Services_settings.setting_id == plugin_setting.id).delete()
                         session.query(Global_values).filter(Global_values.setting_id == plugin_setting.id).delete()
                         session.query(Settings).filter(Settings.id == plugin_setting.id).delete()
+
+                    if "bw_plugins" in old_data:
+                        indexes = [i for i, plugin in enumerate(old_data["bw_plugins"]) if plugin.id in missing_values]
+                        if indexes:
+                            for i in indexes:
+                                del old_data["bw_plugins"][i]
 
                 for plugin in plugins:
                     settings = {}
@@ -694,7 +697,7 @@ class Database:
                             )
                         )
 
-                    db_values = [setting.id for setting in session.query(Settings).with_entities(Settings.id).filter_by(plugin_id=plugin["id"])]
+                    db_values = [old_setting.id for old_setting in old_data.get("bw_settings", []) if old_setting.plugin_id == plugin["id"]]
                     missing_values = [setting for setting in db_values if setting not in settings]
 
                     if missing_values:
@@ -706,20 +709,16 @@ class Database:
                         session.query(Global_values).filter(Global_values.setting_id.in_(missing_values)).delete()
 
                         if "bw_settings" in old_data:
-                            indexes = [i for i, setting in enumerate(old_data["bw_settings"]) if setting.plugin_id == plugin["id"]]
+                            indexes = [
+                                i for i, setting in enumerate(old_data["bw_settings"]) if setting.plugin_id == plugin["id"] and setting.id in missing_values
+                            ]
                             if indexes:
                                 for i in indexes:
                                     del old_data["bw_settings"][i]
 
                     order = 0
                     for setting, value in settings.items():
-                        value.update(
-                            {
-                                "plugin_id": plugin["id"],
-                                "name": value["id"],
-                                "id": setting,
-                            }
-                        )
+                        value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
 
                         if "bw_settings" in old_data:
                             found = False
@@ -775,42 +774,29 @@ class Database:
                                 self.logger.warning(f'Setting "{setting}" does not exist, creating it')
                             to_put.append(Settings(**value | {"order": order}))
 
-                        db_values = [select.value for select in session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"])]
+                        db_values = [select.value for select in old_data.get("bw_selects", []) if select.setting_id == value["id"]]
                         missing_values = [select for select in db_values if select not in select_values]
 
-                        if "bw_selects" in old_data and missing_values:
-                            indexes = [i for i, select in enumerate(old_data["bw_selects"]) if select.setting_id == value["id"]]
-                            if indexes:
-                                for i in indexes:
-                                    del old_data["bw_selects"][i]
+                        if missing_values:
+                            # Remove selects that are no longer in the list
+                            self.logger.warning(f'Removing {len(missing_values)} selects from setting "{setting}" as they are no longer in the list')
+                            session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
 
-                        if select_values:
-                            if missing_values:
-                                # Remove selects that are no longer in the list
-                                self.logger.warning(f'Removing {len(missing_values)} selects from setting "{setting}" as they are no longer in the list')
-                                session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
-
-                            for select in select_values:
-                                if "bw_selects" in old_data:
-                                    found = False
-                                    for i, old_select in enumerate(old_data["bw_selects"]):
-                                        if old_select.value == select:
-                                            found = True
-                                            break
-
-                                    if found:
+                            if "bw_selects" in old_data:
+                                indexes = [
+                                    i for i, select in enumerate(old_data["bw_selects"]) if select.setting_id == value["id"] and select.value in missing_values
+                                ]
+                                if indexes:
+                                    for i in indexes:
                                         del old_data["bw_selects"][i]
 
-                                if select not in db_values:
-                                    to_put.append(Selects(setting_id=value["id"], value=select))
-                        else:
-                            if missing_values:
-                                self.logger.warning(f'Removing all selects from setting "{setting}" as there are no longer any in the list')
-                            session.query(Selects).filter_by(setting_id=value["id"]).delete()
+                        for select in select_values:
+                            if select not in db_values:
+                                to_put.append(Selects(setting_id=value["id"], value=select))
 
                         order += 1
 
-                    db_names = [job.name for job in session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"])]
+                    db_names = [job.name for job in old_data.get("bw_jobs", []) if job.plugin_id == plugin["id"]]
                     job_names = [job["name"] for job in jobs]
                     missing_names = [job for job in db_names if job not in job_names]
 
@@ -822,7 +808,7 @@ class Database:
                         session.query(Jobs_runs).filter(Jobs_runs.job_name.in_(missing_names)).delete()
 
                         if "bw_jobs" in old_data:
-                            indexes = [i for i, job in enumerate(old_data["bw_jobs"]) if job.plugin_id == plugin["id"]]
+                            indexes = [i for i, job in enumerate(old_data["bw_jobs"]) if job.plugin_id == plugin["id"] and job.name in missing_names]
                             if indexes:
                                 for i in indexes:
                                     del old_data["bw_jobs"][i]
@@ -976,7 +962,7 @@ class Database:
                         self.logger.warning(f'Removing page for plugin "{plugin["id"]}" as it no longer exists')
                         session.query(Plugin_pages).filter_by(plugin_id=plugin["id"]).delete()
 
-                    db_names = [command.name for command in session.query(BwcliCommands).with_entities(BwcliCommands.name).filter_by(plugin_id=plugin["id"])]
+                    db_names = [command.name for command in old_data.get("bwcli_commands", []) if command.plugin_id == plugin["id"]]
                     missing_names = [command for command in db_names if command not in commands]
 
                     if missing_names:
@@ -985,7 +971,9 @@ class Database:
                         session.query(BwcliCommands).filter(BwcliCommands.name.in_(missing_names), BwcliCommands.plugin_id == plugin["id"]).delete()
 
                         if "bwcli_commands" in old_data:
-                            indexes = [i for i, command in enumerate(old_data["bwcli_commands"]) if command.plugin_id == plugin["id"]]
+                            indexes = [
+                                i for i, command in enumerate(old_data["bwcli_commands"]) if command.plugin_id == plugin["id"] and command.name in missing_names
+                            ]
                             if indexes:
                                 for i in indexes:
                                     del old_data["bwcli_commands"][i]
@@ -1057,10 +1045,10 @@ class Database:
                             if table_name == "bw_metadata":
                                 existing_row = session.query(Metadata).filter_by(id=1).first()
                                 if not existing_row:
-                                    session.add(Metadata(**row))
+                                    session.add(Metadata(**(row | {"ui_version": db_version})))
                                     session.commit()
                                     continue
-                                session.query(Metadata).filter_by(id=1).update(row)
+                                session.query(Metadata).filter_by(id=1).update(row | {"ui_version": db_version})
                                 continue
 
                             # Check if the row already exists in the table

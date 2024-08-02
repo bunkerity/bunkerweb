@@ -266,3 +266,4 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
     version = Column(String(32), default="1.6.0-beta", nullable=False)
+    ui_version = Column(String(32), default="1.6.0-beta", nullable=False)

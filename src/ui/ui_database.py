@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import Logger
-from os import sep
+from os import getenv, sep
 from os.path import join
 from sys import path as sys_path
 from time import sleep
@@ -37,12 +37,12 @@ class UIDatabase(Database):
 
         if inspector and len(inspector.get_table_names()):
             metadata = self.get_metadata()
-            db_version = metadata["version"]
+            db_version = metadata["ui_version"]
             if metadata["default"]:
                 db_version = "error"
 
             if db_version != bunkerweb_version:
-                self.logger.warning(f"Database version ({db_version}) is different from BunkerWeb version ({bunkerweb_version}), migrating ui tables ...")
+                self.logger.warning(f"UI tables version ({db_version}) is different from BunkerWeb version ({bunkerweb_version}), migrating them ...")
                 current_time = datetime.now()
                 error = True
                 while error:
@@ -103,9 +103,20 @@ class UIDatabase(Database):
                 self.logger.warning(f'Restoring data for ui table "{table_name}"')
                 self.logger.debug(f"Data: {data}")
                 for row in data:
+                    two_factor_enabled = getattr(row, "is_two_factor_enabled", None)
                     row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() if hasattr(row, column)}
 
-                    # TODO: Add special handling for newer UI version
+                    if table_name == "bw_ui_users" and two_factor_enabled is not None:
+                        message = "Detected old user model, as we implemented advanced security in the new model (custom salt for passwords, totp, etc.)"
+                        if row["method"] == "ui":
+                            self.logger.warning(message + ", you will have to re create the admin user.")
+                            continue
+                        elif getenv("PASSWORD_SALT", "").isdigit():
+                            self.logger.warning(message + " and you specified a custom PASSWORD_SALT, you will have to re create the admin user.")
+                            continue
+                        elif two_factor_enabled:
+                            self.logger.warning(message + ", you will have to re set the two factor authentication for the admin user.")
+                        row["admin"] = True
 
                     with self._db_session() as session:
                         try:
