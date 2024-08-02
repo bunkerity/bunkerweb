@@ -13,6 +13,7 @@ inputFolder = abspath("../client/dashboard/components")
 outputFolderMd = abspath("../client/.widgets-md")
 outputFolderPy = abspath("../client/.widgets")
 outputFolderWidgets = abspath("../client/widgets")
+components_path_to_exclude = ("\components\Icons\\", "components\Forms\Error\\", "\components\Dashboard\\", "\components\Builder\\")
 
 
 def run_command(command: List[str]) -> int:
@@ -60,23 +61,29 @@ def vue2js():
     Path(outputFolderMd).mkdir(parents=True, exist_ok=True)
     # Get every subfolders from the input folder
     for folder in Path(inputFolder).rglob("*"):
-        # Get only files
-        if folder.is_file() and folder.suffix == ".vue":
-            # Read the file content
-            data = folder.read_text()
-            # Get only the content between <script setup> and </script> tag
-            script = data.split("<script setup>")[1].split("</script>")[0]
-            # Get index of jsdoc comments
-            first_doc_index_start = script.index("/**")
-            first_doc_index_end = script.index("*/")
-            if first_doc_index_start != -1 and first_doc_index_end != -1:
-                # get content before first_doc_index_end
-                script = script[first_doc_index_start : first_doc_index_end + 2]
+        # Get only vue file
+        if not folder.is_file() or folder.suffix != ".vue":
+            continue
 
-            # Create a file on the output folder with the same name but with .js extension
-            fileName = folder.name.replace(".vue", ".js")
-            dest = Path(outputFolderMd) / fileName
-            dest.write_text(script)
+        # Exclude some files
+        if any(folder_path in str(folder) for folder_path in components_path_to_exclude):
+            continue
+
+        # Read the file content
+        data = folder.read_text()
+        # Get only the content between <script setup> and </script> tag
+        script = data.split("<script setup>")[1].split("</script>")[0]
+        # Get index of jsdoc comments
+        first_doc_index_start = script.index("/**")
+        first_doc_index_end = script.index("*/")
+        if first_doc_index_start != -1 and first_doc_index_end != -1:
+            # get content before first_doc_index_end
+            script = script[first_doc_index_start : first_doc_index_end + 2]
+
+        # Create a file on the output folder with the same name but with .js extension
+        fileName = folder.name.replace(".vue", ".js")
+        dest = Path(outputFolderMd) / fileName
+        dest.write_text(script)
 
 
 def js2md():

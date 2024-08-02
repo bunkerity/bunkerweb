@@ -7,73 +7,6 @@ def add_key_value(data, key, value, default):
         return
     data[key] = value
         
-def bans_widget(
-    builder: list
-    ): 
-    """    
-    This component is lightweight builder containing only the necessary components to create the bans page.
-    
-    PARAMETERS
-    
-    -   `builder` **array** Array of containers and widgets
-    
-    EXAMPLE
-    
-    [
-      {
-        type: "card",
-        gridLayoutClass: "transparent",
-        widgets: [
-                   { type: "MessageUnmatch",
-                     data: { text: "bans_not_found" }
-                  },
-       ],
-      },
-    ];
-    
-       """
-
-    data = {
-        "builder" : builder,
-       }
-
-
-    return { "type" : "Bans", "data" : data }
-        
-
-def box_widget(
-    iconClass: str = "icon-default",
-    color: str = "dark",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing box.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "dark")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Box", "data" : data }
-        
-
 def button_widget(
     text: str,
     id: str = "",
@@ -199,39 +132,6 @@ def buttongroup_widget(
     return { "type" : "Buttongroup", "data" : data }
         
 
-def carton_widget(
-    iconClass: str = "icon-default",
-    color: str = "orange-darker",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing carton box.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange-darker"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "orange-darker")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Carton", "data" : data }
-        
-
 def cell_widget(
     type: str,
     data: dict
@@ -269,39 +169,6 @@ def cell_widget(
 
 
     return { "type" : "Cell", "data" : data }
-        
-
-def check_widget(
-    iconClass: str = "icon-default",
-    color: str = "success",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing a check mark.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "success")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Check", "data" : data }
         
 
 def checkbox_widget(
@@ -431,39 +298,6 @@ def clipboard_widget(
     add_key_value(data, "copyClass", copyClass, "")
 
     return { "type" : "Clipboard", "data" : data }
-        
-
-def close_widget(
-    iconClass: str = "icon-default",
-    color: str = "dark",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing a close mark.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "dark")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Close", "data" : data }
         
 
 def combobox_widget(
@@ -601,105 +435,6 @@ def container_widget(
     add_key_value(data, "tag", tag, "div")
 
     return { "type" : "Container", "data" : data }
-        
-
-def core_widget(
-    iconClass: str = "icon-default",
-    color: str = "blue",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing core plugin.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "blue")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Core", "data" : data }
-        
-
-def cross_widget(
-    iconClass: str = "icon-default",
-    color: str = "red",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing a cross mark.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "red")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Cross", "data" : data }
-        
-
-def crown_widget(
-    iconClass: str = "icon-default",
-    color: str = "amber",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing crown.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"amber"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "amber")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Crown", "data" : data }
         
 
 def datepicker_widget(
@@ -843,176 +578,6 @@ def details_widget(
     return { "type" : "Details", "data" : data }
         
 
-def discord_widget(
-    iconClass: str = "icon-default",
-    color: str = "discord",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing Discord.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string**  (optional, default `"discord"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "discord")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Discord", "data" : data }
-        
-
-def disk_widget(
-    iconClass: str = "icon-default",
-    color: str = "orange",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing disk.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "orange")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Disk", "data" : data }
-        
-
-def disks_widget(
-    iconClass: str = "icon-default",
-    color: str = "orange",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing disks.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "orange")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Disks", "data" : data }
-        
-
-def document_widget(
-    iconClass: str = "icon-default",
-    color: str = "cyan",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing document.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'orange',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "cyan")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Document", "data" : data }
-        
-
-def dropdown_widget(
-    isValid: bool = False,
-    isValue: bool = False,
-    isValueTaken: bool = False,
-    errorClass: str = ""
-    ): 
-    """    
-    This component is used to display a feedback message on a dropdown field.
-    It is used with /Forms/Field components.
-    
-    PARAMETERS
-    
-    -   `isValid` **boolean** Check if the field is valid (optional, default `false`)
-    -   `isValue` **boolean** Check if the field has a value, display a different message if the field is empty or not (optional, default `false`)
-    -   `isValueTaken` **boolean** Check if input is already taken. Use with list input. (optional, default `false`)
-    -   `errorClass` **string** Additional class (optional, default `""`)
-    
-    EXAMPLE
-    
-    {
-       isValid: false,
-       isValue: false,
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "isValid", isValid, False)
-    add_key_value(data, "isValue", isValue, False)
-    add_key_value(data, "isValueTaken", isValueTaken, False)
-    add_key_value(data, "errorClass", errorClass, "")
-
-    return { "type" : "Dropdown", "data" : data }
-        
-
 def easy_widget(
     containerClass: str,
     columns: dict
@@ -1149,72 +714,6 @@ def editor_widget(
     add_key_value(data, "tabId", tabId, "")
 
     return { "type" : "Editor", "data" : data }
-        
-
-def exclamation_widget(
-    iconClass: str = "icon-default",
-    color: str = "red",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing exclamation.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "red")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Exclamation", "data" : data }
-        
-
-def eye_widget(
-    iconClass: str = "icon-default",
-    color: str = "cyan",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing eye.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'green',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "cyan")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Eye", "data" : data }
         
 
 def field_widget(
@@ -1376,219 +875,6 @@ def filter_widget(
     return { "type" : "Filter", "data" : data }
         
 
-def flag_widget(
-    iconClass: str = "icon-default",
-    color: str = "amber-dark",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing flag.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"amber-dark"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "amber-dark")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Flag", "data" : data }
-        
-
-def funnel_widget(
-    iconClass: str = "icon-default",
-    color: str = "red",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing funnel.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "red")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Funnel", "data" : data }
-        
-
-def gear_widget(
-    iconClass: str = "icon-default",
-    color: str = "dark",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing gear.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "dark")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Gear", "data" : data }
-        
-
-def github_widget(
-    iconClass: str = "icon-default",
-    color: str = "github",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing Github.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string**  (optional, default `"github"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "github")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Github", "data" : data }
-        
-
-def globalconfig_widget(
-    builder: list
-    ): 
-    """    
-    This component is lightweight builder containing only the necessary components to create the instances page.
-    
-    PARAMETERS
-    
-    -   `builder` **array** Array of containers and widgets
-    
-    EXAMPLE
-    
-    [
-      {
-        type: "card",
-        containerColumns: { pc: 12, tablet: 12, mobile: 12 },
-        widgets: [
-        {
-        type: "Title",
-        data : {
-          title: "dashboard_global_config",
-          type: "card"
-        },
-        },
-          {
-            type: "Templates",
-            data: {
-              title: "home_version",
-              subtitle: "home_all_features_available" if is_pro_version else "home_upgrade_pro",
-              subtitleColor: "success" is is_pro_version else "warning",
-              stat: "home_pro" if is_pro_version else "home_free",
-              iconName: "crown" if is_pro_version else "core",
-            },
-          },
-        ],
-      },
-    ];
-    
-       """
-
-    data = {
-        "builder" : builder,
-       }
-
-
-    return { "type" : "Globalconfig", "data" : data }
-        
-
-def globe_widget(
-    iconClass: str = "icon-default",
-    color: str = "blue",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing globe.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "blue")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Globe", "data" : data }
-        
-
 def grid_widget(
     gridClass: str = "items-start"
     ): 
@@ -1671,81 +957,6 @@ def gridlayout_widget(
     return { "type" : "Gridlayout", "data" : data }
         
 
-def home_widget(
-    builder: list
-    ): 
-    """    
-    This component is lightweight builder containing only the necessary components to create the home page.
-    
-    PARAMETERS
-    
-    -   `builder` **array** Array of containers and widgets
-    
-    EXAMPLE
-    
-    [
-    {
-      type: "card",
-      link : "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui"
-      containerColumns: { pc: 4, tablet: 6, mobile: 12 },
-      widgets: [
-        {
-          type: "Stat",
-          data: {
-            title: "home_version",
-            subtitle: "home_all_features_available" if is_pro_version else "home_upgrade_pro",
-            subtitleColor: "success" is is_pro_version else "warning",
-            stat: "home_pro" if is_pro_version else "home_free",
-            iconName: "crown" if is_pro_version else "core",
-          },
-        },
-      ],
-    },
-    ]
-    
-       """
-
-    data = {
-        "builder" : builder,
-       }
-
-
-    return { "type" : "Home", "data" : data }
-        
-
-def house_widget(
-    iconClass: str = "icon-default",
-    color: str = "cyan-darker",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing house.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"cyan-darker"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "cyan-darker")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "House", "data" : data }
-        
-
 def icons_widget(
     iconName: str,
     iconClass: str = "base",
@@ -1787,39 +998,6 @@ def icons_widget(
     add_key_value(data, "disabled", disabled, False)
 
     return { "type" : "Icons", "data" : data }
-        
-
-def info_widget(
-    iconClass: str = "icon-default",
-    color: str = "info",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing info.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"info"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "info")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Info", "data" : data }
         
 
 def input_widget(
@@ -1978,136 +1156,96 @@ def instance_widget(
     return { "type" : "Instance", "data" : data }
         
 
-def key_widget(
-    iconClass: str = "icon-default",
-    color: str = "",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing key.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `""`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Key", "data" : data }
-        
-
-def linkedin_widget(
-    iconClass: str = "icon-default",
-    color: str = "linkedin",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing Linkedin.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string**  (optional, default `"linkedin"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "linkedin")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Linkedin", "data" : data }
-        
-
 def list_widget(
-    iconClass: str = "icon-default",
-    color: str = "dark",
-    disabled: bool = False
+    popovers,
+    label: str,
+    name: str,
+    value: str,
+    id: str = "",
+    attrs: dict = {},
+    separator: str = " ",
+    maxBtnChars: str = "",
+    inpType: str = "list",
+    disabled: bool = False,
+    required: bool = False,
+    columns: dict = {"pc":"12","tablet":"12","mobile":"12"},
+    hideLabel: bool = False,
+    onlyDown: bool = False,
+    overflowAttrEl: bool = "",
+    containerClass: str = "",
+    inpClass: str = "",
+    headerClass: str = "",
+    tabId: Union[str, int] = ""
     ): 
     """    
-    This component is a svg icon representing list.
+    This component is used display list of values in a dropdown, remove or add an item in an easy way.
+    We can also add popover to display more information.
     
     PARAMETERS
     
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"dark"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
+    -   `id` **string** Unique id (optional, default `uuidv4()`)
+    -   `label` **string** The label of the field. Can be a translation key or by default raw text.
+    -   `name` **string** The name of the field. Case no label, this is the fallback. Can be a translation key or by default raw text.
+    -   `value` **string**;
+    -   `attrs` **object** Additional attributes to add to the field (optional, default `{}`)
+    -   `separator` **string** Separator to split the value, by default it is a space (optional, default `" "`)
+    -   `maxBtnChars` **string** Max char to display in the dropdown button handler. (optional, default `""`)
+    -   `popovers` **array?** List of popovers to display more information
+    -   `inpType` **string** The type of the field, useful when we have multiple fields in the same container to display the right field (optional, default `"list"`)
+    -   `disabled` **boolean**  (optional, default `false`)
+    -   `required` **boolean**  (optional, default `false`)
+    -   `columns` **object** Field has a grid system. This allow to get multiple field in the same row if needed. (optional, default `{"pc":"12","tablet":"12","mobile":"12"}`)
+    -   `hideLabel` **boolean**  (optional, default `false`)
+    -   `onlyDown` **boolean** If the dropdown should stay down (optional, default `false`)
+    -   `overflowAttrEl` **boolean** Attribute the element has to check for overflow (optional, default `""`)
+    -   `containerClass` **string**  (optional, default `""`)
+    -   `inpClass` **string**  (optional, default `""`)
+    -   `headerClass` **string**  (optional, default `""`)
+    -   `tabId` **(string | number)** The tabindex of the field, by default it is the contentIndex (optional, default `contentIndex`)
     
     EXAMPLE
     
     {
-       color: 'info',
+       id: 'test-input',
+       value: 'yes no maybe',
+       name: 'test-list',
+       label: 'Test list',
+       inpType: "list",
+       popovers : [
+         {
+           text: "This is a popover text",
+           iconName: "info",
+         },
+       ]
      }
     
        """
 
     data = {
+        "popovers" : popovers,
+        "label" : label,
+        "name" : name,
+        "value" : value,
        }
 
     # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "dark")
+    add_key_value(data, "id", id, "")
+    add_key_value(data, "attrs", attrs, {})
+    add_key_value(data, "separator", separator, " ")
+    add_key_value(data, "maxBtnChars", maxBtnChars, "")
+    add_key_value(data, "inpType", inpType, "list")
     add_key_value(data, "disabled", disabled, False)
+    add_key_value(data, "required", required, False)
+    add_key_value(data, "columns", columns, {"pc":"12","tablet":"12","mobile":"12"})
+    add_key_value(data, "hideLabel", hideLabel, False)
+    add_key_value(data, "onlyDown", onlyDown, False)
+    add_key_value(data, "overflowAttrEl", overflowAttrEl, "")
+    add_key_value(data, "containerClass", containerClass, "")
+    add_key_value(data, "inpClass", inpClass, "")
+    add_key_value(data, "headerClass", headerClass, "")
+    add_key_value(data, "tabId", tabId, "")
 
     return { "type" : "List", "data" : data }
-        
-
-def lock_widget(
-    iconClass: str = "icon-default",
-    color: str = "yellow",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing lock.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, yellow, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"yellow"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "yellow")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Lock", "data" : data }
         
 
 def modal_widget(
@@ -2392,126 +1530,6 @@ def pairs_widget(
     return { "type" : "Pairs", "data" : data }
         
 
-def pen_widget(
-    iconClass: str = "icon-default",
-    color: str = "orange",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing pen.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"orange"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-      color: 'orange',
-    }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "orange")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Pen", "data" : data }
-        
-
-def plugin_widget(
-    builder: list
-    ): 
-    """    
-    This component is lightweight builder containing only the necessary components to create the plugins page.
-    
-    PARAMETERS
-    
-    -   `builder` **array** Array of containers and widgets
-    
-    EXAMPLE
-    
-    [
-      {
-        type: "card",
-        containerColumns: { pc: 12, tablet: 12, mobile: 12 },
-        widgets: [
-        {
-        type: "Title",
-        data : {
-          title: "dashboard_plugins",
-          type: "card"
-        },
-        },
-          {
-            type: "ListDetails",
-            data:   {
-                text: "Plugin name",
-                popovers: [
-                  {
-                    text: "This is a popover text",
-                    iconName: "info",
-                  },
-                  {
-                    text: "This is a popover text",
-                    iconName: "info",
-                  },
-                ],
-              },
-          },
-        ],
-      },
-    ];
-    
-       """
-
-    data = {
-        "builder" : builder,
-       }
-
-
-    return { "type" : "Plugin", "data" : data }
-        
-
-def plus_widget(
-    iconClass: str = "icon-default",
-    color: str = "success",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing addition (+).
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "success")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Plus", "data" : data }
-        
-
 def popover_widget(
     text: str,
     color: str,
@@ -2602,39 +1620,6 @@ def popovergroup_widget(
     return { "type" : "Popovergroup", "data" : data }
         
 
-def puzzle_widget(
-    iconClass: str = "icon-default",
-    color: str = "yellow",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing puzzle.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"yellow"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "yellow")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Puzzle", "data" : data }
-        
-
 def raw_widget(
     template: dict,
     containerClass: str,
@@ -2669,151 +1654,6 @@ def raw_widget(
 
 
     return { "type" : "Raw", "data" : data }
-        
-
-def rawmode_widget(
-    builder: list
-    ): 
-    """    
-    This component is lightweight builder containing only the necessary components to create the raw page.
-    
-    PARAMETERS
-    
-    -   `builder` **array** Array of containers and widgets
-    
-    EXAMPLE
-    
-    [
-        {
-          type: "card",
-          containerColumns: { pc: 12, tablet: 12, mobile: 12 },
-          widgets: [
-                    {
-                      type: "Title",
-                      data : {
-                        title: "dashboard_global_config",
-                        type: "card"
-                      },
-                    },
-                    {
-                      type: "Raw",
-                      data: {
-                        template: {},
-                      },
-                    },
-          ],
-        },
-    ];
-    
-       """
-
-    data = {
-        "builder" : builder,
-       }
-
-
-    return { "type" : "Rawmode", "data" : data }
-        
-
-def redirect_widget(
-    iconClass: str = "icon-default",
-    color: str = "blue",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing redirect.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "blue")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Redirect", "data" : data }
-        
-
-def reports_widget(
-    builder: list
-    ): 
-    """    
-    This component is lightweight builder containing only the necessary components to create the reports page.
-    
-    PARAMETERS
-    
-    -   `builder` **array** Array of containers and widgets
-    
-    EXAMPLE
-    
-    [
-      {
-        type: "card",
-        gridLayoutClass: "transparent",
-        widgets: [
-                  {
-                    type: "MessageUnmatch",
-                    data: { text: "reports_not_found" }
-                  }
-        ],
-      },
-    ];
-    
-       """
-
-    data = {
-        "builder" : builder,
-       }
-
-
-    return { "type" : "Reports", "data" : data }
-        
-
-def search_widget(
-    iconClass: str = "icon-default",
-    color: str = "info",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing search.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"info"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "info")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Search", "data" : data }
         
 
 def select_widget(
@@ -2915,360 +1755,6 @@ def select_widget(
     add_key_value(data, "tabId", tabId, "")
 
     return { "type" : "Select", "data" : data }
-        
-
-def services_widget(
-    builder: list
-    ): 
-    """    
-    This component is lightweight builder containing only the necessary components to create the services page.
-    
-    PARAMETERS
-    
-    -   `builder` **array** Array of containers and widgets
-    
-    EXAMPLE
-    
-    [
-        {
-            "type": "card",
-            "containerColumns": {
-                "pc": 12,
-                "tablet": 12,
-                "mobile": 12
-            },
-            "widgets": [
-                {
-                    "type": "Title",
-                    "data": {
-                        "title": "services_title"
-                    }
-                },
-                {
-                    "type": "Table",
-                    "data": {
-                        "title": "services_table_title",
-                        "minWidth": "lg",
-                        "header": [
-                            "services_table_name",
-                            "services_table_method",
-                            "services_table_settings",
-                            "services_table_manage",
-                            "services_table_is_draft",
-                            "services_table_delete"
-                        ],
-                        "positions": [
-                            2,
-                            2,
-                            2,
-                            2,
-                            2,
-                            2
-                        ],
-                        "items": [
-                            [
-                                {
-                                    "name": "app1.example.com",
-                                    "type": "Text",
-                                    "data": {
-                                        "text": "app1.example.com"
-                                    }
-                                },
-                                {
-                                    "method": "scheduler",
-                                    "type": "Text",
-                                    "data": {
-                                        "text": "scheduler"
-                                    }
-                                },
-                                {
-                                    "type": "Button",
-                                    "data": {
-                                        "id": "open-modal-settings-0",
-                                        "text": "settings",
-                                        "hideText": false,
-                                        " color": "info",
-                                        "size": "normal",
-                                        "iconName": "settings"
-                                    }
-                                },
-                                {
-                                    "type": "Button",
-                                    "data": {
-                                        "attrs": {
-                                            "data-server-name": "app1.example.com"
-                                        },
-                                        "id": "open-modal-manage-0",
-                                        "text": "manage",
-                                        "hideText": false,
-                                        " color": "green",
-                                        "size": "normal",
-                                        "iconName": "manage"
-                                    }
-                                },
-                                {
-                                    "type": "Button",
-                                    "data": {
-                                        "attrs": {
-                                            "data-server-name": "app1.example.com",
-                                            "data-is-draft": "no"
-                                        },
-                                        "id": "open-modal-draft-0",
-                                        "text": "online",
-                                        "hideText": false,
-                                        " color": "cyan",
-                                        "size": "normal",
-                                        "iconName": "online"
-                                    }
-                                },
-                                {
-                                    "type": "Button",
-                                    "data": {
-                                        "attrs": {
-                                            "data-server-name": "app1.example.com"
-                                        },
-                                        "id": "open-modal-delete-0",
-                                        "text": "delete",
-                                        "disabled": true,
-                                        "hideText": false,
-                                        " color": "red",
-                                        "size": "normal",
-                                        "iconName": "trash"
-                                    }
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "www.example.com",
-                                    "type": "Text",
-                                    "data": {
-                                        "text": "www.example.com"
-                                    }
-                                },
-                                {
-                                    "method": "scheduler",
-                                    "type": "Text",
-                                    "data": {
-                                        "text": "scheduler"
-                                    }
-                                },
-                                {
-                                    "type": "Button",
-                                    "data": {
-                                        "id": "open-modal-settings-1",
-                                        "text": "settings",
-                                        "hideText": false,
-                                        " color": "info",
-                                        "size": "normal",
-                                        "iconName": "settings"
-                                    }
-                                },
-                                {
-                                    "type": "Button",
-                                    "data": {
-                                        "attrs": {
-                                            "data-server-name": "www.example.com"
-                                        },
-                                        "id": "open-modal-manage-1",
-                                        "text": "manage",
-                                        "hideText": false,
-                                        " color": "green",
-                                        "size": "normal",
-                                        "iconName": "manage"
-                                    }
-                                },
-                                {
-                                    "type": "Button",
-                                    "data": {
-                                        "attrs": {
-                                            "data-server-name": "www.example.com",
-                                            "data-is-draft": "no"
-                                        },
-                                        "id": "open-modal-draft-1",
-                                        "text": "online",
-                                        "hideText": false,
-                                        " color": "cyan",
-                                        "size": "normal",
-                                        "iconName": "online"
-                                    }
-                                },
-                                {
-                                    "type": "Button",
-                                    "data": {
-                                        "attrs": {
-                                            "data-server-name": "www.example.com"
-                                        },
-                                        "id": "open-modal-delete-1",
-                                        "text": "delete",
-                                        "disabled": true,
-                                        "hideText": false,
-                                        " color": "red",
-                                        "size": "normal",
-                                        "iconName": "trash"
-                                    }
-                                }
-                            ]
-                        ],
-                        "filters": [
-                            {
-                                "filter": "table",
-                                "filterName": "keyword",
-                                "type": "keyword",
-                                "value": "",
-                                "keys": [
-                                    "name"
-                                ],
-                                "field": {
-                                    "id": "services-keyword",
-                                    "value": "",
-                                    "type": "text",
-                                    "name": "services-keyword",
-                                    "label": "services_search",
-                                    "placeholder": "inp_keyword",
-                                    "isClipboard": false,
-                                    "popovers": [
-                                        {
-                                            "text": "services_search_desc",
-                                            "iconName": "info"
-                                        }
-                                    ],
-                                    "columns": {
-                                        "pc": 3,
-                                        "tablet": 4,
-                                        "mobile": 12
-                                    }
-                                }
-                            },
-                            {
-                                "filter": "table",
-                                "filterName": "method",
-                                "type": "select",
-                                "value": "all",
-                                "keys": [
-                                    "method"
-                                ],
-                                "field": {
-                                    "id": "services-methods",
-                                    "value": "all",
-                                    "values": [
-                                        "scheduler"
-                                    ],
-                                    "name": "services-methods",
-                                    "onlyDown": true,
-                                    "label": "services_methods",
-                                    "popovers": [
-                                        {
-                                            "text": "services_methods_desc",
-                                            "iconName": "info"
-                                        }
-                                    ],
-                                    "columns": {
-                                        "pc": 3,
-                                        "tablet": 4,
-                                        "mobile": 12
-                                    }
-                                }
-                            },
-                            {
-                                "filter": "table",
-                                "filterName": "draft",
-                                "type": "select",
-                                "value": "all",
-                                "keys": [
-                                    "draft"
-                                ],
-                                "field": {
-                                    "id": "services-draft",
-                                    "value": "all",
-                                    "values": [
-                                        "all",
-                                        "online",
-                                        "draft"
-                                    ],
-                                    "name": "services-draft",
-                                    "onlyDown": true,
-                                    "label": "services_draft",
-                                    "popovers": [
-                                        {
-                                            "text": "services_draft_desc",
-                                            "iconName": "info"
-                                        }
-                                    ],
-                                    "columns": {
-                                        "pc": 3,
-                                        "tablet": 4,
-                                        "mobile": 12
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        }
-    ]
-    
-       """
-
-    data = {
-        "builder" : builder,
-       }
-
-
-    return { "type" : "Services", "data" : data }
-        
-
-def settings_widget(
-    iconClass: str = "icon-default",
-    color: str = "blue-darker",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing settings.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"blue-darker"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "blue-darker")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Settings", "data" : data }
-        
-
-def setup_widget(
-    builder: list
-    ): 
-    """    
-    This component is lightweight builder containing only the necessary components to create the setup page.
-    
-    PARAMETERS
-    
-    -   `builder` **array** Array of containers and widgets
-    
-       """
-
-    data = {
-        "builder" : builder,
-       }
-
-
-    return { "type" : "Setup", "data" : data }
         
 
 def stat_widget(
@@ -3499,39 +1985,6 @@ def table_widget(
     return { "type" : "Table", "data" : data }
         
 
-def task_widget(
-    iconClass: str = "icon-default",
-    color: str = "success",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing task.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"success"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "success")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Task", "data" : data }
-        
-
 def templates_widget(
     templates: dict
     ): 
@@ -3661,105 +2114,6 @@ def title_widget(
     return { "type" : "Title", "data" : data }
         
 
-def trash_widget(
-    iconClass: str = "icon-default",
-    color: str = "red",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing trash.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"red"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "red")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Trash", "data" : data }
-        
-
-def trespass_widget(
-    iconClass: str = "icon-default",
-    color: str = "error",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing no trespassing.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, dark, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"error"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "error")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Trespass", "data" : data }
-        
-
-def twiiter_widget(
-    iconClass: str = "icon-default",
-    color: str = "twitter",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing Twiiter.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string**  (optional, default `"twitter"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "twitter")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Twiiter", "data" : data }
-        
-
 def unmatch_widget(
     text: str,
     unmatchClass: str = ""
@@ -3789,37 +2143,4 @@ def unmatch_widget(
     add_key_value(data, "unmatchClass", unmatchClass, "")
 
     return { "type" : "Unmatch", "data" : data }
-        
-
-def wire_widget(
-    iconClass: str = "icon-default",
-    color: str = "green",
-    disabled: bool = False
-    ): 
-    """    
-    This component is a svg icon representing wire.
-    
-    PARAMETERS
-    
-    -   `iconClass` **string** The class of the icon. (optional, default `"icon-default"`)
-    -   `color` **string** The color of the icon between some tailwind css available colors (purple, green, red, orange, blue, yellow, gray, green, amber, emerald, teal, indigo, cyan, sky, pink...). Darker colors are also available using the base color and adding '-darker' (e.g. 'red-darker'). (optional, default `"green"`)
-    -   `disabled` **boolean** If true, the icon will be disabled. (optional, default `false`)
-    
-    EXAMPLE
-    
-    {
-       color: 'info',
-     }
-    
-       """
-
-    data = {
-       }
-
-    # List of params that will be add only if not default value
-    add_key_value(data, "iconClass", iconClass, "icon-default")
-    add_key_value(data, "color", color, "green")
-    add_key_value(data, "disabled", disabled, False)
-
-    return { "type" : "Wire", "data" : data }
         
