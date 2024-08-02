@@ -162,6 +162,7 @@ class JobScheduler(ApiCaller):
         self.__logger.info(f"Executing job {name} from plugin {plugin} ...")
         success = True
         ret = -1
+        start_date = datetime.now()
         try:
             proc = run(join(path, "jobs", file), stdin=DEVNULL, stderr=STDOUT, env=self.__env, check=False)
             ret = proc.returncode
@@ -170,6 +171,7 @@ class JobScheduler(ApiCaller):
             self.__logger.error(f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}")
             with self.__thread_lock:
                 self.__job_success = False
+        end_date = datetime.now()
 
         if ret == 1:
             with self.__thread_lock:
@@ -181,18 +183,17 @@ class JobScheduler(ApiCaller):
             with self.__thread_lock:
                 self.__job_success = False
 
-        Thread(target=self.__update_job, args=(plugin, name, success)).start()
+        Thread(target=self.__add_job_run, args=(name, success, start_date, end_date)).start()
 
         return ret
 
-    def __update_job(self, plugin: str, name: str, success: bool):
+    def __add_job_run(self, name: str, success: bool, start_date: datetime, end_date: datetime = None):
         with self.__thread_lock:
-            err = self.db.update_job(plugin, name, success)
+            err = self.db.add_job_run(name, success, start_date, end_date)
 
         if not err:
-            self.__logger.info(f"Successfully updated database for the job {name} from plugin {plugin}")
-        else:
-            self.__logger.warning(f"Failed to update database for the job {name} from plugin {plugin}: {err}")
+            return self.__logger.info(f"Successfully added job run for the job {name}")
+        self.__logger.warning(f"Failed to add job run for the job {name}: {err}")
 
     def setup(self):
         for plugin, jobs in self.__jobs.items():

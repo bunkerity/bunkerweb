@@ -152,11 +152,10 @@ class Jobs(Base):
     file_name = Column(String(256), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
     reload = Column(Boolean, default=False, nullable=False)
-    success = Column(Boolean, nullable=True)
-    last_run = Column(DateTime, nullable=True)
 
     plugin = relationship("Plugins", back_populates="jobs")
     cache = relationship("Jobs_cache", back_populates="job", cascade="all")
+    runs = relationship("Jobs_runs", back_populates="job", cascade="all")
 
 
 class Plugin_pages(Base):
@@ -164,6 +163,7 @@ class Plugin_pages(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    # TODO: replace with a raw data that gets extracted by the plugin
     template_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     template_checksum = Column(String(128), nullable=False)
     actions_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
@@ -187,6 +187,18 @@ class Jobs_cache(Base):
 
     job = relationship("Jobs", back_populates="cache")
     service = relationship("Services", back_populates="jobs_cache")
+
+
+class Jobs_runs(Base):
+    __tablename__ = "bw_jobs_runs"
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False)
+    success = Column(Boolean, nullable=True, default=False)
+    start_date = Column(DateTime(), nullable=False)
+    end_date = Column(DateTime(), nullable=True, server_default=func.now())
+
+    job = relationship("Jobs", back_populates="runs")
 
 
 class Custom_configs(Base):
