@@ -506,16 +506,21 @@ class Database:
 
         inspector = inspect(self.sql_engine)
         db_version = None
+        db_ui_version = bunkerweb_version
         has_all_tables = True
         old_data = {}
 
         if inspector and len(inspector.get_table_names()):
             metadata = self.get_metadata()
             db_version = metadata["version"]
+            db_ui_version = metadata["ui_version"]
             if metadata["default"]:
                 db_version = "error"
 
             if db_version != bunkerweb_version:
+                if db_ui_version != bunkerweb_version:
+                    db_ui_version = db_version
+
                 self.logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
                 current_time = datetime.now()
                 error = True
@@ -1045,10 +1050,10 @@ class Database:
                             if table_name == "bw_metadata":
                                 existing_row = session.query(Metadata).filter_by(id=1).first()
                                 if not existing_row:
-                                    session.add(Metadata(**(row | {"ui_version": db_version})))
+                                    session.add(Metadata(**(row | {"ui_version": db_ui_version})))
                                     session.commit()
                                     continue
-                                session.query(Metadata).filter_by(id=1).update(row | {"ui_version": db_version})
+                                session.query(Metadata).filter_by(id=1).update(row | {"ui_version": db_ui_version})
                                 continue
 
                             # Check if the row already exists in the table

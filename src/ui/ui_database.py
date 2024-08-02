@@ -15,6 +15,8 @@ from sqlalchemy import MetaData, inspect, text
 from sqlalchemy.exc import IntegrityError
 
 from Database import Database  # type: ignore
+from model import Metadata  # type: ignore
+
 from models import Base, Users, Roles, RolesUsers, UserRecoveryCodes, RolesPermissions, Permissions
 
 
@@ -131,6 +133,15 @@ class UIDatabase(Database):
                                 self.logger.error(f"Error when trying to restore data for table {table_name}: {e}")
                                 continue
                             self.logger.debug(e)
+
+        with self._db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+                if metadata:
+                    metadata.ui_version = bunkerweb_version
+                    session.commit()
+            except BaseException as e:
+                self.logger.error(f"Error when trying to update ui_version field in metadata: {e}")
 
         return True, ""
 
