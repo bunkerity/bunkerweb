@@ -1,0 +1,15 @@
+{{- if and .Values.db.enabled .Values.db.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bunkerweb-db
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  storageClassName: {{ .Values.db.persistence.storageClassName }}
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.db.persistence.storageRequest | quote }}
+{{- end }}

@@ -1,0 +1,15 @@
+{{- if .Values.clamav.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: bunkerweb-clamav
+  labels:
+  {{- include "bunkerweb.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.clamav.service.type }}
+  selector:
+    app: bunkerweb-clamav
+  {{- include "bunkerweb.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.clamav.service.ports | toYaml | nindent 2 }}
+{{- end }}
