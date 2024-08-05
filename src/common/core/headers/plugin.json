@@ -90,21 +90,12 @@
     },
     "PERMISSIONS_POLICY": {
       "context": "multisite",
-      "default": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",
+      "default": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()",
       "help": "Value for the Permissions-Policy header.",
       "id": "permissions-policy",
       "label": "Permissions-Policy",
       "regex": "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
       "type": "text"
-    },
-    "DISABLE_FLOC": {
-      "context": "multisite",
-      "default": "yes",
-      "help": "Disable FLoC (Federated Learning of Cohorts) by adding the interest-cohort=() directive to the Permissions-Policy header if it is not already present.",
-      "id": "disable-floc",
-      "label": "Disable FLoC (Federated Learning of Cohorts)",
-      "regex": "^(yes|no)$",
-      "type": "check"
     },
     "X_FRAME_OPTIONS": {
       "context": "multisite",
