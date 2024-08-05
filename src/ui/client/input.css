@@ -32,6 +32,14 @@
   word-break: break-word;
 }
 
+.uppercase {
+  text-transform: uppercase !important;
+}
+
+.lowercase {
+  text-transform: lowercase !important;
+}
+
 /* LOGIN */
 
 .login-main {
@@ -1210,35 +1218,35 @@ body {
 /* TITLE */
 
 .title-card {
-  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
+  @apply break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
 }
 
 .title-instance {
-  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
+  @apply break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-[#344767] tracking-normal;
 }
 
 .title-void {
-  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold  dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-white tracking-normal;
+  @apply break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold  dark:text-white/90 transition duration-300 ease-in-out text-[1.3rem] text-white tracking-normal;
 }
 
 .title-form {
-  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
+  @apply break-word w-full max-w-[80%] sm:max-w-[800px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
 }
 
 .title-content {
-  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12  font-bold dark:text-white/90 transition duration-300 ease-in-out text-lg text-[#344767];
+  @apply break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12  font-bold dark:text-white/90 transition duration-300 ease-in-out text-lg text-[#344767];
 }
 
 .title-min {
-  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12  font-bold dark:text-white/90 transition duration-300 ease-in-out text-[0.95rem] text-[#344767];
+  @apply break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12  font-bold dark:text-white/90 transition duration-300 ease-in-out text-[0.95rem] text-[#344767];
 }
 
 .title-stat {
-  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[600px] col-span-12 font-sans text-sm font-semibold leading-normal uppercase dark:text-white/90 text-[#344767];
+  @apply break-word w-full max-w-[80%] sm:max-w-[600px] col-span-12 font-sans text-sm font-semibold leading-normal uppercase dark:text-white/90 text-[#344767];
 }
 
 .title-modal {
-  @apply capitalize-first break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
+  @apply break-word w-full max-w-[80%] sm:max-w-[700px] col-span-12 font-bold dark:text-white/90 transition duration-300 ease-in-out text-xl text-[#344767] tracking-normal;
 }
 
 .no-subtitle.title-modal {
@@ -1274,31 +1282,31 @@ body {
 /* SUBTITLE */
 
 .subtitle-card {
-  @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0 lowercase;
+  @apply break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0;
 }
 
 .subtitle-void {
-  @apply capitalize-first break-word text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0 lowercase;
+  @apply break-word text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0;
 }
 
 .subtitle-form {
-  @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.05rem] mb-0 lowercase;
+  @apply break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.05rem] mb-0;
 }
 
 .subtitle-content {
-  @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-[0.975rem] mb-0 lowercase;
+  @apply break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-[0.975rem] mb-0;
 }
 
 .subtitle-min {
-  @apply capitalize-first break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-[0.9rem] mb-0 lowercase;
+  @apply break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[700px] leading-normal text-[0.9rem] mb-0;
 }
 
 .subtitle-stat {
-  @apply capitalize-first break-word dark:text-gray-300  col-span-12 break-words w-full max-w-[80%] sm:max-w-[600px] font-bold leading-normal text-sm mb-0 lowercase;
+  @apply break-word dark:text-gray-300  col-span-12 break-words w-full max-w-[80%] sm:max-w-[600px] font-bold leading-normal text-sm mb-0;
 }
 
 .subtitle-multiple {
-  @apply capitalize-first break-word dark:text-gray-300  col-span-12 break-words max-w-[80%] sm:max-w-[600px] font-bold leading-normal text-sm mb-0 lowercase;
+  @apply capitalize-first break-word dark:text-gray-300  col-span-12 break-words max-w-[80%] sm:max-w-[600px] font-bold leading-normal text-sm mb-0;
 }
 
 /* STAT COMPONENT */

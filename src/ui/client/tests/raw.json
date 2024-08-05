@@ -8,6 +8,22 @@
         },
         "widgets": [
             {
+                "type": "Title",
+                "data": {
+                    "title": "app1.example.com",
+                    "type": "container",
+                    "lowercase": true
+                }
+            },
+            {
+                "type": "Subtitle",
+                "data": {
+                    "subtitle": "services_manage_subtitle",
+                    "type": "container",
+                    "subtitleClass": "mb-4"
+                }
+            },
+            {
                 "type": "Templates",
                 "data": {
                     "templates": {

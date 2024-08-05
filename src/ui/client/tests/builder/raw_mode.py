@@ -17,6 +17,18 @@ def raw_mode_builder(templates: list[dict], plugins: list, global_config: dict, 
             "containerColumns": {"pc": 12, "tablet": 12, "mobile": 12},
             "widgets": [
                 {
+                    "type": "Title",
+                    "data": {
+                        "title": service_name,
+                        "type": "container",
+                        "lowercase": True,
+                    },
+                },
+                {
+                    "type": "Subtitle",
+                    "data": {"subtitle": "services_manage_subtitle", "type": "container", "subtitleClass": "mb-4"},
+                },
+                {
                     "type": "Templates",
                     "data": {
                         "templates": get_forms(templates, plugins, settings, ("raw",)),

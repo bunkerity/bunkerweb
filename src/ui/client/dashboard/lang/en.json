@@ -296,5 +296,7 @@
   "services_settings_table_name": "Plugin",
   "services_settings_table_status": "Status",
   "services_mode_title": "Service mode",
-  "services_mode_subtitle": "Manage your service settings."
+  "services_mode_subtitle": "Manage your service settings.",
+  "services_manage_title": "Service {service_name}",
+  "services_manage_subtitle": "Manage your service settings."
 }

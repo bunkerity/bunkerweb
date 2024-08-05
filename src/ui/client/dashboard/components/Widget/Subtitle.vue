@@ -17,6 +17,7 @@ import { computed, onMounted, reactive, ref } from "vue";
  *  @param {string} [color=""] - The color of the subtitle between error, success, warning, info or tailwind color
  *  @param {boolean} [bold=false] - If the subtitle should be bold or not.
  *  @param {boolean} [uppercase=false] - If the subtitle should be uppercase or not.
+ *  @param {boolean} [lowercase=false] - If the subtitle should be lowercase or not.
  *  @param {string} [subtitleClass=""] - Additional class, useful when component is used directly on a grid system
  */
 
@@ -46,6 +47,11 @@ const props = defineProps({
     default: false,
   },
   uppercase: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  lowercase: {
     type: Boolean,
     required: false,
     default: false,
@@ -89,7 +95,11 @@ onMounted(() => {
       props.color,
       'text-el',
       props.bold ? 'bold' : '',
-      props.uppercase ? 'uppercase' : '',
+      props.uppercase
+        ? 'uppercase'
+        : props.lowercase
+        ? 'lowercase'
+        : 'capitalize-first',
       props.subtitleClass,
     ]"
   >
