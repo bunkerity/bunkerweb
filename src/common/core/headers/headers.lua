@@ -99,7 +99,11 @@ function headers:header()
 				elseif header == "Permissions-Policy" then
 					ngx_header[header] = self.variables[variable]
 					if self.variables["DISABLE_FLOC"] == "yes" and not ngx_header[header]:find("interest-cohort") then
-						ngx_header[header] = ngx_header[header] .. ", interest-cohort=()"
+						if ngx_header[header] == nil then
+							ngx_header[header] = "interest-cohort=()"
+						else
+							ngx_header[header] = ngx_header[header] .. ", interest-cohort=()"
+						end
 					end
 				else
 					ngx_header[header] = self.variables[variable]
