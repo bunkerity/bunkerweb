@@ -61,6 +61,15 @@
       "regex": "^\\d+$",
       "type": "text"
     },
+    "LIMIT_CONN_MAX_HTTP3": {
+      "context": "multisite",
+      "default": "100",
+      "help": "Maximum number of streams per IP when using HTTP/3 protocol.",
+      "id": "limit-conn-max-http3",
+      "label": "Maximum number of HTTP/3 streams",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
     "LIMIT_CONN_MAX_STREAM": {
       "context": "multisite",
       "default": "10",
