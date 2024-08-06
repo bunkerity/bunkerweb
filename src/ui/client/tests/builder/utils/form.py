@@ -24,7 +24,7 @@ def get_service_settings(service_name: str, global_config: dict, total_config: d
     return global_config
 
 
-def get_forms(templates: list = [], plugins: list = [], settings: dict = {}, render_forms: tuple = ("advanced", "easy", "raw")) -> dict:
+def get_forms(templates: list = [], plugins: list = [], settings: dict = {}, render_forms: tuple = ("advanced", "easy", "raw"), is_new: bool = False) -> dict:
     """
     Will generate every needed form using templates, plugins and settings.
     We will run on each plugins, set template value if one, and override by the custom settings value if exists.
@@ -36,18 +36,18 @@ def get_forms(templates: list = [], plugins: list = [], settings: dict = {}, ren
 
     for template in templates:
         if "advanced" in forms:
-            forms["advanced"][template.get("name")] = set_advanced(template, plugins, settings)
+            forms["advanced"][template.get("name")] = set_advanced(template, plugins, settings, is_new)
 
         if "raw" in forms:
-            forms["raw"][template.get("name")] = set_raw(template, plugins, settings)
+            forms["raw"][template.get("name")] = set_raw(template, plugins, settings, is_new)
 
         if "easy" in forms:
-            forms["easy"][template.get("name")] = set_easy(template, plugins, settings)
+            forms["easy"][template.get("name")] = set_easy(template, plugins, settings, is_new)
 
     return forms
 
 
-def set_easy(template: list, plugins_base: list, settings: dict) -> dict:
+def set_easy(template: list, plugins_base: list, settings: dict, is_new: bool) -> dict:
     """
     Prepare the easy form based on the template and plugins data.
     We need to loop on each steps and prepare settings and configs for each step.
@@ -77,14 +77,7 @@ def set_easy(template: list, plugins_base: list, settings: dict) -> dict:
 
             plugin_setting = copy.deepcopy(plugin.get("settings").get(setting))
 
-            plugin_setting = format_setting(
-                setting,
-                plugin_setting,
-                len(step_settings),
-                loop_id,
-                template_settings,
-                settings,
-            )
+            plugin_setting = format_setting(setting, plugin_setting, len(step_settings), loop_id, template_settings, settings, is_new)
 
             step_settings_output[setting] = plugin_setting
 
@@ -93,7 +86,7 @@ def set_easy(template: list, plugins_base: list, settings: dict) -> dict:
     return steps
 
 
-def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
+def set_raw(template: list, plugins_base: list, settings: dict, is_new: bool) -> dict:
     """
     Set the raw form based on the template and plugins data.
     It consists of keeping only the value or default value for each plugin settings.
@@ -128,15 +121,17 @@ def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
                 if val != default_val:
                     raw_value = val
 
+                if setting == "SERVER_NAME" and is_new:
+                    raw_value = ""
+
             # Add value only if exists
             if raw_value:
                 raw_settings[setting] = raw_value
 
-    print("raw_settings", raw_settings, flush=True)
     return raw_settings
 
 
-def set_advanced(template: list, plugins_base: list, settings: dict) -> dict:
+def set_advanced(template: list, plugins_base: list, settings: dict, is_new: bool) -> dict:
     """
     Set the advanced form based on the template and plugins data.
     It consists of formatting each plugin settings to be used in the advanced form.
@@ -150,14 +145,7 @@ def set_advanced(template: list, plugins_base: list, settings: dict) -> dict:
         total_settings = len(plugin.get("settings"))
         for setting, value in plugin.get("settings").items():
             loop_id += 1
-            value = format_setting(
-                setting,
-                value,
-                total_settings,
-                loop_id,
-                template_settings,
-                settings,
-            )
+            value = format_setting(setting, value, total_settings, loop_id, template_settings, settings, is_new)
 
     set_multiples(template, plugins, settings)
 
@@ -352,6 +340,7 @@ def format_setting(
     loop_id: Union[str, int],
     template_settings: dict,
     settings: dict,
+    is_new: bool = False,
 ) -> dict:
     """
     Format a setting in order to be used with form builder.
@@ -395,6 +384,9 @@ def format_setting(
         # Update value or set default as value
         setting_value["value"] = template_settings.get(setting_name, setting_value.get("default"))
 
+    if setting_name == "SERVER_NAME" and is_new:
+        setting_value["value"] = ""
+
     # Then override by service settings if not a multiple
     # Case multiple, we need to keep the default value and override only each multiple group
     if setting_name in settings and not "multiple" in setting_value:
@@ -406,7 +398,7 @@ def format_setting(
 
     # Then override by service settings
     if setting_name in settings:
-        setting_value["disabled"] = False if settings[setting_name].get("method", "ui") in ("ui", "default", "manual") else True
+        setting_value["disabled"] = False if settings[setting_name].get("method", "ui") in ("ui", "default", "manual") or is_new else True
 
     # Prepare popover checking "help", "context"
     popovers = []

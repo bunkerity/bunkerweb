@@ -32,6 +32,29 @@ export const createFormStore = (storeName, formType) => {
     const isUpdateData = ref(false);
     // Data we gonna submit
     const formattedData = ref({});
+    // Get additionnal data for submit
+    const operation = ref("");
+    const oldServerName = ref("");
+
+    /**
+     *  @name setOperation
+     *  @description Set the operation when we will submit the form.
+     *  @param {string} operation - Operation to set
+     *  @returns {void}
+     */
+    function setOperation(value) {
+      operation.value = value;
+    }
+
+    /**
+     *  @name setOldServerName
+     *  @description Set the operation when we will submit the form.
+     *  @param {string} oldServeName - old server name to set
+     *  @returns {void}
+     */
+    function setOldServerName(value) {
+      oldServerName.value = value;
+    }
 
     /**
      *  @name setTemplate
@@ -49,6 +72,7 @@ export const createFormStore = (storeName, formType) => {
       templateUI.value = JSON.parse(JSON.stringify(tempData));
       templateUIFormat.value = templateUI.value;
       _updateTempState();
+      console.log("format", formattedData.value);
     }
 
     /**
@@ -328,7 +352,11 @@ export const createFormStore = (storeName, formType) => {
       if (!_isFormTypeAllowed(["advanced", "easy", "raw"])) return;
       _updateTempState();
       if (!isUpdateData.value) return;
-      return useSubmitForm(formattedData.value);
+
+      data = JSON.parse(JSON.stringify(formattedData.value));
+      data["operation"] = operation.value;
+      data["OLD_SERVER_NAME"] = oldServerName.value;
+      print(data);
     }
 
     /**
@@ -434,6 +462,8 @@ export const createFormStore = (storeName, formType) => {
       isUpdateData,
       setTemplate,
       setRawData,
+      setOldServerName,
+      setOperation,
       addMultiple,
       delMultiple,
       useListenTempFields,

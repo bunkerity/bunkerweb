@@ -87,7 +87,7 @@
   "dashboard_status_warning": "status warning or alert.",
   "dashboard_status_info": "status loading or waiting or unknown.",
   "dashboard_raw_mode": "raw mode",
-  "dashboard_raw_mode_subtitle": "Raw mode shows settings as raw key-value pairs of settings (disabled and default ones exclude).",
+  "dashboard_raw_mode_subtitle": "Raw mode shows settings as raw key-value pairs of settings (disabled ones will be shown but not updated on save).",
   "dashboard_raw_invalid": "RAW format is invalid",
   "dashboard_advanced_mode": "Advanced mode",
   "dashboard_advanced_mode_subtitle": "Advanced mode show settings by plugin in dedicated fields.",
@@ -280,8 +280,8 @@
   "services_plugins_title": "Details",
   "services_edit_title": "Edit",
   "services_edit_subtitle": "Choose a mode to edit service",
-  "services_create_title": "create service",
-  "services_create_subtitle": "Choose a mode to create a new service",
+  "services_new_title": "new service",
+  "services_new_subtitle": "Choose a mode to create a new service",
   "services_mode_easy": "Easy mode",
   "services_mode_raw": "Raw mode",
   "services_mode_advanced": "Advanced mode",
@@ -297,6 +297,5 @@
   "services_settings_table_status": "Status",
   "services_mode_title": "Service mode",
   "services_mode_subtitle": "Manage your service settings.",
-  "services_manage_title": "Service {service_name}",
   "services_manage_subtitle": "Manage your service settings."
 }

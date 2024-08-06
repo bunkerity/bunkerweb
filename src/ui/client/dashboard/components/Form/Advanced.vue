@@ -45,6 +45,11 @@ import { v4 as uuidv4 } from "uuid";
  *        },
  *      ],
  * }
+ * @param {object} template - Template object with plugin and settings data.
+ * @param {string} containerClass - Container
+ * @param {string} [operation="edit"] - Operation type (edit, new, delete).
+ * @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
+ * @param {object} columns - Columns object.
  */
 
 const advancedForm = useAdvancedForm();
@@ -57,6 +62,16 @@ const props = defineProps({
     default: {},
   },
   containerClass: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  operation: {
+    type: String,
+    required: false,
+    default: "edit",
+  },
+  oldServerName: {
     type: String,
     required: false,
     default: "",
@@ -270,6 +285,8 @@ function getPluginNames(template) {
 onMounted(() => {
   // SetTemplate only if first time we mount it
   advancedForm.setTemplate(props.template);
+  advancedForm.setOperation(props.operation);
+  advancedForm.setOldServerName(props.oldServerName);
   updateStates();
   // I want updatInp to access event, data.base and the container attribut
   advancedForm.useListenTempFields();

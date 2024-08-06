@@ -1144,16 +1144,39 @@ def instances():
     return render_template("instances.html", title="Instances", data_server_builder=json.dumps(data_server_builder))
 
 
-def get_service_data():
+def get_service_data(page_name: str):
+
+    verify_data_in_form(
+        data={"csrf-token": None},
+        err_message=f"Missing csrf-token parameter on /{page_name}.",
+        redirect_url="services",
+    )
+
+    verify_data_in_form(
+        data={"operation": None},
+        err_message=f"Missing operation parameter on /{page_name}.",
+        redirect_url="services",
+    )
+
+    verify_data_in_form(
+        data={"operation": ("edit", "new", "delete")},
+        err_message="Invalid operation parameter on /{page_name}.",
+        redirect_url="services",
+    )
+
     config = DB.get_config(methods=True, with_drafts=True)
     # Check variables
     variables = deepcopy(request.form.to_dict())
+    print(variables, flush=True)
     del variables["csrf_token"]
     operation = variables.pop("operation")
 
     # Delete custom client variables
-    variables.pop("SECURITY_LEVEL", None)
-    variables.pop("mode", None)
+    try:
+        variables.pop("SECURITY_LEVEL", None)
+        variables.pop("mode", None)
+    except:
+        pass
 
     # Get server name and old one
     old_server_name = ""
@@ -1287,42 +1310,38 @@ def services_modes():
         if DB.readonly:
             return handle_error("Database is in read-only mode", "services")
 
-        verify_data_in_form(
-            data={"operation": ("edit", "new", "delete")},
-            err_message="Invalid operation parameter on /easy-mode.",
-            redirect_url="services",
-        )
-
-        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data()
+        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data("modes")
         update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, "raw-mode")
 
     if not request.args.get("mode"):
         return handle_error("Mode type is missing to access /modes.", "services")
 
-    service_name = request.args.get("service_name")
     mode = request.args.get("mode")
+    service_name = request.args.get("service_name")
     total_config = DB.get_config(methods=True, with_drafts=True)
     service_names = total_config["SERVER_NAME"]["value"].split(" ")
 
     if service_name and service_name not in service_names:
         return handle_error("Service name not found to access advanced mode.", "services")
 
-    # Case new service
-    if service_name is None:
-        service_name = "new"
-
     global_config = app.bw_config.get_config(global_only=True, methods=True)
     plugins = app.bw_config.get_plugins()
 
     data_server_builder = None
     if mode == "raw":
-        data_server_builder = raw_mode_builder(TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name)
+        data_server_builder = raw_mode_builder(
+            TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name or "new", False if service_name else True
+        )
 
     if mode == "advanced":
-        data_server_builder = advanced_mode_builder(TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name)
+        data_server_builder = advanced_mode_builder(
+            TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name or "new", False if service_name else True
+        )
 
     if mode == "easy":
-        data_server_builder = easy_mode_builder(TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name)
+        data_server_builder = easy_mode_builder(
+            TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name or "new", False if service_name else True
+        )
 
     return render_template("modes.html", data_server_builder=data_server_builder)
 
@@ -1334,13 +1353,7 @@ def services():
         if DB.readonly:
             return handle_error("Database is in read-only mode", "services")
 
-        verify_data_in_form(
-            data={"operation": ("edit", "new", "delete")},
-            err_message="Invalid operation parameter on /services.",
-            redirect_url="services",
-        )
-
-        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data()
+        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data("services")
         update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, "services")
 
     # Display services

@@ -27,13 +27,13 @@
                             {
                                 "type": "Title",
                                 "data": {
-                                    "title": "services_create_title"
+                                    "title": "services_new_title"
                                 }
                             },
                             {
                                 "type": "Text",
                                 "data": {
-                                    "text": "services_create_subtitle"
+                                    "text": "services_new_subtitle"
                                 }
                             },
                             {
@@ -41,36 +41,36 @@
                                 "data": {
                                     "buttons": [
                                         {
-                                            "id": "create-service-btn-new",
+                                            "id": "new-service-btn-new",
                                             "text": "services_mode_easy",
                                             "disabled": false,
                                             "color": "info",
                                             "size": "normal",
                                             "attrs": {
                                                 "role": "link",
-                                                "data-link": "services/easy/new"
+                                                "data-link": "modes?mode=easy"
                                             }
                                         },
                                         {
-                                            "id": "create-service-btn-new",
+                                            "id": "new-service-btn-new",
                                             "text": "services_mode_advanced",
                                             "disabled": false,
                                             "color": "info",
                                             "size": "normal",
                                             "attrs": {
                                                 "role": "link",
-                                                "data-link": "services/advanced/new"
+                                                "data-link": "modes?mode=advanced"
                                             }
                                         },
                                         {
-                                            "id": "create-service-btn-new",
+                                            "id": "new-service-btn-new",
                                             "text": "services_mode_raw",
                                             "disabled": false,
                                             "color": "info",
                                             "size": "normal",
                                             "attrs": {
                                                 "role": "link",
-                                                "data-link": "services/raw/new"
+                                                "data-link": "modes?mode=raw"
                                             }
                                         }
                                     ]
@@ -357,7 +357,7 @@
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
-                                                                        "data-link": "services/easy/app1.example.com"
+                                                                        "data-link": "modes?service_name=app1.example.com&mode=easy"
                                                                     }
                                                                 },
                                                                 {
@@ -368,7 +368,7 @@
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
-                                                                        "data-link": "services/advanced/app1.example.com"
+                                                                        "data-link": "modes?service_name=app1.example.com&mode=advanced"
                                                                     }
                                                                 },
                                                                 {
@@ -379,7 +379,7 @@
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
-                                                                        "data-link": "services/raw/app1.example.com"
+                                                                        "data-link": "modes?service_name=app1.example.com&mode=raw"
                                                                     }
                                                                 }
                                                             ]
@@ -778,7 +778,7 @@
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
-                                                                        "data-link": "services/easy/www.example.com"
+                                                                        "data-link": "modes?service_name=www.example.com&mode=easy"
                                                                     }
                                                                 },
                                                                 {
@@ -789,7 +789,7 @@
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
-                                                                        "data-link": "services/advanced/www.example.com"
+                                                                        "data-link": "modes?service_name=www.example.com&mode=advanced"
                                                                     }
                                                                 },
                                                                 {
@@ -800,7 +800,7 @@
                                                                     "size": "normal",
                                                                     "attrs": {
                                                                         "role": "link",
-                                                                        "data-link": "services/raw/www.example.com"
+                                                                        "data-link": "modes?service_name=www.example.com&mode=raw"
                                                                     }
                                                                 }
                                                             ]

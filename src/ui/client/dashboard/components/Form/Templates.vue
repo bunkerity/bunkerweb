@@ -24,6 +24,8 @@ import { v4 as uuidv4 } from "uuid";
  *    }
  *  }
  * @param {object} templates - List of advanced templates that contains settings. Must be a dict with mode as key, then the template name as key with a list of data (different for each modes).
+ * @param {string} [operation="edit"] - Operation type (edit, new, delete).
+ * @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
  */
 
 const props = defineProps({
@@ -31,6 +33,16 @@ const props = defineProps({
     type: Object,
     required: true,
     default: {},
+  },
+  operation: {
+    type: String,
+    required: false,
+    default: "edit",
+  },
+  oldServerName: {
+    type: String,
+    required: false,
+    default: "",
   },
 });
 
@@ -131,14 +143,20 @@ onBeforeMount(() => {
     <Advanced
       v-if="data.currModeName === 'advanced'"
       :template="props.templates[data.currModeName][data.currTemplateName]"
+      :operation="props.operation"
+      :oldServerName="props.oldServerName"
     />
     <Raw
       v-if="data.currModeName === 'raw'"
       :template="props.templates[data.currModeName][data.currTemplateName]"
+      :operation="props.operation"
+      :oldServerName="props.oldServerName"
     />
     <Easy
       v-if="data.currModeName === 'easy'"
       :template="props.templates[data.currModeName][data.currTemplateName]"
+      :operation="props.operation"
+      :oldServerName="props.oldServerName"
     />
   </Container>
 </template>

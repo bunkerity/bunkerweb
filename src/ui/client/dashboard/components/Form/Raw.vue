@@ -21,6 +21,8 @@ import { useRawForm } from "@store/form.js";
  *    "MULTISITE": "yes"
  *   }
  *  @param {object} template - Template object with plugin and settings data.
+ *  @param {string} [operation="edit"] - Operation type (edit, new, delete).
+ *  @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
  *  @param {string} containerClass - Container
  *  @param {object} columns - Columns object.
  */
@@ -33,6 +35,16 @@ const props = defineProps({
     type: Object,
     required: true,
     default: {},
+  },
+  operation: {
+    type: String,
+    required: false,
+    default: "edit",
+  },
+  oldServerName: {
+    type: String,
+    required: false,
+    default: "",
   },
   containerClass: {
     type: String,
@@ -150,6 +162,11 @@ const buttonSave = {
 
 onBeforeMount(() => {
   rawForm.setRawData(json2raw(props.template));
+});
+
+onMounted(() => {
+  rawForm.setOperation(props.operation);
+  rawForm.setOldServerName(props.oldServerName);
 });
 </script>
 

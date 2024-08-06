@@ -40,8 +40,10 @@ import { useEasyForm } from "@store/form.js";
  *         },
  *   ],
  * }
- **  @param {object} template - Template object with plugin and settings data.
+ * @param {object} template - Template object with plugin and settings data.
  * @param {string} containerClass - Container
+ * @param {string} [operation="edit"] - Operation type (edit, new, delete).
+ * @param {string} [oldServerName=""] - Old server name. This is a server name before any changes.
  * @param {object} columns - Columns object.
  */
 
@@ -53,6 +55,16 @@ const props = defineProps({
     type: Object,
     required: true,
     default: {},
+  },
+  operation: {
+    type: String,
+    required: false,
+    default: "edit",
+  },
+  oldServerName: {
+    type: String,
+    required: false,
+    default: "",
   },
   containerClass: {
     type: String,
@@ -123,6 +135,8 @@ const buttonNext = {
 onMounted(() => {
   // Restart step one every time the component is mounted
   easyForm.setTemplate(props.template);
+  easyForm.setOperation(props.operation);
+  easyForm.setOldServerName(props.oldServerName);
   data.currStep = 0;
   setValidity();
   // I want updatInp to access event, data.base and the container attribut

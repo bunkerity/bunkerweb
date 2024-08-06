@@ -26,7 +26,7 @@ def services_builder(services):
                         "size": "normal",
                         "iconName": "plus",
                         "iconColor": "white",
-                        "modal": services_action(server_name="new", operation="create", title="services_create_title", subtitle="services_create_subtitle"),
+                        "modal": services_action(server_name="new", operation="new", title="services_new_title", subtitle="services_new_subtitle"),
                         "containerClass": "col-span-12 flex justify-center",
                     },
                 },
@@ -114,7 +114,7 @@ def services_builder(services):
         },
     ]
 
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return builder
 
 
 def services_settings(settings: dict) -> dict:
@@ -250,7 +250,7 @@ def services_action(
             }
         )
 
-    if operation == "edit" or operation == "create":
+    if operation == "edit" or operation == "new":
         modes = ("easy", "advanced", "raw")
         mode_buttons = []
         for mode in modes:
@@ -263,7 +263,7 @@ def services_action(
                     "size": "normal",
                     "attrs": {
                         "role": "link",
-                        "data-link": f"modes?service_name={server_name}&mode={mode}" if mode != "create" else f"modes?mode={mode}",
+                        "data-link": f"modes?service_name={server_name}&mode={mode}" if operation != "new" else f"modes?mode={mode}",
                     },
                 },
             )
