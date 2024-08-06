@@ -325,5 +325,14 @@
     "label": "BunkerWeb instances",
     "regex": "^.*$",
     "type": "text"
+  },
+  "USE_TEMPLATE": {
+    "context": "multisite",
+    "default": "",
+    "help": "Config template to use that will override the default values of specific settings.",
+    "id": "use-template",
+    "label": "Use template",
+    "regex": "^.*$",
+    "type": "text"
   }
 }

@@ -8,6 +8,7 @@
 - [FEATURE] Add new `REVERSE_PROXY_PASS_REQUEST_BODY` setting to control if the request body should be passed to the upstream server (default is yes)
 - [FEATURE] Jobs now have an history which the size can be controlled via the `DATABASE_MAX_JOBS_RUNS` setting (default is 10000) and it will be possible to see it in the web UI in a future release
 - [FEATURE] Add support for HTTP/3 connections limiting via the `HTTP3_CONNECTIONS_LIMIT` setting (default is 100) in the `limit` plugin
+- [FEATURE] Add new templating feature to allow to quickly override the default values of settings and custom configurations. You can also precise steps to follow in the UI to help the user configure services.
 - [SCHEDULER] Refactor the scheduler to use the `BUNKERWEB_INSTANCES` (previously known as `OVERRIDE_INSTANCES`) environment variable instead of an integration specific system
 - [AUTOCONF] Add new `NAMESPACES` environment variable to allow setting the namespaces to watch for the autoconf feature which makes it possible to use multiple autoconf instances in the same cluster while keeping the configuration separated
 - [UI] Start refactoring the UI to make it more modular and easier to maintain with migration from Jinja to Vue.js

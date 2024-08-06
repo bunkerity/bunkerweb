@@ -101,31 +101,6 @@ if __name__ == "__main__":
         config = Configurator(
             str(settings_path), str(core_path), external_plugins, pro_plugins, str(variables_path) if args.variables else environ.copy(), LOGGER
         )
-        settings = config.get_config()
-
-        # Parse BunkerWeb instances from environment
-        apis = []
-        hostnames = set()
-        for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split(" "):
-            if not bw_instance:
-                continue
-
-            match = BUNKERWEB_STATIC_INSTANCES_RX.search(bw_instance)
-            if match:
-                if match.group("hostname") in hostnames:
-                    LOGGER.warning(f"Duplicate BunkerWeb instance hostname {match.group('hostname')}, skipping it")
-
-                hostnames.add(match.group("hostname"))
-                apis.append(
-                    API(
-                        f"http://{match.group('hostname')}:{match.group('port') or settings.get('API_HTTP_PORT', '5000')}",
-                        host=settings.get("API_SERVER_NAME", "bwapi"),
-                    )
-                )
-            else:
-                LOGGER.warning(
-                    f"Invalid BunkerWeb instance {bw_instance}, it should match the following regex: (http://)<hostname>(:<port>) ({BUNKERWEB_STATIC_INSTANCES_RX.pattern}), skipping it"
-                )
 
         custom_confs = []
         for k, v in environ.items():
@@ -150,7 +125,7 @@ if __name__ == "__main__":
 
         bunkerweb_version = get_version()
         db_metadata = db.get_metadata()
-        db_initialized = isinstance(db_metadata, str) or not db_metadata["is_initialized"]
+        db_initialized = not isinstance(db_metadata, str) and db_metadata["is_initialized"]
 
         if not db_initialized:
             LOGGER.info("Database not initialized, initializing ...")
@@ -191,6 +166,32 @@ if __name__ == "__main__":
 
         if args.init:
             sys_exit(0)
+
+        settings = config.get_config(db)
+
+        # Parse BunkerWeb instances from environment
+        apis = []
+        hostnames = set()
+        for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split(" "):
+            if not bw_instance:
+                continue
+
+            match = BUNKERWEB_STATIC_INSTANCES_RX.search(bw_instance)
+            if match:
+                if match.group("hostname") in hostnames:
+                    LOGGER.warning(f"Duplicate BunkerWeb instance hostname {match.group('hostname')}, skipping it")
+
+                hostnames.add(match.group("hostname"))
+                apis.append(
+                    API(
+                        f"http://{match.group('hostname')}:{match.group('port') or settings.get('API_HTTP_PORT', '5000')}",
+                        host=settings.get("API_SERVER_NAME", "bwapi"),
+                    )
+                )
+            else:
+                LOGGER.warning(
+                    f"Invalid BunkerWeb instance {bw_instance}, it should match the following regex: (http://)<hostname>(:<port>) ({BUNKERWEB_STATIC_INSTANCES_RX.pattern}), skipping it"
+                )
 
         changes = []
         changed_plugins = set()

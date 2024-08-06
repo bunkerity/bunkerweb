@@ -21,6 +21,7 @@ from logger import setup_logger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
 
+DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
 if __name__ == "__main__":
     logger = setup_logger("Generator", getenv("LOG_LEVEL", "INFO"))
@@ -68,6 +69,15 @@ if __name__ == "__main__":
 
         integration = get_integration()
 
+        db = None
+        if DB_PATH.is_dir():
+            if DB_PATH.as_posix() not in sys_path:
+                sys_path.append(DB_PATH.as_posix())
+
+            from Database import Database  # type: ignore
+
+            db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None))
+
         if args.variables:
             variables_path = Path(args.variables)
             variables_path.parent.mkdir(parents=True, exist_ok=True)
@@ -105,17 +115,8 @@ if __name__ == "__main__":
             logger.info("Computing config ...")
             config: Dict[str, Any] = Configurator(
                 str(settings_path), str(core_path), str(plugins_path), str(pro_plugins_path), str(variables_path), logger
-            ).get_config()
+            ).get_config(db)
         else:
-            if join(sep, "usr", "share", "bunkerweb", "db") not in sys_path:
-                sys_path.append(join(sep, "usr", "share", "bunkerweb", "db"))
-
-            from Database import Database  # type: ignore
-
-            db = Database(
-                logger,
-                sqlalchemy_string=getenv("DATABASE_URI", None),
-            )
             config: Dict[str, Any] = db.get_config()
 
         # Remove old files

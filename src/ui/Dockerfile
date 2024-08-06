@@ -33,7 +33,6 @@ COPY src/common/gen gen
 COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/common/helpers helpers
-COPY src/common/templates templates
 COPY src/VERSION VERSION
 
 COPY src/ui/builder ui/builder

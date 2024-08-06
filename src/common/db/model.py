@@ -2,20 +2,7 @@
 
 from datetime import datetime, timezone
 from functools import partial
-from sqlalchemy import (
-    TEXT,
-    Boolean,
-    Column,
-    DateTime,
-    Enum,
-    ForeignKey,
-    Identity,
-    Integer,
-    LargeBinary,
-    PrimaryKeyConstraint,
-    String,
-    func,
-)
+from sqlalchemy import TEXT, Boolean, Column, DateTime, Enum, ForeignKey, Identity, Integer, LargeBinary, String, func
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
 
@@ -71,21 +58,18 @@ class Plugins(Base):
     settings = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
     jobs = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
     pages = relationship("Plugin_pages", back_populates="plugin", cascade="all")
-    commands = relationship("BwcliCommands", back_populates="plugin", cascade="all")
+    commands = relationship("Bw_cli_commands", back_populates="plugin", cascade="all")
+    templates = relationship("Templates", back_populates="plugin", cascade="all")
 
 
 class Settings(Base):
     __tablename__ = "bw_settings"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "name"),
-        UniqueConstraint("id"),
-    )
 
     id = Column(String(256), primary_key=True)
-    name = Column(String(256), primary_key=True)
+    name = Column(String(256), unique=True, nullable=False)
     plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     context = Column(CONTEXTS_ENUM, nullable=False)
-    default = Column(String(4096), nullable=True, default="")
+    default = Column(TEXT, nullable=True, default="")
     help = Column(String(512), nullable=False)
     label = Column(String(256), nullable=True)
     regex = Column(String(1024), nullable=False)
@@ -96,6 +80,7 @@ class Settings(Base):
     selects = relationship("Selects", back_populates="setting", cascade="all")
     services = relationship("Services_settings", back_populates="setting", cascade="all")
     global_value = relationship("Global_values", back_populates="setting", cascade="all")
+    templates = relationship("Template_settings", back_populates="setting", cascade="all")
     plugin = relationship("Plugins", back_populates="settings")
 
 
@@ -162,14 +147,9 @@ class Plugin_pages(Base):
     __tablename__ = "bw_plugin_pages"
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    # TODO: replace with a raw data that gets extracted by the plugin
-    template_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
-    template_checksum = Column(String(128), nullable=False)
-    actions_file = Column(LargeBinary(length=(2**32) - 1), nullable=False)
-    actions_checksum = Column(String(128), nullable=False)
-    obfuscation_file = Column(LargeBinary(length=(2**32) - 1), default=None, nullable=True)
-    obfuscation_checksum = Column(String(128), default=None, nullable=True)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), unique=True, nullable=False)
+    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
+    checksum = Column(String(128), nullable=False)
 
     plugin = relationship("Plugins", back_populates="pages")
 
@@ -228,7 +208,7 @@ class Instances(Base):
     last_seen = Column(DateTime, nullable=True, server_default=func.now(), onupdate=partial(datetime.now, timezone.utc))
 
 
-class BwcliCommands(Base):
+class Bw_cli_commands(Base):
     __tablename__ = "bw_cli_commands"
     __table_args__ = (UniqueConstraint("plugin_id", "name"),)
 
@@ -238,6 +218,64 @@ class BwcliCommands(Base):
     file_name = Column(String(256), nullable=False)
 
     plugin = relationship("Plugins", back_populates="commands")
+
+
+class Templates(Base):
+    __tablename__ = "bw_templates"
+
+    id = Column(String(256), primary_key=True)
+    name = Column(String(256), unique=True, nullable=False)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+
+    plugin = relationship("Plugins", back_populates="templates")
+    steps = relationship("Template_steps", back_populates="template", cascade="all")
+    settings = relationship("Template_settings", back_populates="template", cascade="all")
+    custom_configs = relationship("Template_custom_configs", back_populates="template", cascade="all")
+
+
+class Template_steps(Base):
+    __tablename__ = "bw_template_steps"
+
+    id = Column(Integer, primary_key=True)
+    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    title = Column(TEXT, nullable=False)
+    subtitle = Column(TEXT, nullable=True)
+
+    template = relationship("Templates", back_populates="steps")
+    settings = relationship("Template_settings", back_populates="step", cascade="all")
+    custom_configs = relationship("Template_custom_configs", back_populates="step", cascade="all")
+
+
+class Template_settings(Base):
+    __tablename__ = "bw_template_settings"
+    __table_args__ = (UniqueConstraint("template_id", "setting_id", "step_id", "suffix"),)
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    step_id = Column(Integer, ForeignKey("bw_template_steps.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    default = Column(TEXT, nullable=False)
+    suffix = Column(Integer, nullable=True, default=0)
+
+    template = relationship("Templates", back_populates="settings")
+    step = relationship("Template_steps", back_populates="settings")
+    setting = relationship("Settings", back_populates="templates")
+
+
+class Template_custom_configs(Base):
+    __tablename__ = "bw_template_custom_configs"
+    __table_args__ = (UniqueConstraint("template_id", "step_id", "type", "name"),)
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    step_id = Column(Integer, ForeignKey("bw_template_steps.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
+    name = Column(String(256), nullable=False)
+    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
+    checksum = Column(String(128), nullable=False)
+
+    template = relationship("Templates", back_populates="custom_configs")
+    step = relationship("Template_steps", back_populates="custom_configs")
 
 
 class Metadata(Base):

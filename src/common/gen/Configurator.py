@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 
-from glob import glob
-from hashlib import sha256
+from copy import deepcopy
+from functools import cache
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import cpu_count, listdir, sep
-from os.path import basename, dirname, join
+from os import listdir, sep
+from os.path import join
 from pathlib import Path
 from re import compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
 from tarfile import open as tar_open
-from threading import Lock, Semaphore, Thread
-from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
+
+from common_utils import bytes_hash  # type: ignore
 
 
 class Configurator:
@@ -24,80 +24,71 @@ class Configurator:
         self,
         settings: str,
         core: str,
-        external_plugins: Union[str, List[Dict[str, Any]]],
-        pro_plugins: Union[str, List[Dict[str, Any]]],
-        variables: Union[str, Dict[str, Any]],
+        external_plugins: Union[str, List[Dict[str, str]]],
+        pro_plugins: Union[str, List[Dict[str, str]]],
+        variables: Union[str, Dict[str, str]],
         logger: Logger,
     ):
         self.__logger = logger
-        self.__thread_lock = Lock()
-        self.__semaphore = Semaphore(cpu_count() or 1)
         self.__plugin_id_rx = re_compile(r"^[\w.-]{1,64}$")
         self.__plugin_version_rx = re_compile(r"^\d+\.\d+(\.\d+)?$")
         self.__setting_id_rx = re_compile(r"^[A-Z0-9_]{1,256}$")
         self.__name_rx = re_compile(r"^[\w.-]{1,128}$")
         self.__job_file_rx = re_compile(r"^[\w./-]{1,256}$")
-        self.__settings = self.__load_settings(settings)
+        self.__settings = self.__load_settings(Path(settings))
         self.__core_plugins = []
-        self.__load_plugins(core)
+        self.__load_plugins(Path(core))
 
         if isinstance(external_plugins, str):
             self.__external_plugins = []
-            self.__load_plugins(external_plugins, "external")
+            self.__load_plugins(Path(external_plugins), "external")
         else:
             self.__external_plugins = external_plugins
 
         if isinstance(pro_plugins, str):
             self.__pro_plugins = []
-            self.__load_plugins(pro_plugins, "pro")
+            self.__load_plugins(Path(pro_plugins), "pro")
         else:
             self.__pro_plugins = pro_plugins
 
         if isinstance(variables, str):
-            self.__variables = self.__load_variables(variables)
+            self.__variables = self.__load_variables(Path(variables))
         else:
             self.__variables = variables
 
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
         self.__servers = self.__map_servers()
 
-    def get_settings(self) -> Dict[str, Any]:
-        return self.__settings
+    def get_settings(self) -> Dict[str, str]:
+        return self.__settings.copy()
 
-    def get_plugins(self, _type: Literal["core", "external", "pro"]) -> List[Dict[str, Any]]:
-        return {"core": self.__core_plugins, "external": self.__external_plugins, "pro": self.__pro_plugins}[_type]
+    def get_plugins(self, _type: Literal["core", "external", "pro"]) -> List[Dict[str, str]]:
+        return {"core": deepcopy(self.__core_plugins), "external": deepcopy(self.__external_plugins), "pro": deepcopy(self.__pro_plugins)}.get(_type, [])
 
-    def get_plugins_settings(self, _type: Literal["core", "external", "pro"]) -> Dict[str, Any]:
-        if _type == "core":
-            plugins = self.__core_plugins
-        elif _type == "pro":
-            plugins = self.__pro_plugins
-        else:
-            plugins = self.__external_plugins
+    @cache
+    def get_plugins_settings(self, _type: Literal["core", "external", "pro"]) -> Dict[str, str]:
         plugins_settings = {}
-
-        for plugin in plugins:
-            plugins_settings.update(plugin["settings"])
-
+        for plugin in self.get_plugins(_type):
+            plugins_settings.update(plugin.get("settings", {}))
         return plugins_settings
 
+    @cache
     def __map_servers(self) -> Dict[str, List[str]]:
         if not self.__multisite or "SERVER_NAME" not in self.__variables:
             return {}
+
         servers = {}
         for server_name in self.__variables["SERVER_NAME"].strip().split(" "):
             if not server_name:
                 continue
 
-            if not re_search(self.__settings["SERVER_NAME"]["regex"], server_name):
+            if re_search(self.__settings["SERVER_NAME"]["regex"], server_name) is None:
                 self.__logger.warning(f"Ignoring server name {server_name} because regex is not valid")
                 continue
+
             names = [server_name]
             if f"{server_name}_SERVER_NAME" in self.__variables:
-                if not re_search(
-                    self.__settings["SERVER_NAME"]["regex"],
-                    self.__variables[f"{server_name}_SERVER_NAME"],
-                ):
+                if re_search(self.__settings["SERVER_NAME"]["regex"], self.__variables[f"{server_name}_SERVER_NAME"]) is None:
                     self.__logger.warning(f"Ignoring {server_name}_SERVER_NAME because regex is not valid")
                 else:
                     names = self.__variables[f"{server_name}_SERVER_NAME"].strip().split(" ")
@@ -105,21 +96,19 @@ class Configurator:
             servers[server_name] = names
         return servers
 
-    def __load_settings(self, path: str) -> Dict[str, Any]:
-        return loads(Path(path).read_text())
+    def __load_settings(self, path: Path) -> Dict[str, str]:
+        return loads(path.read_text())
 
-    def __load_plugins(self, path: str, _type: Literal["core", "external", "pro"] = "core"):
-        threads = []
-        for file in glob(join(path, "*", "plugin.json")):
-            thread = Thread(target=self.__load_plugin, args=(file, _type))
-            thread.start()
-            threads.append(thread)
+    def __load_plugins(self, path: Path, _type: Literal["core", "external", "pro"] = "core"):
+        x = 0
+        for file in path.glob("*/plugin.json"):
+            self.__logger.debug(f"Loading {_type} plugin {file}")
+            self.__load_plugin(file, _type)
+            x += 1
 
-        for thread in threads:
-            thread.join()
+        self.__logger.info(f"Computed {x} {_type} plugin{'s' if x > 1 else ''}")
 
-    def __load_plugin(self, file: str, _type: Literal["core", "external", "pro"] = "core"):
-        self.__semaphore.acquire(timeout=60)
+    def __load_plugin(self, file: Path, _type: Literal["core", "external", "pro"] = "core"):
         try:
             data = self.__load_settings(file)
 
@@ -128,39 +117,32 @@ class Configurator:
                 self.__logger.warning(f"Ignoring {_type} plugin {file} : {msg}")
                 return
 
-            data["page"] = "ui" in listdir(dirname(file))
+            data["page"] = "ui" in listdir(file.parent)
 
             if _type != "core":
-                plugin_content = BytesIO()
-                with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                    tar.add(dirname(file), arcname=basename(dirname(file)), recursive=True)
-                plugin_content.seek(0, 0)
-                value = plugin_content.getvalue()
+                with BytesIO() as plugin_content:
+                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                        tar.add(file.parent, arcname=file.parent.name, recursive=True)
+                    plugin_content.seek(0)
+                    checksum = bytes_hash(plugin_content, algorithm="sha256")
+                    value = plugin_content.getvalue()
 
-                data.update(
-                    {
-                        "type": _type,
-                        "method": "manual",
-                        "data": value,
-                        "checksum": sha256(value).hexdigest(),
-                    }
-                )
+                data.update({"type": _type, "method": "manual", "data": value, "checksum": checksum})
 
-                with self.__thread_lock:
-                    if _type == "pro":
-                        self.__pro_plugins.append(data)
-                    else:
-                        self.__external_plugins.append(data)
-            else:
-                with self.__thread_lock:
-                    self.__core_plugins.append(data)
-        except:
-            self.__logger.error(f"Exception while loading JSON from {file} : {format_exc()}")
-        self.__semaphore.release()
+                if _type == "pro":
+                    self.__pro_plugins.append(data)
+                else:
+                    self.__external_plugins.append(data)
+                self.__logger.debug(f"Loaded {_type} plugin {file} with {len(data.get('settings', {}))} setting(s)")
+                return
+            self.__core_plugins.append(data)
+            self.__logger.debug(f"Loaded core plugin {file} with {len(data.get('settings', {}))} setting(s)")
+        except BaseException as e:
+            self.__logger.error(f"Exception while loading JSON from {file} : {e}")
 
-    def __load_variables(self, path: str) -> Dict[str, Any]:
+    def __load_variables(self, path: Path) -> Dict[str, str]:
         variables = {}
-        with open(path) as f:
+        with path.open("r", encoding="utf-8") as f:
             lines = f.readlines()
             for line in lines:
                 line = line.strip()
@@ -170,18 +152,34 @@ class Configurator:
                 variables[split[0]] = split[1]
         return variables
 
-    def get_config(self) -> Dict[str, Any]:
+    def get_config(self, db=None) -> Dict[str, str]:
         config = {}
+        template = self.__variables.get("USE_TEMPLATE", "")
+
         # Extract default settings
         default_settings = [
-            self.__settings,
+            self.get_settings(),
             self.get_plugins_settings("core"),
             self.get_plugins_settings("external"),
             self.get_plugins_settings("pro"),
         ]
+
+        if not default_settings[0]:
+            self.__logger.error("No settings found, exiting")
+            exit(1)
+        elif not default_settings[1]:
+            self.__logger.error("No core plugins found, exiting")
+            exit(1)
+
+        # Extract template overridden settings
+        template_settings = {}
+        if template and db:
+            self.__logger.info(f"Using template {template}")
+            template_settings = db.get_template_settings(template)
+
         for settings in default_settings:
             for setting, data in settings.items():
-                config[setting] = data["default"]
+                config[setting] = template_settings.get(setting, data["default"])
 
         # Override with variables
         for variable, value in self.__variables.items():
@@ -213,13 +211,19 @@ class Configurator:
                     "NAMESPACE",
                 )
             ):
-                self.__logger.warning(f"Ignoring variable {variable} : {err}")
+                self.__logger.warning(f"Ignoring variable {variable} : {err} - {value = !r}")
+
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":
-            for server_name in config["SERVER_NAME"].split(" "):
+            for server_name in config["SERVER_NAME"].strip().split(" "):
                 server_name = server_name.strip()
                 if not server_name:
                     continue
+
+                service_template = config.get(f"{server_name}_USE_TEMPLATE", template)
+                service_template_settings = {}
+                if service_template != template and db:
+                    service_template_settings = db.get_template_settings(service_template)
 
                 for settings in default_settings:
                     for setting, data in settings.items():
@@ -231,7 +235,8 @@ class Configurator:
                             if setting == "SERVER_NAME":
                                 config[key] = server_name
                             elif setting in config:
-                                config[key] = config[setting]
+                                config[key] = service_template_settings.get(setting, config[setting])
+
         return config
 
     def __check_var(self, variable: str) -> Tuple[bool, str]:
@@ -243,7 +248,7 @@ class Configurator:
                 return False, f"variable name {variable} doesn't exist"
 
             try:
-                if not re_search(where[real_var]["regex"], value):
+                if re_search(where[real_var]["regex"], value) is None:
                     return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
             except RegexError:
                 self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
@@ -265,9 +270,9 @@ class Configurator:
 
         return True, "ok"
 
-    def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, Any]], str]:
+    def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, str]], str]:
         targets = [
-            self.__settings,
+            self.get_settings(),
             self.get_plugins_settings("core"),
             self.get_plugins_settings("external"),
             self.get_plugins_settings("pro"),
@@ -301,7 +306,7 @@ class Configurator:
         elif plugin["stream"] not in ("yes", "no", "partial"):
             return (False, f"Invalid stream for plugin {plugin['id']} (Must be yes, no or partial)")
 
-        for setting, data in plugin["settings"].items():
+        for setting, data in plugin.get("settings", {}).items():
             if not all(key in data.keys() for key in ("context", "default", "help", "id", "label", "regex", "type")):
                 return (False, f"missing keys for setting {setting} in plugin {plugin['id']}, must have context, default, help, id, label, regex and type")
 

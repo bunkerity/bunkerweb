@@ -50,9 +50,10 @@ class Config:
             for variable, value in service.items():
                 if variable == "NAMESPACE" or variable.startswith("CUSTOM_CONF") or not variable.isupper():
                     continue
-                if not self._db.is_setting(variable, multisite=True):
-                    if variable in service:
-                        self.__logger.warning(f"Variable {variable}: {value} is not a valid multisite setting, ignoring it")
+
+                success, err = self._db.is_valid_setting(variable, value=value, multisite=True)
+                if not success:
+                    self.__logger.warning(f"Variable {variable}: {value} is not a valid autoconf setting ({err}), ignoring it")
                     continue
                 config[f"{server_name}_{variable}"] = value
             config["SERVER_NAME"] += f" {server_name}"
