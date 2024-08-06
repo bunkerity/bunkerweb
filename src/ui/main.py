@@ -1147,8 +1147,8 @@ def instances():
 def get_service_data(page_name: str):
 
     verify_data_in_form(
-        data={"csrf-token": None},
-        err_message=f"Missing csrf-token parameter on /{page_name}.",
+        data={"csrf_token": None},
+        err_message=f"Missing csrf_token parameter on /{page_name}.",
         redirect_url="services",
     )
 
@@ -1168,13 +1168,18 @@ def get_service_data(page_name: str):
     # Check variables
     variables = deepcopy(request.form.to_dict())
     print(variables, flush=True)
+    mode = None
+    try:
+        mode = variables.pop("mode")
+    except:
+        pass
+
     del variables["csrf_token"]
     operation = variables.pop("operation")
 
     # Delete custom client variables
     try:
         variables.pop("SECURITY_LEVEL", None)
-        variables.pop("mode", None)
     except:
         pass
 
@@ -1240,10 +1245,10 @@ def get_service_data(page_name: str):
             del variables[variable]
 
     variables = app.bw_config.check_variables(variables, config)
-    return config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged
+    return config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode
 
 
-def update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, redirect_name):
+def update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged):
     if request.form["operation"] == "edit":
         if is_draft_unchanged and len(variables) == 1 and "SERVER_NAME" in variables and server_name == old_server_name:
             return handle_error("The service was not edited because no values were changed.", "services", True)
@@ -1300,7 +1305,7 @@ def update_service(config, variables, format_configs, server_name, old_server_na
     elif request.form["operation"] == "delete":
         message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
 
-    return redirect(url_for("loading", next=url_for(redirect_name, service_name=[server_name]), message=message))
+    return message
 
 
 @app.route("/modes", methods=["GET", "POST"])
@@ -1310,8 +1315,16 @@ def services_modes():
         if DB.readonly:
             return handle_error("Database is in read-only mode", "services")
 
-        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data("modes")
-        update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, "raw-mode")
+        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode = get_service_data("modes")
+        message = update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged)
+        print(message, flush=True)
+        print("mode", mode, "service name", server_name, flush=True)
+        # TODO: redirect to /mode?service_name=my_service&mode=my_mode
+        # Following is not working :
+        # return redirect(url_for("loading", next=url_for("modes", mode=mode, service_name=server_name), message=message))
+        # or
+        # return redirect(url_for("loading", next=url_for(f"modes?service_name={server_name}&mode={mode}"), message=message))
+        return redirect(url_for("loading", next=url_for(request.endpoint), message=message))
 
     if not request.args.get("mode"):
         return handle_error("Mode type is missing to access /modes.", "services")
@@ -1353,8 +1366,11 @@ def services():
         if DB.readonly:
             return handle_error("Database is in read-only mode", "services")
 
-        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data("services")
-        update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, "services")
+        config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode = get_service_data("services")
+
+        message = update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged)
+
+        return redirect(url_for("loading", next=url_for("services"), message=message))
 
     # Display services
     services = []

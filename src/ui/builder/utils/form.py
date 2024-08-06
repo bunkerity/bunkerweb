@@ -30,6 +30,14 @@ def get_forms(templates: list = [], plugins: list = [], settings: dict = {}, ren
     We will run on each plugins, set template value if one, and override by the custom settings value if exists.
     We will format to fit each form type (easy, advanced, raw) in case
     """
+
+    # Update SERVER_NAME to be empty if new
+    if is_new and "SERVER_NAME" in settings:
+        settings["SERVER_NAME"]["value"] = ""
+
+    if is_new and not "SERVER_NAME" in settings:
+        settings["SERVER_NAME"] = {"value": "", "method": "ui", "global": True}
+
     forms = {}
     for form in render_forms:
         forms[form] = {}
@@ -120,9 +128,6 @@ def set_raw(template: list, plugins_base: list, settings: dict, is_new: bool) ->
 
                 if val != default_val:
                     raw_value = val
-
-                if setting == "SERVER_NAME" and is_new:
-                    raw_value = ""
 
             # Add value only if exists
             if raw_value:
@@ -383,9 +388,6 @@ def format_setting(
     if setting_name in template_settings and not "multiple" in setting_value:
         # Update value or set default as value
         setting_value["value"] = template_settings.get(setting_name, setting_value.get("default"))
-
-    if setting_name == "SERVER_NAME" and is_new:
-        setting_value["value"] = ""
 
     # Then override by service settings if not a multiple
     # Case multiple, we need to keep the default value and override only each multiple group

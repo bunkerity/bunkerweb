@@ -30,6 +30,7 @@
                         "raw": {
                             "default": {
                                 "MULTISITE": "yes",
+                                "SERVER_NAME": "app1.example.com",
                                 "LOG_LEVEL": "info",
                                 "API_WHITELIST_IP": "127.0.0.0/24 10.20.30.0/24",
                                 "BUNKERWEB_INSTANCES": "bunkerweb",

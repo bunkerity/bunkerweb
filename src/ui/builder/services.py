@@ -192,13 +192,14 @@ def services_action(
                 "color": "delete",
                 "size": "normal",
                 "attrs": {
-                    "data-submit-form": f"""{{"SERVER_NAME" : {server_name}, "operation" : "{operation}" }}""",
+                    "data-submit-form": f"""{{"SERVER_NAME" : "{server_name}", "operation" : "{operation}" }}""",
                 },
             },
         )
 
     if operation == "draft":
-        draft_value = "yes" if is_draft else "no"
+        # get reverse of current state for update
+        draft_value = "no" if is_draft else "yes"
         buttons.append(
             {
                 "id": f"{operation}-service-btn-{server_name}",
@@ -207,7 +208,7 @@ def services_action(
                 "color": "success",
                 "size": "normal",
                 "attrs": {
-                    "data-submit-form": f"""{{"SERVER_NAME" : {server_name}, "OLD_SERVER_NAME" : {server_name}, "operation" : "edit", "IS_DRAFT" : {draft_value} }}""",
+                    "data-submit-form": f"""{{"SERVER_NAME" : "{server_name}", "OLD_SERVER_NAME" : "{server_name}", "operation" : "edit", "IS_DRAFT" : "{draft_value}" }}""",
                 },
             },
         )

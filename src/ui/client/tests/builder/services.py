@@ -114,7 +114,7 @@ def services_builder(services):
         },
     ]
 
-    return builder
+    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
 
 
 def services_settings(settings: dict) -> dict:
@@ -184,7 +184,7 @@ def services_action(
                 "color": "delete",
                 "size": "normal",
                 "attrs": {
-                    "data-submit-form": f"""{{"SERVER_NAME" : {server_name}, "operation" : "{operation}" }}""",
+                    "data-submit-form": f"""{{"SERVER_NAME" : "{server_name}", "operation" : "{operation}" }}""",
                 },
             },
         )
@@ -199,7 +199,7 @@ def services_action(
                 "color": "success",
                 "size": "normal",
                 "attrs": {
-                    "data-submit-form": f"""{{"SERVER_NAME" : {server_name}, "OLD_SERVER_NAME" : {server_name}, "operation" : "edit", "IS_DRAFT" : {draft_value} }}""",
+                    "data-submit-form": f"""{{"SERVER_NAME" : "{server_name}", "OLD_SERVER_NAME" : "{server_name}", "operation" : "edit", "IS_DRAFT" : "{draft_value}" }}""",
                 },
             },
         )

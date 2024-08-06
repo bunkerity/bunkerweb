@@ -353,10 +353,11 @@ export const createFormStore = (storeName, formType) => {
       _updateTempState();
       if (!isUpdateData.value) return;
 
-      data = JSON.parse(JSON.stringify(formattedData.value));
+      const data = JSON.parse(JSON.stringify(formattedData.value));
       data["operation"] = operation.value;
       data["OLD_SERVER_NAME"] = oldServerName.value;
-      print(data);
+      data["mode"] = type.value;
+      useSubmitForm(data);
     }
 
     /**
