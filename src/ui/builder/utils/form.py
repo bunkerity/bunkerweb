@@ -106,9 +106,11 @@ def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
     for plugin in plugins:
         for setting, value in plugin.get("settings").items():
 
-            # avoid some methods from services_settings
-            if setting in settings and settings[setting].get("method", "ui") not in ("ui", "default", "manual"):
-                continue
+            # we want to show none default value even if this is a disabled method
+
+            # if setting in settings and settings[setting].get("method", "ui") not in ("ui", "default", "manual") and :
+            #     continue
+
             raw_value = None
 
             # Start by setting template value if exists
@@ -130,6 +132,7 @@ def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
             if raw_value:
                 raw_settings[setting] = raw_value
 
+    print("raw_settings", raw_settings, flush=True)
     return raw_settings
 
 

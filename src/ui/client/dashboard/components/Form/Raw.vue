@@ -103,6 +103,9 @@ function updateRaw(v) {
  *  @returns {string} - The raw string
  */
 function json2raw(json) {
+  // return nothing case json is empty object
+  if (Object.keys(json).length === 0) return "";
+
   let dataStr = JSON.stringify(json);
   // Remove first and last curly brackets
   dataStr = dataStr.slice(1, -1);

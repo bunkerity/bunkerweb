@@ -9,8 +9,8 @@ import ButtonGroup from "@components/Widget/ButtonGroup.vue";
 import { useEqualStr } from "@utils/global.js";
 
 /**
- * @name Builder/RawMode.vue
- * @description This component is lightweight builder containing only the necessary components to create the raw page.
+ * @name Builder/Modes.vue
+ * @description This component is lightweight builder containing only the necessary components to create a service mode page.
  * @example
  * [
  *     {

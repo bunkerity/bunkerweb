@@ -1,16 +1,16 @@
 <script setup>
 import { reactive, onBeforeMount, onMounted } from "vue";
 import DashboardLayout from "@components/Dashboard/Layout.vue";
-import BuilderRaw from "@components/Builder/RawMode.vue";
+import BuilderModes from "@components/Builder/Modes.vue";
 import { useGlobal } from "@utils/global";
 
 /**
- *  @name Page/Raw.vue
- *  @description This component is the raw page.
+ *  @name Page/Modes.vue
+ *  @description This component is the modes page.
  *  This page displays the raw form and additionnal actions to manage or create a service.
  */
 
-const raw = reactive({
+const modes = reactive({
   builder: "",
 });
 
@@ -22,7 +22,7 @@ onBeforeMount(() => {
     dataEl && !dataEl.getAttribute(dataAtt).includes(dataAtt)
       ? JSON.parse(atob(dataEl.getAttribute(dataAtt)))
       : {};
-  raw.builder = data;
+  modes.builder = data;
 });
 
 onMounted(() => {
@@ -34,7 +34,7 @@ onMounted(() => {
 <template>
   <DashboardLayout>
     <div class="col-span-12 grid grid-cols-12 card">
-      <BuilderRaw v-if="raw.builder" :builder="raw.builder" />
+      <BuilderModes v-if="modes.builder" :builder="modes.builder" />
     </div>
   </DashboardLayout>
 </template>

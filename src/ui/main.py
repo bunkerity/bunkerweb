@@ -58,6 +58,8 @@ from builder.global_config import global_config_builder
 from builder.jobs import jobs_builder
 from builder.services import services_builder
 from builder.raw_mode import raw_mode_builder
+from builder.advanced_mode import advanced_mode_builder
+from builder.easy_mode import easy_mode_builder
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -1278,40 +1280,51 @@ def update_service(config, variables, format_configs, server_name, old_server_na
     return redirect(url_for("loading", next=url_for(redirect_name, service_name=[server_name]), message=message))
 
 
-@app.route("/raw-mode", methods=["GET", "POST"])
+@app.route("/modes", methods=["GET", "POST"])
 @login_required
-def services_raw():
+def services_modes():
     if request.method == "POST":
         if DB.readonly:
             return handle_error("Database is in read-only mode", "services")
 
         verify_data_in_form(
             data={"operation": ("edit", "new", "delete")},
-            err_message="Invalid operation parameter on /services.",
+            err_message="Invalid operation parameter on /easy-mode.",
             redirect_url="services",
         )
 
         config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged = get_service_data()
         update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, "raw-mode")
 
-    if not request.args.get("service_name"):
-        return handle_error("Service name missing to access raw mode.", "services")
+    if not request.args.get("mode"):
+        return handle_error("Mode type is missing to access /modes.", "services")
 
     service_name = request.args.get("service_name")
+    mode = request.args.get("mode")
     total_config = DB.get_config(methods=True, with_drafts=True)
     service_names = total_config["SERVER_NAME"]["value"].split(" ")
-    # Case new service
-    service_names.append("new")
 
-    if service_name not in service_names:
-        return handle_error("Service name not found to access raw mode.", "services")
+    if service_name and service_name not in service_names:
+        return handle_error("Service name not found to access advanced mode.", "services")
+
+    # Case new service
+    if service_name is None:
+        service_name = "new"
 
     global_config = app.bw_config.get_config(global_only=True, methods=True)
     plugins = app.bw_config.get_plugins()
 
-    data_server_builder = raw_mode_builder(TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name)
+    data_server_builder = None
+    if mode == "raw":
+        data_server_builder = raw_mode_builder(TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name)
 
-    return render_template("raw.html", data_server_builder=data_server_builder)
+    if mode == "advanced":
+        data_server_builder = advanced_mode_builder(TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name)
+
+    if mode == "easy":
+        data_server_builder = easy_mode_builder(TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name)
+
+    return render_template("modes.html", data_server_builder=data_server_builder)
 
 
 @app.route("/services", methods=["GET", "POST"])

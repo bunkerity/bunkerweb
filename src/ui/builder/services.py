@@ -271,7 +271,7 @@ def services_action(
                     "size": "normal",
                     "attrs": {
                         "role": "link",
-                        "data-link": f"services/{mode}/{server_name}",
+                        "data-link": f"modes?service_name={server_name}&mode={mode}" if mode != "create" else f"modes?mode={mode}",
                     },
                 },
             )
