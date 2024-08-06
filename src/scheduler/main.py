@@ -806,7 +806,7 @@ if __name__ == "__main__":
                     LOGGER.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
 
                 try:
-                    SCHEDULER.db.set_failover(failed)
+                    SCHEDULER.db.set_metadata({"failover": failed})
                 except BaseException as e:
                     LOGGER.error(f"Error while setting failover to true in the database: {e}")
 
