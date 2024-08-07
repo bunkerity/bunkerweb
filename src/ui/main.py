@@ -2142,7 +2142,7 @@ def logs():
 
     current_file = secure_filename(request.args.get("file", ""))
 
-    if current_file not in files:
+    if current_file and current_file not in files:
         return Response("No such file", 404)
 
     if isabs(current_file) or ".." in current_file:
