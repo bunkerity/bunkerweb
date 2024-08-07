@@ -199,7 +199,7 @@ def get_py_title(data: str) -> str:
     if "/" in title:
         title = title.split("/")[-1]
     # remove the extension
-    title = title.replace(".vue", "").lower()
+    title = title.replace(".vue", "")
     return title
 
 
@@ -337,13 +337,19 @@ def convert_params(params: List[dict]) -> List[dict]:
 
 def create_widget(title: str, desc: str, params: List[dict]):
     try:
+        # format function title from camelCase to snake_case
+        f_title = sub(r"([A-Z])", r"_\1", title).lower()
+        # Case title start by _, remove it
+        if f_title.startswith("_"):
+            f_title = f_title[1:]
+
         # Add indentation to desc
         desc_lines = desc.split("\n")
         desc_indent = []
         for line in desc_lines:
             desc_indent.append(f"    {line}")
         desc = "\n".join(desc_indent)
-        desc = '    """' + desc + '   """\n'
+        desc = '    """' + desc + '"""\n'
 
         # Create function params with type and optional value if exists
         params_str = ""
@@ -376,19 +382,24 @@ def create_widget(title: str, desc: str, params: List[dict]):
                 continue
             param_name = param.get("name")
             param_default = '""' if param.get("default") == "" else param.get("default")
-            add_keys_not_default += f"""    add_key_value(data, "{param_name}", {param_name}, {param_default})\n"""
+            add_keys_not_default += f"""("{param_name}", {param_name}, {param_default}),"""
 
         if add_keys_not_default:
-            add_keys_not_default = "    # List of params that will be add only if not default value\n" + add_keys_not_default
+            add_keys_not_default = f"""    
+    # List of params that will be add only if not default value
+    list_params = [{add_keys_not_default.rstrip(',')}]
+    for param in list_params:
+        add_key_value(data, param[0], param[1], param[2])
+"""
 
         widget_function = f"""
-def {title}_widget(
+def {f_title}_widget(
 {params_str}
     ): 
 {desc}
 {data}
 {add_keys_not_default}
-    return {{ "type" : "{title.capitalize()}", "data" : data }}
+    return {{ "type" : "{title.lower().capitalize()}", "data" : data }}
         """
         return widget_function
 

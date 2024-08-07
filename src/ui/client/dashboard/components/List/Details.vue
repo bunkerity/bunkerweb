@@ -30,7 +30,7 @@ import MessageUnmatch from "@components/Message/Unmatch.vue";
 }]
 *  @param {string} details  - List of details item that contains a text, disabled state, attrs and list of popovers. We can also add a disabled key to disable the item.
 *  @param {array} [filters=[]] - List of filters to apply on the list of items.
-*  @param {columns} [columns={pc: 4, tablet: 6, mobile: 12}] - Determine the position of the items in the grid system.
+*  @param {columns} [columns={"pc": "4", "tablet": "6", "mobile": "12"}] - Determine the position of the items in the grid system.
 */
 
 const props = defineProps({

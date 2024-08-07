@@ -11,7 +11,7 @@ import { computed, defineProps } from "vue";
  *    columns: { pc: 12, tablet: 12, mobile: 12 }
  *  }
  *  @param {array} pairs - The list of key value information. The key and value can be a translation key or a raw text.
- *  @param {object} [columns={pc: 12, tablet: 12, mobile: 12}] - Determine the  position of the items in the grid system.
+ *  @param {object} [columns={"pc": "12", "tablet": "12", "mobile": "12"}] - Determine the  position of the items in the grid system.
  */
 
 const props = defineProps({
