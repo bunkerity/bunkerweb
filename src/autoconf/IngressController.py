@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+from os import getenv
 from time import sleep
 from traceback import format_exc
 from typing import List
@@ -18,6 +19,8 @@ class IngressController(Controller):
         config.load_incluster_config()
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
+        self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower() == "yes"
+        self._logger.info(f"Using Pod {'FQDN' if self.__use_fqdn else 'IP'} as hostname")
 
     def _get_controller_instances(self) -> list:
         instances = []
@@ -42,33 +45,37 @@ class IngressController(Controller):
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {
             "name": controller_instance.metadata.name,
-            "hostname": controller_instance.metadata.name,
+            "hostname": controller_instance.metadata.name if self.__use_fqdn else controller_instance.status.pod_ip,
+            "health": False,
             "type": "pod",
+            "env": {},
         }
-        health = False
+
         if controller_instance.status.conditions:
             for condition in controller_instance.status.conditions:
                 if condition.type == "Ready" and condition.status == "True":
-                    health = True
+                    instance["health"] = True
                     break
-        instance["health"] = health
-        instance["env"] = {}
+
         pod = None
         for container in controller_instance.spec.containers:
             if container.name == "bunkerweb":
                 pod = container
                 break
+
         if not pod:
             self._logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
         else:
             for env in pod.env:
                 instance["env"][env.name] = env.value or ""
+
         for controller_service in self._get_controller_services():
             if controller_service.metadata.annotations:
                 for annotation, value in controller_service.metadata.annotations.items():
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
                     instance["env"][annotation.replace("bunkerweb.io/", "", 1)] = value
+
         return [instance]
 
     def _to_services(self, controller_service) -> List[dict]:

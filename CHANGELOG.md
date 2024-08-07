@@ -11,6 +11,7 @@
 - [FEATURE] Add new templating feature to allow to quickly override the default values of settings and custom configurations. You can also precise steps to follow in the UI to help the user configure services.
 - [SCHEDULER] Refactor the scheduler to use the `BUNKERWEB_INSTANCES` (previously known as `OVERRIDE_INSTANCES`) environment variable instead of an integration specific system
 - [AUTOCONF] Add new `NAMESPACES` environment variable to allow setting the namespaces to watch for the autoconf feature which makes it possible to use multiple autoconf instances in the same cluster while keeping the configuration separated
+- [AUTOCONF] Add new `USE_KUBERNETES_FQDN` environment variable to allow using the full qualified domain name of the services in Kubernetes instead of the ip address for the hostname of instances (default is yes)
 - [UI] Start refactoring the UI to make it more modular and easier to maintain with migration from Jinja to Vue.js
 - [UI] Add a `remember me` feature to the login page so that the user can stay logged in for a longer period of time (expires after 31 days)
 - [UI] Add new `TOTP_SECRETS` setting to encrypt the TOTP secrets in the database (if not set, we generate a random amount of secrets via passlib.totp) - ⚠ We highly recommend setting this setting to a custom value to prevent the secrets from being erased when the volumes are deleted
