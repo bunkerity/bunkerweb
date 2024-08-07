@@ -3111,6 +3111,7 @@ class Database:
                         hostname=instance["hostname"],
                         port=instance["env"].get("API_HTTP_PORT", 5000),
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
+                        status="up" if instance.get("health", True) else "down",
                         method=method,
                     )
                 )

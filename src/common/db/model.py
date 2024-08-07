@@ -202,7 +202,7 @@ class Instances(Base):
     hostname = Column(String(256), primary_key=True)
     port = Column(Integer, nullable=False)
     server_name = Column(String(256), nullable=False)
-    status = Column(INSTANCE_STATUS_ENUM, nullable=True, default="up")
+    status = Column(INSTANCE_STATUS_ENUM, nullable=True, default="loading")
     method = Column(METHODS_ENUM, nullable=False, default="manual")
     creation_date = Column(DateTime, nullable=False, server_default=func.now())
     last_seen = Column(DateTime, nullable=True, server_default=func.now(), onupdate=partial(datetime.now, timezone.utc))
