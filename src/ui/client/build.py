@@ -1,6 +1,6 @@
 # I want to run process
 from os import getenv
-from shutil import copy, move, rmtree
+from shutil import copy, move, rmtree, copytree
 from subprocess import PIPE, Popen
 from pathlib import Path
 from re import sub
@@ -16,6 +16,8 @@ opt_dir_setup = current_directory.joinpath("opt-setup")
 opt_dir_setup_page = current_directory.joinpath("opt-setup", "setup")
 ui_dir_static = current_directory.parent.joinpath("static")
 ui_dir_templates = current_directory.parent.joinpath("templates")
+legacy_dir_static = current_directory.joinpath("legacy", "static")
+legacy_dir_templates = current_directory.joinpath("legacy", "templates")
 
 statics = ("assets", "css", "flags", "img", "js")
 
@@ -25,6 +27,8 @@ def reset():
     print("Resetting...", flush=True)
     remove_dir(opt_dir_dashboard)
     remove_dir(opt_dir_setup)
+    remove_dir(ui_dir_static)
+    remove_dir(ui_dir_templates)
 
 
 def set_dashboard():
@@ -135,10 +139,17 @@ def move_statics(folder: Path, target_folder: Path):
         move(file.as_posix(), target_folder.joinpath(file.name).as_posix())
 
 
+def add_legacy():
+    # copy dir
+    copytree(legacy_dir_static.as_posix(), ui_dir_static.as_posix())
+    copytree(legacy_dir_templates.as_posix(), ui_dir_templates.as_posix())
+
+
 def build():
     """All steps to build the front end and set it to the flask app"""
     reset()
     create_base_dirs()
+    add_legacy()
     # Only install packages if not already installed
     if not current_directory.joinpath("node_modules").exists():
         if run_command(["/usr/bin/npm", "install"]):
