@@ -43,6 +43,7 @@ class IngressController(Controller):
         instance = {
             "name": controller_instance.metadata.name,
             "hostname": controller_instance.metadata.name,
+            "type": "pod",
         }
         health = False
         if controller_instance.status.conditions:

@@ -36,6 +36,7 @@ INTEGRATIONS_ENUM = Enum(
 STREAM_TYPES_ENUM = Enum("no", "yes", "partial", name="stream_types_enum")
 PLUGIN_TYPES_ENUM = Enum("core", "external", "pro", name="plugin_types_enum")
 PRO_STATUS_ENUM = Enum("active", "invalid", "expired", "suspended", name="pro_status_enum")
+INSTANCE_TYPE_ENUM = Enum("static", "container", "pod", name="instance_type_enum")
 INSTANCE_STATUS_ENUM = Enum("loading", "up", "down", name="instance_status_enum")
 Base = declarative_base()
 
@@ -200,9 +201,11 @@ class Instances(Base):
     __tablename__ = "bw_instances"
 
     hostname = Column(String(256), primary_key=True)
+    name = Column(String(256), nullable=False, default="static instance")
     port = Column(Integer, nullable=False)
     server_name = Column(String(256), nullable=False)
-    status = Column(INSTANCE_STATUS_ENUM, nullable=True, default="loading")
+    type = Column(INSTANCE_TYPE_ENUM, nullable=False, default="static")
+    status = Column(INSTANCE_STATUS_ENUM, nullable=False, default="loading")
     method = Column(METHODS_ENUM, nullable=False, default="manual")
     creation_date = Column(DateTime, nullable=False, server_default=func.now())
     last_seen = Column(DateTime, nullable=True, server_default=func.now(), onupdate=partial(datetime.now, timezone.utc))

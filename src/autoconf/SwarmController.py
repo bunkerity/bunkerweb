@@ -48,8 +48,7 @@ class SwarmController(Controller):
         instances = []
         instance_env = {}
         for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
-            variable = env.split("=")[0]
-            value = env.replace(f"{variable}=", "", 1)
+            variable, value = env.split("=", 1)
             instance_env[variable] = value
 
         for task in controller_instance.tasks():
@@ -59,6 +58,7 @@ class SwarmController(Controller):
                 {
                     "name": task["ID"],
                     "hostname": f"{controller_instance.name}.{task['NodeID']}.{task['ID']}",
+                    "type": "container",
                     "health": task["Status"]["State"] == "running",
                     "env": instance_env,
                 }

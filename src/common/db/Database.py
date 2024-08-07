@@ -3069,7 +3069,7 @@ class Database:
                 )
             return cache_files
 
-    def add_instance(self, hostname: str, port: int, server_name: str, method: str, changed: Optional[bool] = True) -> str:
+    def add_instance(self, hostname: str, port: int, server_name: str, method: str, changed: Optional[bool] = True, *, name: Optional[str] = None) -> str:
         """Add instance."""
         with self._db_session() as session:
             if self.readonly:
@@ -3080,7 +3080,7 @@ class Database:
             if db_instance is not None:
                 return f"Instance {hostname} already exists, will not be added."
 
-            session.add(Instances(hostname=hostname, port=port, server_name=server_name, method=method))
+            session.add(Instances(hostname=hostname, name=name or "static instance", port=port, server_name=server_name, method=method))
 
             if changed:
                 with suppress(ProgrammingError, OperationalError):
@@ -3112,8 +3112,10 @@ class Database:
                 to_put.append(
                     Instances(
                         hostname=instance["hostname"],
+                        name=instance.get("name", "static instance"),
                         port=instance["env"].get("API_HTTP_PORT", 5000),
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
+                        type=instance.get("type", "static"),
                         status="up" if instance.get("health", True) else "down",
                         method=method,
                     )
@@ -3144,8 +3146,10 @@ class Database:
             return [
                 {
                     "hostname": instance.hostname,
+                    "name": instance.name,
                     "port": instance.port,
                     "server_name": instance.server_name,
+                    "type": instance.type,
                     "status": instance.status,
                     "method": instance.method,
                     "creation_date": instance.creation_date,

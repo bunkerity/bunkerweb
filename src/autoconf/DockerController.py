@@ -45,14 +45,15 @@ class DockerController(Controller):
         ]
 
     def _to_instances(self, controller_instance) -> List[dict]:
-        instance = {}
-        instance["name"] = controller_instance.name
-        instance["hostname"] = controller_instance.name
-        instance["health"] = controller_instance.status == "running" and controller_instance.attrs["State"]["Health"]["Status"] == "healthy"
-        instance["env"] = {}
+        instance = {
+            "name": controller_instance.name,
+            "hostname": controller_instance.name,
+            "type": "container",
+            "health": controller_instance.status == "running" and controller_instance.attrs["State"]["Health"]["Status"] == "healthy",
+            "env": {},
+        }
         for env in controller_instance.attrs["Config"]["Env"]:
-            variable = env.split("=")[0]
-            value = env.replace(f"{variable}=", "", 1)
+            variable, value = env.split("=", 1)
             instance["env"][variable] = value
         return [instance]
 
