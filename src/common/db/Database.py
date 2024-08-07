@@ -3182,7 +3182,7 @@ class Database:
 
             return page.data
 
-    def get_templates(self, plugin: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_templates(self, plugin: Optional[str] = None) -> Dict[str, dict]:
         """Get templates."""
         with self._db_session() as session:
             query = session.query(Templates).with_entities(Templates.id, Templates.plugin_id, Templates.name)
@@ -3190,7 +3190,51 @@ class Database:
             if plugin:
                 query = query.filter_by(plugin_id=plugin)
 
-            return [{"id": template.id, "plugin_id": template.plugin_id, "name": template.name} for template in query]
+            templates = {}
+            for template in query:
+                templates[template.id] = {"plugin_id": template.plugin_id, "name": template.name, "settings": {}, "configs": {}, "steps": {}}
+
+                steps_settings = {}
+                for setting in (
+                    session.query(Template_settings)
+                    .with_entities(Template_settings.setting_id, Template_settings.step_id, Template_settings.default, Template_settings.suffix)
+                    .filter_by(template_id=template.id)
+                ):
+                    key = f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id
+                    templates[template.id]["settings"][key] = setting.default
+
+                    if setting.step_id:
+                        if setting.step_id not in steps_settings:
+                            steps_settings[setting.step_id] = []
+                        steps_settings[setting.step_id].append(key)
+
+                steps_configs = {}
+                for config in (
+                    session.query(Template_custom_configs)
+                    .with_entities(Template_custom_configs.step_id, Template_custom_configs.type, Template_custom_configs.name, Template_custom_configs.data)
+                    .filter_by(template_id=template.id)
+                ):
+                    key = f"{config.type}/{config.name}.conf"
+                    templates[template.id]["configs"][key] = config.data.decode("utf-8")
+
+                    if config.step_id:
+                        if config.step_id not in steps_configs:
+                            steps_configs[config.step_id] = []
+                        steps_configs[config.step_id].append(key)
+
+                for step in (
+                    session.query(Template_steps)
+                    .with_entities(Template_steps.id, Template_steps.title, Template_steps.subtitle)
+                    .filter_by(template_id=template.id)
+                ):
+                    templates[template.id]["steps"][step.id] = {"title": step.title, "subtitle": step.subtitle}
+
+                    if step.id in steps_settings:
+                        templates[template.id]["steps"][step.id]["settings"] = steps_settings[step.id]
+                    if step.id in steps_configs:
+                        templates[template.id]["steps"][step.id]["configs"] = steps_configs[step.id]
+
+            return templates
 
     def get_template_settings(self, template_id: str) -> Dict[str, Any]:
         """Get templates settings."""
