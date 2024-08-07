@@ -3106,6 +3106,9 @@ class Database:
             session.query(Instances).filter(Instances.method == method).delete()
 
             for instance in instances:
+                if instance.get("hostname") is None:
+                    continue
+
                 to_put.append(
                     Instances(
                         hostname=instance["hostname"],
