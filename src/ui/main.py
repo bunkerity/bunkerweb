@@ -23,7 +23,6 @@ from bs4 import BeautifulSoup
 from copy import deepcopy
 from cryptography.fernet import Fernet
 from datetime import datetime, timedelta, timezone
-from dateutil.parser import parse as dateutil_parse
 from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
@@ -35,7 +34,7 @@ from json import JSONDecodeError, dumps, loads as json_loads
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from passlib import totp
 from redis import Redis, Sentinel
-from regex import compile as re_compile, match as regex_match
+from regex import compile as re_compile
 from requests import get
 from shutil import move, rmtree
 from signal import SIGINT, signal, SIGTERM
@@ -1172,20 +1171,13 @@ def get_service_data(page_name: str):
     config = DB.get_config(methods=True, with_drafts=True)
     # Check variables
     variables = deepcopy(request.form.to_dict())
-    mode = None
-    try:
-        mode = variables.pop("mode")
-    except:
-        pass
+    mode = variables.pop("mode", None)
 
     del variables["csrf_token"]
     operation = variables.pop("operation")
 
     # Delete custom client variables
-    try:
-        variables.pop("SECURITY_LEVEL", None)
-    except:
-        pass
+    variables.pop("SECURITY_LEVEL", None)
 
     # Get server name and old one
     old_server_name = ""
@@ -2133,268 +2125,37 @@ def cache():
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    # Case not Linux, return empty ATM
-    if not sbin_nginx_path.is_file():
-        data_server_builder = logs_builder()
-        data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
+    logs_path = Path(sep, "var", "log", "bunkerweb")
+    syslog_path = Path(sep, "var", "log", "syslog")
 
-        return render_template("logs.html", data_server_builder=data_server_builder)
-
-    # Else get all the files in a list of string
     files = []
-    for file in Path(sep, "var", "log", "bunkerweb").iterdir():
-        if file.is_file():
-            files.append(file.name)
+    if logs_path.is_dir():
+        for file in logs_path.glob("*.log"):
+            if file.is_file():
+                files.append(file.name)
 
-    current_file = request.args.get("file", "")
-    # Check if a file is in files list
+    if not files and syslog_path.is_dir():
+        for file in syslog_path.glob("*.log"):
+            if file.is_file():
+                files.append(file.name)
+        logs_path = syslog_path
+
+    current_file = secure_filename(request.args.get("file", ""))
+
     if current_file not in files:
-        current_file = ""
+        return Response("No such file", 404)
 
-    # Case there is a file, get the file content
-    raw_data = ""
+    if isabs(current_file) or ".." in current_file:
+        return error_message("Invalid file path", 400)
+
+    raw_logs = ""
     if current_file:
-        with open(Path(sep, "var", "log", "bunkerweb", current_file), encoding="utf-8") as f:
-            raw_data = f.read()
+        with logs_path.joinpath(current_file).open(encoding="utf-8") as f:
+            raw_logs = f.read()
 
-    data_server_builder = logs_builder(files, current_file, raw_data)
+    data_server_builder = logs_builder(files, current_file, raw_logs)
     data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
     return render_template("logs.html", data_server_builder=data_server_builder)
-
-
-@app.route("/logs/local", methods=["GET"])
-@login_required
-def logs_linux():
-    if not sbin_nginx_path.is_file():
-        return (
-            jsonify(
-                {
-                    "status": "ko",
-                    "message": "There are no linux instances running",
-                }
-            ),
-            404,
-        )
-
-    last_update = request.args.get("last_update", "0.0")
-    from_date = request.args.get("from_date", None)
-    to_date = request.args.get("to_date", None)
-    logs_error = []
-    temp_multiple_lines = []
-    NGINX_LOG_LEVELS = [
-        "debug",
-        "notice",
-        "info",
-        "warn",
-        "error",
-        "crit",
-        "alert",
-        "emerg",
-    ]
-
-    nginx_error_file = Path(sep, "var", "log", "bunkerweb", "error.log")
-    if nginx_error_file.is_file():
-        with open(nginx_error_file, encoding="utf-8") as f:
-            for line in f.readlines()[int(last_update.split(".")[0]) if last_update else 0 :]:  # noqa: E203
-                match = LOG_RX.search(line)
-                if not match:
-                    continue
-                date = match.group("date")
-                level = match.group("level")
-
-                if not date:
-                    if logs_error:
-                        logs_error[-1] += f"\n{line}"
-                        continue
-                    logs_error.append(line)
-                elif all(f"[{log_level}]" != level for log_level in NGINX_LOG_LEVELS) and temp_multiple_lines:
-                    temp_multiple_lines.append(line)
-                else:
-                    logs_error.append(f"{datetime.strptime(date, '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}")
-
-    if temp_multiple_lines:
-        logs_error.append("\n".join(temp_multiple_lines))
-
-    logs_access = []
-    nginx_access_file = Path(sep, "var", "log", "bunkerweb", "access.log")
-    if nginx_access_file.is_file():
-        with open(nginx_access_file, encoding="utf-8") as f:
-            for line in f.readlines()[int(last_update.split(".")[1]) if last_update else 0 :]:  # noqa: E203
-                logs_access.append(
-                    f"{datetime.strptime(line[line.find('[') + 1: line.find(']')], '%d/%b/%Y:%H:%M:%S %z').replace(tzinfo=timezone.utc).timestamp()} {line}"
-                )
-
-    raw_logs = logs_error + logs_access
-
-    if from_date and from_date.isdigit():
-        from_date = int(from_date) // 1000
-    else:
-        from_date = 0
-
-    if to_date and to_date.isdigit():
-        to_date = int(to_date) // 1000
-    else:
-        to_date = None
-
-    def date_filter(log: str):
-        log_date = log.split(" ")[0]
-        log_date = float(log_date) if regex_match(r"^\d+\.\d+$", log_date) else 0
-        if to_date is not None and log_date > int(to_date):
-            return False
-        return log_date > from_date
-
-    logs = []
-    for log in filter(date_filter, raw_logs):
-        if "[48;2" in log or not log.strip():
-            continue
-
-        log_lower = log.lower()
-        error_type = (
-            "error"
-            if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
-            else (
-                "emerg"
-                if "[emerg]" in log_lower
-                else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
-            )
-        )
-
-        logs.append(
-            {
-                "content": " ".join(log.strip().split(" ")[1:]),
-                "type": error_type,
-            }
-        )
-
-    count_error_logs = 0
-    for log in logs_error:
-        if "\n" in log:
-            for _ in log.split("\n"):
-                count_error_logs += 1
-        else:
-            count_error_logs += 1
-
-    return jsonify(
-        {
-            "logs": logs,
-            "last_update": (
-                f"{count_error_logs + int(last_update.split('.')[0])}.{len(logs_access) + int(last_update.split('.')[1])}"
-                if last_update
-                else f"{count_error_logs}.{len(logs_access)}"
-            ),
-        }
-    )
-
-
-@app.route("/logs/<container_id>", methods=["GET"])
-@login_required
-def logs_container(container_id):
-    last_update = request.args.get("last_update", None)
-    from_date = request.args.get("from_date", None)
-    to_date = request.args.get("to_date", None)
-
-    if from_date is not None:
-        last_update = from_date
-
-    if any(arg and not arg.isdigit() for arg in (last_update, from_date, to_date)):
-        return (
-            jsonify(
-                {
-                    "status": "ko",
-                    "message": "arguments must all be integers (timestamps)",
-                }
-            ),
-            422,
-        )
-    elif not last_update:
-        last_update = int(datetime.now().timestamp() - timedelta(days=1).total_seconds())  # 1 day before
-    else:
-        last_update = int(last_update) // 1000
-
-    to_date = int(to_date) // 1000 if to_date else None
-
-    logs = []
-    tmp_logs = []
-    return jsonify({"logs": logs, "last_update": int(time() * 1000)})
-
-    # TODO: find a solution for this
-    # if docker_client:
-    #     try:
-    #         if INTEGRATION != "Swarm":
-    #             docker_logs = docker_client.containers.get(container_id).logs(  # type: ignore
-    #                 stdout=True,
-    #                 stderr=True,
-    #                 since=datetime.fromtimestamp(last_update),
-    #                 timestamps=True,
-    #             )
-    #         else:
-    #             docker_logs = docker_client.services.get(container_id).logs(  # type: ignore
-    #                 stdout=True,
-    #                 stderr=True,
-    #                 since=datetime.fromtimestamp(last_update),
-    #                 timestamps=True,
-    #             )
-
-    #         tmp_logs = docker_logs.decode("utf-8", errors="replace").split("\n")[0:-1]
-    #     except docker_NotFound:
-    #         return (
-    #             jsonify(
-    #                 {
-    #                     "status": "ko",
-    #                     "message": f"Container with ID {container_id} not found!",
-    #                 }
-    #             ),
-    #             404,
-    #         )
-    # elif kubernetes_client:
-    #     try:
-    #         kubernetes_logs = kubernetes_client.read_namespaced_pod_log(
-    #             container_id,
-    #             getenv("KUBERNETES_NAMESPACE", "default"),
-    #             since_seconds=int(datetime.now().timestamp() - last_update),
-    #             timestamps=True,
-    #         )
-    #         tmp_logs = kubernetes_logs.split("\n")[0:-1]
-    #     except kube_ApiException:
-    #         return (
-    #             jsonify(
-    #                 {
-    #                     "status": "ko",
-    #                     "message": f"Pod with ID {container_id} not found!",
-    #                 }
-    #             ),
-    #             404,
-    #         )
-
-    for log in tmp_logs:
-        split = log.split(" ")
-        timestamp = split[0]
-
-        if to_date is not None and dateutil_parse(timestamp).timestamp() > to_date:
-            break
-
-        log = " ".join(split[1:])
-        log_lower = log.lower()
-
-        if "[48;2" in log or not log.strip():
-            continue
-
-        logs.append(
-            {
-                "content": log,
-                "type": (
-                    "error"
-                    if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
-                    else (
-                        "emerg"
-                        if "[emerg]" in log_lower
-                        else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
-                    )
-                ),
-            }
-        )
-
-    return jsonify({"logs": logs, "last_update": int(time() * 1000)})
 
 
 @app.route("/reports", methods=["GET"])
