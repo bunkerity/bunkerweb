@@ -1,7 +1,4 @@
-import base64
-import json
 from typing import Union
-
 
 from os.path import join, sep
 from sys import path as sys_path
@@ -122,7 +119,7 @@ def services_builder(services):
         },
     ]
 
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return builder
 
 
 def services_settings(settings: dict) -> dict:

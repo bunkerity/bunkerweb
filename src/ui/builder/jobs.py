@@ -1,6 +1,3 @@
-import base64
-import json
-
 from os.path import join, sep
 from sys import path as sys_path
 
@@ -141,7 +138,7 @@ def jobs_builder(jobs):
         }
     ]
 
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return builder
 
 
 def get_jobs_list(jobs):

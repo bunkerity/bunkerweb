@@ -1,5 +1,3 @@
-import base64
-import json
 from os.path import join, sep
 from sys import path as sys_path
 
@@ -47,4 +45,4 @@ def raw_mode_builder(templates: list[dict], plugins: list, global_config: dict, 
             ],
         }
     ]
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return builder

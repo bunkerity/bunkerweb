@@ -1,6 +1,3 @@
-import base64
-import json
-
 from .utils.form import get_forms, get_service_settings
 
 
@@ -39,4 +36,4 @@ def easy_mode_builder(templates: list[dict], plugins: list, global_config: dict,
             ],
         }
     ]
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return builder

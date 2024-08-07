@@ -1,6 +1,3 @@
-import base64
-import json
-
 from os.path import join, sep
 from sys import path as sys_path
 from typing import List
@@ -57,4 +54,4 @@ def instances_builder(instances: List[Instance]) -> str:
 
         builder.append(instance)
 
-    return base64.b64encode(json.dumps(builder).encode("utf-8")).decode("ascii")
+    return builder

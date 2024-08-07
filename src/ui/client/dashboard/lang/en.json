@@ -194,6 +194,8 @@
   "instances_status": "status",
   "instances_active": "active",
   "instances_inactive": "inactive",
+  "instances_creation_date": "creation date",
+  "instances_last_seen": "last seen",
   "global_config_title": "Global configuration",
   "global_config_subtitle": "Manage your global settings.",
   "jobs_title": "Jobs list",
@@ -297,5 +299,12 @@
   "services_settings_table_status": "Status",
   "services_mode_title": "Service mode",
   "services_mode_subtitle": "Manage your service settings.",
-  "services_manage_subtitle": "Manage your service settings."
+  "services_manage_subtitle": "Manage your service settings.",
+  "logs_title": "Logs",
+  "logs_not_found": "No logs found",
+  "logs_no_files_found": "No log files found",
+  "logs_select_file": "Select a log file",
+  "logs_select_file_info": "Log files are retrieve using syslog under the hood.",
+  "logs_not_selected_or_not_found": "No log file selected or content not found",
+  "logs_file_content": "Log content"
 }

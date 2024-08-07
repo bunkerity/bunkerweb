@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import base64
 from contextlib import suppress
 from math import floor
 from multiprocessing import Manager
@@ -60,6 +61,7 @@ from builder.services import services_builder
 from builder.raw_mode import raw_mode_builder
 from builder.advanced_mode import advanced_mode_builder
 from builder.easy_mode import easy_mode_builder
+from builder.logs import logs_builder
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -937,6 +939,7 @@ def home():
     }
 
     data_server_builder = home_builder(data)
+    data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
 
     return render_template("home.html", data_server_builder=json.dumps(data_server_builder))
 
@@ -1141,7 +1144,9 @@ def instances():
     instances = app.bw_instances_utils.get_instances()
 
     data_server_builder = instances_builder(instances)
-    return render_template("instances.html", title="Instances", data_server_builder=json.dumps(data_server_builder))
+    data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
+
+    return render_template("instances.html", title="Instances", data_server_builder=data_server_builder)
 
 
 def get_service_data(page_name: str):
@@ -1356,6 +1361,8 @@ def services_modes():
             TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name or "new", False if service_name else True
         )
 
+    data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
+
     return render_template("modes.html", data_server_builder=data_server_builder)
 
 
@@ -1406,6 +1413,7 @@ def services():
     services.sort(key=lambda x: x["SERVER_NAME"]["value"])
 
     data_server_builder = services_builder(services)
+    data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
 
     return render_template("services.html", data_server_builder=data_server_builder)
 
@@ -1479,6 +1487,8 @@ def global_config():
     global_config = app.bw_config.get_config(global_only=True, methods=True)
     plugins = app.bw_config.get_plugins()
     data_server_builder = global_config_builder(TEMPLATE_PLACEHOLDER, plugins, global_config)
+    data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
+
     return render_template("global-config.html", data_server_builder=data_server_builder)
 
 
@@ -2124,7 +2134,33 @@ def cache():
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    return render_template("logs.html", instances=app.bw_instances_utils.get_instances(), username=current_user.get_id())
+    # Case not Linux, return empty ATM
+    if not sbin_nginx_path.is_file():
+        data_server_builder = logs_builder()
+        data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
+
+        return render_template("logs.html", data_server_builder=data_server_builder)
+
+    # Else get all the files in a list of string
+    files = []
+    for file in Path(sep, "var", "log", "bunkerweb").iterdir():
+        if file.is_file():
+            files.append(file.name)
+
+    current_file = request.args.get("file", "")
+    # Check if a file is in files list
+    if current_file not in files:
+        current_file = ""
+
+    # Case there is a file, get the file content
+    raw_data = ""
+    if current_file:
+        with open(Path(sep, "var", "log", "bunkerweb", current_file), encoding="utf-8") as f:
+            raw_data = f.read()
+
+    data_server_builder = logs_builder(files, current_file, raw_data)
+    data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
+    return render_template("logs.html", data_server_builder=data_server_builder)
 
 
 @app.route("/logs/local", methods=["GET"])
@@ -2605,6 +2641,7 @@ def bans():
 @login_required
 def jobs():
     data_server_builder = jobs_builder(DB.get_jobs())
+    data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
     return render_template("jobs.html", data_server_builder=data_server_builder)
 
 

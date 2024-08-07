@@ -1,6 +1,3 @@
-import base64
-import json
-
 from .utils.widgets import instance_widget
 
 
@@ -47,4 +44,4 @@ def instances_builder(instances: list) -> str:
 
         builder.append(instance)
 
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return builder

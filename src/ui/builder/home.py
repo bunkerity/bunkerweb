@@ -1,6 +1,3 @@
-import base64
-import json
-
 from os.path import join, sep
 from sys import path as sys_path
 
@@ -91,4 +88,4 @@ def home_builder(data: dict) -> str:
 
     builder = [version_card, version_num_card, instances_card, services_card, plugins_card]
 
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return builder

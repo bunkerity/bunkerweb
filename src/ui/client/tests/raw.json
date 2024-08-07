@@ -1,63 +1,11 @@
 [
     {
-        "type": "card",
-        "containerColumns": {
-            "pc": 12,
-            "tablet": 12,
-            "mobile": 12
-        },
+        "type": "void",
         "widgets": [
             {
-                "type": "Title",
+                "type": "MessageUnmatch",
                 "data": {
-                    "title": "app1.example.com",
-                    "type": "container",
-                    "lowercase": true
-                }
-            },
-            {
-                "type": "Subtitle",
-                "data": {
-                    "subtitle": "services_manage_subtitle",
-                    "type": "container",
-                    "subtitleClass": "mb-4"
-                }
-            },
-            {
-                "type": "Templates",
-                "data": {
-                    "templates": {
-                        "raw": {
-                            "default": {
-                                "MULTISITE": "yes",
-                                "SERVER_NAME": "app1.example.com",
-                                "LOG_LEVEL": "info",
-                                "API_WHITELIST_IP": "127.0.0.0/24 10.20.30.0/24",
-                                "BUNKERWEB_INSTANCES": "bunkerweb",
-                                "USE_BLACKLIST": "no",
-                                "USE_BUNKERNET": "no",
-                                "CORS_ALLOW_ORIGIN": "self",
-                                "CROSS_ORIGIN_OPENER_POLICY": "same-origin",
-                                "CROSS_ORIGIN_EMBEDDER_POLICY": "require-corp",
-                                "CROSS_ORIGIN_RESOURCE_POLICY": "same-site",
-                                "USE_CLIENT_CACHE": "yes",
-                                "USE_GZIP": "yes",
-                                "REMOVE_HEADERS": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins",
-                                "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Permissions-Policy X-Frame-Options",
-                                "STRICT_TRANSPORT_SECURITY": "max-age=31536000; includeSubDomains; preload",
-                                "PERMISSIONS_POLICY": "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",
-                                "DISABLE_DEFAULT_SERVER": "yes",
-                                "SERVE_FILES": "no",
-                                "SEND_ANONYMOUS_REPORT": "no",
-                                "MODSECURITY_CRS_VERSION": "4",
-                                "USE_REVERSE_PROXY": "yes",
-                                "REVERSE_PROXY_HOST": "http://app1:8080",
-                                "USE_WHITELIST": "no"
-                            }
-                        }
-                    },
-                    "operation": "edit",
-                    "old_service_name": ""
+                    "text": "logs_not_found"
                 }
             }
         ]

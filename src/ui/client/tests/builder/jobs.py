@@ -1,6 +1,3 @@
-import base64
-import json
-
 from .utils.widgets import title_widget, table_widget
 
 
@@ -134,7 +131,7 @@ def jobs_builder(jobs):
         }
     ]
 
-    return base64.b64encode(bytes(json.dumps(builder), "utf-8")).decode("ascii")
+    return builder
 
 
 def get_jobs_list(jobs):

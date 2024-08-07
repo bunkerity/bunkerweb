@@ -52,6 +52,7 @@ export default defineConfig({
         jobs: resolve(__dirname, "./dashboard/pages/jobs/index.html"),
         services: resolve(__dirname, "./dashboard/pages/services/index.html"),
         modes: resolve(__dirname, "./dashboard/pages/modes/index.html"),
+        logs: resolve(__dirname, "./dashboard/pages/logs/index.html"),
       },
     },
   },
