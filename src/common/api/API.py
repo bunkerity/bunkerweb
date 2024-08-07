@@ -25,7 +25,7 @@ class API:
         url: str,
         data: Optional[Union[dict, bytes]] = None,
         files=None,
-        timeout=(10, 30),
+        timeout=(5, 10),
     ) -> tuple[bool, str, Optional[int], Optional[dict]]:
         try:
             kwargs = {}
