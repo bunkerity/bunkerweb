@@ -25,6 +25,11 @@ services:
       bw-services:
         aliases:
           - bunkerweb
+    logging:
+      driver: syslog
+      options:
+        tag: "bunkerweb"
+        syslog-address: "udp://10.20.30.254:514"
 
   bw-autoconf:
     build:
@@ -46,6 +51,11 @@ services:
       bw-docker:
         aliases:
           - bw-autoconf
+    logging:
+      driver: syslog
+      options:
+        tag: "bw-autoconf"
+        syslog-address: "udp://10.20.30.254:514"
 
   bw-scheduler:
     build:
@@ -78,15 +88,19 @@ services:
       bw-db:
         aliases:
           - bw-scheduler
+    logging:
+      driver: syslog
+      options:
+        tag: "bw-scheduler"
+        syslog-address: "udp://10.20.30.254:514"
 
   bw-ui:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
     volumes:
+      - bw-logs:/var/log/syslog:ro
       - ../../src/ui/src:/usr/share/bunkerweb/ui/src:ro
-      - ../../src/ui/static:/usr/share/bunkerweb/ui/static:ro
-      - ../../src/ui/templates:/usr/share/bunkerweb/ui/templates:ro
       - ../../src/ui/gunicorn.conf.py:/usr/share/bunkerweb/ui/gunicorn.conf.py:ro
       - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
       - ../../src/ui/models.py:/usr/share/bunkerweb/ui/models.py:ro
@@ -103,6 +117,11 @@ services:
       bw-db:
         aliases:
           - bw-ui
+    logging:
+      driver: syslog
+      options:
+        tag: "bw-ui"
+        syslog-address: "udp://10.20.30.254:514"
 
   bw-db:
     image: mariadb:11
@@ -132,6 +151,15 @@ services:
         aliases:
           - bw-docker
 
+  bw-syslog:
+    image: balabit/syslog-ng:4.7.1
+    volumes:
+      - bw-logs:/var/log
+      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.254
+
   app1:
     image: nginxdemos/nginx-hello
     restart: "unless-stopped"
@@ -148,6 +176,7 @@ services:
 volumes:
   bw-data:
   bw-db:
+  bw-logs:
 
 networks:
   bw-universe:
