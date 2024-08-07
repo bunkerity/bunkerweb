@@ -76,7 +76,7 @@ const subtitleEl = ref(null);
 
 onMounted(() => {
   subtitle.class =
-    props.subtitleClass || subtitleEl.value.closest("[data-is]")
+    props.subtitleClass || subtitleEl?.value?.closest("[data-is]")
       ? `subtitle-${subtitleEl.value
           .closest("[data-is]")
           .getAttribute("data-is")}`

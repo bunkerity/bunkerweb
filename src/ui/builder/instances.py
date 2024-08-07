@@ -43,6 +43,8 @@ def instances_builder(instances: List[Instance]) -> str:
         instance = instance_widget(
             containerColumns={"pc": 6, "tablet": 6, "mobile": 12},
             pairs=[
+                {"key": "instances_name", "value": instance.name},
+                {"key": "instances_type", "value": instance.type},
                 {"key": "instances_method", "value": instance.method},
                 {"key": "instances_creation_date", "value": instance.creation_date.strftime("%d-%m-%Y %H:%M:%S")},
                 {"key": "instances_last_seen", "value": instance.last_seen.strftime("%d-%m-%Y %H:%M:%S")},

@@ -1172,7 +1172,6 @@ def get_service_data(page_name: str):
     config = DB.get_config(methods=True, with_drafts=True)
     # Check variables
     variables = deepcopy(request.form.to_dict())
-    print(variables, flush=True)
     mode = None
     try:
         mode = variables.pop("mode")
@@ -1322,8 +1321,8 @@ def services_modes():
 
         config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode = get_service_data("modes")
         message = update_service(config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged)
-        print(message, flush=True)
-        print("mode", mode, "service name", server_name, flush=True)
+        # print(message, flush=True)
+        # print("mode", mode, "service name", server_name, flush=True)
         # TODO: redirect to /mode?service_name=my_service&mode=my_mode
         # Following is not working :
         # return redirect(url_for("loading", next=url_for("modes", mode=mode, service_name=server_name), message=message))

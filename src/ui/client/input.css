@@ -1285,6 +1285,10 @@ body {
   @apply break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0;
 }
 
+.subtitle-modal {
+  @apply break-word dark:text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.05rem] mb-0;
+}
+
 .subtitle-void {
   @apply break-word text-gray-300 col-span-12 break-words w-full max-w-[80%] sm:max-w-[800px] leading-normal text-[1.1rem] mb-0;
 }

@@ -24,16 +24,16 @@
                         "jobs_table_interval",
                         "jobs_table_reload",
                         "jobs_table_success",
-                        "jobs_table_last_run_date",
+                        "jobs_table_history",
                         "jobs_table_cache_downloadable"
                     ],
                     "positions": [
-                        2,
+                        3,
                         2,
                         1,
                         1,
                         1,
-                        2,
+                        1,
                         3
                     ],
                     "items": [
@@ -67,17 +67,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:11 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:11 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "anonymous-report"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:04 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -118,17 +194,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:10 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:10 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "backup-data"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -169,17 +321,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:09 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:09 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "blacklist-download"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:01 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -220,17 +448,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:11 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:11 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "bunkernet-data"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -271,17 +575,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:09 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:09 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "bunkernet-register"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -322,17 +702,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:08 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:08 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "certbot-new"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -373,17 +829,220 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:09 PM",
+                                "type": "Button",
+                                "data": {
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "certbot-renew"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "cache": [],
                                 "type": "Text",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:09 PM"
+                                    "text": ""
+                                }
+                            }
+                        ],
+                        [
+                            {
+                                "name": "cleanup-excess-jobs-runs",
+                                "type": "Text",
+                                "data": {
+                                    "text": "cleanup-excess-jobs-runs"
+                                }
+                            },
+                            {
+                                "plugin_id": "db",
+                                "type": "Text",
+                                "data": {
+                                    "text": "db"
+                                }
+                            },
+                            {
+                                "every": "day",
+                                "type": "Text",
+                                "data": {
+                                    "text": "day"
+                                }
+                            },
+                            {
+                                "reload": "failed",
+                                "type": "Icons",
+                                "data": {
+                                    "iconName": "cross"
+                                }
+                            },
+                            {
+                                "history": "success",
+                                "type": "Icons",
+                                "data": {
+                                    "iconName": "check"
+                                }
+                            },
+                            {
+                                "type": "Button",
+                                "data": {
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "cleanup-excess-jobs-runs"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -424,17 +1083,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:09 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:09 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "coreruleset-nightly"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:01 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -475,17 +1210,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:10 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:10 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "custom-cert"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -526,17 +1337,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:10 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:10 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "default-server-cert"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -565,7 +1452,7 @@
                                         },
                                         "overflowAttrEl": "data-table-body",
                                         "containerClass": "table download-cache-file",
-                                        "maxBtnChars": 12,
+                                        "maxBtnChars": 16,
                                         "popovers": [
                                             {
                                                 "iconName": "info",
@@ -573,6 +1460,133 @@
                                             }
                                         ]
                                     }
+                                }
+                            }
+                        ],
+                        [
+                            {
+                                "name": "download-crs-plugins",
+                                "type": "Text",
+                                "data": {
+                                    "text": "download-crs-plugins"
+                                }
+                            },
+                            {
+                                "plugin_id": "modsecurity",
+                                "type": "Text",
+                                "data": {
+                                    "text": "modsecurity"
+                                }
+                            },
+                            {
+                                "every": "day",
+                                "type": "Text",
+                                "data": {
+                                    "text": "day"
+                                }
+                            },
+                            {
+                                "reload": "success",
+                                "type": "Icons",
+                                "data": {
+                                    "iconName": "check"
+                                }
+                            },
+                            {
+                                "history": "success",
+                                "type": "Icons",
+                                "data": {
+                                    "iconName": "check"
+                                }
+                            },
+                            {
+                                "type": "Button",
+                                "data": {
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "download-crs-plugins"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "cache": [],
+                                "type": "Text",
+                                "data": {
+                                    "text": ""
                                 }
                             }
                         ],
@@ -606,17 +1620,113 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:13 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:13 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "download-plugins"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:04 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:05 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ],
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:09:59 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:00 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -657,17 +1767,113 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:10 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:10 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "download-pro-plugins"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:04 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ],
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:00 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:01 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "cross"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -708,17 +1914,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:16 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:16 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "failover-backup"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:07 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:08 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -746,7 +2028,7 @@
                                         },
                                         "overflowAttrEl": "data-table-body",
                                         "containerClass": "table download-cache-file",
-                                        "maxBtnChars": 12,
+                                        "maxBtnChars": 16,
                                         "popovers": [
                                             {
                                                 "iconName": "info",
@@ -787,17 +2069,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:09 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:09 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "greylist-download"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -838,17 +2196,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:14 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:14 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "mmdb-asn"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:04 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:06 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -876,7 +2310,7 @@
                                         },
                                         "overflowAttrEl": "data-table-body",
                                         "containerClass": "table download-cache-file",
-                                        "maxBtnChars": 12,
+                                        "maxBtnChars": 16,
                                         "popovers": [
                                             {
                                                 "iconName": "info",
@@ -917,17 +2351,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:12 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:12 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "mmdb-country"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:04 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -955,7 +2465,7 @@
                                         },
                                         "overflowAttrEl": "data-table-body",
                                         "containerClass": "table download-cache-file",
-                                        "maxBtnChars": 12,
+                                        "maxBtnChars": 16,
                                         "popovers": [
                                             {
                                                 "iconName": "info",
@@ -996,17 +2506,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:09 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:09 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "realip-download"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -1047,17 +2633,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:10 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:10 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "self-signed"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:03 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -1086,7 +2748,7 @@
                                         },
                                         "overflowAttrEl": "data-table-body",
                                         "containerClass": "table download-cache-file",
-                                        "maxBtnChars": 12,
+                                        "maxBtnChars": 16,
                                         "popovers": [
                                             {
                                                 "iconName": "info",
@@ -1127,17 +2789,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:15 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:15 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "update-check"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:06 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:07 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -1178,17 +2916,93 @@
                                 }
                             },
                             {
-                                "success": "success",
+                                "history": "success",
                                 "type": "Icons",
                                 "data": {
                                     "iconName": "check"
                                 }
                             },
                             {
-                                "last_run": "2024/06/14, 01:33:09 PM",
-                                "type": "Text",
+                                "type": "Button",
                                 "data": {
-                                    "text": "2024/06/14, 01:33:09 PM"
+                                    "id": "open-modal-history-history",
+                                    "text": "jobs_history",
+                                    "hideText": true,
+                                    "color": "blue",
+                                    "size": "normal",
+                                    "iconName": "document",
+                                    "iconColor": "white",
+                                    "modal": {
+                                        "widgets": [
+                                            {
+                                                "type": "Title",
+                                                "data": {
+                                                    "title": "whitelist-download"
+                                                }
+                                            },
+                                            {
+                                                "type": "Subtitle",
+                                                "data": {
+                                                    "subtitle": "jobs_history_subtitle"
+                                                }
+                                            },
+                                            {
+                                                "type": "Table",
+                                                "data": {
+                                                    "title": "jobs_history_table_title",
+                                                    "minWidth": "",
+                                                    "header": [
+                                                        "jobs_table_start_run",
+                                                        "jobs_table_end_run",
+                                                        "jobs_table_success"
+                                                    ],
+                                                    "positions": [
+                                                        5,
+                                                        5,
+                                                        2
+                                                    ],
+                                                    "items": [
+                                                        [
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Text",
+                                                                "data": {
+                                                                    "text": "07/08/2024, 01:10:02 PM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "Icons",
+                                                                "data": {
+                                                                    "iconName": "check"
+                                                                }
+                                                            }
+                                                        ]
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "ButtonGroup",
+                                                "data": {
+                                                    "buttons": [
+                                                        {
+                                                            "id": "close-history-history",
+                                                            "text": "action_close",
+                                                            "color": "close",
+                                                            "size": "normal",
+                                                            "attrs": {
+                                                                "data-close-modal": ""
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
                                 }
                             },
                             {
@@ -1208,8 +3022,7 @@
                             "value": "",
                             "keys": [
                                 "name",
-                                "plugin_id",
-                                "last_run"
+                                "plugin_id"
                             ],
                             "field": {
                                 "id": "jobs-keyword",

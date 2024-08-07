@@ -312,7 +312,7 @@ function closeTab(e) {
 /**
  *  @name addEntry
  *  @description When clicking add entry or key "Enter", will add the current input value to list.
- *  @param {e} e - The event object.
+ *  @param {event} e - The event object.
  *  @returns {void}
  */
 function addEntry(e) {

@@ -161,7 +161,7 @@ function useEqualStr(type, compare) {
  *  @name useDataLinkAttr
  *  @description Check from event if the target has a data-link attribute. Case it is, it will be used to redirect the user to the define link.
  * This is useful to avoid using the <a> tag and use a <div> or <button> instead.
- *  @param {e} event - The event to attach the function logic
+ *  @param {event} e - The event to attach the function logic
  *  @returns {void}
  */
 function useDataLinkAttr(e) {

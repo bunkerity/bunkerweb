@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from "vue";
+
 /**
  *  @name Widget/Title.vue
  *  @description This component is a general title wrapper.
@@ -83,7 +84,7 @@ onMounted(() => {
     !nextSibling || !nextSibling.hasAttribute("data-subtitle") ? false : true;
 
   title.class =
-    props.titleClass || titleEl.value.closest("[data-is]")
+    props.titleClass || titleEl?.value?.closest("[data-is]")
       ? `title-${titleEl.value.closest("[data-is]").getAttribute("data-is")}`
       : "title-card";
 });
