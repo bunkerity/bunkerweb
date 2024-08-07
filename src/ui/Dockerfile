@@ -37,8 +37,6 @@ COPY src/VERSION VERSION
 
 COPY src/ui/builder ui/builder
 COPY src/ui/client ui/client
-COPY src/ui/static ui/static
-COPY src/ui/templates ui/templates
 
 # This will build the frontend and add files to the UI folder
 WORKDIR /usr/share/bunkerweb/ui/client
