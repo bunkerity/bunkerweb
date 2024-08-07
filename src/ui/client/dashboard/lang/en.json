@@ -189,6 +189,7 @@
   "home_plugins": "plugins",
   "home_no_error": "no error",
   "home_errors_found": "errors found",
+  "instances_name": "name",
   "instances_hostname": "hostname",
   "instances_type": "type",
   "instances_status": "status",

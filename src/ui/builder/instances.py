@@ -44,6 +44,7 @@ def instances_builder(instances: List[Instance]) -> str:
             containerColumns={"pc": 6, "tablet": 6, "mobile": 12},
             pairs=[
                 {"key": "instances_name", "value": instance.name},
+                {"key": "instances_hostname", "value": instance.hostname},
                 {"key": "instances_type", "value": instance.type},
                 {"key": "instances_method", "value": instance.method},
                 {"key": "instances_creation_date", "value": instance.creation_date.strftime("%d-%m-%Y %H:%M:%S")},
