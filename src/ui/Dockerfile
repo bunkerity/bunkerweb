@@ -55,16 +55,22 @@ FROM python:3.12.4-alpine@sha256:7f15e22f496c65cffbbac5e30e7e98d60f3e3b9cc5ee5d5
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
+# Install runtime dependencies and add ui user
+RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
+  addgroup -g 101 ui && \
+  adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui
+
+# Fix CVEs
+RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
+RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
-# Add ui user, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
-  addgroup -g 101 ui && \
-  adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
-  echo "Docker" > INTEGRATION && \
+# Create data folders and set permissions
+RUN echo "Docker" > INTEGRATION && \
   mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
@@ -76,10 +82,6 @@ RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client po
   chmod 660 INTEGRATION && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
-
-# Fix CVEs
-RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
-RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.5.9"

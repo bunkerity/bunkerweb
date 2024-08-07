@@ -36,16 +36,22 @@ FROM python:3.12.4-alpine@sha256:7f15e22f496c65cffbbac5e30e7e98d60f3e3b9cc5ee5d5
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
+# Install bash and create autoconf user
+RUN apk add --no-cache bash && \
+  addgroup -g 101 autoconf && \
+  adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf
+
+# Fix CVEs
+RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
+RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
-# Add autoconf user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash && \
-  addgroup -g 101 autoconf && \
-  adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf && \
-  cp helpers/bwcli /usr/bin/ && \
+# Drop bwcli, install runtime dependencies, create data folders and set permissions
+RUN cp helpers/bwcli /usr/bin/ && \
   echo "Docker" > INTEGRATION && \
   mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
@@ -59,10 +65,6 @@ RUN apk add --no-cache bash && \
   chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
   chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py && \
   chmod 660 INTEGRATION
-
-# Fix CVEs
-RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
-RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.0-beta"

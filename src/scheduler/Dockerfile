@@ -40,16 +40,22 @@ FROM python:3.12.4-alpine@sha256:7f15e22f496c65cffbbac5e30e7e98d60f3e3b9cc5ee5d5
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
+# Install runtime dependencies and add scheduler user
+RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
+  addgroup -g 101 scheduler && \
+  adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler
+
+# Fix CVEs
+RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
+RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" "openssl>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
-# Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
-  addgroup -g 101 scheduler && \
-  adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
-  cp helpers/bwcli /usr/bin/ && \
+# Drop bwcli, install runtime dependencies, create data folders and set permissions
+RUN cp helpers/bwcli /usr/bin/ && \
   echo "Docker" > INTEGRATION && \
   mkdir -p /etc/nginx /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
@@ -68,10 +74,6 @@ RUN rm -rf /var/cache/apk/*
 
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
-
-# Fix CVEs
-RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
-RUN apk add --no-cache "libcrypto3>=3.1.6-r0" "libssl3>=3.1.6-r0" "openssl>=3.1.6-r0" # CVE-2024-4741 CVE-2024-5535
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.0-beta"

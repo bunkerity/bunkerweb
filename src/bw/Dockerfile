@@ -47,14 +47,19 @@ FROM nginx:1.26.1-alpine-slim@sha256:154e108059468bed12d676c3c446e4767db24d6099f
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
+# Install runtime dependencies
+RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl
+
+# Fix CVEs
+RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42366
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
-# Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
-RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl && \
-	cp helpers/bwcli /usr/bin/ && \
+# Move bwcli, create data folders and set permissions
+RUN cp helpers/bwcli /usr/bin/ && \
 	mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www/html && \
 	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
 	for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
@@ -66,9 +71,6 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl &
 	ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
 	ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
-
-# Fix CVEs
-RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42366
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.0-beta"
