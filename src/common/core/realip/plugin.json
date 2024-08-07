@@ -15,7 +15,7 @@
       "type": "check"
     },
     "USE_PROXY_PROTOCOL": {
-      "context": "multisite",
+      "context": "global",
       "default": "no",
       "help": "Enable PROXY protocol communication.",
       "id": "use-proxy-protocol",
