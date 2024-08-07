@@ -42,11 +42,12 @@ function getLogContent() {
         return;
 
       const value = e.target.getAttribute("data-setting-value");
-      const url = `${location.href}/logs?file=${value}`;
+      const url = new URL(location.href);
+      url.searchParams.set("file", value);
       // go to url
       location.href = url;
     },
-    true
+    true,
   );
 }
 
