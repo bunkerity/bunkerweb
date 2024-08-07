@@ -9,8 +9,10 @@ from ApiCaller import ApiCaller  # type: ignore
 
 class Instance:
     hostname: str
+    name: str
     method: Literal["ui", "scheduler", "autoconf", "manual"]
     status: Literal["loading", "up", "down"]
+    type: Literal["static", "container", "pod"]
     creation_date: datetime
     last_seen: datetime
     apiCaller: ApiCaller
@@ -18,15 +20,19 @@ class Instance:
     def __init__(
         self,
         hostname: str,
+        name: str,
         method: Literal["ui", "scheduler", "autoconf", "manual"],
         status: Literal["loading", "up", "down"],
+        type: Literal["static", "container", "pod"],
         creation_date: datetime,
         last_seen: datetime,
         apiCaller: ApiCaller,
     ) -> None:
         self.hostname = hostname
+        self.name = name
         self.method = method
         self.status = status
+        self.type = type
         self.creation_date = creation_date
         self.last_seen = last_seen
         self.apiCaller = apiCaller or ApiCaller()
@@ -39,8 +45,10 @@ class Instance:
 
         return Instance(
             instance["hostname"],
+            instance["server_name"],
             instance["method"],
             instance["status"],
+            instance["type"],
             instance["creation_date"],
             instance["last_seen"],
             ApiCaller(
@@ -152,8 +160,10 @@ class InstancesUtils:
         return [
             Instance(
                 instance["hostname"],
+                instance["name"],
                 instance["method"],
                 instance["status"],
+                instance["type"],
                 instance["creation_date"],
                 instance["last_seen"],
                 ApiCaller(
