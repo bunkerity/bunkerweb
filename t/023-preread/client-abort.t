@@ -334,6 +334,7 @@ delete thread 1
 [error]
 --- error_log
 client prematurely closed connection
+--- skip_nginx: 4: >= 1.25.5
 
 
 

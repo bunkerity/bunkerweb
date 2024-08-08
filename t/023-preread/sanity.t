@@ -199,6 +199,7 @@ $ssl_preread_server_name = my.sni.server.name while prereading client data
 --- no_error_log
 [crit]
 [warn]
+--- skip_nginx: 5: >= 1.25.5
 
 
 

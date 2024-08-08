@@ -5618,6 +5618,16 @@ ngx_stream_lua_socket_keepalive_close_handler(ngx_event_t *ev)
                    "check stale events");
 
     n = recv(c->fd, buf, 1, MSG_PEEK);
+#if (NGX_STREAM_SSL)
+    /* ignore ssl protocol data like change cipher spec */
+    if (n == 1 && c->ssl != NULL) {
+        n = c->recv(c, (unsigned char *) buf, 1);
+        if (n == NGX_AGAIN) {
+            n = -1;
+            ngx_socket_errno = NGX_EAGAIN;
+        }
+    }
+#endif  /* NGX_STREAM_SSL */
 
     if (n == -1 && ngx_socket_errno == NGX_EAGAIN) {
         /* stale event */
