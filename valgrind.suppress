@@ -68,3 +68,14 @@
    fun:ngx_worker_process_init
    fun:ngx_worker_process_cycle
 }
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:ngx_alloc
+   fun:ngx_set_environment
+   fun:ngx_http_lua_post_init_handler
+   fun:ngx_cycle_post_init
+   fun:main
+}

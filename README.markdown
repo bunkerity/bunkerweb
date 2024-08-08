@@ -291,8 +291,31 @@ LuaJIT when building OpenResty by passing the `--with-luajit` option to its
 `./configure` script. No extra Nginx configuration is required.
 
 If you want to use this library with your own Nginx build (with ngx_lua), then
-you need to ensure you are using ngx_lua 0.8.10 or greater. When not using an
-OpenResty release, you also need to configure the
+you need to ensure you are using ngx_lua 0.8.10 or greater.
+
+By default, ngx_lua will search Lua files in /usr/local/share/lua/5.1/.
+But `make install` will install this module to /usr/local/lib/lua.
+So you may find the error like this:
+
+```text
+nginx: [alert] failed to load the 'resty.lrucache' module
+```
+
+You can install this module with the following command to resolve the above problem.
+
+```bash
+cd lua-resty-lrucache
+sudo make install LUA_LIB_DIR=/usr/local/share/lua/5.1
+```
+
+You can also change the installation directory to any other directory you like with the LUA_LIB_DIR argument.
+
+```bash
+cd lua-resty-lrucache
+sudo make install LUA_LIB_DIR=/opt/nginx/lualib
+```
+
+When not installed in /usr/local/share/lua/5.1, you also need to configure the
 [lua_package_path](https://github.com/openresty/lua-nginx-module#lua_package_path)
 directive to add the path to your lua-resty-lrucache source tree to ngx_lua's
 Lua module search path, as in:
@@ -301,8 +324,7 @@ Lua module search path, as in:
 # nginx.conf
 
     http {
-        # only if not using an official OpenResty release
-        lua_package_path "/path/to/lua-resty-lrucache/lib/?.lua;;";
+        lua_package_path "/opt/nginx/lualib/?.lua;;";
         ...
     }
 ```
