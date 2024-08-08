@@ -65,6 +65,6 @@ const props = defineProps({
     <Status :id="props.title" :status="props.status" />
     <Title type="card" :title="props.title" />
     <ListPairs :pairs="props.pairs" />
-    <ButtonGroup :buttons="props.buttons" />
+    <ButtonGroup v-if="props.buttons.length > 0" :buttons="props.buttons" />
   </Container>
 </template>

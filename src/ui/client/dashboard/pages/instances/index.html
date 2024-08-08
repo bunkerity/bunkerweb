@@ -9,14 +9,17 @@
     <title>BunkerWeb | Instances</title>
   </head>
   <body>
-    <div class="hidden" data-server-global='{"username" : "admin"}'></div>
+    <div
+      class="hidden"
+      data-server-global='{"username" : "admin", "plugins_page": [{"id" : "antibot", "name": "Antibot"}, {"id": "backup", "name" : "backup"}]}'
+    ></div>
     <div
       class="hidden"
       data-server-flash='[{"type" : "success", "title" : "title", "message" : "Success feedback"}, {"type" : "error", "title" : "title", "message" : "Error feedback"}, {"type" : "warning", "title" : "title", "message" : "Warning feedback"}, {"type" : "info", "title" : "title", "message" : "Info feedback"}]'
     ></div>
     <div
       class="hidden"
-      data-server-builder="W3sidHlwZSI6ICJjYXJkIiwgImNvbnRhaW5lckNvbHVtbnMiOiB7InBjIjogNiwgInRhYmxldCI6IDYsICJtb2JpbGUiOiAxMn0sICJ3aWRnZXRzIjogW3sidHlwZSI6ICJJbnN0YW5jZSIsICJkYXRhIjogeyJwYWlycyI6IFt7ImtleSI6ICJpbnN0YW5jZXNfaG9zdG5hbWUiLCAidmFsdWUiOiAiYnVua2Vyd2ViIn0sIHsia2V5IjogImluc3RhbmNlc190eXBlIiwgInZhbHVlIjogIm1hbnVhbCJ9LCB7ImtleSI6ICJpbnN0YW5jZXNfc3RhdHVzIiwgInZhbHVlIjogImluc3RhbmNlc19hY3RpdmUifV0sICJzdGF0dXMiOiAic3VjY2VzcyIsICJ0aXRsZSI6ICJidW5rZXJ3ZWIiLCAiYnV0dG9ucyI6IFt7ImF0dHJzIjogeyJkYXRhLXN1Ym1pdC1mb3JtIjogIntcIklOU1RBTkNFX0lEXCIgOiBcImJ1bmtlcndlYlwiLCBcIm9wZXJhdGlvblwiIDogXCJyZWxvYWRcIiB9In0sICJ0ZXh0IjogImFjdGlvbl9yZWxvYWQiLCAiY29sb3IiOiAid2FybmluZyJ9LCB7ImF0dHJzIjogeyJkYXRhLXN1Ym1pdC1mb3JtIjogIntcIklOU1RBTkNFX0lEXCIgOiBcImJ1bmtlcndlYlwiLCBcIm9wZXJhdGlvblwiIDogXCJzdG9wXCIgfSJ9LCAidGV4dCI6ICJhY3Rpb25fc3RvcCIsICJjb2xvciI6ICJlcnJvciJ9XX19XX0sIHsidHlwZSI6ICJjYXJkIiwgImNvbnRhaW5lckNvbHVtbnMiOiB7InBjIjogNiwgInRhYmxldCI6IDYsICJtb2JpbGUiOiAxMn0sICJ3aWRnZXRzIjogW3sidHlwZSI6ICJJbnN0YW5jZSIsICJkYXRhIjogeyJwYWlycyI6IFt7ImtleSI6ICJpbnN0YW5jZXNfaG9zdG5hbWUiLCAidmFsdWUiOiAiYnVua2Vyd2ViIn0sIHsia2V5IjogImluc3RhbmNlc190eXBlIiwgInZhbHVlIjogIm1hbnVhbCJ9LCB7ImtleSI6ICJpbnN0YW5jZXNfc3RhdHVzIiwgInZhbHVlIjogImluc3RhbmNlc19hY3RpdmUifV0sICJzdGF0dXMiOiAic3VjY2VzcyIsICJ0aXRsZSI6ICJidW5rZXJ3ZWIiLCAiYnV0dG9ucyI6IFt7ImF0dHJzIjogeyJkYXRhLXN1Ym1pdC1mb3JtIjogIntcIklOU1RBTkNFX0lEXCIgOiBcImJ1bmtlcndlYlwiLCBcIm9wZXJhdGlvblwiIDogXCJyZWxvYWRcIiB9In0sICJ0ZXh0IjogImFjdGlvbl9yZWxvYWQiLCAiY29sb3IiOiAid2FybmluZyJ9LCB7ImF0dHJzIjogeyJkYXRhLXN1Ym1pdC1mb3JtIjogIntcIklOU1RBTkNFX0lEXCIgOiBcImJ1bmtlcndlYlwiLCBcIm9wZXJhdGlvblwiIDogXCJzdG9wXCIgfSJ9LCAidGV4dCI6ICJhY3Rpb25fc3RvcCIsICJjb2xvciI6ICJlcnJvciJ9XX19XX1d"
+      data-server-builder="W3sidHlwZSI6ICJjYXJkIiwgImNvbnRhaW5lckNvbHVtbnMiOiB7InBjIjogNiwgInRhYmxldCI6IDYsICJtb2JpbGUiOiAxMn0sICJ3aWRnZXRzIjogW3sidHlwZSI6ICJJbnN0YW5jZSIsICJkYXRhIjogeyJwYWlycyI6IFt7ImtleSI6ICJpbnN0YW5jZXNfbmFtZSIsICJ2YWx1ZSI6ICJzdGF0aWMgaW5zdGFuY2UifSwgeyJrZXkiOiAiaW5zdGFuY2VzX2hvc3RuYW1lIiwgInZhbHVlIjogImJ1bmtlcndlYiJ9LCB7ImtleSI6ICJpbnN0YW5jZXNfdHlwZSIsICJ2YWx1ZSI6ICJzdGF0aWMifSwgeyJrZXkiOiAiaW5zdGFuY2VzX21ldGhvZCIsICJ2YWx1ZSI6ICJtYW51YWwifSwgeyJrZXkiOiAiaW5zdGFuY2VzX2NyZWF0aW9uX2RhdGUiLCAidmFsdWUiOiAiMDgtMDgtMjAyNCAwOTo0Njo1OCJ9LCB7ImtleSI6ICJpbnN0YW5jZXNfbGFzdF9zZWVuIiwgInZhbHVlIjogIjA4LTA4LTIwMjQgMDk6NDY6NTgifV0sICJzdGF0dXMiOiAiZXJyb3IiLCAidGl0bGUiOiAiYnVua2Vyd2ViIiwgImJ1dHRvbnMiOiBbXX19XX1d"
     ></div>
     <div id="app"></div>
     <script type="module" src="instances.js"></script>

@@ -24,19 +24,51 @@ def get_service_settings(service_name: str, global_config: dict, total_config: d
     return global_config
 
 
-def get_forms(templates: list = [], plugins: list = [], settings: dict = {}, render_forms: tuple = ("advanced", "easy", "raw"), is_new: bool = False) -> dict:
+def get_plugins_multisite(plugins: list) -> list:
+    # loop on plugins with list index
+    plugins_multisite = []
+    for index, plugin in enumerate(plugins):
+        multisite_settings = {}
+        # loop on settings
+        for setting, value in plugin.get("settings").items():
+            # check if setting is multisite
+            if value.get("context") != "multisite":
+                continue
+                # add multisite key to plugin
+            multisite_settings[setting] = value
+
+        # add multisite settings to plugin
+        if len(multisite_settings):
+            plugin_multisite = copy.deepcopy(plugin)
+            plugin_multisite["settings"] = multisite_settings
+            plugins_multisite.append(plugin_multisite)
+
+    return plugins
+
+
+def get_forms(
+    templates: list = [],
+    plugins: list = [],
+    settings: dict = {},
+    render_forms: tuple = ("advanced", "easy", "raw"),
+    is_new: bool = False,
+    only_multisite: bool = False,
+) -> dict:
     """
     Will generate every needed form using templates, plugins and settings.
     We will run on each plugins, set template value if one, and override by the custom settings value if exists.
     We will format to fit each form type (easy, advanced, raw) in case
     """
+    # Copy of the plugins, and get the plugins by context if needed
+    # In services page, we want only multisite settings, but in global config we want both
+    plugins_base = get_plugins_multisite(plugins) if only_multisite else copy.deepcopy(plugins)
 
     # Update SERVER_NAME to be empty if new
     if is_new and "SERVER_NAME" in settings:
         settings["SERVER_NAME"]["value"] = ""
 
     if is_new and not "SERVER_NAME" in settings:
-        settings["SERVER_NAME"] = {"value": "", "method": "ui", "global": True}
+        settings["SERVER_NAME"] = {"value": "", "method": "ui", "global": False}
 
     forms = {}
     for form in render_forms:
@@ -44,13 +76,13 @@ def get_forms(templates: list = [], plugins: list = [], settings: dict = {}, ren
 
     for template in templates:
         if "advanced" in forms:
-            forms["advanced"][template.get("name")] = set_advanced(template, plugins, settings, is_new)
+            forms["advanced"][template.get("name")] = set_advanced(template, plugins_base, settings, is_new)
 
         if "raw" in forms:
-            forms["raw"][template.get("name")] = set_raw(template, plugins, settings, is_new)
+            forms["raw"][template.get("name")] = set_raw(template, plugins_base, settings, is_new)
 
         if "easy" in forms:
-            forms["easy"][template.get("name")] = set_easy(template, plugins, settings, is_new)
+            forms["easy"][template.get("name")] = set_easy(template, plugins_base, settings, is_new)
 
     return forms
 
