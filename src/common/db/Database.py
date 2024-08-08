@@ -2321,16 +2321,7 @@ class Database:
 
                     path_ui = plugin_path.joinpath("ui")
 
-                    db_plugin_page = (
-                        session.query(Plugin_pages)
-                        .with_entities(
-                            Plugin_pages.template_checksum,
-                            Plugin_pages.actions_checksum,
-                            Plugin_pages.obfuscation_checksum,
-                        )
-                        .filter_by(plugin_id=plugin["id"])
-                        .first()
-                    )
+                    db_plugin_page = session.query(Plugin_pages).with_entities(Plugin_pages.checksum).filter_by(plugin_id=plugin["id"]).first()
                     remove = not path_ui.is_dir() and db_plugin_page
 
                     if path_ui.is_dir():
