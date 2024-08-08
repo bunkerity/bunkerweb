@@ -67,8 +67,6 @@ $Test::Nginx::Util::PcreVersion == 2 ?
 --- no_error_log
 [error]
 
---- ONLY
-
 
 
 === TEST 3: UTF-8 mode without UTF-8 sequence checks

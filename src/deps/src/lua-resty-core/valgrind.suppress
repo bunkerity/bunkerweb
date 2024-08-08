@@ -113,3 +113,88 @@
    fun:ngx_pass_open_channel
    fun:ngx_start_privileged_agent_processes
 }
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   ...
+   fun:ssl_session_dup
+   fun:tls_process_new_session_ticket
+   ...
+   fun:read_state_machine
+   ...
+   fun:ssl3_read_bytes
+   ...
+   fun:SSL_read
+   fun:ngx_ssl_recv
+   fun:ngx_http_upstream_process_header
+   fun:ngx_http_upstream_handler
+   ...
+   fun:ngx_process_events_and_timers
+   ...
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_malloc
+   fun:ssl_session_dup
+   fun:tls_process_new_session_ticket
+   ...
+   fun:read_state_machine
+   ...
+   fun:ssl3_read_bytes
+   ...
+   fun:SSL_read
+   fun:ngx_ssl_recv
+   fun:ngx_http_upstream_process_header
+   fun:ngx_http_upstream_handler
+   ...
+   fun:ngx_process_events_and_timers
+   ...
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:SSL_SESSION_new
+   fun:ssl_get_new_session
+   fun:tls_construct_client_hello
+   fun:write_state_machine
+   ...
+   fun:ngx_ssl_handshake
+   fun:ngx_http_upstream_ssl_init_connection
+   fun:ngx_http_upstream_send_request_handler
+   fun:ngx_http_upstream_handler
+   ...
+   fun:ngx_process_events_and_timers
+   ...
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_malloc
+   fun:CRYPTO_zalloc
+   fun:SSL_SESSION_new
+   fun:ssl_get_new_session
+   fun:tls_construct_client_hello
+   fun:write_state_machine
+   ...
+   fun:ngx_ssl_handshake
+   fun:ngx_http_upstream_ssl_init_connection
+   fun:ngx_http_upstream_send_request_handler
+   fun:ngx_http_upstream_handler
+   ...
+   fun:ngx_process_events_and_timers
+   ...
+   fun:main
+}
