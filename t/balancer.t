@@ -9,7 +9,10 @@ use t::TestCore;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 4 + 6);
+my $TestPlan = $ENV{TEST_NGINX_CHECK_LEAK} ?
+    repeat_each() * (blocks() * 4 + 8) : repeat_each() * (blocks() * 4 + 6);
+
+plan tests => $TestPlan;
 
 $ENV{TEST_NGINX_LUA_PACKAGE_PATH} = "$t::TestCore::lua_package_path";
 
@@ -700,7 +703,6 @@ github issue openresty/lua-nginx-module#693
 --- grep_error_log_out
 hello from balancer by lua!
 hello from balancer by lua!
-hello from balancer by lua!
 --- error_log eval
 qr/\[error] .*? upstream prematurely closed connection while reading response header from upstream/
 
@@ -837,48 +839,148 @@ qr/log_by_lua\(nginx.conf:\d+\):\d+: ngx.var.upstream_addr is 127.0.0.3:12345, 1
 
 
 
-=== TEST 19: recreate upstream module requests with header change
+=== TEST 19: no 'server' directive
+--- http_config
+    upstream backend {
+        balancer_by_lua_block {
+            print("hello from balancer by lua!")
+        }
+    }
+--- config
+    location = /t {
+        proxy_pass http://backend;
+    }
+--- request
+GET /t
+--- error_code: 500
+--- ignore_response_body
+--- error_log eval
+[
+'[lua] balancer_by_lua(nginx.conf:26):2: hello from balancer by lua! while connecting to upstream,',
+qr/\[error\] .*? lua balancer: no peer set/,
+]
+--- no_error_log
+[warn]
+
+
+
+=== TEST 20: set current peer: no 'server' directive
+--- http_config
+    upstream backend {
+        balancer_by_lua_block {
+            print("hello from balancer by lua!")
+            local b = require "ngx.balancer"
+            assert(b.set_current_peer("127.0.0.3", 12345))
+        }
+    }
+--- config
+    location = /t {
+        proxy_pass http://backend;
+    }
+--- request
+GET /t
+--- error_code: 502
+--- ignore_response_body
+--- error_log eval
+[
+'[lua] balancer_by_lua(nginx.conf:26):2: hello from balancer by lua! while connecting to upstream,',
+qr{connect\(\) failed .*?, upstream: "http://127\.0\.0\.3:12345/t"},
+]
+--- no_error_log
+[warn]
+[crit]
+
+
+
+=== TEST 21: set_upstream_tls off
+--- skip_nginx: 5: < 1.7.5
 --- http_config
     lua_package_path "$TEST_NGINX_LUA_PACKAGE_PATH";
 
     upstream backend {
         server 0.0.0.1;
-
         balancer_by_lua_block {
-            print("here")
             local b = require "ngx.balancer"
+            b.set_current_peer("127.0.0.1", tonumber(ngx.var.server_port))
+            b.set_upstream_tls(false)
+        }
+        keepalive 1;
+    }
 
-            if ngx.ctx.balancer_run then
-                assert(b.set_current_peer("127.0.0.1", tonumber(ngx.var.server_port)))
-                ngx.var.test = "second"
-                assert(b.recreate_request())
+    server {
+        listen $TEST_NGINX_RAND_PORT_1 ssl;
+        ssl_certificate ../../cert/test.crt;
+        ssl_certificate_key ../../cert/test.key;
 
-            else
-                ngx.ctx.balancer_run = true
-                assert(b.set_current_peer("127.0.0.3", 12345))
-                assert(b.set_more_tries(1))
-            end
+        server_tokens off;
+        location = /back {
+            return 200 "ok";
         }
     }
 --- config
-    location = /t {
-        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504 http_403 http_404;
-        proxy_next_upstream_tries 2;
-
-        set $test "first";
-
-        proxy_set_header X-Test $test;
-        proxy_pass http://backend/upstream;
+    location /t {
+        proxy_pass https://backend/back;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
     }
 
-    location = /upstream {
-        return 200 "value is: $http_x_test";
+    location /back {
+        echo "Hello world!";
     }
 --- request
-GET /t
---- response_body: value is: second
---- error_log
-connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1
+    GET /t
 --- no_error_log
-[warn]
-[crit]
+[alert]
+[error]
+--- response_body
+Hello world!
+
+--- no_check_leak
+
+
+
+=== TEST 22: set_upstream_tls on
+--- skip_nginx: 5: < 1.7.5
+--- http_config
+    lua_package_path "$TEST_NGINX_LUA_PACKAGE_PATH";
+
+    upstream backend {
+        server 0.0.0.1;
+        balancer_by_lua_block {
+            local b = require "ngx.balancer"
+            b.set_current_peer("127.0.0.1", $TEST_NGINX_RAND_PORT_1)
+            b.set_upstream_tls(false)
+            b.set_upstream_tls(true)
+        }
+
+        keepalive 1;
+    }
+
+    server {
+        listen $TEST_NGINX_RAND_PORT_1 ssl;
+        ssl_certificate ../../cert/test.crt;
+        ssl_certificate_key ../../cert/test.key;
+
+        server_tokens off;
+        location = /back {
+            return 200 "ok";
+        }
+    }
+--- config
+    location /t {
+        proxy_pass https://backend/back;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+
+    location /back {
+        echo "Hello world!";
+    }
+--- request
+    GET /t
+--- no_error_log
+[alert]
+[error]
+--- response_body chomp
+ok
+--- no_check_leak

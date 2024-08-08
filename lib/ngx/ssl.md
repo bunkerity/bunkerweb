@@ -19,14 +19,20 @@ Table of Contents
     * [server_name](#server_name)
     * [server_port](#server_port)
     * [raw_server_addr](#raw_server_addr)
+    * [export_keying_material](#export_keying_material)
+    * [export_keying_material_early](#export_keying_material_early)
     * [raw_client_addr](#raw_client_addr)
     * [get_tls1_version](#get_tls1_version)
     * [get_tls1_version_str](#get_tls1_version_str)
     * [parse_pem_cert](#parse_pem_cert)
     * [parse_pem_priv_key](#parse_pem_priv_key)
+    * [parse_der_cert](#parse_der_cert)
+    * [parse_der_priv_key](#parse_der_priv_key)
     * [set_cert](#set_cert)
     * [set_priv_key](#set_priv_key)
     * [verify_client](#verify_client)
+    * [get_client_random](#get_client_random)
+    * [get_req_ssl_pointer](#get_req_ssl_pointer)
 * [Community](#community)
     * [English Mailing List](#english-mailing-list)
     * [Chinese Mailing List](#chinese-mailing-list)
@@ -321,6 +327,76 @@ This function can be called in any context where downstream https is used.
 
 [Back to TOC](#table-of-contents)
 
+export_keying_material
+----------------------
+**syntax:** *key, err = ssl.export_keying_material(length, label, context)*
+
+context: *set_by_lua&#42;, rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, header_filter_by_lua&#42;, body_filter_by_lua&#42;, log_by_lua&#42;*
+
+Return a key derived from the SSL master secret.
+
+As described in RFC8446 section 7.5 this function returns key material that is derived from the SSL master secret and can be used on the application level. The returned key material is of the given length. Label is mandatory and requires a special format that is described in RFC5705 section 4. Context is optional but note that in TLSv1.2 and below a zero length context is treated differently from no context at all, and will result in different keying material being returned. In TLSv1.3 a zero length context is that same as no context at all and will result in the same keying material being returned.
+
+The following code snippet shows how to derive a new key that can be used on the application level.
+
+```lua
+local ssl = require "ngx.ssl"
+
+local key_length = 16
+local label = "EXPERIMENTAL my label"
+local context = "\x00\x01\x02\x03"
+
+local key, err = ssl.export_keying_material(key_length, label, context)
+if not key then
+    ngx.log(ngx.ERR, "failed to derive key ", err)
+    return
+end
+
+-- use key...
+
+end
+```
+
+This function can be called in any context where downstream https is used.
+
+[Back to TOC](#table-of-contents)
+
+
+export_keying_material_early
+----------------------------
+**syntax:** *key, err = ssl.export_keying_material_early(length, label, context)*
+
+context: *set_by_lua&#42;, rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, header_filter_by_lua&#42;, body_filter_by_lua&#42;, log_by_lua&#42;*
+
+Returns a key derived from the SSL early exporter master secret.
+
+As described in RFC8446 section 7.5 this function returns key material that is derived from the SSL early exporter master secret and can be used on the application level. The returned key material is of the given length. Label is mandatory and requires a special format that is described in RFC5705 section 4. This function is only usable with TLSv1.3, and derives keying material using the early_exporter_master_secret (as defined in the TLS 1.3 RFC). For the client, the early_exporter_master_secret is only available when the client attempts to send 0-RTT data. For the server, it is only available when the server accepts 0-RTT data.
+
+The following code snippet shows how to derive a new key that can be used on the application level.
+
+```lua
+local ssl = require "ngx.ssl"
+
+local key_length = 16
+local label = "EXPERIMENTAL my label"
+local context = "\x00\x01\x02\x03"
+
+local key, err = ssl.export_keying_material_early(key_length, label, context)
+if not key then
+    ngx.log(ngx.ERR, "failed to derive key ", err)
+    return
+end
+
+-- use key...
+
+end
+```
+
+This function can be called in any context where downstream https TLS1.3 is used.
+
+[Back to TOC](#table-of-contents)
+
+
 raw_client_addr
 ---------------
 **syntax:** *addr_data, addr_type, err = ssl.raw_client_addr()*
@@ -457,6 +533,41 @@ This function was first added in version `0.1.7`.
 
 [Back to TOC](#table-of-contents)
 
+parse_der_cert
+--------------
+**syntax:** *cert_chain, err = ssl.parse_der_cert(der_cert_chain)*
+
+**context:** *any*
+
+Converts the DER-formated SSL certificate chain data into an opaque cdata pointer (for later uses
+in the [set_cert](#set_cert)
+function, for example).
+
+In case of failures, returns `nil` and a string describing the error.
+
+You can always use libraries like [lua-resty-lrucache](https://github.com/openresty/lua-resty-lrucache#readme)
+to cache the cdata result.
+
+This function can be called in any context.
+
+[Back to TOC](#table-of-contents)
+
+parse_der_priv_key
+------------------
+**syntax:** *priv_key, err = ssl.parse_der_priv_key(der_priv_key)*
+
+**context:** *any*
+
+Converts the DER-formatted SSL private key data into an opaque cdata pointer (for later uses
+in the [set_priv_key](#set_priv_key)
+function, for example).
+
+In case of failures, returns `nil` and a string describing the error.
+
+This function can be called in any context.
+
+[Back to TOC](#table-of-contents)
+
 set_cert
 --------
 **syntax:** *ok, err = ssl.set_cert(cert_chain)*
@@ -464,7 +575,7 @@ set_cert
 **context:** *ssl_certificate_by_lua&#42;*
 
 Sets the SSL certificate chain opaque pointer returned by the
-[parse_pem_cert](#parse_pem_cert) function for the current SSL connection.
+[parse_pem_cert](#parse_pem_cert) or [parse_der_cert](#parse_der_cert)function for the current SSL connection.
 
 Returns `true` on success, or a `nil` value and a string describing the error otherwise.
 
@@ -483,7 +594,7 @@ set_priv_key
 **context:** *ssl_certificate_by_lua&#42;*
 
 Sets the SSL private key opaque pointer returned by the
-[parse_pem_priv_key](#parse_pem_priv_key) function for the current SSL connection.
+[parse_pem_priv_key](#parse_pem_priv_key) or [parse_der_priv_key](#parse_der_priv_key) function for the current SSL connection.
 
 Returns `true` on success, or a `nil` value and a string describing the error otherwise.
 
@@ -497,13 +608,13 @@ This function was first added in version `0.1.7`.
 
 verify_client
 -------------
-**syntax:** *ok, err = ssl.verify_client(ca_certs?, depth?)*
+**syntax:** *ok, err = ssl.verify_client(client_certs?, depth?, trusted_certs?)*
 
 **context:** *ssl_certificate_by_lua&#42;*
 
 Requires a client certificate during TLS handshake.
 
-The `ca_certs` is the CA certificate chain opaque pointer returned by the
+The `client_certs` is the CA certificate chain opaque pointer returned by the
 [parse_pem_cert](#parse_pem_cert) function for the current SSL connection.
 The list of certificates will be sent to clients. Also, they will be added to trusted store.
 If omitted, will not send any CA certificate to clients.
@@ -511,12 +622,49 @@ If omitted, will not send any CA certificate to clients.
 The `depth` is the verification depth in the client certificates chain.
 If omitted, will use the value specified by `ssl_verify_depth`.
 
+The `trusted_certs` is same returned by the
+[parse_pem_cert](#parse_pem_cert) function. They will be added to trusted store.
+
 Returns `true` on success, or a `nil` value and a string describing the error otherwise.
 
 Note that TLS is not terminated when verification fails. You need to examine Nginx variable `$ssl_client_verify`
 later to determine next steps.
 
 This function was first added in version `0.1.20`.
+
+[Back to TOC](#table-of-contents)
+
+get_client_random
+-----------
+**syntax:** *client_random = ssl.get_client_random(outlen?)*
+
+**context:** *any*
+
+Returns the random value sent from the client to the server during the initial SSL/TLS handshake.
+
+The `outlen` parameter indicates the maximum length of the client_random value returned.
+If the `outlen` is zero, this function returns the total length of the client_random value.
+If omitted, will use the value 32.
+
+This function can be called in any context where downstream https is used, but in the context of [ssl_client_hello_by_lua*](https://github.com/openresty/lua-nginx-module/#ssl_client_hello_by_lua_block), it can not return the real client_random value, just a string filled with 0.
+
+[Back to TOC](#table-of-contents)
+
+
+get_req_ssl_pointer
+------------
+**syntax:** *ssl_ptr, err = ssl.get_req_ssl_pointer()*
+
+**context:** *any*
+
+Retrieves the OpenSSL `SSL*` object for the current downstream connection.
+
+Returns an FFI pointer on success, or a `nil` value and a string describing the error otherwise.
+
+If you need to retain the pointer beyond the current phase then you will need to use OpenSSL's `SSL_up_ref` to increase the reference count.
+If you do, ensure that your reference is released with `SSL_free`.
+
+This function was first added in version `0.1.16`.
 
 [Back to TOC](#table-of-contents)
 
@@ -545,7 +693,7 @@ Bugs and Patches
 Please report bugs or submit patches by
 
 1. creating a ticket on the [GitHub Issue Tracker](https://github.com/openresty/lua-resty-core/issues),
-1. or posting to the [OpenResty community](#community).
+2. or posting to the [OpenResty community](#community).
 
 [Back to TOC](#table-of-contents)
 

@@ -1,0 +1,16 @@
+{
+  "CN": "Lua Nginx OCSP Responder",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CA",
+      "L": "Ottawa",
+      "O": "Lua Nginx",
+      "OU": "Lua Nginx OCSP Responder",
+      "ST": "Ontario"
+    }
+  ]
+}

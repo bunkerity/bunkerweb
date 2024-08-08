@@ -11,6 +11,7 @@ Table of Contents
 * [Synopsis](#synopsis)
 * [Description](#description)
 * [Prerequisites](#prerequisites)
+* [Installation](#installation)
 * [API Implemented](#api-implemented)
     * [resty.core.hash](#restycorehash)
     * [resty.core.base64](#restycorebase64)
@@ -115,6 +116,39 @@ into serious compatibility issues.
 * [ngx_http_lua_module](https://github.com/openresty/lua-nginx-module) v0.10.25.
 * [ngx_stream_lua_module](https://github.com/openresty/stream-lua-nginx-module) v0.0.13.
 * [lua-resty-lrucache](https://github.com/openresty/lua-resty-lrucache)
+
+[Back to TOC](#table-of-contents)
+
+Installation
+============
+
+By default, LuaJIT will search Lua files in /usr/local/share/lua/5.1/.
+But `make install` will install this module to /usr/local/lib/lua.
+So you may find the error like this:
+
+```text
+nginx: [alert] failed to load the 'resty.core' module
+```
+
+You can install this module with the following command to resolve the above problem.
+
+```bash
+cd lua-resty-core
+sudo make install LUA_LIB_DIR=/usr/local/share/lua/5.1
+```
+
+You can also change the installation directory to any other directory you like with the LUA_LIB_DIR argument.
+
+```bash
+cd lua-resty-core
+sudo make install LUA_LIB_DIR=/opt/nginx/lualib
+```
+
+After that, you need to add the above directory to the LuaJIT search direcotries with `lua_package_path` nginx directive in the http context and stream context.
+
+```
+lua_package_path "/opt/nginx/lualib/?.lua;;";
+```
 
 [Back to TOC](#table-of-contents)
 

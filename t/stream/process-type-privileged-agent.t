@@ -5,7 +5,7 @@ use t::TestCore::Stream;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 4) - 2;
+plan tests => repeat_each() * (blocks() * 4 - 1);
 
 add_block_preprocessor(sub {
     my $block = shift;

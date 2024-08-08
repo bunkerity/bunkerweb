@@ -13,11 +13,14 @@ Table of Contents
     * [stream subsystem](#stream-subsystem)
 * [Description](#description)
 * [Methods](#methods)
-    * [set_current_peer](#set_current_peer)
-    * [set_more_tries](#set_more_tries)
     * [get_last_failure](#get_last_failure)
-    * [set_timeouts](#set_timeouts)
     * [recreate_request](#recreate_request)
+    * [set_current_peer](#set_current_peer)
+    * [bind_to_local_addr](#bind_to_local_addr)
+    * [enable_keepalive](#enable_keepalive)
+    * [set_more_tries](#set_more_tries)
+    * [set_timeouts](#set_timeouts)
+    * [set_upstream_tls](#set_upstream_tls)
 * [Community](#community)
     * [English Mailing List](#english-mailing-list)
     * [Chinese Mailing List](#chinese-mailing-list)
@@ -151,7 +154,7 @@ to call these methods.
 
 set_current_peer
 ----------------
-**syntax:** *ok, err = balancer.set_current_peer(host, port)*
+**syntax:** *ok, err = balancer.set_current_peer(host, port, host?)*
 
 **context:** *balancer_by_lua&#42;*
 
@@ -162,6 +165,177 @@ Domain names in `host` do not make sense. You need to use OpenResty libraries li
 all the domain names before entering the `balancer_by_lua*` handler (for example,
 you can perform DNS lookups in an earlier phase like [access_by_lua*](https://github.com/openresty/lua-nginx-module#access_by_lua)
 and pass the results to the `balancer_by_lua*` handler via [ngx.ctx](https://github.com/openresty/lua-nginx-module#ngxctx).
+
+`host` can be set to a string value or nil. If you set `host` to `nil`, this function will use the host set by directive `proxy_ssl_name`.
+You should not specify `host` and `proxy_ssl_name` at the same time.
+
+This directive should be used on the toplevel scope of your `nginx.conf`.
+
+In case of an error, this function returns `nil` and a string describing the error.
+
+[Back to TOC](#table-of-contents)
+
+bind_to_local_addr
+--------------
+**syntax:** *ok, err = balancer.bind_to_local_addr(addr)*
+
+**context:** *balancer_by_lua&#42;*
+
+Makes outgoing connections to a proxied server originate from the specified local IP address with an optional port.
+
+`addr` is a string value of the IP address with optional port. For example: 127.0.0.1, 127.0.0.1:12345.
+
+In case of an error, this function returns `nil` and a string describing the error.
+
+[Back to TOC](#table-of-contents)
+
+enable_keepalive
+----------------
+**syntax:** `ok, err = balancer.enable_keepalive(idle_timeout?, max_requests?)`
+
+**context:** *balancer_by_lua&#42;*
+
+Instructs the current upstream connection to be kept-alive once the current
+request succeeds. The connection will be inserted in the pool specified by the
+`pool` option of the [set_current_peer](#set_current_peer) function (if
+unspecified, the default pool name will be `"<host>:<port>"`).
+
+The keepalive capabilities offered via this function are similar to that of the
+[keepalive](http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive)
+directive of the ngx_http_upstream_module, with more dynamic capabilities
+addressing a wide range of use-cases.
+
+The first optional argument `idle_timeout` may be a number used to specify the
+maximum amount of time the connection may remain unused in the pool. The value
+is to be specified in seconds, with floating point numbers allowing for
+millisecond precision. If omitted, the default value is `60` (60 seconds).
+When the idle timeout threshold is reached and the connection hasn't been
+reused, it will be closed. A value of `0` will keep the connection in the pool
+indefinitely (it may still be eventually closed by the remote peer).
+This argument is identical to the
+[keepalive_timeout](http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive_timeout)
+directive of the ngx_http_upstream_module, but can be set dynamically for each
+upstream connection.
+
+The second optional argument `max_requests` may be a number used to specify the
+amount of upstream requests a given connection should be reused for before
+being closed. If omitted, the default value is `100`.
+When the connection has been reused as many times as the `max_requests` value,
+it will be closed instead of being inserted back into the connection pool. A
+value of `0` will allow for the connection to be reused for any number of
+upstream requests.
+This argument is identical to the
+[keepalive_requests](http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive_requests)
+directive of the ngx_http_upstream_module, but can be set dynamically for each
+upstream connection.
+
+This function returns `true` upon success, or `nil` and a string describing the
+error otherwise.
+
+Below is a standard example usage:
+
+```nginx
+http {
+    upstream backend {
+        server 0.0.0.1;    # placeholder
+
+        balancer_by_lua_block {
+            local balancer = require "ngx.balancer"
+
+            local ok, err = balancer.set_current_peer("127.0.0.2", 8080)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to set current peer: ", err)
+                return
+            end
+
+            -- default pool will be "host:port"
+            -- default pool_size will be 30
+            ok, err = balancer.enable_keepalive()
+            if not ok then
+                ngx.log(ngx.ERR, "failed to set keepalive: ", err)
+                return
+            end
+        }
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://backend/;
+        }
+    }
+}
+```
+
+A more advanced usage of this API can be made to overcome specific limitations
+of NGINX's upstream keepalive pooling behavior. One of such limitations is the
+lack of consideration for TLS attributes in the connection reuse logic: within
+a given `upstream {}` block, NGINX's connection reuse logic only considers the
+IP and port attributes of a connection, and fails to consider the SNI
+extension (among others), which could result in requests being sent over the
+wrong TLS connection. NGINX's official stance on this limitation is to use
+different `upstream {}` blocks (e.g. one for each SNI), which would not only be
+wasteful but also defeat the purpose of the dynamic capabilities offered by
+OpenResty.
+
+Below is an example of how to overcome this limitation and pool connections by
+IP, port, and SNI:
+
+```nginx
+http {
+    upstream backend {
+        server 0.0.0.1;    # placeholder
+
+        balancer_by_lua_block {
+            local balancer = require "ngx.balancer"
+
+            local host = "example.org"
+            local ip = "127.0.0.2"
+            local port = 8080
+
+            local ok, err = balancer.set_current_peer("127.0.0.2", 8080, host)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to set current peer: ", err)
+                return
+            end
+
+            ok, err = balancer.enable_keepalive(60, 100)
+            if not ok then
+                ngx.log(ngx.ERR, "failed to set keepalive: ", err)
+                return
+            end
+        }
+    }
+
+    ...
+}
+```
+
+Should not specify nginx keepalive with balancer_by_lua at the same time.
+The following configurations are not recommended:
+
+```nginx
+http {
+    upstream backend_ngx_keepalive {
+        server 0.0.0.1;    # placeholder
+
+        balancer_by_lua_block {
+            local balancer = require "ngx.balancer"
+            local host = "example.org"
+            balancer.set_current_peer("127.0.0.2", 8080, host)
+            balancer.enable_keepalive(60, 100)
+        }
+
+        keepalive 60;
+        keepalive_timeout 60s;
+        keepalive_requests 100;
+    }
+}
+```
+
+This function was first added to the `http` subsystem in the `v0.1.18` release
+of this library. It is not yet supported in the `stream` subsystem.
 
 [Back to TOC](#table-of-contents)
 
@@ -267,6 +441,21 @@ to this function should be made **only** if you know the request buffer must be 
 instead of unconditionally in each balancer retries.
 
 This function was first added in the `0.1.20` version of this library.
+
+[Back to TOC](#table-of-contents)
+
+set_upstream_tls
+------------
+**syntax:** `ok, err = balancer.set_upstream_tls(on)`
+
+**context:** *balancer_by_lua&#42;*
+
+Turn off the HTTPs or reenable the HTTPs for the upstream connection.
+
+- If `on` is `true`, then the https protocol will be used to connect to the upstream server.
+- If `on` is `false`, then the http protocol will be used to connect to the upstream server.
+
+This function was first added in the `0.1.29` version of this library.
 
 [Back to TOC](#table-of-contents)
 

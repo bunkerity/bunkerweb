@@ -4,7 +4,7 @@ use t::TestCore;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3 + 19) + 2;
+plan tests => repeat_each() * (blocks() * 3 + 20) + 2;
 
 add_block_preprocessor(sub {
     my $block = shift;
