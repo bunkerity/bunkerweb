@@ -238,9 +238,11 @@ class Templates(Base):
 
 class Template_steps(Base):
     __tablename__ = "bw_template_steps"
+    __table_args__ = (UniqueConstraint("step", "template_id"),)
 
-    id = Column(Integer, primary_key=True)
-    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    step = Column(Integer, nullable=False)
+    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     title = Column(TEXT, nullable=False)
     subtitle = Column(TEXT, nullable=True)
 
@@ -256,7 +258,7 @@ class Template_settings(Base):
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, ForeignKey("bw_template_steps.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    step_id = Column(Integer, ForeignKey("bw_template_steps.step", onupdate="cascade", ondelete="cascade"), nullable=True)
     default = Column(TEXT, nullable=False)
     suffix = Column(Integer, nullable=True, default=0)
 
@@ -271,7 +273,7 @@ class Template_custom_configs(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, ForeignKey("bw_template_steps.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    step_id = Column(Integer, ForeignKey("bw_template_steps.step", onupdate="cascade", ondelete="cascade"), nullable=True)
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)

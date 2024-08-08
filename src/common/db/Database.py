@@ -914,7 +914,7 @@ class Database:
                                 # ? Check if the step already exists and if it has changed
                                 step_found = False
                                 for i, old_step in enumerate(old_data.get("bw_template_steps", [])):
-                                    if old_step.template_id == template_id and old_step.id == step_id:
+                                    if old_step.template_id == template_id and old_step.step == step_id:
                                         step_found = True
                                         if old_step.title != step["title"] or old_step.subtitle != step["subtitle"]:
                                             self.logger.warning(
@@ -928,7 +928,7 @@ class Database:
                                         f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Step "{step["name"]}" does not exist, creating it'
                                     )
 
-                            to_put.append(Template_steps(id=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
+                            to_put.append(Template_steps(step=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
 
                             # ? Add step settings and configs for later
                             for setting in step.get("settings", []):
@@ -945,15 +945,15 @@ class Database:
                         for i, old_step in enumerate(old_data.get("bw_template_steps", [])):
                             if old_step.template_id == template_id:
                                 self.logger.warning(
-                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Step "{old_step.id}" has been removed, deleting it'
+                                    f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Step "{old_step.step}" has been removed, deleting it'
                                 )
 
                                 for j, old_setting in enumerate(old_data.get("bw_template_settings", [])):
-                                    if old_setting.step_id == old_step.id:
+                                    if old_setting.step_id == old_step.step:
                                         old_data["bw_template_settings"][j]["step_id"] = None
 
                                 for j, old_config in enumerate(old_data.get("bw_template_configs", [])):
-                                    if old_config.step_id == old_step.id:
+                                    if old_config.step_id == old_step.step:
                                         old_data["bw_template_configs"][j]["step_id"] = None
 
                                 del old_data["bw_template_steps"][i]
@@ -2433,7 +2433,7 @@ class Database:
 
                         saved_templates.add(template_id)
 
-                        db_ids = [step.id for step in session.query(Template_steps).with_entities(Template_steps.id).filter_by(template_id=template_id)]
+                        db_ids = [step.step for step in session.query(Template_steps).with_entities(Template_steps.step).filter_by(template_id=template_id)]
                         missing_ids = [x for x in range(1, len(template.get("steps", [])) + 1) if x not in db_ids]
 
                         if missing_ids:
@@ -2442,17 +2442,15 @@ class Database:
                             session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).update(
                                 {Template_custom_configs.step_id: None}
                             )
-                            session.query(Template_steps).filter(Template_steps.id.in_(missing_ids)).delete()
+                            session.query(Template_steps).filter(Template_steps.step.in_(missing_ids)).delete()
 
                         steps_settings = {}
                         steps_configs = {}
                         for step_id, step in enumerate(template.get("steps", []), start=1):
-                            db_step = session.query(Template_steps).with_entities(Template_steps.id).filter_by(template_id=template_id, id=step_id).first()
+                            db_step = session.query(Template_steps).with_entities(Template_steps.step).filter_by(step=step_id, template_id=template_id).first()
                             if not db_step:
                                 changes = True
-                                to_put.append(
-                                    Template_steps(template_id=template_id, id=step_id, name=step["name"], title=step["title"], subtitle=step["subtitle"])
-                                )
+                                to_put.append(Template_steps(step=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
                             else:
                                 updates = {}
 
@@ -2464,7 +2462,7 @@ class Database:
 
                                 if updates:
                                     changes = True
-                                    session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
+                                    session.query(Template_steps).filter(Template_steps.step == db_step.step).update(updates)
 
                             for setting in step.get("settings", []):
                                 if step_id not in steps_settings:
@@ -2737,7 +2735,7 @@ class Database:
                     steps_settings = {}
                     steps_configs = {}
                     for step_id, step in enumerate(template_data.get("steps", []), start=1):
-                        to_put.append(Template_steps(template_id=template_id, id=step_id, title=step["title"], subtitle=step["subtitle"]))
+                        to_put.append(Template_steps(step=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
 
                         for setting in step.get("settings", []):
                             if step_id not in steps_settings:
@@ -3235,15 +3233,15 @@ class Database:
 
                 for step in (
                     session.query(Template_steps)
-                    .with_entities(Template_steps.id, Template_steps.title, Template_steps.subtitle)
+                    .with_entities(Template_steps.step, Template_steps.title, Template_steps.subtitle)
                     .filter_by(template_id=template.id)
                 ):
                     templates[template.id]["steps"].append({"title": step.title, "subtitle": step.subtitle})
 
-                    if step.id in steps_settings:
-                        templates[template.id]["steps"][step.id - 1]["settings"] = steps_settings[step.id]
-                    if step.id in steps_configs:
-                        templates[template.id]["steps"][step.id - 1]["configs"] = steps_configs[step.id]
+                    if step.step in steps_settings:
+                        templates[template.id]["steps"][step.step - 1]["settings"] = steps_settings[step.step]
+                    if step.step in steps_configs:
+                        templates[template.id]["steps"][step.step - 1]["configs"] = steps_configs[step.step]
 
             return templates
 
