@@ -561,3 +561,29 @@ AES-256 CBC (custom keygen, without user padding, enable padding) HEX: 794617717
 true
 --- no_error_log
 [error]
+
+
+
+=== TEST 18: AES-256 GCM sha256 no salt with AAD
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua_block {
+            local aes = require "resty.aes"
+            local str = require "resty.string"
+            local aes_default = aes:new("secret",nil,
+              aes.cipher(256,"gcm"), aes.hash.sha256, 1, 12)
+            local encrypted = aes_default:encrypt("hello", "aad")
+            ngx.say("AES-256 GCM: ", str.to_hex(encrypted[1]),
+                    " tag: ",  str.to_hex(encrypted[2]))
+            local decrypted, err = aes_default:decrypt(encrypted[1], encrypted[2], "aad")
+            ngx.say(decrypted == "hello")
+        }
+    }
+--- request
+GET /t
+--- response_body
+AES-256 GCM: 4acef84443 tag: 46f4f3ca65395568407e15768b7526d9
+true
+--- no_error_log
+[error]
