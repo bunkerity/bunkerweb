@@ -966,7 +966,6 @@ TODO
 * cosocket: add support in the context of [init_by_lua*](#init_by_lua).
 * cosocket: review and merge aviramc's [patch](https://github.com/openresty/lua-nginx-module/pull/290) for adding the `bsdrecv` method.
 * cosocket: add configure options for different strategies of handling the cosocket connection exceeding in the pools.
-* review and apply vadim-pavlov's patch for [ngx.location.capture](#ngxlocationcapture)'s `extra_headers` option
 * use `ngx_hash_t` to optimize the built-in header look-up process for [ngx.req.set_header](#ngxreqset_header), and etc.
 * add `ignore_resp_headers`, `ignore_resp_body`, and `ignore_resp` options to [ngx.location.capture](#ngxlocationcapture) and [ngx.location.capture_multi](#ngxlocationcapture_multi) methods, to allow micro performance tuning on the user side.
 * add automatic Lua code time slicing support by yielding and resuming the Lua VM actively via Lua's debug hooks.
@@ -1012,7 +1011,7 @@ The order in which these modules are added during configuration is important bec
 filtering chain determines the final output, for example. The correct adding order is shown above.
 
 * 3rd-party Lua libraries:
-	* [lua-cjson](http://www.kyne.com.au/~mark/software/lua-cjson.php)
+	* [lua-cjson](https://www.kyne.au/~mark/software/lua-cjson.php)
 
 * Applications:
 	* mysql: create database 'ngx_test', grant all privileges to user 'ngx_test', password is 'ngx_test'
@@ -1144,6 +1143,7 @@ Directives
 * [log_by_lua_file](#log_by_lua_file)
 * [balancer_by_lua_block](#balancer_by_lua_block)
 * [balancer_by_lua_file](#balancer_by_lua_file)
+* [balancer_keepalive](#balancer_keepalive)
 * [lua_need_request_body](#lua_need_request_body)
 * [ssl_client_hello_by_lua_block](#ssl_client_hello_by_lua_block)
 * [ssl_client_hello_by_lua_file](#ssl_client_hello_by_lua_file)
@@ -2711,6 +2711,29 @@ This directive was first introduced in the `v0.10.0` release.
 
 [Back to TOC](#directives)
 
+balancer_keepalive
+------------------
+
+**syntax:** *balancer_keepalive &lt;total-connections&gt;*
+
+**context:** *upstream*
+
+**phase:** *loading-config*
+
+The `total-connections` parameter sets the maximum number of idle
+keepalive connections to upstream servers that are preserved in the cache of
+each worker process. When this number is exceeded, the least recently used
+connections are closed.
+
+It should be particularly noted that the keepalive directive does not limit the
+total number of connections to upstream servers that an nginx worker process
+can open. The connections parameter should be set to a number small enough to
+let upstream servers process new incoming connections as well.
+
+This directive was first introduced in the `v0.10.21` release.
+
+[Back to TOC](#directives)
+
 lua_need_request_body
 ---------------------
 
@@ -2721,8 +2744,6 @@ lua_need_request_body
 **context:** *http, server, location, location if*
 
 **phase:** *depends on usage*
-
-Due to the stream processing feature of HTTP/2 or HTTP/3, this configuration could potentially block the entire request. Therefore, this configuration is effective only when HTTP/2 or HTTP/3 requests send content-length header. For requests with versions lower than HTTP/2, this configuration can still be used without any problems.
 
 Determines whether to force the request body data to be read before running rewrite/access/content_by_lua* or not. The Nginx core does not read the client request body by default and if request body data is required, then this directive should be turned `on` or the [ngx.req.read_body](#ngxreqread_body) function should be called within the Lua code.
 
@@ -3601,7 +3622,7 @@ lua_worker_thread_vm_pool_size
 
 **syntax:** *lua_worker_thread_vm_pool_size &lt;size&gt;*
 
-**default:** *lua_worker_thread_vm_pool_size 100*
+**default:** *lua_worker_thread_vm_pool_size 10*
 
 **context:** *http*
 
@@ -3612,6 +3633,8 @@ Also, it is not allowed to create Lua VMs that exceeds the pool size limit.
 The Lua VM in the VM pool is used to execute Lua code in separate thread.
 
 The pool is global at Nginx worker level. And it is used to reuse Lua VMs between requests.
+
+**Warning:** Each worker thread uses a separate Lua VM and caches the Lua VM for reuse in subsequent operations. Configuring too many worker threads can result in consuming a lot of memory.
 
 [Back to TOC](#directives)
 
@@ -3717,6 +3740,7 @@ Nginx API for Lua
 * [ngx.shared.DICT.capacity](#ngxshareddictcapacity)
 * [ngx.shared.DICT.free_space](#ngxshareddictfree_space)
 * [ngx.socket.udp](#ngxsocketudp)
+* [udpsock:bind](#udpsockbind)
 * [udpsock:setpeername](#udpsocksetpeername)
 * [udpsock:send](#udpsocksend)
 * [udpsock:receive](#udpsockreceive)
@@ -4280,6 +4304,8 @@ argument, which supports the options:
 	specify the subrequest's request body (string value only).
 * `args`
 	specify the subrequest's URI query arguments (both string value and Lua tables are accepted)
+* `headers`
+    specify the subrequest's request headers (Lua table only). this headers will override the original headers of the subrequest.
 * `ctx`
 	specify a Lua table to be the [ngx.ctx](#ngxctx) table for the subrequest. It can be the current request's [ngx.ctx](#ngxctx) table, which effectively makes the parent and its subrequest to share exactly the same context table. This option was first introduced in the `v0.3.1rc25` release.
 * `vars`
@@ -4430,6 +4456,33 @@ Accessing `/lua` will yield the output
 
     dog = hello
     cat = 32
+
+The `headers` option can be used to specify the request headers for the subrequest. The value of this option should be a Lua table where the keys are the header names and the values are the header values. For example,
+
+```lua
+
+location /foo {
+    content_by_lua_block {
+        ngx.print(ngx.var.http_x_test)
+    }
+}
+
+location /lua {
+    content_by_lua_block {
+        local res = ngx.location.capture("/foo", {
+            headers = {
+                ["X-Test"] = "aa",
+            }
+        })
+        ngx.print(res.body)
+    }
+}
+```
+
+Accessing `/lua` will yield the output
+
+
+    aa
 
 
 The `ctx` option can be used to specify a custom Lua table to serve as the [ngx.ctx](#ngxctx) table for the subrequest.
@@ -4788,7 +4841,7 @@ ngx.req.http_version
 
 Returns the HTTP version number for the current request as a Lua number.
 
-Current possible values are 2.0, 1.0, 1.1, and 0.9. Returns `nil` for unrecognized values.
+Current possible values are 3.0, 2.0, 1.0, 1.1, and 0.9. Returns `nil` for unrecognized values.
 
 This method was first introduced in the `v0.7.17` release.
 
@@ -5426,8 +5479,6 @@ Reads the client request body synchronously without blocking the Nginx event loo
  local args = ngx.req.get_post_args()
 ```
 
-Due to the stream processing feature of HTTP/2 or HTTP/3, this api could potentially block the entire request. Therefore, this api is effective only when HTTP/2 or HTTP/3 requests send content-length header. For requests with versions lower than HTTP/2, this api can still be used without any problems.
-
 If the request body is already read previously by turning on [lua_need_request_body](#lua_need_request_body) or by using other modules, then this function does not run and returns immediately.
 
 If the request body has already been explicitly discarded, either by the [ngx.req.discard_body](#ngxreqdiscard_body) function or other modules, this function does not run and returns immediately.
@@ -5512,6 +5563,8 @@ If the request body has been read into memory, try calling the [ngx.req.get_body
 
 To force in-file request bodies, try turning on [client_body_in_file_only](http://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_in_file_only).
 
+Note that this function is also work for balancer phase but it needs to call [balancer.recreate_request](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/balancer.md#recreate_request) to make the change take effect after set the request body data or headers.
+
 This function was first introduced in the `v0.3.1rc17` release.
 
 See also [ngx.req.get_body_data](#ngxreqget_body_data).
@@ -5523,13 +5576,15 @@ ngx.req.set_body_data
 
 **syntax:** *ngx.req.set_body_data(data)*
 
-**context:** *rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;*
+**context:** *rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, balancer_by_lua&#42;,*
 
 Set the current request's request body using the in-memory data specified by the `data` argument.
 
 If the request body has not been read yet, call [ngx.req.read_body](#ngxreqread_body) first (or turn on [lua_need_request_body](#lua_need_request_body) to force this module to read the request body. This is not recommended however). Additionally, the request body must not have been previously discarded by [ngx.req.discard_body](#ngxreqdiscard_body).
 
 Whether the previous request body has been read into memory or buffered into a disk file, it will be freed or the disk file will be cleaned up immediately, respectively.
+
+Note that this function is also work for balancer phase but it needs to call [balancer.recreate_request](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/balancer.md#recreate_request) to make the change take effect after set the request body data or headers.
 
 This function was first introduced in the `v0.3.1rc18` release.
 
@@ -5542,7 +5597,7 @@ ngx.req.set_body_file
 
 **syntax:** *ngx.req.set_body_file(file_name, auto_clean?)*
 
-**context:** *rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;*
+**context:** *rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, balancer_by_lua&#42;,*
 
 Set the current request's request body using the in-file data specified by the `file_name` argument.
 
@@ -5643,7 +5698,7 @@ Returns a read-only cosocket object that wraps the downstream connection. Only [
 
 In case of error, `nil` will be returned as well as a string describing the error.
 
-Due to the streaming nature of HTTP2 and HTTP3, this API cannot be used when the downstream connection is HTTP2 and HTTP3.
+**Note:** This method will block while waiting for client request body to be fully received. Block time depends on the [client_body_timeout](http://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_timeout) directive and maximum body size specified by the [client_max_body_size](http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size) directive. If read timeout occurs or client body size exceeds the defined limit, this function will not return and `408 Request Time-out` or `413 Request Entity Too Large` response will be returned to the client instead.
 
 The socket object returned by this method is usually used to read the current request's body in a streaming fashion. Do not turn on the [lua_need_request_body](#lua_need_request_body) directive, and do not mix this call with [ngx.req.read_body](#ngxreqread_body) and [ngx.req.discard_body](#ngxreqdiscard_body).
 
@@ -7526,6 +7581,7 @@ ngx.socket.udp
 
 Creates and returns a UDP or datagram-oriented unix domain socket object (also known as one type of the "cosocket" objects). The following methods are supported on this object:
 
+* [bind](#udpsockbind)
 * [setpeername](#udpsocksetpeername)
 * [send](#udpsocksend)
 * [receive](#udpsockreceive)
@@ -7537,6 +7593,36 @@ It is intended to be compatible with the UDP API of the [LuaSocket](http://w3.im
 This feature was first introduced in the `v0.5.7` release.
 
 See also [ngx.socket.tcp](#ngxsockettcp).
+
+[Back to TOC](#nginx-api-for-lua)
+
+udpsock:bind
+------------
+**syntax:** *ok, err = udpsock:bind(address)*
+
+**context:** *rewrite_by_lua&#42;, access_by_lua&#42;, content_by_lua&#42;, ngx.timer.&#42;, ssl_certificate_by_lua&#42;,ssl_session_fetch_by_lua&#42;,ssl_client_hello_by_lua&#42;*
+
+Just like the standard [proxy_bind](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_bind) directive, this api makes the outgoing connection to a upstream server originate from the specified local IP address.
+
+Only IP addresses can be specified as the `address` argument.
+
+Here is an example for connecting to a TCP server from the specified local IP address:
+
+```nginx
+
+ location /test {
+     content_by_lua_block {
+         local sock = ngx.socket.udp()
+         -- assume "192.168.1.10" is the local ip address
+         local ok, err = sock:bind("192.168.1.10")
+         if not ok then
+             ngx.say("failed to bind: ", err)
+             return
+         end
+         sock:close()
+     }
+ }
+```
 
 [Back to TOC](#nginx-api-for-lua)
 
@@ -7916,11 +8002,11 @@ Set client certificate chain and corresponding private key to the TCP socket obj
 The certificate chain and private key provided will be used later by the [tcpsock:sslhandshake](#tcpsocksslhandshake) method.
 
 * `cert` specify a client certificate chain cdata object that will be used while handshaking with
-remote server. These objects can be created using [ngx.ssl.parse\_pem\_cert](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl.md#parse_pem_cert)
+remote server. These objects can be created using [ngx.ssl.parse\_pem\_cert](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl.md#parse_pem_cert) or [ngx.ssl.parse\_der\_cert](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl.md#parse_der_cert)
 function provided by lua-resty-core. Note that specifying the `cert` option requires
 corresponding `pkey` be provided too. See below.
 * `pkey` specify a private key corresponds to the `cert` option above.
-These objects can be created using [ngx.ssl.parse\_pem\_priv\_key](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl.md#parse_pem_priv_key)
+These objects can be created using [ngx.ssl.parse\_pem\_priv\_key](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl.md#parse_pem_priv_key) or [ngx.ssl.parse\_der\_priv\_key](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl.md#parse_der_priv_key)
 function provided by lua-resty-core.
 
 If both of `cert` and `pkey` are `nil`, this method will clear any existing client certificate and private key
