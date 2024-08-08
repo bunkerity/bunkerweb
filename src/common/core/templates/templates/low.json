@@ -45,7 +45,11 @@
     "LIMIT_CONN_MAX_HTTP2": "200",
     "USE_LIMIT_REQ": "yes",
     "LIMIT_REQ_URL": "/",
-    "LIMIT_REQ_RATE": "5r/s"
+    "LIMIT_REQ_RATE": "5r/s",
+    "USE_MODSECURITY": "yes",
+    "USE_MODSECURITY_CRS_PLUGINS": "yes",
+    "MODSECURITY_CRS_VERSION": "4",
+    "MODSECURITY_CRS_PLUGIN_URLS": ""
   },
   "configs": ["modsec/anomaly_score.conf"],
   "steps": [
@@ -139,6 +143,17 @@
         "ANTIBOT_TURNSTILE_SITEKEY",
         "ANTIBOT_TURNSTILE_SECRET"
       ]
+    },
+    {
+      "title": "Security - ModSecurity",
+      "subtitle": "Configure the settings related to the ModSecurity WAF",
+      "settings": [
+        "USE_MODSECURITY",
+        "USE_MODSECURITY_CRS_PLUGINS",
+        "MODSECURITY_CRS_VERSION",
+        "MODSECURITY_CRS_PLUGIN_URLS"
+      ],
+      "configs": ["modsec/anomaly_score.conf"]
     }
   ]
 }
