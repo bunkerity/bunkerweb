@@ -49,6 +49,7 @@ WORKDIR /usr/share/bunkerweb
 
 COPY src/ui/src ui/src
 COPY src/ui/*.py ui/
+COPY --chmod=750 src/ui/entrypoint.sh ui/
 
 FROM python:3.12.4-alpine@sha256:7f15e22f496c65cffbbac5e30e7e98d60f3e3b9cc5ee5d51cf3c55ed604787c8
 
@@ -58,7 +59,7 @@ RUN umask 027
 # Install runtime dependencies and add ui user
 RUN apk add --no-cache bash unzip libmagic mariadb-connector-c mariadb-client postgresql-client sqlite && \
   addgroup -g 101 ui && \
-  adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui
+  adduser -h /var/cache/nginx -g ui -s /bin/bash -G ui -D -H -u 101 ui
 
 # Fix CVEs
 RUN apk add --no-cache "busybox>=1.36.1-r17" "busybox-binsh>=1.36.1-r17" "ssl_client>=1.36.1-r17" # CVE-2023-42363 CVE-2023-42364 CVE-2023-42365 CVE-2023-42366
@@ -100,4 +101,4 @@ HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr
 
 ENV PYTHONPATH="/usr/share/bunkerweb/deps/python"
 
-CMD [ "python3", "-m", "gunicorn", "--config", "gunicorn.conf.py", "--user", "ui", "--group", "ui", "--bind", "0.0.0.0:7000" ]
+ENTRYPOINT [ "./entrypoint.sh" ]

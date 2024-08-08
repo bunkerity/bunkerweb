@@ -2126,19 +2126,12 @@ def cache():
 @login_required
 def logs():
     logs_path = Path(sep, "var", "log", "bunkerweb")
-    syslog_path = Path(sep, "var", "log", "syslog")
 
     files = []
     if logs_path.is_dir():
         for file in logs_path.glob("*.log"):
             if file.is_file():
                 files.append(file.name)
-
-    if not files and syslog_path.is_dir():
-        for file in syslog_path.glob("*.log"):
-            if file.is_file():
-                files.append(file.name)
-        logs_path = syslog_path
 
     current_file = secure_filename(request.args.get("file", ""))
 
