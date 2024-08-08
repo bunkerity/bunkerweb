@@ -6,7 +6,7 @@ def pre_render(**kwargs):
     data = {}
     error = ""
     try:
-        ping_data = kwargs["app"].config["INSTANCES"].get_ping("redis")
+        ping_data = kwargs["app"].bw_instances_utils.get_ping("redis")
         ping = {"ping_status": {"title": "REDIS STATUS", "value": ping_data["status"]}}
     except BaseException:
         print(format_exc(), flush=True)
@@ -14,7 +14,7 @@ def pre_render(**kwargs):
         ping = {"ping_status": {"title": "REDIS STATUS", "value": "error"}}
 
     try:
-        metrics = kwargs["app"].config["INSTANCES"].get_metrics("redis")
+        metrics = kwargs["app"].bw_instances_utils.get_metrics("redis")
         data = {
             "counter_redis_nb_keys": {
                 "value": metrics.get("redis_nb_keys", 0),

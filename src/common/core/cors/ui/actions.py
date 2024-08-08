@@ -3,7 +3,7 @@ from traceback import format_exc
 
 def pre_render(**kwargs):
     try:
-        data = kwargs["app"].config["INSTANCES"].get_metrics("cors")
+        data = kwargs["app"].bw_instances_utils.get_metrics("cors")
         return {
             "counter_failed_cors": {
                 "value": data.get("counter_failed_cors", 0),

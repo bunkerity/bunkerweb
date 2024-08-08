@@ -3,7 +3,7 @@ from traceback import format_exc
 
 def pre_render(**kwargs):
     try:
-        data = kwargs["app"].config["INSTANCES"].get_metrics("whitelist")
+        data = kwargs["app"].bw_instances_utils.get_metrics("whitelist")
         return {
             "counter_passed_whitelist": {
                 "value": data.get("counter_passed_whitelist", 0),

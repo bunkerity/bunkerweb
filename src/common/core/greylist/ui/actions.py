@@ -3,7 +3,7 @@ from traceback import format_exc
 
 def pre_render(**kwargs):
     try:
-        data = kwargs["app"].config["INSTANCES"].get_metrics("greylist")
+        data = kwargs["app"].bw_instances_utils.get_metrics("greylist")
         return {
             "counter_failed_greylist": {
                 "value": data.get("counter_failed_greylist", 0),

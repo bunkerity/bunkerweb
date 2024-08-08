@@ -11,7 +11,7 @@ from secrets import choice, token_urlsafe
 from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 from uuid import uuid4
 
 
@@ -41,7 +41,6 @@ from signal import SIGINT, signal, SIGTERM
 from subprocess import PIPE, Popen, call
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from threading import Thread
-from tempfile import NamedTemporaryFile
 from time import sleep, time
 from werkzeug.utils import secure_filename
 from zipfile import BadZipFile, ZipFile
@@ -193,11 +192,11 @@ with app.app_context():
     login_manager.login_view = "login"
     login_manager.anonymous_user = AnonymousUser
 
-    DB = UIDatabase(app.logger)
+    app.db = UIDatabase(app.logger)
 
     ready = False
     while not ready:
-        db_metadata = DB.get_metadata()
+        db_metadata = app.db.get_metadata()
         if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
             app.logger.warning("Database is not initialized, retrying in 5s ...")
         else:
@@ -207,7 +206,7 @@ with app.app_context():
 
     BW_VERSION = get_version()
 
-    ret, err = DB.init_ui_tables(BW_VERSION)
+    ret, err = app.db.init_ui_tables(BW_VERSION)
 
     if not ret and err:
         app.logger.error(f"Exception while checking database tables : {err}")
@@ -217,18 +216,18 @@ with app.app_context():
     else:
         app.logger.info("Database ui tables successfully updated")
 
-    if not DB.get_ui_roles(as_dict=True):
-        ret = DB.create_ui_role("admin", "Admin can create account, manager software and read data.", ["manage", "write", "read"])
+    if not app.db.get_ui_roles(as_dict=True):
+        ret = app.db.create_ui_role("admin", "Admin can create account, manager software and read data.", ["manage", "write", "read"])
         if ret:
             app.logger.error(f"Couldn't create the admin role in the database: {ret}")
             exit(1)
 
-        ret = DB.create_ui_role("writer", "Write can manage software and read data but can't create account.", ["write", "read"])
+        ret = app.db.create_ui_role("writer", "Write can manage software and read data but can't create account.", ["write", "read"])
         if ret:
             app.logger.error(f"Couldn't create the admin role in the database: {ret}")
             exit(1)
 
-        ret = DB.create_ui_role("reader", "Reader can read data but can't proceed to any actions.", ["read"])
+        ret = app.db.create_ui_role("reader", "Reader can read data but can't proceed to any actions.", ["read"])
         if ret:
             app.logger.error(f"Couldn't create the admin role in the database: {ret}")
             exit(1)
@@ -236,7 +235,7 @@ with app.app_context():
     ADMIN_USER = "Error"
     while ADMIN_USER == "Error":
         try:
-            ADMIN_USER = DB.get_ui_user(as_dict=True)
+            ADMIN_USER = app.db.get_ui_user(as_dict=True)
         except BaseException as e:
             app.logger.debug(f"Couldn't get the admin user: {e}")
             sleep(1)
@@ -265,7 +264,7 @@ with app.app_context():
                 if updated:
                     if override_admin_creds:
                         app.logger.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
-                    err = DB.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], ADMIN_USER["totp_secret"], method="manual")
+                    err = app.db.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], ADMIN_USER["totp_secret"], method="manual")
                     if err:
                         app.logger.error(f"Couldn't update the admin user in the database: {err}")
                     else:
@@ -285,7 +284,7 @@ with app.app_context():
                 )
                 exit(1)
 
-        ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
+        ret = app.db.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
         if ret:
             app.logger.error(f"Couldn't create the admin user in the database: {ret}")
             exit(1)
@@ -297,8 +296,8 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
-    app.bw_instances_utils = InstancesUtils(DB)
-    app.bw_config = Config(DB)
+    app.bw_instances_utils = InstancesUtils(app.db)
+    app.bw_config = Config(app.db)
     app.bw_custom_configs = CustomConfig()
     app.data = Manager().dict()
     app.totp = Totp(app, TOTP_SECRETS, [key.encode("utf-8") for key in MF_RECOVERY_CODES_KEYS])
@@ -313,7 +312,7 @@ def wait_applying():
     current_time = datetime.now()
     ready = False
     while not ready and (datetime.now() - current_time).seconds < 120:
-        db_metadata = DB.get_metadata()
+        db_metadata = app.db.get_metadata()
         if isinstance(db_metadata, str):
             app.logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
         elif not any(
@@ -349,25 +348,25 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
         operation, error = app.bw_config.edit_global_conf(args[0], check_changes=True)
 
     if operation == "reload":
-        instance = Instance.from_hostname(args[0], DB)
+        instance = Instance.from_hostname(args[0], app.db)
         if instance:
             operation = instance.reload()
         else:
             operation = "The instance does not exist."
     elif operation == "start":
-        instance = Instance.from_hostname(args[0], DB)
+        instance = Instance.from_hostname(args[0], app.db)
         if instance:
             operation = instance.start()
         else:
             operation = "The instance does not exist."
     elif operation == "stop":
-        instance = Instance.from_hostname(args[0], DB)
+        instance = Instance.from_hostname(args[0], app.db)
         if instance:
             operation = instance.stop()
         else:
             operation = "The instance does not exist."
     elif operation == "restart":
-        instance = Instance.from_hostname(args[0], DB)
+        instance = Instance.from_hostname(args[0], app.db)
         if instance:
             operation = instance.restart()
         else:
@@ -399,44 +398,44 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
 
 
 # UTILS
-def run_action(plugin: str, function_name: str = ""):
+def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] = None) -> Union[dict, Response]:
     message = ""
-    module = DB.get_plugin_actions(plugin)
+    if not tmp_dir:
+        page = app.db.get_plugin_page(plugin)
 
-    if module is None:
-        return {"status": "ko", "code": 404, "message": "The actions.py file for the plugin does not exist"}
+        if not page:
+            return {"status": "ko", "code": 404, "message": "The plugin does not have a page"}
 
-    obfuscation = DB.get_plugin_obfuscation(plugin)
-    tmp_dir = None
-
-    try:
-        # Try to import the custom plugin
-        if obfuscation:
+        try:
+            # Try to import the plugin's custom page
             tmp_dir = TMP_DIR.joinpath("ui", "action", str(uuid4()))
             tmp_dir.mkdir(parents=True, exist_ok=True)
 
-            action_file = tmp_dir.joinpath("actions.py")
-            with ZipFile(BytesIO(obfuscation), "r") as zip_ref:
-                zip_ref.extractall(tmp_dir)
-            action_file.write_bytes(module)
-            sys_path.append(tmp_dir.as_posix())
-            loader = SourceFileLoader("actions", action_file.as_posix())
-            actions = loader.load_module()
-        else:
-            with NamedTemporaryFile(mode="wb", suffix=".py", delete=True) as temp:
-                temp.write(module)
-                temp.flush()
-                temp.seek(0)
-                loader = SourceFileLoader("actions", temp.name)
-                actions = loader.load_module()
-    except:
-        if tmp_dir:
-            sys_path.pop()
+            with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar:
+                tar.extractall(tmp_dir)
+
+            tmp_dir = tmp_dir.joinpath("ui")
+        except BaseException as e:
+            app.logger.error(f"An error occurred while extracting the plugin: {e}")
+            return {"status": "ko", "code": 500, "message": "An error occurred while extracting the plugin, see logs for more details"}
+
+    try:
+        action_file = tmp_dir.joinpath("actions.py")
+        if not action_file.is_file():
+            return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
+
+        sys_path.append(tmp_dir.as_posix())
+        loader = SourceFileLoader("actions", action_file.as_posix())
+        actions = loader.load_module()
+    except BaseException as e:
+        sys_path.pop()
+        if function_name != "pre_render":
             rmtree(tmp_dir, ignore_errors=True)
 
-        app.logger.exception("An error occurred while importing the plugin")
+        app.logger.error(f"An error occurred while importing the plugin: {e}")
         return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
 
+    exception = None
     res = None
     message = None
 
@@ -445,32 +444,40 @@ def run_action(plugin: str, function_name: str = ""):
         method = getattr(actions, function_name or plugin)
         queries = request.args.to_dict()
         try:
-            data = request.json or False
-        except:
+            data = request.json or {}
+        except BaseException:
             data = {}
 
         res = method(app=app, args=queries, data=data)
-    except AttributeError:
+    except AttributeError as e:
         if function_name == "pre_render":
+            sys_path.pop()
             return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
 
-        message = "The plugin does not have a method, see logs for more details"
-    except:
-        message = "An error occurred while executing the plugin, see logs for more details"
+        message = "The plugin does not have a method"
+        exception = e
+    except BaseException as e:
+        message = "An error occurred while executing the plugin"
+        exception = e
     finally:
         if sbin_nginx_path.is_file():
             # Remove the custom plugin from the shared library
             sys_modules.pop("actions", None)
             del actions
 
-        if tmp_dir:
-            sys_path.pop()
+        sys_path.pop()
+
+        if function_name != "pre_render":
             rmtree(tmp_dir, ignore_errors=True)
 
         if message:
-            app.logger.exception(message)
+            app.logger.error(message + (f": {exception}" if exception else ""))
         if message or not isinstance(res, dict) and not res:
-            return {"status": "ko", "code": 500, "message": message or "The plugin did not return a valid response"}
+            return {
+                "status": "ko",
+                "code": 500,
+                "message": message + ", see logs for more details" if message else "The plugin did not return a valid response",
+            }
 
     if isinstance(res, Response):
         return res
@@ -524,11 +531,11 @@ def error_message(msg: str):
 
 @app.context_processor
 def inject_variables():
-    metadata = DB.get_metadata()
+    metadata = app.db.get_metadata()
 
     changes_ongoing = any(
         v
-        for k, v in DB.get_metadata().items()
+        for k, v in app.db.get_metadata().items()
         if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
     )
 
@@ -595,24 +602,24 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     if current_user.totp_refreshed:
-        DB.set_ui_user_recovery_code_refreshed(current_user.get_id(), False)
+        app.db.set_ui_user_recovery_code_refreshed(current_user.get_id(), False)
 
     return response
 
 
 @login_manager.user_loader
 def load_user(username):
-    ui_user = DB.get_ui_user(username=username)
+    ui_user = app.db.get_ui_user(username=username)
     if not ui_user:
         app.logger.warning(f"Couldn't get the user {username} from the database.")
         return None
 
-    ui_user.list_roles = DB.get_ui_user_roles(username)
+    ui_user.list_roles = app.db.get_ui_user_roles(username)
     for role in ui_user.list_roles:
-        ui_user.list_permissions.extend(DB.get_ui_role_permissions(role))
+        ui_user.list_permissions.extend(app.db.get_ui_role_permissions(role))
 
     if ui_user.totp_secret:
-        ui_user.list_recovery_codes = DB.get_ui_user_recovery_codes(username)
+        ui_user.list_recovery_codes = app.db.get_ui_user_recovery_codes(username)
 
     return ui_user
 
@@ -661,45 +668,45 @@ def before_request():
 
     if not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
         if (
-            DB.database_uri
-            and DB.readonly
+            app.db.database_uri
+            and app.db.readonly
             and (
                 datetime.now(timezone.utc) - datetime.fromisoformat(app.data.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).replace(tzinfo=timezone.utc)
                 > timedelta(minutes=1)
             )
         ):
             try:
-                DB.retry_connection(pool_timeout=1)
-                DB.retry_connection(log=False)
+                app.db.retry_connection(pool_timeout=1)
+                app.db.retry_connection(log=False)
                 app.data["READONLY_MODE"] = False
                 app.logger.info("The database is no longer read-only, defaulting to read-write mode")
             except BaseException:
                 try:
-                    DB.retry_connection(readonly=True, pool_timeout=1)
-                    DB.retry_connection(readonly=True, log=False)
+                    app.db.retry_connection(readonly=True, pool_timeout=1)
+                    app.db.retry_connection(readonly=True, log=False)
                 except BaseException:
-                    if DB.database_uri_readonly:
+                    if app.db.database_uri_readonly:
                         with suppress(BaseException):
-                            DB.retry_connection(fallback=True, pool_timeout=1)
-                            DB.retry_connection(fallback=True, log=False)
+                            app.db.retry_connection(fallback=True, pool_timeout=1)
+                            app.db.retry_connection(fallback=True, log=False)
                 app.data["READONLY_MODE"] = True
-            app.data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
+            app.data["LAST_DATABASE_RETRY"] = app.db.last_connection_retry.isoformat() if app.db.last_connection_retry else datetime.now().isoformat()
         elif not app.data.get("READONLY_MODE", False) and request.method == "POST" and not ("/totp" in request.path or "/login" in request.path):
             try:
-                DB.test_write()
+                app.db.test_write()
                 app.data["READONLY_MODE"] = False
             except BaseException:
                 app.data["READONLY_MODE"] = True
-                app.data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
+                app.data["LAST_DATABASE_RETRY"] = app.db.last_connection_retry.isoformat() if app.db.last_connection_retry else datetime.now().isoformat()
         else:
             try:
-                DB.test_read()
+                app.db.test_read()
             except BaseException:
-                app.data["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().isoformat()
+                app.data["LAST_DATABASE_RETRY"] = app.db.last_connection_retry.isoformat() if app.db.last_connection_retry else datetime.now().isoformat()
 
-        DB.readonly = app.data.get("READONLY_MODE", False)
+        app.db.readonly = app.data.get("READONLY_MODE", False)
 
-        if DB.readonly:
+        if app.db.readonly:
             flash("Database connection is in read-only mode : no modification possible.", "error")
 
         if current_user.is_authenticated:
@@ -721,7 +728,7 @@ def before_request():
 
 @app.route("/", strict_slashes=False)
 def index():
-    if DB.get_ui_user():
+    if app.db.get_ui_user():
         if current_user.is_authenticated:  # type: ignore
             return redirect(url_for("home"))
         return redirect(url_for("login"), 301)
@@ -744,7 +751,7 @@ def check():
 def setup():
     db_config = app.bw_config.get_config(methods=False, filtered_settings=("SERVER_NAME", "MULTISITE", "USE_UI", "UI_HOST", "AUTO_LETS_ENCRYPT"))
 
-    admin_user = DB.get_ui_user()
+    admin_user = app.db.get_ui_user()
 
     ui_reverse_proxy = False
     for server_name in db_config["SERVER_NAME"].split(" "):
@@ -755,7 +762,7 @@ def setup():
             break
 
     if request.method == "POST":
-        if DB.readonly:
+        if app.db.readonly:
             return handle_error("Database is in read-only mode", "setup")
 
         required_keys = []
@@ -780,7 +787,7 @@ def setup():
                     "setup",
                 )
 
-            ret = DB.create_ui_user(request.form["admin_username"], gen_password_hash(request.form["admin_password"]), ["admin"], method="ui", admin=True)
+            ret = app.db.create_ui_user(request.form["admin_username"], gen_password_hash(request.form["admin_password"]), ["admin"], method="ui", admin=True)
             if ret:
                 return handle_error(f"Couldn't create the admin user in the database: {ret}", "setup", False, "error")
 
@@ -858,7 +865,7 @@ def totp():
             recovery_code = app.totp.verify_recovery_code(request.form["totp_token"], user=current_user)
             if not recovery_code:
                 return handle_error("The token is invalid.", "totp")
-            DB.use_ui_user_recovery_code(current_user.get_id(), recovery_code)
+            app.db.use_ui_user_recovery_code(current_user.get_id(), recovery_code)
 
         session["totp_validated"] = True
         redirect(url_for("loading", next=request.form.get("next") or url_for("home")))
@@ -917,7 +924,7 @@ def home():
             services_autoconf_count += 1
         services += 1
 
-    metadata = DB.get_metadata()
+    metadata = app.db.get_metadata()
 
     data = {
         "check_version": not remote_version or BW_VERSION == remote_version,
@@ -934,7 +941,7 @@ def home():
         "pro_services": metadata["pro_services"],
         "pro_overlapped": metadata["pro_overlapped"],
         "plugins_number": len(app.bw_config.get_plugins()),
-        "plugins_errors": DB.get_plugins_errors(),
+        "plugins_errors": app.db.get_plugins_errors(),
     }
 
     data_server_builder = home_builder(data)
@@ -947,7 +954,7 @@ def home():
 @login_required
 def account():
     if request.method == "POST":
-        if DB.readonly:
+        if app.db.readonly:
             return handle_error("Database is in read-only mode", "account")
 
         verify_data_in_form(
@@ -973,11 +980,11 @@ def account():
 
             # Force job to contact PRO API
             # by setting the last check to None
-            metadata = DB.get_metadata()
+            metadata = app.db.get_metadata()
             metadata["last_pro_check"] = None
-            DB.set_pro_metadata(metadata)
+            app.db.set_pro_metadata(metadata)
 
-            curr_changes = DB.check_changes()
+            curr_changes = app.db.check_changes()
 
             # Reload instances
             def update_global_config(threaded: bool = False):
@@ -1065,7 +1072,7 @@ def account():
 
             app.logger.debug(f"totp recovery codes: {totp_recovery_codes}")
 
-        ret = DB.update_ui_user(
+        ret = app.db.update_ui_user(
             username,
             gen_password_hash(password),
             totp_secret,
@@ -1168,7 +1175,7 @@ def get_service_data(page_name: str):
         redirect_url="services",
     )
 
-    config = DB.get_config(methods=True, with_drafts=True)
+    config = app.db.get_config(methods=True, with_drafts=True)
     # Check variables
     variables = deepcopy(request.form.to_dict())
     mode = variables.pop("mode", None)
@@ -1263,7 +1270,7 @@ def update_service(config, variables, format_configs, server_name, old_server_na
         if config.get(f"{request.form['SERVER_NAME'].split(' ')[0]}_SERVER_NAME", {"method": "scheduler"})["method"] != "ui":
             return handle_error("The service cannot be deleted because it has not been created with the UI.", "services", True)
 
-    db_metadata = DB.get_metadata()
+    db_metadata = app.db.get_metadata()
 
     def update_services(threaded: bool = False):
         wait_applying()
@@ -1308,7 +1315,7 @@ def update_service(config, variables, format_configs, server_name, old_server_na
 @login_required
 def services_modes():
     if request.method == "POST":
-        if DB.readonly:
+        if app.db.readonly:
             return handle_error("Database is in read-only mode", "services")
 
         config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode = get_service_data("modes")
@@ -1327,7 +1334,7 @@ def services_modes():
 
     mode = request.args.get("mode")
     service_name = request.args.get("service_name")
-    total_config = DB.get_config(methods=True, with_drafts=True)
+    total_config = app.db.get_config(methods=True, with_drafts=True)
     service_names = total_config["SERVER_NAME"]["value"].split(" ")
 
     if service_name and service_name not in service_names:
@@ -1361,7 +1368,7 @@ def services_modes():
 @login_required
 def services():
     if request.method == "POST":
-        if DB.readonly:
+        if app.db.readonly:
             return handle_error("Database is in read-only mode", "services")
 
         config, variables, format_configs, server_name, old_server_name, operation, is_draft, was_draft, is_draft_unchanged, mode = get_service_data("services")
@@ -1372,7 +1379,7 @@ def services():
 
     # Display services
     services = []
-    tmp_config = DB.get_config(methods=True, with_drafts=True).copy()
+    tmp_config = app.db.get_config(methods=True, with_drafts=True).copy()
     service_names = tmp_config["SERVER_NAME"]["value"].split(" ")
 
     table_settings = (
@@ -1413,7 +1420,7 @@ def services():
 @login_required
 def global_config():
     if request.method == "POST":
-        if DB.readonly:
+        if app.db.readonly:
             return handle_error("Database is in read-only mode", "global_config")
 
         # Check variables
@@ -1421,7 +1428,7 @@ def global_config():
         del variables["csrf_token"]
 
         # Edit check fields and remove already existing ones
-        config = DB.get_config(methods=True, with_drafts=True)
+        config = app.db.get_config(methods=True, with_drafts=True)
         services = config["SERVER_NAME"]["value"].split(" ")
         for variable, value in variables.copy().items():
             setting = config.get(variable, {"value": None, "global": True})
@@ -1440,7 +1447,7 @@ def global_config():
                 if setting and setting["global"] and (setting["value"] != value or setting["value"] == config.get(variable, {"value": None})["value"]):
                     variables[f"{service}_{variable}"] = value
 
-        db_metadata = DB.get_metadata()
+        db_metadata = app.db.get_metadata()
 
         def update_global_config(threaded: bool = False):
             wait_applying()
@@ -1486,10 +1493,10 @@ def global_config():
 @app.route("/configs", methods=["GET", "POST"])
 @login_required
 def configs():
-    db_configs = DB.get_custom_configs()
+    db_configs = app.db.get_custom_configs()
 
     if request.method == "POST":
-        if DB.readonly:
+        if app.db.readonly:
             return handle_error("Database is in read-only mode", "configs")
 
         operation = ""
@@ -1578,7 +1585,7 @@ def configs():
             del db_configs[index]
             operation = f"Deleted config {name}{f' for service {service_id}' if service_id else ''}"
 
-        error = DB.save_custom_configs([config for config in db_configs if config["method"] == "ui"], "ui")
+        error = app.db.save_custom_configs([config for config in db_configs if config["method"] == "ui"], "ui")
         if error:
             app.logger.error(f"Could not save custom configs: {error}")
             return handle_error("Couldn't save custom configs", "configs", True)
@@ -1607,7 +1614,7 @@ def plugins():
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
     if request.method == "POST":
-        if DB.readonly:
+        if app.db.readonly:
             return handle_error("Database is in read-only mode", "plugins")
 
         verify_data_in_form(
@@ -1628,7 +1635,7 @@ def plugins():
             if variables["type"] in ("core", "pro"):
                 return handle_error(f"Can't delete {variables['type']} plugin {variables['name']}", "plugins", True)
 
-            db_metadata = DB.get_metadata()
+            db_metadata = app.db.get_metadata()
 
             def update_plugins(threaded: bool = False):  # type: ignore
                 wait_applying()
@@ -1638,7 +1645,7 @@ def plugins():
                     if plugin["id"] == variables["name"]:
                         del plugins[x]
 
-                err = DB.update_external_plugins(plugins)
+                err = app.db.update_external_plugins(plugins)
                 if err:
                     message = f"Couldn't update external plugins to database: {err}"
                     if threaded:
@@ -1834,7 +1841,7 @@ def plugins():
             if errors >= files_count:
                 return redirect(url_for("loading", next=url_for("plugins")))
 
-            db_metadata = DB.get_metadata()
+            db_metadata = app.db.get_metadata()
 
             def update_plugins(threaded: bool = False):
                 wait_applying()
@@ -1845,7 +1852,7 @@ def plugins():
                         flash(f"Plugin {plugin['id']} already exists", "error")
                         del new_plugins[new_plugins_ids.index(plugin["id"])]
 
-                err = DB.update_external_plugins(new_plugins, delete_missing=False)
+                err = app.db.update_external_plugins(new_plugins, delete_missing=False)
                 if err:
                     message = f"Couldn't update external plugins to database: {err}"
                     if threaded:
@@ -1903,7 +1910,7 @@ def plugins():
 @app.route("/plugins/upload", methods=["POST"])
 @login_required
 def upload_plugin():
-    if DB.readonly:
+    if app.db.readonly:
         return {"status": "ko", "message": "Database is in read-only mode"}, 403
 
     if not request.files:
@@ -1982,11 +1989,21 @@ def custom_plugin(plugin: str):
     # We need to check if a page exists, and if it does, we need to check if the plugin is activated and metrics are on
     if request.method == "GET":
 
-        # Check template
-        page = DB.get_plugin_template(plugin)
+        # Check plugin's page
+        page = app.db.get_plugin_page(plugin)
 
         if not page:
-            return error_message("The plugin does not have a template"), 404
+            return error_message("The plugin does not have a page"), 404
+
+        tmp_page_dir = TMP_DIR.joinpath("ui", "page", str(uuid4()))
+        tmp_page_dir.mkdir(parents=True, exist_ok=True)
+
+        with tar_open(fileobj=BytesIO(page), mode="r:gz") as tar_file:
+            tar_file.extractall(tmp_page_dir)
+
+        tmp_page_dir = tmp_page_dir.joinpath("ui")
+
+        app.logger.debug(f"Plugin {plugin} page extracted successfully")
 
         # Case template, prepare data
         plugins = app.bw_config.get_plugins()
@@ -2007,7 +2024,7 @@ def custom_plugin(plugin: str):
         if plugin_id is None:
             return error_message("Plugin not found"), 404
 
-        config = DB.get_config()
+        config = app.db.get_config()
 
         # Check if we are using metrics
         for service in config.get("SERVER_NAME", "").split(" "):
@@ -2075,12 +2092,13 @@ def custom_plugin(plugin: str):
                     break
 
         # Get prerender from action.py
-        pre_render = run_action(plugin, "pre_render")
+        pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)
         return render_template(
             # deepcode ignore Ssti: We trust the plugin template
             Environment(
-                loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/"), autoescape=select_autoescape(["html"])
-            ).from_string(page.decode("utf-8")),
+                loader=FileSystemLoader((tmp_page_dir.as_posix() + "/", join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")),
+                autoescape=select_autoescape(["html"]),
+            ).from_string(tmp_page_dir.joinpath("template.html").read_text(encoding="utf-8")),
             current_endpoint=plugin,
             plugin=curr_plugin,
             pre_render=pre_render,
@@ -2088,6 +2106,8 @@ def custom_plugin(plugin: str):
             is_metrics=is_metrics_on,
             **app.jinja_env.globals,
         )
+
+    rmtree(TMP_DIR.joinpath("ui", "page"), ignore_errors=True)
 
     action_result = run_action(plugin)
 
@@ -2115,7 +2135,7 @@ def cache():
             path_to_dict(
                 join(sep, "var", "cache", "bunkerweb"),
                 is_cache=True,
-                db_data=DB.get_jobs_cache_files(),
+                db_data=app.db.get_jobs_cache_files(),
                 services=app.bw_config.get_config(global_only=True, methods=False, filtered_settings=("SERVER_NAME",)).get("SERVER_NAME", "").split(" "),
             )
         ],
@@ -2189,7 +2209,7 @@ def reports():
 def bans():
     if request.method == "POST":
 
-        if DB.readonly:
+        if app.db.readonly:
             return handle_error("Database is in read-only mode", "bans")
 
         # Check variables
@@ -2263,12 +2283,12 @@ def bans():
                 socket_keepalive=True,
                 max_connections=redis_keepalive_pool,
             )
-            redis_client = sentinel.slave_for(sentinel_master, DB=redis_db, username=username, password=password)
+            redis_client = sentinel.slave_for(sentinel_master, db=redis_db, username=username, password=password)
         else:
             redis_client = Redis(
                 host=redis_host,
                 port=redis_port,
-                DB=redis_db,
+                db=redis_db,
                 username=username,
                 password=password,
                 socket_timeout=redis_timeout,
@@ -2393,7 +2413,7 @@ def bans():
 @app.route("/jobs", methods=["GET"])
 @login_required
 def jobs():
-    data_server_builder = jobs_builder(DB.get_jobs())
+    data_server_builder = jobs_builder(app.db.get_jobs())
     data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
     return render_template("jobs.html", data_server_builder=data_server_builder)
 
@@ -2409,7 +2429,7 @@ def jobs_download():
     if not plugin_id or not job_name or not file_name:
         return jsonify({"status": "ko", "message": "plugin_id, job_name and file_name are required"}), 422
 
-    cache_file = DB.get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
+    cache_file = app.db.get_job_cache_file(job_name, file_name, service_id=service_id, plugin_id=plugin_id)
 
     if not cache_file:
         return jsonify({"status": "ko", "message": "file not found"}), 404
@@ -2421,7 +2441,7 @@ def jobs_download():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    admin_user = DB.get_ui_user()
+    admin_user = app.db.get_ui_user()
     if not admin_user:
         return redirect(url_for("setup"))
     elif current_user.is_authenticated:  # type: ignore
@@ -2431,7 +2451,7 @@ def login():
     if request.method == "POST" and "username" in request.form and "password" in request.form:
         app.logger.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
 
-        ui_user = DB.get_ui_user(username=request.form["username"])
+        ui_user = app.db.get_ui_user(username=request.form["username"])
         if ui_user and ui_user.username == request.form["username"] and ui_user.check_password(request.form["password"]):
             # log the user in
             session["user_agent"] = request.headers.get("User-Agent")
@@ -2441,7 +2461,7 @@ def login():
             ui_user.last_login_ip = request.remote_addr
             ui_user.login_count += 1
 
-            DB.mark_ui_user_login(ui_user.username, ui_user.last_login_at, ui_user.last_login_ip)
+            app.db.mark_ui_user_login(ui_user.username, ui_user.last_login_at, ui_user.last_login_ip)
 
             if not login_user(ui_user, remember=request.form.get("remember") == "on"):
                 flash("Couldn't log you in, please try again", "error")
