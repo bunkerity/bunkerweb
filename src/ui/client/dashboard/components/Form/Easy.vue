@@ -96,9 +96,6 @@ const data = reactive({
   isReqErr: false,
   settingErr: "",
   stepErr: "",
-  checkValidity: computed(() => {
-    setValidity();
-  }),
 });
 
 watch(
@@ -139,6 +136,18 @@ function setup() {
   setValidity();
 }
 
+/**
+ * @name listenToValidate
+ * @description Setup the needed data for the component to work properly.
+ * @returns {void}
+ */
+function listenToValidate(e) {
+  setTimeout(() => {
+    if (!e.target.closest('[data-is="form"]')) return;
+    setValidity();
+  }, 50);
+}
+
 const buttonSave = {
   id: `easy-mode-${uuidv4()}`,
   text: "action_save",
@@ -166,10 +175,12 @@ onMounted(() => {
   setup();
   // I want updatInp to access event, data.base and the container attribut
   easyForm.useListenTempFields();
+  window.addEventListener("input", listenToValidate);
 });
 
 onUnmounted(() => {
   easyForm.useUnlistenTempFields();
+  window.removeEventListener("input", listenToValidate);
 });
 </script>
 
