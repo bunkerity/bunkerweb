@@ -1730,29 +1730,6 @@ class Database:
                 if global_value.context == "multisite":
                     multisite.add(setting_id)
 
-            template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]
-            if template_used:
-                query = (
-                    session.query(Template_settings)
-                    .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
-                    .filter_by(template_id=template_used)
-                )
-
-                if filtered_settings:
-                    query = query.filter(Template_settings.setting_id.in_(filtered_settings))
-
-                for template_setting in query:
-                    key = template_setting.setting_id + (f"_{template_setting.suffix}" if template_setting.suffix > 0 else "")
-                    if key in config and config[key]["method"] != "default":
-                        continue
-
-                    config[key] = {
-                        "value": template_setting.default,
-                        "global": True,
-                        "method": "default",
-                        "template": template_used,
-                    }
-
             is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes"
 
             services = session.query(Services).with_entities(Services.id, Services.is_draft)
@@ -1815,31 +1792,6 @@ class Database:
                         "method": result.method,
                         "template": None,
                     }
-
-                for service in services:
-                    template_used = config.get(f"{service.id}_USE_TEMPLATE", {"value": ""})["value"]
-                    if template_used and template_used != config.get("USE_TEMPLATE", {"value": ""})["value"]:
-                        query = (
-                            session.query(Template_settings)
-                            .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
-                            .filter_by(template_id=template_used)
-                        )
-
-                        if filtered_settings:
-                            query = query.filter(Template_settings.setting_id.in_(filtered_settings))
-
-                        for setting in query:
-                            key = f"{service.id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
-                            if key in config and config[key]["method"] != "default":
-                                continue
-
-                            config[key] = {
-                                "value": setting.default,
-                                "global": False,
-                                "method": "default",
-                                "template": template_used,
-                            }
-
             else:
                 servers = " ".join(service.id for service in services)
 
@@ -1864,6 +1816,11 @@ class Database:
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
+        filtered_settings = set(filtered_settings or [])
+
+        if filtered_settings and not global_only:
+            filtered_settings.update(("SERVER_NAME", "MULTISITE", "USE_TEMPLATE"))
+
         with self._db_session() as session:
             config = {}
             multisite = set()
@@ -1887,14 +1844,71 @@ class Database:
                 if setting.context == "multisite":
                     multisite.add(setting.id)
 
-        return self.get_non_default_settings(
+        config = self.get_non_default_settings(
             global_only=global_only,
-            methods=methods,
+            methods=True,
             with_drafts=with_drafts,
             filtered_settings=filtered_settings,
             original_config=config,
             original_multisite=multisite,
         )
+
+        with self._db_session() as session:
+            template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]
+            if template_used:
+                query = (
+                    session.query(Template_settings)
+                    .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
+                    .filter_by(template_id=template_used)
+                )
+
+                if filtered_settings:
+                    query = query.filter(Template_settings.setting_id.in_(filtered_settings))
+
+                for template_setting in query:
+                    key = template_setting.setting_id + (f"_{template_setting.suffix}" if template_setting.suffix > 0 else "")
+                    if key in config and (config[key]["method"] != "default" or key == "SERVER_NAME" and config[key]["value"] != template_setting.default):
+                        continue
+
+                    config[key] = {
+                        "value": template_setting.default,
+                        "global": True,
+                        "method": "default",
+                        "template": template_used,
+                    }
+
+            if not global_only and config["MULTISITE"]["value"] == "yes":
+                for service_id in config["SERVER_NAME"]["value"].split(" "):
+                    service_template_used = config.get(f"{service_id}_USE_TEMPLATE", {"value": template_used})["value"]
+                    if service_template_used:
+                        query = (
+                            session.query(Template_settings)
+                            .with_entities(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
+                            .filter_by(template_id=service_template_used)
+                        )
+
+                        if filtered_settings:
+                            query = query.filter(Template_settings.setting_id.in_(filtered_settings))
+
+                        for setting in query:
+                            key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
+                            if key in config and (
+                                config[key]["method"] != "default" or setting.setting_id == "SERVER_NAME" and config[key]["value"] != template_setting.default
+                            ):
+                                continue
+
+                            config[key] = {
+                                "value": setting.default,
+                                "global": False,
+                                "method": "default",
+                                "template": service_template_used,
+                            }
+
+        if not methods:
+            for key, value in config.copy().items():
+                config[key] = value["value"]
+
+        return config
 
     def get_custom_configs(self) -> List[Dict[str, Any]]:
         """Get the custom configs from the database"""
