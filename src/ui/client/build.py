@@ -46,16 +46,16 @@ def run_command(command: List[str]) -> int:
     """Utils to run a subprocess command. This is usefull to run npm commands to build vite project"""
     print(f"Running command: {command}", flush=True)
     try:
-        process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory.as_posix(), shell=not bool(getenv("DOCKERFILE", "")), text=True)
+        process = Popen(command, stdout=PIPE, stderr=PIPE, cwd=current_directory.as_posix(), shell=not bool(getenv("DOCKERFILE", "")))
         while process.poll() is None:
             if process.stdout is not None:
                 for line in process.stdout:
-                    print(line.strip(), flush=True)
+                    print(line.decode("utf-8").strip(), flush=True)
 
         if process.returncode != 0:
             print("Error while running command", flush=True)
-            print(process.stdout.read(), flush=True)
-            print(process.stderr.read(), flush=True)
+            print(process.stdout.read().decode("utf-8"), flush=True)
+            print(process.stderr.read().decode("utf-8"), flush=True)
             return 1
     except BaseException as e:
         print(f"Error while running command: {e}", flush=True)

@@ -37,7 +37,7 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
 
 # Install node and npm to build vite frontend
 RUN curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - && \
-    dnf install -y --setopt=install_weak_deps=False nodejs
+dnf install -y --setopt=install_weak_deps=False nodejs
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
