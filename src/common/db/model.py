@@ -238,17 +238,13 @@ class Templates(Base):
 
 class Template_steps(Base):
     __tablename__ = "bw_template_steps"
-    __table_args__ = (UniqueConstraint("step", "template_id"),)
 
-    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
-    step = Column(Integer, nullable=False)
-    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    id = Column(Integer, primary_key=True)
+    template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), primary_key=True)
     title = Column(TEXT, nullable=False)
     subtitle = Column(TEXT, nullable=True)
 
     template = relationship("Templates", back_populates="steps")
-    settings = relationship("Template_settings", back_populates="step", cascade="all")
-    custom_configs = relationship("Template_custom_configs", back_populates="step", cascade="all")
 
 
 class Template_settings(Base):
@@ -258,12 +254,11 @@ class Template_settings(Base):
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, ForeignKey("bw_template_steps.step", onupdate="cascade", ondelete="cascade"), nullable=True)
+    step_id = Column(Integer, nullable=True)
     default = Column(TEXT, nullable=False)
     suffix = Column(Integer, nullable=True, default=0)
 
     template = relationship("Templates", back_populates="settings")
-    step = relationship("Template_steps", back_populates="settings")
     setting = relationship("Settings", back_populates="templates")
 
 
@@ -273,14 +268,13 @@ class Template_custom_configs(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     template_id = Column(String(256), ForeignKey("bw_templates.id", onupdate="cascade", ondelete="cascade"), nullable=False)
-    step_id = Column(Integer, ForeignKey("bw_template_steps.step", onupdate="cascade", ondelete="cascade"), nullable=True)
+    step_id = Column(Integer, nullable=True)
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
 
     template = relationship("Templates", back_populates="custom_configs")
-    step = relationship("Template_steps", back_populates="custom_configs")
 
 
 class Metadata(Base):
