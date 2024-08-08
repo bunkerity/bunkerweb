@@ -3191,7 +3191,7 @@ class Database:
 
             templates = {}
             for template in query:
-                templates[template.id] = {"plugin_id": template.plugin_id, "name": template.name, "settings": {}, "configs": {}, "steps": {}}
+                templates[template.id] = {"plugin_id": template.plugin_id, "name": template.name, "settings": {}, "configs": {}, "steps": []}
 
                 steps_settings = {}
                 for setting in (
@@ -3226,12 +3226,12 @@ class Database:
                     .with_entities(Template_steps.id, Template_steps.title, Template_steps.subtitle)
                     .filter_by(template_id=template.id)
                 ):
-                    templates[template.id]["steps"][step.id] = {"title": step.title, "subtitle": step.subtitle}
+                    templates[template.id]["steps"].append({"title": step.title, "subtitle": step.subtitle})
 
                     if step.id in steps_settings:
-                        templates[template.id]["steps"][step.id]["settings"] = steps_settings[step.id]
+                        templates[template.id]["steps"][step.id - 1]["settings"] = steps_settings[step.id]
                     if step.id in steps_configs:
-                        templates[template.id]["steps"][step.id]["configs"] = steps_configs[step.id]
+                        templates[template.id]["steps"][step.id - 1]["configs"] = steps_configs[step.id]
 
             return templates
 
