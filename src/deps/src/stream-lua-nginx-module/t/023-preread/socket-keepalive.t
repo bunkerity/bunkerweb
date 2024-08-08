@@ -1,6 +1,19 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
-use Test::Nginx::Socket::Lua::Stream;
+our $SkipReason;
+
+BEGIN {
+    use Test::Nginx::Util;
+
+    my $nginx_version = Test::Nginx::Util::get_nginx_version();
+
+    if (eval "$nginx_version >= 1.25.5") {
+        $SkipReason = "Nginx version greater than 1.25.5 have changed behavior, current version $nginx_version";
+    }
+}
+
+use Test::Nginx::Socket::Lua::Stream $SkipReason ? (skip_all => $SkipReason) : ();
+
 repeat_each(2);
 
 plan tests => repeat_each() * (blocks() * 5);

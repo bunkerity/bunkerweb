@@ -1,5 +1,17 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
+our $SkipReason;
+
+BEGIN {
+    use Test::Nginx::Util;
+
+    my $nginx_version = Test::Nginx::Util::get_nginx_version();
+
+    if (eval "$nginx_version >= 1.25.5") {
+        $SkipReason = "Nginx version greater than 1.25.5 have changed behavior, current version $nginx_version";
+    }
+}
+
 BEGIN {
     if (!defined $ENV{LD_PRELOAD}) {
         $ENV{LD_PRELOAD} = '';
@@ -20,7 +32,7 @@ BEGIN {
     $ENV{MOCKEAGAIN_WRITE_TIMEOUT_PATTERN} = 'get helloworld';
 }
 
-use Test::Nginx::Socket::Lua::Stream;
+use Test::Nginx::Socket::Lua::Stream $SkipReason ? (skip_all => $SkipReason) : ();
 repeat_each(2);
 
 plan tests => repeat_each() * (blocks() * 4 + 8);
