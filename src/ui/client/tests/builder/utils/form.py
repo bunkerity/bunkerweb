@@ -2,6 +2,17 @@ import copy
 from typing import Union
 
 
+def get_setting_data(template_settings: dict, settings: dict, setting: str, value: dict) -> tuple:
+    template_value = template_settings.get(setting, None)
+    current_value = settings[setting].get("value", None)
+    default_value = value.get("default")
+    is_disabled_method = settings.get(setting, {}).get("method", "ui") not in ("ui", "default", "manual")
+    is_current_from_template = settings[setting].get("template", None) and template_value is not None
+    is_current_default = current_value is not None and current_value == default_value
+    setting_value = current_value if current_value is not None else default_value
+    return template_value, current_value, default_value, is_disabled_method, is_current_from_template, is_current_default, setting_value
+
+
 def get_service_settings(service_name: str, global_config: dict, total_config: dict) -> dict:
     """
     total_config is a dict that contains global settings and services settings (format SERVICE_NAME_SETTING - www.example.com_USE_ANTIBOT for example -).
@@ -154,42 +165,26 @@ def set_raw(template: list, plugins_base: list, settings: dict, is_new: bool) ->
     for plugin in plugins:
         for setting, value in plugin.get("settings").items():
 
-            # we want to show disabled method on raw mode
+            # Avoid issue with multiple settings
+            if not setting in settings:
+                continue
 
-            # if setting in settings and settings[setting].get("method", "ui") not in ("ui", "default", "manual") and :
+            template_value, current_value, default_value, is_disabled_method, is_current_from_template, is_current_default, setting_value = get_setting_data(
+                template_settings, settings, setting, value
+            )
+
+            # We want to show any methods on raw mode
+
+            # if is_disabled_method :
             #     continue
 
-            template_value = template_settings.get(setting, None)
-            current_value = settings[setting].get("value", None)
-            default_value = value.get("default")
-            is_disabled_method = settings.get(setting, {}).get("method", "ui") not in ("ui", "default", "manual")
-            is_current_from_template = settings[setting].get("template", None) and template_value is not None
-            is_current_default = current_value is not None and current_value == default_value
-            # setting value is the current (custom one) if exists or fallback to default
-            setting_value = current_value if current_value is not None else default_value
-
-            # Cases we set the setting value
-            # 1 - the value is from a disabled method
-            # 2 - no template value
-            if is_disabled_method or not is_disabled_method and template_value is None:
-                raw_settings[setting] = setting_value
+            if current_value is not None and not is_current_default:
+                raw_settings[setting] = current_value
                 continue
 
-            # Cases we can override by template value
-            # 1 - the current value is default and from template
-            # 2 - the current value is default and not from template
-            # 3 - the current value is not default but from template
-            if template_value is not None and (
-                (is_current_default and is_current_from_template)
-                or (not is_current_from_template and is_current_default)
-                or (is_current_from_template and not is_current_default)
-            ):
+            if template_value is not None:
                 raw_settings[setting] = template_value
                 continue
-
-            # Case the current value is not default and not from template, we can't override
-            # Or any others cases, we set this fallback
-            raw_settings[setting] = setting_value
 
     return raw_settings
 
