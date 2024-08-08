@@ -16,7 +16,6 @@ services:
       CONTENT_SECURITY_POLICY_REPORT_ONLY: "no"
       REFERRER_POLICY: "strict-origin-when-cross-origin"
       PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"
-      DISABLE_FLOC: "yes"
       X_FRAME_OPTIONS: "SAMEORIGIN"
       X_CONTENT_TYPE_OPTIONS: "nosniff"
       X_XSS_PROTECTION: "1; mode=block"

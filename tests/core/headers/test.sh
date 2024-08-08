@@ -45,8 +45,7 @@ else
     echo "CONTENT_SECURITY_POLICY=object-src 'none'; form-action 'self'; frame-ancestors 'self';" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CONTENT_SECURITY_POLICY_REPORT_ONLY=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REFERRER_POLICY=strict-origin-when-cross-origin" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "DISABLE_FLOC=yes" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_FRAME_OPTIONS=SAMEORIGIN" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_CONTENT_TYPE_OPTIONS=nosniff" | sudo tee -a /etc/bunkerweb/variables.env
     echo "X_XSS_PROTECTION=1; mode=block" | sudo tee -a /etc/bunkerweb/variables.env
@@ -71,7 +70,6 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY_REPORT_ONLY: ".*"$@CONTENT_SECURITY_POLICY_REPORT_ONLY: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "no-referrer"@REFERRER_POLICY: "strict-origin-when-cross-origin"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@DISABLE_FLOC: ".*"@DISABLE_FLOC: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
@@ -96,7 +94,6 @@ cleanup_stack () {
             sudo sed -i 's@CONTENT_SECURITY_POLICY_REPORT_ONLY=.*$@CONTENT_SECURITY_POLICY_REPORT_ONLY=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REFERRER_POLICY=.*$@REFERRER_POLICY=strict-origin-when-cross-origin@' /etc/bunkerweb/variables.env
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@DISABLE_FLOC=.*$@DISABLE_FLOC=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env
@@ -112,7 +109,6 @@ cleanup_stack () {
             unset CONTENT_SECURITY_POLICY_REPORT_ONLY
             unset REFERRER_POLICY
             unset PERMISSIONS_POLICY
-            unset DISABLE_FLOC
             unset X_FRAME_OPTIONS
             unset X_CONTENT_TYPE_OPTIONS
             unset X_XSS_PROTECTION
@@ -161,7 +157,6 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY_REPORT_ONLY: "no"@CONTENT_SECURITY_POLICY_REPORT_ONLY: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "strict-origin-when-cross-origin"@REFERRER_POLICY: "no-referrer"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "geolocation=(self), microphone=()"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@DISABLE_FLOC: "yes"@DISABLE_FLOC: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "SAMEORIGIN"@X_FRAME_OPTIONS: "DENY"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: "nosniff"@X_CONTENT_TYPE_OPTIONS: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "1; mode=block"@X_XSS_PROTECTION: "0"@' {} \;
@@ -174,7 +169,6 @@ do
             sudo sed -i 's@CONTENT_SECURITY_POLICY_REPORT_ONLY=.*$@CONTENT_SECURITY_POLICY_REPORT_ONLY=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REFERRER_POLICY=.*$@REFERRER_POLICY=no-referrer@' /etc/bunkerweb/variables.env
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=geolocation=(self), microphone=()@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@DISABLE_FLOC=.*$@DISABLE_FLOC=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=DENY@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=0@' /etc/bunkerweb/variables.env
@@ -186,7 +180,6 @@ do
             export CONTENT_SECURITY_POLICY_REPORT_ONLY="yes"
             export REFERRER_POLICY="no-referrer"
             export PERMISSIONS_POLICY="geolocation=(self), microphone=()"
-            export DISABLE_FLOC="no"
             export X_FRAME_OPTIONS="DENY"
             export X_CONTENT_TYPE_OPTIONS=""
             export X_XSS_PROTECTION="0"
@@ -205,7 +198,6 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CONTENT_SECURITY_POLICY_REPORT_ONLY: "yes"@CONTENT_SECURITY_POLICY_REPORT_ONLY: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REFERRER_POLICY: "no-referrer"@REFERRER_POLICY: "strict-origin-when-cross-origin"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@PERMISSIONS_POLICY: ".*"$@PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@DISABLE_FLOC: "no"@DISABLE_FLOC: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_FRAME_OPTIONS: "DENY"@X_FRAME_OPTIONS: "SAMEORIGIN"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_CONTENT_TYPE_OPTIONS: ""@X_CONTENT_TYPE_OPTIONS: "nosniff"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@X_XSS_PROTECTION: "0"@X_XSS_PROTECTION: "1; mode=block"@' {} \;
@@ -221,7 +213,6 @@ do
             sudo sed -i 's@CONTENT_SECURITY_POLICY_REPORT_ONLY=.*$@CONTENT_SECURITY_POLICY_REPORT_ONLY=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REFERRER_POLICY=.*$@REFERRER_POLICY=strict-origin-when-cross-origin@' /etc/bunkerweb/variables.env
             sudo sed -i 's@PERMISSIONS_POLICY=.*$@PERMISSIONS_POLICY=accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@DISABLE_FLOC=.*$@DISABLE_FLOC=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_FRAME_OPTIONS=.*$@X_FRAME_OPTIONS=SAMEORIGIN@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_CONTENT_TYPE_OPTIONS=.*$@X_CONTENT_TYPE_OPTIONS=nosniff@' /etc/bunkerweb/variables.env
             sudo sed -i 's@X_XSS_PROTECTION=.*$@X_XSS_PROTECTION=1; mode=block@' /etc/bunkerweb/variables.env
@@ -235,7 +226,6 @@ do
             unset CONTENT_SECURITY_POLICY_REPORT_ONLY
             unset REFERRER_POLICY
             unset PERMISSIONS_POLICY
-            unset DISABLE_FLOC
             unset X_FRAME_OPTIONS
             unset X_CONTENT_TYPE_OPTIONS
             unset X_XSS_PROTECTION

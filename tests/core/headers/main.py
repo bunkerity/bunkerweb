@@ -50,7 +50,7 @@ try:
     permissions_policy = getenv(
         "PERMISSIONS_POLICY",
         "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=()",  # noqa: E501
-    ) + (", interest-cohort=()" if getenv("DISABLE_FLOC", "yes") == "yes" else "")
+    )
     x_frame_options = getenv("X_FRAME_OPTIONS", "SAMEORIGIN")
     x_content_type_options = getenv("X_CONTENT_TYPE_OPTIONS", "nosniff")
     x_xss_protection = getenv("X_XSS_PROTECTION", "1; mode=block")
