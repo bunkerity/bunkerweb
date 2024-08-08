@@ -1,11 +1,19 @@
 <script setup>
-import { defineProps, reactive, onMounted, onUnmounted, computed } from "vue";
+import {
+  defineProps,
+  reactive,
+  onMounted,
+  onUnmounted,
+  computed,
+  watch,
+} from "vue";
 import Container from "@components/Widget/Container.vue";
 import Fields from "@components/Form/Fields.vue";
 import Title from "@components/Widget/Title.vue";
 import Subtitle from "@components/Widget/Subtitle.vue";
 import Button from "@components/Widget/Button.vue";
 import Text from "@components/Widget/Text.vue";
+import MessageUnmatch from "@components/Message/Unmatch.vue";
 import { v4 as uuidv4 } from "uuid";
 import { useCheckPluginsValidity } from "@utils/global.js";
 import { useEasyForm } from "@store/form.js";
@@ -81,7 +89,7 @@ const props = defineProps({
 const data = reactive({
   base: JSON.parse(JSON.stringify(props.template)),
   currStep: 0,
-  totalSteps: Object.keys(props.template).length,
+  totalSteps: computed(() => Object.keys(props.template).length),
   isFinalStep: computed(() => data.currStep === data.totalSteps - 1),
   isFirstStep: computed(() => data.currStep === 0),
   isRegErr: false,
@@ -93,6 +101,14 @@ const data = reactive({
   }),
 });
 
+watch(
+  () => props.template,
+  () => {
+    console.log("Template changed");
+    setup();
+  }
+);
+
 /**
  * @name setValidity
  * @description Check template settings and return if there is any error.
@@ -103,10 +119,24 @@ function setValidity() {
   const [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id] =
     useCheckPluginsValidity(easyForm.templateUI);
 
-  data.stepErr = id;
+  data.stepErr = id + 1;
   data.isRegErr = isRegErr;
   data.isReqErr = isReqErr;
   data.settingErr = `"${settingNameErr}"`;
+}
+
+/**
+ * @name setup
+ * @description Setup the needed data for the component to work properly.
+ * @returns {void}
+ */
+function setup() {
+  // Restart step one every time the component is mounted
+  easyForm.setTemplate(props.template, true);
+  easyForm.setOperation(props.operation);
+  easyForm.setOldServerName(props.oldServerName);
+  data.currStep = 0;
+  setValidity();
 }
 
 const buttonSave = {
@@ -133,12 +163,7 @@ const buttonNext = {
 };
 
 onMounted(() => {
-  // Restart step one every time the component is mounted
-  easyForm.setTemplate(props.template);
-  easyForm.setOperation(props.operation);
-  easyForm.setOldServerName(props.oldServerName);
-  data.currStep = 0;
-  setValidity();
+  setup();
   // I want updatInp to access event, data.base and the container attribut
   easyForm.useListenTempFields();
 });
@@ -157,68 +182,77 @@ onUnmounted(() => {
     :containerClass="`form-easy-container`"
     :columns="props.columns"
   >
-    <Title type="card" :title="'dashboard_easy_mode'" />
-    <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
+    <MessageUnmatch
+      v-if="easyForm.templateUIFormat.length <= 0"
+      :text="'services_no_easy_mode'"
+    />
+    <template v-if="easyForm.templateUIFormat.length > 0">
+      <Title type="card" :title="'dashboard_easy_mode'" />
+      <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
 
-    <template v-for="(step, id) in easyForm.templateUIFormat">
-      <Container
-        data-is="content"
-        data-easy-form-step
-        v-if="data.currStep === id"
-        class="form-easy-step-container"
-      >
-        <Title
-          type="content"
-          :title="
-            $t('dashboard_easy_mode_title', {
-              step: id + 1,
-              total: data.totalSteps,
-              name: step.title,
-            })
+      <template v-for="(step, id) in easyForm.templateUIFormat">
+        <Container
+          data-is="content"
+          data-easy-form-step
+          v-if="data.currStep === id"
+          class="form-easy-step-container"
+        >
+          <Title
+            type="content"
+            :title="
+              $t('dashboard_easy_mode_title', {
+                step: id + 1,
+                total: data.totalSteps,
+                name: step.title,
+              })
+            "
+          />
+          <Subtitle type="content" :subtitle="step.subtitle" />
+
+          <Container class="layout-settings min-h-[300px]">
+            <template
+              v-for="(setting, name, index) in step.settings"
+              :key="name"
+            >
+              <Fields :setting="setting" />
+            </template>
+          </Container>
+        </Container>
+      </template>
+      <div class="flex justify-center items-center">
+        <Button
+          @click="data.currStep = Math.max(data.currStep - 1, 0)"
+          :disabled="data.isFirstStep"
+          v-bind="buttonPrev"
+          :containerClass="`mr-2`"
+        />
+        <Button
+          :containerClass="`mr-2`"
+          @click="data.currStep = Math.min(data.currStep + 1, data.totalSteps)"
+          :disabled="data.isFinalStep"
+          v-bind="buttonNext"
+        />
+        <Button
+          :disabled="!data.isFinalStep || data.isRegErr || data.isReqErr"
+          v-bind="buttonSave"
+        />
+      </div>
+      <div class="flex justify-center items-center" data-is="form-error">
+        <Text
+          v-if="data.isRegErr || data.isReqErr"
+          :text="
+            data.isReqErr
+              ? $t('dashboard_easy_required', {
+                  step: data.stepErr,
+                  setting: data.settingErr,
+                })
+              : $t('dashboard_easy_invalid', {
+                  step: data.stepErr,
+                  setting: data.settingErr,
+                })
           "
         />
-        <Subtitle type="content" :subtitle="step.subtitle" />
-
-        <Container class="layout-settings">
-          <template v-for="(setting, name, index) in step.settings" :key="name">
-            <Fields :setting="setting" />
-          </template>
-        </Container>
-      </Container>
+      </div>
     </template>
-    <div class="flex justify-center items-center">
-      <Button
-        @click="data.currStep = Math.max(data.currStep - 1, 0)"
-        :disabled="data.isFirstStep"
-        v-bind="buttonPrev"
-        :containerClass="`mr-2`"
-      />
-      <Button
-        :containerClass="`mr-2`"
-        @click="data.currStep = Math.min(data.currStep + 1, data.totalSteps)"
-        :disabled="data.isFinalStep"
-        v-bind="buttonNext"
-      />
-      <Button
-        :disabled="!data.isFinalStep || data.isRegErr || data.isReqErr"
-        v-bind="buttonSave"
-      />
-    </div>
-    <div class="flex justify-center items-center" data-is="form-error">
-      <Text
-        v-if="data.isRegErr || data.isReqErr"
-        :text="
-          data.isReqErr
-            ? $t('dashboard_easy_required', {
-                step: data.stepErr,
-                setting: data.settingErr,
-              })
-            : $t('dashboard_easy_invalid', {
-                step: data.stepErr,
-                setting: data.settingErr,
-              })
-        "
-      />
-    </div>
   </Container>
 </template>

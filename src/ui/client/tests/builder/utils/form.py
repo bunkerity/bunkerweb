@@ -123,7 +123,7 @@ def set_easy(template: list, plugins_base: list, settings: dict, is_new: bool) -
     template_settings = template.get("settings")
     plugins = copy.deepcopy(plugins_base)
     steps = template.get("steps")
-
+    print(steps)
     for step in steps:
         step_settings = step.get("settings", {})
         # Loop on step settings to set the settings value

@@ -305,6 +305,7 @@
   "services_mode_title": "Service mode",
   "services_mode_subtitle": "Manage your service settings.",
   "services_manage_subtitle": "Manage your service settings.",
+  "services_no_easy_mode": "No easy mode for this template",
   "logs_title": "Logs",
   "logs_not_found": "No logs found",
   "logs_no_files_found": "No log files found",
