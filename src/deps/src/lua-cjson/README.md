@@ -15,6 +15,7 @@ Table of Contents
     * [empty_array_mt](#empty_array_mt)
     * [encode_number_precision](#encode_number_precision)
     * [encode_escape_forward_slash](#encode_escape_forward_slash)
+    * [encode_skip_unsupported_value_types](#encode_skip_unsupported_value_types)
     * [decode_array_with_array_mt](#decode_array_with_array_mt)
 
 Description
@@ -24,7 +25,7 @@ This fork of [mpx/lua-cjson](https://github.com/mpx/lua-cjson) is included in
 the [OpenResty](https://openresty.org/) bundle and includes a few bugfixes and
 improvements, especially to facilitate the encoding of empty tables as JSON Arrays.
 
-Please refer to the [lua-cjson documentation](http://www.kyne.com.au/~mark/software/lua-cjson.php)
+Please refer to the [lua-cjson documentation](https://kyne.au/~mark/software/lua-cjson.php)
 for standard usage, this README only provides informations regarding this fork's additions.
 
 See [`mpx/master..openresty/master`](https://github.com/mpx/lua-cjson/compare/master...openresty:master)
@@ -168,6 +169,35 @@ encode_escape_forward_slash
 If enabled, forward slash '/' will be encoded as '\\/'.
 
 If disabled, forward slash '/' will be encoded as '/' (no escape is applied).
+
+[Back to TOC](#table-of-contents)
+
+encode_skip_unsupported_value_types
+---------------------------
+**syntax:** `cjson.encode_skip_unsupported_value_types(enabled)`
+
+**default:** false
+
+If enabled, cjson will not throw exception when there are unsupported types
+in the Lua table.
+
+For example:
+
+```lua
+local ffi = require "ffi"
+local cjson = require "cjson"
+cjson.encode_skip_unsupported_value_types(true)
+local t = {key = "val"}
+
+t.cdata = ffi.new("char[?]", 100)
+print(cjson.encode(t))
+```
+
+This will generate:
+
+```json
+{"key":"val"}
+```
 
 [Back to TOC](#table-of-contents)
 
