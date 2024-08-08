@@ -1798,7 +1798,7 @@ class Database:
             config["SERVER_NAME"] = {
                 "value": servers,
                 "global": True,
-                "method": "default",
+                "method": "scheduler",
                 "template": None,
             }
 
@@ -1867,7 +1867,7 @@ class Database:
 
                 for template_setting in query:
                     key = template_setting.setting_id + (f"_{template_setting.suffix}" if template_setting.suffix > 0 else "")
-                    if key in config and (config[key]["method"] != "default" or key == "SERVER_NAME" and config[key]["value"] != template_setting.default):
+                    if key in config and config[key]["method"] != "default":
                         continue
 
                     config[key] = {
@@ -1892,9 +1892,7 @@ class Database:
 
                         for setting in query:
                             key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
-                            if key in config and (
-                                config[key]["method"] != "default" or setting.setting_id == "SERVER_NAME" and config[key]["value"] != template_setting.default
-                            ):
+                            if key in config and config[key]["method"] != "default":
                                 continue
 
                             config[key] = {
