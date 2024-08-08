@@ -43,7 +43,7 @@ def get_plugins_multisite(plugins: list) -> list:
             plugin_multisite["settings"] = multisite_settings
             plugins_multisite.append(plugin_multisite)
 
-    return plugins
+    return plugins_multisite
 
 
 def get_forms(
@@ -61,7 +61,19 @@ def get_forms(
     """
     # Copy of the plugins, and get the plugins by context if needed
     # In services page, we want only multisite settings, but in global config we want both
-    plugins_base = get_plugins_multisite(plugins) if only_multisite else copy.deepcopy(plugins)
+    plugins_base = get_plugins_multisite(plugins) if only_multisite else plugins
+
+    # This template will be used to show default value or value if exists
+    TEMPLATE_DEFAULT = [
+        {
+            "name": "default",
+            "steps": [],
+            "configs": {},
+            "settings": {},
+        }
+    ]
+
+    templates = TEMPLATE_DEFAULT + templates
 
     # Update SERVER_NAME to be empty if new
     if is_new and "SERVER_NAME" in settings:
