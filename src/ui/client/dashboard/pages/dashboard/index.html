@@ -9,8 +9,14 @@
     <title>BunkerWeb | DASHBOARD</title>
   </head>
   <body>
-    <div class="hidden" data-server-global='{"username" : "admin"}'></div>
-    <div class="hidden" data-server-flash='[{"type" : "success", "title" : "title", "message" : "Success feedback"}, {"type" : "error", "title" : "title", "message" : "Error feedback"}, {"type" : "warning", "title" : "title", "message" : "Warning feedback"}, {"type" : "info", "title" : "title", "message" : "Info feedback"}]'></div>
+    <div
+      class="hidden"
+      data-server-global='{"username" : "admin", "plugins_page": [{"id" : "antibot", "name": "Antibot"}, {"id": "backup", "name" : "backup"}]}'
+    ></div>
+    <div
+      class="hidden"
+      data-server-flash='[{"type" : "success", "title" : "title", "message" : "Success feedback"}, {"type" : "error", "title" : "title", "message" : "Error feedback"}, {"type" : "warning", "title" : "title", "message" : "Warning feedback"}, {"type" : "info", "title" : "title", "message" : "Info feedback"}]'
+    ></div>
     <div id="app"></div>
     <script type="module" src="dashboard.js"></script>
   </body>

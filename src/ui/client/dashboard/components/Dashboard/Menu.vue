@@ -202,6 +202,7 @@ onBeforeMount(() => {
       ? JSON.parse(dataEl.getAttribute(dataAtt))
       : {};
   menu.username = data?.username || "";
+  menu.pagePlugins = data?.plugins_page || [];
 });
 </script>
 
@@ -365,13 +366,12 @@ onBeforeMount(() => {
             :tabindex="
               menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
             "
-            target="_blank"
             class="menu-page-plugin-anchor"
-            :href="`/plugins?plugin_id=${plugin.id}`"
+            :href="`plugins/${plugin.id}`"
           >
             <div aria-hidden="true" class="menu-page-plugin-svg-container">
               <Icons
-                :iconName="plugin.type === 'pro' ? 'crown' : 'free'"
+                :iconName="plugin.type === 'pro' ? 'crown' : 'document'"
                 :color="plugin.type === 'pro' ? 'amber' : 'dark'"
               />
             </div>

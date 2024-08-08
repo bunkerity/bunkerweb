@@ -544,9 +544,12 @@ def inject_variables():
         flash("The last changes have been applied successfully.", "success")
         app.data["CONFIG_CHANGED"] = False
 
+    # Keep only plugins with a page to display on sidebar
+    plugins_page = [{"id": plugin.get("id"), "name": plugin.get("name")} for plugin in app.bw_config.get_plugins() if plugin.get("page", False)]
+
     # check that is value is in tuple
     return dict(
-        data_server_global=json.dumps({"username": current_user.get_id() if current_user.is_authenticated else ""}),
+        data_server_global=json.dumps({"username": current_user.get_id() if current_user.is_authenticated else "", "plugins_page": plugins_page}),
         script_nonce=app.config["SCRIPT_NONCE"],
         is_pro_version=metadata["is_pro"],
         pro_status=metadata["pro_status"],
