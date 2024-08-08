@@ -179,10 +179,10 @@ def set_raw(template: list, plugins_base: list, settings: dict, is_new: bool) ->
             # 1 - the current value is default and from template
             # 2 - the current value is default and not from template
             # 3 - the current value is not default but from template
-            if (
-                (template_value is not None and is_current_default and is_current_from_template)
-                or (template_value is not None and not is_current_from_template and is_current_default)
-                or (template_value is not None and is_current_from_template and not is_current_default)
+            if template_value is not None and (
+                (is_current_default and is_current_from_template)
+                or (not is_current_from_template and is_current_default)
+                or (is_current_from_template and not is_current_default)
             ):
                 raw_settings[setting] = template_value
                 continue
