@@ -50,7 +50,8 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   python3 -m pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Install node and npm to build vite frontend
-RUN dnf install -y nodejs npm
+RUN curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - && \
+    dnf install -y --setopt=install_weak_deps=False nodejs
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
