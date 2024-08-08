@@ -79,7 +79,7 @@
       "id": "lua-cjson",
       "name": "lua-cjson v2.1.0.14",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "f95cd9ea1e39221a36818772eb85f05b4164bbb1"
+      "commit": "91ca29db9a4a4fd0eedaebcd5d5f3ba2ace5ae63"
     },
     {
       "id": "lua-ffi-zlib",
@@ -96,9 +96,9 @@
     },
     {
       "id": "lua-nginx-module",
-      "name": "lua-nginx-module v0.10.26",
+      "name": "lua-nginx-module v0.10.27",
       "url": "https://github.com/openresty/lua-nginx-module.git",
-      "commit": "0e769b76432df91e5f10aa56a56858e8a190faf7"
+      "commit": "f44c18859050be5af314bae8f05660478af5e31d"
     },
     {
       "id": "lua-resty-core",
@@ -139,9 +139,9 @@
     },
     {
       "id": "lua-resty-lrucache",
-      "name": "lua-resty-lrucache v0.13",
+      "name": "lua-resty-lrucache v0.14",
       "url": "https://github.com/openresty/lua-resty-lrucache.git",
-      "commit": "a79615ec9dc547fdb4aaee59ef8f5a50648ce9fd"
+      "commit": "1293147608c9dfb0ee163e39a4c8997476e8f741"
     },
     {
       "id": "lua-resty-mlcache",
@@ -176,15 +176,15 @@
     },
     {
       "id": "lua-resty-signal",
-      "name": "lua-resty-signal v0.03",
+      "name": "lua-resty-signal v0.04",
       "url": "https://github.com/openresty/lua-resty-signal.git",
-      "commit": "d07163e8cfa673900e66048cd2a1f18523aecf16"
+      "commit": "737d8ccfaa59c08ad4d32a712611a856775a61c5"
     },
     {
       "id": "lua-resty-string",
-      "name": "lua-resty-string v0.15",
+      "name": "lua-resty-string v0.16",
       "url": "https://github.com/openresty/lua-resty-string.git",
-      "commit": "b192878f6ed31b0af237935bbc5a8110a3c2256c"
+      "commit": "7be2e1d907744f965af115819cca9e6580f2e760"
     },
     {
       "id": "lua-resty-template",
@@ -225,9 +225,9 @@
     },
     {
       "id": "stream-lua-nginx-module",
-      "name": "stream-lua-nginx-module v0.0.14+ (10 commits after to include nginx 1.26.0 fixes)",
+      "name": "stream-lua-nginx-module v0.0.15",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "bea8a0c0de94cede71554f53818ac0267d675d63"
+      "commit": "982ce5283172fd5ac5cba21bfc55b579568a0994"
     },
     {
       "id": "zlib",
