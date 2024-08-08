@@ -1,4 +1,4 @@
 cryptography==43.0.0
 psycopg[binary,pool]==3.2.1
 PyMySQL==1.1.1
-sqlalchemy==2.0.31
+sqlalchemy==2.0.32
