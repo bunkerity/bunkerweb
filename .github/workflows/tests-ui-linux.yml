@@ -57,13 +57,13 @@ jobs:
       - name: Pull BW linux ubuntu test image
         run: docker pull ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}
       - name: Copy deb file to host
-        if: inputs.RELEASE != '1.6'
+        if: inputs.RELEASE != '1.5'
         run: |
           container_id=$(docker create "ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}")
           docker cp "$container_id:/opt/bunkerweb_${{ inputs.RELEASE }}-1_amd64.deb" "/tmp/bunkerweb.deb"
           docker rm "$container_id"
-      - name: Copy deb file to host 1.6
-        if: inputs.RELEASE == '1.6'
+      - name: Copy deb file to host 1.5
+        if: inputs.RELEASE == '1.5'
         run: |
           container_id=$(docker create "ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}")
           docker cp "$container_id:/opt/bunkerweb_dev-1_amd64.deb" "/tmp/bunkerweb.deb"
@@ -78,7 +78,7 @@ jobs:
           sudo apt update
           sudo -E apt install -y nginx=1.26.1-2~noble
       - name: Fix version without a starting number
-        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.6'
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.5'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
       - name: Edit configuration files
         run: |

@@ -4,7 +4,7 @@ permissions: read-all
 
 on:
   push:
-    branches: [1.6]
+    branches: [1.5]
 
 jobs:
   # Containers
@@ -27,7 +27,7 @@ jobs:
             dockerfile: src/ui/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: 1.6
+      RELEASE: 1.5
       ARCH: linux/amd64
       CACHE: true
       IMAGE: ${{ matrix.image }}
@@ -59,7 +59,7 @@ jobs:
             package: rpm
     uses: ./.github/workflows/linux-build.yml
     with:
-      RELEASE: 1.6
+      RELEASE: 1.5
       LINUX: ${{ matrix.linux }}
       PACKAGE: ${{ matrix.package }}
       TEST: true
@@ -96,7 +96,7 @@ jobs:
     uses: ./.github/workflows/tests-ui.yml
     with:
       TEST: ${{ matrix.test }}
-      RELEASE: 1.6
+      RELEASE: 1.5
   tests-ui-linux:
     needs: [prepare-tests-ui, build-packages]
     strategy:
@@ -106,7 +106,7 @@ jobs:
     uses: ./.github/workflows/tests-ui-linux.yml
     with:
       TEST: ${{ matrix.test }}
-      RELEASE: 1.6
+      RELEASE: 1.5
 
   # Core tests
   prepare-tests-core:
@@ -129,7 +129,7 @@ jobs:
     uses: ./.github/workflows/test-core.yml
     with:
       TEST: ${{ matrix.test }}
-      RELEASE: 1.6
+      RELEASE: 1.5
   tests-core-linux:
     needs: [build-packages, prepare-tests-core]
     strategy:
@@ -139,11 +139,11 @@ jobs:
     uses: ./.github/workflows/test-core-linux.yml
     with:
       TEST: ${{ matrix.test }}
-      RELEASE: 1.6
+      RELEASE: 1.5
     secrets: inherit
 
-  # Push with 1.6 tag
-  push-1_6:
+  # Push with 1.5 tag
+  push-1_5:
     needs: [tests-ui, tests-core]
     runs-on: ubuntu-latest
     permissions:
@@ -162,22 +162,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push BW image
-        run: docker pull ghcr.io/bunkerity/$FROM-tests:1.6 && docker tag ghcr.io/bunkerity/$FROM-tests:1.6 bunkerity/$TO:1.6 && docker tag ghcr.io/bunkerity/$FROM-tests:1.6 ghcr.io/bunkerity/$TO:1.6 && docker push bunkerity/$TO:1.6 && docker push ghcr.io/bunkerity/$TO:1.6
+        run: docker pull ghcr.io/bunkerity/$FROM-tests:1.5 && docker tag ghcr.io/bunkerity/$FROM-tests:1.5 bunkerity/$TO:1.5 && docker tag ghcr.io/bunkerity/$FROM-tests:1.5 ghcr.io/bunkerity/$TO:1.5 && docker push bunkerity/$TO:1.5 && docker push ghcr.io/bunkerity/$TO:1.5
         env:
           FROM: "bunkerweb"
           TO: "bunkerweb"
       - name: Push scheduler image
-        run: docker pull ghcr.io/bunkerity/$FROM-tests:1.6 && docker tag ghcr.io/bunkerity/$FROM-tests:1.6 bunkerity/$TO:1.6 && docker tag ghcr.io/bunkerity/$FROM-tests:1.6 ghcr.io/bunkerity/$TO:1.6 && docker push bunkerity/$TO:1.6 && docker push ghcr.io/bunkerity/$TO:1.6
+        run: docker pull ghcr.io/bunkerity/$FROM-tests:1.5 && docker tag ghcr.io/bunkerity/$FROM-tests:1.5 bunkerity/$TO:1.5 && docker tag ghcr.io/bunkerity/$FROM-tests:1.5 ghcr.io/bunkerity/$TO:1.5 && docker push bunkerity/$TO:1.5 && docker push ghcr.io/bunkerity/$TO:1.5
         env:
           FROM: "scheduler"
           TO: "bunkerweb-scheduler"
       - name: Push UI image
-        run: docker pull ghcr.io/bunkerity/$FROM-tests:1.6 && docker tag ghcr.io/bunkerity/$FROM-tests:1.6 bunkerity/$TO:1.6 && docker tag ghcr.io/bunkerity/$FROM-tests:1.6 ghcr.io/bunkerity/$TO:1.6 && docker push bunkerity/$TO:1.6 && docker push ghcr.io/bunkerity/$TO:1.6
+        run: docker pull ghcr.io/bunkerity/$FROM-tests:1.5 && docker tag ghcr.io/bunkerity/$FROM-tests:1.5 bunkerity/$TO:1.5 && docker tag ghcr.io/bunkerity/$FROM-tests:1.5 ghcr.io/bunkerity/$TO:1.5 && docker push bunkerity/$TO:1.5 && docker push ghcr.io/bunkerity/$TO:1.5
         env:
           FROM: "ui"
           TO: "bunkerweb-ui"
       - name: Push autoconf image
-        run: docker pull ghcr.io/bunkerity/$FROM-tests:1.6 && docker tag ghcr.io/bunkerity/$FROM-tests:1.6 bunkerity/$TO:1.6 && docker tag ghcr.io/bunkerity/$FROM-tests:1.6 ghcr.io/bunkerity/$TO:1.6 && docker push bunkerity/$TO:1.6 && docker push ghcr.io/bunkerity/$TO:1.6
+        run: docker pull ghcr.io/bunkerity/$FROM-tests:1.5 && docker tag ghcr.io/bunkerity/$FROM-tests:1.5 bunkerity/$TO:1.5 && docker tag ghcr.io/bunkerity/$FROM-tests:1.5 ghcr.io/bunkerity/$TO:1.5 && docker push bunkerity/$TO:1.5 && docker push ghcr.io/bunkerity/$TO:1.5
         env:
           FROM: "autoconf"
           TO: "bunkerweb-autoconf"
@@ -190,7 +190,7 @@ jobs:
         linux: [ubuntu, debian, fedora, el, el9, ubuntu-jammy]
         arch: [amd64]
         include:
-          - release: 1.6
+          - release: 1.5
             repo: bunkerweb
           - linux: ubuntu
             package_arch: amd64

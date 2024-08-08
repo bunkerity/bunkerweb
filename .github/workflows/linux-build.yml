@@ -41,8 +41,8 @@ jobs:
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
         run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
-      - name: Replace VERSION 1.6
-        if: inputs.RELEASE == '1.6'
+      - name: Replace VERSION 1.5
+        if: inputs.RELEASE == '1.5'
         run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh dev
       - name: Extract arch
         run: |
@@ -96,7 +96,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       # Build testing package image
       - name: Build package image
-        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.6'
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.5'
         uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
         with:
           context: .
@@ -108,7 +108,7 @@ jobs:
           cache-to: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }},mode=min
       # Build non-testing package image
       - name: Build package image
-        if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev' && inputs.RELEASE != 'ui' && inputs.RELEASE != '1.6'
+        if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev' && inputs.RELEASE != 'ui' && inputs.RELEASE != '1.5'
         uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
         with:
           context: .
