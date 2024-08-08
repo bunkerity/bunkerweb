@@ -3427,9 +3427,44 @@
                                                         "mobile": 12
                                                     },
                                                     "disabled": false,
-                                                    "value": "test",
+                                                    "value": "",
                                                     "name": "Custom header (HeaderName: HeaderValue)",
-                                                    "prev_value": "test",
+                                                    "prev_value": "",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Custom header to add (HeaderName: HeaderValue)."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-13",
+                                                    "method": "default"
+                                                }
+                                            },
+                                            "2": {
+                                                "CUSTOM_HEADER_2": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "Custom header to add (HeaderName: HeaderValue).",
+                                                    "id": "custom-header-2",
+                                                    "label": "Custom header (HeaderName: HeaderValue)",
+                                                    "regex": "^([\\w\\-]+: .+)?$",
+                                                    "type": "text",
+                                                    "multiple": "custom-headers",
+                                                    "pattern": "^([\\w\\-]+: .+)?$",
+                                                    "inpType": "input",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "dzdz",
+                                                    "name": "Custom header (HeaderName: HeaderValue)",
+                                                    "prev_value": "dzdz",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",
@@ -10293,9 +10328,44 @@
                                                         "mobile": 12
                                                     },
                                                     "disabled": false,
-                                                    "value": "test",
+                                                    "value": "",
                                                     "name": "Custom header (HeaderName: HeaderValue)",
-                                                    "prev_value": "test",
+                                                    "prev_value": "",
+                                                    "popovers": [
+                                                        {
+                                                            "iconName": "disk",
+                                                            "text": "inp_popover_multisite"
+                                                        },
+                                                        {
+                                                            "iconName": "info",
+                                                            "text": "Custom header to add (HeaderName: HeaderValue)."
+                                                        }
+                                                    ],
+                                                    "containerClass": "z-13",
+                                                    "method": "default"
+                                                }
+                                            },
+                                            "2": {
+                                                "CUSTOM_HEADER_2": {
+                                                    "context": "multisite",
+                                                    "default": "",
+                                                    "help": "Custom header to add (HeaderName: HeaderValue).",
+                                                    "id": "custom-header-2",
+                                                    "label": "Custom header (HeaderName: HeaderValue)",
+                                                    "regex": "^([\\w\\-]+: .+)?$",
+                                                    "type": "text",
+                                                    "multiple": "custom-headers",
+                                                    "pattern": "^([\\w\\-]+: .+)?$",
+                                                    "inpType": "input",
+                                                    "columns": {
+                                                        "pc": 4,
+                                                        "tablet": 6,
+                                                        "mobile": 12
+                                                    },
+                                                    "disabled": false,
+                                                    "value": "dzdz",
+                                                    "name": "Custom header (HeaderName: HeaderValue)",
+                                                    "prev_value": "dzdz",
                                                     "popovers": [
                                                         {
                                                             "iconName": "disk",

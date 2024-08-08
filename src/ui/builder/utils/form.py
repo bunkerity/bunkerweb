@@ -62,7 +62,6 @@ def get_forms(
     # Copy of the plugins, and get the plugins by context if needed
     # In services page, we want only multisite settings, but in global config we want both
     plugins_base = get_plugins_multisite(plugins) if only_multisite else plugins
-
     # This template will be used to show default value or value if exists
     templates = [
         {
