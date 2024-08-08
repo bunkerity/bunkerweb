@@ -1,5 +1,5 @@
 {
-  "name": "Basic security level",
+  "name": "Basic security level that provides essential settings for web application protection",
   "settings": {
     "SERVER_NAME": "www.example.com",
     "USE_REVERSE_PROXY": "yes",
