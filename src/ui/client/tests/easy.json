@@ -1189,7 +1189,7 @@
                                                 "mobile": 12
                                             },
                                             "disabled": false,
-                                            "value": "yes",
+                                            "value": "no",
                                             "name": "Antibot challenge",
                                             "prev_value": "no",
                                             "popovers": [

@@ -4209,7 +4209,7 @@ templates_ui = {
             "BAD_BEHAVIOR_BAN_TIME": "3600",
             "BAD_BEHAVIOR_THRESHOLD": "30",
             "BAD_BEHAVIOR_COUNT_TIME": "60",
-            "USE_ANTIBOT": "yes",
+            "USE_ANTIBOT": "no",
             "ANTIBOT_URI": "/challenge",
             "ANTIBOT_RECAPTCHA_SCORE": "0.7",
             "ANTIBOT_RECAPTCHA_SITEKEY": "",

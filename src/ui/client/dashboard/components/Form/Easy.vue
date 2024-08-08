@@ -182,14 +182,14 @@ onUnmounted(() => {
     :containerClass="`form-easy-container`"
     :columns="props.columns"
   >
+    <Title type="card" :title="'dashboard_easy_mode'" />
+    <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
     <MessageUnmatch
       v-if="easyForm.templateUIFormat.length <= 0"
       :text="'services_no_easy_mode'"
     />
-    <template v-if="easyForm.templateUIFormat.length > 0">
-      <Title type="card" :title="'dashboard_easy_mode'" />
-      <Subtitle type="card" :subtitle="'dashboard_easy_mode_subtitle'" />
 
+    <template v-if="easyForm.templateUIFormat.length > 0">
       <template v-for="(step, id) in easyForm.templateUIFormat">
         <Container
           data-is="content"

@@ -221,7 +221,7 @@ export const createFormStore = (storeName, formType) => {
 
       const templates = [templateBase.value, templateUI.value];
       // Filter to avoid multiple calls
-      if (!e.target.closest("[data-advanced-form-plugin]")) return;
+      if (!e.target.closest("[data-is='form']")) return;
       if (e.type === "change" && e.target.tagName === "INPUT") return;
       // Wait some ms that previous update logic is done like datepicker
       setTimeout(() => {
