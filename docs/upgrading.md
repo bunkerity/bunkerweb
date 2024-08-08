@@ -1,6 +1,6 @@
 # Upgrading
 
-## Upgrade from 1.5.X
+## Upgrade from 1.6.X
 
 !!! warning "Read me first"
 
@@ -375,6 +375,36 @@
 
     6. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
+
+## Upgrade from 1.5.X
+
+### Scheduler
+
+Unlike the 1.5.X releases, the Scheduler service **no longer uses the *docker socket proxy* to fetch BunkerWeb's instances**. Instead, it uses the new `BUNKERWEB_INSTANCES` environment variable.
+
+!!! info "About the `BUNKERWEB_INSTANCES` environment variable"
+
+    This new variable is a list of BunkerWeb instances separated by spaces in this format: `http://bunkerweb:5000 bunkerweb1:5000 bunkerweb2 ...`. The scheduler will then use this list to fetch the instances' configuration and to send the configuration to them.
+
+    * The `http://` prefix is optional.
+    * The port is optional and defaults to the value of the `API_HTTP_PORT` environment variable.
+    * The default value of the `BUNKERWEB_INSTANCES` environment variable is `127.0.0.1`.
+
+!!! tip "Autoconf/Swarm/Kubernetes integrations"
+
+    If you are using the `Autoconf`, `Swarm`, or `Kubernetes` integrations, you can set the `BUNKERWEB_INSTANCES` environment variable to an empty string (so that it doesn't try to send the configuration to the default one which is `127.0.0.1`).
+
+    **The instances will be automatically fetched by the controller**. You can also add custom instances to the list that may not be picked up by the controller.
+
+### BunkerWeb container
+
+Another important change is that the **settings** that were previously declared on the BunkerWeb container **are now declared on the scheduler**. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.
+
+While the settings are now declared on the Scheduler container, **you'll still need to declare api related mandatory settings on the BunkerWeb container** like the `API_WHITELIST_IP` setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.
+
+!!! warning "BunkerWeb's container settings"
+
+    Every api related setting that you declare on the BunkerWeb container **have to be mirrored on the Scheduler container** so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.
 
 ## Upgrade from 1.4.X
 

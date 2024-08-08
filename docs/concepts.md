@@ -146,3 +146,88 @@ In essence, the scheduler serves as the brain of BunkerWeb, orchestrating variou
 Depending on the integration approach, the execution environment of the scheduler may differ. In container-based integrations, the scheduler is executed within its dedicated container, providing isolation and flexibility. On the other hand, for Linux-based integrations, the scheduler is self-contained within the bunkerweb service, simplifying the deployment and management process.
 
 By employing the scheduler, BunkerWeb streamlines the automation and coordination of essential tasks, enabling efficient and reliable operation of the entire system.
+
+## Templates
+
+BunkerWeb leverages the power of templates to simplify the configuration process and enhance flexibility. Templates provide a structured and standardized approach to defining settings and custom configurations, ensuring consistency and ease of use.
+
+- **Predefined templates**: The community version offers three predefined templates that encapsulate common custom  configurations and settings. These templates serve as a starting point for configuring BunkerWeb, enabling quick setup and deployment. The predefined templates are the following:
+    - **low**: A basic template that provides essential settings for web application protection.
+    - **medium**: A balanced template that offers a mix of security features and performance optimizations.
+    - **high**: An advanced template that focuses on robust security measures and comprehensive protection.
+
+- **Custom templates**: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.
+
+### Creating custom templates
+
+Creating a custom template is a straightforward process that involves defining the desired settings, custom configurations and steps in a structured format.
+
+* **Template structure**: A custom template consists of a name, series of settings, custom configurations and optional steps. The template structure is defined in a JSON file that adheres to the specified format. The key components of a custom template include:
+    * **Settings**: A setting is defined with a name and corresponding value. This value will override the default value of the setting. **Only multisite settings are supported.**
+    * **Configs**: A custom configuration is a path to an NGINX configuration file that will be included as a custom configuration. To know where to place the custom configuration file, refer to the example of a plugin's tree below. **Only multisite configuration types are supported.**
+    * **Steps**: A step contains a title, subtitle, settings and custom configurations. Each step represents a configuration step that the user can follow to set up BunkerWeb according to the custom template in the web UI.
+
+!!! info "Specifications about steps"
+
+    If steps are declared, **it is not mandatory to include all the settings and custom configurations in the settings and configs sections**. keep in mind that when a setting or a custom configuration is declared in a step, the user will be allowed to make edits to it in the web UI.
+
+* **Template file**: The custom template is defined in a json file in a `templates` folder inside the plugin directory that adheres to the specified structure. The template file contains a name, the settings, custom configurations, and steps required to configure BunkerWeb according to the user's preferences.
+
+* **Selecting a template**: Once the custom template is defined, users can select it during the easy-mode configuration process of a service in the web UI. A template can also be selected with the `USE_TEMPLATE` setting in the configuration. The name of the template file (without the `.json` extension) should be specified as the value of the `USE_TEMPLATE` setting.
+
+Example of a custom template file:
+```json
+{
+    "name": "template name",
+	// optional
+    "settings": {
+        "SETTING_1": "value",
+        "SETTING_2": "value"
+    },
+	// optional
+    "configs": [
+        "modsec/false_positives.conf",
+        "modsec/non_editable.conf",
+		"modsec-crs/custom_rules.conf"
+    ],
+	// optional
+    "steps": [
+        {
+            "title": "Title 1",
+            "subtitle": "subtitle 1",
+            "settings": [
+                "SETTING_1"
+            ],
+            "configs": [
+                "modsec-crs/custom_rules.conf"
+            ]
+        },
+        {
+            "title": "Title 2",
+            "subtitle": "subtitle 2",
+            "settings": [
+                "SETTING_2"
+            ],
+            "configs": [
+                "modsec/false_positives.conf"
+            ]
+        }
+    ]
+}
+```
+
+Example of a plugin's tree including custom templates:
+```tree
+.
+├── plugin.json
+└── templates
+    ├── my_other_template.json
+    ├── my_template
+    │   └── configs
+    │       ├── modsec
+    │       │   ├── false_positives.conf
+    │       │   └── non_editable.conf
+    │       └── modsec-crs
+    │           └── custom_rules.conf
+    └── my_template.json
+```
