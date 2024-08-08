@@ -24,7 +24,7 @@ jobs:
           token: ${{ secrets.BUNKERBOT_TOKEN }}
       - name: Replace VERSION
         if: inputs.VERSION == 'testing'
-        run: ./misc/update-version.sh testing
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh testing
       - name: Setup git user
         run: |
           git config --global user.name "BunkerBot"

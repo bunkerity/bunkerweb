@@ -32,6 +32,7 @@ jobs:
       - name: Run tests
         run: |
           cd ./tests/ui
+          chmod +x ./tests.sh
           ./tests.sh "docker" ${{ inputs.TEST }}
         env:
           MODE: ${{ inputs.RELEASE }}

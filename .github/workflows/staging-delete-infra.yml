@@ -44,6 +44,6 @@ jobs:
         continue-on-error: true
         env:
           KUBECONFIG: /tmp/k8s/kubeconfig
-      - run: ./tests/rm.sh ${{ inputs.TYPE }}
+      - run: chmod +x ./tests/rm.sh && ./tests/rm.sh ${{ inputs.TYPE }}
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}

@@ -40,7 +40,10 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
-        run: ./misc/update-version.sh ${{ inputs.RELEASE }}
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
+      - name: Replace VERSION 1.5
+        if: inputs.RELEASE == '1.5'
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh dev
       - name: Extract arch
         run: |
           echo "ARCH=${{ env.PLATFORMS }}" | sed 's/linux//g' | sed 's@/@@g' >> "$GITHUB_ENV"
@@ -93,7 +96,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       # Build testing package image
       - name: Build package image
-        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui' || inputs.RELEASE == '1.5'
         uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
         with:
           context: .
@@ -105,7 +108,7 @@ jobs:
           cache-to: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }},mode=min
       # Build non-testing package image
       - name: Build package image
-        if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev'
+        if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev' && inputs.RELEASE != 'ui' && inputs.RELEASE != '1.5'
         uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
         with:
           context: .
@@ -116,7 +119,7 @@ jobs:
       # Generate package
       - name: Generate package
         if: startsWith(env.ARCH, 'arm') == false
-        run: ./src/linux/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
+        run: chmod +x ./src/linux/package.sh && ./src/linux/package.sh ${{ inputs.LINUX }} ${{ env.LARCH }}
         env:
           LARCH: ${{ env.LARCH }}
       - name: Generate package (ARM)
