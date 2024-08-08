@@ -24,17 +24,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
 # Install node and npm to build vite frontend
 RUN apk add --no-cache nodejs npm
 
-# Copy files
-# can't exclude specific files/dir from . so we are copying everything by hand
-COPY src/common/api api
-COPY src/common/db db
-COPY src/common/core core
-COPY src/common/gen gen
-COPY src/common/settings.json settings.json
-COPY src/common/utils utils
-COPY src/common/helpers helpers
-COPY src/VERSION VERSION
-
 COPY src/ui/builder ui/builder
 COPY src/ui/client ui/client
 
@@ -47,6 +36,16 @@ RUN rm -rf /usr/share/bunkerweb/ui/client
 
 WORKDIR /usr/share/bunkerweb
 
+# Copy files
+# can't exclude specific files/dir from . so we are copying everything by hand
+COPY src/common/api api
+COPY src/common/db db
+COPY src/common/core core
+COPY src/common/gen gen
+COPY src/common/settings.json settings.json
+COPY src/common/utils utils
+COPY src/common/helpers helpers
+COPY src/VERSION VERSION
 COPY src/ui/src ui/src
 COPY src/ui/*.py ui/
 COPY --chmod=750 src/ui/entrypoint.sh ui/
