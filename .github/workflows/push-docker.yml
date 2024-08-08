@@ -70,7 +70,7 @@ jobs:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build and push
       - name: Build and push
-        uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
+        uses: docker/build-push-action@16ebe778df0e7752d2cfcbd924afdbbd89c1a755 # v6.6.1
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
