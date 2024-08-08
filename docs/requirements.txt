@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-babel==2.15.0 \
-    --hash=sha256:08706bdad8d0a3413266ab61bd6c34d0c28d6e1e7badf40a2cebe67644e2e1fb \
-    --hash=sha256:8daf0e265d05768bc6c7a314cf1321e9a123afc328cc635c18622a2f30a04413
+babel==2.16.0 \
+    --hash=sha256:368b5b98b37c06b7daf6696391c3240c938b37767d4584413e8438c5c435fa8b \
+    --hash=sha256:d1f3554ca26605fe173f3de0c65f750f5a42f924499bf134de6423582298e316
     # via mkdocs-material
 cairocffi==1.7.1 \
     --hash=sha256:2e48ee864884ec4a3a34bfa8c9ab9999f688286eb714a15a43ec9d068c36557b \
