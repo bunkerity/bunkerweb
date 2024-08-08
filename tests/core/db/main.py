@@ -21,6 +21,7 @@ from bunkerweb.db.model import (
     Custom_configs,
     Global_values,
     Jobs,
+    Jobs_runs,
     Metadata,
     Plugins,
     Plugin_pages,
@@ -399,7 +400,7 @@ try:
             if job.plugin_id in pro_plugin_ids:
                 continue
 
-            if job.name != "download-pro-plugins" and not job.success:
+            if job.name != "download-pro-plugins" and not all(job_run.success for job_run in session.query(Jobs_runs).filter_by(job_name=job.name)):
                 print(
                     f"❌ The job {job.name} (plugin_id: {job.plugin_id}) is in the database but failed, exiting ...",
                     flush=True,
@@ -463,8 +464,7 @@ try:
             .with_entities(
                 Plugin_pages.id,
                 Plugin_pages.plugin_id,
-                Plugin_pages.template_checksum,
-                Plugin_pages.actions_checksum,
+                Plugin_pages.checksum,
             )
             .all()
         )

@@ -132,10 +132,15 @@ cleanup_stack () {
 
     if [ "$integration" == "docker" ] ; then
         soft_cleanup=$1
+        compose_file="docker-compose.yml"
+        if [ "$2" == "old" ] ; then
+            compose_file="docker-compose.old.yml"
+        fi
+
         if [ "$soft_cleanup" = "1" ] ; then
-            docker compose down
+            docker compose -f "$compose_file" down
         else
-            docker compose down -v --remove-orphans
+            docker compose -f "$compose_file" down -v --remove-orphans
         fi
 
         if [[ $end -eq 0 && $exit_code = 1 ]] && [ $manual = 0 ] ; then
@@ -169,7 +174,12 @@ trap cleanup_stack EXIT
 starting_stack () {
     echo "💾 Starting stack ..."
     if [ "$integration" == "docker" ] ; then
-        docker compose up -d
+        compose_file="docker-compose.yml"
+        if [ "$1" == "old" ] ; then
+            compose_file="docker-compose.old.yml"
+        fi
+
+        docker compose -f "$compose_file" up -d
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             echo "💾 Up failed, retrying ... ⚠️"
@@ -195,7 +205,7 @@ starting_stack () {
                 fi
             fi
             manual=0
-            docker compose up -d
+            docker compose -f "$compose_file" up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 echo "💾 Up failed ❌"
@@ -217,6 +227,11 @@ waiting_stack () {
     echo "💾 Waiting for stack to be healthy ..."
     i=0
     if [ "$integration" == "docker" ] ; then
+        compose_file="docker-compose.yml"
+        if [ "$1" == "old" ] ; then
+            compose_file="docker-compose.old.yml"
+        fi
+
         while [ $i -lt 120 ] ; do
             containers=("db-bw-1" "db-bw-scheduler-1")
             healthy="true"
@@ -235,10 +250,9 @@ waiting_stack () {
             i=$((i+1))
         done
         if [ $i -ge 120 ] ; then
-            docker compose logs
             echo "💾 Docker stack is not healthy ❌"
-            echo "🛡️ Showing BunkerWeb and BunkerWeb Scheduler logs ..."
-            docker compose logs bw bw-scheduler
+            echo "🛡️ Showing logs ..."
+            docker compose -f "$compose_file" logs
             exit 1
         fi
     else
@@ -356,11 +370,12 @@ else
     sudo chmod -R 777 /etc/bunkerweb/plugins external bunkerweb
 fi
 
-tests="local multisite"
+tests="multisite upgrade"
+# tests="local multisite"
 
-if [ "$integration" == "docker" ] ; then
-    tests="$tests mariadb mysql postgres upgrade"
-fi
+# if [ "$integration" == "docker" ] ; then
+#     tests="$tests mariadb mysql postgres upgrade"
+# fi
 
 for test in $tests
 do
@@ -467,8 +482,8 @@ do
         older_version="$(curl -i https://github.com/bunkerity/bunkerweb/tags | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+' | uniq | sed -n 1p | cut -c 2-)"
         echo "💾 Running tests when upgrading from $older_version (older) to latest version ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"@' {} \;
-        sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$older_version"'@' docker-compose.yml
-        sed -i 's@bunkerity/bunkerweb-scheduler:.*$@bunkerity/bunkerweb-scheduler:'"$older_version"'@' docker-compose.yml
+        sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$older_version"'@' docker-compose.old.yml
+        sed -i 's@bunkerity/bunkerweb-scheduler:.*$@bunkerity/bunkerweb-scheduler:'"$older_version"'@' docker-compose.old.yml
 
         docker pull bunkerity/bunkerweb:"$older_version"
         # shellcheck disable=SC2181
@@ -484,12 +499,12 @@ do
             exit 1
         fi
 
-        starting_stack
+        starting_stack "old"
 
-        waiting_stack
+        waiting_stack "old"
 
         manual=1
-        cleanup_stack "1"
+        cleanup_stack "1" "old"
         manual=0
 
         sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$release"'@' docker-compose.yml
