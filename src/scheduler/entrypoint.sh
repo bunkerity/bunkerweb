@@ -34,17 +34,6 @@ elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
 	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
 fi
 
-if ! grep -q "Docker" /usr/share/bunkerweb/INTEGRATION ; then
-	# Init database
-	get_env > "/tmp/variables.env"
-	/usr/share/bunkerweb/gen/save_config.py --variables /tmp/variables.env --init
-	# shellcheck disable=SC2181
-	if [ $? -ne 0 ] ; then
-		log "ENTRYPOINT" "❌" "Scheduler generator failed"
-		exit 1
-	fi
-fi
-
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
 /usr/share/bunkerweb/scheduler/main.py &
