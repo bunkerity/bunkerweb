@@ -154,7 +154,7 @@ def set_easy(template: list, plugins_base: list, settings: dict, is_new: bool) -
     return steps
 
 
-def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
+def set_raw(template: list, plugins_base: list, settings: dict, is_new: bool = False) -> dict:
     """
     Set the raw form based on the template and plugins data.
     It consists of keeping only the value or default value for each plugin settings.
@@ -167,29 +167,32 @@ def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
     for plugin in plugins:
         for setting, value in plugin.get("settings").items():
 
-            # Avoid issue with multiple settings
-            if not setting in settings:
-                continue
+            is_multiple_setting = "multiple" in value
 
-            template_value, current_value, default_value, is_disabled_method, is_current_from_template, is_current_default, setting_value = get_setting_data(
-                template_settings,
-                settings,
-                setting,
-                value,
-            )
+            # By default, we will loop on one setting (not multiple)
+            total_settings = {setting: value}
 
-            # We want to show any methods on raw mode
+            # Case multiple, retrieve all settings that start with setting name
+            if is_multiple_setting:
+                # get all settings that start with setting name
+                total_settings = {k: v for k, v in settings.items() if k.startswith(f"{setting}")}
 
-            # if is_disabled_method :
-            #     continue
+            # Loop in a same way it is a multiple or regular setting
+            for mult_setting, mult_value in total_settings.items():
 
-            if current_value is not None and not is_current_default:
-                raw_settings[setting] = current_value
-                continue
+                # Get setting data
+                # We need to send setting and not mult_setting because mult_setting is unknown on plugin side
+                template_value, current_value, default_value, is_disabled_method, is_current_from_template, is_current_default, setting_value = (
+                    get_setting_data(template_settings, settings, mult_setting, mult_value)
+                )
 
-            if template_value is not None:
-                raw_settings[setting] = template_value
-                continue
+                if current_value is not None:
+                    raw_settings[mult_setting] = current_value
+                    continue
+
+                if template_value is not None:
+                    raw_settings[mult_setting] = template_value
+                    continue
 
     return raw_settings
 

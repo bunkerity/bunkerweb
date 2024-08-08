@@ -5,9 +5,8 @@ def advanced_mode_builder(templates: list[dict], plugins: list, global_config: d
     """Render forms with global config data.
     ATM we don't need templates but we need to pass at least one to the function (it will simply not override anything).
     """
-
-    # We need
     settings = get_service_settings(service_name, global_config, total_config)
+
     builder = [
         {
             "type": "card",
