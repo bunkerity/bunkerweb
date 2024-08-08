@@ -47,7 +47,7 @@ def get_plugins_multisite(plugins: list) -> list:
 
 
 def get_forms(
-    templates: list = [],
+    templates_ui: list = [],
     plugins: list = [],
     settings: dict = {},
     render_forms: tuple = ("advanced", "easy", "raw"),
@@ -64,7 +64,7 @@ def get_forms(
     plugins_base = get_plugins_multisite(plugins) if only_multisite else plugins
 
     # This template will be used to show default value or value if exists
-    TEMPLATE_DEFAULT = [
+    templates = [
         {
             "name": "default",
             "steps": [],
@@ -73,7 +73,10 @@ def get_forms(
         }
     ]
 
-    templates = TEMPLATE_DEFAULT + templates
+    for key, value in templates_ui.items():
+        value["label"] = value["name"]
+        value["name"] = key
+        templates.append(value)
 
     # Update SERVER_NAME to be empty if new
     if is_new and "SERVER_NAME" in settings:
@@ -151,31 +154,42 @@ def set_raw(template: list, plugins_base: list, settings: dict, is_new: bool) ->
     for plugin in plugins:
         for setting, value in plugin.get("settings").items():
 
-            # we want to show none default value even if this is a disabled method
+            # we want to show disabled method on raw mode
 
             # if setting in settings and settings[setting].get("method", "ui") not in ("ui", "default", "manual") and :
             #     continue
 
-            raw_value = None
+            template_value = template_settings.get(setting, None)
+            current_value = settings[setting].get("value", None)
+            default_value = value.get("default")
+            is_disabled_method = settings.get(setting, {}).get("method", "ui") not in ("ui", "default", "manual")
+            is_current_from_template = settings[setting].get("template", None) and template_value is not None
+            is_current_default = current_value is not None and current_value == default_value
+            # setting value is the current (custom one) if exists or fallback to default
+            setting_value = current_value if current_value is not None else default_value
 
-            # Start by setting template value if exists
-            if setting in template_settings:
-                # Update value or set default as value
-                raw_value = template_settings.get(setting, None)
+            # Cases we set the setting value
+            # 1 - the value is from a disabled method
+            # 2 - no template value
+            if is_disabled_method or not is_disabled_method and template_value is None:
+                raw_settings[setting] = setting_value
+                continue
 
-            # Then override by service settings
-            if setting in settings:
+            # Cases we can override by template value
+            # 1 - the current value is default and from template
+            # 2 - the current value is default and not from template
+            # 3 - the current value is not default but from template
+            if (
+                (template_value is not None and is_current_default and is_current_from_template)
+                or (template_value is not None and not is_current_from_template and is_current_default)
+                or (template_value is not None and is_current_from_template and not is_current_default)
+            ):
+                raw_settings[setting] = template_value
+                continue
 
-                # Check if the service setting is not default value to add it
-                default_val = value.get("default")
-                val = settings[setting].get("value", value.get("value", value.get("default")))
-
-                if val != default_val:
-                    raw_value = val
-
-            # Add value only if exists
-            if raw_value:
-                raw_settings[setting] = raw_value
+            # Case the current value is not default and not from template, we can't override
+            # Or any others cases, we set this fallback
+            raw_settings[setting] = setting_value
 
     return raw_settings
 

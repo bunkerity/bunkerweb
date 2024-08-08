@@ -47,7 +47,7 @@ def get_plugins_multisite(plugins: list) -> list:
 
 
 def get_forms(
-    templates: list = [],
+    templates_ui: list = [],
     plugins: list = [],
     settings: dict = {},
     render_forms: tuple = ("advanced", "easy", "raw"),
@@ -64,7 +64,7 @@ def get_forms(
     plugins_base = get_plugins_multisite(plugins) if only_multisite else plugins
 
     # This template will be used to show default value or value if exists
-    TEMPLATE_DEFAULT = [
+    templates = [
         {
             "name": "default",
             "steps": [],
@@ -73,7 +73,10 @@ def get_forms(
         }
     ]
 
-    templates = TEMPLATE_DEFAULT + templates
+    for key, value in templates_ui.items():
+        value["label"] = value["name"]
+        value["name"] = key
+        templates.append(value)
 
     # Update SERVER_NAME to be empty if new
     if is_new and "SERVER_NAME" in settings:

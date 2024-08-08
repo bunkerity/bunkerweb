@@ -54,6 +54,7 @@ const comboboxTemplate = {
   label: "dashboard_templates",
   columns: { pc: 3, tablet: 12, mobile: 12 },
   containerClass: "setting",
+  onlyDown: true,
   popovers: [
     {
       text: "inp_templates_desc",
@@ -118,7 +119,9 @@ onBeforeMount(() => {
 <template>
   <Container
     v-if="data.currModeName && data.currTemplateName"
-    :containerClass="`col-span-12 w-full`"
+    :containerClass="`col-span-12 w-full ${
+      data.templates.length > 1 ? '' : 'mb-3'
+    }`"
     :columns="props.columns"
   >
     <Grid

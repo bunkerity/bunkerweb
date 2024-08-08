@@ -23,7 +23,7 @@ def easy_mode_builder(templates: list[dict], plugins: list, global_config: dict,
                 },
                 {
                     "type": "Subtitle",
-                    "data": {"subtitle": "services_manage_subtitle", "type": "container", "subtitleClass": "mb-4"},
+                    "data": {"subtitle": "services_manage_subtitle", "type": "container"},
                 },
                 {
                     "type": "Templates",
