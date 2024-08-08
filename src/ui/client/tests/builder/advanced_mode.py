@@ -28,7 +28,7 @@ def advanced_mode_builder(templates: list[dict], plugins: list, global_config: d
                 {
                     "type": "Templates",
                     "data": {
-                        "templates": get_forms(templates, plugins, settings, ("advanced",), is_new),
+                        "templates": get_forms(templates, plugins, settings, ("advanced",), is_new, True),
                         "operation": "new" if is_new else "edit",
                         "oldServerName": service_name if service_name else "",
                     },

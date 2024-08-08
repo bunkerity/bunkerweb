@@ -101,17 +101,6 @@ signal(SIGTERM, handle_stop)
 
 sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
 
-
-TEMPLATE_PLACEHOLDER = [
-    {
-        "name": "default",
-        "steps": [],
-        "configs": {},
-        "settings": {},
-    }
-]
-
-
 # Flask app
 app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
 
@@ -1347,20 +1336,15 @@ def services_modes():
     plugins = app.bw_config.get_plugins()
 
     data_server_builder = None
+    templates = []
     if mode == "raw":
-        data_server_builder = raw_mode_builder(
-            TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name or "new", False if service_name else True
-        )
+        data_server_builder = raw_mode_builder(templates, plugins, global_config, total_config, service_name or "new", False if service_name else True)
 
     if mode == "advanced":
-        data_server_builder = advanced_mode_builder(
-            TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name or "new", False if service_name else True
-        )
+        data_server_builder = advanced_mode_builder(templates, plugins, global_config, total_config, service_name or "new", False if service_name else True)
 
     if mode == "easy":
-        data_server_builder = easy_mode_builder(
-            TEMPLATE_PLACEHOLDER, plugins, global_config, total_config, service_name or "new", False if service_name else True
-        )
+        data_server_builder = easy_mode_builder(templates, plugins, global_config, total_config, service_name or "new", False if service_name else True)
 
     data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
 
@@ -1487,7 +1471,8 @@ def global_config():
 
     global_config = app.bw_config.get_config(global_only=True, methods=True)
     plugins = app.bw_config.get_plugins()
-    data_server_builder = global_config_builder(TEMPLATE_PLACEHOLDER, plugins, global_config)
+    templates = []
+    data_server_builder = global_config_builder(templates, plugins, global_config)
     data_server_builder = base64.b64encode(bytes(json.dumps(data_server_builder), "utf-8")).decode("ascii")
 
     return render_template("global-config.html", data_server_builder=data_server_builder)
