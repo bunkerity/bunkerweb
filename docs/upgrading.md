@@ -406,6 +406,14 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
     Every api related setting that you declare on the BunkerWeb container **have to be mirrored on the Scheduler container** so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.
 
+### Default values and new settings
+
+The default value of some settings have changed and we have added many other settings, we recommend you read the [security tuning](security-tuning.md) and [settings](settings.md) sections of the documentation.
+
+### Templates
+
+We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](concepts.md#templates) section for more information.
+
 ## Upgrade from 1.4.X
 
 !!! warning "Read this if you were a 1.4.X user"
