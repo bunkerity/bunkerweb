@@ -2,14 +2,16 @@ import copy
 from typing import Union
 
 
-def get_setting_data(template_settings: dict, settings: dict, setting: str, value: dict) -> tuple:
+def get_setting_data(template_settings: dict, settings: dict, setting: str, value: dict, is_multiple_setting: bool = False, is_new: bool = False) -> tuple:
     template_value = template_settings.get(setting, None)
-    current_value = settings[setting].get("value", None)
+    current_value = settings[setting].get("value", None) if setting in settings else None
     default_value = value.get("default")
-    is_disabled_method = settings.get(setting, {}).get("method", "ui") not in ("ui", "default", "manual")
-    is_current_from_template = settings[setting].get("template", None) and template_value is not None
+    is_disabled_method = (
+        True if settings.get(setting, {}).get("method", "ui") not in ("ui", "default", "manual") and not is_new and not is_multiple_setting else False
+    )
+    is_current_from_template = True if settings.get(setting, {}).get("template", None) is not None and template_value is not None else False
     is_current_default = current_value is not None and current_value == default_value
-    setting_value = current_value if current_value is not None else default_value
+    setting_value = current_value if current_value is not None and not is_new and not is_multiple_setting else default_value
     return template_value, current_value, default_value, is_disabled_method, is_current_from_template, is_current_default, setting_value
 
 
@@ -152,7 +154,7 @@ def set_easy(template: list, plugins_base: list, settings: dict, is_new: bool) -
     return steps
 
 
-def set_raw(template: list, plugins_base: list, settings: dict, is_new: bool) -> dict:
+def set_raw(template: list, plugins_base: list, settings: dict) -> dict:
     """
     Set the raw form based on the template and plugins data.
     It consists of keeping only the value or default value for each plugin settings.
@@ -170,7 +172,10 @@ def set_raw(template: list, plugins_base: list, settings: dict, is_new: bool) ->
                 continue
 
             template_value, current_value, default_value, is_disabled_method, is_current_from_template, is_current_default, setting_value = get_setting_data(
-                template_settings, settings, setting, value
+                template_settings,
+                settings,
+                setting,
+                value,
             )
 
             # We want to show any methods on raw mode
@@ -392,8 +397,8 @@ def set_multiples(template, format_plugins, settings):
 
 
 def format_setting(
-    setting_name: str,
-    setting_value: Union[str, int],
+    name: str,
+    value: Union[str, int],
     total_settings: Union[str, int],
     loop_id: Union[str, int],
     template_settings: dict,
@@ -405,60 +410,37 @@ def format_setting(
     This will only set value for none multiple settings.
     Additionnel set_multiples function will handle multiple settings.
     """
-    # add zindex for field in case not a multiple
-    # Case multiple, this will be set on the group level
-    if not "multiple" in setting_value:
-        setting_value["containerClass"] = f"z-{total_settings - loop_id}"
 
-    # regex by pattern
-    setting_value["pattern"] = setting_value.get("regex", "")
+    is_multiple_setting = value.get("multiple", False)
+
+    template_value, current_value, default_value, is_disabled_method, is_current_from_template, is_current_default, setting_value = get_setting_data(
+        template_settings, settings, name, value, is_multiple_setting, is_new
+    )  # regex by pattern
+
+    value["pattern"] = value.get("regex", "")
 
     # set inpType based on type define for each settings
     inpType = (
         "checkbox"
-        if setting_value.get("type") == "check"
-        else ("select" if setting_value.get("type") == "select" else "datepicker" if setting_value.get("type") == "date" else "input")
+        if value.get("type") == "check"
+        else ("select" if value.get("type") == "select" else "datepicker" if value.get("type") == "date" else "input")
     )
-    setting_value["inpType"] = inpType
+    value["inpType"] = inpType
 
-    # set name using the label
-    setting_value["name"] = setting_value.get("label")
-
-    # case select
     if inpType == "select":
         # replace "select" key by "values"
-        setting_value["values"] = setting_value.pop("select")
+        value["values"] = value.pop("select")
 
-    # add columns
-    setting_value["columns"] = {"pc": 4, "tablet": 6, "mobile": 12}
-
-    # By default, the input is enabled unless specific method
-    setting_value["disabled"] = False
-
-    setting_value["value"] = setting_value.get("default")
-
-    # Start by setting template value if exists
-    if setting_name in template_settings and not "multiple" in setting_value:
-        # Update value or set default as value
-        setting_value["value"] = template_settings.get(setting_name, setting_value.get("default"))
-
-    # Then override by service settings if not a multiple
-    # Case multiple, we need to keep the default value and override only each multiple group
-    if setting_name in settings and not "multiple" in setting_value:
-        setting_value["value"] = settings[setting_name].get("value", setting_value.get("value", setting_value.get("default")))
-        setting_value["method"] = settings[setting_name].get("method", "ui")
-
-    # Add prev_value in order to check if value has changed to submit it
-    setting_value["prev_value"] = setting_value.get("value")
-
-    # Then override by service settings
-    if setting_name in settings:
-        setting_value["disabled"] = False if settings[setting_name].get("method", "ui") in ("ui", "default", "manual") or is_new else True
+    value["columns"] = {"pc": 4, "tablet": 6, "mobile": 12}
+    value["disabled"] = is_disabled_method
+    value["value"] = default_value
+    value["name"] = value.get("label")
+    value["prev_value"] = value.get("value")
 
     # Prepare popover checking "help", "context"
     popovers = []
 
-    if (setting_value.get("disabled", False)) and settings[setting_name].get("method", "ui") not in ("ui", "default", "manual"):
+    if is_disabled_method:
         popovers.append(
             {
                 "iconName": "trespass",
@@ -466,21 +448,37 @@ def format_setting(
             }
         )
 
-    if setting_value.get("context"):
+    if value.get("context"):
         popovers.append(
             {
-                "iconName": ("disk" if setting_value.get("context") == "multisite" else "globe"),
-                "text": ("inp_popover_multisite" if setting_value.get("context") == "multisite" else "inp_popover_global"),
+                "iconName": ("disk" if value.get("context") == "multisite" else "globe"),
+                "text": ("inp_popover_multisite" if value.get("context") == "multisite" else "inp_popover_global"),
             }
         )
 
-    if setting_value.get("help"):
+    if value.get("help"):
         popovers.append(
             {
                 "iconName": "info",
-                "text": setting_value.get("help"),
+                "text": value.get("help"),
             }
         )
 
-    setting_value["popovers"] = popovers
-    return setting_value
+    value["popovers"] = popovers
+
+    # Case multiple, stop here
+    if "multiple" in value:
+        return value
+
+    # Else, we can add additionnal final data
+    value["method"] = settings.get(name, {}).get("method", "ui")
+    value["containerClass"] = f"z-{total_settings - loop_id}"
+
+    if current_value is not None and not is_current_default:
+        value["value"] = current_value
+    elif template_value is not None:
+        value["value"] = template_value
+    else:
+        value["value"] = setting_value
+
+    return value
