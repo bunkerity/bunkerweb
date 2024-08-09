@@ -11,7 +11,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from bcrypt import gensalt, hashpw
 from sqlalchemy import MetaData, inspect, text
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
 from Database import Database  # type: ignore
@@ -70,9 +72,9 @@ class UIDatabase(Database):
 
                 # Rename the old tables
                 db_version_id = db_version.replace(".", "_")
-                for table_name in metadata.tables.keys():
-                    if table_name in Base.metadata.tables:
-                        with self._db_session() as session:
+                with self._db_session() as session:
+                    for table_name in metadata.tables.keys():
+                        if table_name in Base.metadata.tables:
                             if inspector.has_table(f"{table_name}_{db_version_id}"):
                                 self.logger.warning(f'UI table "{table_name}" already exists, dropping it to make room for the new one')
                                 session.execute(text(f"DROP TABLE {table_name}_{db_version_id}"))
@@ -144,9 +146,12 @@ class UIDatabase(Database):
         """Get ui user. If username is None, return the first admin user."""
         with self._db_session() as session:
             if username:
-                ui_user = session.query(Users).filter_by(username=username).first()
+                query = session.query(Users).filter_by(username=username)
             else:
-                ui_user = session.query(Users).filter_by(admin=True).first()
+                query = session.query(Users).filter_by(admin=True)
+            query = query.options(joinedload(Users.roles), joinedload(Users.recovery_codes))
+
+            ui_user = query.first()
 
             if not ui_user:
                 return None
@@ -164,14 +169,9 @@ class UIDatabase(Database):
                 "totp_secret": ui_user.totp_secret,
                 "creation_date": ui_user.creation_date,
                 "update_date": ui_user.update_date,
-                "roles": [],
-                "recovery_codes": [],
+                "roles": [role.role_name for role in ui_user.roles],
+                "recovery_codes": [recovery_code.code for recovery_code in ui_user.recovery_codes],
             }
-
-            for role in session.query(RolesUsers).filter_by(user_name=ui_user.username).all():
-                ui_user_data["roles"].append(role.role_name)
-            for recovery_code in session.query(UserRecoveryCodes).filter_by(user_name=ui_user.username).all():
-                ui_user_data["recovery_codes"].append(recovery_code.code)
 
             return ui_user_data
 
@@ -192,15 +192,15 @@ class UIDatabase(Database):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            if admin and session.query(Users).filter_by(admin=True).first():
+            if admin and session.query(Users).with_entities(Users.username).filter_by(admin=True).first():
                 return "An admin user already exists"
 
-            user = session.query(Users).filter_by(username=username).first()
+            user = session.query(Users).with_entities(Users.username).filter_by(username=username).first()
             if user:
                 return f"User {username} already exists"
 
             for role in roles:
-                if not session.query(Roles).filter_by(name=role).first():
+                if not session.query(Roles).with_entities(Roles.name).filter_by(name=role).first():
                     return f"Role {role} doesn't exist"
                 session.add(RolesUsers(user_name=username, role_name=role))
 
@@ -212,12 +212,11 @@ class UIDatabase(Database):
                     method=method,
                     admin=admin,
                     totp_secret=totp_secret,
-                    totp_refreshed=bool(totp_secret),
                 )
             )
 
             for code in totp_recovery_codes or []:
-                session.add(UserRecoveryCodes(user_name=username, code=code))
+                session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=8)).decode("utf-8")))
 
             try:
                 session.commit()
@@ -230,6 +229,7 @@ class UIDatabase(Database):
         self, username: str, password: bytes, totp_secret: Optional[str], *, totp_recovery_codes: Optional[List[str]] = None, method: str = "manual"
     ) -> str:
         """Update ui user."""
+        totp_changed = False
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -238,8 +238,7 @@ class UIDatabase(Database):
             if not user:
                 return f"User {username} doesn't exist"
 
-            if user.totp_secret != totp_secret:
-                user.totp_refreshed = True
+            totp_changed = user.totp_secret != totp_secret
 
             user.password = password.decode("utf-8")
             user.totp_secret = totp_secret
@@ -250,7 +249,7 @@ class UIDatabase(Database):
             except BaseException as e:
                 return str(e)
 
-        if user.totp_refreshed:
+        if totp_changed:
             if totp_recovery_codes:
                 self.refresh_ui_user_recovery_codes(username, totp_recovery_codes or [])
             else:
@@ -303,13 +302,13 @@ class UIDatabase(Database):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            if session.query(Roles).filter_by(name=name).first():
+            if session.query(Roles).with_entities(Roles.name).filter_by(name=name).first():
                 return f"Role {name} already exists"
 
             session.add(Roles(name=name, description=description))
 
             for permission in permissions:
-                if not session.query(Permissions).filter_by(name=permission).first():
+                if not session.query(Permissions).with_entities(Permissions.name).filter_by(name=permission).first():
                     session.add(Permissions(name=permission))
                 session.add(RolesPermissions(role_name=name, permission_name=permission))
 
@@ -323,7 +322,7 @@ class UIDatabase(Database):
     def get_ui_roles(self, *, as_dict: bool = False) -> List[Union[Roles, dict]]:
         """Get ui roles."""
         with self._db_session() as session:
-            roles = session.query(Roles).all()
+            roles = session.query(Roles).with_entities(Roles.name, Roles.description, Roles.update_datetime).all()
             if not as_dict:
                 return roles
 
@@ -336,7 +335,7 @@ class UIDatabase(Database):
                     "permissions": [],
                 }
 
-                for permission in session.query(RolesPermissions).filter_by(role_name=role.name).all():
+                for permission in session.query(RolesPermissions).with_entities(RolesPermissions.permission_name).filter_by(role_name=role.name):
                     role_data["permissions"].append(permission.permission_name)
 
                 roles_data.append(role_data)
@@ -349,19 +348,17 @@ class UIDatabase(Database):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            if not codes:
+                return "No recovery codes provided"
+
             user = session.query(Users).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
 
-            if not codes:
-                return "No recovery codes provided"
-
             session.query(UserRecoveryCodes).filter_by(user_name=username).delete()
 
             for code in codes:
-                session.add(UserRecoveryCodes(user_name=username, code=code))
-
-            user.totp_refreshed = True
+                session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=8)).decode("utf-8")))
 
             try:
                 session.commit()
@@ -388,54 +385,43 @@ class UIDatabase(Database):
     def get_ui_user_roles(self, username: str) -> List[str]:
         """Get ui user roles."""
         with self._db_session() as session:
-            return [role.role_name for role in session.query(RolesUsers).filter_by(user_name=username).all()]
+            return [role.role_name for role in session.query(RolesUsers).with_entities(RolesUsers.role_name).filter_by(user_name=username)]
 
     def get_ui_role_permissions(self, role_name: str) -> List[str]:
         """Get ui role permissions."""
         with self._db_session() as session:
-            return [permission.permission_name for permission in session.query(RolesPermissions).filter_by(role_name=role_name).all()]
+            return [
+                permission.permission_name
+                for permission in session.query(RolesPermissions).with_entities(RolesPermissions.permission_name).filter_by(role_name=role_name)
+            ]
 
     def get_ui_user_recovery_codes(self, username: str) -> List[str]:
         """Get ui user recovery codes."""
         with self._db_session() as session:
-            return [code.code for code in session.query(UserRecoveryCodes).filter_by(user_name=username).all()]
+            return [code.code for code in session.query(UserRecoveryCodes).with_entities(UserRecoveryCodes.code).filter_by(user_name=username)]
 
     def get_ui_user_permissions(self, username: str) -> List[str]:
         """Get ui user permissions."""
         with self._db_session() as session:
-            roles = session.query(RolesUsers).filter_by(user_name=username).all()
+            query = session.query(RolesUsers).with_entities(RolesUsers.role_name).filter_by(user_name=username)
 
         permissions = []
-        for role in roles:
+        for role in query:
             permissions.extend(self.get_ui_role_permissions(role.role_name))
         return permissions
 
-    def use_ui_user_recovery_code(self, username: str, code: str) -> str:
+    def use_ui_user_recovery_code(self, username: str, hashed_code: str) -> str:
         """Use ui user recovery code."""
         with self._db_session() as session:
             user = session.query(Users).filter_by(username=username).first()
             if not user:
                 return f"User {username} doesn't exist"
 
-            recovery_code = session.query(UserRecoveryCodes).filter_by(user_name=username, code=code).first()
+            recovery_code = session.query(UserRecoveryCodes).filter_by(user_name=username, code=hashed_code).first()
             if not recovery_code:
                 return "Invalid recovery code"
 
             session.delete(recovery_code)
-
-            try:
-                session.commit()
-            except BaseException as e:
-                return str(e)
-
-    def set_ui_user_recovery_code_refreshed(self, username: str, value: bool) -> str:
-        """Set ui user recovery code refreshed."""
-        with self._db_session() as session:
-            user = session.query(Users).filter_by(username=username).first()
-            if not user:
-                return f"User {username} doesn't exist"
-
-            user.totp_refreshed = value
 
             try:
                 session.commit()

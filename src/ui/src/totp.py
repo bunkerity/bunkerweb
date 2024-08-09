@@ -1,7 +1,6 @@
 from base64 import b64encode
-from contextlib import suppress
 from io import BytesIO
-from cryptography.fernet import Fernet, InvalidToken, MultiFernet
+from bcrypt import checkpw
 from typing import Dict, List, Optional, Union
 from flask import Flask
 from passlib.totp import TOTP, MalformedTokenError, TokenError, TotpMatch
@@ -13,7 +12,7 @@ from models import Users
 
 
 class Totp:
-    def __init__(self, app: Flask, secrets: Dict[Union[str, int], str], recovery_codes_keys: List[bytes]):
+    def __init__(self, app: Flask, secrets: Dict[Union[str, int], str]):
         """Initialize a totp factory.
         secrets are used to encrypt the per-user totp_secret on disk.
         recovery_codes_keys are used to encrypt the per-user recovery codes on disk.
@@ -21,10 +20,6 @@ class Totp:
         # This should be a dict with at least one entry
         self.app = app
         self._totp = TOTP.using(secrets=secrets, issuer="BunkerWeb UI")
-
-        self.cryptor: Optional[MultiFernet] = None
-        if recovery_codes_keys:
-            self.cryptor = MultiFernet([Fernet(key) for key in recovery_codes_keys])
 
     def generate_totp_secret(self) -> str:
         """Create new user-unique totp_secret."""
@@ -37,28 +32,16 @@ class Totp:
         return self._totp.from_source(totp_secret).pretty_key()
 
     def generate_recovery_codes(self) -> List[str]:
-        codes = ["-".join([pwd[i : i + 4] for i in range(0, len(pwd), 4)]) for pwd in genword(length=16, charset="hex", returns=5)]  # noqa: E203
-        if not self.cryptor:
-            return codes
-        return [self.cryptor.encrypt(code.encode()).decode() for code in codes]
-
-    def decrypt_recovery_code(self, code: str) -> Optional[str]:
-        if not self.cryptor:
-            return code
-        return self.cryptor.decrypt(code.encode()).decode()
-
-    def decrypt_recovery_codes(self, user: Users) -> List[str]:
-        return [self.decrypt_recovery_code(code) for code in user.list_recovery_codes]
+        return ["-".join([pwd[i : i + 4] for i in range(0, len(pwd), 4)]) for pwd in genword(length=16, charset="hex", returns=5)]  # noqa: E203
 
     def verify_recovery_code(self, code: str, user: Users) -> Optional[str]:
         """Check if recovery code is valid for user."""
         if not user.list_recovery_codes:
             return
 
-        with suppress(InvalidToken):
-            for i, decrypted_code in enumerate(self.decrypt_recovery_codes(user)):
-                if code == decrypted_code:
-                    return user.list_recovery_codes.pop(i)
+        for i, encrypted_code in enumerate(user.list_recovery_codes):
+            if checkpw(code.encode("utf-8"), encrypted_code.encode("utf-8")):
+                return user.list_recovery_codes.pop(i)
 
     def verify_totp(self, token: str, *, totp_secret: Optional[str] = None, user: Optional[Users] = None) -> bool:
         """Verifies token for specific user."""
@@ -68,7 +51,7 @@ class Totp:
             totp_secret = user.totp_secret
 
         try:
-            tmatch = self._totp.verify(token, totp_secret, last_counter=self.get_last_counter(user))
+            tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user))
             if user:
                 self.set_last_counter(user, tmatch)
             return True

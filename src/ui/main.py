@@ -3,10 +3,8 @@ import json
 import base64
 from contextlib import suppress
 from math import floor
-from multiprocessing import Manager
 from os import _exit, getenv, listdir, sep
 from os.path import basename, dirname, isabs, join
-from random import randint
 from secrets import choice, token_urlsafe
 from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
@@ -21,7 +19,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from bs4 import BeautifulSoup
 from copy import deepcopy
-from cryptography.fernet import Fernet
 from datetime import datetime, timedelta, timezone
 from flask import Flask, Response, flash, jsonify, make_response, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
@@ -32,7 +29,6 @@ from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, dumps, loads as json_loads
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from passlib import totp
 from redis import Redis, Sentinel
 from regex import compile as re_compile
 from requests import get
@@ -50,6 +46,7 @@ from src.custom_config import CustomConfig
 from src.config import Config
 from src.reverse_proxied import ReverseProxied
 from src.totp import Totp
+from src.ui_data import UIData
 
 from builder.home import home_builder
 from builder.instances import instances_builder
@@ -66,13 +63,10 @@ from logger import setup_logger  # type: ignore
 
 from models import AnonymousUser
 from ui_database import UIDatabase
-from utils import USER_PASSWORD_RX, PLUGIN_KEYS, PLUGIN_ID_RX, check_password, check_settings, gen_password_hash, path_to_dict, get_remain
+from utils import USER_PASSWORD_RX, PLUGIN_KEYS, PLUGIN_ID_RX, check_settings, gen_password_hash, path_to_dict, get_remain
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
-TMP_DIR.mkdir(parents=True, exist_ok=True)
-
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
-LIB_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def stop_gunicorn():
@@ -112,8 +106,8 @@ with app.app_context():
     FLASK_SECRET = getenv("FLASK_SECRET")
     if not FLASK_SECRET:
         if not TMP_DIR.joinpath(".flask_secret").is_file():
-            app.logger.warning("The FLASK_SECRET environment variable is missing or the .flask_secret file is missing, generating a random one ...")
-            TMP_DIR.joinpath(".flask_secret").write_text(token_urlsafe(32), encoding="utf-8")
+            app.logger.error("The FLASK_SECRET environment variable is missing and the .flask_secret file is missing, exiting ...")
+            stop(1)
         FLASK_SECRET = TMP_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
     TOTP_SECRETS = getenv("TOTP_SECRETS", "")
@@ -121,39 +115,20 @@ with app.app_context():
         try:
             TOTP_SECRETS = json_loads(TOTP_SECRETS)
         except JSONDecodeError:
-            app.logger.warning(
-                "The TOTP_SECRETS environment variable is invalid, generating a random one ... (check the format via the documentation: https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets)"
-            )
-            TOTP_SECRETS = None
+            x = 1
+            tmp_secrets = {}
+            for secret in TOTP_SECRETS.strip().split(" "):
+                if secret:
+                    tmp_secrets[x] = secret
+                    x += 1
+            TOTP_SECRETS = tmp_secrets.copy()
+            del tmp_secrets
 
     if not TOTP_SECRETS:
         if not LIB_DIR.joinpath(".totp_secrets.json").is_file():
-            if TOTP_SECRETS is not None:
-                app.logger.warning("The TOTP_SECRETS environment variable is missing or the .totp_secrets.json file is missing, generating a random one ...")
-            LIB_DIR.joinpath(".totp_secrets.json").write_text(dumps({k: totp.generate_secret() for k in range(randint(1, 5))}), encoding="utf-8")
+            app.logger.error("The TOTP_SECRETS environment variable is missing and the .totp_secrets.json file is missing, exiting ...")
+            stop(1)
         TOTP_SECRETS = json_loads(LIB_DIR.joinpath(".totp_secrets.json").read_text(encoding="utf-8"))
-
-    MF_RECOVERY_CODES_KEYS = []
-    if getenv("MF_ENCRYPT_RECOVERY_CODES", "yes").lower() != "no":
-        MF_RECOVERY_CODES_KEYS = getenv("MF_RECOVERY_CODES_KEYS", "")
-        if MF_RECOVERY_CODES_KEYS:
-            try:
-                MF_RECOVERY_CODES_KEYS = json_loads(MF_RECOVERY_CODES_KEYS)
-            except JSONDecodeError:
-                app.logger.warning(
-                    "The MF_RECOVERY_CODES_KEYS environment variable is invalid, generating a random one ... (check the format via the documentation: https://cryptography.io/en/latest/fernet/#fernet-symmetric-encryption)"
-                )
-                MF_RECOVERY_CODES_KEYS = None
-
-        if not MF_RECOVERY_CODES_KEYS:
-            if MF_RECOVERY_CODES_KEYS is not None and not LIB_DIR.joinpath(".mf_recovery_codes_keys.json").is_file():
-                app.logger.warning("The MF_RECOVERY_CODES_KEYS environment variable is missing, generating a random one ...")
-                LIB_DIR.joinpath(".mf_recovery_codes_keys.json").write_text(
-                    dumps([Fernet.generate_key().decode() for _ in range(randint(1, 5))]), encoding="utf-8"
-                )
-            MF_RECOVERY_CODES_KEYS = json_loads(LIB_DIR.joinpath(".mf_recovery_codes_keys.json").read_text(encoding="utf-8"))
-    else:
-        app.logger.warning("MF_ENCRYPT_RECOVERY_CODES is set to 'no', multi-factor recovery codes will not be encrypted")
 
     app.config["SECRET_KEY"] = FLASK_SECRET
 
@@ -181,102 +156,7 @@ with app.app_context():
     login_manager.login_view = "login"
     login_manager.anonymous_user = AnonymousUser
 
-    app.db = UIDatabase(app.logger)
-
-    ready = False
-    while not ready:
-        db_metadata = app.db.get_metadata()
-        if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
-            app.logger.warning("Database is not initialized, retrying in 5s ...")
-        else:
-            ready = True
-            continue
-        sleep(5)
-
-    BW_VERSION = get_version()
-
-    ret, err = app.db.init_ui_tables(BW_VERSION)
-
-    if not ret and err:
-        app.logger.error(f"Exception while checking database tables : {err}")
-        exit(1)
-    elif not ret:
-        app.logger.info("Database ui tables didn't change, skipping update ...")
-    else:
-        app.logger.info("Database ui tables successfully updated")
-
-    if not app.db.get_ui_roles(as_dict=True):
-        ret = app.db.create_ui_role("admin", "Admin can create account, manager software and read data.", ["manage", "write", "read"])
-        if ret:
-            app.logger.error(f"Couldn't create the admin role in the database: {ret}")
-            exit(1)
-
-        ret = app.db.create_ui_role("writer", "Write can manage software and read data but can't create account.", ["write", "read"])
-        if ret:
-            app.logger.error(f"Couldn't create the admin role in the database: {ret}")
-            exit(1)
-
-        ret = app.db.create_ui_role("reader", "Reader can read data but can't proceed to any actions.", ["read"])
-        if ret:
-            app.logger.error(f"Couldn't create the admin role in the database: {ret}")
-            exit(1)
-
-    ADMIN_USER = "Error"
-    while ADMIN_USER == "Error":
-        try:
-            ADMIN_USER = app.db.get_ui_user(as_dict=True)
-        except BaseException as e:
-            app.logger.debug(f"Couldn't get the admin user: {e}")
-            sleep(1)
-
-    env_admin_username = getenv("ADMIN_USERNAME", "")
-    env_admin_password = getenv("ADMIN_PASSWORD", "")
-
-    if ADMIN_USER:
-        if env_admin_username or env_admin_password:
-            override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
-            if ADMIN_USER["method"] == "manual" or override_admin_creds:
-                updated = False
-                if env_admin_username and ADMIN_USER["username"] != env_admin_username:
-                    ADMIN_USER["username"] = env_admin_username
-                    updated = True
-
-                if env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
-                    if not USER_PASSWORD_RX.match(env_admin_password):
-                        app.logger.warning(
-                            "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). It will not be updated."
-                        )
-                    else:
-                        ADMIN_USER["password"] = gen_password_hash(env_admin_password)
-                        updated = True
-
-                if updated:
-                    if override_admin_creds:
-                        app.logger.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
-                    err = app.db.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], ADMIN_USER["totp_secret"], method="manual")
-                    if err:
-                        app.logger.error(f"Couldn't update the admin user in the database: {err}")
-                    else:
-                        app.logger.info("The admin user was updated successfully")
-            else:
-                app.logger.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
-    elif env_admin_username and env_admin_password:
-        user_name = env_admin_username or "admin"
-
-        if not getenv("FLASK_DEBUG", False):
-            if len(user_name) > 256:
-                app.logger.error("The admin username is too long. It must be less than 256 characters.")
-                exit(1)
-            elif not USER_PASSWORD_RX.match(env_admin_password):
-                app.logger.error(
-                    "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
-                )
-                exit(1)
-
-        ret = app.db.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
-        if ret:
-            app.logger.error(f"Couldn't create the admin user in the database: {ret}")
-            exit(1)
+    app.db = UIDatabase(app.logger, log=False)
 
     # Declare functions for jinja2
     app.jinja_env.globals.update(check_settings=check_settings)
@@ -288,13 +168,11 @@ with app.app_context():
     app.bw_instances_utils = InstancesUtils(app.db)
     app.bw_config = Config(app.db)
     app.bw_custom_configs = CustomConfig()
-    app.data = Manager().dict()
-    app.totp = Totp(app, TOTP_SECRETS, [key.encode("utf-8") for key in MF_RECOVERY_CODES_KEYS])
+    app.data = UIData(TMP_DIR.joinpath("ui_data.json"))
+    app.totp = Totp(app, TOTP_SECRETS)
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
-
-app.logger.info("UI is ready")
 
 
 def wait_applying():
@@ -520,6 +398,7 @@ def error_message(msg: str):
 
 @app.context_processor
 def inject_variables():
+    app.data.load_from_file()
     metadata = app.db.get_metadata()
 
     changes_ongoing = any(
@@ -593,9 +472,6 @@ def set_security_headers(response):
     # * Referrer-Policy header to prevent leaking of sensitive data
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
-    if current_user.totp_refreshed:
-        app.db.set_ui_user_recovery_code_refreshed(current_user.get_id(), False)
-
     return response
 
 
@@ -606,12 +482,12 @@ def load_user(username):
         app.logger.warning(f"Couldn't get the user {username} from the database.")
         return None
 
-    ui_user.list_roles = app.db.get_ui_user_roles(username)
+    ui_user.list_roles = [role.role_name for role in ui_user.roles]
     for role in ui_user.list_roles:
         ui_user.list_permissions.extend(app.db.get_ui_role_permissions(role))
 
     if ui_user.totp_secret:
-        ui_user.list_recovery_codes = app.db.get_ui_user_recovery_codes(username)
+        ui_user.list_recovery_codes = [recovery_code.code for recovery_code in ui_user.recovery_codes]
 
     return ui_user
 
@@ -651,6 +527,7 @@ def handle_csrf_error(_):
 
 @app.before_request
 def before_request():
+    app.data.load_from_file()
     if app.data.get("SERVER_STOPPING", False):
         response = make_response(jsonify({"message": "Server is shutting down, try again later."}), 503)
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
@@ -919,7 +796,7 @@ def home():
     metadata = app.db.get_metadata()
 
     data = {
-        "check_version": not remote_version or BW_VERSION == remote_version,
+        "check_version": not remote_version or get_version() == remote_version,
         "remote_version": remote_version,
         "version": metadata["version"],
         "instances_number": len(instances),
@@ -1054,11 +931,9 @@ def account():
 
             if totp_secret and totp_secret != current_user.totp_secret:
                 totp_recovery_codes = app.totp.generate_recovery_codes()
-                current_user.totp_refreshed = True
-                current_user.list_recovery_codes = totp_recovery_codes
                 flash(
                     "The recovery codes have been refreshed.\nPlease save them in a safe place. They will not be displayed again."
-                    + "\n".join(app.totp.decrypt_recovery_codes(current_user)),
+                    + "\n".join(totp_recovery_codes),
                     "info",
                 )  # TODO: Remove this when we have a way to display the recovery codes
 
@@ -2476,6 +2351,8 @@ def login():
 @app.route("/check_reloading")
 @login_required
 def check_reloading():
+    app.data.load_from_file()
+
     if not app.data.get("RELOADING", False) or app.data.get("LAST_RELOAD", 0) + 60 < time():
         if app.data.get("RELOADING", False):
             app.logger.warning("Reloading took too long, forcing the state to be reloaded")
