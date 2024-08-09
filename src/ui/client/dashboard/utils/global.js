@@ -73,20 +73,7 @@ function useSubmitForm(data) {
 
 /**
  *  @name useCheckPluginsValidity
- *  @description  This is a wrapper that will call the correct function to check if plugin settings are valid based on the template and mode.
- *  @example
- *    const template = [
- *      {
- *        name: "test",
- *        settings: {
- *          test: {
- *            required: true,
- *            value: "",
- *            pattern: "^[a-zA-Z0-9]*$",
- *          },
- *        },
- *      },
- *    ];
+ *  @description  This is a wrapper that will check the validity of the plugins settings based on the defined mode.
  *  @param {dict|array} template - Template with plugins list and detail settings
  *  @param {string} mode - Mode to check, can be "advanced", "easy"...
  *  @returns {array} - Array with error flags and error details
@@ -117,10 +104,10 @@ function useCheckPluginsValidity(template, mode) {
 
 /**
  *  @name _checkSettingsValidityFromPlugins
- *  @description  Access regular settings from a plugin and return the error flags and error details.
+ *  @description  Check settings from a list of plugins and return the error flags and error details.
  *  @param {object|array} template - The template to check
- *  @param {function(key, value, plugin)} callback - Callback function that will access the key, value, and plugin
- *  @returns {any} - Return the result of the callback function
+ *  @param {string|number} [id=0] - The id of the plugin or the current step.
+ *  @returns {array} - Return [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr, id]
  */
 function _checkSettingsValidityFromPlugins(plugins, id = 0) {
   let isRegErr = false;
@@ -147,8 +134,7 @@ function _checkSettingsValidityFromPlugins(plugins, id = 0) {
  *  @name _checkRegularSettingsValidityFromPlugins
  *  @description  Access regular settings from a plugin and return the error flags and error details.
  *  @param {object|array} template - The template to check
- *  @param {function(key, value, plugin)} callback - Callback function that will access the key, value, and plugin
- *  @returns {any} - Return the result of the callback function
+ *  @returns {array} - Return empty array or [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr]
  */
 function _checkRegularSettingsValidityFromPlugins(plugins) {
   let result;
@@ -169,8 +155,7 @@ function _checkRegularSettingsValidityFromPlugins(plugins) {
  *  @name _checkMultipleSettingsValidityFromPlugins
  *  @description  Access multiple settings from a plugin and return the error flags and error details.
  *  @param {object|array} template - The template to check
- *  @param {function(key, value, plugin)} callback - Callback function that will access the key, value, and plugin
- *  @returns {any} - Return the result of the callback function
+ *  @returns {array} - Return empty array or [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr]
  */
 function _checkMultipleSettingsValidityFromPlugins(plugins) {
   let result;
@@ -192,12 +177,11 @@ function _checkMultipleSettingsValidityFromPlugins(plugins) {
 
 /**
  *  @name _isSettingValid
- *  @description  Check if the setting is valid based on the pattern and required flags.
- * This function is a callback of a _checkMultipleSettingsValidityFromPlugins function or similar.
+ *  @description  Check if a setting is valid based on the pattern and required flags.
  *  @param {key} str - The name of the setting
  *  @param {object} value - Setting value used to check if it's valid
  *  @param {pluginName} str - The name of the plugin
- *  @returns {object} - Return object with a stop bool key to stop the loop and a data key with the result
+ *  @returns {object} - Return object with {stop, data : [isRegErr, isReqErr, settingErr, settingNameErr, pluginErr]}
  */
 function _isSettingValid(key, value, pluginName) {
   let is_reg_valid = true;
