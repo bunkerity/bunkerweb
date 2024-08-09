@@ -9,16 +9,8 @@ def instances_builder(instances: List[Instance]) -> str:
 
     for instance in instances:
         # setup actions buttons
-        actions = (
-            ["restart", "stop"]
-            if instance.hostname in ("localhost", "127.0.0.1") and instance.status == "up"
-            else (
-                ["reload", "stop"]
-                if instance.hostname not in ("localhost", "127.0.0.1") and instance.status == "up"
-                else ["start"] if instance.hostname in ("localhost", "127.0.0.1") and instance.status != "up" else []
-            )
-        )
-
+        actions = ["reload", "stop"] if instance.status == "up"  else ["start"]
+            
         buttons = [
             {
                 "attrs": {
