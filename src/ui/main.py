@@ -518,6 +518,7 @@ def handle_csrf_error(_):
     :param e: The exception object
     :return: A template with the error message and a 401 status code.
     """
+    app.logger.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
     logout()
     flash("Wrong CSRF token !", "error")
     if not current_user:
@@ -587,8 +588,10 @@ def before_request():
                     return redirect(url_for("totp", next=request.form.get("next")))
                 passed = False
             elif current_user.last_login_ip != request.remote_addr:
+                app.logger.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
                 passed = False
             elif session.get("user_agent") != request.headers.get("User-Agent"):
+                app.logger.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
 
             if not passed:
