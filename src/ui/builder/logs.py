@@ -24,11 +24,11 @@ def logs_builder(files: list[str] = [], current_file: str = "", raw_data: str = 
         "data": {
             "setting": {
                 "id": "logs-select-file",
-                "label": "logs_select_file",
+                "label": "logs_log_file",
                 "inpType": "select",
                 "name": "logs-select-file",
                 "onlyDown": True,
-                "value": current_file,
+                "value": current_file or "Select a file",
                 "values": files,
                 "columns": {
                     "pc": 4,
@@ -74,6 +74,7 @@ def logs_builder(files: list[str] = [], current_file: str = "", raw_data: str = 
                     "tablet": 12,
                     "mobile": 12,
                 },
+                "editorClass" : "min-h-[500px]",
             }
         },
     }

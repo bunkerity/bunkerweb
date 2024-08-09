@@ -309,8 +309,9 @@
   "logs_title": "Logs",
   "logs_not_found": "No logs found",
   "logs_no_files_found": "No log files found",
-  "logs_select_file": "Select a log file",
+  "logs_select_file": "Select a file",
   "logs_select_file_info": "Log files are retrieve using syslog under the hood.",
+  "logs_log_file": "Log files",
   "logs_not_selected_or_not_found": "No log file selected or content not found",
   "logs_file_content": "Log content"
 }
