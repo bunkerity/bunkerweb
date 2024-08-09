@@ -18,6 +18,10 @@ ui_dir_static = current_directory.parent.joinpath("static")
 ui_dir_templates = current_directory.parent.joinpath("templates")
 legacy_dir_static = current_directory.joinpath("legacy", "static")
 legacy_dir_templates = current_directory.joinpath("legacy", "templates")
+builder_dir_pages = current_directory.joinpath("builder", "pages")
+builder_dir_utils = current_directory.joinpath("builder", "utils")
+ui_dir_builder = current_directory.parent.joinpath("builder")
+ui_dir_builder_utils = current_directory.parent.joinpath("builder", "utils")
 
 statics = ("assets", "css", "flags", "img", "js")
 
@@ -29,6 +33,7 @@ def reset():
     remove_dir(opt_dir_setup)
     remove_dir(ui_dir_static)
     remove_dir(ui_dir_templates)
+    remove_dir(ui_dir_builder)
 
 
 def set_dashboard():
@@ -146,6 +151,32 @@ def add_legacy():
     copytree(legacy_dir_templates.as_posix(), ui_dir_templates.as_posix())
 
 
+def add_builder_and_widgets():
+    # First we want to generate widgets by executing "widgets_generator.py" that is on same level
+    if run_command(["/usr/bin/python3", "widgets_generator.py"]):
+        if run_command(["python", "widgets_generator.py"]):
+            exit(1) 
+
+    # Create output folders
+    copytree(builder_dir_pages.as_posix(), ui_dir_builder.as_posix())
+    # I want to loop on each file
+    for file in ui_dir_builder.glob("*.py"):
+        # I want to replace "from .utils." by "from builder.utils."
+        content = file.read_text()
+        content = content.replace("from .utils.", "from builder.utils.")
+        content = """from os.path import join, sep
+from sys import path as sys_path
+
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+""" + content
+        file.write_text(content)
+
+    copytree(builder_dir_utils.as_posix(), ui_dir_builder_utils.as_posix())
+
+
 def build():
     """All steps to build the front end and set it to the flask app"""
     reset()
@@ -162,6 +193,7 @@ def build():
     set_dashboard()
     # run_command(["/usr/bin/npm", "run", "build-setup"])
     # set_setup()
+    add_builder_and_widgets()
 
 
 build()

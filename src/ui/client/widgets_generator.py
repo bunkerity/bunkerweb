@@ -12,7 +12,7 @@ from typing import Union
 inputFolder = abspath("../client/dashboard/components")
 outputFolderMd = abspath("../client/.widgets-md")
 outputFolderPy = abspath("../client/.widgets")
-outputFolderWidgets = abspath("../client/widgets")
+outputFolderWidgets = abspath("../client/builder/utils")
 components_path_to_exclude = ("\components\Icons\\", "components\Forms\Error\\", "\components\Dashboard\\", "\components\Builder\\")
 
 
@@ -51,8 +51,7 @@ def reset():
     rmtree(outputFolderMd, ignore_errors=True)
     # Remove all files from the output folder
     rmtree(outputFolderPy, ignore_errors=True)
-    # remove outputfilename
-    rmtree(outputFolderWidgets, ignore_errors=True)
+
 
 
 def vue2js():
@@ -430,6 +429,10 @@ def add_key_value(data, key, value, default):
         content += data
         content += "\n"
     # Utils function to add key value to data dict if not default value
+
+    # Remove previous file if exists
+    if Path(f"{outputFolderWidgets}/widgets.py").exists():
+        Path(f"{outputFolderWidgets}/widgets.py").unlink()
 
     Path(f"{outputFolderWidgets}/widgets.py").write_text(content)
 
